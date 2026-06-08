@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.coverage*
+
+# Environments
+.venv/
+venv/
+
+# IDE / editor
+.idea/
+.vscode/
+
+# Logs
+*.log
+pipeline.log
+
+# Local data artifacts
+/data/raw/**
+!/data/raw/.gitkeep
+/data/processed/**
+!/data/processed/.gitkeep
+/data/features/**
+!/data/features/.gitkeep
+/data/models/**
+!/data/models/.gitkeep
+/data/validation/**
+!/data/validation/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+

@@ -1,0 +1,18 @@
+statsbombpy>=1.0.3
+pandas>=2.0
+numpy>=1.26
+matplotlib>=3.8
+seaborn>=0.13
+tqdm>=4.66
+pyarrow>=15.0
+fastparquet>=2023.10
+
+# Optional for notebooks
+jupyter>=1.0
+ipykernel>=6.29
+
+# Phase 8+ supervised modelling (install when needed)
+# scikit-learn>=1.4
+# lightgbm>=4.3
+# shap>=0.45
+
