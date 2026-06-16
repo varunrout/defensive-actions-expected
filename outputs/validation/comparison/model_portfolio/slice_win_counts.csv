@@ -1,0 +1,8 @@
+variant,slice_wins,family
+v4_freeze_geometry,30,logistic
+v3_context_enhanced,5,logistic
+v2_full_baseline,4,logistic
+v1_spatial,1,logistic
+v4_freeze_geometry,28,regression
+v3_context_enhanced,9,regression
+v2_full_baseline,3,regression

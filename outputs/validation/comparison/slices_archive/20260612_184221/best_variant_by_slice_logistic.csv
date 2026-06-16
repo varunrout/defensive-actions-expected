@@ -1,0 +1,41 @@
+family,variant,slice_col,slice_value,n,roc_auc,avg_precision
+logistic,v4_freeze_geometry,action_family,contest,6910,0.8525626512948224,0.4476579043796688
+logistic,v4_freeze_geometry,action_family,recovery,8932,0.8307500648780293,0.40807124424908103
+logistic,v4_freeze_geometry,action_family,pressure,27478,0.813307056978438,0.3227563734814571
+logistic,v4_freeze_geometry,action_family,goalkeeper,1469,0.7585689113613728,0.18608272661074793
+logistic,v4_freeze_geometry,action_family,intervention,10105,0.7363389997131778,0.18935469240385897
+logistic,v4_freeze_geometry,action_family,discipline,2643,0.6648020287260794,0.021268184828830364
+logistic,v4_freeze_geometry,action_zone,defensive_third_center,10187,0.7999569541142837,0.41449547430873485
+logistic,v4_freeze_geometry,action_zone,attacking_third_center,12110,0.7833327169692289,0.4042547013526249
+logistic,v4_freeze_geometry,action_zone,attacking_third_right_flank,3794,0.7430367103874567,0.12208026927672287
+logistic,v3_context_enhanced,action_zone,defensive_third_right_flank,3210,0.7398079315320696,0.14086337446173947
+logistic,v4_freeze_geometry,action_zone,attacking_third_left_flank,3669,0.7252796380735252,0.10823777221194558
+logistic,v4_freeze_geometry,action_zone,defensive_third_left_flank,3477,0.7056612287285046,0.13552002107813982
+logistic,v3_context_enhanced,action_zone,middle_third_center,9611,0.7044348753116981,0.10972516948016947
+logistic,v4_freeze_geometry,action_zone,middle_third_right_flank,5717,0.7042610998969433,0.0692618491151933
+logistic,v2_full_baseline,action_zone,middle_third_left_flank,5862,0.689235003392783,0.09141761041331428
+logistic,v4_freeze_geometry,counterpress,False,48947,0.8225589722750035,0.3577633905353958
+logistic,v3_context_enhanced,counterpress,True,8690,0.7040165786827919,0.12758558396918707
+logistic,v1_spatial,phase_label,second_ball,6035,0.8598080757347457,0.4879494634849274
+logistic,v3_context_enhanced,phase_label,high_press,9797,0.7876827157662073,0.3985849770874976
+logistic,v4_freeze_geometry,phase_label,box_defence,9686,0.7721946622648947,0.37334865959497265
+logistic,v3_context_enhanced,phase_label,settled_low_block,8915,0.755805131538002,0.18008959304375127
+logistic,v4_freeze_geometry,phase_label,central_progression_defence,6748,0.7399722819102231,0.13096901991646268
+logistic,v4_freeze_geometry,phase_label,counterpress_after_loss,4070,0.721735245822467,0.10500540772867005
+logistic,v2_full_baseline,phase_label,settled_mid_block,5795,0.6860105024810906,0.08286287243990317
+logistic,v4_freeze_geometry,phase_label,wide_defending,6560,0.684879080133896,0.04805532672133716
+logistic,v2_full_baseline,play_pattern,From Kick Off,1453,0.8531110639201529,0.34101223686562887
+logistic,v2_full_baseline,play_pattern,From Keeper,1786,0.8346454086193082,0.29906156171426984
+logistic,v4_freeze_geometry,play_pattern,From Free Kick,8284,0.8207889140714625,0.36154023659536005
+logistic,v4_freeze_geometry,play_pattern,From Throw In,12537,0.8124975155949337,0.3110502674845528
+logistic,v4_freeze_geometry,play_pattern,From Goal Kick,4477,0.7981010002098342,0.26877196563905115
+logistic,v4_freeze_geometry,play_pattern,From Corner,3235,0.7908739647748848,0.4915749403710011
+logistic,v4_freeze_geometry,play_pattern,Regular Play,24821,0.788467932681884,0.2664769087961327
+logistic,v4_freeze_geometry,play_pattern,From Counter,759,0.7122307968413496,0.5348371293828329
+logistic,v4_freeze_geometry,position_group,goalkeeper,2346,0.8261944706581384,0.17839959929673901
+logistic,v4_freeze_geometry,position_group,forward,7076,0.8256800826720669,0.3352171428947259
+logistic,v4_freeze_geometry,position_group,fullback_wingback,10414,0.8246799983736955,0.34392314489883086
+logistic,v4_freeze_geometry,position_group,other,6121,0.8184630573287466,0.3142342522605705
+logistic,v4_freeze_geometry,position_group,centre_back,10607,0.8139042039222288,0.39848500348597365
+logistic,v4_freeze_geometry,position_group,midfielder,10229,0.8028214206844709,0.294343754010951
+logistic,v4_freeze_geometry,position_group,defensive_midfielder,10844,0.7860585137480423,0.3182382194096945

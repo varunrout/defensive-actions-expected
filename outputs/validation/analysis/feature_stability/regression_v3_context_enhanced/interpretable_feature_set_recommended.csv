@@ -1,0 +1,45 @@
+feature,feature_type,is_proxy,cluster_id,stability_score,nonzero_folds_max,encoded_terms,abs_mean_coef_sum,selected,selection_reason
+possession_duration_total,numeric,True,8.0,1.0,5,1,0.6200240178958736,True,cluster representative
+event_order_in_possession,numeric,True,1.0,1.0,5,1,0.5230530730638331,True,cluster representative
+event_type,categorical,False,,1.0,5,10,0.4697826826638548,True,stable tactical signal
+position_group,categorical,True,,1.0,5,7,0.37674824679971836,True,stable tactical signal
+action_family,categorical,False,,1.0,5,7,0.3690458357951956,True,stable tactical signal
+phase_label_prev_event,categorical,False,,1.0,5,9,0.243215736049485,True,stable tactical signal
+possession_progress_ratio,numeric,False,,1.0,5,1,0.1599495336201886,True,stable tactical signal
+is_high_zone,numeric,False,,1.0,5,1,0.047596583367981074,True,stable tactical signal
+is_deep_zone,numeric,False,,1.0,5,1,0.04709570231123331,True,stable tactical signal
+action_x,numeric,False,2.0,1.0,5,1,0.03216069076351339,True,cluster representative
+nearest_goal_distance,numeric,False,,1.0,5,1,0.027120485850202148,True,stable tactical signal
+is_wide_lane,numeric,False,,1.0,5,1,0.019524281636648717,True,stable tactical signal
+phase_changed_since_prev_event,numeric,False,,1.0,5,1,0.01380662879642528,True,stable tactical signal
+distance_to_center_line,numeric,False,4.0,1.0,5,1,0.011585800965892169,True,cluster representative
+freeze_support_ratio_5m,numeric,False,,1.0,5,1,0.00906877630399634,True,stable tactical signal
+counterpress,numeric,False,,1.0,5,1,0.008513267894472279,True,stable tactical signal
+teammate_opponent_ratio,numeric,False,,1.0,5,1,0.007651527054574432,True,stable tactical signal
+nearest_goal_side,categorical,False,,1.0,5,2,0.007035511907687773,True,stable tactical signal
+freeze_support_balance_5m,numeric,False,,1.0,5,1,0.005349257946177975,True,stable tactical signal
+freeze_teammate_nearest_distance,numeric,False,7.0,1.0,5,1,0.004657857912256483,True,cluster representative
+freeze_teammate_spread,numeric,False,,1.0,5,1,0.003637979229534906,True,stable tactical signal
+freeze_support_balance_10m,numeric,False,6.0,1.0,5,1,0.0033772015465983996,True,cluster representative
+period,numeric,False,,1.0,5,1,0.002316819197658295,True,stable tactical signal
+freeze_frame_count,numeric,False,5.0,1.0,5,1,0.0014256062283496118,True,cluster representative
+action_zone,categorical,False,,0.9777777777777779,5,9,0.28702929460547827,True,stable tactical signal
+phase_label,categorical,False,,0.9555555555555555,5,9,0.4103882015470547,True,stable tactical signal
+play_pattern,categorical,True,,0.9333333333333333,5,9,0.12067619167635232,True,stable tactical signal
+freeze_opponent_spread,numeric,False,,0.8,5,1,0.0015885445615841805,True,stable tactical signal
+action_y,numeric,False,3.0,0.8,5,1,0.001114253658385014,True,cluster representative
+possession_event_count_total,numeric,True,8.0,1.0,5,1,0.6802775571577854,False,redundant high-correlation cluster
+seconds_since_possession_start,numeric,True,1.0,1.0,5,1,0.5129242202061023,False,redundant high-correlation cluster
+phase_transition_count_so_far,numeric,True,1.0,1.0,5,1,0.03488698242600392,False,redundant high-correlation cluster
+ball_x,numeric,False,2.0,1.0,5,1,0.03216069076342624,False,redundant high-correlation cluster
+freeze_opponent_count,numeric,False,5.0,1.0,5,1,0.007980361533101981,False,redundant high-correlation cluster
+opponent_count,numeric,False,5.0,1.0,5,1,0.007980361532929676,False,redundant high-correlation cluster
+teammate_count,numeric,False,5.0,1.0,5,1,0.005840292029542529,False,redundant high-correlation cluster
+freeze_teammate_count,numeric,False,5.0,1.0,5,1,0.005840292029042277,False,redundant high-correlation cluster
+freeze_support_ratio_10m,numeric,False,6.0,1.0,5,1,0.0015780054420936735,False,redundant high-correlation cluster
+distance_to_left_goal,numeric,False,2.0,0.8,5,1,0.0400615831138862,False,redundant high-correlation cluster
+distance_to_right_goal,numeric,False,2.0,0.8,5,1,0.01444884865089901,False,redundant high-correlation cluster
+is_central_lane,numeric,False,4.0,0.8,5,1,0.0023165034483311224,False,redundant high-correlation cluster
+ball_y,numeric,False,3.0,0.8,5,1,0.001114253658392294,False,redundant high-correlation cluster
+freeze_opponent_nearest_distance,numeric,False,7.0,0.6,5,1,0.0029874160224441027,False,low sign stability
+has_360,numeric,False,,,0,1,0.0,False,low sign stability

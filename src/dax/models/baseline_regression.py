@@ -1,0 +1,513 @@
+"""Baseline regression modeling utilities for DAx (xT-based target).
+
+This module supports training regression models using xT_from_generic_grid
+as the continuous target instead of the binary target_shot_in_10s.
+
+This enables:
+- Dense target signal (all actions get xT scores, not sparse binary)
+- Richer threat assessment (magnitude, not just yes/no)
+- Better model convergence (continuous gradients)
+- Complementary perspective (spatial threat vs. temporal outcome)
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any
+
+import numpy as np
+import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import Ridge, Lasso, LinearRegression
+from sklearn.metrics import (
+    mean_squared_error,
+    mean_absolute_error,
+    r2_score,
+    mean_absolute_percentage_error,
+)
+from sklearn.model_selection import GroupKFold
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from scipy.stats import spearmanr
+
+# Target configuration
+TARGET_COL = "target_xt_10s"
+GROUP_COL = "match_id"
+
+
+@dataclass(frozen=True)
+class RegressionVariantSpec:
+    """Specification for a regression model variant."""
+
+    name: str
+    model_type: str  # 'ridge', 'lasso', or 'linear'
+    categorical: list[str]
+    numeric: list[str]
+    alpha: float = 1.0  # Regularization strength for ridge/lasso
+
+
+def default_regression_specs() -> list[RegressionVariantSpec]:
+    """Return xT regression baseline variants (V0-V8)."""
+    return [
+        RegressionVariantSpec(
+            name="v0_phase_only",
+            model_type="ridge",
+            categorical=["phase_label"],
+            numeric=[],
+            alpha=1.0,
+        ),
+        RegressionVariantSpec(
+            name="v1_spatial",
+            model_type="ridge",
+            categorical=["phase_label", "action_zone", "action_family", "position_group"],
+            numeric=[
+                "action_x",
+                "action_y",
+                "nearest_goal_distance",
+                "distance_to_center_line",
+            ],
+            alpha=1.0,
+        ),
+        RegressionVariantSpec(
+            name="v2_full_baseline",
+            model_type="ridge",
+            categorical=[
+                "phase_label",
+                "action_zone",
+                "action_family",
+                "position_group",
+                "event_type",
+                "play_pattern",
+            ],
+            numeric=[
+                "action_x",
+                "action_y",
+                "nearest_goal_distance",
+                "distance_to_center_line",
+                "freeze_support_balance_5m",
+                "freeze_support_balance_10m",
+                "freeze_support_ratio_5m",
+                "freeze_support_ratio_10m",
+                "freeze_teammate_nearest_distance",
+                "freeze_opponent_nearest_distance",
+                "freeze_teammate_spread",
+                "freeze_opponent_spread",
+                "teammate_count",
+                "opponent_count",
+                "teammate_opponent_ratio",
+                "possession_progress_ratio",
+                "seconds_since_possession_start",
+                "possession_duration_total",
+                "possession_event_count_total",
+                "phase_transition_count_so_far",
+            ],
+            alpha=1.0,
+        ),
+        RegressionVariantSpec(
+            name="v3_context_enhanced",
+            model_type="ridge",
+            categorical=[
+                "phase_label",
+                "phase_label_prev_event",
+                "action_zone",
+                "action_family",
+                "position_group",
+                "event_type",
+                "play_pattern",
+                "nearest_goal_side",
+            ],
+            numeric=[
+                "period",
+                "counterpress",
+                "has_360",
+                "phase_changed_since_prev_event",
+                "event_order_in_possession",
+                "action_x",
+                "action_y",
+                "ball_x",
+                "ball_y",
+                "nearest_goal_distance",
+                "distance_to_left_goal",
+                "distance_to_right_goal",
+                "distance_to_center_line",
+                "is_central_lane",
+                "is_wide_lane",
+                "is_deep_zone",
+                "is_high_zone",
+                "freeze_frame_count",
+                "freeze_teammate_count",
+                "freeze_opponent_count",
+                "freeze_support_balance_5m",
+                "freeze_support_balance_10m",
+                "freeze_support_ratio_5m",
+                "freeze_support_ratio_10m",
+                "freeze_teammate_nearest_distance",
+                "freeze_opponent_nearest_distance",
+                "freeze_teammate_spread",
+                "freeze_opponent_spread",
+                "teammate_count",
+                "opponent_count",
+                "teammate_opponent_ratio",
+                "possession_progress_ratio",
+                "seconds_since_possession_start",
+                "possession_duration_total",
+                "possession_event_count_total",
+                "phase_transition_count_so_far",
+            ],
+            alpha=0.8,
+        ),
+        RegressionVariantSpec(
+            name="v4_freeze_geometry",
+            model_type="ridge",
+            categorical=[
+                "phase_label",
+                "phase_label_prev_event",
+                "action_zone",
+                "action_family",
+                "position_group",
+                "position",
+                "event_type",
+                "play_pattern",
+                "nearest_goal_side",
+            ],
+            numeric=[
+                "period",
+                "counterpress",
+                "has_360",
+                "phase_changed_since_prev_event",
+                "event_order_in_possession",
+                "action_x",
+                "action_y",
+                "ball_x",
+                "ball_y",
+                "nearest_goal_distance",
+                "distance_to_left_goal",
+                "distance_to_right_goal",
+                "distance_to_center_line",
+                "is_central_lane",
+                "is_wide_lane",
+                "is_deep_zone",
+                "is_high_zone",
+                "freeze_frame_count",
+                "freeze_teammate_count",
+                "freeze_opponent_count",
+                "freeze_support_balance_5m",
+                "freeze_support_balance_10m",
+                "freeze_support_ratio_5m",
+                "freeze_support_ratio_10m",
+                "freeze_teammate_nearest_distance",
+                "freeze_opponent_nearest_distance",
+                "freeze_teammate_centroid_x",
+                "freeze_teammate_centroid_y",
+                "freeze_opponent_centroid_x",
+                "freeze_opponent_centroid_y",
+                "freeze_teammate_centroid_dx",
+                "freeze_teammate_centroid_dy",
+                "freeze_opponent_centroid_dx",
+                "freeze_opponent_centroid_dy",
+                "freeze_teammate_spread",
+                "freeze_opponent_spread",
+                "teammate_count",
+                "opponent_count",
+                "teammate_opponent_ratio",
+                "possession_progress_ratio",
+                "seconds_since_possession_start",
+                "possession_duration_total",
+                "possession_event_count_total",
+                "phase_transition_count_so_far",
+            ],
+            alpha=0.6,
+        ),
+        RegressionVariantSpec(
+            name="v5_interpretable_clustered",
+            model_type="linear",
+            categorical=[
+                "phase_label",
+                "phase_label_prev_event",
+                "action_zone",
+                "action_family",
+                "position",
+                "event_type",
+                "nearest_goal_side",
+            ],
+            numeric=[
+                "period",
+                "counterpress",
+                "has_360",
+                "phase_changed_since_prev_event",
+                "nearest_goal_distance",
+                "distance_to_right_goal",
+                "distance_to_center_line",
+                "is_wide_lane",
+                "is_deep_zone",
+                "is_high_zone",
+                "freeze_teammate_count",
+                "freeze_support_balance_5m",
+                "freeze_support_balance_10m",
+                "freeze_support_ratio_5m",
+                "freeze_teammate_nearest_distance",
+                "freeze_opponent_centroid_y",
+                "freeze_teammate_centroid_dx",
+                "freeze_teammate_spread",
+                "freeze_opponent_spread",
+                "teammate_opponent_ratio",
+                "possession_progress_ratio",
+            ],
+            alpha=0.0,
+        ),
+        RegressionVariantSpec(
+            name="v6_balanced_clustered",
+            model_type="linear",
+            categorical=[
+                "phase_label",
+                "phase_label_prev_event",
+                "action_zone",
+                "action_family",
+                "position_group",
+                "position",
+                "event_type",
+                "play_pattern",
+                "nearest_goal_side",
+            ],
+            numeric=[
+                "period",
+                "counterpress",
+                "has_360",
+                "phase_changed_since_prev_event",
+                "nearest_goal_distance",
+                "distance_to_right_goal",
+                "distance_to_center_line",
+                "is_wide_lane",
+                "is_deep_zone",
+                "is_high_zone",
+                "freeze_teammate_count",
+                "freeze_support_balance_5m",
+                "freeze_support_balance_10m",
+                "freeze_support_ratio_5m",
+                "freeze_teammate_nearest_distance",
+                "freeze_opponent_centroid_y",
+                "freeze_teammate_centroid_dx",
+                "freeze_teammate_spread",
+                "freeze_opponent_spread",
+                "teammate_opponent_ratio",
+                "possession_progress_ratio",
+                "possession_duration_total",
+                "phase_transition_count_so_far",
+            ],
+            alpha=0.0,
+        ),
+        RegressionVariantSpec(
+            name="v7_interpretable_ridge",
+            model_type="ridge",
+            categorical=[
+                "phase_label",
+                "phase_label_prev_event",
+                "action_zone",
+                "action_family",
+                "position",
+                "event_type",
+                "nearest_goal_side",
+            ],
+            numeric=[
+                "period",
+                "counterpress",
+                "has_360",
+                "phase_changed_since_prev_event",
+                "nearest_goal_distance",
+                "distance_to_right_goal",
+                "distance_to_center_line",
+                "is_wide_lane",
+                "is_deep_zone",
+                "is_high_zone",
+                "freeze_teammate_count",
+                "freeze_support_balance_5m",
+                "freeze_support_balance_10m",
+                "freeze_support_ratio_5m",
+                "freeze_teammate_nearest_distance",
+                "freeze_opponent_centroid_y",
+                "freeze_teammate_centroid_dx",
+                "freeze_teammate_spread",
+                "freeze_opponent_spread",
+                "teammate_opponent_ratio",
+                "possession_progress_ratio",
+            ],
+            alpha=0.6,
+        ),
+        RegressionVariantSpec(
+            name="v8_balanced_ridge",
+            model_type="ridge",
+            categorical=[
+                "phase_label",
+                "phase_label_prev_event",
+                "action_zone",
+                "action_family",
+                "position_group",
+                "position",
+                "event_type",
+                "play_pattern",
+                "nearest_goal_side",
+            ],
+            numeric=[
+                "period",
+                "counterpress",
+                "has_360",
+                "phase_changed_since_prev_event",
+                "nearest_goal_distance",
+                "distance_to_right_goal",
+                "distance_to_center_line",
+                "is_wide_lane",
+                "is_deep_zone",
+                "is_high_zone",
+                "freeze_teammate_count",
+                "freeze_support_balance_5m",
+                "freeze_support_balance_10m",
+                "freeze_support_ratio_5m",
+                "freeze_teammate_nearest_distance",
+                "freeze_opponent_centroid_y",
+                "freeze_teammate_centroid_dx",
+                "freeze_teammate_spread",
+                "freeze_opponent_spread",
+                "teammate_opponent_ratio",
+                "possession_progress_ratio",
+                "possession_duration_total",
+                "phase_transition_count_so_far",
+            ],
+            alpha=0.5,
+        ),
+    ]
+
+
+def resolve_columns(
+    df: pd.DataFrame, spec: RegressionVariantSpec
+) -> RegressionVariantSpec:
+    """Keep only columns that exist in the dataframe."""
+    categorical = [c for c in spec.categorical if c in df.columns]
+    numeric = [c for c in spec.numeric if c in df.columns]
+    return RegressionVariantSpec(
+        name=spec.name,
+        model_type=spec.model_type,
+        categorical=categorical,
+        numeric=numeric,
+        alpha=spec.alpha,
+    )
+
+
+def build_regression_pipeline(spec: RegressionVariantSpec) -> Pipeline:
+    """Build preprocessing + regression pipeline for a variant."""
+    numeric_transformer = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="median")),
+            ("scaler", StandardScaler()),
+        ]
+    )
+    categorical_transformer = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="most_frequent")),
+            ("encoder", OneHotEncoder(sparse_output=False, handle_unknown="ignore")),
+        ]
+    )
+
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ("num", numeric_transformer, spec.numeric),
+            ("cat", categorical_transformer, spec.categorical),
+        ],
+        remainder="drop",
+    )
+
+    # Select regression model based on type
+    if spec.model_type == "ridge":
+        model = Ridge(alpha=spec.alpha, random_state=42)
+    elif spec.model_type == "lasso":
+        model = Lasso(alpha=spec.alpha, random_state=42, max_iter=10000)
+    else:  # linear
+        model = LinearRegression()
+
+    return Pipeline(
+        steps=[
+            ("preprocessor", preprocessor),
+            ("model", model),
+        ]
+    )
+
+
+def prepare_xyg_regression(
+    df: pd.DataFrame, spec: RegressionVariantSpec
+) -> tuple[pd.DataFrame, np.ndarray, np.ndarray]:
+    """Prepare features, target and group arrays for regression."""
+    needed = [TARGET_COL, GROUP_COL, *spec.categorical, *spec.numeric]
+    needed = [c for c in needed if c in df.columns]
+    data = df[needed].copy()
+    data = data.dropna(subset=[TARGET_COL, GROUP_COL])
+
+    x_cols = [*spec.categorical, *spec.numeric]
+    x = data[x_cols].copy()
+    y = pd.to_numeric(data[TARGET_COL], errors="coerce").fillna(0).to_numpy()
+    groups = data[GROUP_COL].to_numpy()
+    return x, y, groups
+
+
+def grouped_cv_scores_regression(
+    x: pd.DataFrame,
+    y: np.ndarray,
+    groups: np.ndarray,
+    pipeline: Pipeline,
+    n_splits: int = 5,
+) -> dict[str, Any]:
+    """Run GroupKFold CV for regression and return fold metrics + OOF predictions."""
+    gkf = GroupKFold(n_splits=n_splits)
+    fold_rows: list[dict[str, Any]] = []
+    oof = np.full(shape=y.shape[0], fill_value=np.nan, dtype=float)
+
+    for fold, (train_idx, test_idx) in enumerate(gkf.split(x, y, groups), start=1):
+        x_train = x.iloc[train_idx]
+        x_test = x.iloc[test_idx]
+        y_train = y[train_idx]
+        y_test = y[test_idx]
+
+        pipeline.fit(x_train, y_train)
+        y_pred = pipeline.predict(x_test)
+        oof[test_idx] = y_pred
+
+        # Regression metrics
+        fold_rows.append(
+            {
+                "fold": fold,
+                "n_train": int(len(train_idx)),
+                "n_test": int(len(test_idx)),
+                "r2": float(r2_score(y_test, y_pred)),
+                "rmse": float(np.sqrt(mean_squared_error(y_test, y_pred))),
+                "mae": float(mean_absolute_error(y_test, y_pred)),
+                "mape": float(mean_absolute_percentage_error(y_test, y_pred)),
+            }
+        )
+
+    mask = ~np.isnan(oof)
+    overall_r2 = float(r2_score(y[mask], oof[mask]))
+    overall_rmse = float(np.sqrt(mean_squared_error(y[mask], oof[mask])))
+    overall_mae = float(mean_absolute_error(y[mask], oof[mask]))
+    overall_mape = float(mean_absolute_percentage_error(y[mask], oof[mask]))
+    overall_spearman = float(spearmanr(y[mask], oof[mask]).correlation)
+
+    return {
+        "fold_metrics": fold_rows,
+        "oof_predictions": oof,
+        "r2": overall_r2,
+        "rmse": overall_rmse,
+        "mae": overall_mae,
+        "mape": overall_mape,
+        "spearman": overall_spearman,
+    }
+
+
+def coefficient_table(pipeline: Pipeline) -> pd.DataFrame:
+    """Extract coefficient table from fitted regression pipeline."""
+    pre = pipeline.named_steps["preprocessor"]
+    model = pipeline.named_steps["model"]
+    feature_names = pre.get_feature_names_out()
+    coefs = model.coef_
+    out = pd.DataFrame({"feature": feature_names, "coef": coefs})
+    out["abs_coef"] = out["coef"].abs()
+    return out.sort_values("abs_coef", ascending=False).reset_index(drop=True)
+

@@ -1,0 +1,16 @@
+{
+  "generated_at_utc": "2026-06-15T09:16:42.383569+00:00",
+  "data_rows": 57637,
+  "matches": 115,
+  "top_oof_logistic_variant": "v3_context_enhanced",
+  "top_oof_regression_variant": "v3_context_enhanced",
+  "top_direct_logistic_variant": "v4_freeze_geometry",
+  "top_direct_regression_variant": "v4_freeze_geometry",
+  "artifact_paths": {
+    "model_leaderboard_all_csv": "outputs/validation/comparison/model_portfolio/model_leaderboard_all.csv",
+    "cross_task_alignment_csv": "outputs/validation/comparison/model_portfolio/cross_task_alignment.csv",
+    "fold_stability_summary_csv": "outputs/validation/comparison/model_portfolio/fold_stability_summary.csv",
+    "slice_win_counts_csv": "outputs/validation/comparison/model_portfolio/slice_win_counts.csv",
+    "report_markdown": "docs/analysis/MODEL_PORTFOLIO_REPORT.md"
+  }
+}

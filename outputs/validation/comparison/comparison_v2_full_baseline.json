@@ -1,0 +1,89 @@
+{
+  "comparison": {
+    "pearson_correlation": 0.34978496883607313,
+    "spearman_correlation": 0.3439406577963141,
+    "binary_agreement": 0.6065841334884448,
+    "true_negatives": 23037,
+    "true_positives": 11898,
+    "false_negatives": 16899,
+    "false_positives": 5759
+  },
+  "logistic_metrics": {
+    "categorical": [
+      "phase_label",
+      "action_zone",
+      "action_family",
+      "position_group",
+      "event_type",
+      "play_pattern"
+    ],
+    "numeric": [
+      "action_x",
+      "action_y",
+      "nearest_goal_distance",
+      "distance_to_center_line",
+      "freeze_support_balance_5m",
+      "freeze_support_balance_10m",
+      "freeze_support_ratio_5m",
+      "freeze_support_ratio_10m",
+      "freeze_teammate_nearest_distance",
+      "freeze_opponent_nearest_distance",
+      "freeze_teammate_spread",
+      "freeze_opponent_spread",
+      "teammate_count",
+      "opponent_count",
+      "teammate_opponent_ratio",
+      "possession_progress_ratio",
+      "seconds_since_possession_start",
+      "possession_duration_total",
+      "possession_event_count_total",
+      "phase_transition_count_so_far"
+    ],
+    "roc_auc": 0.8058122398856371,
+    "avg_precision": 0.318068734791152,
+    "model_path": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\models\\baseline\\logistic_v2_full_baseline.joblib",
+    "coefficients_path": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\baseline\\baseline_v2_full_baseline_coefficients.csv",
+    "fold_metrics_path": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\baseline\\baseline_v2_full_baseline_fold_metrics.csv"
+  },
+  "regression_metrics": {
+    "model_type": "ridge",
+    "categorical": [
+      "phase_label",
+      "action_zone",
+      "action_family",
+      "position_group",
+      "event_type",
+      "play_pattern"
+    ],
+    "numeric": [
+      "action_x",
+      "action_y",
+      "nearest_goal_distance",
+      "distance_to_center_line",
+      "freeze_support_balance_5m",
+      "freeze_support_balance_10m",
+      "freeze_support_ratio_5m",
+      "freeze_support_ratio_10m",
+      "freeze_teammate_nearest_distance",
+      "freeze_opponent_nearest_distance",
+      "freeze_teammate_spread",
+      "freeze_opponent_spread",
+      "teammate_count",
+      "opponent_count",
+      "teammate_opponent_ratio",
+      "possession_progress_ratio",
+      "seconds_since_possession_start",
+      "possession_duration_total",
+      "possession_event_count_total",
+      "phase_transition_count_so_far"
+    ],
+    "r2": 0.31933490450017776,
+    "rmse": 0.32379133641016616,
+    "mae": 0.23597306602978121,
+    "mape": 95652291790544.03,
+    "spearman": 0.6375883958949707,
+    "model_path": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\models\\regression\\regression_v2_full_baseline.joblib",
+    "coefficients_path": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\regression\\regression_v2_full_baseline_coefficients.csv",
+    "fold_metrics_path": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\regression\\regression_v2_full_baseline_fold_metrics.csv"
+  }
+}

@@ -1,0 +1,4 @@
+scenario,categorical_features,numeric_features,total_features,primary_metric,secondary_metric,primary_metric_name,secondary_metric_name,delta_vs_full_primary
+full,9,44,53,0.8076410895239305,0.3280594268106021,roc_auc,avg_precision,0.0
+tactical_only,7,39,46,0.7855647472485366,0.31085146071563813,roc_auc,avg_precision,-0.0220763422753939
+proxy_only,2,5,7,0.6961958342786654,0.1574824798149152,roc_auc,avg_precision,-0.11144525524526516

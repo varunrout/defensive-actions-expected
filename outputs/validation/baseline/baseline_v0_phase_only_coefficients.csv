@@ -1,0 +1,10 @@
+feature,coef,abs_coef
+cat__phase_label_transition_defence,-1.6865397001651652,1.6865397001651652
+cat__phase_label_box_defence,1.1495974384206233,1.1495974384206233
+cat__phase_label_high_press,1.135501368318807,1.135501368318807
+cat__phase_label_wide_defending,-0.9508677550626575,0.9508677550626575
+cat__phase_label_second_ball,0.7618366149453456,0.7618366149453456
+cat__phase_label_counterpress_after_loss,-0.48606732814891235,0.48606732814891235
+cat__phase_label_settled_mid_block,-0.4546489910779468,0.4546489910779468
+cat__phase_label_settled_low_block,0.17306335588587352,0.17306335588587352
+cat__phase_label_central_progression_defence,-0.14991671574478288,0.14991671574478288

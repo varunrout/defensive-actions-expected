@@ -272,8 +272,9 @@ The repository should store data in a layered structure:
 - `data/raw/` for original JSON files
 - `data/processed/` for enriched parquet tables
 - `data/features/` for engineered feature outputs
-- `data/models/` for trained artifacts
-- `data/validation/` for checks, summaries, and diagnostics
+- `outputs/models/` for trained artifacts
+- `outputs/validation/` for checks, summaries, and diagnostics
+- `outputs/oof/` for out-of-fold prediction artifacts
 
 ### 6.4 Why raw and processed layers matter
 

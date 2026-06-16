@@ -1,0 +1,491 @@
+feature,coef,fold
+num__period,0.0030088354272489438,1
+num__counterpress,-0.008544323094318745,1
+num__has_360,0.0,1
+num__phase_changed_since_prev_event,0.014195296583145138,1
+num__event_order_in_possession,-0.5103977556570108,1
+num__action_x,-0.03716951635528289,1
+num__action_y,0.002048821233081706,1
+num__ball_x,-0.03716951635531252,1
+num__ball_y,0.002048821233057362,1
+num__nearest_goal_distance,-0.024417206566498525,1
+num__distance_to_left_goal,0.03799108257270208,1
+num__distance_to_right_goal,-0.018006533093749815,1
+num__distance_to_center_line,-0.01213097254741167,1
+num__is_central_lane,-0.0019705422858724447,1
+num__is_wide_lane,-0.0186120776097872,1
+num__is_deep_zone,0.04617316659921817,1
+num__is_high_zone,0.05020851131411924,1
+num__freeze_frame_count,-0.001440879890559744,1
+num__freeze_teammate_count,0.0063314300128247784,1
+num__freeze_opponent_count,-0.008474407312645248,1
+num__freeze_support_balance_5m,-0.005637172433605057,1
+num__freeze_support_balance_10m,0.0017918160116842958,1
+num__freeze_support_ratio_5m,0.0082648132878134,1
+num__freeze_support_ratio_10m,0.0032481574691620926,1
+num__freeze_teammate_nearest_distance,0.008945397219474478,1
+num__freeze_opponent_nearest_distance,-0.006030873016046398,1
+num__freeze_teammate_spread,0.003777566400154918,1
+num__freeze_opponent_spread,0.0021172110479585554,1
+num__teammate_count,0.006331430014452229,1
+num__opponent_count,-0.008474407312675002,1
+num__teammate_opponent_ratio,-0.010210609998535089,1
+num__possession_progress_ratio,-0.16394297744728215,1
+num__seconds_since_possession_start,0.5061562413247781,1
+num__possession_duration_total,-0.6063448471875369,1
+num__possession_event_count_total,0.6622979386990316,1
+num__phase_transition_count_so_far,0.03527777967901603,1
+cat__phase_label_box_defence,0.0817578974596181,1
+cat__phase_label_central_progression_defence,0.0271869260383509,1
+cat__phase_label_counterpress_after_loss,-0.0952939757432786,1
+cat__phase_label_high_press,0.0010892944871712994,1
+cat__phase_label_second_ball,-0.08688911689567981,1
+cat__phase_label_settled_low_block,0.04212209257367394,1
+cat__phase_label_settled_mid_block,0.01325253088463519,1
+cat__phase_label_transition_defence,-0.017803048824147964,1
+cat__phase_label_wide_defending,0.03457740002222275,1
+cat__phase_label_prev_event_box_defence,0.010015202291694189,1
+cat__phase_label_prev_event_central_progression_defence,0.0259253260128029,1
+cat__phase_label_prev_event_counterpress_after_loss,-0.0585594249150893,1
+cat__phase_label_prev_event_high_press,-0.0062441809994145175,1
+cat__phase_label_prev_event_second_ball,0.026785382379123958,1
+cat__phase_label_prev_event_settled_low_block,0.004510485069309829,1
+cat__phase_label_prev_event_settled_mid_block,0.02205582090597098,1
+cat__phase_label_prev_event_transition_defence,-0.04113839035683181,1
+cat__phase_label_prev_event_wide_defending,0.01664977960376358,1
+cat__action_zone_attacking_third_center,0.04712077430093419,1
+cat__action_zone_attacking_third_left_flank,0.02008949618735365,1
+cat__action_zone_attacking_third_right_flank,0.006088058665391396,1
+cat__action_zone_defensive_third_center,0.04582337469422413,1
+cat__action_zone_defensive_third_left_flank,0.014897943332413614,1
+cat__action_zone_defensive_third_right_flank,0.012817426136155299,1
+cat__action_zone_middle_third_center,-0.05460535910317769,1
+cat__action_zone_middle_third_left_flank,-0.037020809692704666,1
+cat__action_zone_middle_third_right_flank,-0.055210904527131774,1
+cat__action_family_contest,0.10902028439394314,1
+cat__action_family_discipline,-0.02758969776591901,1
+cat__action_family_goalkeeper,-0.019433682276854804,1
+cat__action_family_intervention,-0.046332899601878856,1
+cat__action_family_possession_protection,-0.09429744838758783,1
+cat__action_family_pressure,0.031113429407264984,1
+cat__action_family_recovery,0.047520014215382704,1
+cat__position_group_centre_back,0.023784921835245665,1
+cat__position_group_defensive_midfielder,0.04358847929074041,1
+cat__position_group_forward,0.003920180012833245,1
+cat__position_group_fullback_wingback,0.03758448686981418,1
+cat__position_group_goalkeeper,-0.1859814977631279,1
+cat__position_group_midfielder,0.03808414359465219,1
+cat__position_group_other,0.039019286158587095,1
+cat__event_type_50/50,0.09130602308523492,1
+cat__event_type_Ball Recovery,0.0475200142154023,1
+cat__event_type_Block,-0.015783833297172836,1
+cat__event_type_Clearance,-0.08001028842970186,1
+cat__event_type_Duel,0.017714261309881258,1
+cat__event_type_Foul Committed,-0.027589697765938555,1
+cat__event_type_Goal Keeper,-0.01943368227689117,1
+cat__event_type_Interception,0.04946122212686225,1
+cat__event_type_Pressure,0.031113429407565635,1
+cat__event_type_Shield,-0.09429744838757725,1
+cat__play_pattern_From Corner,-0.02294584060128549,1
+cat__play_pattern_From Counter,-0.01550637875555129,1
+cat__play_pattern_From Free Kick,0.01782336160569315,1
+cat__play_pattern_From Goal Kick,-0.008147924703346994,1
+cat__play_pattern_From Keeper,-0.0026209190335038926,1
+cat__play_pattern_From Kick Off,0.024874718634428215,1
+cat__play_pattern_From Throw In,0.004369029528076611,1
+cat__play_pattern_Other,-0.0036814156300661468,1
+cat__play_pattern_Regular Play,0.005835368959920029,1
+cat__nearest_goal_side_left,-0.005375227688862887,1
+cat__nearest_goal_side_right,0.005375227688862082,1
+num__period,0.001739902099437409,2
+num__counterpress,-0.008222108767790596,2
+num__has_360,0.0,2
+num__phase_changed_since_prev_event,0.012517455803295286,2
+num__event_order_in_possession,-0.5339299694664139,2
+num__action_x,-0.04815784178889495,2
+num__action_y,0.001087709203001492,2
+num__ball_x,-0.048157841788394204,2
+num__ball_y,0.001087709203037608,2
+num__nearest_goal_distance,-0.024266536820423526,2
+num__distance_to_left_goal,0.05453671930958794,2
+num__distance_to_right_goal,-0.025637181744066814,2
+num__distance_to_center_line,-0.013685700745693084,2
+num__is_central_lane,-0.001036810266025733,2
+num__is_wide_lane,-0.019754131902793296,2
+num__is_deep_zone,0.04813561409293556,2
+num__is_high_zone,0.0489336724416916,2
+num__freeze_frame_count,-0.0017049854380336111,2
+num__freeze_teammate_count,0.005858469742743626,2
+num__freeze_opponent_count,-0.008452581011937878,2
+num__freeze_support_balance_5m,-0.0005814337824933671,2
+num__freeze_support_balance_10m,0.0036824462002393132,2
+num__freeze_support_ratio_5m,0.004720937259936318,2
+num__freeze_support_ratio_10m,0.0011807998649192616,2
+num__freeze_teammate_nearest_distance,0.004471697865376949,2
+num__freeze_opponent_nearest_distance,-0.00525339006886943,2
+num__freeze_teammate_spread,0.003966500422496215,2
+num__freeze_opponent_spread,0.002180047594176108,2
+num__teammate_count,0.005858469742851704,2
+num__opponent_count,-0.0084525810120618,2
+num__teammate_opponent_ratio,-0.007601632262279619,2
+num__possession_progress_ratio,-0.15934171886442486,2
+num__seconds_since_possession_start,0.5242533420423087,2
+num__possession_duration_total,-0.6332245989567888,2
+num__possession_event_count_total,0.6924891481147224,2
+num__phase_transition_count_so_far,0.03491637908709567,2
+cat__phase_label_box_defence,0.0855649771044392,2
+cat__phase_label_central_progression_defence,0.021151750042901207,2
+cat__phase_label_counterpress_after_loss,-0.09278175497993973,2
+cat__phase_label_high_press,-0.004283098516908743,2
+cat__phase_label_second_ball,-0.07583212425555622,2
+cat__phase_label_settled_low_block,0.04748369671714711,2
+cat__phase_label_settled_mid_block,0.015156993534214326,2
+cat__phase_label_transition_defence,-0.03398291539706499,2
+cat__phase_label_wide_defending,0.03752247575222716,2
+cat__phase_label_prev_event_box_defence,0.01353709327872694,2
+cat__phase_label_prev_event_central_progression_defence,0.027719781324158577,2
+cat__phase_label_prev_event_counterpress_after_loss,-0.061740883850920775,2
+cat__phase_label_prev_event_high_press,-0.0034210508983618226,2
+cat__phase_label_prev_event_second_ball,0.030125458441579232,2
+cat__phase_label_prev_event_settled_low_block,0.013151076818872029,2
+cat__phase_label_prev_event_settled_mid_block,0.025746897750127475,2
+cat__phase_label_prev_event_transition_defence,-0.06821375235967508,2
+cat__phase_label_prev_event_wide_defending,0.023095379495800834,2
+cat__action_zone_attacking_third_center,0.047640174217921334,2
+cat__action_zone_attacking_third_left_flank,0.018919840560194516,2
+cat__action_zone_attacking_third_right_flank,0.01430186454603194,2
+cat__action_zone_defensive_third_center,0.04730300262097866,2
+cat__action_zone_defensive_third_left_flank,0.008931580918011302,2
+cat__action_zone_defensive_third_right_flank,0.008638795446049551,2
+cat__action_zone_middle_third_center,-0.050622093973429004,2
+cat__action_zone_middle_third_left_flank,-0.04102806501049681,2
+cat__action_zone_middle_third_right_flank,-0.054085099318862066,2
+cat__action_family_contest,0.1011577739146667,2
+cat__action_family_discipline,-0.024807381281954866,2
+cat__action_family_goalkeeper,-0.01803554900760959,2
+cat__action_family_intervention,-0.044973639991402456,2
+cat__action_family_possession_protection,-0.09471252980899904,2
+cat__action_family_pressure,0.03323154527046024,2
+cat__action_family_recovery,0.04813978090517614,2
+cat__position_group_centre_back,0.024033212951202348,2
+cat__position_group_defensive_midfielder,0.041951678636871756,2
+cat__position_group_forward,0.004882689827941855,2
+cat__position_group_fullback_wingback,0.03658622519685377,2
+cat__position_group_goalkeeper,-0.18913549248101463,2
+cat__position_group_midfielder,0.04009327609273275,2
+cat__position_group_other,0.04158840977287613,2
+cat__event_type_50/50,0.08089616184000865,2
+cat__event_type_Ball Recovery,0.0481397809052087,2
+cat__event_type_Block,-0.012686835446494894,2
+cat__event_type_Clearance,-0.08506289578573197,2
+cat__event_type_Duel,0.02026161207378555,2
+cat__event_type_Foul Committed,-0.024807381282009846,2
+cat__event_type_Goal Keeper,-0.0180355490075539,2
+cat__event_type_Interception,0.05277609124685918,2
+cat__event_type_Pressure,0.03323154527055926,2
+cat__event_type_Shield,-0.09471252980900043,2
+cat__play_pattern_From Corner,-0.02465071822910862,2
+cat__play_pattern_From Counter,-0.013989547418217431,2
+cat__play_pattern_From Free Kick,0.01620508759025383,2
+cat__play_pattern_From Goal Kick,-0.01265872381622929,2
+cat__play_pattern_From Keeper,0.0048458832956826394,2
+cat__play_pattern_From Kick Off,0.02052332672514526,2
+cat__play_pattern_From Throw In,0.0035528350722668855,2
+cat__play_pattern_Other,-0.002749544358553744,2
+cat__play_pattern_Regular Play,0.008921401141983976,2
+cat__nearest_goal_side_left,-0.0016401129965599977,2
+cat__nearest_goal_side_right,0.0016401129965598214,2
+num__period,0.00319118491642865,3
+num__counterpress,-0.009201723080224678,3
+num__has_360,0.0,3
+num__phase_changed_since_prev_event,0.013542074541215473,3
+num__event_order_in_possession,-0.5114571117313825,3
+num__action_x,-0.030770790076708708,3
+num__action_y,0.00021707755733496036,3
+num__ball_x,-0.030770790076264903,3
+num__ball_y,0.0002170775573444738,3
+num__nearest_goal_distance,-0.027231066073555372,3
+num__distance_to_left_goal,0.048584977177045637,3
+num__distance_to_right_goal,-0.0015193559333141597,3
+num__distance_to_center_line,-0.01422108687716322,3
+num__is_central_lane,0.0023689767579581447,3
+num__is_wide_lane,-0.017917837235648323,3
+num__is_deep_zone,0.0488133721300837,3
+num__is_high_zone,0.04736451886971449,3
+num__freeze_frame_count,-0.0016122861517645695,3
+num__freeze_teammate_count,0.005528360390485796,3
+num__freeze_opponent_count,-0.007991742981233079,3
+num__freeze_support_balance_5m,-0.007528793505888638,3
+num__freeze_support_balance_10m,0.004124435263819962,3
+num__freeze_support_ratio_5m,0.010924254219556947,3
+num__freeze_support_ratio_10m,0.00043829640638868043,3
+num__freeze_teammate_nearest_distance,0.00412524841841427,3
+num__freeze_opponent_nearest_distance,-0.0030863680465820654,3
+num__freeze_teammate_spread,0.004689797189976232,3
+num__freeze_opponent_spread,-2.113366424529003e-05,3
+num__teammate_count,0.005528360391025944,3
+num__opponent_count,-0.007991742981286007,3
+num__teammate_opponent_ratio,-0.00682278228107852,3
+num__possession_progress_ratio,-0.157681736299541,3
+num__seconds_since_possession_start,0.5040990351115138,3
+num__possession_duration_total,-0.6108701836193816,3
+num__possession_event_count_total,0.6737521525555176,3
+num__phase_transition_count_so_far,0.02876436474423479,3
+cat__phase_label_box_defence,0.07708476481953862,3
+cat__phase_label_central_progression_defence,0.02578991903378425,3
+cat__phase_label_counterpress_after_loss,-0.09545976958966389,3
+cat__phase_label_high_press,-0.005576670788776362,3
+cat__phase_label_second_ball,-0.0844590362932544,3
+cat__phase_label_settled_low_block,0.043595140449992346,3
+cat__phase_label_settled_mid_block,0.02054125511262938,3
+cat__phase_label_transition_defence,-0.014307257861459604,3
+cat__phase_label_wide_defending,0.032791655114698746,3
+cat__phase_label_prev_event_box_defence,0.013923993464879126,3
+cat__phase_label_prev_event_central_progression_defence,0.02748363896587579,3
+cat__phase_label_prev_event_counterpress_after_loss,-0.06134376014283249,3
+cat__phase_label_prev_event_high_press,-0.004583146705067608,3
+cat__phase_label_prev_event_second_ball,0.03389924442661719,3
+cat__phase_label_prev_event_settled_low_block,0.012705388789418426,3
+cat__phase_label_prev_event_settled_mid_block,0.030332956716755125,3
+cat__phase_label_prev_event_transition_defence,-0.07672434608046395,3
+cat__phase_label_prev_event_wide_defending,0.024306030561968048,3
+cat__action_zone_attacking_third_center,0.04179269112394171,3
+cat__action_zone_attacking_third_left_flank,0.011975268235069506,3
+cat__action_zone_attacking_third_right_flank,0.015549846999097087,3
+cat__action_zone_defensive_third_center,0.04176918236855592,3
+cat__action_zone_defensive_third_left_flank,0.0173286955668631,3
+cat__action_zone_defensive_third_right_flank,0.016477301357292865,3
+cat__action_zone_middle_third_center,-0.05400185578746012,3
+cat__action_zone_middle_third_left_flank,-0.04097565897151011,3
+cat__action_zone_middle_third_right_flank,-0.04991547090388272,3
+cat__action_family_contest,0.10980814325171417,3
+cat__action_family_discipline,-0.026318985924254867,3
+cat__action_family_goalkeeper,-0.015462283915901969,3
+cat__action_family_intervention,-0.04654245236365281,3
+cat__action_family_possession_protection,-0.10053122600828551,3
+cat__action_family_pressure,0.032183198102343956,3
+cat__action_family_recovery,0.04686360686768033,3
+cat__position_group_centre_back,0.025416069235611,3
+cat__position_group_defensive_midfielder,0.046503441168767666,3
+cat__position_group_forward,0.007828175320743357,3
+cat__position_group_fullback_wingback,0.041496545943131895,3
+cat__position_group_goalkeeper,-0.19730095304103784,3
+cat__position_group_midfielder,0.036138057399877174,3
+cat__position_group_other,0.039918663971689784,3
+cat__event_type_50/50,0.09390069182696224,3
+cat__event_type_Ball Recovery,0.0468636068676952,3
+cat__event_type_Block,-0.009741299140321125,3
+cat__event_type_Clearance,-0.08953321336210443,3
+cat__event_type_Duel,0.015907451424934372,3
+cat__event_type_Foul Committed,-0.02631898592425101,3
+cat__event_type_Goal Keeper,-0.015462283915856604,3
+cat__event_type_Interception,0.0527320601358773,3
+cat__event_type_Pressure,0.032183198102592375,3
+cat__event_type_Shield,-0.10053122600828102,3
+cat__play_pattern_From Corner,-0.00915113599939405,3
+cat__play_pattern_From Counter,-0.0064831449780934245,3
+cat__play_pattern_From Free Kick,0.02188262000467355,3
+cat__play_pattern_From Goal Kick,-0.00318287611984746,3
+cat__play_pattern_From Keeper,0.006746602650327538,3
+cat__play_pattern_From Kick Off,0.02748460669293913,3
+cat__play_pattern_From Throw In,0.0069000413517169975,3
+cat__play_pattern_Other,-0.05232750880761002,3
+cat__play_pattern_Regular Play,0.008130795202063341,3
+cat__nearest_goal_side_left,-0.0015998699651967201,3
+cat__nearest_goal_side_right,0.0015998699651951864,3
+num__period,0.0011713262580023138,4
+num__counterpress,-0.00806343531044776,4
+num__has_360,0.0,4
+num__phase_changed_since_prev_event,0.014603884249274285,4
+num__event_order_in_possession,-0.5220227960304704,4
+num__action_x,-0.02978892831179125,4
+num__action_y,-0.0010263116753575104,4
+num__ball_x,-0.02978892831229806,4
+num__ball_y,-0.0010263116753545416,4
+num__nearest_goal_distance,-0.029682495271372327,4
+num__distance_to_left_goal,0.048233656034635065,4
+num__distance_to_right_goal,0.006018207384008007,4
+num__distance_to_center_line,-0.015136206363253867,4
+num__is_central_lane,-0.0033844310425326027,4
+num__is_wide_lane,-0.02005551706892428,4
+num__is_deep_zone,0.04602489761138665,4
+num__is_high_zone,0.0441302639664867,4
+num__freeze_frame_count,-0.0012962964259788845,4
+num__freeze_teammate_count,0.005678554815779584,4
+num__freeze_opponent_count,-0.007617879712982193,4
+num__freeze_support_balance_5m,-0.006880180651322333,4
+num__freeze_support_balance_10m,0.0029847821692955104,4
+num__freeze_support_ratio_5m,0.010416423644999754,4
+num__freeze_support_ratio_10m,0.0025935362230889956,4
+num__freeze_teammate_nearest_distance,0.004525535298749303,4
+num__freeze_opponent_nearest_distance,0.00029177377703848336,4
+num__freeze_teammate_spread,0.0026284763916579303,4
+num__freeze_opponent_spread,0.0020576975276623815,4
+num__teammate_count,0.005678554816308766,4
+num__opponent_count,-0.007617879712226726,4
+num__teammate_opponent_ratio,-0.0074854761000376,4
+num__possession_progress_ratio,-0.162106989594965,4
+num__seconds_since_possession_start,0.5132355265304568,4
+num__possession_duration_total,-0.6225389814922692,4
+num__possession_event_count_total,0.6806048714868015,4
+num__phase_transition_count_so_far,0.03730756386661497,4
+cat__phase_label_box_defence,0.08039238427968991,4
+cat__phase_label_central_progression_defence,0.018104475446580757,4
+cat__phase_label_counterpress_after_loss,-0.09404360792882285,4
+cat__phase_label_high_press,-0.0026779124126828464,4
+cat__phase_label_second_ball,-0.08022211290062073,4
+cat__phase_label_settled_low_block,0.03652779031209562,4
+cat__phase_label_settled_mid_block,0.013163693004760599,4
+cat__phase_label_transition_defence,-0.008028029475048694,4
+cat__phase_label_wide_defending,0.03678331966114521,4
+cat__phase_label_prev_event_box_defence,0.012207475676217267,4
+cat__phase_label_prev_event_central_progression_defence,0.0255894507601808,4
+cat__phase_label_prev_event_counterpress_after_loss,-0.07687601625793171,4
+cat__phase_label_prev_event_high_press,-0.004985935784948558,4
+cat__phase_label_prev_event_second_ball,0.025706949175572414,4
+cat__phase_label_prev_event_settled_low_block,0.011183385644604506,4
+cat__phase_label_prev_event_settled_mid_block,0.023592326295552815,4
+cat__phase_label_prev_event_transition_defence,-0.037915417804277325,4
+cat__phase_label_prev_event_wide_defending,0.021497782286416883,4
+cat__action_zone_attacking_third_center,0.0504690473392679,4
+cat__action_zone_attacking_third_left_flank,0.017594403558243522,4
+cat__action_zone_attacking_third_right_flank,0.017898512537885287,4
+cat__action_zone_defensive_third_center,0.03786087580790076,4
+cat__action_zone_defensive_third_left_flank,-0.0018132889935705823,4
+cat__action_zone_defensive_third_right_flank,0.01438064150529617,4
+cat__action_zone_middle_third_center,-0.047053267315226494,4
+cat__action_zone_middle_third_left_flank,-0.043683935359807094,4
+cat__action_zone_middle_third_right_flank,-0.04565298907656281,4
+cat__action_family_contest,0.09745440060153752,4
+cat__action_family_discipline,-0.022921655874170405,4
+cat__action_family_goalkeeper,-0.020913704631364893,4
+cat__action_family_intervention,-0.04080375929682581,4
+cat__action_family_possession_protection,-0.09943039664037563,4
+cat__action_family_pressure,0.035582828122198665,4
+cat__action_family_recovery,0.051032287716568335,4
+cat__position_group_centre_back,0.023543943802467156,4
+cat__position_group_defensive_midfielder,0.04349655337166697,4
+cat__position_group_forward,0.008383417036928261,4
+cat__position_group_fullback_wingback,0.03591312678258114,4
+cat__position_group_goalkeeper,-0.18864924842677505,4
+cat__position_group_midfielder,0.03866753944670242,4
+cat__position_group_other,0.03864466799146798,4
+cat__event_type_50/50,0.07364655678390594,4
+cat__event_type_Ball Recovery,0.05103228771655698,4
+cat__event_type_Block,-0.008843478022422717,4
+cat__event_type_Clearance,-0.07959529313355122,4
+cat__event_type_Duel,0.02380784381816339,4
+cat__event_type_Foul Committed,-0.02292165587383046,4
+cat__event_type_Goal Keeper,-0.020913704631402602,4
+cat__event_type_Interception,0.047635011860292883,4
+cat__event_type_Pressure,0.03558282812232072,4
+cat__event_type_Shield,-0.09943039664038031,4
+cat__play_pattern_From Corner,-0.014040819664890295,4
+cat__play_pattern_From Counter,-0.018287720410141338,4
+cat__play_pattern_From Free Kick,0.014906078908338826,4
+cat__play_pattern_From Goal Kick,-0.005727715840033113,4
+cat__play_pattern_From Keeper,0.010402069952594946,4
+cat__play_pattern_From Kick Off,0.030304955633502446,4
+cat__play_pattern_From Throw In,-0.0004370705771589086,4
+cat__play_pattern_Other,-0.026359543059525873,4
+cat__play_pattern_Regular Play,0.009239765048835209,4
+cat__nearest_goal_side_left,-0.003954783173616857,4
+cat__nearest_goal_side_right,0.003954783173618085,4
+num__period,0.0024728472871741584,5
+num__counterpress,-0.008534749219579616,5
+num__has_360,0.0,5
+num__phase_changed_since_prev_event,0.014174432805196209,5
+num__event_order_in_possession,-0.537457732433888,5
+num__action_x,-0.014916377284889136,5
+num__action_y,0.0011913486231494008,5
+num__ball_x,-0.014916377284861464,5
+num__ball_y,0.0011913486231674836,5
+num__nearest_goal_distance,-0.030005124519161,5
+num__distance_to_left_goal,-0.01096148047546024,5
+num__distance_to_right_goal,-0.021062965099356252,5
+num__distance_to_center_line,-0.002755038295939004,5
+num__is_central_lane,-0.002821756889266686,5
+num__is_wide_lane,-0.02128184436609048,5
+num__is_deep_zone,0.04633146112254247,5
+num__is_high_zone,0.04734595024789334,5
+num__freeze_frame_count,-0.0010735832354112503,5
+num__freeze_teammate_count,0.005804645183377598,5
+num__freeze_opponent_count,-0.007365196646711505,5
+num__freeze_support_balance_5m,-0.006118709357580477,5
+num__freeze_support_balance_10m,0.004302528087952917,5
+num__freeze_support_ratio_5m,0.01101745310767528,5
+num__freeze_support_ratio_10m,0.00042923724690933804,5
+num__freeze_teammate_nearest_distance,0.001221410759267414,5
+num__freeze_opponent_nearest_distance,0.00027467520368413883,5
+num__freeze_teammate_spread,0.0031275557433892366,5
+num__freeze_opponent_spread,0.0015666329738785673,5
+num__teammate_count,0.005804645183074005,5
+num__opponent_count,-0.007365196646398846,5
+num__teammate_opponent_ratio,-0.0061371346309413285,5
+num__possession_progress_ratio,-0.15667424589473006,5
+num__seconds_since_possession_start,0.5168769560214538,5
+num__possession_duration_total,-0.6271414782233912,5
+num__possession_event_count_total,0.6922436749328542,5
+num__phase_transition_count_so_far,0.038168824753058106,5
+cat__phase_label_box_defence,0.08624393097152287,5
+cat__phase_label_central_progression_defence,0.02746607582467386,5
+cat__phase_label_counterpress_after_loss,-0.08351580258661305,5
+cat__phase_label_high_press,0.013368471100259504,5
+cat__phase_label_second_ball,-0.0776504970515702,5
+cat__phase_label_settled_low_block,0.04686557821645248,5
+cat__phase_label_settled_mid_block,0.01781036053726938,5
+cat__phase_label_transition_defence,-0.07316377236331105,5
+cat__phase_label_wide_defending,0.0425756553691787,5
+cat__phase_label_prev_event_box_defence,0.00356599117227021,5
+cat__phase_label_prev_event_central_progression_defence,0.0284056760168063,5
+cat__phase_label_prev_event_counterpress_after_loss,-0.05653199345415369,5
+cat__phase_label_prev_event_high_press,-0.008322630654602188,5
+cat__phase_label_prev_event_second_ball,0.02274725895140851,5
+cat__phase_label_prev_event_settled_low_block,0.007462570846100474,5
+cat__phase_label_prev_event_settled_mid_block,0.023685273267531743,5
+cat__phase_label_prev_event_transition_defence,-0.041438409874015786,5
+cat__phase_label_prev_event_wide_defending,0.020426263718732116,5
+cat__action_zone_attacking_third_center,0.048272250687669084,5
+cat__action_zone_attacking_third_left_flank,0.024767349802952057,5
+cat__action_zone_attacking_third_right_flank,0.013175639588652569,5
+cat__action_zone_defensive_third_center,0.03428191661701996,5
+cat__action_zone_defensive_third_left_flank,0.013105841457469862,5
+cat__action_zone_defensive_third_right_flank,0.00830144032942559,5
+cat__action_zone_middle_third_center,-0.05070701487229735,5
+cat__action_zone_middle_third_left_flank,-0.03782550228247766,5
+cat__action_zone_middle_third_right_flank,-0.05337192133053176,5
+cat__action_family_contest,0.10087866358762322,5
+cat__action_family_discipline,-0.025150765925605167,5
+cat__action_family_goalkeeper,-0.02125097175537521,5
+cat__action_family_intervention,-0.04839655793805632,5
+cat__action_family_possession_protection,-0.08470900109694797,5
+cat__action_family_pressure,0.032086173417064115,5
+cat__action_family_recovery,0.046542459709330845,5
+cat__position_group_centre_back,0.02303164518104971,5
+cat__position_group_defensive_midfielder,0.044971833165059705,5
+cat__position_group_forward,0.0036941693072486607,5
+cat__position_group_fullback_wingback,0.03523769184968288,5
+cat__position_group_goalkeeper,-0.18080342528489468,5
+cat__position_group_midfielder,0.03774535528872026,5
+cat__position_group_other,0.03612273049799433,5
+cat__event_type_50/50,0.0834949397131891,5
+cat__event_type_Ball Recovery,0.04654245970934894,5
+cat__event_type_Block,-0.010412887572245528,5
+cat__event_type_Clearance,-0.08722140216901426,5
+cat__event_type_Duel,0.017383723873201442,5
+cat__event_type_Foul Committed,-0.02515076592580136,5
+cat__event_type_Goal Keeper,-0.021250971755428495,5
+cat__event_type_Interception,0.049237731805952305,5
+cat__event_type_Pressure,0.03208617341700203,5
+cat__event_type_Shield,-0.0847090010969472,5
+cat__play_pattern_From Corner,-0.026591840576898253,5
+cat__play_pattern_From Counter,-0.017058752926762937,5
+cat__play_pattern_From Free Kick,0.021119187632906423,5
+cat__play_pattern_From Goal Kick,-0.0023487020210171293,5
+cat__play_pattern_From Keeper,0.004492371611503109,5
+cat__play_pattern_From Kick Off,0.02917252942587559,5
+cat__play_pattern_From Throw In,-0.0027478967834465924,5
+cat__play_pattern_Other,-0.009994738882060627,5
+cat__play_pattern_Regular Play,0.0039578425202909905,5
+cat__nearest_goal_side_left,-0.0050187859449842285,5
+cat__nearest_goal_side_right,0.005018785944983003,5

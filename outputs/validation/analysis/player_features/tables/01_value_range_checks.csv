@@ -1,0 +1,4 @@
+metric,value
+action_x_out_of_bounds_pct,0.0
+action_y_out_of_bounds_pct,0.0
+target_not_binary_pct,0.0

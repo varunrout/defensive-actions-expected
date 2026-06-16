@@ -22,6 +22,9 @@ from typing import Any
 import pandas as pd
 from statsbombpy import sb
 
+PITCH_X_MAX = 120.0
+PITCH_Y_MAX = 80.0
+
 # ── Competition registry ──────────────────────────────────────────────────────
 
 TARGET_COMPETITIONS: list[dict[str, Any]] = [
@@ -125,6 +128,149 @@ def load_360(match_id: int) -> pd.DataFrame:
 
 # ── Enriched event table ──────────────────────────────────────────────────────
 
+def _as_float(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        out = float(value)
+    except (TypeError, ValueError):
+        return None
+    return None if out != out else out
+
+
+def _xy_from_any(location: Any) -> tuple[float | None, float | None]:
+    if isinstance(location, (list, tuple)) and len(location) >= 2:
+        return _as_float(location[0]), _as_float(location[1])
+    if hasattr(location, "tolist"):
+        try:
+            arr = location.tolist()
+            if isinstance(arr, list) and len(arr) >= 2:
+                return _as_float(arr[0]), _as_float(arr[1])
+        except Exception:
+            return None, None
+    return None, None
+
+
+def _normalize_xy(x: float | None, y: float | None, sign: int) -> tuple[float | None, float | None]:
+    if x is None or y is None:
+        return None, None
+    if sign < 0:
+        return PITCH_X_MAX - x, PITCH_Y_MAX - y
+    return x, y
+
+
+def _extract_end_x(row: pd.Series) -> float | None:
+    for col in [
+        "pass_end_location",
+        "carry_end_location",
+        "dribble_end_location",
+        "shot_end_location",
+    ]:
+        if col not in row.index:
+            continue
+        x, _ = _xy_from_any(row.get(col))
+        if x is not None:
+            return x
+    return None
+
+
+def _infer_attack_sign_by_period_team(events: pd.DataFrame, home_team: str, away_team: str) -> dict[tuple[int, str], int]:
+    """Infer attacking direction sign by (period, team) using progression deltas.
+
+    sign=+1 means coordinates already left-to-right for that attacking team.
+    sign=-1 means coordinates need 180-degree flip to become left-to-right.
+    """
+    work = events.copy()
+    if "possession_team" in work.columns:
+        work["_attack_team"] = work["possession_team"]
+    else:
+        work["_attack_team"] = work.get("team")
+
+    work["_x_raw"] = work["raw_ball_x"]
+    work["_end_x"] = work.apply(_extract_end_x, axis=1)
+    valid = work[
+        work["_attack_team"].notna()
+        & work["period"].notna()
+        & work["_x_raw"].notna()
+        & work["_end_x"].notna()
+    ].copy()
+    valid["_dx"] = pd.to_numeric(valid["_end_x"], errors="coerce") - pd.to_numeric(valid["_x_raw"], errors="coerce")
+
+    grouped = (
+        valid.groupby(["period", "_attack_team"], dropna=False)["_dx"]
+        .agg(median_dx="median", abs_median_dx=lambda s: float(s.abs().median()))
+        .reset_index()
+    )
+
+    signs: dict[tuple[int, str], int] = {}
+    confidence: dict[tuple[int, str], float] = {}
+    for _, row in grouped.iterrows():
+        period = int(row["period"])
+        team = str(row["_attack_team"])
+        median_dx = float(row["median_dx"])
+        signs[(period, team)] = 1 if median_dx >= 0 else -1
+        confidence[(period, team)] = float(row["abs_median_dx"])
+
+    periods = sorted({int(p) for p in work["period"].dropna().unique().tolist()})
+    for period in periods:
+        home_key = (period, home_team)
+        away_key = (period, away_team)
+        home_sign = signs.get(home_key)
+        away_sign = signs.get(away_key)
+
+        if home_sign is not None and away_sign is None:
+            signs[away_key] = -home_sign
+        elif home_sign is None and away_sign is not None:
+            signs[home_key] = -away_sign
+        elif home_sign is not None and away_sign is not None and home_sign == away_sign:
+            # If inference disagrees with football constraints, flip the weaker side.
+            home_conf = confidence.get(home_key, 0.0)
+            away_conf = confidence.get(away_key, 0.0)
+            if home_conf <= away_conf:
+                signs[home_key] = -home_sign
+            else:
+                signs[away_key] = -away_sign
+
+        # Last-resort fallback if both are missing.
+        if home_key not in signs and away_key not in signs:
+            fallback_home = 1 if period % 2 == 1 else -1
+            signs[home_key] = fallback_home
+            signs[away_key] = -fallback_home
+
+    return signs
+
+
+def _normalize_freeze_frame(frame: Any, sign: int) -> list[dict[str, Any]]:
+    if not isinstance(frame, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for player in frame:
+        if not isinstance(player, dict):
+            continue
+        entry = dict(player)
+        x, y = _xy_from_any(entry.get("location"))
+        x_n, y_n = _normalize_xy(x, y, sign)
+        if x_n is not None and y_n is not None:
+            entry["location"] = [x_n, y_n]
+        out.append(entry)
+    return out
+
+
+def _normalize_visible_area(area: Any, sign: int) -> list[float] | None:
+    if not isinstance(area, list) or len(area) < 2:
+        return None if area is None else area
+    out: list[float] = []
+    for i in range(0, len(area), 2):
+        if i + 1 >= len(area):
+            break
+        x = _as_float(area[i])
+        y = _as_float(area[i + 1])
+        x_n, y_n = _normalize_xy(x, y, sign)
+        if x_n is None or y_n is None:
+            continue
+        out.extend([x_n, y_n])
+    return out if out else None
+
 def build_enriched_events(
     match_id: int,
     competition_id: int,
@@ -148,15 +294,48 @@ def build_enriched_events(
 
     # ── ball coordinates ──────────────────────────────────────────────────────
     if "location" in events.columns:
-        events["ball_x"] = events["location"].apply(
+        events["raw_ball_x"] = events["location"].apply(
             lambda loc: float(loc[0]) if isinstance(loc, list) and len(loc) >= 2 else None
         )
-        events["ball_y"] = events["location"].apply(
+        events["raw_ball_y"] = events["location"].apply(
             lambda loc: float(loc[1]) if isinstance(loc, list) and len(loc) >= 2 else None
         )
     else:
-        events["ball_x"] = None
-        events["ball_y"] = None
+        events["raw_ball_x"] = None
+        events["raw_ball_y"] = None
+
+    # Infer attacking direction by (period, team) and normalize all coordinates
+    direction_map = _infer_attack_sign_by_period_team(events, home_team=home_team, away_team=away_team)
+
+    def _row_sign(row: pd.Series) -> int:
+        team_key = row.get("possession_team") if "possession_team" in events.columns else row.get("team")
+        period = row.get("period")
+        if pd.isna(period) or team_key is None:
+            return 1
+        return int(direction_map.get((int(period), str(team_key)), 1))
+
+    events["attack_dir_sign"] = events.apply(_row_sign, axis=1)
+    events["ball_x"] = events.apply(
+        lambda r: _normalize_xy(_as_float(r.get("raw_ball_x")), _as_float(r.get("raw_ball_y")), int(r["attack_dir_sign"]))[0],
+        axis=1,
+    )
+    events["ball_y"] = events.apply(
+        lambda r: _normalize_xy(_as_float(r.get("raw_ball_x")), _as_float(r.get("raw_ball_y")), int(r["attack_dir_sign"]))[1],
+        axis=1,
+    )
+
+    if "location" in events.columns:
+        events["location"] = events.apply(
+            lambda r: (
+                [
+                    _normalize_xy(_as_float(r.get("raw_ball_x")), _as_float(r.get("raw_ball_y")), int(r["attack_dir_sign"]))[0],
+                    _normalize_xy(_as_float(r.get("raw_ball_x")), _as_float(r.get("raw_ball_y")), int(r["attack_dir_sign"]))[1],
+                ]
+                if _normalize_xy(_as_float(r.get("raw_ball_x")), _as_float(r.get("raw_ball_y")), int(r["attack_dir_sign"]))[0] is not None
+                else r.get("location")
+            ),
+            axis=1,
+        )
 
     # ── 360 freeze-frame join ─────────────────────────────────────────────────
     if has_360:
@@ -170,6 +349,15 @@ def build_enriched_events(
         )
         events["visible_area"] = events["id"].map(
             lambda eid: frame_map.get(eid, {}).get("visible_area")
+        )
+
+        events["freeze_frame"] = events.apply(
+            lambda r: _normalize_freeze_frame(r.get("freeze_frame"), int(r.get("attack_dir_sign") or 1)),
+            axis=1,
+        )
+        events["visible_area"] = events.apply(
+            lambda r: _normalize_visible_area(r.get("visible_area"), int(r.get("attack_dir_sign") or 1)),
+            axis=1,
         )
     else:
         events["freeze_frame"] = [[] for _ in range(len(events))]

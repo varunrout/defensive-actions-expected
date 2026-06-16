@@ -1,0 +1,4 @@
+scenario,categorical_features,numeric_features,total_features,primary_metric,secondary_metric,primary_metric_name,secondary_metric_name,delta_vs_full_primary
+full,8,36,44,0.36970865875518233,0.6821904710311212,r2,spearman,0.0
+tactical_only,6,31,37,0.23432214834758125,0.5618605837601759,r2,spearman,-0.13538651040760108
+proxy_only,2,5,7,0.199496866409689,0.6019840174732418,r2,spearman,-0.17021179234549333

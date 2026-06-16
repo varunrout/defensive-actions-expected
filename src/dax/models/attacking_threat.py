@@ -69,6 +69,11 @@ def _event_seconds(row: dict[str, Any]) -> int:
     return (minute * 60) + second
 
 
+def _event_type(row: dict[str, Any]) -> Any:
+    # Support both internal naming conventions used across the pipeline.
+    return row.get("event_type", row.get("type"))
+
+
 def add_shot_in_10s_target(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     with_targets: list[dict[str, Any]] = []
     n = len(rows)
@@ -76,17 +81,20 @@ def add_shot_in_10s_target(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for i, row in enumerate(rows):
         current_time = _event_seconds(row)
         current_team = row.get("team_in_possession")
+        current_match = row.get("match_id")
         target = 0
 
         for j in range(i + 1, n):
             next_row = rows[j]
+            if next_row.get("match_id") != current_match:
+                break
             if next_row.get("period") != row.get("period"):
                 break
             if _event_seconds(next_row) - current_time > 10:
                 break
             if next_row.get("team_in_possession") != current_team:
                 continue
-            if next_row.get("event_type") == "Shot":
+            if _event_type(next_row) == "Shot":
                 target = 1
                 break
 
@@ -96,3 +104,67 @@ def add_shot_in_10s_target(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
     return with_targets
 
+
+def add_xt_target(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Add xT-based continuous target: aggregated threat in next 10 seconds.
+    
+    For each event, collect all attacking events in the next 10 seconds
+    (same team, same period, same match) and aggregate their position-based
+    expected threat scores.
+    
+    Args:
+        rows: sorted list of event dictionaries
+        
+    Returns:
+        list with added 'target_xt_10s' field (continuous threat 0.0-1.0+)
+    """
+    with_targets: list[dict[str, Any]] = []
+    n = len(rows)
+    
+    # Build a threat model from the current data for position-based scoring
+    threat_model = GridThreatModel(n_x=12, n_y=8, smoothing=0.5)
+    threat_model.fit(rows)
+    
+    for i, row in enumerate(rows):
+        current_time = _event_seconds(row)
+        current_team = row.get("team_in_possession")
+        current_match = row.get("match_id")
+        current_period = row.get("period")
+        
+        # Collect threat scores from future events in this possession
+        future_threat_scores: list[float] = []
+        
+        for j in range(i + 1, n):
+            next_row = rows[j]
+            
+            # Stop if we cross match/period boundary
+            if next_row.get("match_id") != current_match:
+                break
+            if next_row.get("period") != current_period:
+                break
+            
+            # Stop if we exceed 10 second window
+            if _event_seconds(next_row) - current_time > 10:
+                break
+            
+            # Skip if possession changed (defensive action by other team)
+            if next_row.get("team_in_possession") != current_team:
+                continue
+            
+            # Score this event's position for threat
+            threat_score = threat_model.predict_point(
+                next_row.get("ball_x"),
+                next_row.get("ball_y")
+            )
+            future_threat_scores.append(threat_score)
+        
+        # Aggregate threat: use sum (captures sustained threat over window)
+        # Could also use: max (peak threat), mean (avg threat), etc.
+        target_xt = sum(future_threat_scores) if future_threat_scores else 0.0
+        
+        out = dict(row)
+        out["target_xt_10s"] = round(target_xt, 6)
+        with_targets.append(out)
+    
+    return with_targets

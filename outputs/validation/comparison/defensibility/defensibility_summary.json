@@ -1,0 +1,8 @@
+{
+  "n_boot": 40,
+  "seed": 42,
+  "best_classification_auc": "v3_context_enhanced",
+  "best_regression_r2": "v3_context_enhanced",
+  "best_calibration_ece": "v4_freeze_geometry",
+  "lowest_regression_decile_bias": "v5_interpretable_clustered"
+}

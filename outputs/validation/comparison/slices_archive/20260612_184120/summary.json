@@ -1,0 +1,22 @@
+{
+  "rows": 57637,
+  "slice_cols": [
+    "phase_label",
+    "action_zone",
+    "position_group",
+    "play_pattern",
+    "action_family",
+    "counterpress"
+  ],
+  "min_slice_size": 500,
+  "top_logistic_variant": "v4_freeze_geometry",
+  "top_regression_variant": "v4_freeze_geometry",
+  "outputs": {
+    "leaderboard_logistic_overall": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\comparison\\slices\\leaderboard_logistic_overall.csv",
+    "leaderboard_regression_overall": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\comparison\\slices\\leaderboard_regression_overall.csv",
+    "slice_metrics_logistic": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\comparison\\slices\\slice_metrics_logistic.csv",
+    "slice_metrics_regression": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\comparison\\slices\\slice_metrics_regression.csv",
+    "best_variant_by_slice_logistic": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\comparison\\slices\\best_variant_by_slice_logistic.csv",
+    "best_variant_by_slice_regression": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\comparison\\slices\\best_variant_by_slice_regression.csv"
+  }
+}

@@ -1,0 +1,54 @@
+feature,feature_type,is_proxy,cluster_id,target_corr_abs,keep_v5,reason_v5,keep_v6,reason_v6
+action_family,categorical,False,,,True,kept categorical,True,kept categorical
+action_zone,categorical,False,,,True,kept categorical,True,kept categorical
+event_type,categorical,False,,,True,kept categorical,True,kept categorical
+nearest_goal_side,categorical,False,,,True,kept categorical,True,kept categorical
+phase_label,categorical,False,,,True,kept categorical,True,kept categorical
+phase_label_prev_event,categorical,False,,,True,kept categorical,True,kept categorical
+play_pattern,categorical,True,,,False,drop proxy categorical,True,kept categorical
+position,categorical,False,,,True,kept categorical,True,kept categorical
+position_group,categorical,True,,,False,drop proxy categorical,True,kept categorical
+action_x,numeric,False,2.0,0.005912492928255267,False,redundant in cluster,False,redundant in cluster
+action_y,numeric,False,3.0,0.0002300882872429632,False,redundant in cluster,False,redundant in cluster
+ball_x,numeric,False,2.0,0.005912492928255267,False,redundant in cluster,False,redundant in cluster
+ball_y,numeric,False,3.0,0.0002300882872429632,False,redundant in cluster,False,redundant in cluster
+counterpress,numeric,False,,0.05772837816265498,True,non-cluster numeric,True,non-cluster numeric
+distance_to_center_line,numeric,False,4.0,0.16052004009472043,True,cluster representative,True,cluster representative
+distance_to_left_goal,numeric,False,2.0,0.009647377053382644,False,redundant in cluster,False,redundant in cluster
+distance_to_right_goal,numeric,False,2.0,0.023531039259128757,True,cluster representative,True,cluster representative
+event_order_in_possession,numeric,True,1.0,0.05097598969649359,False,proxy + redundant in cluster,False,redundant in cluster
+freeze_frame_count,numeric,False,5.0,0.005471658076884992,False,redundant in cluster,False,redundant in cluster
+freeze_opponent_centroid_dx,numeric,False,8.0,0.016577633707620817,False,redundant in cluster,False,redundant in cluster
+freeze_opponent_centroid_dy,numeric,False,3.0,0.0053275593384802785,False,redundant in cluster,False,redundant in cluster
+freeze_opponent_centroid_x,numeric,False,2.0,0.0029420386064241645,False,redundant in cluster,False,redundant in cluster
+freeze_opponent_centroid_y,numeric,False,3.0,0.0060855378640085195,True,cluster representative,True,cluster representative
+freeze_opponent_count,numeric,False,5.0,0.01645636932024174,False,redundant in cluster,False,redundant in cluster
+freeze_opponent_nearest_distance,numeric,False,7.0,0.10612046884184985,False,redundant in cluster,False,redundant in cluster
+freeze_opponent_spread,numeric,False,,0.17159495109259382,True,non-cluster numeric,True,non-cluster numeric
+freeze_support_balance_10m,numeric,False,6.0,0.04351230738291027,True,cluster representative,True,cluster representative
+freeze_support_balance_5m,numeric,False,,0.028040275103102173,True,non-cluster numeric,True,non-cluster numeric
+freeze_support_ratio_10m,numeric,False,6.0,0.012714894257555653,False,redundant in cluster,False,redundant in cluster
+freeze_support_ratio_5m,numeric,False,,0.0168504168231449,True,non-cluster numeric,True,non-cluster numeric
+freeze_teammate_centroid_dx,numeric,False,8.0,0.01729361185476049,True,cluster representative,True,cluster representative
+freeze_teammate_centroid_dy,numeric,False,3.0,0.004320874593809582,False,redundant in cluster,False,redundant in cluster
+freeze_teammate_centroid_x,numeric,False,2.0,0.0032644442302365486,False,redundant in cluster,False,redundant in cluster
+freeze_teammate_centroid_y,numeric,False,3.0,0.0044840096765522254,False,redundant in cluster,False,redundant in cluster
+freeze_teammate_count,numeric,False,5.0,0.026042725843455752,True,cluster representative,True,cluster representative
+freeze_teammate_nearest_distance,numeric,False,7.0,0.11057126626939519,True,cluster representative,True,cluster representative
+freeze_teammate_spread,numeric,False,,0.17431237315905287,True,non-cluster numeric,True,non-cluster numeric
+has_360,numeric,False,,0.0,True,non-cluster numeric,True,non-cluster numeric
+is_central_lane,numeric,False,4.0,0.14211007267468523,False,redundant in cluster,False,redundant in cluster
+is_deep_zone,numeric,False,,0.10169905289233998,True,non-cluster numeric,True,non-cluster numeric
+is_high_zone,numeric,False,,0.10648849963249235,True,non-cluster numeric,True,non-cluster numeric
+is_wide_lane,numeric,False,,0.11677730368951872,True,non-cluster numeric,True,non-cluster numeric
+nearest_goal_distance,numeric,False,,0.21373857080270905,True,non-cluster numeric,True,non-cluster numeric
+opponent_count,numeric,False,5.0,0.01645636932024174,False,redundant in cluster,False,redundant in cluster
+period,numeric,False,,0.025468787253825374,True,non-cluster numeric,True,non-cluster numeric
+phase_changed_since_prev_event,numeric,False,,0.07746911071538506,True,non-cluster numeric,True,non-cluster numeric
+phase_transition_count_so_far,numeric,True,1.0,0.060267649185189454,False,proxy + redundant in cluster,True,cluster representative
+possession_duration_total,numeric,True,9.0,0.026521167916919178,False,proxy + redundant in cluster,True,cluster representative
+possession_event_count_total,numeric,True,9.0,0.017304715823236044,False,proxy + redundant in cluster,False,redundant in cluster
+possession_progress_ratio,numeric,False,,0.07622315104607569,True,non-cluster numeric,True,non-cluster numeric
+seconds_since_possession_start,numeric,True,1.0,0.04961148541171165,False,proxy + redundant in cluster,False,redundant in cluster
+teammate_count,numeric,False,5.0,0.026042725843455752,False,redundant in cluster,False,redundant in cluster
+teammate_opponent_ratio,numeric,False,,0.03828936527288923,True,non-cluster numeric,True,non-cluster numeric

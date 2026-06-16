@@ -1,0 +1,361 @@
+family,variant,slice_col,slice_value,n,roc_auc,avg_precision
+logistic,v0_phase_only,phase_label,box_defence,9686,0.5,0.14102828825108404
+logistic,v0_phase_only,phase_label,central_progression_defence,6748,0.5,0.04282750444576171
+logistic,v0_phase_only,phase_label,counterpress_after_loss,4070,0.5,0.03095823095823096
+logistic,v0_phase_only,phase_label,high_press,9797,0.5,0.13932836582627334
+logistic,v0_phase_only,phase_label,second_ball,6035,0.5,0.10024855012427507
+logistic,v0_phase_only,phase_label,settled_low_block,8915,0.5,0.058216489063376335
+logistic,v0_phase_only,phase_label,settled_mid_block,5795,0.5,0.03192407247627265
+logistic,v0_phase_only,phase_label,wide_defending,6560,0.5,0.019664634146341464
+logistic,v0_phase_only,action_zone,attacking_third_center,12110,0.5809676735155596,0.16975805440610894
+logistic,v0_phase_only,action_zone,attacking_third_left_flank,3669,0.5938773510971788,0.056423223638730015
+logistic,v0_phase_only,action_zone,attacking_third_right_flank,3794,0.6194147633046886,0.06438273133672473
+logistic,v0_phase_only,action_zone,defensive_third_center,10187,0.5990448512636417,0.17725413578864455
+logistic,v0_phase_only,action_zone,defensive_third_left_flank,3477,0.5716412686089296,0.06269546499714032
+logistic,v0_phase_only,action_zone,defensive_third_right_flank,3210,0.6090889187440912,0.06760449725014145
+logistic,v0_phase_only,action_zone,middle_third_center,9611,0.4855016136560525,0.03572819946036173
+logistic,v0_phase_only,action_zone,middle_third_left_flank,5862,0.532226374583498,0.0245217987826418
+logistic,v0_phase_only,action_zone,middle_third_right_flank,5717,0.5375880454131214,0.023080559796384136
+logistic,v0_phase_only,position_group,centre_back,10607,0.6664629734981794,0.1597519160471747
+logistic,v0_phase_only,position_group,defensive_midfielder,10844,0.6750934420882271,0.14469633339820695
+logistic,v0_phase_only,position_group,forward,7076,0.6449980668649149,0.0871737877258689
+logistic,v0_phase_only,position_group,fullback_wingback,10414,0.693771474207021,0.1357737592450571
+logistic,v0_phase_only,position_group,goalkeeper,2346,0.7303615742197057,0.0777483371090261
+logistic,v0_phase_only,position_group,midfielder,10229,0.6741660560803429,0.11860061676976973
+logistic,v0_phase_only,position_group,other,6121,0.6877555212743498,0.1111996192575202
+logistic,v0_phase_only,play_pattern,From Corner,3235,0.5293979187463712,0.20579464172522713
+logistic,v0_phase_only,play_pattern,From Counter,759,0.6172559224694903,0.37184839762756183
+logistic,v0_phase_only,play_pattern,From Free Kick,8284,0.6941805520579759,0.15098861265332675
+logistic,v0_phase_only,play_pattern,From Goal Kick,4477,0.6561184164510037,0.0971797599024758
+logistic,v0_phase_only,play_pattern,From Keeper,1786,0.7230539021273497,0.10275326767553682
+logistic,v0_phase_only,play_pattern,From Kick Off,1453,0.7276704183478445,0.09833186265699967
+logistic,v0_phase_only,play_pattern,From Throw In,12537,0.6681774226180237,0.11875237265227526
+logistic,v0_phase_only,play_pattern,Regular Play,24821,0.6878136540825801,0.10807147364530797
+logistic,v0_phase_only,action_family,contest,6910,0.547004088036266,0.09988052782366862
+logistic,v0_phase_only,action_family,discipline,2643,0.5666634701444828,0.016771298361558502
+logistic,v0_phase_only,action_family,goalkeeper,1469,0.6731441048034934,0.09570698634674629
+logistic,v0_phase_only,action_family,intervention,10105,0.63065440611391,0.10405497694828497
+logistic,v0_phase_only,action_family,pressure,27478,0.7009047206370616,0.13405960757041918
+logistic,v0_phase_only,action_family,recovery,8932,0.7319653426558071,0.2132058122304307
+logistic,v0_phase_only,counterpress,False,48947,0.6875211076505826,0.13902585662967246
+logistic,v0_phase_only,counterpress,True,8690,0.5364870089032581,0.04555051976269928
+logistic,v1_spatial,phase_label,box_defence,9686,0.7166145628026805,0.32038264502119557
+logistic,v1_spatial,phase_label,central_progression_defence,6748,0.6604349179359184,0.08493993604717909
+logistic,v1_spatial,phase_label,counterpress_after_loss,4070,0.5304138896938086,0.031441785826064036
+logistic,v1_spatial,phase_label,high_press,9797,0.7321880365049245,0.3442296379975953
+logistic,v1_spatial,phase_label,second_ball,6035,0.8598080757347457,0.4879494634849274
+logistic,v1_spatial,phase_label,settled_low_block,8915,0.7074913414131512,0.13770287350685773
+logistic,v1_spatial,phase_label,settled_mid_block,5795,0.5776369417545888,0.04186452733927941
+logistic,v1_spatial,phase_label,wide_defending,6560,0.6460693660431124,0.038424436427318326
+logistic,v1_spatial,action_zone,attacking_third_center,12110,0.7337519986512503,0.34818851205245344
+logistic,v1_spatial,action_zone,attacking_third_left_flank,3669,0.660144449985751,0.08842099548694865
+logistic,v1_spatial,action_zone,attacking_third_right_flank,3794,0.683286534499221,0.0882754286233637
+logistic,v1_spatial,action_zone,defensive_third_center,10187,0.7468296851062156,0.36611342341307945
+logistic,v1_spatial,action_zone,defensive_third_left_flank,3477,0.6604233230812107,0.10562348368294053
+logistic,v1_spatial,action_zone,defensive_third_right_flank,3210,0.6890998656515898,0.12694984541741716
+logistic,v1_spatial,action_zone,middle_third_center,9611,0.602334428476383,0.05904660672228153
+logistic,v1_spatial,action_zone,middle_third_left_flank,5862,0.601683478665978,0.03250641003428035
+logistic,v1_spatial,action_zone,middle_third_right_flank,5717,0.6087823968793384,0.03658060535660573
+logistic,v1_spatial,position_group,centre_back,10607,0.7930762070657008,0.3783392134914766
+logistic,v1_spatial,position_group,defensive_midfielder,10844,0.7507709471508247,0.27424289760709464
+logistic,v1_spatial,position_group,forward,7076,0.756243163960038,0.28085422260809695
+logistic,v1_spatial,position_group,fullback_wingback,10414,0.7950112992743044,0.29738911014929725
+logistic,v1_spatial,position_group,goalkeeper,2346,0.7670629303414771,0.10276726637366844
+logistic,v1_spatial,position_group,midfielder,10229,0.754199371425145,0.2446144477053809
+logistic,v1_spatial,position_group,other,6121,0.7813563531337957,0.2833738340915976
+logistic,v1_spatial,play_pattern,From Corner,3235,0.7497703523356465,0.43980440913338426
+logistic,v1_spatial,play_pattern,From Counter,759,0.6940954773869347,0.5096646592981708
+logistic,v1_spatial,play_pattern,From Free Kick,8284,0.8074523804527268,0.3607365968420085
+logistic,v1_spatial,play_pattern,From Goal Kick,4477,0.7675237812128418,0.21931695296910064
+logistic,v1_spatial,play_pattern,From Keeper,1786,0.7966007428840055,0.22255644070811473
+logistic,v1_spatial,play_pattern,From Kick Off,1453,0.8150987470800595,0.3200153079132796
+logistic,v1_spatial,play_pattern,From Throw In,12537,0.7761276079568699,0.27832089511837266
+logistic,v1_spatial,play_pattern,Regular Play,24821,0.7566050749179942,0.2199964829812152
+logistic,v1_spatial,action_family,contest,6910,0.8465472032274209,0.4708716199912952
+logistic,v1_spatial,action_family,discipline,2643,0.6309082385031752,0.019385166997907738
+logistic,v1_spatial,action_family,goalkeeper,1469,0.6825135984064965,0.10626554900223087
+logistic,v1_spatial,action_family,intervention,10105,0.6934046912939621,0.13859275782176067
+logistic,v1_spatial,action_family,pressure,27478,0.764535713548791,0.2591258637359015
+logistic,v1_spatial,action_family,recovery,8932,0.7950665873158462,0.3845570688507765
+logistic,v1_spatial,counterpress,False,48947,0.7903172965574653,0.31352441747642973
+logistic,v1_spatial,counterpress,True,8690,0.6109884906083768,0.06668326726949957
+logistic,v2_full_baseline,phase_label,box_defence,9686,0.7604308621466382,0.3557934220088516
+logistic,v2_full_baseline,phase_label,central_progression_defence,6748,0.734257233944642,0.1246041514096927
+logistic,v2_full_baseline,phase_label,counterpress_after_loss,4070,0.7038881644611868,0.08853382585328508
+logistic,v2_full_baseline,phase_label,high_press,9797,0.7810947828262819,0.38284287689797936
+logistic,v2_full_baseline,phase_label,second_ball,6035,0.8589775200523568,0.44800413845972364
+logistic,v2_full_baseline,phase_label,settled_low_block,8915,0.7450708246242591,0.17473526495167296
+logistic,v2_full_baseline,phase_label,settled_mid_block,5795,0.6860105024810906,0.08286287243990317
+logistic,v2_full_baseline,phase_label,wide_defending,6560,0.6749212571374845,0.04580144609611196
+logistic,v2_full_baseline,action_zone,attacking_third_center,12110,0.7764202116666847,0.3916696235813099
+logistic,v2_full_baseline,action_zone,attacking_third_left_flank,3669,0.7059365203761755,0.09484694649463295
+logistic,v2_full_baseline,action_zone,attacking_third_right_flank,3794,0.7214417181767927,0.11821093322702747
+logistic,v2_full_baseline,action_zone,defensive_third_center,10187,0.7928446312274481,0.39268901970000253
+logistic,v2_full_baseline,action_zone,defensive_third_left_flank,3477,0.6966864741656464,0.12968231962223442
+logistic,v2_full_baseline,action_zone,defensive_third_right_flank,3210,0.7321968453002936,0.134894399825546
+logistic,v2_full_baseline,action_zone,middle_third_center,9611,0.70243104806219,0.10929596609689526
+logistic,v2_full_baseline,action_zone,middle_third_left_flank,5862,0.689235003392783,0.09141761041331428
+logistic,v2_full_baseline,action_zone,middle_third_right_flank,5717,0.6847370916410443,0.06521991282314585
+logistic,v2_full_baseline,position_group,centre_back,10607,0.8090605575526778,0.381697502743138
+logistic,v2_full_baseline,position_group,defensive_midfielder,10844,0.7810398483086323,0.3030524589863559
+logistic,v2_full_baseline,position_group,forward,7076,0.8247778331927198,0.31856714677793946
+logistic,v2_full_baseline,position_group,fullback_wingback,10414,0.8176664999257052,0.33056922431497365
+logistic,v2_full_baseline,position_group,goalkeeper,2346,0.8087536262276747,0.15808644842483546
+logistic,v2_full_baseline,position_group,midfielder,10229,0.7960224871265003,0.2884839910560399
+logistic,v2_full_baseline,position_group,other,6121,0.8155165964544356,0.2970561698988454
+logistic,v2_full_baseline,play_pattern,From Corner,3235,0.7844154637072194,0.47429827163713156
+logistic,v2_full_baseline,play_pattern,From Counter,759,0.69305455850682,0.49858763216403085
+logistic,v2_full_baseline,play_pattern,From Free Kick,8284,0.8175158790117238,0.3449303543076467
+logistic,v2_full_baseline,play_pattern,From Goal Kick,4477,0.7949980765195497,0.26491941857971296
+logistic,v2_full_baseline,play_pattern,From Keeper,1786,0.8346454086193082,0.29906156171426984
+logistic,v2_full_baseline,play_pattern,From Kick Off,1453,0.8531110639201529,0.34101223686562887
+logistic,v2_full_baseline,play_pattern,From Throw In,12537,0.8083198826380414,0.3044296787286867
+logistic,v2_full_baseline,play_pattern,Regular Play,24821,0.7799681279897452,0.24820727768713136
+logistic,v2_full_baseline,action_family,contest,6910,0.8518208633966919,0.43215783153322124
+logistic,v2_full_baseline,action_family,discipline,2643,0.6432681242807825,0.02008590825532261
+logistic,v2_full_baseline,action_family,goalkeeper,1469,0.7359840649659082,0.16571468950589904
+logistic,v2_full_baseline,action_family,intervention,10105,0.7262963923902358,0.17267517421911505
+logistic,v2_full_baseline,action_family,pressure,27478,0.8091445073854445,0.31724054295482856
+logistic,v2_full_baseline,action_family,recovery,8932,0.8228495428594242,0.38504195084871784
+logistic,v2_full_baseline,counterpress,False,48947,0.8178042283507556,0.34320312108936124
+logistic,v2_full_baseline,counterpress,True,8690,0.6969563734815332,0.1300938827719688
+logistic,v3_context_enhanced,phase_label,box_defence,9686,0.7709247240680257,0.3716803254425137
+logistic,v3_context_enhanced,phase_label,central_progression_defence,6748,0.7393588839049183,0.12961472913670455
+logistic,v3_context_enhanced,phase_label,counterpress_after_loss,4070,0.7216567661547377,0.10297223041436276
+logistic,v3_context_enhanced,phase_label,high_press,9797,0.7876827157662073,0.3985849770874976
+logistic,v3_context_enhanced,phase_label,second_ball,6035,0.8582107361916502,0.4612620617772772
+logistic,v3_context_enhanced,phase_label,settled_low_block,8915,0.755805131538002,0.18008959304375127
+logistic,v3_context_enhanced,phase_label,settled_mid_block,5795,0.6827807486631017,0.0844385851559675
+logistic,v3_context_enhanced,phase_label,wide_defending,6560,0.679018417331747,0.04391006308664565
+logistic,v3_context_enhanced,action_zone,attacking_third_center,12110,0.7826495317445641,0.4028837395883251
+logistic,v3_context_enhanced,action_zone,attacking_third_left_flank,3669,0.7197171558848675,0.1071698542891444
+logistic,v3_context_enhanced,action_zone,attacking_third_right_flank,3794,0.7417316824966079,0.12203680393773748
+logistic,v3_context_enhanced,action_zone,defensive_third_center,10187,0.7998235011186097,0.4139128776321497
+logistic,v3_context_enhanced,action_zone,defensive_third_left_flank,3477,0.7056346860163039,0.13528546767523592
+logistic,v3_context_enhanced,action_zone,defensive_third_right_flank,3210,0.7398079315320696,0.14086337446173947
+logistic,v3_context_enhanced,action_zone,middle_third_center,9611,0.7044348753116981,0.10972516948016947
+logistic,v3_context_enhanced,action_zone,middle_third_left_flank,5862,0.6864840640476407,0.08294431291212358
+logistic,v3_context_enhanced,action_zone,middle_third_right_flank,5717,0.7001516041938148,0.06759797365063284
+logistic,v3_context_enhanced,position_group,centre_back,10607,0.8132589286362177,0.39705243711229343
+logistic,v3_context_enhanced,position_group,defensive_midfielder,10844,0.7857129648565396,0.3180127116838981
+logistic,v3_context_enhanced,position_group,forward,7076,0.8245669130635376,0.33220825153406935
+logistic,v3_context_enhanced,position_group,fullback_wingback,10414,0.8241209257383293,0.34298826417322525
+logistic,v3_context_enhanced,position_group,goalkeeper,2346,0.8257357310125476,0.17678243085734036
+logistic,v3_context_enhanced,position_group,midfielder,10229,0.8022803022658237,0.2941275805962212
+logistic,v3_context_enhanced,position_group,other,6121,0.8177504228940053,0.31119857096683395
+logistic,v3_context_enhanced,play_pattern,From Corner,3235,0.7906904880601321,0.48689522834013277
+logistic,v3_context_enhanced,play_pattern,From Counter,759,0.710848887293611,0.5344689134049123
+logistic,v3_context_enhanced,play_pattern,From Free Kick,8284,0.8195245390189989,0.3612972721305067
+logistic,v3_context_enhanced,play_pattern,From Goal Kick,4477,0.7970046163530812,0.2666718210768077
+logistic,v3_context_enhanced,play_pattern,From Keeper,1786,0.8276800434342164,0.30402220828842613
+logistic,v3_context_enhanced,play_pattern,From Kick Off,1453,0.8501592694839669,0.3234906857584514
+logistic,v3_context_enhanced,play_pattern,From Throw In,12537,0.8112206873624663,0.31082611035010854
+logistic,v3_context_enhanced,play_pattern,Regular Play,24821,0.7882049319585499,0.26601876628818283
+logistic,v3_context_enhanced,action_family,contest,6910,0.8518102628210806,0.4447872862729523
+logistic,v3_context_enhanced,action_family,discipline,2643,0.6617653326514086,0.021190640489501734
+logistic,v3_context_enhanced,action_family,goalkeeper,1469,0.7577644985827012,0.18440020534413898
+logistic,v3_context_enhanced,action_family,intervention,10105,0.7351356055779248,0.18795390351269137
+logistic,v3_context_enhanced,action_family,pressure,27478,0.8126604262456989,0.32253887898364053
+logistic,v3_context_enhanced,action_family,recovery,8932,0.8306395226973291,0.4080002448077076
+logistic,v3_context_enhanced,counterpress,False,48947,0.8219091234163362,0.3566209513073617
+logistic,v3_context_enhanced,counterpress,True,8690,0.7040165786827919,0.12758558396918707
+logistic,v4_freeze_geometry,phase_label,box_defence,9686,0.7721946622648947,0.37334865959497265
+logistic,v4_freeze_geometry,phase_label,central_progression_defence,6748,0.7399722819102231,0.13096901991646268
+logistic,v4_freeze_geometry,phase_label,counterpress_after_loss,4070,0.721735245822467,0.10500540772867005
+logistic,v4_freeze_geometry,phase_label,high_press,9797,0.7874513453023889,0.39750668945983086
+logistic,v4_freeze_geometry,phase_label,second_ball,6035,0.8588572820114759,0.4641956564691768
+logistic,v4_freeze_geometry,phase_label,settled_low_block,8915,0.7554843071432308,0.18002200276967276
+logistic,v4_freeze_geometry,phase_label,settled_mid_block,5795,0.6837568049332755,0.08529443968605159
+logistic,v4_freeze_geometry,phase_label,wide_defending,6560,0.684879080133896,0.04805532672133716
+logistic,v4_freeze_geometry,action_zone,attacking_third_center,12110,0.7833327169692289,0.4042547013526249
+logistic,v4_freeze_geometry,action_zone,attacking_third_left_flank,3669,0.7252796380735252,0.10823777221194558
+logistic,v4_freeze_geometry,action_zone,attacking_third_right_flank,3794,0.7430367103874567,0.12208026927672287
+logistic,v4_freeze_geometry,action_zone,defensive_third_center,10187,0.7999569541142837,0.41449547430873485
+logistic,v4_freeze_geometry,action_zone,defensive_third_left_flank,3477,0.7056612287285046,0.13552002107813982
+logistic,v4_freeze_geometry,action_zone,defensive_third_right_flank,3210,0.7395153505498334,0.13942410931574473
+logistic,v4_freeze_geometry,action_zone,middle_third_center,9611,0.7032855502261418,0.11056504348500527
+logistic,v4_freeze_geometry,action_zone,middle_third_left_flank,5862,0.6866726926543717,0.08645759547680226
+logistic,v4_freeze_geometry,action_zone,middle_third_right_flank,5717,0.7042610998969433,0.0692618491151933
+logistic,v4_freeze_geometry,position_group,centre_back,10607,0.8139042039222288,0.39848500348597365
+logistic,v4_freeze_geometry,position_group,defensive_midfielder,10844,0.7860585137480423,0.3182382194096945
+logistic,v4_freeze_geometry,position_group,forward,7076,0.8256800826720669,0.3352171428947259
+logistic,v4_freeze_geometry,position_group,fullback_wingback,10414,0.8246799983736955,0.34392314489883086
+logistic,v4_freeze_geometry,position_group,goalkeeper,2346,0.8261944706581384,0.17839959929673901
+logistic,v4_freeze_geometry,position_group,midfielder,10229,0.8028214206844709,0.294343754010951
+logistic,v4_freeze_geometry,position_group,other,6121,0.8184630573287466,0.3142342522605705
+logistic,v4_freeze_geometry,play_pattern,From Corner,3235,0.7908739647748848,0.4915749403710011
+logistic,v4_freeze_geometry,play_pattern,From Counter,759,0.7122307968413496,0.5348371293828329
+logistic,v4_freeze_geometry,play_pattern,From Free Kick,8284,0.8207889140714625,0.36154023659536005
+logistic,v4_freeze_geometry,play_pattern,From Goal Kick,4477,0.7981010002098342,0.26877196563905115
+logistic,v4_freeze_geometry,play_pattern,From Keeper,1786,0.8273423688862698,0.29491192077811934
+logistic,v4_freeze_geometry,play_pattern,From Kick Off,1453,0.8489488214058186,0.32345489486761697
+logistic,v4_freeze_geometry,play_pattern,From Throw In,12537,0.8124975155949337,0.3110502674845528
+logistic,v4_freeze_geometry,play_pattern,Regular Play,24821,0.788467932681884,0.2664769087961327
+logistic,v4_freeze_geometry,action_family,contest,6910,0.8525626512948224,0.4476579043796688
+logistic,v4_freeze_geometry,action_family,discipline,2643,0.6648020287260794,0.021268184828830364
+logistic,v4_freeze_geometry,action_family,goalkeeper,1469,0.7585689113613728,0.18608272661074793
+logistic,v4_freeze_geometry,action_family,intervention,10105,0.7363389997131778,0.18935469240385897
+logistic,v4_freeze_geometry,action_family,pressure,27478,0.813307056978438,0.3227563734814571
+logistic,v4_freeze_geometry,action_family,recovery,8932,0.8307500648780293,0.40807124424908103
+logistic,v4_freeze_geometry,counterpress,False,48947,0.8225589722750035,0.3577633905353958
+logistic,v4_freeze_geometry,counterpress,True,8690,0.7036723293563906,0.12717770929125063
+logistic,v5_interpretable_clustered,phase_label,box_defence,9686,0.7517953176033336,0.35468550174637126
+logistic,v5_interpretable_clustered,phase_label,central_progression_defence,6748,0.6840030621685574,0.102568259674518
+logistic,v5_interpretable_clustered,phase_label,counterpress_after_loss,4070,0.5448601854534917,0.03280464655701317
+logistic,v5_interpretable_clustered,phase_label,high_press,9797,0.7679337740058803,0.37716839475595304
+logistic,v5_interpretable_clustered,phase_label,second_ball,6035,0.851016544145625,0.4644450046404481
+logistic,v5_interpretable_clustered,phase_label,settled_low_block,8915,0.7184281715946946,0.15718204205945724
+logistic,v5_interpretable_clustered,phase_label,settled_mid_block,5795,0.6014578214578215,0.04815048625424072
+logistic,v5_interpretable_clustered,phase_label,wide_defending,6560,0.6337881313743146,0.03309576412116536
+logistic,v5_interpretable_clustered,action_zone,attacking_third_center,12110,0.7650362748403798,0.39119397556281327
+logistic,v5_interpretable_clustered,action_zone,attacking_third_left_flank,3669,0.6775452408093474,0.08881593630989744
+logistic,v5_interpretable_clustered,action_zone,attacking_third_right_flank,3794,0.6944632896125433,0.10020510460711456
+logistic,v5_interpretable_clustered,action_zone,defensive_third_center,10187,0.7805981304909227,0.3981802280782045
+logistic,v5_interpretable_clustered,action_zone,defensive_third_left_flank,3477,0.667739987591282,0.10760055208857608
+logistic,v5_interpretable_clustered,action_zone,defensive_third_right_flank,3210,0.6992546151166841,0.1230917347503552
+logistic,v5_interpretable_clustered,action_zone,middle_third_center,9611,0.6195821747761131,0.05697652248250125
+logistic,v5_interpretable_clustered,action_zone,middle_third_left_flank,5862,0.5963563029805852,0.03148906257400933
+logistic,v5_interpretable_clustered,action_zone,middle_third_right_flank,5717,0.6279394605275486,0.03639639825000096
+logistic,v5_interpretable_clustered,position_group,centre_back,10607,0.7940408092626482,0.3845442807085917
+logistic,v5_interpretable_clustered,position_group,defensive_midfielder,10844,0.7601491309357843,0.3090730787281834
+logistic,v5_interpretable_clustered,position_group,forward,7076,0.8019711510130635,0.30196466381639464
+logistic,v5_interpretable_clustered,position_group,fullback_wingback,10414,0.80310204119507,0.32800197433055683
+logistic,v5_interpretable_clustered,position_group,goalkeeper,2346,0.7762617524728251,0.09511316235470293
+logistic,v5_interpretable_clustered,position_group,midfielder,10229,0.7703123423261364,0.2847349907988427
+logistic,v5_interpretable_clustered,position_group,other,6121,0.7932580490022678,0.29164746388375323
+logistic,v5_interpretable_clustered,play_pattern,From Corner,3235,0.7633319371399118,0.48112184477900416
+logistic,v5_interpretable_clustered,play_pattern,From Counter,759,0.6987167982770998,0.5238048972721681
+logistic,v5_interpretable_clustered,play_pattern,From Free Kick,8284,0.8149448081927306,0.3551484202765747
+logistic,v5_interpretable_clustered,play_pattern,From Goal Kick,4477,0.7843061481429672,0.26788164985428575
+logistic,v5_interpretable_clustered,play_pattern,From Keeper,1786,0.8154774122211701,0.27586080300162313
+logistic,v5_interpretable_clustered,play_pattern,From Kick Off,1453,0.8198980675302612,0.32573688681772256
+logistic,v5_interpretable_clustered,play_pattern,From Throw In,12537,0.7913435751725268,0.29724108080267764
+logistic,v5_interpretable_clustered,play_pattern,Regular Play,24821,0.7694183295196586,0.2567910263849002
+logistic,v5_interpretable_clustered,action_family,contest,6910,0.8378180078035381,0.4477348054110996
+logistic,v5_interpretable_clustered,action_family,discipline,2643,0.6166091292673571,0.01878870281435427
+logistic,v5_interpretable_clustered,action_family,goalkeeper,1469,0.6861717612809316,0.09729680341782262
+logistic,v5_interpretable_clustered,action_family,intervention,10105,0.6906758438811638,0.13402963214848732
+logistic,v5_interpretable_clustered,action_family,pressure,27478,0.7920448828129181,0.3284346442201391
+logistic,v5_interpretable_clustered,action_family,recovery,8932,0.8001898930011578,0.3761952213507639
+logistic,v5_interpretable_clustered,counterpress,False,48947,0.8040565990001983,0.3401895061910154
+logistic,v5_interpretable_clustered,counterpress,True,8690,0.6101234705412792,0.08125324378075965
+logistic,v6_balanced_clustered,phase_label,box_defence,9686,0.7595024073656943,0.3620980206784922
+logistic,v6_balanced_clustered,phase_label,central_progression_defence,6748,0.7296355880129708,0.1300635564610624
+logistic,v6_balanced_clustered,phase_label,counterpress_after_loss,4070,0.7001452880002577,0.11573869019114724
+logistic,v6_balanced_clustered,phase_label,high_press,9797,0.7756737806785244,0.385372118828925
+logistic,v6_balanced_clustered,phase_label,second_ball,6035,0.8575340547615786,0.47509885661917756
+logistic,v6_balanced_clustered,phase_label,settled_low_block,8915,0.7384615667062303,0.16730917112250873
+logistic,v6_balanced_clustered,phase_label,settled_mid_block,5795,0.6556390615214146,0.07125187722469609
+logistic,v6_balanced_clustered,phase_label,wide_defending,6560,0.671999363547931,0.04285663036228504
+logistic,v6_balanced_clustered,action_zone,attacking_third_center,12110,0.7758621664835703,0.394848257639724
+logistic,v6_balanced_clustered,action_zone,attacking_third_left_flank,3669,0.6986979908805928,0.09420756280313848
+logistic,v6_balanced_clustered,action_zone,attacking_third_right_flank,3794,0.7119296195788735,0.1042452893086262
+logistic,v6_balanced_clustered,action_zone,defensive_third_center,10187,0.7917431449081463,0.4068307532296245
+logistic,v6_balanced_clustered,action_zone,defensive_third_left_flank,3477,0.6817047720478697,0.12323861933232079
+logistic,v6_balanced_clustered,action_zone,defensive_third_right_flank,3210,0.7126158133054684,0.12678701621552466
+logistic,v6_balanced_clustered,action_zone,middle_third_center,9611,0.6888195520265594,0.10599703209419843
+logistic,v6_balanced_clustered,action_zone,middle_third_left_flank,5862,0.6693720313148805,0.08496120185767635
+logistic,v6_balanced_clustered,action_zone,middle_third_right_flank,5717,0.6804913225052734,0.057018155764031575
+logistic,v6_balanced_clustered,position_group,centre_back,10607,0.8069153845818937,0.3835515551034742
+logistic,v6_balanced_clustered,position_group,defensive_midfielder,10844,0.7805381568369605,0.3054437327939534
+logistic,v6_balanced_clustered,position_group,forward,7076,0.8194980029061704,0.3199925819087003
+logistic,v6_balanced_clustered,position_group,fullback_wingback,10414,0.8135919482796155,0.3460943324903365
+logistic,v6_balanced_clustered,position_group,goalkeeper,2346,0.7993822306106043,0.13308355722653045
+logistic,v6_balanced_clustered,position_group,midfielder,10229,0.7903758433038058,0.2931774895632954
+logistic,v6_balanced_clustered,position_group,other,6121,0.8120992800070782,0.29576329103806404
+logistic,v6_balanced_clustered,play_pattern,From Corner,3235,0.7798068183327037,0.5030502519027916
+logistic,v6_balanced_clustered,play_pattern,From Counter,759,0.7007986360373295,0.5249499680127439
+logistic,v6_balanced_clustered,play_pattern,From Free Kick,8284,0.8152560927837936,0.34500190269213943
+logistic,v6_balanced_clustered,play_pattern,From Goal Kick,4477,0.7821876967195915,0.24045350952524344
+logistic,v6_balanced_clustered,play_pattern,From Keeper,1786,0.8228466626498845,0.2953757954316831
+logistic,v6_balanced_clustered,play_pattern,From Kick Off,1453,0.8294648545338713,0.3140191315025515
+logistic,v6_balanced_clustered,play_pattern,From Throw In,12537,0.8033992008905533,0.3044306101079754
+logistic,v6_balanced_clustered,play_pattern,Regular Play,24821,0.7794132325809631,0.257323892657786
+logistic,v6_balanced_clustered,action_family,contest,6910,0.8503236582889308,0.4579698833070821
+logistic,v6_balanced_clustered,action_family,discipline,2643,0.6312705110173464,0.01834000119131896
+logistic,v6_balanced_clustered,action_family,goalkeeper,1469,0.7194131617252739,0.1377167736857464
+logistic,v6_balanced_clustered,action_family,intervention,10105,0.7113805451372696,0.1625658240773199
+logistic,v6_balanced_clustered,action_family,pressure,27478,0.805197779332298,0.31353735100755203
+logistic,v6_balanced_clustered,action_family,recovery,8932,0.8261271309937317,0.40011405469392347
+logistic,v6_balanced_clustered,counterpress,False,48947,0.8149207050313299,0.3476771867780825
+logistic,v6_balanced_clustered,counterpress,True,8690,0.6865751556205624,0.12593064565740214
+logistic,v7_interpretable_ridge,phase_label,box_defence,9686,0.7517859028325261,0.35476925689982175
+logistic,v7_interpretable_ridge,phase_label,central_progression_defence,6748,0.6839441331025456,0.10253488833378085
+logistic,v7_interpretable_ridge,phase_label,counterpress_after_loss,4070,0.5445080330982968,0.03279468480069096
+logistic,v7_interpretable_ridge,phase_label,high_press,9797,0.7678826865733888,0.3772599462854799
+logistic,v7_interpretable_ridge,phase_label,second_ball,6035,0.8510113693438657,0.46452550637035234
+logistic,v7_interpretable_ridge,phase_label,settled_low_block,8915,0.7184339087977485,0.15726857183192966
+logistic,v7_interpretable_ridge,phase_label,settled_mid_block,5795,0.6013903743315507,0.04814300455837958
+logistic,v7_interpretable_ridge,phase_label,wide_defending,6560,0.6337411207101262,0.03269960818387504
+logistic,v7_interpretable_ridge,action_zone,attacking_third_center,12110,0.765031924034937,0.3913139130627786
+logistic,v7_interpretable_ridge,action_zone,attacking_third_left_flank,3669,0.6774544029638073,0.08881018747328724
+logistic,v7_interpretable_ridge,action_zone,attacking_third_right_flank,3794,0.694453867028494,0.1002775235587268
+logistic,v7_interpretable_ridge,action_zone,defensive_third_center,10187,0.7805792412867019,0.39828855703671656
+logistic,v7_interpretable_ridge,action_zone,defensive_third_left_flank,3477,0.6677316929937194,0.10764314502891612
+logistic,v7_interpretable_ridge,action_zone,defensive_third_right_flank,3210,0.6991730108971488,0.12303024390143391
+logistic,v7_interpretable_ridge,action_zone,middle_third_center,9611,0.6195222415743907,0.056935515232741714
+logistic,v7_interpretable_ridge,action_zone,middle_third_left_flank,5862,0.5962081852155684,0.03147276654273149
+logistic,v7_interpretable_ridge,action_zone,middle_third_right_flank,5717,0.6278471920575301,0.03636883434929335
+logistic,v7_interpretable_ridge,position_group,centre_back,10607,0.7940495169415148,0.38471940435485596
+logistic,v7_interpretable_ridge,position_group,defensive_midfielder,10844,0.7601285599441432,0.30917418410425834
+logistic,v7_interpretable_ridge,position_group,forward,7076,0.8019395309596254,0.301442018608758
+logistic,v7_interpretable_ridge,position_group,fullback_wingback,10414,0.8031163263006252,0.3282819436525997
+logistic,v7_interpretable_ridge,position_group,goalkeeper,2346,0.7764102967390165,0.09508342945984517
+logistic,v7_interpretable_ridge,position_group,midfielder,10229,0.7703142435530128,0.2847600087219627
+logistic,v7_interpretable_ridge,position_group,other,6121,0.7932068023957131,0.29175656399904604
+logistic,v7_interpretable_ridge,play_pattern,From Corner,3235,0.7633144344269913,0.48109198277010917
+logistic,v7_interpretable_ridge,play_pattern,From Counter,759,0.6985193826274229,0.5237022722319956
+logistic,v7_interpretable_ridge,play_pattern,From Free Kick,8284,0.8149196256190716,0.35517754099400034
+logistic,v7_interpretable_ridge,play_pattern,From Goal Kick,4477,0.78439008183535,0.267904570136967
+logistic,v7_interpretable_ridge,play_pattern,From Keeper,1786,0.815338369760251,0.2755920251006432
+logistic,v7_interpretable_ridge,play_pattern,From Kick Off,1453,0.8198555956678701,0.32689432080051867
+logistic,v7_interpretable_ridge,play_pattern,From Throw In,12537,0.7913448229454749,0.29726165656470366
+logistic,v7_interpretable_ridge,play_pattern,Regular Play,24821,0.7693553428711865,0.25691150196923707
+logistic,v7_interpretable_ridge,action_family,contest,6910,0.8378301227470937,0.4478325402330234
+logistic,v7_interpretable_ridge,action_family,discipline,2643,0.6165345437497336,0.01878665568876569
+logistic,v7_interpretable_ridge,action_family,goalkeeper,1469,0.685941929058454,0.09722951543873484
+logistic,v7_interpretable_ridge,action_family,intervention,10105,0.690706222946211,0.13402978939393304
+logistic,v7_interpretable_ridge,action_family,pressure,27478,0.7920520193325215,0.32833795914090913
+logistic,v7_interpretable_ridge,action_family,recovery,8932,0.8001197748233322,0.3765285782375199
+logistic,v7_interpretable_ridge,counterpress,False,48947,0.8040386616739165,0.34028814786459904
+logistic,v7_interpretable_ridge,counterpress,True,8690,0.6100752691218776,0.08117207003471098
+logistic,v8_balanced_ridge,phase_label,box_defence,9686,0.7594856015598603,0.362191153316616
+logistic,v8_balanced_ridge,phase_label,central_progression_defence,6748,0.7296902313287272,0.13004223882414173
+logistic,v8_balanced_ridge,phase_label,counterpress_after_loss,4070,0.6997629511574746,0.11545041362751375
+logistic,v8_balanced_ridge,phase_label,high_press,9797,0.7756298176838973,0.38556844704128984
+logistic,v8_balanced_ridge,phase_label,second_ball,6035,0.8575297931601298,0.4751124865735827
+logistic,v8_balanced_ridge,phase_label,settled_low_block,8915,0.7384450435614354,0.1674050767612824
+logistic,v8_balanced_ridge,phase_label,settled_mid_block,5795,0.6555696873343932,0.07090799474668738
+logistic,v8_balanced_ridge,phase_label,wide_defending,6560,0.6719547636870343,0.04287187852184717
+logistic,v8_balanced_ridge,action_zone,attacking_third_center,12110,0.7758440018708463,0.3950407856455387
+logistic,v8_balanced_ridge,action_zone,attacking_third_left_flank,3669,0.6985270019948703,0.0941615259889563
+logistic,v8_balanced_ridge,action_zone,attacking_third_right_flank,3794,0.7118589501985024,0.1043179751141131
+logistic,v8_balanced_ridge,action_zone,defensive_third_center,10187,0.7917161164533261,0.4070295658137923
+logistic,v8_balanced_ridge,action_zone,defensive_third_left_flank,3477,0.6817313147600705,0.12338791002265453
+logistic,v8_balanced_ridge,action_zone,defensive_third_right_flank,3210,0.7124645469473055,0.12690106652569558
+logistic,v8_balanced_ridge,action_zone,middle_third_center,9611,0.6888404378392811,0.10601236219223605
+logistic,v8_balanced_ridge,action_zone,middle_third_left_flank,5862,0.6693770951700948,0.08461148507273264
+logistic,v8_balanced_ridge,action_zone,middle_third_right_flank,5717,0.6803607271323243,0.05694973404039005
+logistic,v8_balanced_ridge,position_group,centre_back,10607,0.8069084910027909,0.3838071017541061
+logistic,v8_balanced_ridge,position_group,defensive_midfielder,10844,0.7805081757108454,0.30554675146456
+logistic,v8_balanced_ridge,position_group,forward,7076,0.8194706946782013,0.31992468026812115
+logistic,v8_balanced_ridge,position_group,fullback_wingback,10414,0.813585599343813,0.3465674115674157
+logistic,v8_balanced_ridge,position_group,goalkeeper,2346,0.7993298032225369,0.1330561219527749
+logistic,v8_balanced_ridge,position_group,midfielder,10229,0.7903452774255634,0.2932920039893495
+logistic,v8_balanced_ridge,position_group,other,6121,0.8120291991776014,0.29587731702026493
+logistic,v8_balanced_ridge,play_pattern,From Corner,3235,0.7797790554087607,0.5032268569165882
+logistic,v8_balanced_ridge,play_pattern,From Counter,759,0.7006999282124909,0.5248383097798548
+logistic,v8_balanced_ridge,play_pattern,From Free Kick,8284,0.8152366812165981,0.3450223401569885
+logistic,v8_balanced_ridge,play_pattern,From Goal Kick,4477,0.7822847450514094,0.24049236863108378
+logistic,v8_balanced_ridge,play_pattern,From Keeper,1786,0.8227076201889653,0.2957657487766113
+logistic,v8_balanced_ridge,play_pattern,From Kick Off,1453,0.8294330006370779,0.31393179197017124
+logistic,v8_balanced_ridge,play_pattern,From Throw In,12537,0.8034089156942207,0.30448496004540054
+logistic,v8_balanced_ridge,play_pattern,Regular Play,24821,0.7793261676307289,0.2573803937558593
+logistic,v8_balanced_ridge,action_family,contest,6910,0.8503297157607089,0.45817907330746754
+logistic,v8_balanced_ridge,action_family,discipline,2643,0.6309828240207987,0.01833137164816459
+logistic,v8_balanced_ridge,action_family,goalkeeper,1469,0.7192676013177048,0.13772327910377902
+logistic,v8_balanced_ridge,action_family,intervention,10105,0.7113831451473411,0.16256917321866493
+logistic,v8_balanced_ridge,action_family,pressure,27478,0.8052164739108236,0.3136213651458975
+logistic,v8_balanced_ridge,action_family,recovery,8932,0.8260139687387711,0.4004179655489575
+logistic,v8_balanced_ridge,counterpress,False,48947,0.8148909562249682,0.34780977865753926
+logistic,v8_balanced_ridge,counterpress,True,8690,0.6864781014112269,0.1258357117282586

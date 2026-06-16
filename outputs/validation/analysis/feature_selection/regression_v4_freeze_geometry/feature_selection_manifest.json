@@ -1,0 +1,91 @@
+{
+  "task": "regression",
+  "base_variant": "v4_freeze_geometry",
+  "rows": 57637,
+  "corr_threshold": 0.8,
+  "v5": {
+    "name": "v5_interpretable_clustered",
+    "categorical": [
+      "phase_label",
+      "phase_label_prev_event",
+      "action_zone",
+      "action_family",
+      "position",
+      "event_type",
+      "nearest_goal_side"
+    ],
+    "numeric": [
+      "period",
+      "counterpress",
+      "has_360",
+      "phase_changed_since_prev_event",
+      "nearest_goal_distance",
+      "distance_to_right_goal",
+      "distance_to_center_line",
+      "is_wide_lane",
+      "is_deep_zone",
+      "is_high_zone",
+      "freeze_teammate_count",
+      "freeze_support_balance_5m",
+      "freeze_support_balance_10m",
+      "freeze_support_ratio_5m",
+      "freeze_opponent_nearest_distance",
+      "freeze_opponent_centroid_y",
+      "freeze_teammate_centroid_dx",
+      "freeze_teammate_spread",
+      "freeze_opponent_spread",
+      "teammate_opponent_ratio",
+      "possession_progress_ratio"
+    ],
+    "total_features": 28
+  },
+  "v6": {
+    "name": "v6_balanced_clustered",
+    "categorical": [
+      "phase_label",
+      "phase_label_prev_event",
+      "action_zone",
+      "action_family",
+      "position_group",
+      "position",
+      "event_type",
+      "play_pattern",
+      "nearest_goal_side"
+    ],
+    "numeric": [
+      "period",
+      "counterpress",
+      "has_360",
+      "phase_changed_since_prev_event",
+      "nearest_goal_distance",
+      "distance_to_right_goal",
+      "distance_to_center_line",
+      "is_wide_lane",
+      "is_deep_zone",
+      "is_high_zone",
+      "freeze_teammate_count",
+      "freeze_support_balance_5m",
+      "freeze_support_balance_10m",
+      "freeze_support_ratio_5m",
+      "freeze_opponent_nearest_distance",
+      "freeze_opponent_centroid_y",
+      "freeze_teammate_centroid_dx",
+      "freeze_teammate_spread",
+      "freeze_opponent_spread",
+      "teammate_opponent_ratio",
+      "possession_progress_ratio",
+      "possession_event_count_total",
+      "phase_transition_count_so_far"
+    ],
+    "total_features": 32
+  },
+  "artifacts": {
+    "clusters_csv": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\feature_selection\\regression_v4_freeze_geometry\\correlation_clusters.csv",
+    "decisions_csv": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\feature_selection\\regression_v4_freeze_geometry\\feature_selection_decisions.csv",
+    "selected_v5_csv": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\feature_selection\\regression_v4_freeze_geometry\\selected_features_v5.csv",
+    "selected_v6_csv": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\feature_selection\\regression_v4_freeze_geometry\\selected_features_v6.csv",
+    "corr_heatmap": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\feature_selection\\regression_v4_freeze_geometry\\correlation_heatmap_clustered.png",
+    "explained_variance": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\feature_selection\\regression_v4_freeze_geometry\\pca_explained_variance.png",
+    "top_loadings": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\feature_selection\\regression_v4_freeze_geometry\\pca_top_loadings.png"
+  }
+}

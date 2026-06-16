@@ -1,0 +1,69 @@
+{
+  "config": {
+    "task": "regression",
+    "variant": "v3_context_enhanced",
+    "n_splits": 5,
+    "corr_threshold": 0.8,
+    "min_sign_consistency": 0.8
+  },
+  "input_path": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\data\\features\\player_defensive_actions.parquet",
+  "rows": 57637,
+  "variant_features": {
+    "categorical": [
+      "phase_label",
+      "phase_label_prev_event",
+      "action_zone",
+      "action_family",
+      "position_group",
+      "event_type",
+      "play_pattern",
+      "nearest_goal_side"
+    ],
+    "numeric": [
+      "period",
+      "counterpress",
+      "has_360",
+      "phase_changed_since_prev_event",
+      "event_order_in_possession",
+      "action_x",
+      "action_y",
+      "ball_x",
+      "ball_y",
+      "nearest_goal_distance",
+      "distance_to_left_goal",
+      "distance_to_right_goal",
+      "distance_to_center_line",
+      "is_central_lane",
+      "is_wide_lane",
+      "is_deep_zone",
+      "is_high_zone",
+      "freeze_frame_count",
+      "freeze_teammate_count",
+      "freeze_opponent_count",
+      "freeze_support_balance_5m",
+      "freeze_support_balance_10m",
+      "freeze_support_ratio_5m",
+      "freeze_support_ratio_10m",
+      "freeze_teammate_nearest_distance",
+      "freeze_opponent_nearest_distance",
+      "freeze_teammate_spread",
+      "freeze_opponent_spread",
+      "teammate_count",
+      "opponent_count",
+      "teammate_opponent_ratio",
+      "possession_progress_ratio",
+      "seconds_since_possession_start",
+      "possession_duration_total",
+      "possession_event_count_total",
+      "phase_transition_count_so_far"
+    ],
+    "total": 44
+  },
+  "outputs": {
+    "correlation_clusters": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\feature_stability\\regression_v3_context_enhanced\\correlation_clusters.csv",
+    "fold_coefficients": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\feature_stability\\regression_v3_context_enhanced\\fold_coefficients.csv",
+    "coefficient_sign_stability": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\feature_stability\\regression_v3_context_enhanced\\coefficient_sign_stability.csv",
+    "tactical_vs_proxy_ablation": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\feature_stability\\regression_v3_context_enhanced\\tactical_vs_proxy_ablation.csv",
+    "interpretable_feature_set_recommended": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\feature_stability\\regression_v3_context_enhanced\\interpretable_feature_set_recommended.csv"
+  }
+}

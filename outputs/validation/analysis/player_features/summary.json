@@ -1,0 +1,83 @@
+{
+  "input_path": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\data\\features\\player_defensive_actions.parquet",
+  "output_dir": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\player_features",
+  "rows": 57637,
+  "matches": 115,
+  "players": 1012,
+  "decision": "GO_BASELINE",
+  "failed_mandatory_steps": [],
+  "step_results": {
+    "01_schema_quality": {
+      "rows": 57637,
+      "matches": 115,
+      "players": 1012,
+      "duplicate_key_pct": 0.0,
+      "max_missing_pct": 8.832867775907836,
+      "core_max_missing_pct": 0.0,
+      "pass_missingness": true,
+      "pass_duplicates": true,
+      "pass_players": true,
+      "pass": true
+    },
+    "02_target_label_audit": {
+      "base_rate": 0.07953224491212242,
+      "base_rate_ci_low": 0.07735123709932454,
+      "base_rate_ci_high": 0.08176929871186667,
+      "phase_groups": 8,
+      "action_groups": 7,
+      "role_groups": 7,
+      "unstable_phase_cells": 0,
+      "pass": true
+    },
+    "03_univariate_signal": {
+      "numeric_features_tested": 20,
+      "categorical_features_tested": 6,
+      "strong_numeric_signal_count": 11,
+      "strong_categorical_signal_count": 6,
+      "pass": true
+    },
+    "04_feature_interactions": {
+      "interaction_rows": 265,
+      "strong_interaction_cells": 35,
+      "pass": true
+    },
+    "05_phase_role_stratification": {
+      "rows": 84,
+      "features_with_sign_flip": 4,
+      "pass": false
+    },
+    "06_leakage_and_confounding": {
+      "suspect_leakage_columns": 0,
+      "team_rate_std": 0.019408781263076755,
+      "match_rate_std": 0.027382376987021045,
+      "pass": true
+    },
+    "07_stability_and_shift": {
+      "features_tested": 20,
+      "unstable_drift_features": 0,
+      "stability_features": 20,
+      "pass": true
+    },
+    "08_redundancy_and_selection": {
+      "numeric_features_total": 20,
+      "core_feature_count": 17,
+      "extended_feature_count": 20,
+      "high_corr_pairs": 3,
+      "pass": true
+    },
+    "09_sanity_negative_controls": {
+      "feature_tested": "nearest_goal_distance",
+      "observed_abs_corr": 0.21373857080270905,
+      "perm_p95_abs_corr": 0.008261939387391152,
+      "noise_abs_corr": 0.004221333917588366,
+      "pass": true
+    },
+    "10_decision_report": {
+      "decision": "GO_BASELINE",
+      "failed_mandatory_steps": [],
+      "decision_json": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\player_features\\report\\decision.json",
+      "decision_markdown": "C:\\Users\\USER\\Documents\\Projects\\defensive-action-expected\\outputs\\validation\\analysis\\player_features\\report\\player_feature_analysis_report.md",
+      "pass": true
+    }
+  }
+}
