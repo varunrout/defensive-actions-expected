@@ -181,6 +181,8 @@ def _infer_attack_sign_by_period_team(events: pd.DataFrame, home_team: str, away
     sign=-1 means coordinates need 180-degree flip to become left-to-right.
     """
     work = events.copy()
+    if "period" not in work.columns:
+        return {}
     if "possession_team" in work.columns:
         work["_attack_team"] = work["possession_team"]
     else:

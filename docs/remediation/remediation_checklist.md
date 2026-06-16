@@ -1,0 +1,23 @@
+# Remediation checklist
+
+- [x] Create branch `fix/methodology-pipeline-rebuild`.
+- [x] Inspect repository tree, package files, scripts, tests, docs, notebooks, and existing output/report areas.
+- [x] Run pre-change tests and record failures.
+- [x] Create initial audit.
+- [x] Add canonical event ordering/context helpers.
+- [x] Add event semantics QA utility.
+- [x] Implement possession-bounded `target_future_shot_10s`.
+- [x] Add observed `target_future_xg_10s`.
+- [x] Reset `GridThreatModel.fit` state on repeated calls.
+- [x] Remove known future-only fields from baseline model specs.
+- [x] Add feature leakage denylist test.
+- [x] Replace nearest-goal model geometry with attacking/defending goal geometry.
+- [x] Remove `Shield` and generic goalkeeper actions from included defensive action types.
+- [x] Add basic possession-state phase proxy segmentation fields.
+- [x] Add deterministic fixture tests for targets, geometry, leakage and grid fitting.
+- [x] Add CI workflow for install, tests and Ruff.
+- [x] Rewrite README to avoid unsupported DAx/causal claims.
+- [x] Add methodology/data-dictionary/final remediation docs.
+- [ ] Full raw-data re-download and full corrected model regeneration (not run in this environment/timebox).
+- [ ] Notebook reruns with full corrected data (not run; old outputs treated as historical).
+- [ ] Human tactical validation of phase proxies (template generated; no human labels fabricated).
