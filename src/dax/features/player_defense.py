@@ -1,4 +1,4 @@
-﻿"""Player defensive feature engineering for DAx.
+"""Player defensive feature engineering for DAx.
 Builds a 360-only, player-action table for defensive events.
 A row represents one defensive action by an identifiable player,
 with phase, possession, and freeze-frame support context.
@@ -7,8 +7,8 @@ from __future__ import annotations
 from itertools import groupby
 from math import sqrt
 from typing import Any
-DEFENSIVE_ACTION_TYPES = {"Pressure", "Ball Recovery", "Duel", "Clearance", "Block", "Interception", "Foul Committed", "Goal Keeper", "50/50", "Shield"}
-ACTION_FAMILIES = {"Pressure": "pressure", "Ball Recovery": "recovery", "Duel": "contest", "50/50": "contest", "Clearance": "intervention", "Block": "intervention", "Interception": "intervention", "Foul Committed": "discipline", "Goal Keeper": "goalkeeper", "Shield": "possession_protection"}
+DEFENSIVE_ACTION_TYPES = {"Pressure", "Ball Recovery", "Duel", "Clearance", "Block", "Interception", "Foul Committed", "50/50"}
+ACTION_FAMILIES = {"Pressure": "pressure", "Ball Recovery": "recovery", "Duel": "contest", "50/50": "contest", "Clearance": "intervention", "Block": "intervention", "Interception": "intervention", "Foul Committed": "discipline"}
 def _as_float(value: Any) -> float | None:
     if value is None:
         return None
@@ -84,13 +84,25 @@ def _pitch_zone(x: float | None, y: float | None) -> str | None:
     y_zone = "left_flank" if y < 20 else "right_flank" if y > 60 else "center"
     return f"{x_zone}_{y_zone}"
 def _goal_metrics(x: float, y: float) -> dict[str, Any]:
-    left_goal = _distance(x, y, 0.0, 40.0)
-    right_goal = _distance(x, y, 120.0, 40.0)
+    """Goal geometry after normalising attack left-to-right.
+
+    Attacking goal is always (120, 40); defending goal is always (0, 40).
+    """
+    import math
+    distance_to_attacking_goal = _distance(x, y, 120.0, 40.0)
+    distance_to_defending_goal = _distance(x, y, 0.0, 40.0)
+    angle_to_attacking_goal = abs(math.atan2(y - 40.0, 120.0 - x))
+    distance_to_attacking_box = max(0.0, 102.0 - x) if 18.0 <= y <= 62.0 else _distance(x, y, min(max(x, 102.0), 120.0), min(max(y, 18.0), 62.0))
+    distance_to_defending_box = max(0.0, x - 18.0) if 18.0 <= y <= 62.0 else _distance(x, y, min(max(x, 0.0), 18.0), min(max(y, 18.0), 62.0))
     return {
-        "distance_to_left_goal": left_goal,
-        "distance_to_right_goal": right_goal,
-        "nearest_goal_distance": min(left_goal, right_goal),
-        "nearest_goal_side": "left" if left_goal <= right_goal else "right",
+        "distance_to_attacking_goal": distance_to_attacking_goal,
+        "distance_to_defending_goal": distance_to_defending_goal,
+        "angle_to_attacking_goal": angle_to_attacking_goal,
+        "distance_to_attacking_box": distance_to_attacking_box,
+        "distance_to_defending_box": distance_to_defending_box,
+        "attacking_goal_centrality": max(0.0, 1.0 - abs(y - 40.0) / 40.0),
+        "is_in_attacking_box": int(x >= 102.0 and 18.0 <= y <= 62.0),
+        "is_in_defending_box": int(x <= 18.0 and 18.0 <= y <= 62.0),
         "distance_to_center_line": abs(y - 40.0),
         "is_central_lane": 1 if 24.0 <= y <= 56.0 else 0,
         "is_wide_lane": 1 if y <= 12.0 or y >= 68.0 else 0,
@@ -174,7 +186,6 @@ def build_player_defensive_actions(events: list[dict[str, Any]], only_with_360: 
         if not group:
             continue
         group_start = (_as_float(group[0][1].get("minute") or 0) or 0) * 60 + (_as_float(group[0][1].get("second") or 0) or 0)
-        group_end = (_as_float(group[-1][1].get("minute") or 0) or 0) * 60 + (_as_float(group[-1][1].get("second") or 0) or 0)
         prev_phase: str | None = None
         phase_changes = 0
         for order_in_possession, (_, row) in enumerate(group):
@@ -202,15 +213,13 @@ def build_player_defensive_actions(events: list[dict[str, Any]], only_with_360: 
                 "event_index": row.get("index"),
                 "event_order_in_possession": order_in_possession,
                 "match_time_seconds": (_as_float(row.get("minute") or 0) or 0) * 60 + (_as_float(row.get("second") or 0) or 0),
-                "seconds_since_possession_start": max(0.0, ((_as_float(row.get("minute") or 0) or 0) * 60 + (_as_float(row.get("second") or 0) or 0)) - group_start),
-                "possession_duration_total": max(0.0, group_end - group_start),
-                "possession_progress_ratio": (((_as_float(row.get("minute") or 0) or 0) * 60 + (_as_float(row.get("second") or 0) or 0) - group_start) / max(1.0, group_end - group_start)) if group_end > group_start else 0.0,
-                "possession_event_count_total": len(group),
-                "phase_transition_count_so_far": phase_changes,
+                "possession_elapsed_seconds": max(0.0, ((_as_float(row.get("minute") or 0) or 0) * 60 + (_as_float(row.get("second") or 0) or 0)) - group_start),
+                "events_elapsed_in_possession": order_in_possession + 1,
+                "phase_transitions_observed_so_far": phase_changes,
                 "phase_changed_since_prev_event": int(order_in_possession > 0 and phase_label != group[order_in_possession - 1][1].get("phase_label")),
                 "phase_label": phase_label,
                 "target_shot_in_10s": int(row.get("target_shot_in_10s") or 0),
-                "target_xt_10s": float(row.get("target_xt_10s") or 0.0),
+                "target_future_xg_10s": float(row.get("target_future_xg_10s") or 0.0),
                 "has_360": bool(row.get("has_360")),
                 "team": row.get("team"),
                 "team_id": row.get("team_id"),
@@ -218,12 +227,18 @@ def build_player_defensive_actions(events: list[dict[str, Any]], only_with_360: 
                 "player_id": row.get("player_id"),
                 "position": row.get("position"),
                 "position_group": _position_group(row.get("position")),
-                "attacking_team": row.get("possession_team") or row.get("team_in_possession"),
-                "defending_team": row.get("team"),
+                "actor_team": row.get("team"),
+                "attacking_team": row.get("attacking_team_before_action") or row.get("possession_team") or row.get("team_in_possession"),
+                "defending_team": row.get("defending_team_before_action") or row.get("team"),
                 "event_type": event_type,
                 "action_family": _action_family(event_type),
                 "play_pattern": row.get("play_pattern"),
                 "counterpress": bool(row.get("counterpress")),
+                "action_changed_possession": bool(row.get("action_changed_possession")),
+                "action_ended_possession": bool(row.get("action_ended_possession", row.get("action_changed_possession"))),
+                "action_won_possession": bool(row.get("action_won_possession")),
+                "action_retained_defensive_team_control": bool(row.get("action_retained_defensive_team_control")),
+                "action_was_under_opponent_possession": bool(row.get("action_was_under_opponent_possession")),
                 "action_x": action_x,
                 "action_y": action_y,
                 "action_zone": _pitch_zone(action_x, action_y),

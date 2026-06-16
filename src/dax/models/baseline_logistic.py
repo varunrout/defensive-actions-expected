@@ -38,7 +38,7 @@ def default_variant_specs() -> list[VariantSpec]:
         VariantSpec(
             name="v1_spatial",
             categorical=["phase_label", "action_zone", "action_family", "position_group"],
-            numeric=["action_x", "action_y", "nearest_goal_distance", "distance_to_center_line"],
+            numeric=["action_x", "action_y",  "distance_to_center_line"],
         ),
         VariantSpec(
             name="v2_full_baseline",
@@ -53,7 +53,7 @@ def default_variant_specs() -> list[VariantSpec]:
             numeric=[
                 "action_x",
                 "action_y",
-                "nearest_goal_distance",
+                
                 "distance_to_center_line",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
@@ -66,11 +66,11 @@ def default_variant_specs() -> list[VariantSpec]:
                 "teammate_count",
                 "opponent_count",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
-                "seconds_since_possession_start",
-                "possession_duration_total",
-                "possession_event_count_total",
-                "phase_transition_count_so_far",
+                
+                "possession_elapsed_seconds",
+                
+                
+                "phase_transitions_observed_so_far",
             ],
         ),
         VariantSpec(
@@ -83,7 +83,7 @@ def default_variant_specs() -> list[VariantSpec]:
                 "position_group",
                 "event_type",
                 "play_pattern",
-                "nearest_goal_side",
+                
             ],
             numeric=[
                 "period",
@@ -95,9 +95,9 @@ def default_variant_specs() -> list[VariantSpec]:
                 "action_y",
                 "ball_x",
                 "ball_y",
-                "nearest_goal_distance",
-                "distance_to_left_goal",
-                "distance_to_right_goal",
+                
+                
+                
                 "distance_to_center_line",
                 "is_central_lane",
                 "is_wide_lane",
@@ -117,11 +117,11 @@ def default_variant_specs() -> list[VariantSpec]:
                 "teammate_count",
                 "opponent_count",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
-                "seconds_since_possession_start",
-                "possession_duration_total",
-                "possession_event_count_total",
-                "phase_transition_count_so_far",
+                
+                "possession_elapsed_seconds",
+                
+                
+                "phase_transitions_observed_so_far",
             ],
         ),
         VariantSpec(
@@ -135,7 +135,7 @@ def default_variant_specs() -> list[VariantSpec]:
                 "position",
                 "event_type",
                 "play_pattern",
-                "nearest_goal_side",
+                
             ],
             numeric=[
                 "period",
@@ -147,9 +147,9 @@ def default_variant_specs() -> list[VariantSpec]:
                 "action_y",
                 "ball_x",
                 "ball_y",
-                "nearest_goal_distance",
-                "distance_to_left_goal",
-                "distance_to_right_goal",
+                
+                
+                
                 "distance_to_center_line",
                 "is_central_lane",
                 "is_wide_lane",
@@ -177,11 +177,11 @@ def default_variant_specs() -> list[VariantSpec]:
                 "teammate_count",
                 "opponent_count",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
-                "seconds_since_possession_start",
-                "possession_duration_total",
-                "possession_event_count_total",
-                "phase_transition_count_so_far",
+                
+                "possession_elapsed_seconds",
+                
+                
+                "phase_transitions_observed_so_far",
             ],
         ),
         VariantSpec(
@@ -193,15 +193,15 @@ def default_variant_specs() -> list[VariantSpec]:
                 "action_family",
                 "position",
                 "event_type",
-                "nearest_goal_side",
+                
             ],
             numeric=[
                 "period",
                 "counterpress",
                 "has_360",
                 "phase_changed_since_prev_event",
-                "nearest_goal_distance",
-                "distance_to_right_goal",
+                
+                
                 "distance_to_center_line",
                 "is_wide_lane",
                 "is_deep_zone",
@@ -216,7 +216,7 @@ def default_variant_specs() -> list[VariantSpec]:
                 "freeze_teammate_spread",
                 "freeze_opponent_spread",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
+                
             ],
         ),
         VariantSpec(
@@ -230,15 +230,15 @@ def default_variant_specs() -> list[VariantSpec]:
                 "position",
                 "event_type",
                 "play_pattern",
-                "nearest_goal_side",
+                
             ],
             numeric=[
                 "period",
                 "counterpress",
                 "has_360",
                 "phase_changed_since_prev_event",
-                "nearest_goal_distance",
-                "distance_to_right_goal",
+                
+                
                 "distance_to_center_line",
                 "is_wide_lane",
                 "is_deep_zone",
@@ -253,9 +253,9 @@ def default_variant_specs() -> list[VariantSpec]:
                 "freeze_teammate_spread",
                 "freeze_opponent_spread",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
-                "possession_duration_total",
-                "phase_transition_count_so_far",
+                
+                
+                "phase_transitions_observed_so_far",
             ],
         ),
         VariantSpec(
@@ -267,15 +267,15 @@ def default_variant_specs() -> list[VariantSpec]:
                 "action_family",
                 "position",
                 "event_type",
-                "nearest_goal_side",
+                
             ],
             numeric=[
                 "period",
                 "counterpress",
                 "has_360",
                 "phase_changed_since_prev_event",
-                "nearest_goal_distance",
-                "distance_to_right_goal",
+                
+                
                 "distance_to_center_line",
                 "is_wide_lane",
                 "is_deep_zone",
@@ -290,7 +290,7 @@ def default_variant_specs() -> list[VariantSpec]:
                 "freeze_teammate_spread",
                 "freeze_opponent_spread",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
+                
             ],
             c=0.6,
         ),
@@ -305,15 +305,15 @@ def default_variant_specs() -> list[VariantSpec]:
                 "position",
                 "event_type",
                 "play_pattern",
-                "nearest_goal_side",
+                
             ],
             numeric=[
                 "period",
                 "counterpress",
                 "has_360",
                 "phase_changed_since_prev_event",
-                "nearest_goal_distance",
-                "distance_to_right_goal",
+                
+                
                 "distance_to_center_line",
                 "is_wide_lane",
                 "is_deep_zone",
@@ -328,9 +328,9 @@ def default_variant_specs() -> list[VariantSpec]:
                 "freeze_teammate_spread",
                 "freeze_opponent_spread",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
-                "possession_duration_total",
-                "phase_transition_count_so_far",
+                
+                
+                "phase_transitions_observed_so_far",
             ],
             c=0.5,
         ),
@@ -346,6 +346,7 @@ def resolve_columns(df: pd.DataFrame, spec: VariantSpec) -> VariantSpec:
 
 def build_pipeline(spec: VariantSpec) -> Pipeline:
     """Build preprocessing + logistic pipeline for a variant."""
+    validate_no_future_features(spec)
     numeric_transformer = Pipeline(
         steps=[
             ("imputer", SimpleImputer(strategy="median")),
@@ -451,3 +452,16 @@ def coefficient_table(pipeline: Pipeline) -> pd.DataFrame:
     out["abs_coef"] = out["coef"].abs()
     return out.sort_values("abs_coef", ascending=False).reset_index(drop=True)
 
+
+FUTURE_ONLY_FEATURES = {
+    "possession_duration_total",
+    "possession_event_count_total",
+    "possession_progress_ratio",
+    "target_xt_10s",
+}
+
+
+def validate_no_future_features(spec: VariantSpec) -> None:
+    leaked = FUTURE_ONLY_FEATURES.intersection([*spec.categorical, *spec.numeric])
+    if leaked:
+        raise ValueError(f"Future-only features in model spec {spec.name}: {sorted(leaked)}")

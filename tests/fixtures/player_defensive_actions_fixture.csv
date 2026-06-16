@@ -1,0 +1,2 @@
+match_id,period,possession,event_id,event_index,player_id,player,actor_team,attacking_team,defending_team,event_type,action_x,action_y,target_future_shot_10s,target_future_xg_10s
+1,1,1,e1,1,10,Defender B,B,A,B,Pressure,80,40,1,0.1

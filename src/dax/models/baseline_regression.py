@@ -32,7 +32,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from scipy.stats import spearmanr
 
 # Target configuration
-TARGET_COL = "target_xt_10s"
+TARGET_COL = "target_future_xg_10s"
 GROUP_COL = "match_id"
 
 
@@ -64,7 +64,7 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
             numeric=[
                 "action_x",
                 "action_y",
-                "nearest_goal_distance",
+                
                 "distance_to_center_line",
             ],
             alpha=1.0,
@@ -83,7 +83,7 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
             numeric=[
                 "action_x",
                 "action_y",
-                "nearest_goal_distance",
+                
                 "distance_to_center_line",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
@@ -96,11 +96,11 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "teammate_count",
                 "opponent_count",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
-                "seconds_since_possession_start",
-                "possession_duration_total",
-                "possession_event_count_total",
-                "phase_transition_count_so_far",
+                
+                "possession_elapsed_seconds",
+                
+                
+                "phase_transitions_observed_so_far",
             ],
             alpha=1.0,
         ),
@@ -115,7 +115,7 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "position_group",
                 "event_type",
                 "play_pattern",
-                "nearest_goal_side",
+                
             ],
             numeric=[
                 "period",
@@ -127,9 +127,9 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "action_y",
                 "ball_x",
                 "ball_y",
-                "nearest_goal_distance",
-                "distance_to_left_goal",
-                "distance_to_right_goal",
+                
+                
+                
                 "distance_to_center_line",
                 "is_central_lane",
                 "is_wide_lane",
@@ -149,11 +149,11 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "teammate_count",
                 "opponent_count",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
-                "seconds_since_possession_start",
-                "possession_duration_total",
-                "possession_event_count_total",
-                "phase_transition_count_so_far",
+                
+                "possession_elapsed_seconds",
+                
+                
+                "phase_transitions_observed_so_far",
             ],
             alpha=0.8,
         ),
@@ -169,7 +169,7 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "position",
                 "event_type",
                 "play_pattern",
-                "nearest_goal_side",
+                
             ],
             numeric=[
                 "period",
@@ -181,9 +181,9 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "action_y",
                 "ball_x",
                 "ball_y",
-                "nearest_goal_distance",
-                "distance_to_left_goal",
-                "distance_to_right_goal",
+                
+                
+                
                 "distance_to_center_line",
                 "is_central_lane",
                 "is_wide_lane",
@@ -211,11 +211,11 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "teammate_count",
                 "opponent_count",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
-                "seconds_since_possession_start",
-                "possession_duration_total",
-                "possession_event_count_total",
-                "phase_transition_count_so_far",
+                
+                "possession_elapsed_seconds",
+                
+                
+                "phase_transitions_observed_so_far",
             ],
             alpha=0.6,
         ),
@@ -229,15 +229,15 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "action_family",
                 "position",
                 "event_type",
-                "nearest_goal_side",
+                
             ],
             numeric=[
                 "period",
                 "counterpress",
                 "has_360",
                 "phase_changed_since_prev_event",
-                "nearest_goal_distance",
-                "distance_to_right_goal",
+                
+                
                 "distance_to_center_line",
                 "is_wide_lane",
                 "is_deep_zone",
@@ -252,7 +252,7 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "freeze_teammate_spread",
                 "freeze_opponent_spread",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
+                
             ],
             alpha=0.0,
         ),
@@ -268,15 +268,15 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "position",
                 "event_type",
                 "play_pattern",
-                "nearest_goal_side",
+                
             ],
             numeric=[
                 "period",
                 "counterpress",
                 "has_360",
                 "phase_changed_since_prev_event",
-                "nearest_goal_distance",
-                "distance_to_right_goal",
+                
+                
                 "distance_to_center_line",
                 "is_wide_lane",
                 "is_deep_zone",
@@ -291,9 +291,9 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "freeze_teammate_spread",
                 "freeze_opponent_spread",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
-                "possession_duration_total",
-                "phase_transition_count_so_far",
+                
+                
+                "phase_transitions_observed_so_far",
             ],
             alpha=0.0,
         ),
@@ -307,15 +307,15 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "action_family",
                 "position",
                 "event_type",
-                "nearest_goal_side",
+                
             ],
             numeric=[
                 "period",
                 "counterpress",
                 "has_360",
                 "phase_changed_since_prev_event",
-                "nearest_goal_distance",
-                "distance_to_right_goal",
+                
+                
                 "distance_to_center_line",
                 "is_wide_lane",
                 "is_deep_zone",
@@ -330,7 +330,7 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "freeze_teammate_spread",
                 "freeze_opponent_spread",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
+                
             ],
             alpha=0.6,
         ),
@@ -346,15 +346,15 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "position",
                 "event_type",
                 "play_pattern",
-                "nearest_goal_side",
+                
             ],
             numeric=[
                 "period",
                 "counterpress",
                 "has_360",
                 "phase_changed_since_prev_event",
-                "nearest_goal_distance",
-                "distance_to_right_goal",
+                
+                
                 "distance_to_center_line",
                 "is_wide_lane",
                 "is_deep_zone",
@@ -369,9 +369,9 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "freeze_teammate_spread",
                 "freeze_opponent_spread",
                 "teammate_opponent_ratio",
-                "possession_progress_ratio",
-                "possession_duration_total",
-                "phase_transition_count_so_far",
+                
+                
+                "phase_transitions_observed_so_far",
             ],
             alpha=0.5,
         ),

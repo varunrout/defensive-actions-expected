@@ -36,6 +36,9 @@ class GridThreatModel:
         return cx, cy
 
     def fit(self, rows: list[dict[str, Any]]) -> "GridThreatModel":
+        # Reset state on every fit; use a future partial_fit for intentional accumulation.
+        self._totals = [[0.0 for _ in range(self.n_y)] for _ in range(self.n_x)]
+        self._positives = [[0.0 for _ in range(self.n_y)] for _ in range(self.n_x)]
         for row in rows:
             cell = self._cell(row.get("ball_x"), row.get("ball_y"))
             if cell is None:
@@ -75,34 +78,15 @@ def _event_type(row: dict[str, Any]) -> Any:
 
 
 def add_shot_in_10s_target(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    with_targets: list[dict[str, Any]] = []
-    n = len(rows)
-
-    for i, row in enumerate(rows):
-        current_time = _event_seconds(row)
-        current_team = row.get("team_in_possession")
-        current_match = row.get("match_id")
-        target = 0
-
-        for j in range(i + 1, n):
-            next_row = rows[j]
-            if next_row.get("match_id") != current_match:
-                break
-            if next_row.get("period") != row.get("period"):
-                break
-            if _event_seconds(next_row) - current_time > 10:
-                break
-            if next_row.get("team_in_possession") != current_team:
-                continue
-            if _event_type(next_row) == "Shot":
-                target = 1
-                break
-
-        out = dict(row)
-        out["target_shot_in_10s"] = target
-        with_targets.append(out)
-
-    return with_targets
+    """Add possession-bounded observed future-shot target."""
+    import pandas as pd
+    from dax.targets.short_horizon import add_future_shot_target
+    if not rows:
+        return []
+    df = pd.DataFrame(rows)
+    if "attacking_team_before_action" not in df.columns:
+        df["attacking_team_before_action"] = df.get("team_in_possession", df.get("possession_team"))
+    return add_future_shot_target(df).to_dict("records")
 
 
 def add_xt_target(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
