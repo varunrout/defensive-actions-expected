@@ -42,6 +42,7 @@ clustering_feature_groups:
     - numerical_disadvantage_5m_share
     - numerical_disadvantage_10m_share
     - visibility_limited_share
+    - box_defence_share
 primary_clustering_feature_groups:
   - action_mix
   - phase_mix
@@ -49,3 +50,11 @@ primary_clustering_feature_groups:
   - possession_style
   - 360_context
   - difficulty_exposure
+
+minimum_action_threshold_sensitivity: [20, 30, 40, 50]
+feature_group_sensitivity_sets:
+  all_configured_groups: [action_mix, phase_mix, spatial_style, possession_style, 360_context, difficulty_exposure]
+  without_360_context: [action_mix, phase_mix, spatial_style, possession_style, difficulty_exposure]
+  without_possession_style: [action_mix, phase_mix, spatial_style, 360_context, difficulty_exposure]
+  action_phase_spatial: [action_mix, phase_mix, spatial_style]
+  spatial_difficulty: [spatial_style, difficulty_exposure]

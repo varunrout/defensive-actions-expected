@@ -239,6 +239,83 @@ def run_clustering(matrix: pd.DataFrame, config: dict[str, Any]) -> dict[str, pd
     }
 
 
+def _selected_row_from_tables(tables: dict[str, pd.DataFrame]) -> dict[str, Any]:
+    selection = tables["cluster_selection"].iloc[0]
+    evaluation = tables["cluster_evaluation"]
+    selected_eval = evaluation[
+        (evaluation["method"] == selection["selected_method"]) & (evaluation["clusters"] == selection["selected_k"])
+    ].iloc[0]
+    return {
+        "selected_method": selection["selected_method"],
+        "selected_k": int(selection["selected_k"]),
+        "silhouette": selected_eval["silhouette"],
+        "calinski_harabasz": selected_eval["calinski_harabasz"],
+        "davies_bouldin": selected_eval["davies_bouldin"],
+        "stability": selected_eval["subsample_ari_stability"],
+        "size_balance": selected_eval["size_balance"],
+    }
+
+
+def _assignment_agreement(base_assignments: pd.DataFrame, comparison_assignments: pd.DataFrame) -> float:
+    keys = [column for column in ["player_id", "team"] if column in base_assignments.columns and column in comparison_assignments.columns]
+    if not keys:
+        return np.nan
+    merged = base_assignments[keys + ["cluster"]].merge(
+        comparison_assignments[keys + ["cluster"]], on=keys, suffixes=("_base", "_comparison")
+    )
+    if len(merged) < 2:
+        return np.nan
+    return float(adjusted_rand_score(merged["cluster_base"], merged["cluster_comparison"]))
+
+
+def threshold_sensitivity(summary: pd.DataFrame, config: dict[str, Any], base_assignments: pd.DataFrame) -> pd.DataFrame:
+    """Evaluate selected clustering solutions across minimum-action thresholds."""
+    rows: list[dict[str, Any]] = []
+    for threshold in config.get("minimum_action_threshold_sensitivity", []):
+        variant = config.copy()
+        variant["minimum_player_actions"] = int(threshold)
+        try:
+            matrix, _, _ = prepare_clustering_matrix(summary, variant)
+            tables = run_clustering(matrix, variant)
+            selected = _selected_row_from_tables(tables)
+            rows.append(
+                {
+                    "minimum_actions": int(threshold),
+                    "eligible_player_count": len(matrix),
+                    **selected,
+                    "assignment_agreement": _assignment_agreement(base_assignments, tables["player_clusters"]),
+                }
+            )
+        except ValueError as exc:
+            rows.append({"minimum_actions": int(threshold), "eligible_player_count": 0, "error": str(exc)})
+    return pd.DataFrame(rows)
+
+
+def feature_group_sensitivity(summary: pd.DataFrame, config: dict[str, Any], base_assignments: pd.DataFrame) -> pd.DataFrame:
+    """Evaluate selected clustering solutions across configured feature-group subsets."""
+    rows: list[dict[str, Any]] = []
+    for sensitivity_name, groups in config.get("feature_group_sensitivity_sets", {}).items():
+        variant = config.copy()
+        variant["primary_clustering_feature_groups"] = list(groups)
+        try:
+            matrix, _, metadata = prepare_clustering_matrix(summary, variant)
+            tables = run_clustering(matrix, variant)
+            selected = _selected_row_from_tables(tables)
+            rows.append(
+                {
+                    "feature_group_set": sensitivity_name,
+                    "feature_groups": ",".join(groups),
+                    "eligible_player_count": len(matrix),
+                    "selected_feature_count": len(metadata["selected_features"]),
+                    **selected,
+                    "assignment_agreement": _assignment_agreement(base_assignments, tables["player_clusters"]),
+                }
+            )
+        except ValueError as exc:
+            rows.append({"feature_group_set": sensitivity_name, "feature_groups": ",".join(groups), "eligible_player_count": 0, "error": str(exc)})
+    return pd.DataFrame(rows)
+
+
 def write_clustering_outputs(tables: dict[str, pd.DataFrame], outdir: str | Path, metadata: dict[str, Any]) -> None:
     """Write clustering tables and preprocessing metadata."""
     output_dir = Path(outdir)

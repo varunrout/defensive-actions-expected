@@ -46,6 +46,13 @@ def main() -> int:
         if column in df.columns:
             histogram(df, column, output_dir / f"{column}_distribution.png", f"{column} distribution", bins=int(config["feature_bins"]), dpi=dpi)
     pitch_grid_heatmap(tables["zone_summary"], "rows", output_dir / "total_action_pitch_heatmap.png", "Total action density by pitch zone", bins_x=bins_x, bins_y=bins_y, denominator_note="Denominator: player defensive-action rows", dpi=dpi)
+    for family, family_df in df.groupby("action_family"):
+        family_zone = zone_summary(family_df, bins_x=bins_x, bins_y=bins_y)
+        pitch_grid_heatmap(family_zone, "rows", output_dir / f"action_family_pitch_map_{family}.png", f"Action-family pitch map: {family}", bins_x=bins_x, bins_y=bins_y, denominator_note="Denominator: action-family rows", dpi=dpi)
+    for phase, phase_df in df.groupby("phase_label"):
+        safe_phase = str(phase).replace("/", "_").replace(" ", "_")
+        phase_zone = zone_summary(phase_df, bins_x=bins_x, bins_y=bins_y)
+        pitch_grid_heatmap(phase_zone, "rows", output_dir / f"phase_pitch_map_{safe_phase}.png", f"Phase pitch map: {phase}", bins_x=bins_x, bins_y=bins_y, denominator_note="Denominator: phase rows", dpi=dpi)
     print(f"Analysed player defensive-action features: {len(df):,} rows -> {output_dir}")
     return 0
 

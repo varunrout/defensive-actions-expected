@@ -159,3 +159,89 @@ def test_plotting_handles_empty_and_non_empty_data(tmp_path: Path) -> None:
     bar_chart(pd.DataFrame(columns=["x", "y"]), "x", "y", tmp_path / "empty.png", "Empty")
     assert (tmp_path / "bar.png").exists()
     assert (tmp_path / "empty.png").exists()
+
+
+def test_defensive_box_flag_uses_penalty_box_boundaries() -> None:
+    rows = []
+    base = production_player_actions_fixture(players=1, actions_per_player=1).iloc[0].to_dict()
+    locations = [(10.0, 40.0), (10.0, 70.0), (30.0, 40.0)]
+    for idx, (x, y) in enumerate(locations):
+        row = base.copy()
+        row["event_id"] = f"box-{idx}"
+        row["action_x"] = x
+        row["action_y"] = y
+        row["player_id"] = 9000
+        row["player"] = "Box Tester"
+        row["team"] = "Team B"
+        rows.append(row)
+    summary = build_player_summary(pd.DataFrame(rows), min_actions=1)
+    assert int(summary.loc[0, "box_defence_actions"]) == 1
+    assert int(summary.loc[0, "box_defence_denominator"]) == 3
+    assert summary.loc[0, "box_defence_share"] == 1 / 3
+
+
+def test_cli_chart_orchestration_creates_expected_files(tmp_path: Path) -> None:
+    import subprocess
+    import sys
+
+    actions_path = tmp_path / "player.parquet"
+    summary_path = tmp_path / "summary.parquet"
+    matrix_path = tmp_path / "matrix.parquet"
+    config_path = tmp_path / "analysis.yaml"
+    production_player_actions_fixture(players=12, actions_per_player=4).to_parquet(actions_path, index=False)
+    config_path.write_text(
+        "minimum_player_actions: 2\n"
+        "minimum_category_sample_size: 2\n"
+        "pitch_grid_dimensions: [6, 4]\n"
+        "feature_bins: 5\n"
+        "cluster_count_candidates: [2, 3]\n"
+        "random_seed: 42\n"
+        "scaling_method: standard\n"
+        "missing_value_threshold: 0.8\n"
+        "correlation_threshold: 0.95\n"
+        "output_formats: [csv, parquet, png]\n"
+        "chart_dpi: 80\n"
+        "enable_umap: false\n"
+        "enable_hdbscan: false\n"
+        "minimum_action_threshold_sensitivity: [2, 3]\n"
+        "clustering_feature_groups:\n"
+        "  action_mix: [\"action_family_*_share\"]\n"
+        "  phase_mix: [\"phase_*_share\"]\n"
+        "  spatial_style: [\"mean_action_x\", \"mean_action_y\", \"median_action_x\", \"median_action_y\", \"action_width_std\", \"zone_*_share\"]\n"
+        "  possession_style: [\"possession_win_rate\", \"opponent_possession_end_rate\", \"retained_control_rate\", \"actions_under_opponent_possession_rate\"]\n"
+        "  360_context: [\"mean_visible_attacker_count\", \"mean_visible_defender_count\", \"mean_nearest_attacker_distance\", \"mean_nearest_defender_distance\", \"mean_defenders_between_ball_and_attacking_goal\", \"role_known_share\", \"reliable_visibility_share\"]\n"
+        "  difficulty_exposure: [\"mean_local_numerical_balance_5m\", \"mean_local_numerical_balance_10m\", \"numerical_disadvantage_5m_share\", \"numerical_disadvantage_10m_share\", \"visibility_limited_share\", \"box_defence_share\"]\n"
+        "primary_clustering_feature_groups: [action_mix, phase_mix, spatial_style, possession_style, 360_context, difficulty_exposure]\n"
+        "feature_group_sensitivity_sets:\n"
+        "  all_configured_groups: [action_mix, phase_mix, spatial_style, possession_style, 360_context, difficulty_exposure]\n"
+        "  without_360_context: [action_mix, phase_mix, spatial_style, possession_style, difficulty_exposure]\n"
+        "  without_possession_style: [action_mix, phase_mix, spatial_style, 360_context, difficulty_exposure]\n"
+        "  action_phase_spatial: [action_mix, phase_mix, spatial_style]\n"
+        "  spatial_difficulty: [spatial_style, difficulty_exposure]\n",
+        encoding="utf-8",
+    )
+    subprocess.run([sys.executable, "scripts/analyze_features.py", "--input", str(actions_path), "--output-dir", str(tmp_path / "features"), "--config", str(config_path)], check=True)
+    subprocess.run([sys.executable, "scripts/build_player_summary.py", "--input", str(actions_path), "--output", str(summary_path), "--config", str(config_path), "--charts-dir", str(tmp_path / "players")], check=True)
+    subprocess.run([sys.executable, "scripts/run_player_clustering.py", "--input", str(summary_path), "--output-dir", str(tmp_path / "clustering"), "--matrix-output", str(matrix_path), "--config", str(config_path)], check=True)
+
+    expected = [
+        tmp_path / "features" / "action_family_pitch_map_pressure.png",
+        tmp_path / "features" / "phase_pitch_map_high_press.png",
+        tmp_path / "players" / "player_action_family_profile.png",
+        tmp_path / "players" / "player_phase_profile.png",
+        tmp_path / "players" / "activity_vs_outcome_scatter.png",
+        tmp_path / "players" / "difficulty_vs_outcome_scatter.png",
+        tmp_path / "players" / "possession_win_rate_min_sample.png",
+        tmp_path / "players" / "future_xg_vs_action_volume.png",
+        tmp_path / "players" / "visibility_reliability_chart.png",
+        tmp_path / "clustering" / "cluster_size_chart.png",
+        tmp_path / "clustering" / "cluster_centroid_heatmap.png",
+        tmp_path / "clustering" / "pca_cluster_scatter.png",
+        tmp_path / "clustering" / "pca_loading_chart.png",
+        tmp_path / "clustering" / "cluster_stability_chart.png",
+        tmp_path / "clustering" / "selected_player_cluster_comparison.png",
+        tmp_path / "clustering" / "cluster_threshold_sensitivity.csv",
+        tmp_path / "clustering" / "cluster_feature_group_sensitivity.csv",
+    ]
+    missing = [path for path in expected if not path.exists()]
+    assert missing == []

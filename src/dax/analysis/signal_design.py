@@ -27,7 +27,7 @@ SIGNAL_COMPONENTS: tuple[SignalComponentSpec, ...] = (
     SignalComponentSpec("phase_versatility_index", "phase_entropy", "total_actions", 1, 30, "Diversity of rule-based phase exposure.", "Phase labels are tactical proxies, not ground truth."),
     SignalComponentSpec("spatial_aggression_index", "mean_action_x", "total_actions", 1, 30, "Higher average action location toward the attacking goal.", "Depends on normalised coordinate convention."),
     SignalComponentSpec("transition_defence_exposure_index", "phase_transition_defence_share", "total_actions", 1, 30, "Share of actions in transition-defence proxy phases when available.", "Missing if transition-defence phase is not present."),
-    SignalComponentSpec("box_defence_exposure_index", "zone_0_1_share", "total_actions", 1, 30, "Proxy for deep/box defensive action exposure using configured pitch zones.", "Zone definition is approximate and grid-dependent."),
+    SignalComponentSpec("box_defence_exposure_index", "box_defence_share", "box_defence_denominator", 1, 30, "Share of actions inside the canonical defensive penalty box.", "Exposure descriptor only; not a quality measure."),
     SignalComponentSpec("local_numerical_difficulty_index", "mean_local_numerical_balance_10m", "numerical_disadvantage_10m_denominator", -1, 20, "Lower local attacking-minus-defending balance indicates harder visible local context.", "Requires roles-known and locally visible 360 data."),
     SignalComponentSpec("visibility_reliability_index", "reliable_visibility_share", "reliable_visibility_share_denominator", 1, 30, "Share of actions with reliable local 5m and 10m visibility.", "Visibility reliability is coverage, not player quality."),
 )
