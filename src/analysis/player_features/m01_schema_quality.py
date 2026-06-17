@@ -11,7 +11,7 @@ from .io import REQUIRED_COLUMNS
 
 
 KEY_COLUMNS = ["match_id", "event_id", "player_id"]
-CORE_MISSINGNESS_COLUMNS = sorted(REQUIRED_COLUMNS | {"phase_label", "action_family", "position_group", "nearest_goal_distance"})
+CORE_MISSINGNESS_COLUMNS = sorted(REQUIRED_COLUMNS | {"phase_label", "action_family", "position_group", "distance_to_attacking_goal"})
 
 
 def run(df: pd.DataFrame, cfg: AnalysisConfig) -> dict[str, Any]:
@@ -34,7 +34,7 @@ def run(df: pd.DataFrame, cfg: AnalysisConfig) -> dict[str, Any]:
                 float(((df.get("action_y", pd.Series(dtype=float)) < 0) | (df.get("action_y", pd.Series(dtype=float)) > 80)).mean() * 100.0)
                 if "action_y" in df.columns
                 else 0.0,
-                float((~df["target_shot_in_10s"].isin([0, 1])).mean() * 100.0),
+                float((~df["target_future_shot_10s"].isin([0, 1])).mean() * 100.0),
             ],
         }
     )

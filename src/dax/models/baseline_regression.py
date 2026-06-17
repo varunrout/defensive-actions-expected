@@ -42,9 +42,23 @@ class RegressionVariantSpec:
     alpha: float = 1.0  # Regularization strength for ridge/lasso
 
 
+def _unique_features(features: list[str]) -> list[str]:
+    return list(dict.fromkeys(features))
+
+
+def _dedupe_spec_features(spec: RegressionVariantSpec) -> RegressionVariantSpec:
+    return RegressionVariantSpec(
+        name=spec.name,
+        model_type=spec.model_type,
+        categorical=_unique_features(spec.categorical),
+        numeric=_unique_features(spec.numeric),
+        alpha=spec.alpha,
+    )
+
+
 def default_regression_specs() -> list[RegressionVariantSpec]:
     """Return future-xG regression baseline variants (V0-V8)."""
-    return [
+    specs = [
         RegressionVariantSpec(
             name="v0_phase_only",
             model_type="ridge",
@@ -371,6 +385,7 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
             alpha=0.5,
         ),
     ]
+    return [_dedupe_spec_features(spec) for spec in specs]
 
 
 def resolve_columns(

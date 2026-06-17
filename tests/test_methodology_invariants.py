@@ -20,7 +20,7 @@ def test_future_feature_denylist_fails():
 
 def test_grid_fit_resets_state():
     m=GridThreatModel(smoothing=0)
-    m.fit([{'ball_x':10,'ball_y':10,'target_shot_in_10s':1}])
+    m.fit([{'ball_x':10,'ball_y':10,'target_future_shot_10s':1}])
     assert m.predict_point(10,10) == 1
-    m.fit([{'ball_x':10,'ball_y':10,'target_shot_in_10s':0}])
+    m.fit([{'ball_x':10,'ball_y':10,'target_future_shot_10s':0}])
     assert m.predict_point(10,10) == 0

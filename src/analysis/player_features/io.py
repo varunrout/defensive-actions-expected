@@ -14,28 +14,25 @@ REQUIRED_COLUMNS = {
     "position_group",
     "phase_label",
     "action_family",
-    "target_shot_in_10s",
+    "target_future_shot_10s",
 }
 
 NUMERIC_CANDIDATES = [
-    "nearest_goal_distance",
+    "distance_to_attacking_goal",
     "distance_to_center_line",
     "local_numerical_balance_5m",
     "local_numerical_balance_10m",
     "attackers_within_5m",
     "attackers_within_10m",
-    "freeze_teammate_nearest_distance",
-    "freeze_opponent_nearest_distance",
-    "freeze_teammate_spread",
-    "freeze_opponent_spread",
-    "teammate_count",
-    "opponent_count",
-    "teammate_opponent_ratio",
-    "possession_progress_ratio",
-    "phase_transition_count_so_far",
-    "seconds_since_possession_start",
-    "possession_duration_total",
-    "possession_event_count_total",
+    "defenders_within_5m",
+    "defenders_within_10m",
+    "nearest_attacker_distance",
+    "nearest_defender_distance",
+    "attacker_spread",
+    "defender_spread",
+    "attacker_defender_ratio",
+    "possession_elapsed_seconds",
+    "phase_transitions_observed_so_far",
     "action_x",
     "action_y",
 ]
@@ -57,8 +54,8 @@ def load_player_features(path: Path) -> pd.DataFrame:
     if missing:
         raise ValueError(f"Missing required columns: {missing}")
 
-    df["target_shot_in_10s"] = pd.to_numeric(df["target_shot_in_10s"], errors="coerce").fillna(0).astype(int)
-    df["target_shot_in_10s"] = (df["target_shot_in_10s"] > 0).astype(int)
+    df["target_future_shot_10s"] = pd.to_numeric(df["target_future_shot_10s"], errors="coerce").fillna(0).astype(int)
+    df["target_future_shot_10s"] = (df["target_future_shot_10s"] > 0).astype(int)
 
     for col in NUMERIC_CANDIDATES:
         if col in df.columns:

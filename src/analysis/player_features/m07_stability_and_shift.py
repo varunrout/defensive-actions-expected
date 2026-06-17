@@ -51,7 +51,7 @@ def run(df: pd.DataFrame, cfg: AnalysisConfig) -> dict[str, Any]:
             s = pd.to_numeric(sample[col], errors="coerce").dropna()
             if len(s) < cfg.min_group_size:
                 continue
-            y = sample.loc[s.index, "target_shot_in_10s"]
+            y = sample.loc[s.index, "target_future_shot_10s"]
             if s.nunique() <= 1 or y.nunique() <= 1:
                 continue
             corr = s.corr(y)

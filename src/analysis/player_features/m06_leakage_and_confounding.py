@@ -20,7 +20,7 @@ SUSPECT_PATTERNS = [
 ALLOWED_FALSE_POSITIVES = {
     "distance_to_left_goal",
     "distance_to_right_goal",
-    "nearest_goal_distance",
+    "distance_to_attacking_goal",
     "nearest_goal_side",
 }
 
@@ -30,14 +30,14 @@ def run(df: pd.DataFrame, cfg: AnalysisConfig) -> dict[str, Any]:
     suspect_cols = []
     for c in df.columns:
         c_low = c.lower()
-        if c == "target_shot_in_10s" or c in ALLOWED_FALSE_POSITIVES:
+        if c == "target_future_shot_10s" or c in ALLOWED_FALSE_POSITIVES:
             continue
         if any(p in c_low for p in SUSPECT_PATTERNS):
             suspect_cols.append(c)
 
     # Team-level confounding proxy: variance in team shot rates.
     team_rates = (
-        df.groupby("team", dropna=False)["target_shot_in_10s"].agg(size="size", shot_rate="mean").reset_index()
+        df.groupby("team", dropna=False)["target_future_shot_10s"].agg(size="size", shot_rate="mean").reset_index()
         if "team" in df.columns
         else pd.DataFrame(columns=["team", "size", "shot_rate"])
     )
@@ -47,7 +47,7 @@ def run(df: pd.DataFrame, cfg: AnalysisConfig) -> dict[str, Any]:
     team_rate_std = float(team_rates["shot_rate"].std()) if not team_rates.empty else 0.0
 
     match_rates = (
-        df.groupby("match_id", dropna=False)["target_shot_in_10s"].agg(size="size", shot_rate="mean").reset_index()
+        df.groupby("match_id", dropna=False)["target_future_shot_10s"].agg(size="size", shot_rate="mean").reset_index()
     )
     match_rates = match_rates[match_rates["size"] >= cfg.min_group_size]
     match_rates.to_csv(cfg.tables_dir / "06_match_rate_confounding.csv", index=False)

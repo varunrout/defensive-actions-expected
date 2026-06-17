@@ -27,9 +27,22 @@ class VariantSpec:
     c: float = 1.0
 
 
+def _unique_features(features: list[str]) -> list[str]:
+    return list(dict.fromkeys(features))
+
+
+def _dedupe_spec_features(spec: VariantSpec) -> VariantSpec:
+    return VariantSpec(
+        name=spec.name,
+        categorical=_unique_features(spec.categorical),
+        numeric=_unique_features(spec.numeric),
+        c=spec.c,
+    )
+
+
 def default_variant_specs() -> list[VariantSpec]:
     """Return default baseline variants V0-V8."""
-    return [
+    specs = [
         VariantSpec(
             name="v0_phase_only",
             categorical=["phase_label"],
@@ -335,6 +348,7 @@ def default_variant_specs() -> list[VariantSpec]:
             c=0.5,
         ),
     ]
+    return [_dedupe_spec_features(spec) for spec in specs]
 
 
 def resolve_columns(df: pd.DataFrame, spec: VariantSpec, strict: bool = True) -> VariantSpec:

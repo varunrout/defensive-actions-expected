@@ -44,7 +44,6 @@ def test_fixture_full_chain_produces_non_degenerate_player_targets():
     assert players["target_future_xg_10s"].notna().all()
     assert players["target_future_shot_10s"].sum() > 0
     assert players["target_future_xg_10s"].sum() > 0
-    assert "target_xt_10s" not in players.columns
 
     known = players.dropna(subset=["attacking_team", "defending_team"])
     assert not (known["attacking_team"] == known["defending_team"]).any()

@@ -137,10 +137,10 @@ def create_team_clustering_notebook():
                     wide_lane_share=('is_wide_lane', 'mean'),
                     deep_zone_share=('is_deep_zone', 'mean'),
                     high_zone_share=('is_high_zone', 'mean'),
-                    avg_goal_distance=('nearest_goal_distance', 'mean'),
+                    avg_goal_distance=('distance_to_attacking_goal', 'mean'),
                     avg_support_balance_10m=('local_numerical_balance_10m', 'mean'),
                     avg_support_ratio_10m=('attackers_within_10m', 'mean'),
-                    avg_opponent_nearest_distance=('freeze_opponent_nearest_distance', 'mean'),
+                    avg_nearest_attacker_distance=('nearest_attacker_distance', 'mean'),
                 )
                 .reset_index()
             )
@@ -183,7 +183,7 @@ def create_team_clustering_notebook():
                 'actions_per_match', 'shot_rate', 'mean_future_xg', 'has_360_share', 'counterpress_share',
                 'central_lane_share', 'wide_lane_share', 'deep_zone_share', 'high_zone_share',
                 'avg_goal_distance', 'avg_support_balance_10m', 'avg_support_ratio_10m',
-                'avg_opponent_nearest_distance',
+                'avg_nearest_attacker_distance',
                 'phase__high_press', 'phase__counterpress_after_loss', 'phase__settled_low_block',
                 'phase__settled_mid_block', 'phase__box_defence', 'phase__wide_defending',
                 'phase__central_progression_defence', 'phase__second_ball',
@@ -484,10 +484,10 @@ def create_player_archetype_notebook():
                     wide_lane_share=('is_wide_lane', 'mean'),
                     deep_zone_share=('is_deep_zone', 'mean'),
                     high_zone_share=('is_high_zone', 'mean'),
-                    avg_goal_distance=('nearest_goal_distance', 'mean'),
+                    avg_goal_distance=('distance_to_attacking_goal', 'mean'),
                     avg_support_balance_10m=('local_numerical_balance_10m', 'mean'),
                     avg_support_ratio_10m=('attackers_within_10m', 'mean'),
-                    avg_opponent_nearest_distance=('freeze_opponent_nearest_distance', 'mean'),
+                    avg_nearest_attacker_distance=('nearest_attacker_distance', 'mean'),
                 )
                 .reset_index()
             )
@@ -568,7 +568,7 @@ def create_player_archetype_notebook():
                 'actions_per_match', 'shot_rate', 'mean_future_xg', 'has_360_share', 'counterpress_share',
                 'central_lane_share', 'wide_lane_share', 'deep_zone_share', 'high_zone_share',
                 'avg_goal_distance', 'avg_support_balance_10m', 'avg_support_ratio_10m',
-                'avg_opponent_nearest_distance',
+                'avg_nearest_attacker_distance',
                 'phase__high_press', 'phase__counterpress_after_loss', 'phase__settled_low_block',
                 'phase__settled_mid_block', 'phase__box_defence', 'phase__wide_defending',
                 'phase__central_progression_defence', 'phase__second_ball',
