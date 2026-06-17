@@ -1,5 +1,4 @@
-"""Deprecated compatibility wrapper for the canonical feature builder."""
-
+"""Build DAx feature tables from processed events."""
 from __future__ import annotations
 
 from dax.features.build_player_dataset import main

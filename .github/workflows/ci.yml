@@ -34,7 +34,7 @@ jobs:
           Path("data/processed").mkdir(parents=True, exist_ok=True)
           targeted.to_parquet("data/processed/events_with_targets.parquet", index=False)
           PY
-          python scripts/features/build_player_defense_dataset.py --input data/processed/events_with_targets.parquet --output /tmp/player_defensive_actions.parquet
+          python scripts/build_features.py --input data/processed/events_with_targets.parquet --output /tmp/player_defensive_actions.parquet
           python - <<'PY'
           import pandas as pd
           df = pd.read_parquet('/tmp/player_defensive_actions.parquet')
