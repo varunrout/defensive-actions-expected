@@ -9,6 +9,7 @@ from pathlib import Path
 import pandas as pd
 
 from dax.analysis.clustering import (
+    expanded_cluster_profiles,
     feature_group_sensitivity,
     prepare_clustering_matrix,
     run_clustering,
@@ -66,6 +67,46 @@ def _generate_clustering_charts(tables: dict[str, pd.DataFrame], output_dir: Pat
         bar_chart(sample, "player_label", "total_actions", output_dir / "selected_player_cluster_comparison.png", "Selected player cluster comparison", dpi=dpi)
 
 
+
+
+def _write_expanded_profile_tables(matrix: pd.DataFrame, tables: dict[str, pd.DataFrame], summary: pd.DataFrame, output_dir: Path) -> None:
+    expanded = expanded_cluster_profiles(matrix, tables["player_clusters"], summary)
+    for name, table in expanded.items():
+        if not table.empty:
+            table.to_csv(output_dir / f"{name}.csv", index=False)
+            table.to_parquet(output_dir / f"{name}.parquet", index=False)
+            tables[name] = table
+
+
+def _write_fixed_kmeans_view(matrix: pd.DataFrame, summary: pd.DataFrame, k: int, config: dict, output_dir: Path) -> None:
+    from sklearn.cluster import KMeans
+    from sklearn.decomposition import PCA
+
+    feature_columns = [c for c in matrix.columns if c not in {"player_id", "player_name", "team", "total_actions", "matches"}]
+    if len(matrix) <= k or not feature_columns:
+        return
+    view_dir = output_dir / f"k{k}"
+    view_dir.mkdir(parents=True, exist_ok=True)
+    labels = KMeans(n_clusters=k, random_state=int(config["random_seed"]), n_init=20).fit_predict(matrix[feature_columns])
+    assignments = matrix[[c for c in ["player_id", "player_name", "team", "total_actions", "matches"] if c in matrix]].copy()
+    assignments["cluster"] = labels
+    assignments.to_csv(view_dir / "assignments.csv", index=False)
+    assignments.to_parquet(view_dir / "assignments.parquet", index=False)
+    sizes = assignments["cluster"].value_counts().rename_axis("cluster").reset_index(name="players")
+    sizes.to_csv(view_dir / "cluster_sizes.csv", index=False)
+    centroids = matrix[feature_columns].join(assignments["cluster"]).groupby("cluster").mean().reset_index()
+    centroids.to_csv(view_dir / "centroids.csv", index=False)
+    reps = expanded_cluster_profiles(matrix, assignments, summary)
+    for name, table in reps.items():
+        if not table.empty:
+            table.to_csv(view_dir / f"{name}.csv", index=False)
+    # representatives by centroid distance
+    from dax.analysis.clustering import representative_players_from_centroids
+    representative_players_from_centroids(matrix, assignments).to_csv(view_dir / "representative_players.csv", index=False)
+    if len(feature_columns) >= 2:
+        pca = PCA(n_components=2, random_state=int(config["random_seed"])).fit_transform(matrix[feature_columns])
+        pca_df = assignments.assign(pc1=pca[:, 0], pc2=pca[:, 1])
+        scatter_chart(pca_df, "pc1", "pc2", view_dir / "pca_scatter.png", f"K-means k={k} PCA view", color="cluster", dpi=int(config["chart_dpi"]))
 
 def _write_k2_k3_comparison(tables: dict[str, pd.DataFrame], output_dir: Path) -> None:
     evaluation = tables["cluster_evaluation"]
@@ -132,9 +173,9 @@ def _generate_cluster_spatial_outputs(actions_path: str, tables: dict[str, pd.Da
             if len(family_actions) >= int(config.get("minimum_spatial_bin_actions", 20)):
                 safe_family = str(family).replace(" ", "_").replace("/", "_")
                 plot_pitch_density(family_actions, output_dir / f"cluster_{cluster}_{safe_family}_spatial_profile.png", title=f"Cluster {cluster} {family} spatial profile", config=config)
-    # Representative player maps use highest-action player per cluster as a robust fallback.
-    for cluster, cluster_players in assignments.sort_values("total_actions", ascending=False).groupby("cluster"):
-        representative = cluster_players.iloc[0]
+    reps = tables.get("representative_players", pd.DataFrame())
+    for _, representative in reps.iterrows():
+        cluster = representative["cluster"]
         mask = (joined["cluster"] == cluster) & (joined["player_id"] == representative["player_id"])
         if "team" in representative:
             mask &= joined["team"].eq(representative["team"])
@@ -154,12 +195,15 @@ def main() -> int:
     audit.to_csv(output_dir / "clustering_unscaled_audit.csv", index=False)
 
     tables = run_clustering(matrix, config)
+    _write_expanded_profile_tables(matrix, tables, summary, output_dir)
     threshold_table = threshold_sensitivity(summary, config, tables["player_clusters"])
     feature_group_table = feature_group_sensitivity(summary, config, tables["player_clusters"])
     tables["cluster_threshold_sensitivity"] = threshold_table
     tables["cluster_feature_group_sensitivity"] = feature_group_table
     write_clustering_outputs(tables, output_dir, metadata)
     (output_dir / "selected_features.json").write_text(json.dumps(metadata["selected_features"], indent=2), encoding="utf-8")
+    _write_fixed_kmeans_view(matrix, summary, 2, config, output_dir)
+    _write_fixed_kmeans_view(matrix, summary, 3, config, output_dir)
     _write_k2_k3_comparison(tables, output_dir)
     _run_position_aware_clustering(summary, config, output_dir)
     _generate_cluster_spatial_outputs(args.actions_input, tables, output_dir, config)

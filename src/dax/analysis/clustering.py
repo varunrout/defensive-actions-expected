@@ -37,10 +37,16 @@ def select_clustering_features(summary: pd.DataFrame, config: dict[str, Any]) ->
     groups = config["clustering_feature_groups"]
     primary_groups = config["primary_clustering_feature_groups"]
     numeric_columns = set(summary.select_dtypes(include="number").columns)
+    spatial_mode = config.get("clustering_spatial_feature_mode", "reduced")
     selected: dict[str, list[str]] = {}
     for group in primary_groups:
         columns: list[str] = []
-        for pattern in groups[group]:
+        patterns = list(groups[group])
+        if group == "spatial_style" and spatial_mode == "full_grid" and "zone_*_share" not in patterns:
+            patterns.append("zone_*_share")
+        if group == "spatial_style" and spatial_mode == "reduced":
+            patterns = [pattern for pattern in patterns if pattern != "zone_*_share"]
+        for pattern in patterns:
             matches = [column for column in numeric_columns if fnmatch.fnmatch(column, pattern)]
             columns.extend(matches)
         filtered = sorted(
@@ -200,6 +206,7 @@ def run_clustering(matrix: pd.DataFrame, config: dict[str, Any]) -> dict[str, pd
 
     profiles = assignments.groupby("cluster", dropna=False).agg(players=("cluster", "size"), mean_total_actions=("total_actions", "mean")).reset_index()
     centroids = features.join(assignments["cluster"]).groupby("cluster").mean(numeric_only=True).reset_index()
+    representatives = representative_players_from_centroids(matrix, assignments)
 
     pca_scores = pd.DataFrame()
     loadings = pd.DataFrame()
@@ -230,6 +237,7 @@ def run_clustering(matrix: pd.DataFrame, config: dict[str, Any]) -> dict[str, pd
         "cluster_evaluation": evaluation,
         "cluster_selection": selection,
         "player_clusters": assignments,
+        "representative_players": representatives,
         "cluster_profiles": profiles,
         "cluster_centroids": centroids,
         "cluster_stability": evaluation[["method", "clusters", "subsample_ari_stability"]].copy(),
@@ -314,6 +322,73 @@ def feature_group_sensitivity(summary: pd.DataFrame, config: dict[str, Any], bas
         except ValueError as exc:
             rows.append({"feature_group_set": sensitivity_name, "feature_groups": ",".join(groups), "eligible_player_count": 0, "error": str(exc)})
     return pd.DataFrame(rows)
+
+
+def clustering_feature_columns(matrix: pd.DataFrame) -> list[str]:
+    """Return scaled feature columns from a clustering matrix."""
+    id_columns = [column for column in ["player_id", "player_name", "team", "total_actions", "matches"] if column in matrix]
+    return [column for column in matrix.columns if column not in id_columns]
+
+
+def representative_players_from_centroids(matrix: pd.DataFrame, assignments: pd.DataFrame) -> pd.DataFrame:
+    """Select the nearest player to each assigned cluster centroid in scaled feature space."""
+    feature_columns = clustering_feature_columns(matrix)
+    keys = [column for column in ["player_id", "team"] if column in matrix.columns and column in assignments.columns]
+    data = matrix.merge(assignments[keys + ["cluster"]], on=keys, how="inner") if keys else matrix.join(assignments[["cluster"]])
+    if not feature_columns or data.empty:
+        fallback = assignments.sort_values("total_actions", ascending=False).groupby("cluster", as_index=False).head(1).copy()
+        fallback["centroid_distance"] = np.nan
+        fallback["centroid_rank_within_cluster"] = 1
+        fallback["representative_selection_method"] = "highest_action_fallback"
+        return fallback
+    centroids = data.groupby("cluster")[feature_columns].mean()
+    rows = []
+    for cluster, part in data.groupby("cluster"):
+        centroid = centroids.loc[cluster]
+        distances = np.sqrt(((part[feature_columns] - centroid) ** 2).sum(axis=1))
+        ranked = part.assign(centroid_distance=distances).sort_values("centroid_distance").reset_index(drop=True)
+        representative = ranked.iloc[0].to_dict()
+        representative["centroid_rank_within_cluster"] = 1
+        representative["representative_selection_method"] = "nearest_centroid"
+        rows.append(representative)
+    columns = [column for column in ["player_id", "player_name", "team", "total_actions", "matches", "cluster", "centroid_distance", "centroid_rank_within_cluster", "representative_selection_method"] if rows and column in rows[0]]
+    return pd.DataFrame(rows)[columns]
+
+
+def expanded_cluster_profiles(matrix: pd.DataFrame, assignments: pd.DataFrame, summary: pd.DataFrame | None = None) -> dict[str, pd.DataFrame]:
+    """Build expanded cluster profiles, distinguishing features, outcomes, and composition."""
+    feature_columns = clustering_feature_columns(matrix)
+    keys = [column for column in ["player_id", "team"] if column in matrix.columns and column in assignments.columns]
+    data = matrix.merge(assignments[keys + ["cluster"]], on=keys, how="inner") if keys else matrix.join(assignments[["cluster"]])
+    means = data.groupby("cluster")[feature_columns].mean() if feature_columns else pd.DataFrame()
+    population_mean = data[feature_columns].mean() if feature_columns else pd.Series(dtype="float64")
+    population_std = data[feature_columns].std(ddof=0).replace(0, np.nan) if feature_columns else pd.Series(dtype="float64")
+    long_rows = []
+    for cluster, row in means.iterrows():
+        for feature in feature_columns:
+            diff = row[feature] - population_mean[feature]
+            long_rows.append({"cluster": cluster, "feature": feature, "mean": row[feature], "population_mean": population_mean[feature], "difference_from_population": diff, "standardised_difference": diff / population_std[feature] if pd.notna(population_std[feature]) else np.nan})
+    long = pd.DataFrame(long_rows)
+    top = (
+        long.assign(abs_standardised_difference=long["standardised_difference"].abs())
+        .sort_values(["cluster", "abs_standardised_difference"], ascending=[True, False])
+        .groupby("cluster")
+        .head(10)
+        if not long.empty else pd.DataFrame()
+    )
+    profiles = means.reset_index() if not means.empty else pd.DataFrame(columns=["cluster"])
+    counts = assignments.groupby("cluster").size().reset_index(name="players")
+    profiles = counts.merge(profiles, on="cluster", how="left")
+    outcome = pd.DataFrame()
+    position = pd.DataFrame()
+    if summary is not None and keys:
+        joined = summary.merge(assignments[keys + ["cluster"]], on=keys, how="inner")
+        outcome_cols = [c for c in ["future_shot_rate", "future_xg_mean", "possession_win_rate", "box_defence_share"] if c in joined]
+        if outcome_cols:
+            outcome = joined.groupby("cluster")[outcome_cols].mean().reset_index()
+        if "position_group" in joined:
+            position = pd.crosstab(joined["cluster"], joined["position_group"], normalize="index").reset_index()
+    return {"cluster_profiles": profiles, "cluster_feature_profiles": long, "cluster_distinguishing_features": top, "cluster_outcome_summaries": outcome, "cluster_position_composition": position}
 
 
 def write_clustering_outputs(tables: dict[str, pd.DataFrame], outdir: str | Path, metadata: dict[str, Any]) -> None:
