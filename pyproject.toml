@@ -20,13 +20,14 @@ dependencies = [
   "tqdm>=4.66",
   "scipy>=1.11",
   "shapely>=2.0",
-  "PyYAML>=6.0"
+  "PyYAML>=6.0",
+  "mplsoccer>=1.2"
 ]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "ruff"]
 notebooks = ["jupyter", "ipykernel", "seaborn", "mplsoccer"]
-visualization = ["matplotlib", "seaborn", "mplsoccer"]
+visualization = ["matplotlib", "mplsoccer"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -17,6 +17,7 @@ from dax.analysis.clustering import (
 )
 from dax.analysis.config import load_analysis_config
 from dax.analysis.plotting import bar_chart, labelled_heatmap, scatter_chart
+from dax.analysis.pitch_plotting import plot_cluster_population_difference, plot_pitch_density, plot_pitch_scatter
 
 
 def parse_args() -> argparse.Namespace:
@@ -25,6 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", default="outputs/analysis/clustering")
     parser.add_argument("--config", default="configs/analysis.yaml")
     parser.add_argument("--matrix-output", default="data/features/player_clustering_matrix.parquet")
+    parser.add_argument("--actions-input", default="data/features/player_defensive_actions.parquet")
     return parser.parse_args()
 
 
@@ -110,6 +112,34 @@ def _run_position_aware_clustering(summary: pd.DataFrame, config: dict, output_d
         except ValueError as exc:
             pd.DataFrame([{"position_segment": name, "eligible_players": len(subset), "status": "skipped", "reason": str(exc)}]).to_csv(group_dir / "cluster_evaluation.csv", index=False)
 
+
+def _generate_cluster_spatial_outputs(actions_path: str, tables: dict[str, pd.DataFrame], output_dir: Path, config: dict) -> None:
+    path = Path(actions_path)
+    if not path.exists():
+        return
+    actions = pd.read_parquet(path)
+    assignments = tables["player_clusters"]
+    keys = [column for column in ["player_id", "team"] if column in actions.columns and column in assignments.columns]
+    if not keys:
+        return
+    joined = actions.merge(assignments[keys + ["cluster"]], on=keys, how="inner")
+    if joined.empty:
+        return
+    for cluster, cluster_actions in joined.groupby("cluster"):
+        plot_pitch_density(cluster_actions, output_dir / f"cluster_{cluster}_spatial_profile.png", title=f"Cluster {cluster} spatial style profile", config=config)
+        plot_cluster_population_difference(cluster_actions, joined, output_dir / f"cluster_{cluster}_spatial_difference.png", title=f"Cluster {cluster} density minus population", config=config)
+        for family, family_actions in cluster_actions.groupby("action_family"):
+            if len(family_actions) >= int(config.get("minimum_spatial_bin_actions", 20)):
+                safe_family = str(family).replace(" ", "_").replace("/", "_")
+                plot_pitch_density(family_actions, output_dir / f"cluster_{cluster}_{safe_family}_spatial_profile.png", title=f"Cluster {cluster} {family} spatial profile", config=config)
+    # Representative player maps use highest-action player per cluster as a robust fallback.
+    for cluster, cluster_players in assignments.sort_values("total_actions", ascending=False).groupby("cluster"):
+        representative = cluster_players.iloc[0]
+        mask = (joined["cluster"] == cluster) & (joined["player_id"] == representative["player_id"])
+        if "team" in representative:
+            mask &= joined["team"].eq(representative["team"])
+        plot_pitch_scatter(joined[mask], output_dir / f"cluster_{cluster}_representative_player.png", title=f"Representative player, cluster {cluster}: {representative.get('player_name', representative['player_id'])}", config=config)
+
 def main() -> int:
     args = parse_args()
     config = load_analysis_config(args.config)
@@ -132,6 +162,7 @@ def main() -> int:
     (output_dir / "selected_features.json").write_text(json.dumps(metadata["selected_features"], indent=2), encoding="utf-8")
     _write_k2_k3_comparison(tables, output_dir)
     _run_position_aware_clustering(summary, config, output_dir)
+    _generate_cluster_spatial_outputs(args.actions_input, tables, output_dir, config)
     _generate_clustering_charts(tables, output_dir, int(config["chart_dpi"]))
     print(f"Ran clustering for {len(matrix):,} eligible players -> {output_dir}")
     return 0

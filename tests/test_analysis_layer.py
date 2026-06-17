@@ -285,13 +285,15 @@ def test_cli_chart_orchestration_creates_expected_files(tmp_path: Path) -> None:
     )
     subprocess.run([sys.executable, "scripts/analyze_features.py", "--input", str(actions_path), "--output-dir", str(tmp_path / "features"), "--config", str(config_path)], check=True)
     subprocess.run([sys.executable, "scripts/build_player_summary.py", "--input", str(actions_path), "--output", str(summary_path), "--config", str(config_path), "--charts-dir", str(tmp_path / "players")], check=True)
-    subprocess.run([sys.executable, "scripts/run_player_clustering.py", "--input", str(summary_path), "--output-dir", str(tmp_path / "clustering"), "--matrix-output", str(matrix_path), "--config", str(config_path)], check=True)
+    subprocess.run([sys.executable, "scripts/run_player_clustering.py", "--input", str(summary_path), "--output-dir", str(tmp_path / "clustering"), "--matrix-output", str(matrix_path), "--config", str(config_path), "--actions-input", str(actions_path)], check=True)
 
     expected = [
         tmp_path / "features" / "event_type_distribution.csv",
         tmp_path / "features" / "player_event_type_distribution.png",
-        tmp_path / "features" / "action_family_pitch_map_pressure.png",
-        tmp_path / "features" / "phase_pitch_map_high_press.png",
+        tmp_path / "spatial" / "all_actions_density.png",
+        tmp_path / "spatial" / "all_actions_scatter.png",
+        tmp_path / "spatial" / "pressure_density.png",
+        tmp_path / "spatial" / "phase_high_press_density.png",
         tmp_path / "players" / "player_action_family_profile.png",
         tmp_path / "players" / "player_phase_profile.png",
         tmp_path / "players" / "activity_vs_outcome_scatter.png",
@@ -310,6 +312,9 @@ def test_cli_chart_orchestration_creates_expected_files(tmp_path: Path) -> None:
     ]
     missing = [path for path in expected if not path.exists()]
     assert missing == []
+    assert not (tmp_path / "features" / "total_action_pitch_heatmap.png").exists()
+    assert not list((tmp_path / "features").glob("action_family_pitch_map_*.png"))
+    assert not list((tmp_path / "features").glob("phase_pitch_map_*.png"))
 
 
 def test_generic_bar_chart_does_not_default_to_45_degree_labels(tmp_path: Path) -> None:
@@ -359,7 +364,8 @@ def test_k2_k3_and_position_outputs_created_by_cli(tmp_path: Path) -> None:
     config_path = tmp_path / "analysis.yaml"
     config_path.write_text(Path("configs/analysis.yaml").read_text(encoding="utf-8").replace("minimum_player_actions: 30", "minimum_player_actions: 2").replace("minimum_action_threshold_sensitivity: [20, 30, 40, 50]", "minimum_action_threshold_sensitivity: [2, 3]"), encoding="utf-8")
     subprocess.run([sys.executable, "scripts/build_player_summary.py", "--input", str(actions_path), "--output", str(summary_path), "--config", str(config_path), "--charts-dir", str(tmp_path / "players")], check=True)
-    subprocess.run([sys.executable, "scripts/run_player_clustering.py", "--input", str(summary_path), "--output-dir", str(tmp_path / "clustering"), "--matrix-output", str(matrix_path), "--config", str(config_path)], check=True)
+    subprocess.run([sys.executable, "scripts/run_player_clustering.py", "--input", str(summary_path), "--output-dir", str(tmp_path / "clustering"), "--matrix-output", str(matrix_path), "--config", str(config_path), "--actions-input", str(actions_path)], check=True)
     assert (tmp_path / "clustering" / "k2_k3_comparison.csv").exists()
     assert (tmp_path / "clustering" / "k2_k3_interpretation.md").exists()
     assert (tmp_path / "clustering" / "by_position").exists()
+    assert (tmp_path / "clustering" / "cluster_0_spatial_profile.png").exists()
