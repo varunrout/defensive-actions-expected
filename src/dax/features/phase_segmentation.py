@@ -48,10 +48,10 @@ def label_defensive_phases(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             phase='counterpress_after_loss'; conf=0.7; rule='turnover_0_5s'
         elif lost_team and elapsed is not None and 5 < elapsed <= 10 and (not defending or defending == lost_team):
             phase='transition_defence'; conf=0.65; rule='turnover_5_10s'
-        elif event_type in {'Duel','50/50'}:
-            phase='second_ball'; conf=0.3; rule='contest_event_proxy'
-        elif event_type in {'Clearance','Block'} and ball_x is not None and (ball_x >= 95 or ball_x <= 25):
-            phase='box_defence'; conf=0.55; rule='clearance_or_block_near_box'
+        elif event_type in {'Duel','50/50'} and row.get('preceded_by_loose_ball_evidence'):
+            phase='second_ball'; conf=0.3; rule='contest_with_loose_ball_evidence'
+        elif event_type in {'Clearance','Block'} and ball_x is not None and ball_x >= 95:
+            phase='box_defence'; conf=0.55; rule='clearance_or_block_near_defensive_box'
         elif ball_x is not None and ball_x >= 95:
             phase='box_defence'; conf=0.5; rule='ball_near_attacking_goal'
         elif ball_x is not None and ball_x >= 75:
