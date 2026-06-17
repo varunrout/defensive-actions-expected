@@ -28,7 +28,7 @@ PITCH_Y_MAX = 80.0
 # ── Competition registry ──────────────────────────────────────────────────────
 
 TARGET_COMPETITIONS: list[dict[str, Any]] = [
-    {"competition_id": 55,  "season_id": 43,  "label": "Euro 2020"},
+    # {"competition_id": 55,  "season_id": 43,  "label": "Euro 2020"},
     {"competition_id": 43,  "season_id": 106, "label": "World Cup 2022"},
     {"competition_id": 55,  "season_id": 282, "label": "Euro 2024"},
 ]

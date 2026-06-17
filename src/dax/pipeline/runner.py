@@ -127,8 +127,11 @@ def stage_process_models() -> None:
 
     events_enriched = add_event_context(events_enriched)
     context_issues = validate_event_context(events_enriched)
-    if context_issues:
-        raise ValueError(f"Event context validation failed: {context_issues}")
+    fatal_context_issues = [issue for issue in context_issues if issue != "possession_moves_backwards"]
+    if fatal_context_issues:
+        raise ValueError(f"Event context validation failed: {fatal_context_issues}")
+    if "possession_moves_backwards" in context_issues:
+        print("  [WARN] Raw possession ids move backwards in at least one period; using stable possession_sequence_id.")
     save_parquet(events_enriched, DATA_PROCESSED / "events_enriched.parquet")
     print(f"  Saved {len(events_enriched):,} enriched event rows with event context")
 
@@ -145,8 +148,9 @@ def stage_process_models() -> None:
     print(f"  Phase distribution:\n{df_phased['phase_label'].value_counts().to_string()}")
 
     print("\n[2c] Add future shot and observed future-xG targets")
-    df_targets = add_future_shot_target(df_phased)
-    df_targets = add_future_xg_target(df_targets)
+    possession_col_for_targets = "possession_sequence_id" if "possession_sequence_id" in df_phased.columns else "possession"
+    df_targets = add_future_shot_target(df_phased, possession_column=possession_col_for_targets)
+    df_targets = add_future_xg_target(df_targets, possession_column=possession_col_for_targets)
     if sort_cols:
         df_targets = df_targets.sort_values(sort_cols).reset_index(drop=True)
     save_parquet(df_targets, DATA_PROCESSED / "events_with_targets.parquet")

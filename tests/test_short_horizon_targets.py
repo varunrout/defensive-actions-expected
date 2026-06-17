@@ -25,3 +25,15 @@ def test_shot_does_not_count_itself(): assert val(base([{'index':1,'second':0,'e
 def test_future_xg_sums_multiple_shots():
     df=base([{'index':1,'second':0},{'index':2,'second':3,'event_type':'Shot','shot_statsbomb_xg':0.2},{'index':3,'second':5,'event_type':'Shot','shot_statsbomb_xg':0.1}])
     assert add_future_xg_target(df).loc[0,'target_future_xg_10s'] == 0.3
+
+
+def test_possession_sequence_id_prevents_backwards_id_leakage():
+    df = base([
+        {'index': 1, 'second': 0, 'possession': 2, 'attacking_team_before_action': 'A'},
+        {'index': 2, 'second': 3, 'possession': 1, 'attacking_team_before_action': 'B'},
+        {'index': 3, 'second': 6, 'possession': 2, 'event_type': 'Shot', 'attacking_team_before_action': 'A'},
+    ])
+    df['possession_sequence_id'] = [1, 2, 3]
+    out = add_future_shot_target(df, possession_column='possession_sequence_id')
+    assert int(out.loc[0, 'target_future_shot_10s']) == 0
+
