@@ -1,13 +1,7 @@
 import unittest
-import sys
-from pathlib import Path
 from unittest.mock import patch
 
 import pandas as pd
-
-SRC_PATH = Path(__file__).resolve().parents[1] / "src"
-if str(SRC_PATH) not in sys.path:
-    sys.path.insert(0, str(SRC_PATH))
 
 from dax.data.statsbomb_loader import build_enriched_events
 
@@ -93,5 +87,4 @@ class PipelineTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
 

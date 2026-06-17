@@ -32,19 +32,46 @@ Local checks:
 
 ```bash
 python -m pytest -q
+python -m pytest -q tests/test_end_to_end_fixture.py
+python -m pytest -q tests/test_cli_execution.py
 python -m ruff check src scripts tests
 ```
+
+Supported execution order:
+
+1. `python scripts/run_pipeline.py --stage prepare-data` builds processed event tables with event context, phase proxies and corrected targets.
+2. `python scripts/build_features.py --input data/processed/events_with_targets.parquet --output data/features/player_defensive_actions.parquet` builds the player defensive actions table.
+3. `python scripts/train_models.py --task all` trains the supported logistic and regression baselines.
+4. `python scripts/validate_models.py --task all` generates validation plots and summary tables for trained baselines.
+5. `python scripts/generate_reports.py --report validation-summary` builds the canonical validation summary report.
+
+Compatibility wrappers remain active for migration-safe legacy commands at:
+
+- `scripts/pipeline/pipeline.py`
+- `scripts/features/build_player_defense_dataset.py`
+- `scripts/models/train_baseline_logistic.py`
+- `scripts/models/train_baseline_regression.py`
+- `scripts/models/evaluate_baseline_model.py`
+- `scripts/models/evaluate_baseline_regression.py`
+
+## Methodology summary
+
+- **Targets:** `target_future_shot_10s` and `target_future_xg_10s` are observed outcomes, not model predictions.
+- **Prediction:** Baseline models predict post-action short-horizon attacking threat.
+- **Validation:** Grouped validation by match is retained; tournament holdout reporting is planned for full-data runs.
+- **Geometry:** After normalisation, attacking goal is `(120, 40)` and defending goal is `(0, 40)`.
+- **Phases:** Defensive phases are `rule_based_proxy` labels with confidence/rule metadata, not confirmed tactical truth.
 
 ## Repository layout
 
 ```text
 configs/                 pipeline, competition and model references
 src/dax/                 reusable package logic
-scripts/                 five thin active CLI entry points
+scripts/                 active canonical CLIs plus migration wrappers
 docs/                    active methodology, architecture, validation and data dictionary docs
 notebooks/               sequential notebook index; historical notebooks archived
 outputs/                 generated artifact directories; historical outputs archived
 tests/                   unit/integration tests and fixtures
 ```
 
-Historical pre-fix documents and outputs are retained under `docs/archive/pre_methodology_fix/` and `outputs/archive/pre_methodology_fix/`. They must not be cited as current results.
+Historical pre-fix documents and outputs are retained under `docs/archive/pre_methodology_fix/` and `outputs/archive/pre_methodology_fix/`. Historical pre-cleanup scripts are retained under `scripts/archive/pre_repository_cleanup/`. Archive contents are for reference only and are not active execution paths.
