@@ -12,7 +12,7 @@ from .utils_stats import wilson_interval
 
 def _group_rates(df: pd.DataFrame, col: str, min_size: int) -> pd.DataFrame:
     grouped = (
-        df.groupby(col, dropna=False)["target_shot_in_10s"]
+        df.groupby(col, dropna=False)["target_future_shot_10s"]
         .agg(size="size", shots="sum", shot_rate="mean")
         .reset_index()
     )
@@ -25,8 +25,8 @@ def _group_rates(df: pd.DataFrame, col: str, min_size: int) -> pd.DataFrame:
 
 def run(df: pd.DataFrame, cfg: AnalysisConfig) -> dict[str, Any]:
     """Audit label prevalence and subgroup reliability."""
-    base_rate = float(df["target_shot_in_10s"].mean())
-    base_ci = wilson_interval(int(df["target_shot_in_10s"].sum()), int(len(df)))
+    base_rate = float(df["target_future_shot_10s"].mean())
+    base_ci = wilson_interval(int(df["target_future_shot_10s"].sum()), int(len(df)))
 
     phase = _group_rates(df, "phase_label", cfg.min_group_size)
     action = _group_rates(df, "action_family", cfg.min_group_size)

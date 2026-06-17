@@ -156,7 +156,7 @@ def _make_figures(df: pd.DataFrame, cfg) -> None:
         cfg.figures_dir / "pitch_shot_risk_map.png",
         title="Shot-in-10s rate by defensive action location",
         statistic="mean",
-        value_col="target_shot_in_10s",
+        value_col="target_future_shot_10s",
     )
 
 

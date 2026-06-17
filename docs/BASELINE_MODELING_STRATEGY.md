@@ -99,10 +99,12 @@ For the baseline model, we approximate this by:
 
 #### Group D: Freeze-frame support features (360 data)
 **Density at action location:**
-- `freeze_support_balance_5m`: Teammates - opponents within 5m
-- `freeze_support_balance_10m`: Teammates - opponents within 10m
-- `freeze_support_ratio_5m`: Teammates / opponents within 5m
-- `freeze_support_ratio_10m`: Teammates / opponents within 10m
+- `local_numerical_balance_5m`: Teammates - opponents within 5m
+- `local_numerical_balance_10m`: Teammates - opponents within 10m
+- `attackers_within_5m`: Attackers within 5m
+- `defenders_within_5m`: Defenders within 5m
+- `attackers_within_10m`: Attackers within 10m
+- `defenders_within_10m`: Defenders within 10m
 
 **Nearest player distances:**
 - `freeze_teammate_nearest_distance`: Distance to closest teammate
@@ -185,7 +187,7 @@ For the baseline model, we approximate this by:
 - Add engineered interactions:
   - `phase × action_family`
   - `phase × nearest_goal_distance`
-  - `is_central_lane × freeze_support_balance_5m`
+  - `is_central_lane × local_numerical_balance_5m`
 - Purpose: Capture tactical dependencies
 
 **V4: Tree-based ensemble**
@@ -406,7 +408,7 @@ For the baseline model, we approximate this by:
 | `phase_label=high_press` | +0.45 | High press actions are in higher-threat contexts |
 | `phase_label=settled_low_block` | -0.30 | Low block actions are in lower-threat contexts |
 | `nearest_goal_distance` | -0.15 | Each 10m farther from goal reduces log-odds by 1.5 |
-| `freeze_support_balance_5m` | -0.10 | Each extra teammate within 5m reduces threat |
+| `local_numerical_balance_5m` | -0.10 | Each extra teammate within 5m reduces threat |
 | `freeze_opponent_nearest_distance` | -0.20 | Closer opponent pressure increases threat |
 | `is_central_lane` | +0.25 | Central defensive actions face higher threat |
 | `action_family=pressure` | +0.10 | Pressure actions occur in slightly higher-threat moments |

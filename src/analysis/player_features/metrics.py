@@ -19,7 +19,7 @@ def dataset_summary(df: pd.DataFrame) -> dict[str, Any]:
         "players": int(df["player_id"].nunique()),
         "phases": int(df["phase_label"].nunique(dropna=True)),
         "action_families": int(df["action_family"].nunique(dropna=True)),
-        "shot_rate": float(df["target_shot_in_10s"].mean()),
+        "shot_rate": float(df["target_future_shot_10s"].mean()),
     }
 
 
@@ -30,7 +30,7 @@ def missingness_table(df: pd.DataFrame) -> pd.DataFrame:
 
 def grouped_rate_table(df: pd.DataFrame, group_col: str, min_size: int = 1) -> pd.DataFrame:
     out = (
-        df.groupby(group_col, dropna=False)["target_shot_in_10s"]
+        df.groupby(group_col, dropna=False)["target_future_shot_10s"]
         .agg(size="size", shot_rate="mean")
         .sort_values("shot_rate", ascending=False)
         .reset_index()
@@ -40,7 +40,7 @@ def grouped_rate_table(df: pd.DataFrame, group_col: str, min_size: int = 1) -> p
 
 def phase_position_table(df: pd.DataFrame, min_size: int = 30) -> pd.DataFrame:
     out = (
-        df.groupby(["phase_label", "position_group"], dropna=False)["target_shot_in_10s"]
+        df.groupby(["phase_label", "position_group"], dropna=False)["target_future_shot_10s"]
         .agg(size="size", shot_rate="mean")
         .reset_index()
     )
@@ -49,7 +49,7 @@ def phase_position_table(df: pd.DataFrame, min_size: int = 30) -> pd.DataFrame:
 
 def numeric_signal_table(df: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
-    y = df["target_shot_in_10s"]
+    y = df["target_future_shot_10s"]
 
     for col in NUMERIC_CANDIDATES:
         if col not in df.columns:
@@ -90,13 +90,13 @@ def numeric_signal_table(df: pd.DataFrame) -> pd.DataFrame:
 
 def player_reliability_table(df: pd.DataFrame, min_actions: int = 80) -> pd.DataFrame:
     out = (
-        df.groupby(["player_id", "player", "position_group"], dropna=False)["target_shot_in_10s"]
+        df.groupby(["player_id", "player", "position_group"], dropna=False)["target_future_shot_10s"]
         .agg(actions="size", shot_rate="mean")
         .reset_index()
     )
     out = out[out["actions"] >= min_actions].copy()
     out["empirical_bayes_rate"] = (
-        (out["shot_rate"] * out["actions"] + df["target_shot_in_10s"].mean() * 200) / (out["actions"] + 200)
+        (out["shot_rate"] * out["actions"] + df["target_future_shot_10s"].mean() * 200) / (out["actions"] + 200)
     )
     return out.sort_values("actions", ascending=False).reset_index(drop=True)
 
@@ -110,7 +110,7 @@ def bootstrap_signal_stability(df: pd.DataFrame, n_boot: int = 100, sample_frac:
     stats: dict[str, list[float]] = {c: [] for c in available}
     for _ in range(n_boot):
         sample = df.sample(frac=sample_frac, replace=True, random_state=int(rng.integers(1, 1_000_000)))
-        y = sample["target_shot_in_10s"]
+        y = sample["target_future_shot_10s"]
         for col in available:
             s = pd.to_numeric(sample[col], errors="coerce").dropna()
             if s.shape[0] < 30 or s.nunique() <= 1:
