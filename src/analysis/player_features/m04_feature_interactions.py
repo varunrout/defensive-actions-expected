@@ -9,7 +9,7 @@ import pandas as pd
 from .config import AnalysisConfig
 
 KEY_NUMERIC = [
-    "nearest_goal_distance",
+    "distance_to_attacking_goal",
     "distance_to_center_line",
     "local_numerical_balance_10m",
     "teammate_opponent_ratio",
@@ -18,7 +18,7 @@ KEY_NUMERIC = [
 
 
 def _interaction_table(df: pd.DataFrame, feature: str, context: str, min_size: int) -> pd.DataFrame:
-    work = df[[feature, context, "target_shot_in_10s"]].copy()
+    work = df[[feature, context, "target_future_shot_10s"]].copy()
     work[feature] = pd.to_numeric(work[feature], errors="coerce")
     work = work.dropna(subset=[feature, context])
     if work.empty or work[feature].nunique() < 6:
@@ -26,7 +26,7 @@ def _interaction_table(df: pd.DataFrame, feature: str, context: str, min_size: i
 
     work["feature_bin"] = pd.qcut(work[feature], q=4, duplicates="drop")
     out = (
-        work.groupby([context, "feature_bin"], observed=True)["target_shot_in_10s"]
+        work.groupby([context, "feature_bin"], observed=True)["target_future_shot_10s"]
         .agg(size="size", shot_rate="mean")
         .reset_index()
     )

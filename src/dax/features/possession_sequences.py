@@ -329,7 +329,7 @@ def _build_single_possession(
     
     # Outcome
     has_shot_in_10s = max(
-        (event.get("target_shot_in_10s") or 0) for _, event in events_with_indices
+        (event.get("target_future_shot_10s") or 0) for _, event in events_with_indices
     )
     
     return PossessionSequence(

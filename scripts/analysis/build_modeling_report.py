@@ -378,6 +378,15 @@ def build_markdown(
     best_regression = regression_df.sort_values(["r2", "spearman"], ascending=False).iloc[0]
     best_logistic_direct = logistic_direct_df.sort_values(["roc_auc", "avg_precision"], ascending=False).iloc[0]
     best_regression_direct = regression_direct_df.sort_values(["r2", "spearman"], ascending=False).iloc[0]
+    top_logistic_fold = logistic_fold_df.sort_values(
+        ["roc_auc_mean", "avg_precision_mean"], ascending=False
+    ).iloc[0]
+    top_regression_fold = regression_fold_df.sort_values(["r2_mean", "rmse_mean"], ascending=[False, True]).iloc[0]
+    top_cross_task = (
+        cross_task_df.sort_values("spearman_correlation", ascending=False).iloc[0]
+        if not cross_task_df.empty
+        else None
+    )
 
     ridge_delta_logistic = {
         "v5_vs_v7_auc": float(
@@ -419,22 +428,26 @@ def build_markdown(
     sections.append("")
     sections.append(f"Generated: {created_at}")
     sections.append("")
+    sections.append(
+        "> Methodology note: this report summarizes the metric artifacts supplied to the script. It must not be read as current corrected-model evidence until the full pipeline has been rerun and the models have been retrained."
+    )
+    sections.append("")
     sections.append("## Executive Summary")
     sections.append("")
     sections.append(
         f"- **Dataset / validation context:** {logistic_metrics['rows']:,} defensive actions across {logistic_metrics['matches']} matches; grouped CV by `match_id`; logistic target base rate {logistic_metrics['target_rate']:.2%}; regression target mean {regression_metrics['target_mean']:.4f}."
     )
     sections.append(
-        f"- **Best OOF classification model:** `{best_logistic['variant']}` with ROC-AUC {best_logistic['roc_auc']:.4f} and AP {best_logistic['avg_precision']:.4f}."
+        f"- **Top OOF classification model in supplied metrics:** `{best_logistic['variant']}` with ROC-AUC {best_logistic['roc_auc']:.4f} and AP {best_logistic['avg_precision']:.4f}."
     )
     sections.append(
-        f"- **Best OOF regression model:** `{best_regression['variant']}` with R2 {best_regression['r2']:.4f}, RMSE {best_regression['rmse']:.4f}, MAE {best_regression['mae']:.4f}, and Spearman {best_regression['spearman']:.4f}."
+        f"- **Top OOF regression model in supplied metrics:** `{best_regression['variant']}` with R2 {best_regression['r2']:.4f}, RMSE {best_regression['rmse']:.4f}, MAE {best_regression['mae']:.4f}, and Spearman {best_regression['spearman']:.4f}."
     )
     sections.append(
-        f"- **Best direct-score / slice-analysis model:** classification `{best_logistic_direct['variant']}` and regression `{best_regression_direct['variant']}`. These are useful for relative segment behavior but are more optimistic than OOF CV because they score saved models on the full dataset."
+        f"- **Top direct-score / slice-analysis model in supplied metrics:** classification `{best_logistic_direct['variant']}` and regression `{best_regression_direct['variant']}`. These are useful for relative segment behavior but are more optimistic than OOF CV because they score saved models on the full dataset."
     )
     sections.append(
-        f"- **Feature-selection takeaway:** clustered compact variants (`v6` / `v8`) preserve much more signal than the strict interpretable variants (`v5` / `v7`), but they still trail `v3` / `v4` materially."
+        "- **Feature-selection context:** compact and interpretable variants should be compared from regenerated metrics before any current recommendation is made."
     )
     sections.append(
         f"- **Regularization takeaway:** on filtered feature sets, Ridge had almost no portfolio-level lift (`v5`→`v7` logistic ΔAUC {ridge_delta_logistic['v5_vs_v7_auc']:+.5f}; `v6`→`v8` logistic ΔAUC {ridge_delta_logistic['v6_vs_v8_auc']:+.5f}; `v5`→`v7` regression ΔR2 {ridge_delta_regression['v5_vs_v7_r2']:+.5f}; `v6`→`v8` regression ΔR2 {ridge_delta_regression['v6_vs_v8_r2']:+.5f})."
@@ -472,7 +485,7 @@ def build_markdown(
     )
     sections.append("")
     sections.append(
-        "**Readout:** `v3_context_enhanced` is the strongest OOF classifier. `v4_freeze_geometry` is effectively tied, while `v6`/`v8` are the best reduced-feature alternatives. `v5`/`v7` buy interpretability but give back noticeable discrimination."
+        f"**Readout:** In the supplied OOF classification metrics, `{best_logistic['variant']}` ranks first by ROC-AUC and average precision. Treat this as artifact-specific until corrected models are retrained."
     )
 
     sections.append("")
@@ -500,7 +513,7 @@ def build_markdown(
     )
     sections.append("")
     sections.append(
-        "**Readout:** `v3_context_enhanced` is the best OOF regressor and `v4_freeze_geometry` is nearly identical. This suggests richer context is valuable for continuous future xG, while detailed freeze-frame geometry adds little on top."
+        f"**Readout:** In the supplied OOF regression metrics, `{best_regression['variant']}` ranks first by R2 and Spearman. Treat this as artifact-specific until corrected models are retrained."
     )
 
     sections.append("")
@@ -531,7 +544,7 @@ def build_markdown(
     )
     sections.append("")
     sections.append(
-        f"**Readout:** on direct scoring, `v4_freeze_geometry` edges the field in both families. This is directionally useful for segment analysis, but OOF CV still favors `v3` as the safest all-round production candidate."
+        f"**Readout:** In the supplied direct-score files, `{best_logistic_direct['variant']}` leads classification and `{best_regression_direct['variant']}` leads regression. Direct scores are segment diagnostics, not deployment evidence."
     )
 
     sections.append("")
@@ -572,7 +585,7 @@ def build_markdown(
     )
     sections.append("")
     sections.append(
-        "**Readout:** `v3`/`v4` have the strongest metrics with low fold spread, which is what we want. The clustered variants are stable too, but they plateau lower."
+        f"**Readout:** The supplied fold summaries rank `{top_logistic_fold['variant']}` first for classification mean AUC/AP and `{top_regression_fold['variant']}` first for regression mean R2/RMSE."
     )
 
     sections.append("")
@@ -592,9 +605,10 @@ def build_markdown(
         )
     )
     sections.append("")
-    sections.append(
-        "**Readout:** `v0` and `v1` show very high alignment because both tasks are mostly expressing the same coarse phase/spatial gradient at that simplicity level. From `v2` onward, the correlation drops into the moderate range because the classifier and regressor begin separating shot-trigger risk from continuous threat accumulation. That separation is desirable: the two targets are related, but not redundant."
-    )
+    if top_cross_task is not None:
+        sections.append(
+            f"**Readout:** `{top_cross_task['variant']}` has the highest supplied cross-task Spearman correlation ({top_cross_task['spearman_correlation']:.4f}). Use this as an alignment diagnostic, not a ranking of model quality."
+        )
 
     sections.append("")
     sections.append("## 7. Slice Analysis")
@@ -648,7 +662,7 @@ def build_markdown(
     )
     sections.append("")
     sections.append(
-        "**Readout:** `v4_freeze_geometry` is the strongest segment specialist. It dominates most slice families, especially action-family, play-pattern, and position-group cuts. `v3` remains competitive in counterpress-heavy and some phase-specific segments."
+        "**Readout:** Slice-win tables show which variants lead each supplied segment file. Because slice scores are not OOF, they should be used as qualitative diagnostics."
     )
 
     sections.append("")
@@ -718,41 +732,38 @@ def build_markdown(
     sections.append("")
     sections.append("**Readout:**")
     sections.append("")
-    sections.append("1. The main redundancy bundles are possession-time proxies, x-axis geometry aliases, y-axis / centroid aliases, freeze-frame counts, and nearest-distance pairs.")
-    sections.append("2. `v5` is the strict interpretability candidate; it removes more proxies and cluster duplicates, but that costs meaningful predictive power.")
-    sections.append("3. `v6` is the better compromise for a compact linear model because it retains a few controlled context variables (for example `play_pattern`, `position_group`, and one possession-lifecycle representative).")
-    sections.append("4. Moving from `v6` to `v8` shows that once the correlated blocks are already pruned, Ridge adds little. The remaining variance is more about missing non-linearity than about coefficient explosion.")
+    sections.append("1. Correlation and feature-selection artifacts identify candidate redundancy bundles for reviewer inspection.")
+    sections.append("2. Compact and interpretable variants should be re-evaluated after regenerated corrected metrics are available.")
+    sections.append("3. Ridge deltas above are computed from the supplied metrics and should not be presented as current findings until retraining is complete.")
 
     sections.append("")
-    sections.append("## 10. Model-by-Model Interpretation")
+    sections.append("## 10. Variant Feature Set Notes")
     sections.append("")
-    sections.append("- **`v0_phase_only`** — sanity baseline. Good for proving the phase taxonomy carries real signal, but far too weak for deployment.")
-    sections.append("- **`v1_spatial`** — adds the core football geometry: where the action happened and what type of action it was. Big jump in both families confirms location/context is the first major driver.")
-    sections.append("- **`v2_full_baseline`** — the first production-worthy baseline: freeze-frame support, counts, and possession progression produce a large lift over `v1`.")
-    sections.append("- **`v3_context_enhanced`** — the best OOF all-rounder. Adds temporal and phase-transition context without overcomplicating the geometry. Strongest recommendation when the target is robust match-held-out generalization.")
-    sections.append("- **`v4_freeze_geometry`** — the best slice specialist and best direct scorer. Adds fine-grained freeze-frame centroids and player-position detail. Useful when segment performance matters most or when richer geometry is available in production.")
-    sections.append("- **`v5_interpretable_clustered`** — strict feature-governed linear model. Best choice if stakeholder trust and coefficient clarity matter more than raw performance.")
-    sections.append("- **`v6_balanced_clustered`** — compact but still competitive. Best reduced-feature candidate if you want a model that is easier to explain and cheaper to maintain without collapsing performance.")
-    sections.append("- **`v7_interpretable_ridge`** — Ridge version of `v5`. It confirms that regularization alone does not recover the performance lost when aggressively trimming features.")
-    sections.append("- **`v8_balanced_ridge`** — Ridge version of `v6`. Essentially the same portfolio behavior as `v6`, indicating the clustered balanced set is already stable enough for linear fitting.")
+    sections.append("- **`v0_phase_only`**: phase taxonomy only.")
+    sections.append("- **`v1_spatial`**: phase, action category, role group, and basic action geometry.")
+    sections.append("- **`v2_full_baseline`**: adds generated support, visibility, local balance, and possession-context features.")
+    sections.append("- **`v3_context_enhanced`**: adds previous-phase, event-order, ball-location, and phase-transition context.")
+    sections.append("- **`v4_freeze_geometry`**: adds player position and generated freeze-frame centroid geometry.")
+    sections.append("- **`v5_interpretable_clustered`**: compact feature-governed linear set.")
+    sections.append("- **`v6_balanced_clustered`**: compact feature-governed set with additional categorical context.")
+    sections.append("- **`v7_interpretable_ridge`**: Ridge version of `v5`.")
+    sections.append("- **`v8_balanced_ridge`**: Ridge version of `v6`.")
 
     sections.append("")
-    sections.append("## 11. Selection Recommendations")
+    sections.append("## 11. Metric-Derived Leaders")
     sections.append("")
-    sections.append("### Recommended default choices")
+    sections.append("### Supplied artifact leaders")
     sections.append("")
-    sections.append("- **Best OOF classification default:** `v3_context_enhanced`.")
-    sections.append("- **Best OOF regression default:** `v3_context_enhanced`.")
-    sections.append("- **Best slice-robust specialist:** `v4_freeze_geometry`.")
-    sections.append("- **Best compact / governed portfolio choice:** `v6_balanced_clustered` (or `v8_balanced_ridge`, effectively tied).")
-    sections.append("- **Best pure interpretability choice:** `v5_interpretable_clustered` if stakeholder transparency is prioritized over top-end accuracy.")
+    sections.append(f"- **OOF classification leader:** `{best_logistic['variant']}`.")
+    sections.append(f"- **OOF regression leader:** `{best_regression['variant']}`.")
+    sections.append(f"- **Direct-score classification leader:** `{best_logistic_direct['variant']}`.")
+    sections.append(f"- **Direct-score regression leader:** `{best_regression_direct['variant']}`.")
     sections.append("")
-    sections.append("### Recommended deployment framing")
+    sections.append("### Regeneration framing")
     sections.append("")
-    sections.append("1. Use **`v3_context_enhanced` regression** as the main DAx scoring engine because it best fits the continuous threat framing and is strongest on OOF validation.")
-    sections.append("2. Keep **`v3_context_enhanced` or `v4_freeze_geometry` logistic** as the short-horizon shot-risk companion signal.")
-    sections.append("3. Use **`v6`/`v8`** for coach-facing interpretability packs, lower-maintenance production baselines, or environments where some features may be unstable / unavailable.")
-    sections.append("4. Do **not** assume Ridge is the next big gain. The negligible `v6`→`v8` and `v5`→`v7` changes suggest the next improvement path is likely non-linear modeling, interaction design, or better calibration rather than more shrinkage.")
+    sections.append("1. Regenerate the player defensive-action dataset with the corrected targets and canonical feature schema.")
+    sections.append("2. Retrain all logistic and regression variants from the regenerated dataset.")
+    sections.append("3. Rebuild this report from the regenerated metrics before making current model-selection claims.")
 
     sections.append("")
     sections.append("## 12. Caveats")

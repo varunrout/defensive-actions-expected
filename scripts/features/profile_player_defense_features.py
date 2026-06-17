@@ -19,7 +19,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_FEATURES = REPO_ROOT / "data" / "features"
 
 NUMERIC_FEATURES = [
-    "nearest_goal_distance",
+    "distance_to_attacking_goal",
     "distance_to_center_line",
     "local_numerical_balance_5m",
     "local_numerical_balance_10m",
@@ -27,15 +27,12 @@ NUMERIC_FEATURES = [
     "attackers_within_10m",
     "nearest_attacker_distance",
     "nearest_defender_distance",
-    "nearest_attacker_distance",
-    "nearest_defender_distance",
     "attacker_spread",
     "defender_spread",
     "visible_attacker_count",
     "visible_defender_count",
-    "possession_progress_ratio",
-    "phase_transition_count_so_far",
-    "seconds_since_possession_start",
+    "possession_elapsed_seconds",
+    "phase_transitions_observed_so_far",
 ]
 
 
@@ -96,7 +93,7 @@ def main() -> None:
     print(corr_series.to_string())
 
     for feature in [
-        "nearest_goal_distance",
+        "distance_to_attacking_goal",
         "local_numerical_balance_5m",
         "attackers_within_5m",
         "nearest_defender_distance",

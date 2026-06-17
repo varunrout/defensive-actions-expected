@@ -31,7 +31,7 @@ class AttackingThreatTests(unittest.TestCase):
         ]
 
         out = add_shot_in_10s_target(rows)
-        self.assertEqual(out[0]["target_shot_in_10s"], 1)
+        self.assertEqual(out[0]["target_future_shot_10s"], 1)
 
     def test_target_labeling_supports_type_column(self):
         rows = [
@@ -54,7 +54,7 @@ class AttackingThreatTests(unittest.TestCase):
         ]
 
         out = add_shot_in_10s_target(rows)
-        self.assertEqual(out[0]["target_shot_in_10s"], 1)
+        self.assertEqual(out[0]["target_future_shot_10s"], 1)
 
     def test_target_labeling_does_not_cross_match_boundary(self):
         rows = [
@@ -77,14 +77,14 @@ class AttackingThreatTests(unittest.TestCase):
         ]
 
         out = add_shot_in_10s_target(rows)
-        self.assertEqual(out[0]["target_shot_in_10s"], 0)
+        self.assertEqual(out[0]["target_future_shot_10s"], 0)
 
     def test_grid_model_scores_higher_in_positive_cell(self):
         rows = [
-            {"ball_x": 100.0, "ball_y": 40.0, "target_shot_in_10s": 1},
-            {"ball_x": 100.0, "ball_y": 42.0, "target_shot_in_10s": 1},
-            {"ball_x": 20.0, "ball_y": 40.0, "target_shot_in_10s": 0},
-            {"ball_x": 22.0, "ball_y": 38.0, "target_shot_in_10s": 0},
+            {"ball_x": 100.0, "ball_y": 40.0, "target_future_shot_10s": 1},
+            {"ball_x": 100.0, "ball_y": 42.0, "target_future_shot_10s": 1},
+            {"ball_x": 20.0, "ball_y": 40.0, "target_future_shot_10s": 0},
+            {"ball_x": 22.0, "ball_y": 38.0, "target_future_shot_10s": 0},
         ]
         model = GridThreatModel(n_x=12, n_y=8, smoothing=1.0).fit(rows)
 

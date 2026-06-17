@@ -29,7 +29,7 @@ class BaselineLogisticTests(unittest.TestCase):
                 "position_group": ["centre_back", "centre_back", "fullback_wingback", "fullback_wingback", "defensive_midfielder", "defensive_midfielder"],
                 "action_x": [50, 52, 40, 42, 55, 58],
                 "action_y": [35, 36, 42, 43, 30, 31],
-                "nearest_goal_distance": [60, 58, 70, 68, 50, 48],
+                "distance_to_attacking_goal": [60, 58, 70, 68, 50, 48],
                 "distance_to_center_line": [5, 4, 2, 3, 10, 9],
             }
         )

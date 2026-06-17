@@ -41,7 +41,7 @@ def plot_numeric_signal(signal_df: pd.DataFrame, out_path: Path, top_n: int = 12
     plot_df = signal_df.head(top_n).copy().sort_values("corr_with_target")
     plt.figure(figsize=(10, 6))
     plt.barh(plot_df["feature"], plot_df["corr_with_target"])
-    plt.title("Top numeric feature correlations with target_shot_in_10s")
+    plt.title("Top numeric feature correlations with target_future_shot_10s")
     plt.xlabel("Pearson correlation")
     plt.tight_layout()
     plt.savefig(out_path, dpi=170)

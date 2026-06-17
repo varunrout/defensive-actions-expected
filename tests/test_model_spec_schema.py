@@ -1,8 +1,14 @@
+import re
+
 import pandas as pd
 
 from dax.features.player_defense import build_player_defensive_actions
 from dax.models.baseline_logistic import default_variant_specs, resolve_columns as resolve_logistic_columns
 from dax.models.baseline_regression import default_regression_specs, resolve_columns as resolve_regression_columns
+from scripts.analysis.build_notebooks_06_07 import (
+    create_player_archetype_notebook,
+    create_team_clustering_notebook,
+)
 
 
 def _fixture_player_dataset() -> pd.DataFrame:
@@ -63,6 +69,33 @@ def test_default_model_specs_exist_in_generated_player_dataset():
         missing = [feature for feature in missing if feature not in df.columns]
         assert missing == []
         resolve_regression_columns(df, spec)
+
+
+def test_default_model_specs_do_not_duplicate_features():
+    specs = [*default_variant_specs(), *default_regression_specs()]
+    for spec in specs:
+        numeric = list(spec.numeric)
+        categorical = list(spec.categorical)
+        assert numeric == list(dict.fromkeys(numeric)), spec.name
+        assert categorical == list(dict.fromkeys(categorical)), spec.name
+        assert set(numeric).isdisjoint(categorical), spec.name
+
+
+def test_notebook_aggregation_features_exist_in_generated_player_dataset():
+    df = _fixture_player_dataset()
+    referenced_features: set[str] = set()
+    for notebook in [create_team_clustering_notebook(), create_player_archetype_notebook()]:
+        for cell in notebook.cells:
+            if cell.cell_type != "code":
+                continue
+            source = cell.source
+            if "base = (" not in source:
+                continue
+            base_block = source.split("base = (", 1)[1].split("base['actions_per_match']", 1)[0]
+            referenced_features.update(re.findall(r"=\('([^']+)',\s*'[^']+'\)", base_block))
+
+    missing = sorted(referenced_features - set(df.columns))
+    assert missing == []
 
 
 def test_resolve_columns_fails_for_missing_required_features():

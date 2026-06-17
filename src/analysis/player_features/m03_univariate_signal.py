@@ -14,7 +14,7 @@ from .utils_stats import cliffs_delta, cramers_v
 
 def run(df: pd.DataFrame, cfg: AnalysisConfig) -> dict[str, Any]:
     """Assess independent feature signal against the target."""
-    y = df["target_shot_in_10s"]
+    y = df["target_future_shot_10s"]
 
     num_rows: list[dict[str, Any]] = []
     for col in NUMERIC_CANDIDATES:

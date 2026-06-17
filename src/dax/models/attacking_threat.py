@@ -45,7 +45,7 @@ class GridThreatModel:
                 continue
             cx, cy = cell
             self._totals[cx][cy] += 1.0
-            self._positives[cx][cy] += float(row.get("target_shot_in_10s") or 0.0)
+            self._positives[cx][cy] += float(row.get("target_future_shot_10s") or 0.0)
         return self
 
     def predict_point(self, x: float | None, y: float | None) -> float:
@@ -101,7 +101,7 @@ def add_xt_target(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         rows: sorted list of event dictionaries
         
     Returns:
-        list with added 'target_xt_10s' field (continuous threat 0.0-1.0+)
+        list with added 'target_future_xg_10s' field (continuous threat 0.0-1.0+)
     """
     with_targets: list[dict[str, Any]] = []
     n = len(rows)
@@ -148,7 +148,7 @@ def add_xt_target(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         target_xt = sum(future_threat_scores) if future_threat_scores else 0.0
         
         out = dict(row)
-        out["target_xt_10s"] = round(target_xt, 6)
+        out["target_future_xg_10s"] = round(target_xt, 6)
         with_targets.append(out)
     
     return with_targets
