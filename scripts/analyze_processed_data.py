@@ -32,7 +32,7 @@ def main() -> int:
     if "competition" in df.columns:
         competition_counts = df["competition"].value_counts(dropna=False).rename_axis("competition").reset_index(name="rows")
         bar_chart(competition_counts, "competition", "rows", output_dir / "events_by_competition.png", "Events by competition", dpi=dpi)
-    bar_chart(tables["event_counts_by_type"], "event_type", "rows", output_dir / "events_by_event_type.png", "Events by event type", dpi=dpi)
+    bar_chart(tables["event_counts_by_type"], "type", "rows", output_dir / "events_by_type.png", "Events by type", dpi=dpi)
     bar_chart(tables["rows_per_match"], "match_id", "rows", output_dir / "rows_per_match.png", "Rows per match", dpi=dpi)
     bar_chart(tables["missingness"], "column", "missing_rate", output_dir / "missingness.png", "Missingness by column", ylabel="Missing rate", dpi=dpi)
     bar_chart(tables["phase_distribution"], "phase_label", "rows", output_dir / "phase_distribution.png", "Rule-based phase distribution", dpi=dpi)

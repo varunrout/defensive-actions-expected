@@ -2,7 +2,7 @@
 
 ## Inputs
 
-Default input is `data/processed/events_with_targets.parquet`. The table must contain corrected short-horizon targets and event context columns including match, period, index, possession, event type, phase proxy, 360 availability, attacking team before action, and defending team before action.
+Default input is `data/processed/events_with_targets.parquet`. The table must contain corrected short-horizon targets and event context columns including match, period, index, possession, `type` event category, phase proxy, 360 availability, attacking team before action, and defending team before action.
 
 ## Checks
 

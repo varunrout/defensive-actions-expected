@@ -33,6 +33,7 @@ def main() -> int:
     bins_x, bins_y = config["pitch_grid_dimensions"]
     tables = diagnostics_tables(df, min_category_count=int(config["minimum_category_sample_size"]))
     tables["missingness"] = missingness_summary(df)
+    tables["event_type_distribution"] = df["event_type"].value_counts(dropna=False).rename_axis("event_type").reset_index(name="rows")
     tables["zone_summary"] = zone_summary(df, bins_x=bins_x, bins_y=bins_y)
     tables["player_spatial_profiles"] = player_spatial_profiles(df)
     tables.update(phase_tables(df, min_count=int(config["minimum_category_sample_size"])))
@@ -40,6 +41,7 @@ def main() -> int:
 
     dpi = int(config["chart_dpi"])
     bar_chart(df["action_family"].value_counts().rename_axis("action_family").reset_index(name="rows"), "action_family", "rows", output_dir / "action_family_distribution.png", "Action-family distribution", dpi=dpi)
+    bar_chart(tables["event_type_distribution"], "event_type", "rows", output_dir / "player_event_type_distribution.png", "Player action event-type distribution", dpi=dpi)
     bar_chart(tables["missingness_by_feature_family"], "group", "mean_missing_rate", output_dir / "missingness_by_feature_family.png", "Missingness by feature family", dpi=dpi)
     labelled_heatmap(tables["correlations"], output_dir / "correlation_heatmap.png", "Labelled feature correlation heatmap", dpi=dpi)
     for column in ["visible_attacker_count", "visible_defender_count", "local_numerical_balance_5m", "local_numerical_balance_10m"]:
