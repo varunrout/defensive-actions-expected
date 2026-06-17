@@ -80,16 +80,41 @@ def production_player_actions_fixture(players: int = 12, actions_per_player: int
 
 
 def processed_events_fixture() -> pd.DataFrame:
-    players = production_player_actions_fixture(players=4, actions_per_player=3)
-    events = players.rename(
-        columns={
-            "event_index": "index",
-            "attacking_team": "attacking_team_before_action",
-            "defending_team": "defending_team_before_action",
-        }
-    ).copy()
-    events["minute"] = 0
-    return events
+    """Return a production-shaped processed event fixture with `type`, not `event_type`."""
+    rows = []
+    event_types = ["Pass", "Pressure", "Shot", "Ball Recovery", "Interception", "Duel"]
+    for index, event_type in enumerate(event_types, start=1):
+        rows.append(
+            {
+                "match_id": 1,
+                "period": 1,
+                "index": index,
+                "minute": 0,
+                "second": index * 5,
+                "event_time_seconds": index * 5.0,
+                "possession": 1 + index // 3,
+                "id": f"processed-{index}",
+                "type": event_type,
+                "duel_type": None,
+                "goalkeeper_type": None,
+                "pass_type": "Regular" if event_type == "Pass" else None,
+                "related_events": [],
+                "shot_type": "Open Play" if event_type == "Shot" else None,
+                "foul_committed_type": None,
+                "previous_event_team": "Team A" if index > 1 else None,
+                "event_starts_new_possession": index in {1, 3},
+                "event_semantics_known": True,
+                "team": "Team A" if index in {1, 3} else "Team B",
+                "player": f"Event Player {index}",
+                "phase_label": PHASES[index % len(PHASES)],
+                "has_360": True,
+                "attacking_team_before_action": "Team A",
+                "defending_team_before_action": "Team B",
+                "target_future_shot_10s": int(event_type == "Pressure"),
+                "target_future_xg_10s": 0.12 if event_type == "Pressure" else 0.0,
+            }
+        )
+    return pd.DataFrame(rows)
 
 
 def test_schema_uses_production_player_feature_contract() -> None:
@@ -105,6 +130,44 @@ def test_schema_uses_production_player_feature_contract() -> None:
         "under_opponent_possession",
     }
     assert forbidden.isdisjoint(df.columns)
+
+
+def test_processed_schema_requires_type_not_event_type(tmp_path: Path) -> None:
+    import subprocess
+    import sys
+
+    events = processed_events_fixture()
+    assert validate_processed_events(events).ok
+    with_missing_type = events.drop(columns=["type"])
+    try:
+        validate_processed_events(with_missing_type)
+    except ValueError as exc:
+        assert "type" in str(exc)
+    else:
+        raise AssertionError("processed event validation should reject fixtures missing `type`")
+
+    tables = processed_event_tables(events)
+    assert "type" in tables["event_counts_by_type"].columns
+    assert "event_type" not in tables["event_counts_by_type"].columns
+
+    input_path = tmp_path / "events.parquet"
+    output_dir = tmp_path / "data_quality"
+    events.to_parquet(input_path, index=False)
+    subprocess.run(
+        [
+            sys.executable,
+            "scripts/analyze_processed_data.py",
+            "--input",
+            str(input_path),
+            "--output-dir",
+            str(output_dir),
+            "--config",
+            "configs/analysis.yaml",
+        ],
+        check=True,
+    )
+    counts = pd.read_csv(output_dir / "event_counts_by_type.csv")
+    assert "type" in counts.columns
 
 
 def test_processed_quality_and_spatial_tables() -> None:
@@ -225,6 +288,8 @@ def test_cli_chart_orchestration_creates_expected_files(tmp_path: Path) -> None:
     subprocess.run([sys.executable, "scripts/run_player_clustering.py", "--input", str(summary_path), "--output-dir", str(tmp_path / "clustering"), "--matrix-output", str(matrix_path), "--config", str(config_path)], check=True)
 
     expected = [
+        tmp_path / "features" / "event_type_distribution.csv",
+        tmp_path / "features" / "player_event_type_distribution.png",
         tmp_path / "features" / "action_family_pitch_map_pressure.png",
         tmp_path / "features" / "phase_pitch_map_high_press.png",
         tmp_path / "players" / "player_action_family_profile.png",

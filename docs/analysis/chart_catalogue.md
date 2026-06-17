@@ -3,7 +3,7 @@
 | Area | Chart | Source table | Default output | Interpretation |
 |---|---|---|---|---|
 | Data quality | Events by competition | processed events | `outputs/analysis/data_quality/events_by_competition.png` | Competition coverage |
-| Data quality | Events by type | event counts | `events_by_event_type.png` | Event mix |
+| Data quality | Events by type | event counts | `events_by_type.png` | Event mix |
 | Data quality | Rows per match | rows per match | `rows_per_match.png` | Match coverage |
 | Data quality | Missingness | missingness table | `missingness.png` | Column completeness |
 | Data quality | Phase distribution | phase table | `phase_distribution.png` | Rule-based phase proxy mix |

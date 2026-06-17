@@ -34,7 +34,7 @@ EVENT_REQUIRED: tuple[str, ...] = (
     "period",
     "index",
     "possession",
-    "event_type",
+    "type",
     "phase_label",
     "has_360",
     "target_future_shot_10s",
