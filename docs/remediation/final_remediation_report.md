@@ -53,7 +53,7 @@ README and methodology/data dictionary/remediation documents were rewritten or a
 No large output artifacts were moved in this environment. Historical outputs should be placed under `outputs/archive/pre_methodology_fix/` before full regeneration.
 
 ## 18. Remaining limitations
-Full raw-to-processed offline pipeline rebuild, visible-area polygon controls, tournament holdout metrics, calibration plots, and notebook reruns remain to be completed on full data.
+Full raw-to-processed offline pipeline rebuild, manifests/checksums, structured failure manifests, removal of sys.path manipulation, stale output archiving, tournament holdout metrics, calibration/subgroup validation plots, and notebook reruns remain to be completed on full data.
 
 ## 19. Work still required for true DAx
 Pre-action threat, post-action threat, counterfactual no-intervention threat, option availability/removal, multi-defender attribution, role/team/opportunity adjustment, human validation, and uncertainty estimates.

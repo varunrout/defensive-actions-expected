@@ -24,12 +24,12 @@
 | nearest_attacker_distance / nearest_defender_distance | float | Nearest visible role distance | Euclidean distance | Yes | Null when no visible role | Numeric | Medium |
 | attacker_centroid_x/y, defender_centroid_x/y | float | Visible role centroids | Mean visible role coordinates | Yes | Null when no visible role | Numeric | Medium |
 | attacker_spread / defender_spread | float | Mean distance from role centroid | Visible role geometry | Yes | Null when no visible role | Numeric | Medium |
-| defenders_goal_side_count | int | Visible defenders between action and defending goal | Count defenders with x <= action_x after normalisation | Yes | 0 if none visible | Numeric | Medium |
+| defenders_between_ball_and_attacking_goal | int/null | Visible defenders between ball/action and the attacking goal | Count visible defenders with x >= ball_x after attack-direction normalisation | Yes when roles and ball x are known | Null if role context unknown | Numeric | Medium |
 | local_numerical_balance_5m / 10m | int/null | Local attackers minus defenders | Role counts in reliable local regions | Yes | Null when local region unreliable | Numeric | Medium |
 | visible_area_polygon_area | float | StatsBomb 360 visible polygon area | Shoelace area after coordinate normalisation | Yes | Null if absent/invalid | Visibility control | Low |
 | visible_area_fraction_of_pitch | float | Visible polygon share of pitch | Area / 9600 | Yes | Null if absent/invalid | Visibility control | Low |
 | ball_inside_visible_area / action_inside_visible_area | bool/null | Whether action point is in visible polygon | Ray-casting point-in-polygon | Yes | Null if absent/invalid | Visibility control | Low |
-| local_5m_region_fully_visible / local_10m_region_fully_visible | bool | Conservative local visibility flags | Requires action inside polygon and sufficient visible fraction | Yes | False if absent/low coverage | Visibility control | Low |
+| local_5m_region_fully_visible / local_10m_region_fully_visible | bool | Conservative local visibility flags | Requires the visible polygon to cover the clipped local buffer around the action | Yes | False if absent/low coverage | Visibility control | Low |
 | visibility_quality_band / visibility_limited | string/bool | Coarse 360 coverage quality | Missing/low/medium/high band from visible fraction | Yes | Missing band if no polygon | Visibility control | Low |
 | target_future_shot_10s | int | Future same-possession shot within 10s | Target builder | No (outcome) | 0 if none | Target only | Target |
 | target_future_xg_10s | float | Future same-possession shot xG sum | Target builder | No (outcome) | 0 if none | Target only | Target |

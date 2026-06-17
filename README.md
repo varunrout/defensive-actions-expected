@@ -78,9 +78,9 @@ No full corrected model metrics are claimed in this commit because the full Stat
 
 ## Limitations
 
-- Visible-area controls use deterministic polygon area and point-in-polygon checks; they do not infer players outside the StatsBomb 360 camera footprint.
+- Visible-area controls use polygon/buffer coverage checks where geometry support is available; they do not infer players outside the StatsBomb 360 camera footprint.
 - Human phase validation has not been performed.
-- Tournament holdout metrics require full regenerated feature tables.
+- This PR does not close Issue #2; remaining work includes true raw-to-processed offline rebuilds, manifests/checksums, structured failure manifests, removal of `sys.path` manipulation, stale output archiving, notebook regeneration, tournament holdout validation, calibration plots and subgroup validation.
 - Current models are baselines, not causal DAx.
 
 ## Roadmap to true DAx
