@@ -98,15 +98,56 @@ def scatter_chart(df: pd.DataFrame, x: str, y: str, output_path: str | Path, tit
     return _save(fig, output_path, dpi=dpi, save_svg=save_svg)
 
 
-def labelled_heatmap(matrix: pd.DataFrame, output_path: str | Path, title: str, *, xlabel: str = "Columns", ylabel: str = "Rows", dpi: int = 150, save_svg: bool = False, center_zero: bool = False) -> plt.Figure:
-    fig, ax = plt.subplots(figsize=(max(7, min(16, len(matrix.columns) * 0.45)), max(5, len(matrix) * 0.3)))
-    values = matrix.fillna(0).to_numpy() if not matrix.empty else np.zeros((1, 1))
+
+def prepare_numeric_heatmap_matrix(
+    df: pd.DataFrame,
+    *,
+    index_column: str | None = None,
+    exclude_columns: set[str] | list[str] | None = None,
+) -> pd.DataFrame:
+    """Return a numeric-only heatmap matrix with preserved row labels.
+
+    Non-numeric metadata columns are dropped before plotting so Matplotlib never
+    receives object-dtype arrays. A clear error is raised if no numeric columns
+    remain after applying the requested index and exclusions.
+    """
+    if df.empty:
+        return pd.DataFrame()
+    matrix = df.copy()
+    if index_column is not None and index_column in matrix.columns:
+        matrix = matrix.set_index(index_column)
+    excluded = set(exclude_columns or [])
+    excluded.discard(index_column or "")
+    if excluded:
+        matrix = matrix.drop(columns=[column for column in excluded if column in matrix.columns])
+    numeric = matrix.select_dtypes(include=[np.number])
+    if numeric.empty:
+        raise ValueError("Heatmap matrix has no numeric columns after dropping metadata columns.")
+    return numeric
+
+def labelled_heatmap(
+    matrix: pd.DataFrame,
+    output_path: str | Path,
+    title: str,
+    *,
+    xlabel: str = "Columns",
+    ylabel: str = "Rows",
+    dpi: int = 150,
+    save_svg: bool = False,
+    center_zero: bool = False,
+    index_column: str | None = None,
+    exclude_columns: set[str] | list[str] | None = None,
+) -> plt.Figure:
+    """Save a labelled heatmap after filtering to numeric plotting columns."""
+    numeric_matrix = prepare_numeric_heatmap_matrix(matrix, index_column=index_column, exclude_columns=exclude_columns) if not matrix.empty else pd.DataFrame()
+    fig, ax = plt.subplots(figsize=(max(7, min(16, len(numeric_matrix.columns) * 0.45)), max(5, len(numeric_matrix) * 0.3)))
+    values = numeric_matrix.fillna(0).to_numpy(dtype=float) if not numeric_matrix.empty else np.zeros((1, 1))
     vlim = np.nanmax(np.abs(values)) if center_zero and values.size else None
     image = ax.imshow(values, aspect="auto", cmap="RdBu_r" if center_zero else "viridis", vmin=-vlim if vlim else None, vmax=vlim if vlim else None)
     apply_theme(ax, title=title, xlabel=xlabel, ylabel=ylabel)
-    if not matrix.empty:
-        ax.set_xticks(range(len(matrix.columns)), labels=[display_label(column, width=18) for column in matrix.columns], rotation=90)
-        ax.set_yticks(range(len(matrix.index)), labels=[display_label(index, width=22) for index in matrix.index])
+    if not numeric_matrix.empty:
+        ax.set_xticks(range(len(numeric_matrix.columns)), labels=[display_label(column, width=18) for column in numeric_matrix.columns], rotation=90)
+        ax.set_yticks(range(len(numeric_matrix.index)), labels=[display_label(index, width=22) for index in numeric_matrix.index])
     fig.colorbar(image, ax=ax, label="Standardised value" if center_zero else "Value")
     return _save(fig, output_path, dpi=dpi, save_svg=save_svg)
 

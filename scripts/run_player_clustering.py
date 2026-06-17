@@ -17,7 +17,7 @@ from dax.analysis.clustering import (
     write_clustering_outputs,
 )
 from dax.analysis.config import load_analysis_config
-from dax.analysis.plotting import bar_chart, labelled_heatmap, scatter_chart
+from dax.analysis.plotting import bar_chart, labelled_heatmap, prepare_numeric_heatmap_matrix, scatter_chart
 from dax.analysis.pitch_plotting import plot_cluster_population_difference, plot_pitch_density, plot_pitch_scatter
 
 
@@ -41,8 +41,10 @@ def _generate_clustering_charts(tables: dict[str, pd.DataFrame], output_dir: Pat
     cluster_sizes = player_clusters["cluster"].value_counts().rename_axis("cluster").reset_index(name="players")
     bar_chart(cluster_sizes, "cluster", "players", output_dir / "cluster_size_chart.png", "Cluster sizes", dpi=dpi, color="cluster")
 
-    centroids = tables["cluster_centroids"].set_index("cluster") if not tables["cluster_centroids"].empty else pd.DataFrame()
-    labelled_heatmap(centroids, output_dir / "cluster_centroid_heatmap.png", "Cluster centroid heatmap", dpi=dpi)
+    centroids = tables["cluster_centroids"]
+    if not centroids.empty:
+        centroid_matrix = prepare_numeric_heatmap_matrix(centroids, index_column="cluster")
+        labelled_heatmap(centroid_matrix, output_dir / "cluster_centroid_heatmap.png", "Cluster centroid heatmap", dpi=dpi, center_zero=True)
 
     pca_scores = tables.get("pca_scores", pd.DataFrame())
     if {"pc1", "pc2"}.issubset(pca_scores.columns):
@@ -233,19 +235,28 @@ def _generate_cluster_spatial_outputs(actions_path: str, tables: dict[str, pd.Da
     if joined.empty:
         return
     for cluster, cluster_actions in joined.groupby("cluster"):
-        plot_pitch_density(cluster_actions, output_dir / f"cluster_{cluster}_spatial_profile.png", title=f"Cluster {cluster} spatial style profile", config=config)
-        plot_cluster_population_difference(cluster_actions, joined, output_dir / f"cluster_{cluster}_spatial_difference.png", title=f"Cluster {cluster} density minus population", config=config)
-        for family, family_actions in cluster_actions.groupby("action_family"):
-            if len(family_actions) >= int(config.get("minimum_spatial_bin_actions", 20)):
-                safe_family = str(family).replace(" ", "_").replace("/", "_")
-                plot_pitch_density(family_actions, output_dir / f"cluster_{cluster}_{safe_family}_spatial_profile.png", title=f"Cluster {cluster} {family} spatial profile", config=config)
+        plot_pitch_density(cluster_actions, output_dir / f"cluster_{cluster}_spatial_density_pitch.png", title=f"Cluster {cluster} spatial density", config=config)
+        plot_cluster_population_difference(cluster_actions, joined, output_dir / f"cluster_{cluster}_spatial_difference_pitch.png", title=f"Cluster {cluster} density minus population", config=config)
+        if "action_family" in cluster_actions.columns:
+            family_counts = cluster_actions["action_family"].value_counts()
+            if not family_counts.empty:
+                top_family = family_counts.index[0]
+                family_actions = cluster_actions[cluster_actions["action_family"] == top_family]
+                if len(family_actions) >= int(config.get("minimum_spatial_bin_actions", 20)):
+                    plot_pitch_density(
+                        family_actions,
+                        output_dir / f"cluster_{cluster}_action_family_pitch.png",
+                        title=f"Cluster {cluster} top action-family spatial density",
+                        subtitle=f"Action family: {top_family}. Style distribution, not performance.",
+                        config=config,
+                    )
     reps = tables.get("representative_players", pd.DataFrame())
     for _, representative in reps.iterrows():
         cluster = representative["cluster"]
         mask = (joined["cluster"] == cluster) & (joined["player_id"] == representative["player_id"])
         if "team" in representative:
             mask &= joined["team"].eq(representative["team"])
-        plot_pitch_scatter(joined[mask], output_dir / f"cluster_{cluster}_representative_player.png", title=f"Representative player, cluster {cluster}: {representative.get('player_name', representative['player_id'])}", config=config)
+        plot_pitch_scatter(joined[mask], output_dir / f"cluster_{cluster}_representative_player_pitch.png", title=f"Representative player, cluster {cluster}: {representative.get('player_name', representative['player_id'])}", config=config)
 
 def main() -> int:
     args = parse_args()
