@@ -1,5 +1,7 @@
 # xT-Based Target Analysis & Implementation Guide
 
+> Historical note: this document predates the methodology corrections in PR #4. It is retained as an xT-based historical analysis and should not be read as current validation output or as documentation of the corrected `target_future_xg_10s` regression target.
+
 **Document version:** 1.0  
 **Created:** June 11, 2026  
 **Status:** Strategic analysis and implementation framework

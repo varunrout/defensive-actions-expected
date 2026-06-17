@@ -132,7 +132,7 @@ data/features/
 - `phase=high_press`: +0.45 → Higher threat context
 - `phase=settled_low_block`: -0.30 → Lower threat context
 - `nearest_goal_distance`: -0.15 → Farther from goal = less threat
-- `freeze_support_balance_5m`: -0.10 → More teammates = less threat
+- `local_numerical_balance_5m`: -0.10 → More teammates = less threat
 - `is_central_lane`: +0.25 → Central actions = higher threat
 
 **Football story:**

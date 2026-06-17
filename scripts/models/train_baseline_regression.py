@@ -1,4 +1,4 @@
-"""Train DAx baseline regression variants for xT-based target.
+"""Train DAx baseline regression variants for observed future-xG target.
 
 Usage:
   python scripts/models/train_baseline_regression.py
@@ -35,7 +35,7 @@ from dax.models.baseline_regression import (  # noqa: E402
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Train baseline regression models for DAx (xT-based target)"
+        description="Train baseline regression models for DAx (future-xG target)"
     )
     parser.add_argument(
         "--input",
@@ -89,11 +89,11 @@ def main() -> None:
         raise ValueError(f"Dataset must contain {TARGET_COL!r} and {GROUP_COL!r}")
 
     print("=" * 72)
-    print("TRAIN BASELINE REGRESSION MODELS (xT-BASED TARGET)")
+    print("TRAIN BASELINE REGRESSION MODELS (FUTURE-XG TARGET)")
     print("=" * 72)
     print(f"Rows: {len(df):,}")
     print(f"Matches: {df[GROUP_COL].nunique():,}")
-    print(f"Target (xT) stats:")
+    print(f"Target (future xG) stats:")
     print(f"  Mean: {df[TARGET_COL].mean():.4f}")
     print(f"  Median: {df[TARGET_COL].median():.4f}")
     print(f"  Std: {df[TARGET_COL].std():.4f}")

@@ -10,12 +10,12 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import average_precision_score, roc_auc_score
+from sklearn.metrics import average_precision_score, brier_score_loss, log_loss, roc_auc_score
 from sklearn.model_selection import GroupKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-TARGET_COL = "target_shot_in_10s"
+TARGET_COL = "target_future_shot_10s"
 GROUP_COL = "match_id"
 
 
@@ -27,9 +27,22 @@ class VariantSpec:
     c: float = 1.0
 
 
+def _unique_features(features: list[str]) -> list[str]:
+    return list(dict.fromkeys(features))
+
+
+def _dedupe_spec_features(spec: VariantSpec) -> VariantSpec:
+    return VariantSpec(
+        name=spec.name,
+        categorical=_unique_features(spec.categorical),
+        numeric=_unique_features(spec.numeric),
+        c=spec.c,
+    )
+
+
 def default_variant_specs() -> list[VariantSpec]:
     """Return default baseline variants V0-V8."""
-    return [
+    specs = [
         VariantSpec(
             name="v0_phase_only",
             categorical=["phase_label"],
@@ -55,17 +68,17 @@ def default_variant_specs() -> list[VariantSpec]:
                 "action_y",
                 
                 "distance_to_center_line",
-                "freeze_support_balance_5m",
-                "freeze_support_balance_10m",
-                "freeze_support_ratio_5m",
-                "freeze_support_ratio_10m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_nearest_distance",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_count",
-                "opponent_count",
-                "teammate_opponent_ratio",
+                "local_numerical_balance_5m",
+                "local_numerical_balance_10m",
+                "attackers_within_5m",
+                "attackers_within_10m",
+                "nearest_attacker_distance",
+                "nearest_defender_distance",
+                "attacker_spread",
+                "defender_spread",
+                "visible_attacker_count",
+                "visible_defender_count",
+                "attacker_defender_ratio",
                 
                 "possession_elapsed_seconds",
                 
@@ -104,19 +117,19 @@ def default_variant_specs() -> list[VariantSpec]:
                 "is_deep_zone",
                 "is_high_zone",
                 "freeze_frame_count",
-                "freeze_teammate_count",
-                "freeze_opponent_count",
-                "freeze_support_balance_5m",
-                "freeze_support_balance_10m",
-                "freeze_support_ratio_5m",
-                "freeze_support_ratio_10m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_nearest_distance",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_count",
-                "opponent_count",
-                "teammate_opponent_ratio",
+                "visible_attacker_count",
+                "visible_defender_count",
+                "local_numerical_balance_5m",
+                "local_numerical_balance_10m",
+                "attackers_within_5m",
+                "attackers_within_10m",
+                "nearest_attacker_distance",
+                "nearest_defender_distance",
+                "attacker_spread",
+                "defender_spread",
+                "visible_attacker_count",
+                "visible_defender_count",
+                "attacker_defender_ratio",
                 
                 "possession_elapsed_seconds",
                 
@@ -156,27 +169,27 @@ def default_variant_specs() -> list[VariantSpec]:
                 "is_deep_zone",
                 "is_high_zone",
                 "freeze_frame_count",
-                "freeze_teammate_count",
-                "freeze_opponent_count",
-                "freeze_support_balance_5m",
-                "freeze_support_balance_10m",
-                "freeze_support_ratio_5m",
-                "freeze_support_ratio_10m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_nearest_distance",
-                "freeze_teammate_centroid_x",
-                "freeze_teammate_centroid_y",
-                "freeze_opponent_centroid_x",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_centroid_dy",
-                "freeze_opponent_centroid_dx",
-                "freeze_opponent_centroid_dy",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_count",
-                "opponent_count",
-                "teammate_opponent_ratio",
+                "visible_attacker_count",
+                "visible_defender_count",
+                "local_numerical_balance_5m",
+                "local_numerical_balance_10m",
+                "attackers_within_5m",
+                "attackers_within_10m",
+                "nearest_attacker_distance",
+                "nearest_defender_distance",
+                "attacker_centroid_x",
+                "attacker_centroid_y",
+                "defender_centroid_x",
+                "defender_centroid_y",
+                "attacker_centroid_x",
+                "attacker_centroid_y",
+                "defender_centroid_x",
+                "defender_centroid_y",
+                "attacker_spread",
+                "defender_spread",
+                "visible_attacker_count",
+                "visible_defender_count",
+                "attacker_defender_ratio",
                 
                 "possession_elapsed_seconds",
                 
@@ -206,16 +219,16 @@ def default_variant_specs() -> list[VariantSpec]:
                 "is_wide_lane",
                 "is_deep_zone",
                 "is_high_zone",
-                "freeze_teammate_count",
-                "freeze_support_balance_5m",
-                "freeze_support_balance_10m",
-                "freeze_support_ratio_5m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_opponent_ratio",
+                "visible_attacker_count",
+                "local_numerical_balance_5m",
+                "local_numerical_balance_10m",
+                "attackers_within_5m",
+                "nearest_attacker_distance",
+                "defender_centroid_y",
+                "attacker_centroid_x",
+                "attacker_spread",
+                "defender_spread",
+                "attacker_defender_ratio",
                 
             ],
         ),
@@ -243,16 +256,16 @@ def default_variant_specs() -> list[VariantSpec]:
                 "is_wide_lane",
                 "is_deep_zone",
                 "is_high_zone",
-                "freeze_teammate_count",
-                "freeze_support_balance_5m",
-                "freeze_support_balance_10m",
-                "freeze_support_ratio_5m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_opponent_ratio",
+                "visible_attacker_count",
+                "local_numerical_balance_5m",
+                "local_numerical_balance_10m",
+                "attackers_within_5m",
+                "nearest_attacker_distance",
+                "defender_centroid_y",
+                "attacker_centroid_x",
+                "attacker_spread",
+                "defender_spread",
+                "attacker_defender_ratio",
                 
                 
                 "phase_transitions_observed_so_far",
@@ -280,16 +293,16 @@ def default_variant_specs() -> list[VariantSpec]:
                 "is_wide_lane",
                 "is_deep_zone",
                 "is_high_zone",
-                "freeze_teammate_count",
-                "freeze_support_balance_5m",
-                "freeze_support_balance_10m",
-                "freeze_support_ratio_5m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_opponent_ratio",
+                "visible_attacker_count",
+                "local_numerical_balance_5m",
+                "local_numerical_balance_10m",
+                "attackers_within_5m",
+                "nearest_attacker_distance",
+                "defender_centroid_y",
+                "attacker_centroid_x",
+                "attacker_spread",
+                "defender_spread",
+                "attacker_defender_ratio",
                 
             ],
             c=0.6,
@@ -318,16 +331,16 @@ def default_variant_specs() -> list[VariantSpec]:
                 "is_wide_lane",
                 "is_deep_zone",
                 "is_high_zone",
-                "freeze_teammate_count",
-                "freeze_support_balance_5m",
-                "freeze_support_balance_10m",
-                "freeze_support_ratio_5m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_opponent_ratio",
+                "visible_attacker_count",
+                "local_numerical_balance_5m",
+                "local_numerical_balance_10m",
+                "attackers_within_5m",
+                "nearest_attacker_distance",
+                "defender_centroid_y",
+                "attacker_centroid_x",
+                "attacker_spread",
+                "defender_spread",
+                "attacker_defender_ratio",
                 
                 
                 "phase_transitions_observed_so_far",
@@ -335,10 +348,22 @@ def default_variant_specs() -> list[VariantSpec]:
             c=0.5,
         ),
     ]
+    return [_dedupe_spec_features(spec) for spec in specs]
 
 
-def resolve_columns(df: pd.DataFrame, spec: VariantSpec) -> VariantSpec:
-    """Keep only columns that exist in the dataframe."""
+def resolve_columns(df: pd.DataFrame, spec: VariantSpec, strict: bool = True) -> VariantSpec:
+    """Validate model feature columns and return the resolved specification.
+
+    Strict mode is the default so production training fails loudly when a
+    declared model feature is missing from the generated player table.
+    """
+    missing_categorical = [c for c in spec.categorical if c not in df.columns]
+    missing_numeric = [c for c in spec.numeric if c not in df.columns]
+    if strict and (missing_categorical or missing_numeric):
+        raise ValueError(
+            f"Missing required features for model spec {spec.name}: "
+            f"categorical={missing_categorical}, numeric={missing_numeric}"
+        )
     categorical = [c for c in spec.categorical if c in df.columns]
     numeric = [c for c in spec.numeric if c in df.columns]
     return VariantSpec(name=spec.name, categorical=categorical, numeric=numeric, c=spec.c)
@@ -427,18 +452,28 @@ def grouped_cv_scores(
                 "n_test": int(len(test_idx)),
                 "roc_auc": float(roc_auc_score(y_test, y_score)),
                 "avg_precision": float(average_precision_score(y_test, y_score)),
+                "log_loss": float(log_loss(y_test, y_score, labels=[0, 1])),
+                "brier_score": float(brier_score_loss(y_test, y_score)),
+                "train_positive_rate": float(y_train.mean()),
+                "test_positive_rate": float(y_test.mean()),
             }
         )
 
     mask = ~np.isnan(oof)
     overall_auc = float(roc_auc_score(y[mask], oof[mask]))
     overall_ap = float(average_precision_score(y[mask], oof[mask]))
+    overall_log_loss = float(log_loss(y[mask], oof[mask], labels=[0, 1]))
+    overall_brier = float(brier_score_loss(y[mask], oof[mask]))
 
     return {
         "fold_metrics": fold_rows,
         "oof_predictions": oof,
         "roc_auc": overall_auc,
         "avg_precision": overall_ap,
+        "log_loss": overall_log_loss,
+        "brier_score": overall_brier,
+        "target_mean": float(y[mask].mean()),
+        "target_zero_rate": float((y[mask] == 0).mean()),
     }
 
 
@@ -457,7 +492,7 @@ FUTURE_ONLY_FEATURES = {
     "possession_duration_total",
     "possession_event_count_total",
     "possession_progress_ratio",
-    "target_xt_10s",
+    "target_future_xg_10s",
 }
 
 

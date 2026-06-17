@@ -14,7 +14,7 @@ from .io import NUMERIC_CANDIDATES
 def run(df: pd.DataFrame, cfg: AnalysisConfig) -> dict[str, Any]:
     """Verify signal collapses under permutation and random controls."""
     rng = np.random.default_rng(cfg.random_seed)
-    y = df["target_shot_in_10s"]
+    y = df["target_future_shot_10s"]
 
     feature = next((c for c in NUMERIC_CANDIDATES if c in df.columns), None)
     if feature is None:

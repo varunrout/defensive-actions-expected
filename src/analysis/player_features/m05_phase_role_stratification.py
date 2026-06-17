@@ -9,9 +9,9 @@ import pandas as pd
 from .config import AnalysisConfig
 
 CHECK_FEATURES = [
-    "nearest_goal_distance",
+    "distance_to_attacking_goal",
     "distance_to_center_line",
-    "freeze_support_balance_10m",
+    "local_numerical_balance_10m",
     "teammate_opponent_ratio",
 ]
 
@@ -26,7 +26,7 @@ def _corr_by_group(df: pd.DataFrame, group_col: str, feature: str, min_size: int
         s = pd.to_numeric(chunk[feature], errors="coerce").dropna()
         if len(s) < min_size:
             continue
-        y = chunk.loc[s.index, "target_shot_in_10s"]
+        y = chunk.loc[s.index, "target_future_shot_10s"]
         if s.nunique() <= 1 or y.nunique() <= 1:
             continue
         corr = s.corr(y)

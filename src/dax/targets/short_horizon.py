@@ -53,7 +53,6 @@ def add_future_shot_target(
                     out.loc[idx] = 1
                     break
     df["target_future_shot_10s"] = out
-    df["target_shot_in_10s"] = out
     return df
 
 

@@ -22,14 +22,14 @@ class BaselineLogisticTests(unittest.TestCase):
         df = pd.DataFrame(
             {
                 "match_id": [1, 1, 2, 2, 3, 3],
-                "target_shot_in_10s": [0, 1, 0, 1, 0, 1],
+                "target_future_shot_10s": [0, 1, 0, 1, 0, 1],
                 "phase_label": ["high_press", "high_press", "settled_low_block", "settled_low_block", "transition_defence", "transition_defence"],
                 "action_zone": ["middle_third_center"] * 6,
                 "action_family": ["pressure", "intervention", "pressure", "intervention", "pressure", "intervention"],
                 "position_group": ["centre_back", "centre_back", "fullback_wingback", "fullback_wingback", "defensive_midfielder", "defensive_midfielder"],
                 "action_x": [50, 52, 40, 42, 55, 58],
                 "action_y": [35, 36, 42, 43, 30, 31],
-                "nearest_goal_distance": [60, 58, 70, 68, 50, 48],
+                "distance_to_attacking_goal": [60, 58, 70, 68, 50, 48],
                 "distance_to_center_line": [5, 4, 2, 3, 10, 9],
             }
         )
