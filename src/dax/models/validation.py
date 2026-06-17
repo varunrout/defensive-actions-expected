@@ -9,6 +9,8 @@ import pandas as pd
 from sklearn.metrics import PrecisionRecallDisplay, RocCurveDisplay, average_precision_score, roc_auc_score
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+MAX_SCATTER_POINTS = 6000
+MAX_RESIDUAL_POINTS = 8000
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -142,7 +144,7 @@ def _plot_regression_pred_vs_actual(oof_df: pd.DataFrame, out_path: Path) -> Non
         part = oof_df[oof_df["variant"] == variant].dropna(subset=["y_true", "y_pred"])
         if part.empty:
             continue
-        sample = part.sample(n=min(6000, len(part)), random_state=42) if len(part) > 6000 else part
+        sample = part.sample(n=min(MAX_SCATTER_POINTS, len(part)), random_state=42) if len(part) > MAX_SCATTER_POINTS else part
         ax.scatter(sample["y_true"], sample["y_pred"], s=6, alpha=0.25, label=variant)
     lo = float(min(oof_df["y_true"].min(), oof_df["y_pred"].min()))
     hi = float(max(oof_df["y_true"].max(), oof_df["y_pred"].max()))
@@ -163,9 +165,9 @@ def _plot_regression_residuals(oof_df: pd.DataFrame, out_path: Path) -> None:
         if part.empty:
             continue
         residual = part["y_true"] - part["y_pred"]
-        sample = residual.sample(n=min(8000, len(residual)), random_state=42) if len(residual) > 8000 else residual
+        sample = residual.sample(n=min(MAX_RESIDUAL_POINTS, len(residual)), random_state=42) if len(residual) > MAX_RESIDUAL_POINTS else residual
         axes[0].hist(sample, bins=40, alpha=0.4, density=True, label=variant)
-        scat = part.sample(n=6000, random_state=42) if len(part) > 6000 else part
+        scat = part.sample(n=MAX_SCATTER_POINTS, random_state=42) if len(part) > MAX_SCATTER_POINTS else part
         axes[1].scatter(scat["y_pred"], scat["y_true"] - scat["y_pred"], s=6, alpha=0.2, label=variant)
     axes[0].set_title("Residual Distribution")
     axes[0].legend()
