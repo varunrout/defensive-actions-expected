@@ -39,7 +39,7 @@ def _write_table(table: pd.DataFrame, path_base: Path) -> None:
 def _generate_clustering_charts(tables: dict[str, pd.DataFrame], output_dir: Path, dpi: int) -> None:
     player_clusters = tables["player_clusters"]
     cluster_sizes = player_clusters["cluster"].value_counts().rename_axis("cluster").reset_index(name="players")
-    bar_chart(cluster_sizes, "cluster", "players", output_dir / "cluster_size_chart.png", "Cluster sizes", dpi=dpi)
+    bar_chart(cluster_sizes, "cluster", "players", output_dir / "cluster_size_chart.png", "Cluster sizes", dpi=dpi, color="cluster")
 
     centroids = tables["cluster_centroids"].set_index("cluster") if not tables["cluster_centroids"].empty else pd.DataFrame()
     labelled_heatmap(centroids, output_dir / "cluster_centroid_heatmap.png", "Cluster centroid heatmap", dpi=dpi)
@@ -51,22 +51,58 @@ def _generate_clustering_charts(tables: dict[str, pd.DataFrame], output_dir: Pat
     loadings = tables.get("pca_loadings", pd.DataFrame())
     if not loadings.empty and "0" in [str(c) for c in loadings.columns]:
         first_component = loadings.columns[1]
-        plot = loadings[["feature", first_component]].copy().sort_values(first_component, key=lambda s: s.abs(), ascending=False).head(20)
+        plot = loadings[["feature", first_component]].copy().sort_values(first_component, key=lambda series: series.abs(), ascending=False).head(20)
         bar_chart(plot, "feature", first_component, output_dir / "pca_loading_chart.png", "Top PCA loadings", dpi=dpi)
 
     stability = tables["cluster_stability"]
     stability_plot = stability.assign(solution=stability["method"] + "_k" + stability["clusters"].astype(str))
     bar_chart(stability_plot, "solution", "subsample_ari_stability", output_dir / "cluster_stability_chart.png", "Cluster subsample stability", dpi=dpi)
 
-    profiles = tables["cluster_profiles"]
-    bar_chart(profiles, "cluster", "mean_total_actions", output_dir / "cluster_profile_chart.png", "Cluster profile: mean actions", dpi=dpi)
+    distinguishing = tables.get("cluster_distinguishing_features", pd.DataFrame())
+    if not distinguishing.empty and "standardised_difference" in distinguishing.columns:
+        profile = distinguishing.copy()
+        profile["cluster_feature"] = "C" + profile["cluster"].astype(str) + ": " + profile["feature"].astype(str)
+        profile = profile.sort_values("standardised_difference", key=lambda series: series.abs(), ascending=False).head(24)
+        bar_chart(
+            profile,
+            "cluster_feature",
+            "standardised_difference",
+            output_dir / "cluster_profile_chart.png",
+            "Cluster profile: distinguishing features",
+            ylabel="Standardised difference from population",
+            dpi=dpi,
+            color="cluster",
+        )
+        positive = profile[profile["standardised_difference"] > 0].copy()
+        negative = profile[profile["standardised_difference"] < 0].copy()
+        if not positive.empty:
+            bar_chart(positive, "cluster_feature", "standardised_difference", output_dir / "cluster_profile_positive_features.png", "Top positive cluster features", dpi=dpi, color="cluster")
+        if not negative.empty:
+            negative["absolute_difference"] = negative["standardised_difference"].abs()
+            bar_chart(negative, "cluster_feature", "absolute_difference", output_dir / "cluster_profile_negative_features.png", "Top negative cluster features", dpi=dpi, color="cluster")
 
-    if not player_clusters.empty:
-        sample = player_clusters.head(20).copy()
-        sample["player_label"] = sample["player_name"].astype(str) + " (" + sample["cluster"].astype(str) + ")"
-        bar_chart(sample, "player_label", "total_actions", output_dir / "selected_player_cluster_comparison.png", "Selected player cluster comparison", dpi=dpi)
-
-
+    representatives = tables.get("representative_players", pd.DataFrame())
+    if not representatives.empty:
+        sample = representatives.copy()
+        sample["player_label"] = (
+            sample.get("player_name", sample["player_id"]).astype(str)
+            + " | "
+            + sample.get("team", pd.Series("", index=sample.index)).astype(str)
+            + " | C"
+            + sample["cluster"].astype(str)
+            + " | actions "
+            + sample.get("total_actions", pd.Series(0, index=sample.index)).astype(str)
+        )
+        bar_chart(
+            sample.sort_values(["cluster", "centroid_distance"]),
+            "player_label",
+            "centroid_distance",
+            output_dir / "selected_player_cluster_comparison.png",
+            "Centroid-selected representative players",
+            ylabel="Distance to cluster centroid",
+            dpi=dpi,
+            color="cluster",
+        )
 
 
 def _write_expanded_profile_tables(matrix: pd.DataFrame, tables: dict[str, pd.DataFrame], summary: pd.DataFrame, output_dir: Path) -> None:
@@ -94,15 +130,26 @@ def _write_fixed_kmeans_view(matrix: pd.DataFrame, summary: pd.DataFrame, k: int
     assignments.to_parquet(view_dir / "assignments.parquet", index=False)
     sizes = assignments["cluster"].value_counts().rename_axis("cluster").reset_index(name="players")
     sizes.to_csv(view_dir / "cluster_sizes.csv", index=False)
+    sizes.to_parquet(view_dir / "cluster_sizes.parquet", index=False)
+    bar_chart(sizes, "cluster", "players", view_dir / "cluster_size_chart.png", f"K-means k={k} cluster sizes", color="cluster", dpi=int(config["chart_dpi"]))
     centroids = matrix[feature_columns].join(assignments["cluster"]).groupby("cluster").mean().reset_index()
     centroids.to_csv(view_dir / "centroids.csv", index=False)
+    centroids.to_parquet(view_dir / "centroids.parquet", index=False)
     reps = expanded_cluster_profiles(matrix, assignments, summary)
     for name, table in reps.items():
         if not table.empty:
             table.to_csv(view_dir / f"{name}.csv", index=False)
+            table.to_parquet(view_dir / f"{name}.parquet", index=False)
+    distinguishing = reps.get("cluster_distinguishing_features", pd.DataFrame())
+    if not distinguishing.empty:
+        profile = distinguishing.assign(cluster_feature="C" + distinguishing["cluster"].astype(str) + ": " + distinguishing["feature"].astype(str))
+        profile = profile.sort_values("standardised_difference", key=lambda series: series.abs(), ascending=False).head(20)
+        bar_chart(profile, "cluster_feature", "standardised_difference", view_dir / "cluster_profile_chart.png", f"K-means k={k} distinguishing features", color="cluster", dpi=int(config["chart_dpi"]))
     # representatives by centroid distance
     from dax.analysis.clustering import representative_players_from_centroids
-    representative_players_from_centroids(matrix, assignments).to_csv(view_dir / "representative_players.csv", index=False)
+    fixed_representatives = representative_players_from_centroids(matrix, assignments)
+    fixed_representatives.to_csv(view_dir / "representative_players.csv", index=False)
+    fixed_representatives.to_parquet(view_dir / "representative_players.parquet", index=False)
     if len(feature_columns) >= 2:
         pca = PCA(n_components=2, random_state=int(config["random_seed"])).fit_transform(matrix[feature_columns])
         pca_df = assignments.assign(pc1=pca[:, 0], pc2=pca[:, 1])
@@ -135,23 +182,42 @@ def _run_position_aware_clustering(summary: pd.DataFrame, config: dict, output_d
         "midfielders": ["defensive_midfielder", "midfielder"],
         "attackers": ["winger", "forward"],
     }
+    minimum_actions = int(config["minimum_player_actions"])
+    configured_candidates = [int(k) for k in config.get("cluster_count_candidates", [])]
     for name, groups in buckets.items():
         subset = summary[summary["position_group"].isin(groups)].copy()
         group_dir = position_dir / name
         group_dir.mkdir(parents=True, exist_ok=True)
-        if len(subset) < max(6, int(config["minimum_player_actions"]) // 2):
-            pd.DataFrame([{"position_segment": name, "eligible_players": len(subset), "status": "too_few_players"}]).to_csv(group_dir / "cluster_evaluation.csv", index=False)
+        total_players = int(len(subset))
+        eligible = subset[subset["total_actions"] >= minimum_actions].copy() if "total_actions" in subset else subset.iloc[0:0].copy()
+        eligible_players = int(len(eligible))
+        excluded_players = total_players - eligible_players
+        valid_candidates = [k for k in configured_candidates if eligible_players >= max(10, 4 * k) and eligible_players > k]
+        status_payload = {
+            "position_segment": name,
+            "total_players": total_players,
+            "eligible_players": eligible_players,
+            "excluded_players": excluded_players,
+            "minimum_player_actions": minimum_actions,
+        }
+        if not valid_candidates:
+            reason = "insufficient eligible players after applying minimum_player_actions"
+            pd.DataFrame([{**status_payload, "status": "skipped", "reason": reason}]).to_csv(group_dir / "cluster_evaluation.csv", index=False)
             continue
         variant = config.copy()
-        variant["minimum_player_actions"] = min(int(config["minimum_player_actions"]), int(subset["total_actions"].max()))
-        variant["cluster_count_candidates"] = [k for k in config["cluster_count_candidates"] if k < len(subset)] or [2]
+        variant["minimum_player_actions"] = minimum_actions
+        variant["cluster_count_candidates"] = valid_candidates
         try:
-            matrix, _, metadata = prepare_clustering_matrix(subset, variant)
+            matrix, _, metadata = prepare_clustering_matrix(eligible, variant)
             pos_tables = run_clustering(matrix, variant)
+            for table in pos_tables.values():
+                if isinstance(table, pd.DataFrame):
+                    for key, value in status_payload.items():
+                        table[key] = value
             write_clustering_outputs(pos_tables, group_dir, metadata)
             _generate_clustering_charts(pos_tables, group_dir, int(config["chart_dpi"]))
         except ValueError as exc:
-            pd.DataFrame([{"position_segment": name, "eligible_players": len(subset), "status": "skipped", "reason": str(exc)}]).to_csv(group_dir / "cluster_evaluation.csv", index=False)
+            pd.DataFrame([{**status_payload, "status": "skipped", "reason": str(exc)}]).to_csv(group_dir / "cluster_evaluation.csv", index=False)
 
 
 def _generate_cluster_spatial_outputs(actions_path: str, tables: dict[str, pd.DataFrame], output_dir: Path, config: dict) -> None:

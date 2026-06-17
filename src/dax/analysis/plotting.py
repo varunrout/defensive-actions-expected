@@ -21,12 +21,25 @@ def _save(fig: plt.Figure, output_path: str | Path, *, dpi: int = 150, save_svg:
     return fig
 
 
-def _prepared_categories(df: pd.DataFrame, x: str, y: str, *, top_n: int = 25) -> pd.DataFrame:
+def _prepared_categories(df: pd.DataFrame, x: str, y: str, *, top_n: int = 25, keep: list[str] | None = None) -> pd.DataFrame:
+    columns = [x, y] + [column for column in (keep or []) if column in df.columns and column not in {x, y}]
     if df.empty or not {x, y}.issubset(df.columns):
-        return pd.DataFrame(columns=[x, y])
-    values = df[[x, y]].copy().head(top_n)
+        return pd.DataFrame(columns=columns)
+    values = df[columns].copy().head(top_n)
     values[x] = values[x].map(display_label)
     return values
+
+
+def _cluster_colours(values: pd.Series | None) -> list[str] | str:
+    if values is None:
+        return DEFAULT_THEME.bar_colour
+    colours: list[str] = []
+    for value in values:
+        try:
+            colours.append(CLUSTER_COLOURS.get(int(value), DEFAULT_THEME.bar_colour))
+        except (TypeError, ValueError):
+            colours.append(DEFAULT_THEME.bar_colour)
+    return colours
 
 
 def bar_chart(
@@ -43,19 +56,21 @@ def bar_chart(
     save_svg: bool = False,
     top_n: int = 25,
     force_vertical: bool = False,
+    color: str | None = None,
 ) -> plt.Figure:
     """Save an intelligently oriented bar chart without default 45-degree tick rotation."""
-    values = _prepared_categories(df, x, y, top_n=top_n)
+    values = _prepared_categories(df, x, y, top_n=top_n, keep=[color] if color else None)
+    bar_colours = _cluster_colours(values[color]) if color and color in values.columns else DEFAULT_THEME.bar_colour
     max_label_length = int(values[x].astype(str).map(len).max()) if not values.empty else 0
     horizontal = (not force_vertical) and (len(values) > 8 or max_label_length > 18)
     figsize = (DEFAULT_THEME.wide_figure_size[0], max(4.5, len(values) * 0.35)) if horizontal else DEFAULT_THEME.figure_size
     fig, ax = plt.subplots(figsize=figsize)
     if not values.empty:
         if horizontal:
-            ax.barh(values[x], values[y], color=DEFAULT_THEME.bar_colour)
+            ax.barh(values[x], values[y], color=bar_colours)
             ax.invert_yaxis()
         else:
-            ax.bar(values[x], values[y], color=DEFAULT_THEME.bar_colour)
+            ax.bar(values[x], values[y], color=bar_colours)
             rotation = 90 if len(values) > 14 else 0
             ax.tick_params(axis="x", rotation=rotation)
     apply_theme(ax, title=title, xlabel=xlabel or display_label(x), ylabel=ylabel or display_label(y))
