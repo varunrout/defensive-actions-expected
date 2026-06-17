@@ -75,3 +75,18 @@ tests/                   unit/integration tests and fixtures
 ```
 
 Historical pre-fix documents and outputs are retained under `docs/archive/pre_methodology_fix/` and `outputs/archive/pre_methodology_fix/`. Historical pre-cleanup scripts are retained under `scripts/archive/pre_repository_cleanup/`. Archive contents are for reference only and are not active execution paths.
+
+## Pre-modelling analysis
+
+Reusable analysis logic lives in `src/dax/analysis/` and is executed with thin CLI scripts. Run it after preparing data and building features, and before any final predictive model training:
+
+```bash
+python scripts/analyze_processed_data.py --input data/processed/events_with_targets.parquet --output-dir outputs/analysis/data_quality
+python scripts/analyze_features.py --input data/features/player_defensive_actions.parquet --output-dir outputs/analysis/features
+python scripts/build_player_summary.py --input data/features/player_defensive_actions.parquet --output data/features/player_defensive_summary.parquet
+python scripts/run_player_clustering.py --input data/features/player_defensive_summary.parquet --output-dir outputs/analysis/clustering --config configs/analysis.yaml
+python scripts/build_descriptive_signals.py --input data/features/player_defensive_summary.parquet --clusters outputs/analysis/clustering/player_clusters.parquet --output data/features/player_defensive_signals_descriptive.parquet
+python scripts/generate_analysis_report.py --analysis-dir outputs/analysis --output outputs/analysis/reports/pre_model_analysis_report.md
+```
+
+These analyses are descriptive foundations only: no final classifier/regressor is trained, no causal defensive value is claimed, and provisional signals are not true DAx.

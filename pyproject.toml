@@ -19,7 +19,8 @@ dependencies = [
   "pyarrow>=15.0",
   "tqdm>=4.66",
   "scipy>=1.11",
-  "shapely>=2.0"
+  "shapely>=2.0",
+  "PyYAML>=6.0"
 ]
 
 [project.optional-dependencies]
