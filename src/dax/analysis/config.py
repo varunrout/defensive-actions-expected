@@ -20,6 +20,14 @@ DEFAULT_ANALYSIS_CONFIG: dict[str, Any] = {
     "chart_dpi": 150,
     "enable_umap": False,
     "enable_hdbscan": False,
+    "minimum_action_threshold_sensitivity": [20, 30, 40, 50],
+    "feature_group_sensitivity_sets": {
+        "all_configured_groups": ["action_mix", "phase_mix", "spatial_style", "possession_style", "360_context", "difficulty_exposure"],
+        "without_360_context": ["action_mix", "phase_mix", "spatial_style", "possession_style", "difficulty_exposure"],
+        "without_possession_style": ["action_mix", "phase_mix", "spatial_style", "360_context", "difficulty_exposure"],
+        "action_phase_spatial": ["action_mix", "phase_mix", "spatial_style"],
+        "spatial_difficulty": ["spatial_style", "difficulty_exposure"],
+    },
     "clustering_feature_groups": {
         "action_mix": ["action_family_*_share"],
         "phase_mix": ["phase_*_share"],
@@ -52,6 +60,7 @@ DEFAULT_ANALYSIS_CONFIG: dict[str, Any] = {
             "numerical_disadvantage_5m_share",
             "numerical_disadvantage_10m_share",
             "visibility_limited_share",
+            "box_defence_share",
         ],
     },
     "primary_clustering_feature_groups": [
@@ -86,6 +95,10 @@ def load_analysis_config(path: str | Path | None = None) -> dict[str, Any]:
             merged_groups = DEFAULT_ANALYSIS_CONFIG["clustering_feature_groups"].copy()
             merged_groups.update(loaded["clustering_feature_groups"] or {})
             config["clustering_feature_groups"] = merged_groups
+        if "feature_group_sensitivity_sets" in loaded:
+            merged_sets = DEFAULT_ANALYSIS_CONFIG["feature_group_sensitivity_sets"].copy()
+            merged_sets.update(loaded["feature_group_sensitivity_sets"] or {})
+            config["feature_group_sensitivity_sets"] = merged_sets
     validate_analysis_config(config)
     return config
 
@@ -115,3 +128,14 @@ def validate_analysis_config(config: dict[str, Any]) -> None:
     missing_groups = sorted(set(primary) - set(groups))
     if missing_groups:
         raise ValueError(f"primary clustering groups are not defined: {missing_groups}")
+
+    thresholds = config.get("minimum_action_threshold_sensitivity")
+    if not isinstance(thresholds, list) or not all(isinstance(v, int) and v > 0 for v in thresholds):
+        raise ValueError("analysis config `minimum_action_threshold_sensitivity` must be a list of positive integers")
+
+    sensitivity_sets = config.get("feature_group_sensitivity_sets")
+    if not isinstance(sensitivity_sets, dict):
+        raise ValueError("analysis config `feature_group_sensitivity_sets` must be a mapping")
+    for name, group_list in sensitivity_sets.items():
+        if not isinstance(group_list, list) or sorted(set(group_list) - set(groups)):
+            raise ValueError(f"feature-group sensitivity set `{name}` references undefined groups")

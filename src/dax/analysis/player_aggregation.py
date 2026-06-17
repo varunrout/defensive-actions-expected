@@ -42,6 +42,10 @@ def build_player_summary(df: pd.DataFrame, min_actions: int = 30, *, grid_dimens
     """
     bins_x, bins_y = grid_dimensions
     data = add_pitch_zones(df, bins_x=bins_x, bins_y=bins_y).copy()
+    data["is_defensive_box_action"] = (
+        data["action_x"].between(0.0, 18.0, inclusive="both")
+        & data["action_y"].between(18.0, 62.0, inclusive="both")
+    )
     keys = IDENTITY_COLUMNS
     grouped = data.groupby(keys, dropna=False)
 
@@ -57,6 +61,7 @@ def build_player_summary(df: pd.DataFrame, min_actions: int = 30, *, grid_dimens
         median_action_x=("action_x", "median"),
         median_action_y=("action_y", "median"),
         action_width_std=("action_y", "std"),
+        box_defence_actions=("is_defensive_box_action", "sum"),
     ).reset_index()
     summary = summary.rename(columns={"player": "player_name"})
     bool_metrics = {
@@ -84,6 +89,8 @@ def build_player_summary(df: pd.DataFrame, min_actions: int = 30, *, grid_dimens
     summary["future_shot_denominator"] = summary["total_actions"]
     summary["future_xg_denominator"] = summary["total_actions"]
     summary["actions_per_match"] = summary["total_actions"] / summary["matches"].replace(0, np.nan)
+    summary["box_defence_denominator"] = summary["total_actions"]
+    summary["box_defence_share"] = summary["box_defence_actions"] / summary["box_defence_denominator"].replace(0, np.nan)
 
     rate_specs = {
         "possession_wins": "possession_win_rate",
