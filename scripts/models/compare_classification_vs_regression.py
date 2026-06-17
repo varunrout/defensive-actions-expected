@@ -1,4 +1,4 @@
-"""Compare binary classification vs xT regression approaches.
+"""Compare binary classification vs future-xG regression approaches.
 
 This script loads both trained models and compares their predictions
 on the same test data to evaluate which approach better captures
@@ -79,18 +79,18 @@ def compare_predictions(
     # Logistic predictions (probabilities)
     p_shot = logistic_pipe.predict_proba(test_data)[:, 1]
 
-    # Regression predictions (xT scores)
-    threat_xt = regression_pipe.predict(test_data)
+    # Regression predictions (future-xG scores)
+    threat_xg = regression_pipe.predict(test_data)
 
     # Also get binary predictions from regression via median split
-    xt_median = threat_xt.median() if isinstance(threat_xt, pd.Series) else np.median(threat_xt)
-    threat_binary = (threat_xt >= xt_median).astype(int)
+    xg_median = threat_xg.median() if isinstance(threat_xg, pd.Series) else np.median(threat_xg)
+    threat_binary = (threat_xg >= xg_median).astype(int)
 
     results = {
         "p_shot": p_shot,
-        "threat_xt": threat_xt,
+        "threat_xg": threat_xg,
         "threat_binary": threat_binary,
-        "xt_median": float(xt_median),
+        "xg_median": float(xg_median),
     }
 
     return results
@@ -99,14 +99,14 @@ def compare_predictions(
 def compute_correlations(results: dict[str, object]) -> dict[str, float]:
     """Compute correlations between prediction approaches."""
     p_shot = results["p_shot"]
-    threat_xt = results["threat_xt"]
+    threat_xg = results["threat_xg"]
     threat_binary = results["threat_binary"]
 
     # Pearson correlation
-    corr_pearson = np.corrcoef(p_shot, threat_xt)[0, 1]
+    corr_pearson = np.corrcoef(p_shot, threat_xg)[0, 1]
 
     # Spearman correlation
-    corr_spearman = spearmanr(p_shot, threat_xt).correlation
+    corr_spearman = spearmanr(p_shot, threat_xg).correlation
 
     # Agreement on binary splits (both high or both low)
     agreement = (p_shot >= 0.5) == threat_binary
@@ -131,7 +131,7 @@ def compute_correlations(results: dict[str, object]) -> dict[str, float]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Compare binary classification vs xT regression models"
+        description="Compare binary classification vs future-xG regression models"
     )
     parser.add_argument(
         "--input",
@@ -178,7 +178,7 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print("=" * 72)
-    print("COMPARE BINARY CLASSIFICATION vs xT REGRESSION")
+    print("COMPARE BINARY CLASSIFICATION vs FUTURE-XG REGRESSION")
     print("=" * 72)
 
     if not input_path.exists():
@@ -221,7 +221,7 @@ def main() -> None:
     print("\n" + "=" * 72)
     print("COMPARISON RESULTS")
     print("=" * 72)
-    print(f"\nCorrelation between P(shot) and E[xT]:")
+    print(f"\nCorrelation between P(shot) and E[future xG]:")
     print(f"  Pearson:  {correlations['pearson_correlation']:.4f}")
     print(f"  Spearman: {correlations['spearman_correlation']:.4f}")
 

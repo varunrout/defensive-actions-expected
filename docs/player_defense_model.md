@@ -10,7 +10,7 @@ A player contributes to defending by:
 - supporting teammates with compact shape,
 - and helping the team prevent a shot as the possession evolves.
 
-Because the 360 freeze-frame does **not** expose identities for all visible defenders, the model starts with **player-actor defensive actions** and **teammate interaction features** around that action.
+Because the 360 freeze-frame does **not** expose identities for all visible defenders, the model starts with **player-actor defensive actions** and role-aware freeze-frame features around that action.
 
 ## Output dataset
 
@@ -20,8 +20,8 @@ One row per defensive action by an identifiable player, with:
 - player / team / possession identifiers
 - phase and possession context
 - action location and goal-distance features
-- 360 support features around the action
-- the future target `target_shot_in_10s`
+- 360 role and visibility features around the action
+- the future targets `target_future_shot_10s` and `target_future_xg_10s`
 
 ## Feature groups
 
@@ -42,14 +42,16 @@ One row per defensive action by an identifiable player, with:
 - `distance_to_center_line`
 - `is_central_lane`, `is_wide_lane`
 
-### 3. Teammate interaction / support
+### 3. Freeze-frame role context
 - `freeze_teammate_count`
 - `freeze_opponent_count`
 - `local_numerical_balance_5m`
 - `local_numerical_balance_10m`
 - `attackers_within_5m`
+- `defenders_within_5m`
 - `attackers_within_10m`
-- centroid and spread features for teammates/opponents
+- `defenders_within_10m`
+- centroid and spread features for attackers/defenders
 
 ## How we will analyze features
 
@@ -73,15 +75,15 @@ Why:
 - phase interactions matter a lot,
 - and logistic coefficients are easier to interpret.
 
-## Teammate interaction
+## Freeze-frame role context
 
-Teammate support is not a separate identity-tracking model yet.
+Freeze-frame role context is not a separate identity-tracking model yet.
 Instead, it enters as context:
-- how many teammates are near the action,
-- how compact the support shape is,
-- and whether opponents outnumber that support nearby.
+- how many attackers and defenders are near the action,
+- whether the defensive actor is locally overloaded or supported,
+- and whether the local region is visible enough to trust those counts.
 
-That means teammate interaction is treated as a **feature family**, not a separate sub-model for now.
+That means role context is treated as a **feature family**, not a separate sub-model for now.
 
 ## Next scripts
 

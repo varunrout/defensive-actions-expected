@@ -101,8 +101,10 @@ For the baseline model, we approximate this by:
 **Density at action location:**
 - `local_numerical_balance_5m`: Teammates - opponents within 5m
 - `local_numerical_balance_10m`: Teammates - opponents within 10m
-- `attackers_within_5m`: Teammates / opponents within 5m
-- `attackers_within_10m`: Teammates / opponents within 10m
+- `attackers_within_5m`: Attackers within 5m
+- `defenders_within_5m`: Defenders within 5m
+- `attackers_within_10m`: Attackers within 10m
+- `defenders_within_10m`: Defenders within 10m
 
 **Nearest player distances:**
 - `freeze_teammate_nearest_distance`: Distance to closest teammate

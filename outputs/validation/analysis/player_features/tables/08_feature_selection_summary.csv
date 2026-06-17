@@ -1,10 +1,10 @@
 feature,missing_pct,in_core,in_extended
 nearest_goal_distance,0.0,1,1
 distance_to_center_line,0.0,1,1
-local_numerical_balance_5m,0.0,1,1
-local_numerical_balance_10m,0.0,1,1
-attackers_within_5m,0.0,1,1
-attackers_within_10m,0.0,1,1
+freeze_support_balance_5m,0.0,1,1
+freeze_support_balance_10m,0.0,1,1
+freeze_support_ratio_5m,0.0,1,1
+freeze_support_ratio_10m,0.0,1,1
 freeze_teammate_nearest_distance,0.0,1,1
 freeze_teammate_spread,0.0,1,1
 teammate_count,0.0,1,1
