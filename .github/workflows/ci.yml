@@ -15,5 +15,30 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e '.[dev]'
+      - run: ruff check src scripts tests
       - run: python -m pytest -q
-      - run: ruff check src/dax/targets src/dax/features/event_context.py src/dax/features/phase_segmentation.py --select F
+      - run: python -m pytest -q tests/test_end_to_end_fixture.py
+      - name: Build player dataset on fixture data
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+          from tests.test_end_to_end_fixture import add_event_context, add_future_shot_target, add_future_xg_target, label_defensive_phases
+
+          events = pd.DataFrame([
+              {"match_id": 1, "period": 1, "index": 1, "minute": 0, "second": 0, "possession": 1, "team": "Team A", "possession_team": "Team A", "team_in_possession": "Team A", "home_team": "Team A", "away_team": "Team B", "event_type": "Pass", "id": "e1", "location": [80, 40], "ball_x": 80, "ball_y": 40, "has_360": True, "freeze_frame": [], "visible_area": [0, 0, 120, 0, 120, 80, 0, 80]},
+              {"match_id": 1, "period": 1, "index": 2, "minute": 0, "second": 2, "possession": 1, "team": "Team B", "possession_team": "Team A", "team_in_possession": "Team A", "home_team": "Team A", "away_team": "Team B", "event_type": "Pressure", "id": "e2", "player_id": 9, "player": "Defender", "position": "Centre Back", "location": [90, 42], "ball_x": 90, "ball_y": 42, "has_360": True, "freeze_frame": [{"teammate": True, "location": [88, 41]}, {"teammate": False, "location": [96, 40]}], "visible_area": [0, 0, 120, 0, 120, 80, 0, 80]},
+              {"match_id": 1, "period": 1, "index": 3, "minute": 0, "second": 6, "possession": 1, "team": "Team A", "possession_team": "Team A", "team_in_possession": "Team A", "home_team": "Team A", "away_team": "Team B", "event_type": "Shot", "id": "e3", "location": [108, 40], "ball_x": 108, "ball_y": 40, "shot_statsbomb_xg": 0.25, "has_360": True, "freeze_frame": [], "visible_area": [0, 0, 120, 0, 120, 80, 0, 80]},
+          ])
+          targeted = add_future_xg_target(add_future_shot_target(pd.DataFrame(label_defensive_phases(add_event_context(events).to_dict("records")))))
+          Path("data/processed").mkdir(parents=True, exist_ok=True)
+          targeted.to_parquet("data/processed/events_with_targets.parquet", index=False)
+          PY
+          python scripts/features/build_player_defense_dataset.py --input data/processed/events_with_targets.parquet --output /tmp/player_defensive_actions.parquet
+          python - <<'PY'
+          import pandas as pd
+          df = pd.read_parquet('/tmp/player_defensive_actions.parquet')
+          assert df['target_future_shot_10s'].sum() > 0
+          assert df['target_future_xg_10s'].sum() > 0
+          assert 'target_xt_10s' not in df.columns
+          PY
