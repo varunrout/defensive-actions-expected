@@ -368,7 +368,7 @@ def test_k2_k3_and_position_outputs_created_by_cli(tmp_path: Path) -> None:
     assert (tmp_path / "clustering" / "k2_k3_comparison.csv").exists()
     assert (tmp_path / "clustering" / "k2_k3_interpretation.md").exists()
     assert (tmp_path / "clustering" / "by_position").exists()
-    assert (tmp_path / "clustering" / "cluster_0_spatial_profile.png").exists()
+    assert (tmp_path / "clustering" / "cluster_0_spatial_density_pitch.png").exists()
 
 
 def test_representative_players_use_centroid_distance() -> None:
@@ -445,3 +445,37 @@ def test_position_aware_clustering_eligibility_uses_action_threshold(tmp_path: P
     assert defenders["eligible_players"].iloc[0] == 4
     assert defenders["excluded_players"].iloc[0] == 2
     assert defenders["status"].iloc[0] == "skipped"
+
+
+def test_numeric_heatmap_filters_object_metadata(tmp_path: Path) -> None:
+    from dax.analysis.plotting import labelled_heatmap, prepare_numeric_heatmap_matrix
+
+    centroids = pd.DataFrame(
+        {
+            "cluster": [0, 1],
+            "feature_a": [0.1, -0.2],
+            "feature_b": [1.5, 0.5],
+            "position_segment": ["defenders", "defenders"],
+            "status": ["ok", "ok"],
+        }
+    )
+    matrix = prepare_numeric_heatmap_matrix(centroids, index_column="cluster")
+    assert list(matrix.columns) == ["feature_a", "feature_b"]
+    fig = labelled_heatmap(centroids, tmp_path / "mixed_heatmap.png", "Mixed centroid heatmap", index_column="cluster")
+    assert (tmp_path / "mixed_heatmap.png").exists()
+    assert fig.axes[0].images[0].get_array().dtype.kind in {"f", "i"}
+
+
+def test_pitch_chart_long_title_layout_and_cluster_filenames(tmp_path: Path) -> None:
+    from dax.analysis.pitch_plotting import plot_cluster_population_difference, plot_pitch_density
+
+    df = production_player_actions_fixture(players=5, actions_per_player=4)
+    long_title = "Cluster 0 contest spatial profile with an intentionally long title that should be wrapped away from the subtitle"
+    fig = plot_pitch_density(df, tmp_path / "cluster_0_spatial_density_pitch.png", title=long_title)
+    assert (tmp_path / "cluster_0_spatial_density_pitch.png").exists()
+    y_positions = [round(text.get_position()[1], 3) for text in fig.texts]
+    assert 0.965 in y_positions
+    assert 0.895 in y_positions
+    assert min(y_positions) <= 0.05
+    plot_cluster_population_difference(df.iloc[:5], df, tmp_path / "cluster_0_spatial_difference_pitch.png", title="Cluster 0 density minus population")
+    assert (tmp_path / "cluster_0_spatial_difference_pitch.png").exists()
