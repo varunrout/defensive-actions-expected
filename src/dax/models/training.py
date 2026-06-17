@@ -50,7 +50,10 @@ def _effective_splits(groups: pd.Series, requested: int) -> int:
     unique_groups = int(groups.nunique())
     if unique_groups < 2:
         raise ValueError("Training requires at least two unique match_id groups.")
-    return min(requested, unique_groups)
+    effective = min(requested, unique_groups)
+    if effective != requested:
+        print(f"[WARN] Requested n_splits={requested}, using {effective} because only {unique_groups} groups are available.")
+    return effective
 
 
 def train_logistic_models(
