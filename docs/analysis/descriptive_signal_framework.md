@@ -1,11 +1,17 @@
-# Analysis documentation
+# Descriptive Signal Framework
 
-The pre-modelling analysis layer runs after data preparation and feature building, before final predictive model training. Reusable logic lives in `src/dax/analysis/`; scripts under `scripts/` are thin entry points.
+Signals are provisional, transparent, non-modelled components. They must not be called true DAx and must not be interpreted causally.
 
-Execution order:
+| Component | Source | Direction | Denominator | Interpretation | Warning behaviour |
+|---|---|---:|---|---|---|
+| `activity_index` | `actions_per_match` | Higher is higher activity | `matches` | Action frequency by represented match | Missing if matches/actions unavailable |
+| `possession_win_index` | `possession_win_rate` | Higher | possession-win denominator | Share of actions winning possession | Missing below sample threshold |
+| `threat_suppression_descriptive_index` | `future_shot_rate` | Lower observed rate is higher index | future-shot denominator | Descriptive post-action shot suppression | Not model-adjusted or causal |
+| `phase_versatility_index` | phase-share entropy | Higher | total actions | Diversity across phase proxies | Missing if phase shares unavailable |
+| `spatial_aggression_index` | `mean_action_x` | Higher | total actions | Average action height toward attacking goal | No future-xG fallback is allowed |
+| `transition_defence_exposure_index` | transition-defence phase share | Higher | total actions | Exposure to transition-defence proxy | Missing if phase absent |
+| `box_defence_exposure_index` | configured deep-zone share | Higher | total actions | Approximate box/deep defending exposure | Grid-dependent |
+| `local_numerical_difficulty_index` | `mean_local_numerical_balance_10m` | Lower balance is harder | valid 10m denominator | Visible local numerical difficulty | Requires roles and visibility |
+| `visibility_reliability_index` | `reliable_visibility_share` | Higher | total actions | Local visibility reliability | Coverage, not player quality |
 
-```text
-prepare data → build features → analyse processed data → analyse features → build player summary → run clustering → build descriptive signals → generate analysis report → assess model readiness → train models later
-```
-
-Outputs are written below `outputs/analysis/` and generated feature tables are written below `data/features/`. Phase labels are rule-based tactical proxies, not ground-truth tactical labels. Descriptive signals are provisional and must not be called true DAx.
+Missing component inputs remain missing and add warnings; components are not zero-filled.

@@ -1,11 +1,21 @@
-# Analysis documentation
+# Analysis Limitations
 
-The pre-modelling analysis layer runs after data preparation and feature building, before final predictive model training. Reusable logic lives in `src/dax/analysis/`; scripts under `scripts/` are thin entry points.
+## Exposure and minutes
 
-Execution order:
+The current framework avoids manufacturing per-90 metrics when reliable minutes are unavailable. Actions per match and action shares are exposure descriptors, not quality ratings.
 
-```text
-prepare data → build features → analyse processed data → analyse features → build player summary → run clustering → build descriptive signals → generate analysis report → assess model readiness → train models later
-```
+## 360 visibility
 
-Outputs are written below `outputs/analysis/` and generated feature tables are written below `data/features/`. Phase labels are rule-based tactical proxies, not ground-truth tactical labels. Descriptive signals are provisional and must not be called true DAx.
+`has_360` indicates 360 data exists, but reliable local context requires local region visibility and role-known checks. Missing or limited visibility can bias role and difficulty features.
+
+## Phase proxies
+
+Phase labels are rule-based tactical proxies. They support stratification and description but are not ground-truth tactical labels.
+
+## Target interpretation
+
+`target_future_shot_10s` and `target_future_xg_10s` are observed future outcomes after actions. Descriptive rates are not causal and are not expected-versus-observed residuals.
+
+## Clustering
+
+Clusters describe style using configured player-level features. They are sensitive to feature selection, sample thresholds, visibility coverage, and dataset composition. They should not be interpreted as player quality tiers.

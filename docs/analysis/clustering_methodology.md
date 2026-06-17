@@ -1,11 +1,21 @@
-# Analysis documentation
+# Clustering Methodology
 
-The pre-modelling analysis layer runs after data preparation and feature building, before final predictive model training. Reusable logic lives in `src/dax/analysis/`; scripts under `scripts/` are thin entry points.
+## Feature selection
 
-Execution order:
+Primary style clustering uses explicit feature groups in `configs/analysis.yaml`: action mix, phase mix, spatial style, possession style, 360 context, and difficulty exposure. Identifiers, matches, total action volume, target totals/rates, denominator columns, and reliability flags are excluded by default.
 
-```text
-prepare data → build features → analyse processed data → analyse features → build player summary → run clustering → build descriptive signals → generate analysis report → assess model readiness → train models later
-```
+## Scaling and missing values
 
-Outputs are written below `outputs/analysis/` and generated feature tables are written below `data/features/`. Phase labels are rule-based tactical proxies, not ground-truth tactical labels. Descriptive signals are provisional and must not be called true DAx.
+Eligible players must meet the configured minimum action threshold. Selected features above the configured missingness threshold are removed, remaining missing values are median-imputed, constant features are removed, and retained features are scaled using the configured scaler.
+
+## Algorithms
+
+K-means, hierarchical agglomerative clustering, and Gaussian mixture models are evaluated across configured cluster-count candidates. GMM outputs include membership probability and low-confidence assignment flags for the selected solution when GMM is selected.
+
+## Evaluation and stability
+
+Solutions are evaluated with silhouette, Calinski-Harabasz, Davies-Bouldin, cluster-size balance, and repeated 80% subsample adjusted Rand index stability. The selection table ranks solutions by average percentile score across those metrics.
+
+## Selection rule
+
+The selected solution is the highest average percentile rank across silhouette, Calinski-Harabasz, inverse Davies-Bouldin, size balance, and subsample ARI stability. Clusters describe defensive style, not player quality.

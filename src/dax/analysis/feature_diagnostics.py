@@ -26,5 +26,5 @@ def target_relationships(df: pd.DataFrame) -> pd.DataFrame:
     for c in nums:
         rows.append({"feature":c,"corr_future_shot":df[[c,"target_future_shot_10s"]].corr().iloc[0,1] if "target_future_shot_10s" in df else np.nan,"corr_future_xg":df[[c,"target_future_xg_10s"]].corr().iloc[0,1] if "target_future_xg_10s" in df else np.nan})
     return pd.DataFrame(rows)
-def diagnostics_tables(df: pd.DataFrame) -> dict[str,pd.DataFrame]:
-    return {"numeric_diagnostics":numeric_diagnostics(df),"categorical_diagnostics":categorical_diagnostics(df),"correlations":correlation_matrix(df),"target_relationships":target_relationships(df),"missingness_by_feature_family":numeric_diagnostics(df).groupby("group").agg(features=("feature","count"),mean_missing_rate=("missing_rate","mean")).reset_index()}
+def diagnostics_tables(df: pd.DataFrame, min_category_count: int = 20) -> dict[str,pd.DataFrame]:
+    return {"numeric_diagnostics":numeric_diagnostics(df),"categorical_diagnostics":categorical_diagnostics(df, min_count=min_category_count),"correlations":correlation_matrix(df),"target_relationships":target_relationships(df),"missingness_by_feature_family":numeric_diagnostics(df).groupby("group").agg(features=("feature","count"),mean_missing_rate=("missing_rate","mean")).reset_index()}
