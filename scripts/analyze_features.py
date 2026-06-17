@@ -12,6 +12,7 @@ from dax.analysis.data_quality import missingness_summary, write_tables
 from dax.analysis.feature_diagnostics import diagnostics_tables
 from dax.analysis.phase_analysis import phase_tables
 from dax.analysis.plotting import bar_chart, histogram, labelled_heatmap, pitch_grid_heatmap
+from dax.analysis.pitch_plotting import plot_pitch_density, plot_pitch_rate_map, plot_pitch_scatter
 from dax.analysis.schemas import validate_player_actions
 from dax.analysis.spatial_analysis import player_spatial_profiles, zone_summary
 
@@ -47,14 +48,25 @@ def main() -> int:
     for column in ["visible_attacker_count", "visible_defender_count", "local_numerical_balance_5m", "local_numerical_balance_10m"]:
         if column in df.columns:
             histogram(df, column, output_dir / f"{column}_distribution.png", f"{column} distribution", bins=int(config["feature_bins"]), dpi=dpi)
-    pitch_grid_heatmap(tables["zone_summary"], "rows", output_dir / "total_action_pitch_heatmap.png", "Total action density by pitch zone", bins_x=bins_x, bins_y=bins_y, denominator_note="Denominator: player defensive-action rows", dpi=dpi)
+    spatial_dir = output_dir.parent / "spatial" if output_dir.name == "features" else output_dir
+    plot_pitch_scatter(df, spatial_dir / "all_actions_scatter.png", title="All defensive-action locations", dpi=dpi)
+    plot_pitch_density(df, spatial_dir / "all_actions_density.png", title="All defensive-action density", bins=tuple(config.get("pitch_visualisation", {}).get("density_bins", [12, 8])), dpi=dpi)
+    if "action_won_possession" in df.columns:
+        plot_pitch_rate_map(df, spatial_dir / "possession_win_rate_map.png", value_col="action_won_possession", title="Possession-win rate by pitch location", min_bin_actions=int(config.get("minimum_spatial_bin_actions", 20)), dpi=dpi)
+    plot_pitch_rate_map(df, spatial_dir / "future_shot_rate_map.png", value_col="target_future_shot_10s", title="Future-shot rate by pitch location", min_bin_actions=int(config.get("minimum_spatial_bin_actions", 20)), dpi=dpi)
+    plot_pitch_rate_map(df, spatial_dir / "future_xg_map.png", value_col="target_future_xg_10s", title="Future-xG mean by pitch location", min_bin_actions=int(config.get("minimum_spatial_bin_actions", 20)), dpi=dpi)
+    if "is_defensive_box_action" in df.columns:
+        plot_pitch_density(df[df["is_defensive_box_action"]], spatial_dir / "defensive_box_actions.png", title="Defensive-box action density", dpi=dpi)
+    pitch_grid_heatmap(tables["zone_summary"], "rows", output_dir / "total_action_pitch_heatmap.png", "Technical diagnostic: total action pitch grid", bins_x=bins_x, bins_y=bins_y, denominator_note="Denominator: player defensive-action rows", dpi=dpi)
     for family, family_df in df.groupby("action_family"):
         family_zone = zone_summary(family_df, bins_x=bins_x, bins_y=bins_y)
-        pitch_grid_heatmap(family_zone, "rows", output_dir / f"action_family_pitch_map_{family}.png", f"Action-family pitch map: {family}", bins_x=bins_x, bins_y=bins_y, denominator_note="Denominator: action-family rows", dpi=dpi)
+        plot_pitch_density(family_df, spatial_dir / f"{family}_density.png", title=f"Action-family density: {family}", dpi=dpi)
+        pitch_grid_heatmap(family_zone, "rows", output_dir / f"action_family_pitch_map_{family}.png", f"Technical diagnostic: action-family grid {family}", bins_x=bins_x, bins_y=bins_y, denominator_note="Denominator: action-family rows", dpi=dpi)
     for phase, phase_df in df.groupby("phase_label"):
         safe_phase = str(phase).replace("/", "_").replace(" ", "_")
         phase_zone = zone_summary(phase_df, bins_x=bins_x, bins_y=bins_y)
-        pitch_grid_heatmap(phase_zone, "rows", output_dir / f"phase_pitch_map_{safe_phase}.png", f"Phase pitch map: {phase}", bins_x=bins_x, bins_y=bins_y, denominator_note="Denominator: phase rows", dpi=dpi)
+        plot_pitch_density(phase_df, spatial_dir / f"phase_{safe_phase}_density.png", title=f"Phase density: {phase}", dpi=dpi)
+        pitch_grid_heatmap(phase_zone, "rows", output_dir / f"phase_pitch_map_{safe_phase}.png", f"Technical diagnostic: phase grid {phase}", bins_x=bins_x, bins_y=bins_y, denominator_note="Denominator: phase rows", dpi=dpi)
     print(f"Analysed player defensive-action features: {len(df):,} rows -> {output_dir}")
     return 0
 

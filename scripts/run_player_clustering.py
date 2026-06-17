@@ -64,6 +64,52 @@ def _generate_clustering_charts(tables: dict[str, pd.DataFrame], output_dir: Pat
         bar_chart(sample, "player_label", "total_actions", output_dir / "selected_player_cluster_comparison.png", "Selected player cluster comparison", dpi=dpi)
 
 
+
+def _write_k2_k3_comparison(tables: dict[str, pd.DataFrame], output_dir: Path) -> None:
+    evaluation = tables["cluster_evaluation"]
+    comparison = evaluation[(evaluation["method"] == "kmeans") & (evaluation["clusters"].isin([2, 3]))].copy()
+    comparison.to_csv(output_dir / "k2_k3_comparison.csv", index=False)
+    comparison.to_parquet(output_dir / "k2_k3_comparison.parquet", index=False)
+    lines = [
+        "# K=2 versus K=3 candidate interpretation",
+        "",
+        "These are candidate analytical views, not proof of a natural number of defensive styles.",
+        "Stability should be interpreted alongside separation, size balance and football plausibility.",
+        "",
+    ]
+    for row in comparison.to_dict("records"):
+        lines.append(f"- K-means k={int(row['clusters'])}: silhouette={row['silhouette']:.6f}, stability={row['subsample_ari_stability']:.6f}, size balance={row['size_balance']:.6f}.")
+    (output_dir / "k2_k3_interpretation.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _run_position_aware_clustering(summary: pd.DataFrame, config: dict, output_dir: Path) -> None:
+    if "position_group" not in summary.columns:
+        return
+    position_dir = output_dir / "by_position"
+    position_dir.mkdir(parents=True, exist_ok=True)
+    buckets = {
+        "defenders": ["centre_back", "fullback_wingback", "goalkeeper"],
+        "midfielders": ["defensive_midfielder", "midfielder"],
+        "attackers": ["winger", "forward"],
+    }
+    for name, groups in buckets.items():
+        subset = summary[summary["position_group"].isin(groups)].copy()
+        group_dir = position_dir / name
+        group_dir.mkdir(parents=True, exist_ok=True)
+        if len(subset) < max(6, int(config["minimum_player_actions"]) // 2):
+            pd.DataFrame([{"position_segment": name, "eligible_players": len(subset), "status": "too_few_players"}]).to_csv(group_dir / "cluster_evaluation.csv", index=False)
+            continue
+        variant = config.copy()
+        variant["minimum_player_actions"] = min(int(config["minimum_player_actions"]), int(subset["total_actions"].max()))
+        variant["cluster_count_candidates"] = [k for k in config["cluster_count_candidates"] if k < len(subset)] or [2]
+        try:
+            matrix, _, metadata = prepare_clustering_matrix(subset, variant)
+            pos_tables = run_clustering(matrix, variant)
+            write_clustering_outputs(pos_tables, group_dir, metadata)
+            _generate_clustering_charts(pos_tables, group_dir, int(config["chart_dpi"]))
+        except ValueError as exc:
+            pd.DataFrame([{"position_segment": name, "eligible_players": len(subset), "status": "skipped", "reason": str(exc)}]).to_csv(group_dir / "cluster_evaluation.csv", index=False)
+
 def main() -> int:
     args = parse_args()
     config = load_analysis_config(args.config)
@@ -84,6 +130,8 @@ def main() -> int:
     tables["cluster_feature_group_sensitivity"] = feature_group_table
     write_clustering_outputs(tables, output_dir, metadata)
     (output_dir / "selected_features.json").write_text(json.dumps(metadata["selected_features"], indent=2), encoding="utf-8")
+    _write_k2_k3_comparison(tables, output_dir)
+    _run_position_aware_clustering(summary, config, output_dir)
     _generate_clustering_charts(tables, output_dir, int(config["chart_dpi"]))
     print(f"Ran clustering for {len(matrix):,} eligible players -> {output_dir}")
     return 0

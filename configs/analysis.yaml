@@ -22,7 +22,13 @@ clustering_feature_groups:
     - median_action_x
     - median_action_y
     - action_width_std
-    - zone_*_share
+    - action_height_std
+    - central_action_share
+    - wide_action_share
+    - defensive_third_share
+    - middle_third_share
+    - attacking_third_share
+    - box_defence_share
   possession_style:
     - possession_win_rate
     - opponent_possession_end_rate
@@ -58,3 +64,13 @@ feature_group_sensitivity_sets:
   without_possession_style: [action_mix, phase_mix, spatial_style, 360_context, difficulty_exposure]
   action_phase_spatial: [action_mix, phase_mix, spatial_style]
   spatial_difficulty: [spatial_style, difficulty_exposure]
+pitch_visualisation:
+  pitch_type: statsbomb
+  orientation: horizontal
+  density_bins: [12, 8]
+  coarse_bins: [6, 4]
+  positional_bins: true
+  kde_levels: 20
+minimum_spatial_bin_actions: 20
+
+clustering_spatial_feature_mode: reduced

@@ -46,6 +46,11 @@ def build_player_summary(df: pd.DataFrame, min_actions: int = 30, *, grid_dimens
         data["action_x"].between(0.0, 18.0, inclusive="both")
         & data["action_y"].between(18.0, 62.0, inclusive="both")
     )
+    data["is_central_action"] = data["action_y"].between(24.0, 56.0, inclusive="both")
+    data["is_wide_action"] = ~data["is_central_action"]
+    data["is_defensive_third_action"] = data["action_x"] < 40.0
+    data["is_middle_third_action"] = data["action_x"].between(40.0, 80.0, inclusive="left")
+    data["is_attacking_third_action"] = data["action_x"] >= 80.0
     keys = IDENTITY_COLUMNS
     grouped = data.groupby(keys, dropna=False)
 
@@ -61,6 +66,13 @@ def build_player_summary(df: pd.DataFrame, min_actions: int = 30, *, grid_dimens
         median_action_x=("action_x", "median"),
         median_action_y=("action_y", "median"),
         action_width_std=("action_y", "std"),
+        position_group=("position_group", lambda s: s.mode().iat[0] if not s.mode().empty else "unknown"),
+        central_action_share=("is_central_action", "mean"),
+        wide_action_share=("is_wide_action", "mean"),
+        defensive_third_share=("is_defensive_third_action", "mean"),
+        middle_third_share=("is_middle_third_action", "mean"),
+        attacking_third_share=("is_attacking_third_action", "mean"),
+        action_height_std=("action_x", "std"),
         box_defence_actions=("is_defensive_box_action", "sum"),
     ).reset_index()
     summary = summary.rename(columns={"player": "player_name"})
