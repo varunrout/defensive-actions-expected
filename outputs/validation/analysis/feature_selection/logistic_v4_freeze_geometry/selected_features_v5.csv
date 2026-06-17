@@ -17,9 +17,9 @@ is_wide_lane,numeric
 is_deep_zone,numeric
 is_high_zone,numeric
 freeze_teammate_count,numeric
-freeze_support_balance_5m,numeric
-freeze_support_balance_10m,numeric
-freeze_support_ratio_5m,numeric
+local_numerical_balance_5m,numeric
+local_numerical_balance_10m,numeric
+attackers_within_5m,numeric
 freeze_teammate_nearest_distance,numeric
 freeze_opponent_centroid_y,numeric
 freeze_teammate_centroid_dx,numeric

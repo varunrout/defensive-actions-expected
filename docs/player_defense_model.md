@@ -45,10 +45,10 @@ One row per defensive action by an identifiable player, with:
 ### 3. Teammate interaction / support
 - `freeze_teammate_count`
 - `freeze_opponent_count`
-- `freeze_support_balance_5m`
-- `freeze_support_balance_10m`
-- `freeze_support_ratio_5m`
-- `freeze_support_ratio_10m`
+- `local_numerical_balance_5m`
+- `local_numerical_balance_10m`
+- `attackers_within_5m`
+- `attackers_within_10m`
 - centroid and spread features for teammates/opponents
 
 ## How we will analyze features
