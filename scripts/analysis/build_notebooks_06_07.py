@@ -35,7 +35,7 @@ def create_team_clustering_notebook():
             ## Questions answered
             1. Which teams defend with similar phase mixes and spatial footprints?
             2. Which clusters are front-foot pressers, deep-block absorbers, balanced teams, or risk-exposed teams?
-            3. Which team profiles concede the most downstream shot threat (`target_shot_in_10s`) and expected threat (`target_xt_10s`)?
+            3. Which team profiles concede the most downstream shot threat (`target_future_shot_10s`) and expected threat (`target_future_xg_10s`)?
             4. Which features most define each cluster?
 
             **Unit of analysis:** one row per `tournament × team`, filtered to teams with enough matches/actions for stable profiles.
@@ -102,7 +102,7 @@ def create_team_clustering_notebook():
             print(f'Defensive actions: {len(df):,}')
             print(f'Teams: {df["team"].nunique()}')
             print(f'Team-tournament profiles: {df["team_profile"].nunique()}')
-            display(df[['tournament', 'team', 'phase_label', 'action_family', 'target_shot_in_10s', 'target_xt_10s']].head())
+            display(df[['tournament', 'team', 'phase_label', 'action_family', 'target_future_shot_10s', 'target_future_xg_10s']].head())
             '''
         ),
         md(
@@ -112,7 +112,7 @@ def create_team_clustering_notebook():
 
             Profiles combine:
             - **Volume / intensity:** defensive actions per match
-            - **Outcome risk:** downstream shot rate and mean xT
+            - **Outcome risk:** downstream shot rate and mean future xG
             - **Phase identity:** high press, counterpress, low block, box defending, wide defending, central progression defending
             - **Action identity:** pressure, contests, recoveries, interventions
             - **Spatial footprint:** central/wide/deep/high lane shares and mean distance to nearest goal
@@ -129,8 +129,8 @@ def create_team_clustering_notebook():
                     matches=('match_id', 'nunique'),
                     actions=('event_id', 'size'),
                     players=('player_id', 'nunique'),
-                    shot_rate=('target_shot_in_10s', 'mean'),
-                    mean_xt=('target_xt_10s', 'mean'),
+                    shot_rate=('target_future_shot_10s', 'mean'),
+                    mean_future_xg=('target_future_xg_10s', 'mean'),
                     has_360_share=('has_360', 'mean'),
                     counterpress_share=('counterpress', 'mean'),
                     central_lane_share=('is_central_lane', 'mean'),
@@ -138,8 +138,8 @@ def create_team_clustering_notebook():
                     deep_zone_share=('is_deep_zone', 'mean'),
                     high_zone_share=('is_high_zone', 'mean'),
                     avg_goal_distance=('nearest_goal_distance', 'mean'),
-                    avg_support_balance_10m=('freeze_support_balance_10m', 'mean'),
-                    avg_support_ratio_10m=('freeze_support_ratio_10m', 'mean'),
+                    avg_support_balance_10m=('local_numerical_balance_10m', 'mean'),
+                    avg_support_ratio_10m=('attackers_within_10m', 'mean'),
                     avg_opponent_nearest_distance=('freeze_opponent_nearest_distance', 'mean'),
                 )
                 .reset_index()
@@ -166,7 +166,7 @@ def create_team_clustering_notebook():
 
             print(f'All profiles: {len(team_profiles)}')
             print(f'Profiles retained (matches >= {MIN_MATCHES}, actions >= {MIN_ACTIONS}): {len(profiles)}')
-            display(profiles[['tournament', 'team', 'matches', 'actions', 'actions_per_match', 'shot_rate', 'mean_xt']].sort_values('shot_rate', ascending=False).round(4).head(12))
+            display(profiles[['tournament', 'team', 'matches', 'actions', 'actions_per_match', 'shot_rate', 'mean_future_xg']].sort_values('shot_rate', ascending=False).round(4).head(12))
             '''
         ),
         md(
@@ -180,7 +180,7 @@ def create_team_clustering_notebook():
         code(
             r'''
             candidate_features = [
-                'actions_per_match', 'shot_rate', 'mean_xt', 'has_360_share', 'counterpress_share',
+                'actions_per_match', 'shot_rate', 'mean_future_xg', 'has_360_share', 'counterpress_share',
                 'central_lane_share', 'wide_lane_share', 'deep_zone_share', 'high_zone_share',
                 'avg_goal_distance', 'avg_support_balance_10m', 'avg_support_ratio_10m',
                 'avg_opponent_nearest_distance',
@@ -243,7 +243,7 @@ def create_team_clustering_notebook():
                 'Deep-block absorbers': ['phase__settled_low_block', 'phase__box_defence', 'deep_zone_share'],
                 'High-central disruptors': ['central_lane_share', 'high_zone_share', 'phase__central_progression_defence'],
                 'Wide-channel protectors': ['wide_lane_share', 'phase__wide_defending'],
-                'Risk-exposed profiles': ['shot_rate', 'mean_xt'],
+                'Risk-exposed profiles': ['shot_rate', 'mean_future_xg'],
             }
 
             style_scores = pd.DataFrame(index=center_z.index)
@@ -270,7 +270,7 @@ def create_team_clustering_notebook():
                     avg_matches=('matches', 'mean'),
                     avg_actions_per_match=('actions_per_match', 'mean'),
                     avg_shot_rate=('shot_rate', 'mean'),
-                    avg_xt=('mean_xt', 'mean'),
+                    avg_xt=('mean_future_xg', 'mean'),
                     high_press=('phase__high_press', 'mean'),
                     counterpress=('counterpress_share', 'mean'),
                     low_block=('phase__settled_low_block', 'mean'),
@@ -318,7 +318,7 @@ def create_team_clustering_notebook():
             plt.show()
 
             heat_cols = [c for c in [
-                'actions_per_match', 'shot_rate', 'mean_xt', 'counterpress_share', 'central_lane_share', 'deep_zone_share',
+                'actions_per_match', 'shot_rate', 'mean_future_xg', 'counterpress_share', 'central_lane_share', 'deep_zone_share',
                 'high_zone_share', 'phase__high_press', 'phase__settled_low_block', 'phase__box_defence',
                 'phase__wide_defending', 'action__pressure', 'action__contest', 'action__recovery',
             ] if c in centers.columns]
@@ -341,7 +341,7 @@ def create_team_clustering_notebook():
         ),
         code(
             r'''
-            display_cols = ['tournament', 'team', 'cluster_label', 'matches', 'actions_per_match', 'shot_rate', 'mean_xt', 'phase__high_press', 'phase__settled_low_block', 'phase__box_defence', 'counterpress_share']
+            display_cols = ['tournament', 'team', 'cluster_label', 'matches', 'actions_per_match', 'shot_rate', 'mean_future_xg', 'phase__high_press', 'phase__settled_low_block', 'phase__box_defence', 'counterpress_share']
             display_cols = [c for c in display_cols if c in profiles.columns]
 
             print('Lowest downstream shot rates among retained team profiles')
@@ -359,7 +359,7 @@ def create_team_clustering_notebook():
                 .head(5)
                 .sort_values(['cluster_label', 'distance_to_cluster_center'])
             )
-            display(representatives[['cluster_label', 'tournament', 'team', 'matches', 'shot_rate', 'mean_xt', 'distance_to_cluster_center']].round(4))
+            display(representatives[['cluster_label', 'tournament', 'team', 'matches', 'shot_rate', 'mean_future_xg', 'distance_to_cluster_center']].round(4))
             '''
         ),
         md(
@@ -382,7 +382,7 @@ def create_team_clustering_notebook():
                 subset = profiles[profiles['cluster'] == row['cluster']].sort_values('shot_rate')
                 examples = ', '.join(subset['team'].head(4).tolist())
                 print(f"Cluster {int(row['cluster'])}: {row['cluster_label']}")
-                print(f"  Profiles: {int(row['profiles'])}; avg shot rate: {row['avg_shot_rate']*100:.2f}%; avg xT: {row['avg_xt']:.3f}")
+                print(f"  Profiles: {int(row['profiles'])}; avg shot rate: {row['avg_shot_rate']*100:.2f}%; avg future xG: {row['avg_xt']:.3f}")
                 print(f"  Style: high press {row['high_press']*100:.1f}%, low block {row['low_block']*100:.1f}%, box defence {row['box_defence']*100:.1f}%")
                 print(f"  Example lower-risk teams: {examples}")
                 print()
@@ -453,7 +453,7 @@ def create_player_archetype_notebook():
             print(f'Defensive actions: {len(df):,}')
             print(f'Players: {df["player_id"].nunique():,}')
             print(f'Teams: {df["team"].nunique()}')
-            display(df[['player', 'team', 'position', 'position_group', 'phase_label', 'action_family', 'target_shot_in_10s']].head())
+            display(df[['player', 'team', 'position', 'position_group', 'phase_label', 'action_family', 'target_future_shot_10s']].head())
             '''
         ),
         md(
@@ -476,8 +476,8 @@ def create_player_archetype_notebook():
                     position_group=('position_group', mode_or_unknown),
                     matches=('match_id', 'nunique'),
                     actions=('event_id', 'size'),
-                    shot_rate=('target_shot_in_10s', 'mean'),
-                    mean_xt=('target_xt_10s', 'mean'),
+                    shot_rate=('target_future_shot_10s', 'mean'),
+                    mean_future_xg=('target_future_xg_10s', 'mean'),
                     has_360_share=('has_360', 'mean'),
                     counterpress_share=('counterpress', 'mean'),
                     central_lane_share=('is_central_lane', 'mean'),
@@ -485,8 +485,8 @@ def create_player_archetype_notebook():
                     deep_zone_share=('is_deep_zone', 'mean'),
                     high_zone_share=('is_high_zone', 'mean'),
                     avg_goal_distance=('nearest_goal_distance', 'mean'),
-                    avg_support_balance_10m=('freeze_support_balance_10m', 'mean'),
-                    avg_support_ratio_10m=('freeze_support_ratio_10m', 'mean'),
+                    avg_support_balance_10m=('local_numerical_balance_10m', 'mean'),
+                    avg_support_ratio_10m=('attackers_within_10m', 'mean'),
                     avg_opponent_nearest_distance=('freeze_opponent_nearest_distance', 'mean'),
                 )
                 .reset_index()
@@ -513,7 +513,7 @@ def create_player_archetype_notebook():
             print(f'All player profiles: {len(player_profiles):,}')
             print(f'Profiles retained (actions >= {MIN_ACTIONS}, matches >= {MIN_MATCHES}): {len(profiles):,}')
             print(f'Action coverage retained: {profiles["actions"].sum() / player_profiles["actions"].sum() * 100:.1f}%')
-            display(profiles[['player', 'primary_team', 'primary_position', 'position_group', 'matches', 'actions', 'actions_per_match', 'shot_rate', 'mean_xt']].sort_values('actions', ascending=False).head(15).round(4))
+            display(profiles[['player', 'primary_team', 'primary_position', 'position_group', 'matches', 'actions', 'actions_per_match', 'shot_rate', 'mean_future_xg']].sort_values('actions', ascending=False).head(15).round(4))
             '''
         ),
         md(
@@ -533,7 +533,7 @@ def create_player_archetype_notebook():
                     actions=('actions', 'sum'),
                     median_actions=('actions', 'median'),
                     shot_rate=('shot_rate', 'mean'),
-                    mean_xt=('mean_xt', 'mean'),
+                    mean_future_xg=('mean_future_xg', 'mean'),
                     high_press=('phase__high_press', 'mean'),
                     low_block=('phase__settled_low_block', 'mean'),
                     box_defence=('phase__box_defence', 'mean'),
@@ -565,7 +565,7 @@ def create_player_archetype_notebook():
         code(
             r'''
             candidate_features = [
-                'actions_per_match', 'shot_rate', 'mean_xt', 'has_360_share', 'counterpress_share',
+                'actions_per_match', 'shot_rate', 'mean_future_xg', 'has_360_share', 'counterpress_share',
                 'central_lane_share', 'wide_lane_share', 'deep_zone_share', 'high_zone_share',
                 'avg_goal_distance', 'avg_support_balance_10m', 'avg_support_ratio_10m',
                 'avg_opponent_nearest_distance',
@@ -626,7 +626,7 @@ def create_player_archetype_notebook():
                 'Ball-winning disruptors': ['action__contest', 'action__recovery', 'action__intervention'],
                 'Central screeners': ['phase__central_progression_defence', 'central_lane_share', 'phase__settled_mid_block'],
                 'Goalkeeper / last-line actors': ['action__goalkeeper'],
-                'Risk-exposed defenders': ['shot_rate', 'mean_xt'],
+                'Risk-exposed defenders': ['shot_rate', 'mean_future_xg'],
             }
 
             style_scores = pd.DataFrame(index=center_z.index)
@@ -653,7 +653,7 @@ def create_player_archetype_notebook():
                     actions=('actions', 'sum'),
                     avg_actions_per_match=('actions_per_match', 'mean'),
                     avg_shot_rate=('shot_rate', 'mean'),
-                    avg_xt=('mean_xt', 'mean'),
+                    avg_xt=('mean_future_xg', 'mean'),
                     high_press=('phase__high_press', 'mean'),
                     low_block=('phase__settled_low_block', 'mean'),
                     box_defence=('phase__box_defence', 'mean'),
@@ -709,7 +709,7 @@ def create_player_archetype_notebook():
             plt.show()
 
             heat_cols = [c for c in [
-                'actions_per_match', 'shot_rate', 'mean_xt', 'counterpress_share', 'central_lane_share', 'wide_lane_share',
+                'actions_per_match', 'shot_rate', 'mean_future_xg', 'counterpress_share', 'central_lane_share', 'wide_lane_share',
                 'deep_zone_share', 'high_zone_share', 'phase__high_press', 'phase__settled_low_block', 'phase__box_defence',
                 'phase__wide_defending', 'phase__central_progression_defence', 'action__pressure', 'action__contest',
                 'action__recovery', 'action__intervention',
@@ -738,7 +738,7 @@ def create_player_archetype_notebook():
             distances = kmeans.transform(X_scaled)
             profiles['distance_to_archetype_center'] = [distances[i, c] for i, c in enumerate(profiles['cluster'])]
 
-            exemplar_cols = ['archetype', 'player', 'primary_team', 'primary_position', 'position_group', 'matches', 'actions', 'shot_rate', 'mean_xt', 'distance_to_archetype_center']
+            exemplar_cols = ['archetype', 'player', 'primary_team', 'primary_position', 'position_group', 'matches', 'actions', 'shot_rate', 'mean_future_xg', 'distance_to_archetype_center']
             exemplars = (
                 profiles.sort_values('distance_to_archetype_center')
                 .groupby('archetype', as_index=False)
@@ -750,11 +750,11 @@ def create_player_archetype_notebook():
 
             print('Lowest-risk retained players within each position group (minimum volume already applied)')
             low_risk = (
-                profiles.sort_values(['position_group', 'shot_rate', 'mean_xt'])
+                profiles.sort_values(['position_group', 'shot_rate', 'mean_future_xg'])
                 .groupby('position_group', as_index=False)
                 .head(8)
             )
-            display(low_risk[['position_group', 'player', 'primary_team', 'primary_position', 'archetype', 'matches', 'actions', 'shot_rate', 'mean_xt']].round(4))
+            display(low_risk[['position_group', 'player', 'primary_team', 'primary_position', 'archetype', 'matches', 'actions', 'shot_rate', 'mean_future_xg']].round(4))
 
             print('Highest-volume retained players')
             display(profiles.sort_values('actions', ascending=False)[['player', 'primary_team', 'position_group', 'archetype', 'matches', 'actions', 'actions_per_match', 'shot_rate']].head(20).round(4))
@@ -780,12 +780,12 @@ def create_player_archetype_notebook():
                 subset = profiles[profiles['cluster'] == row['cluster']].sort_values('distance_to_archetype_center')
                 examples = ', '.join(subset['player'].head(5).tolist())
                 print(f"Cluster {int(row['cluster'])}: {row['archetype']}")
-                print(f"  Players: {int(row['players'])}; avg shot rate: {row['avg_shot_rate']*100:.2f}%; avg xT: {row['avg_xt']:.3f}")
+                print(f"  Players: {int(row['players'])}; avg shot rate: {row['avg_shot_rate']*100:.2f}%; avg future xG: {row['avg_xt']:.3f}")
                 print(f"  Style: high press {row['high_press']*100:.1f}%, box defence {row['box_defence']*100:.1f}%, pressure {row['pressure']*100:.1f}%")
                 print(f"  Exemplars: {examples}")
                 print()
 
-            safest = profiles.sort_values(['shot_rate', 'mean_xt']).iloc[0]
+            safest = profiles.sort_values(['shot_rate', 'mean_future_xg']).iloc[0]
             print(f"Lowest-risk retained player by shot rate: {safest['player']} ({safest['primary_team']}, {safest['position_group']}) — {safest['shot_rate']*100:.2f}%")
             '''
         ),

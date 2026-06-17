@@ -21,8 +21,8 @@ cluster_id,cluster_size,feature,target_corr_abs,rank_by_target_corr,is_proxy
 5,5,freeze_frame_count,0.0066750757514475335,3,False
 5,5,freeze_opponent_count,0.005447218247645197,4,False
 5,5,opponent_count,0.005447218247645197,5,False
-6,2,freeze_support_balance_10m,0.021891767332951118,1,False
-6,2,freeze_support_ratio_10m,0.015512258214866102,2,False
+6,2,local_numerical_balance_10m,0.021891767332951118,1,False
+6,2,attackers_within_10m,0.015512258214866102,2,False
 7,2,freeze_opponent_nearest_distance,0.02906324260326647,1,False
 7,2,freeze_teammate_nearest_distance,0.022393043305573828,2,False
 8,2,freeze_teammate_centroid_dx,0.0070113147226220085,1,False

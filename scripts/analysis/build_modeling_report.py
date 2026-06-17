@@ -443,8 +443,8 @@ def build_markdown(
     sections.append("")
     sections.append("## 1. Validation Protocol")
     sections.append("")
-    sections.append("- **Classification family:** logistic regression with L2 penalty predicting `target_shot_in_10s`.")
-    sections.append("- **Regression family:** linear or Ridge regression predicting `target_xt_10s`.")
+    sections.append("- **Classification family:** logistic regression with L2 penalty predicting `target_future_shot_10s`.")
+    sections.append("- **Regression family:** linear or Ridge regression predicting `target_future_xg_10s`.")
     sections.append("- **Split strategy:** `GroupKFold` by `match_id` to prevent leakage across events from the same match.")
     sections.append("- **Primary metrics:** ROC-AUC / Average Precision for classification; R2 / RMSE / MAE / Spearman for regression.")
     sections.append("- **Secondary analyses:** slice leaderboards, cross-task alignment, correlation clustering, tactical-vs-proxy ablations, and feature-selection manifests for clustered variants.")
@@ -500,7 +500,7 @@ def build_markdown(
     )
     sections.append("")
     sections.append(
-        "**Readout:** `v3_context_enhanced` is the best OOF regressor and `v4_freeze_geometry` is nearly identical. This suggests richer context is valuable for continuous xT, while detailed freeze-frame geometry adds little on top."
+        "**Readout:** `v3_context_enhanced` is the best OOF regressor and `v4_freeze_geometry` is nearly identical. This suggests richer context is valuable for continuous future xG, while detailed freeze-frame geometry adds little on top."
     )
 
     sections.append("")
@@ -576,7 +576,7 @@ def build_markdown(
     )
 
     sections.append("")
-    sections.append("## 6. Cross-Task Alignment (P(shot) vs E[xT))")
+    sections.append("## 6. Cross-Task Alignment (P(shot) vs E[future xG))")
     sections.append("")
     sections.append(
         markdown_table(
@@ -684,11 +684,17 @@ def build_markdown(
         )
     )
     sections.append("")
+    logistic_ablation = pd.read_csv(Path(logistic_stability_summary["outputs"]["tactical_vs_proxy_ablation"]))
+    regression_ablation = pd.read_csv(Path(regression_stability_summary["outputs"]["tactical_vs_proxy_ablation"]))
+    logistic_tactical_drop = logistic_ablation.query("scenario == 'tactical_only'")["delta_vs_full_primary"].iloc[0]
+    logistic_proxy_drop = logistic_ablation.query("scenario == 'proxy_only'")["delta_vs_full_primary"].iloc[0]
+    regression_tactical_drop = regression_ablation.query("scenario == 'tactical_only'")["delta_vs_full_primary"].iloc[0]
+    regression_proxy_drop = regression_ablation.query("scenario == 'proxy_only'")["delta_vs_full_primary"].iloc[0]
     sections.append(
-        f"- Logistic tactical-only ablation drops AUC by {pd.read_csv(Path(logistic_stability_summary['outputs']['tactical_vs_proxy_ablation'])).query('scenario == \"tactical_only\"')['delta_vs_full_primary'].iloc[0]:.4f}; proxy-only drops AUC by {pd.read_csv(Path(logistic_stability_summary['outputs']['tactical_vs_proxy_ablation'])).query('scenario == \"proxy_only\"')['delta_vs_full_primary'].iloc[0]:.4f}."
+        f"- Logistic tactical-only ablation drops AUC by {logistic_tactical_drop:.4f}; proxy-only drops AUC by {logistic_proxy_drop:.4f}."
     )
     sections.append(
-        f"- Regression tactical-only ablation drops R2 by {pd.read_csv(Path(regression_stability_summary['outputs']['tactical_vs_proxy_ablation'])).query('scenario == \"tactical_only\"')['delta_vs_full_primary'].iloc[0]:.4f}; proxy-only drops R2 by {pd.read_csv(Path(regression_stability_summary['outputs']['tactical_vs_proxy_ablation'])).query('scenario == \"proxy_only\"')['delta_vs_full_primary'].iloc[0]:.4f}."
+        f"- Regression tactical-only ablation drops R2 by {regression_tactical_drop:.4f}; proxy-only drops R2 by {regression_proxy_drop:.4f}."
     )
     sections.append(
         "- Interpretation: possession-time and progression proxies matter, but they are not the core source of signal. They can inflate coefficients if left unconstrained, especially in linear models with many correlated inputs."

@@ -11,7 +11,7 @@ from .config import AnalysisConfig
 CHECK_FEATURES = [
     "nearest_goal_distance",
     "distance_to_center_line",
-    "freeze_support_balance_10m",
+    "local_numerical_balance_10m",
     "teammate_opponent_ratio",
 ]
 

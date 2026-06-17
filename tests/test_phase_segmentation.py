@@ -43,7 +43,7 @@ class PhaseSegmentationTests(unittest.TestCase):
                 "period": 1,
                 "team_in_possession": "Team A",
                 "event_type": "Clearance",
-                "ball_x": 20.0,
+                "ball_x": 100.0,
                 "ball_y": 40.0,
             }
         ]
@@ -93,10 +93,28 @@ class PhaseSegmentationTests(unittest.TestCase):
         ]
 
         labeled = label_defensive_phases(rows)
-        self.assertEqual(labeled[0]["phase_label"], "second_ball")
+        self.assertNotEqual(labeled[0]["phase_label"], "second_ball")
 
 
 if __name__ == "__main__":
     unittest.main()
 
 
+
+
+def test_second_ball_requires_loose_ball_evidence_positive():
+    rows = [
+        {
+            "match_id": 10,
+            "minute": 5,
+            "second": 1,
+            "period": 1,
+            "team_in_possession": "Team A",
+            "type": "Duel",
+            "ball_x": 70.0,
+            "ball_y": 36.0,
+            "preceded_by_loose_ball_evidence": True,
+        }
+    ]
+    labeled = label_defensive_phases(rows)
+    assert labeled[0]["phase_label"] == "second_ball"

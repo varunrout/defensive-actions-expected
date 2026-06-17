@@ -13,14 +13,14 @@ nearest_goal_distance,numeric,False,,1.0,5,1,0.027120485850202148,True,stable ta
 is_wide_lane,numeric,False,,1.0,5,1,0.019524281636648717,True,stable tactical signal
 phase_changed_since_prev_event,numeric,False,,1.0,5,1,0.01380662879642528,True,stable tactical signal
 distance_to_center_line,numeric,False,4.0,1.0,5,1,0.011585800965892169,True,cluster representative
-freeze_support_ratio_5m,numeric,False,,1.0,5,1,0.00906877630399634,True,stable tactical signal
+attackers_within_5m,numeric,False,,1.0,5,1,0.00906877630399634,True,stable tactical signal
 counterpress,numeric,False,,1.0,5,1,0.008513267894472279,True,stable tactical signal
 teammate_opponent_ratio,numeric,False,,1.0,5,1,0.007651527054574432,True,stable tactical signal
 nearest_goal_side,categorical,False,,1.0,5,2,0.007035511907687773,True,stable tactical signal
-freeze_support_balance_5m,numeric,False,,1.0,5,1,0.005349257946177975,True,stable tactical signal
+local_numerical_balance_5m,numeric,False,,1.0,5,1,0.005349257946177975,True,stable tactical signal
 freeze_teammate_nearest_distance,numeric,False,7.0,1.0,5,1,0.004657857912256483,True,cluster representative
 freeze_teammate_spread,numeric,False,,1.0,5,1,0.003637979229534906,True,stable tactical signal
-freeze_support_balance_10m,numeric,False,6.0,1.0,5,1,0.0033772015465983996,True,cluster representative
+local_numerical_balance_10m,numeric,False,6.0,1.0,5,1,0.0033772015465983996,True,cluster representative
 period,numeric,False,,1.0,5,1,0.002316819197658295,True,stable tactical signal
 freeze_frame_count,numeric,False,5.0,1.0,5,1,0.0014256062283496118,True,cluster representative
 action_zone,categorical,False,,0.9777777777777779,5,9,0.28702929460547827,True,stable tactical signal
@@ -36,7 +36,7 @@ freeze_opponent_count,numeric,False,5.0,1.0,5,1,0.007980361533101981,False,redun
 opponent_count,numeric,False,5.0,1.0,5,1,0.007980361532929676,False,redundant high-correlation cluster
 teammate_count,numeric,False,5.0,1.0,5,1,0.005840292029542529,False,redundant high-correlation cluster
 freeze_teammate_count,numeric,False,5.0,1.0,5,1,0.005840292029042277,False,redundant high-correlation cluster
-freeze_support_ratio_10m,numeric,False,6.0,1.0,5,1,0.0015780054420936735,False,redundant high-correlation cluster
+attackers_within_10m,numeric,False,6.0,1.0,5,1,0.0015780054420936735,False,redundant high-correlation cluster
 distance_to_left_goal,numeric,False,2.0,0.8,5,1,0.0400615831138862,False,redundant high-correlation cluster
 distance_to_right_goal,numeric,False,2.0,0.8,5,1,0.01444884865089901,False,redundant high-correlation cluster
 is_central_lane,numeric,False,4.0,0.8,5,1,0.0023165034483311224,False,redundant high-correlation cluster

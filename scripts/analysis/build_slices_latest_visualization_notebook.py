@@ -42,8 +42,8 @@ def build_notebook():
             - `best_variant_by_slice_regression.csv`
 
             ## Coach translation
-            - **Logistic models** predict `target_shot_in_10s`: *does this defensive context turn into an opponent shot soon?*
-            - **Regression models** predict `target_xt_10s`: *how dangerous is the opponent's next attacking window?*
+            - **Logistic models** predict `target_future_shot_10s`: *does this defensive context turn into an opponent shot soon?*
+            - **Regression models** predict `target_future_xg_10s`: *how dangerous is the opponent's next attacking window?*
 
             ## Metrics
             - Logistic: `roc_auc`, `avg_precision` — higher is better.
@@ -232,10 +232,10 @@ def build_notebook():
 
             metric_heatmaps(logistic, 'roc_auc', 'Logistic shot target', 'YlGnBu', higher_is_better=True)
             metric_heatmaps(logistic, 'avg_precision', 'Logistic shot target', 'YlOrRd', higher_is_better=True)
-            metric_heatmaps(regression, 'r2', 'Regression xT target', 'YlGnBu', higher_is_better=True)
-            metric_heatmaps(regression, 'spearman', 'Regression xT target', 'PuBuGn', higher_is_better=True)
-            metric_heatmaps(regression, 'rmse', 'Regression xT target', 'rocket_r', higher_is_better=False)
-            metric_heatmaps(regression, 'mae', 'Regression xT target', 'rocket_r', higher_is_better=False)
+            metric_heatmaps(regression, 'r2', 'Regression future xG target', 'YlGnBu', higher_is_better=True)
+            metric_heatmaps(regression, 'spearman', 'Regression future xG target', 'PuBuGn', higher_is_better=True)
+            metric_heatmaps(regression, 'rmse', 'Regression future xG target', 'rocket_r', higher_is_better=False)
+            metric_heatmaps(regression, 'mae', 'Regression future xG target', 'rocket_r', higher_is_better=False)
             '''
         ),
         md(
@@ -509,7 +509,7 @@ def build_notebook():
         md(
             """
             ---
-            ## 11. Combined shot-risk + xT dashboard
+            ## 11. Combined shot-risk + future xG dashboard
 
             This joins the best logistic and best regression result for each slice value.
             """
@@ -554,7 +554,7 @@ def build_notebook():
             )
             ax.axvline(0.70, color='steelblue', linestyle='--', linewidth=1, label='ROC-AUC 0.70')
             ax.axhline(0.20, color='seagreen', linestyle='--', linewidth=1, label='R² 0.20')
-            ax.set_title('Combined best slice performance: shot-risk readability vs xT readability')
+            ax.set_title('Combined best slice performance: shot-risk readability vs future xG readability')
             ax.set_xlabel('Best logistic ROC-AUC')
             ax.set_ylabel('Best regression R²')
             ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left')
@@ -580,12 +580,12 @@ def build_notebook():
             most_reg_wins = best_regression['variant'].value_counts().idxmax()
 
             print(f'Most frequent shot-risk winner: {most_log_wins}')
-            print(f'Most frequent xT-threat winner: {most_reg_wins}')
+            print(f'Most frequent future xG-threat winner: {most_reg_wins}')
             print()
             print('Best immediate shot-risk context:')
             print(f"  {top_log['slice_col']} = {top_log['slice_value']} | {top_log['variant']} | ROC-AUC={top_log['roc_auc']:.3f}, AP={top_log['avg_precision']:.3f}, n={int(top_log['n']):,}")
             print()
-            print('Best xT-threat context:')
+            print('Best future xG-threat context:')
             print(f"  {top_reg['slice_col']} = {top_reg['slice_value']} | {top_reg['variant']} | R²={top_reg['r2']:.3f}, Spearman={top_reg['spearman']:.3f}, n={int(top_reg['n']):,}")
             print()
             print('Coach rule:')

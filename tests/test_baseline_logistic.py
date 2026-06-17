@@ -22,7 +22,7 @@ class BaselineLogisticTests(unittest.TestCase):
         df = pd.DataFrame(
             {
                 "match_id": [1, 1, 2, 2, 3, 3],
-                "target_shot_in_10s": [0, 1, 0, 1, 0, 1],
+                "target_future_shot_10s": [0, 1, 0, 1, 0, 1],
                 "phase_label": ["high_press", "high_press", "settled_low_block", "settled_low_block", "transition_defence", "transition_defence"],
                 "action_zone": ["middle_third_center"] * 6,
                 "action_family": ["pressure", "intervention", "pressure", "intervention", "pressure", "intervention"],

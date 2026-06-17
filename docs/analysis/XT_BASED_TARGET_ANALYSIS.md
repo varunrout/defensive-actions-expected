@@ -438,8 +438,8 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
             ],
             numeric=[
                 "action_x", "action_y", "nearest_goal_distance", "distance_to_center_line",
-                "freeze_support_balance_5m", "freeze_support_balance_10m",
-                "freeze_support_ratio_5m", "freeze_support_ratio_10m",
+                "local_numerical_balance_5m", "local_numerical_balance_10m",
+                "attackers_within_5m", "attackers_within_10m",
                 "freeze_teammate_nearest_distance", "freeze_opponent_nearest_distance",
                 "freeze_teammate_spread", "freeze_opponent_spread",
                 "teammate_count", "opponent_count", "teammate_opponent_ratio",
