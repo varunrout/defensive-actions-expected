@@ -1,42 +1,154 @@
+"""Strict input contracts for pre-modelling analysis datasets."""
 from __future__ import annotations
-from dataclasses import dataclass
+
+from dataclasses import asdict, dataclass
+
 import pandas as pd
+
 
 @dataclass(frozen=True)
 class SchemaResult:
+    """Schema validation result."""
+
     name: str
     required: tuple[str, ...]
     optional_present: tuple[str, ...]
     missing_required: tuple[str, ...]
     rows: int
     columns: int
+
     @property
-    def ok(self) -> bool: return not self.missing_required
-    def to_dict(self) -> dict: return self.__dict__ | {"ok": self.ok}
+    def ok(self) -> bool:
+        """Return ``True`` when no required columns are missing."""
+        return not self.missing_required
 
-EVENT_REQUIRED=("match_id","period","index","possession","event_type","phase_label","target_future_shot_10s","target_future_xg_10s","attacking_team_before_action","defending_team_before_action")
-EVENT_ALTERNATIVES=(("event_id","id"),("timestamp","minute"),("team","team_id"),("player","player_id"))
-PLAYER_REQUIRED=("match_id","event_id","player_id","player_name","team","actor_team","attacking_team","defending_team","event_type","action_family","phase_label","target_future_shot_10s","target_future_xg_10s")
-PLAYER_OPTIONAL=("x","y","location_x","location_y","action_x","action_y","has_360","visible_attacker_count","visible_defender_count","local_numerical_balance","nearest_attacker_distance","nearest_defender_distance","goal_side_defenders","visibility_quality","possession_won","ends_opponent_possession","retained_control","under_opponent_possession","distance_to_attacking_goal","is_central_lane","is_box_defence","is_transition_defence","is_counterpress","is_low_block","high_threat_context")
+    def to_dict(self) -> dict[str, object]:
+        """Return a JSON-serialisable representation."""
+        data = asdict(self)
+        data["ok"] = self.ok
+        return data
 
-def _with_alternatives(required, alternatives, cols):
-    missing=[c for c in required if c not in cols]
+
+EVENT_REQUIRED: tuple[str, ...] = (
+    "match_id",
+    "period",
+    "index",
+    "possession",
+    "event_type",
+    "phase_label",
+    "has_360",
+    "target_future_shot_10s",
+    "target_future_xg_10s",
+    "attacking_team_before_action",
+    "defending_team_before_action",
+)
+EVENT_ALTERNATIVES: tuple[tuple[str, ...], ...] = (("event_id", "id"), ("timestamp", "minute"), ("team", "team_id"), ("player", "player_id"))
+
+PLAYER_REQUIRED: tuple[str, ...] = (
+    "match_id",
+    "period",
+    "possession",
+    "event_id",
+    "event_index",
+    "player_id",
+    "player",
+    "team",
+    "actor_team",
+    "attacking_team",
+    "defending_team",
+    "event_type",
+    "action_family",
+    "phase_label",
+    "action_x",
+    "action_y",
+    "action_zone",
+    "has_360",
+    "freeze_frame_roles_known",
+    "visibility_quality_band",
+    "visibility_limited",
+    "local_5m_region_fully_visible",
+    "local_10m_region_fully_visible",
+    "action_won_possession",
+    "action_ended_possession",
+    "action_retained_defensive_team_control",
+    "action_was_under_opponent_possession",
+    "target_future_shot_10s",
+    "target_future_xg_10s",
+)
+PLAYER_OPTIONAL: tuple[str, ...] = (
+    "visible_attacker_count",
+    "visible_defender_count",
+    "attackers_within_5m",
+    "defenders_within_5m",
+    "attackers_within_10m",
+    "defenders_within_10m",
+    "nearest_attacker_distance",
+    "nearest_defender_distance",
+    "defenders_between_ball_and_attacking_goal",
+    "local_numerical_balance_5m",
+    "local_numerical_balance_10m",
+    "distance_to_attacking_goal",
+    "distance_to_attacking_box",
+    "is_central_lane",
+    "is_wide_lane",
+    "is_deep_zone",
+    "is_high_zone",
+    "counterpress",
+    "position",
+    "position_group",
+)
+
+
+def _missing_with_alternatives(required: tuple[str, ...], alternatives: tuple[tuple[str, ...], ...], columns: pd.Index) -> tuple[str, ...]:
+    missing = [column for column in required if column not in columns]
     for group in alternatives:
-        if not any(c in cols for c in group): missing.append(" or ".join(group))
+        if not any(column in columns for column in group):
+            missing.append(" or ".join(group))
     return tuple(missing)
 
-def validate_processed_events(df: pd.DataFrame, *, strict: bool=True) -> SchemaResult:
-    res=SchemaResult("processed_events", EVENT_REQUIRED, tuple(c for c in df.columns if c in sum(EVENT_ALTERNATIVES, ())), _with_alternatives(EVENT_REQUIRED, EVENT_ALTERNATIVES, df.columns), len(df), len(df.columns))
-    if strict and not res.ok: raise ValueError(f"Processed event schema missing required columns: {res.missing_required}")
-    return res
 
-def validate_player_actions(df: pd.DataFrame, *, strict: bool=True) -> SchemaResult:
-    missing=tuple(c for c in PLAYER_REQUIRED if c not in df.columns)
-    res=SchemaResult("player_defensive_actions", PLAYER_REQUIRED, tuple(c for c in PLAYER_OPTIONAL if c in df.columns), missing, len(df), len(df.columns))
-    if strict and missing: raise ValueError(f"Player action schema missing required columns: {missing}")
-    return res
+def validate_processed_events(df: pd.DataFrame, *, strict: bool = True) -> SchemaResult:
+    """Validate the processed event table used before feature construction.
 
-def coordinate_columns(df: pd.DataFrame) -> tuple[str|None,str|None]:
-    for x,y in (("x","y"),("location_x","location_y"),("action_x","action_y")):
-        if x in df.columns and y in df.columns: return x,y
-    return None,None
+    Raises
+    ------
+    ValueError
+        If ``strict`` is true and a required column is missing.
+    """
+    result = SchemaResult(
+        name="processed_events",
+        required=EVENT_REQUIRED,
+        optional_present=tuple(column for group in EVENT_ALTERNATIVES for column in group if column in df.columns),
+        missing_required=_missing_with_alternatives(EVENT_REQUIRED, EVENT_ALTERNATIVES, df.columns),
+        rows=len(df),
+        columns=len(df.columns),
+    )
+    if strict and not result.ok:
+        raise ValueError(f"Processed event schema missing required columns: {list(result.missing_required)}")
+    return result
+
+
+def validate_player_actions(df: pd.DataFrame, *, strict: bool = True) -> SchemaResult:
+    """Validate the canonical player defensive-action table produced by feature code."""
+    missing = tuple(column for column in PLAYER_REQUIRED if column not in df.columns)
+    result = SchemaResult(
+        name="player_defensive_actions",
+        required=PLAYER_REQUIRED,
+        optional_present=tuple(column for column in PLAYER_OPTIONAL if column in df.columns),
+        missing_required=missing,
+        rows=len(df),
+        columns=len(df.columns),
+    )
+    if strict and missing:
+        raise ValueError(
+            "Player defensive-action schema missing required canonical columns: "
+            f"{list(missing)}. Rebuild with src/dax/features/player_defense.py."
+        )
+    return result
+
+
+def coordinate_columns(df: pd.DataFrame) -> tuple[str | None, str | None]:
+    """Return canonical action coordinate columns when present."""
+    if {"action_x", "action_y"}.issubset(df.columns):
+        return "action_x", "action_y"
+    return None, None

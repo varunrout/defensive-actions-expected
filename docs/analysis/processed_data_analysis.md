@@ -1,11 +1,17 @@
-# Analysis documentation
+# Processed Data Analysis
 
-The pre-modelling analysis layer runs after data preparation and feature building, before final predictive model training. Reusable logic lives in `src/dax/analysis/`; scripts under `scripts/` are thin entry points.
+## Inputs
 
-Execution order:
+Default input is `data/processed/events_with_targets.parquet`. The table must contain corrected short-horizon targets and event context columns including match, period, index, possession, event type, phase proxy, 360 availability, attacking team before action, and defending team before action.
 
-```text
-prepare data → build features → analyse processed data → analyse features → build player summary → run clustering → build descriptive signals → generate analysis report → assess model readiness → train models later
-```
+## Checks
 
-Outputs are written below `outputs/analysis/` and generated feature tables are written below `data/features/`. Phase labels are rule-based tactical proxies, not ground-truth tactical labels. Descriptive signals are provisional and must not be called true DAx.
+The processed-data CLI validates the schema, then writes row/match/competition coverage, event counts by type, rows per match, events per possession, duplicate identifier checks, missingness, team-context validity, 360 coverage when present, phase distribution, and target health tables.
+
+## Outputs
+
+Tables are written to `outputs/analysis/data_quality/` as CSV plus `metadata.json`. Charts include events by competition when the field exists, events by type, rows per match, missingness, phase distribution, and future-xG target distribution.
+
+## Failure conditions
+
+The analysis fails fast when required corrected target or team-context fields are absent. Optional breakdowns are skipped only when the source column is unavailable; those limitations should be reviewed in the generated report.

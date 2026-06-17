@@ -11,3 +11,41 @@ output_formats: [csv, parquet, png]
 chart_dpi: 150
 enable_umap: false
 enable_hdbscan: false
+clustering_feature_groups:
+  action_mix:
+    - action_family_*_share
+  phase_mix:
+    - phase_*_share
+  spatial_style:
+    - mean_action_x
+    - mean_action_y
+    - median_action_x
+    - median_action_y
+    - action_width_std
+    - zone_*_share
+  possession_style:
+    - possession_win_rate
+    - opponent_possession_end_rate
+    - retained_control_rate
+    - actions_under_opponent_possession_rate
+  360_context:
+    - mean_visible_attacker_count
+    - mean_visible_defender_count
+    - mean_nearest_attacker_distance
+    - mean_nearest_defender_distance
+    - mean_defenders_between_ball_and_attacking_goal
+    - role_known_share
+    - reliable_visibility_share
+  difficulty_exposure:
+    - mean_local_numerical_balance_5m
+    - mean_local_numerical_balance_10m
+    - numerical_disadvantage_5m_share
+    - numerical_disadvantage_10m_share
+    - visibility_limited_share
+primary_clustering_feature_groups:
+  - action_mix
+  - phase_mix
+  - spatial_style
+  - possession_style
+  - 360_context
+  - difficulty_exposure

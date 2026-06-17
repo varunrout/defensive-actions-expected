@@ -1,11 +1,17 @@
-# Analysis documentation
+# Feature Analysis
 
-The pre-modelling analysis layer runs after data preparation and feature building, before final predictive model training. Reusable logic lives in `src/dax/analysis/`; scripts under `scripts/` are thin entry points.
+## Feature groups
 
-Execution order:
+Feature diagnostics group columns into identifiers, targets, spatial features, action context, possession semantics, phase proxies, 360 attacker/defender roles, local numerical balance, visibility, exposure, and player aggregates.
 
-```text
-prepare data → build features → analyse processed data → analyse features → build player summary → run clustering → build descriptive signals → generate analysis report → assess model readiness → train models later
-```
+## Diagnostics
 
-Outputs are written below `outputs/analysis/` and generated feature tables are written below `data/features/`. Phase labels are rule-based tactical proxies, not ground-truth tactical labels. Descriptive signals are provisional and must not be called true DAx.
+Numeric diagnostics include missingness, moments, quantiles, unique counts, zero rates, IQR outliers, constant flags, correlations, and univariate descriptive relationships with future-shot and future-xG targets. Categorical diagnostics include frequency concentration, rare-category rates, and target means where sample sizes permit.
+
+## Missingness policy
+
+Required schema fields are never silently skipped. Optional diagnostics are generated only for available canonical production fields. Configured missingness thresholds are used by clustering preprocessing to remove unsuitable style features.
+
+## Interpretation rules
+
+Relationships are descriptive only and must not be interpreted as causal. Phase labels are rule-based tactical proxies. Future targets are observed post-action outcomes, not player value estimates.

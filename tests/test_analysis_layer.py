@@ -1,53 +1,161 @@
 from __future__ import annotations
-import pandas as pd
-from dax.analysis.schemas import validate_player_actions, validate_processed_events
-from dax.analysis.data_quality import missingness_summary, processed_event_tables
-from dax.analysis.spatial_analysis import add_pitch_zones, zone_summary
-from dax.analysis.player_aggregation import build_player_summary
-from dax.analysis.clustering import prepare_clustering_matrix, run_clustering
-from dax.analysis.signal_design import build_descriptive_signals
-from dax.analysis.reporting import generate_pre_model_report
-from dax.analysis.plotting import save_bar
 
-def player_df(n=60):
-    rows=[]
-    for i in range(n):
-        rows.append({"match_id":i//10,"event_id":i,"player_id":i%6,"player_name":f"P{i%6}","team":f"T{i%2}","actor_team":f"T{i%2}","attacking_team":f"T{(i+1)%2}","defending_team":f"T{i%2}","event_type":"Duel" if i%2 else "Interception","action_family":"duel" if i%2 else "interception","phase_label":"counterpress" if i%3 else "low_block","x":float(i%120),"y":float(i%80),"has_360":i%2==0,"visible_attacker_count":i%5,"visible_defender_count":i%4,"local_numerical_balance":(i%5)-2,"nearest_attacker_distance":float(i%10),"nearest_defender_distance":float(i%8),"goal_side_defenders":i%3,"possession_won":i%4==0,"ends_opponent_possession":i%5==0,"retained_control":i%6==0,"under_opponent_possession":True,"target_future_shot_10s":i%7==0,"target_future_xg_10s":0.1 if i%7==0 else 0.0})
+from pathlib import Path
+
+import pandas as pd
+
+from dax.analysis.clustering import prepare_clustering_matrix, run_clustering
+from dax.analysis.config import load_analysis_config
+from dax.analysis.data_quality import missingness_summary, processed_event_tables
+from dax.analysis.player_aggregation import build_player_summary
+from dax.analysis.plotting import bar_chart
+from dax.analysis.reporting import generate_pre_model_report
+from dax.analysis.schemas import validate_player_actions, validate_processed_events
+from dax.analysis.signal_design import build_descriptive_signals
+from dax.analysis.spatial_analysis import add_pitch_zones, zone_summary
+from dax.features.player_defense import build_player_defensive_actions
+
+FULL_VISIBLE_AREA = [0, 0, 120, 0, 120, 80, 0, 80]
+SMALL_VISIBLE_AREA = [40, 20, 80, 20, 80, 60, 40, 60]
+EVENT_TYPES = ["Pressure", "Ball Recovery", "Duel", "Interception", "Clearance", "Block"]
+PHASES = ["high_press", "counterpress", "transition_defence", "low_block"]
+
+
+def production_player_actions_fixture(players: int = 12, actions_per_player: int = 4) -> pd.DataFrame:
+    """Build analysis test data through the production player feature builder."""
+    events: list[dict[str, object]] = []
+    index = 1
+    for player_number in range(players):
+        for action_number in range(actions_per_player):
+            team = "Team B" if player_number % 2 == 0 else "Team A"
+            opponent = "Team A" if team == "Team B" else "Team B"
+            event_type = EVENT_TYPES[(player_number + action_number) % len(EVENT_TYPES)]
+            x = 30.0 + ((player_number * 7 + action_number * 11) % 75)
+            y = 15.0 + ((player_number * 5 + action_number * 9) % 50)
+            visible_area = FULL_VISIBLE_AREA if action_number % 3 else SMALL_VISIBLE_AREA
+            events.append(
+                {
+                    "match_id": 1 + player_number // 6,
+                    "period": 1,
+                    "possession": index,
+                    "index": index,
+                    "minute": index // 60,
+                    "second": index % 60,
+                    "id": f"event-{index}",
+                    "event_type": event_type,
+                    "player_id": 1000 + player_number,
+                    "player": f"Player {player_number}",
+                    "position": "Centre Back" if player_number % 3 == 0 else "Midfield",
+                    "team": team,
+                    "actor_team": team,
+                    "attacking_team_before_action": opponent,
+                    "defending_team_before_action": team,
+                    "location": [x, y],
+                    "ball_x": x,
+                    "ball_y": y,
+                    "has_360": True,
+                    "freeze_frame_count": 4,
+                    "freeze_frame": [
+                        {"teammate": True, "location": [max(0.0, x - 5), y]},
+                        {"teammate": True, "location": [min(120.0, x + 5), y]},
+                        {"teammate": False, "location": [min(120.0, x + 10), y + 3]},
+                        {"teammate": False, "location": [min(120.0, x + 15), y - 3]},
+                    ],
+                    "visible_area": visible_area,
+                    "phase_label": PHASES[(player_number + action_number) % len(PHASES)],
+                    "play_pattern": "Regular Play",
+                    "counterpress": action_number % 2 == 0,
+                    "action_changed_possession": event_type in {"Ball Recovery", "Interception"},
+                    "action_ended_possession": event_type in {"Ball Recovery", "Interception", "Clearance"},
+                    "action_won_possession": event_type in {"Ball Recovery", "Interception"},
+                    "action_retained_defensive_team_control": event_type in {"Ball Recovery", "Interception"},
+                    "action_was_under_opponent_possession": True,
+                    "target_future_shot_10s": int((player_number + action_number) % 5 == 0),
+                    "target_future_xg_10s": 0.08 if (player_number + action_number) % 5 == 0 else 0.0,
+                }
+            )
+            index += 1
+    rows = build_player_defensive_actions(events, only_with_360=True, defensive_only=True)
     return pd.DataFrame(rows)
 
-def event_df():
-    df=player_df(40).rename(columns={"attacking_team":"attacking_team_before_action","defending_team":"defending_team_before_action"})
-    df["period"]=1; df["index"]=range(len(df)); df["minute"]=0; df["possession"]=df.index//4; return df
 
-def test_schema_and_quality():
-    assert validate_processed_events(event_df()).ok
-    assert validate_player_actions(player_df()).ok
-    assert not missingness_summary(player_df()).empty
-    assert "overview" in processed_event_tables(event_df())
+def processed_events_fixture() -> pd.DataFrame:
+    players = production_player_actions_fixture(players=4, actions_per_player=3)
+    events = players.rename(
+        columns={
+            "event_index": "index",
+            "attacking_team": "attacking_team_before_action",
+            "defending_team": "defending_team_before_action",
+        }
+    ).copy()
+    events["minute"] = 0
+    return events
 
-def test_spatial_and_player_aggregation_denominators():
-    df=player_df(); assert "pitch_zone" in add_pitch_zones(df)
-    assert not zone_summary(df).empty
-    s=build_player_summary(df,min_actions=5)
-    assert (s["future_shot_denominator"]==s["total_actions"]).all()
-    assert "minimum_sample_flag" in s
 
-def test_clustering_and_signals():
-    s=build_player_summary(player_df(120),min_actions=5)
-    matrix, audit, meta=prepare_clustering_matrix(s,min_actions=5)
-    assert meta["features"]
-    tables=run_clustering(matrix,candidates=[2,3],seed=1)
-    assert not tables["cluster_evaluation"].empty
-    sig=build_descriptive_signals(s,tables["player_clusters"],min_actions=5)
-    assert "activity_index" in sig
+def test_schema_uses_production_player_feature_contract() -> None:
+    df = production_player_actions_fixture()
+    assert validate_player_actions(df).ok
+    forbidden = {
+        "local_numerical_balance",
+        "goal_side_defenders",
+        "visibility_quality",
+        "possession_won",
+        "ends_opponent_possession",
+        "retained_control",
+        "under_opponent_possession",
+    }
+    assert forbidden.isdisjoint(df.columns)
 
-def test_plot_and_report(tmp_path):
-    save_bar(pd.DataFrame({"x":["a"],"y":[1]}),"x","y",tmp_path/"bar.png","Bar")
-    assert (tmp_path/"bar.png").exists()
-    dq=tmp_path/"data_quality"; dq.mkdir()
-    pd.DataFrame([{"rows":10,"future_shot_rate":0.1}]).to_csv(dq/"overview.csv",index=False)
-    pd.DataFrame([{"duplicate_rows":0}]).to_csv(dq/"duplicates.csv",index=False)
-    pd.DataFrame([{"column":"a","missing_rate":0.0}]).to_csv(dq/"missingness.csv",index=False)
-    c=tmp_path/"clustering"; c.mkdir(); pd.DataFrame([{"method":"kmeans"}]).to_csv(c/"cluster_evaluation.csv",index=False)
-    out=generate_pre_model_report(tmp_path,tmp_path/"reports"/"report.md")
-    assert out.exists()
+
+def test_processed_quality_and_spatial_tables() -> None:
+    events = processed_events_fixture()
+    assert validate_processed_events(events).ok
+    assert not missingness_summary(events).empty
+    assert "overview" in processed_event_tables(events)
+    actions = production_player_actions_fixture()
+    assert "pitch_zone" in add_pitch_zones(actions)
+    assert not zone_summary(actions).empty
+
+
+def test_production_fixture_full_analysis_chain(tmp_path: Path) -> None:
+    config = load_analysis_config(None)
+    config["minimum_player_actions"] = 2
+    config["cluster_count_candidates"] = [2, 3]
+    actions = production_player_actions_fixture(players=12, actions_per_player=4)
+    validate_player_actions(actions)
+
+    summary = build_player_summary(actions, min_actions=2, grid_dimensions=tuple(config["pitch_grid_dimensions"]))
+    assert {"role_known_actions", "reliable_visibility_actions", "numerical_disadvantage_10m_denominator"}.issubset(summary.columns)
+    assert (summary["future_shot_denominator"] == summary["total_actions"]).all()
+
+    matrix, audit, metadata = prepare_clustering_matrix(summary, config)
+    assert len(matrix) == 12
+    assert metadata["selected_features"]
+    assert not any(feature.startswith("future_") for feature in metadata["selected_features"])
+
+    tables = run_clustering(matrix, config)
+    assert {"kmeans", "hierarchical", "gmm"}.issubset(set(tables["cluster_evaluation"]["method"]))
+    assert tables["cluster_stability"]["subsample_ari_stability"].notna().any()
+
+    signals = build_descriptive_signals(summary, tables["player_clusters"], min_actions=2)
+    assert "activity_index" in signals
+    assert signals["warnings"].str.contains("not true DAx").all()
+
+    analysis_dir = tmp_path / "analysis"
+    data_quality_dir = analysis_dir / "data_quality"
+    clustering_dir = analysis_dir / "clustering"
+    data_quality_dir.mkdir(parents=True)
+    clustering_dir.mkdir(parents=True)
+    processed_event_tables(processed_events_fixture())["overview"].to_csv(data_quality_dir / "overview.csv", index=False)
+    processed_event_tables(processed_events_fixture())["duplicates"].to_csv(data_quality_dir / "duplicates.csv", index=False)
+    processed_event_tables(processed_events_fixture())["missingness"].to_csv(data_quality_dir / "missingness.csv", index=False)
+    tables["cluster_evaluation"].to_csv(clustering_dir / "cluster_evaluation.csv", index=False)
+    report = generate_pre_model_report(analysis_dir, analysis_dir / "reports" / "report.md")
+    assert report.exists()
+
+
+def test_plotting_handles_empty_and_non_empty_data(tmp_path: Path) -> None:
+    bar_chart(pd.DataFrame({"x": ["a"], "y": [1]}), "x", "y", tmp_path / "bar.png", "Bar")
+    bar_chart(pd.DataFrame(columns=["x", "y"]), "x", "y", tmp_path / "empty.png", "Empty")
+    assert (tmp_path / "bar.png").exists()
+    assert (tmp_path / "empty.png").exists()
