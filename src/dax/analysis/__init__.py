@@ -1,1 +1,1 @@
-"""Analysis helpers for DAx."""
+"""Reusable pre-modelling analysis framework for defensive-actions-expected."""

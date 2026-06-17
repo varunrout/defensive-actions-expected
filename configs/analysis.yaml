@@ -1,0 +1,13 @@
+minimum_player_actions: 30
+minimum_category_sample_size: 20
+pitch_grid_dimensions: [6, 4]
+feature_bins: 10
+cluster_count_candidates: [2, 3, 4, 5]
+random_seed: 42
+scaling_method: standard
+missing_value_threshold: 0.5
+correlation_threshold: 0.95
+output_formats: [csv, parquet, png]
+chart_dpi: 150
+enable_umap: false
+enable_hdbscan: false
