@@ -44,11 +44,13 @@ python -m pytest -q tests/test_end_to_end_fixture.py
 
 Full run order:
 
-1. `python scripts/pipeline/pipeline.py` to fetch raw StatsBomb JSON and build processed event tables with event context, phase proxies and corrected targets.
-2. `python scripts/features/build_player_defense_dataset.py` to build `data/features/player_defensive_actions.parquet`.
-3. Run model scripts only after regenerated feature tables contain `target_future_shot_10s` and `target_future_xg_10s`.
+1. `python scripts/run_pipeline.py --stage prepare-data` to fetch raw StatsBomb JSON and build processed event tables with event context, phase proxies and corrected targets.
+2. `python scripts/build_features.py --input data/processed/events_with_targets.parquet --output data/features/player_defensive_actions.parquet` to build the player defensive actions table.
+3. `python scripts/train_models.py --task all` to train the supported logistic and regression baselines.
+4. `python scripts/validate_models.py --task all` to generate validation plots and summary tables for trained baselines.
+5. `python scripts/generate_reports.py --report validation-summary` to build the canonical validation summary report.
 
-Legacy scripts remain under `scripts/`; reusable logic belongs under `src/dax/`. Full raw-data regeneration may require network access and StatsBomb availability.
+Compatibility wrappers remain active at `scripts/pipeline/pipeline.py`, `scripts/features/build_player_defense_dataset.py`, and the baseline model scripts while the broader consolidation continues. Specialized analysis/report builders under `scripts/analysis/` remain the active path for portfolio and defensibility reports until the canonical report CLI reaches parity.
 
 ## Methodology summary
 
