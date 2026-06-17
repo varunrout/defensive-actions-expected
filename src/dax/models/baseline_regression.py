@@ -4,7 +4,7 @@ This module supports training regression models using observed future xG
 as the continuous target instead of the binary target_future_shot_10s.
 
 This enables:
-- Dense target signal (all actions get xT scores, not sparse binary)
+- Dense target signal (all actions get future-xG outcomes, not sparse binary)
 - Richer threat assessment (magnitude, not just yes/no)
 - Better model convergence (continuous gradients)
 - Complementary perspective (spatial threat vs. temporal outcome)

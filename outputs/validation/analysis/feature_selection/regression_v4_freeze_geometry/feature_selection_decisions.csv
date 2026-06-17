@@ -25,10 +25,10 @@ freeze_opponent_centroid_y,numeric,False,3.0,0.0028559846406380736,True,cluster 
 freeze_opponent_count,numeric,False,5.0,0.005447218247645197,False,redundant in cluster,False,redundant in cluster
 freeze_opponent_nearest_distance,numeric,False,7.0,0.02906324260326647,True,cluster representative,True,cluster representative
 freeze_opponent_spread,numeric,False,,0.0723348090138314,True,non-cluster numeric,True,non-cluster numeric
-local_numerical_balance_10m,numeric,False,6.0,0.021891767332951118,True,cluster representative,True,cluster representative
-local_numerical_balance_5m,numeric,False,,0.019652514024449345,True,non-cluster numeric,True,non-cluster numeric
-attackers_within_10m,numeric,False,6.0,0.015512258214866102,False,redundant in cluster,False,redundant in cluster
-attackers_within_5m,numeric,False,,0.013470202942284341,True,non-cluster numeric,True,non-cluster numeric
+freeze_support_balance_10m,numeric,False,6.0,0.021891767332951118,True,cluster representative,True,cluster representative
+freeze_support_balance_5m,numeric,False,,0.019652514024449345,True,non-cluster numeric,True,non-cluster numeric
+freeze_support_ratio_10m,numeric,False,6.0,0.015512258214866102,False,redundant in cluster,False,redundant in cluster
+freeze_support_ratio_5m,numeric,False,,0.013470202942284341,True,non-cluster numeric,True,non-cluster numeric
 freeze_teammate_centroid_dx,numeric,False,8.0,0.0070113147226220085,True,cluster representative,True,cluster representative
 freeze_teammate_centroid_dy,numeric,False,3.0,0.0015693106866026608,False,redundant in cluster,False,redundant in cluster
 freeze_teammate_centroid_x,numeric,False,2.0,0.03753185558520459,False,redundant in cluster,False,redundant in cluster

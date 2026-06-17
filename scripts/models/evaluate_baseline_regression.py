@@ -93,9 +93,9 @@ def _plot_pred_vs_actual(oof_df: pd.DataFrame, out_path: Path) -> None:
     lo = float(min(oof_df["y_true"].min(), oof_df["y_pred"].min()))
     hi = float(max(oof_df["y_true"].max(), oof_df["y_pred"].max()))
     ax.plot([lo, hi], [lo, hi], linestyle="--", linewidth=1, color="gray")
-    ax.set_title("Predicted vs Actual xT")
-    ax.set_xlabel("Actual xT")
-    ax.set_ylabel("Predicted xT")
+    ax.set_title("Predicted vs Actual Future xG")
+    ax.set_xlabel("Actual future xG")
+    ax.set_ylabel("Predicted future xG")
     ax.legend()
     fig.tight_layout()
     fig.savefig(out_path, dpi=150)
@@ -125,7 +125,7 @@ def _plot_residuals(oof_df: pd.DataFrame, out_path: Path) -> None:
 
     axes[1].axhline(0.0, linestyle="--", linewidth=1, color="gray")
     axes[1].set_title("Residuals vs Predicted")
-    axes[1].set_xlabel("Predicted xT")
+    axes[1].set_xlabel("Predicted future xG")
     axes[1].set_ylabel("Residual")
     axes[1].legend()
 
