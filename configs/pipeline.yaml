@@ -1,0 +1,11 @@
+workflow:
+  stages:
+    - download
+    - process
+    - event_context
+    - phase_proxies
+    - targets
+    - player_features
+    - train
+    - validate
+    - report
