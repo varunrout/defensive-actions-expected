@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from .plot_style import DEFAULT_THEME, add_note, apply_theme, display_label
+from .plot_style import CLUSTER_COLOURS, DEFAULT_THEME, add_note, apply_theme, display_label
 
 
 def _save(fig: plt.Figure, output_path: str | Path, *, dpi: int = 150, save_svg: bool = False) -> plt.Figure:
@@ -74,8 +74,11 @@ def histogram(df: pd.DataFrame, column: str, output_path: str | Path, title: str
 def scatter_chart(df: pd.DataFrame, x: str, y: str, output_path: str | Path, title: str, *, color: str | None = None, dpi: int = 150, save_svg: bool = False) -> plt.Figure:
     fig, ax = plt.subplots(figsize=DEFAULT_THEME.figure_size)
     if not df.empty and {x, y}.issubset(df.columns):
-        colors = df[color] if color and color in df.columns else None
-        ax.scatter(df[x], df[y], c=colors, alpha=0.72)
+        if color and color in df.columns:
+            colours = df[color].map(lambda value: CLUSTER_COLOURS.get(int(value), "#777777") if pd.notna(value) else "#777777")
+        else:
+            colours = None
+        ax.scatter(df[x], df[y], c=colours, alpha=0.72)
     apply_theme(ax, title=title, xlabel=display_label(x), ylabel=display_label(y))
     return _save(fig, output_path, dpi=dpi, save_svg=save_svg)
 

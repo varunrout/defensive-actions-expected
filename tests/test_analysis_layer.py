@@ -369,3 +369,41 @@ def test_k2_k3_and_position_outputs_created_by_cli(tmp_path: Path) -> None:
     assert (tmp_path / "clustering" / "k2_k3_interpretation.md").exists()
     assert (tmp_path / "clustering" / "by_position").exists()
     assert (tmp_path / "clustering" / "cluster_0_spatial_profile.png").exists()
+
+
+def test_representative_players_use_centroid_distance() -> None:
+    from dax.analysis.clustering import representative_players_from_centroids
+
+    matrix = pd.DataFrame(
+        {
+            "player_id": [1, 2, 3],
+            "team": ["A", "A", "A"],
+            "player_name": ["near", "far", "other"],
+            "total_actions": [10, 100, 10],
+            "matches": [1, 1, 1],
+            "feature_a": [0.0, 10.0, 100.0],
+            "feature_b": [0.0, 10.0, 100.0],
+        }
+    )
+    assignments = pd.DataFrame({"player_id": [1, 2, 3], "team": ["A", "A", "A"], "cluster": [0, 0, 1]})
+    reps = representative_players_from_centroids(matrix, assignments)
+    assert reps.loc[reps["cluster"] == 0, "player_id"].iloc[0] == 1
+    assert "centroid_distance" in reps.columns
+    assert reps["representative_selection_method"].eq("nearest_centroid").all()
+
+
+def test_weak_cluster_warnings_are_reported(tmp_path: Path) -> None:
+    from dax.analysis.reporting import build_model_readiness
+
+    clustering = tmp_path / "clustering"
+    clustering.mkdir()
+    pd.DataFrame(
+        [
+            {"silhouette": 0.1, "size_balance": 0.1, "subsample_ari_stability": 0.95},
+        ]
+    ).to_csv(clustering / "cluster_evaluation.csv", index=False)
+    pd.DataFrame({"explained_variance_ratio": [0.1, 0.1]}).to_csv(clustering / "pca_explained_variance.csv", index=False)
+    readiness = build_model_readiness(tmp_path)
+    warnings = readiness["clustering_interpretation_warnings"]["warnings"]
+    assert any("silhouette" in warning for warning in warnings)
+    assert any("stability does not imply" in warning for warning in warnings)

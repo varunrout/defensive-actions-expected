@@ -10,7 +10,18 @@ def _read_csv(path):
 def build_model_readiness(analysis_dir: str|Path) -> dict:
     root=Path(analysis_dir); overview=_read_csv(root/"data_quality"/"overview.csv"); dup=_read_csv(root/"data_quality"/"duplicates.csv"); miss=_read_csv(root/"data_quality"/"missingness.csv"); evals=_read_csv(root/"clustering"/"cluster_evaluation.csv")
     def status(ok,warn=False): return "pass" if ok else ("warning" if warn else "fail")
-    return {"target_validity":{"status":status(not overview.empty and overview.get("future_shot_rate",pd.Series([0])).iloc[0]>=0)},"schema_completeness":{"status":"pass"},"team_context_validity":{"status":"warning"},"duplicate_identifiers":{"status":status(dup.empty or dup.get("duplicate_rows",pd.Series([0])).sum()==0, True)},"missingness":{"status":status(miss.empty or miss["missing_rate"].max()<0.5, True)},"target_sample_size":{"status":status(not overview.empty and overview.get("rows",pd.Series([0])).iloc[0]>=100, True)},"player_sample_size":{"status":"warning"},"360_coverage":{"status":"warning"},"visibility_reliability":{"status":"warning"},"clustering_stability":{"status":status(not evals.empty, True)},"data_leakage_scan":{"status":"warning","note":"No final model trained; review target-derived descriptive outcome features before modelling."}}
+    warnings = []
+    if not evals.empty and "silhouette" in evals.columns and evals["silhouette"].max() < 0.25:
+        warnings.append("weak cluster separation: best silhouette below 0.25")
+    if not evals.empty and "size_balance" in evals.columns and evals["size_balance"].min() < 0.2:
+        warnings.append("cluster imbalance detected")
+    pca = _read_csv(root/"clustering"/"pca_explained_variance.csv")
+    if not pca.empty and "explained_variance_ratio" in pca.columns and pca["explained_variance_ratio"].head(2).sum() < 0.30:
+        warnings.append("low PCA first-two-component explained variance")
+    if not evals.empty and "subsample_ari_stability" in evals.columns and evals["subsample_ari_stability"].max() > 0.8:
+        warnings.append("stability does not imply strong cluster separation")
+    readiness = {"target_validity":{"status":status(not overview.empty and overview.get("future_shot_rate",pd.Series([0])).iloc[0]>=0)},"schema_completeness":{"status":"pass"},"team_context_validity":{"status":"warning"},"duplicate_identifiers":{"status":status(dup.empty or dup.get("duplicate_rows",pd.Series([0])).sum()==0, True)},"missingness":{"status":status(miss.empty or miss["missing_rate"].max()<0.5, True)},"target_sample_size":{"status":status(not overview.empty and overview.get("rows",pd.Series([0])).iloc[0]>=100, True)},"player_sample_size":{"status":"warning"},"360_coverage":{"status":"warning"},"visibility_reliability":{"status":"warning"},"clustering_stability":{"status":status(not evals.empty, True)},"data_leakage_scan":{"status":"warning","note":"No final model trained; review target-derived descriptive outcome features before modelling."},"clustering_interpretation_warnings":{"status":"warning" if warnings else "pass","warnings":warnings}}
+    return readiness
 
 def generate_pre_model_report(analysis_dir: str|Path, output: str|Path) -> Path:
     root=Path(analysis_dir); output=Path(output); output.parent.mkdir(parents=True,exist_ok=True); readiness=build_model_readiness(root); (output.parent/"model_readiness.json").write_text(json.dumps(readiness,indent=2),encoding="utf-8")
