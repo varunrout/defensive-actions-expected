@@ -160,7 +160,7 @@ def stage_process_models() -> None:
         "total_rows": len(df_targets),
         "competitions": df_targets["competition_label"].nunique(),
         "matches": df_targets["match_id"].nunique(),
-        "with_360": int(df_targets["has_360"].sum()),
+        "with_360": int(df_targets["has_360"].fillna(False).sum()),
         "phases": df_targets["phase_label"].nunique(),
         "future_shot_10s_rate": float(shot_rate),
         "future_xg_10s_mean": float(future_xg_mean),

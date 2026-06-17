@@ -65,7 +65,7 @@ def build_player_dataset(
     if "has_360" not in df.columns:
         raise ValueError("Input parquet must contain a 'has_360' column.")
 
-    df = df[df["has_360"] == True].copy()  # noqa: E712
+    df = df[df["has_360"].fillna(False)].copy()
     df = df.sort_values(["match_id", "period", "index"]).reset_index(drop=True)
 
     if max_matches is not None:
