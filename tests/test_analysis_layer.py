@@ -407,3 +407,41 @@ def test_weak_cluster_warnings_are_reported(tmp_path: Path) -> None:
     warnings = readiness["clustering_interpretation_warnings"]["warnings"]
     assert any("silhouette" in warning for warning in warnings)
     assert any("stability does not imply" in warning for warning in warnings)
+
+
+def test_bar_chart_uses_cluster_colour_mapping(tmp_path: Path) -> None:
+    from matplotlib.colors import to_hex
+
+    from dax.analysis.plot_style import CLUSTER_COLOURS
+
+    fig = bar_chart(
+        pd.DataFrame({"cluster": [0, 1], "players": [5, 7]}),
+        "cluster",
+        "players",
+        tmp_path / "cluster_bars.png",
+        "Cluster bars",
+        color="cluster",
+        force_vertical=True,
+    )
+    colours = [to_hex(patch.get_facecolor()) for patch in fig.axes[0].patches]
+    assert colours[:2] == [CLUSTER_COLOURS[0], CLUSTER_COLOURS[1]]
+
+
+def test_position_aware_clustering_eligibility_uses_action_threshold(tmp_path: Path) -> None:
+    from scripts.run_player_clustering import _run_position_aware_clustering
+
+    summary = build_player_summary(production_player_actions_fixture(players=12, actions_per_player=4), min_actions=1)
+    summary["position_group"] = ["centre_back"] * 6 + ["midfielder"] * 4 + ["forward"] * 2
+    summary.loc[summary.index[:2], "total_actions"] = 1
+    config = load_analysis_config(None)
+    config["minimum_player_actions"] = 4
+    config["cluster_count_candidates"] = [2, 3]
+    config["chart_dpi"] = 80
+
+    _run_position_aware_clustering(summary, config, tmp_path)
+    defenders = pd.read_csv(tmp_path / "by_position" / "defenders" / "cluster_evaluation.csv")
+    assert {"total_players", "eligible_players", "excluded_players", "minimum_player_actions"}.issubset(defenders.columns)
+    assert defenders["total_players"].iloc[0] == 6
+    assert defenders["eligible_players"].iloc[0] == 4
+    assert defenders["excluded_players"].iloc[0] == 2
+    assert defenders["status"].iloc[0] == "skipped"
