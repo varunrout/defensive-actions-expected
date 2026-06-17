@@ -37,8 +37,16 @@ python -m pip install -e ".[dev]"
 Fixture/local checks:
 
 ```bash
+ruff check src scripts tests
 python -m pytest -q
+python -m pytest -q tests/test_end_to_end_fixture.py
 ```
+
+Full run order:
+
+1. `python scripts/pipeline/pipeline.py` to fetch raw StatsBomb JSON and build processed event tables with event context, phase proxies and corrected targets.
+2. `python scripts/features/build_player_defense_dataset.py` to build `data/features/player_defensive_actions.parquet`.
+3. Run model scripts only after regenerated feature tables contain `target_future_shot_10s` and `target_future_xg_10s`.
 
 Legacy scripts remain under `scripts/`; reusable logic belongs under `src/dax/`. Full raw-data regeneration may require network access and StatsBomb availability.
 
@@ -70,7 +78,7 @@ No full corrected model metrics are claimed in this commit because the full Stat
 
 ## Limitations
 
-- Full Shapely-based visible-area controls are documented but not fully implemented.
+- Visible-area controls use deterministic polygon area and point-in-polygon checks; they do not infer players outside the StatsBomb 360 camera footprint.
 - Human phase validation has not been performed.
 - Tournament holdout metrics require full regenerated feature tables.
 - Current models are baselines, not causal DAx.

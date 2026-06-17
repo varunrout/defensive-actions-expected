@@ -36,6 +36,21 @@ def add_event_context(events: pd.DataFrame, home_team_col: str = "home_team", aw
     df["opponent_team"] = df["defending_team_before_action"]
     df["actor_was_attacking"] = df["actor_team"].notna() & (df["actor_team"] == df["attacking_team_before_action"])
     df["actor_was_defending"] = df["actor_team"].notna() & (df["actor_team"] == df["defending_team_before_action"])
+    event_type = df.get("event_type", df.get("type", pd.Series(index=df.index, dtype=object)))
+    possession_changes = df["action_changed_possession"].fillna(False)
+    df["action_ended_possession"] = possession_changes & df["actor_was_attacking"]
+    df["action_won_possession"] = possession_changes & df["actor_was_defending"]
+    # Recoveries/interceptions frequently begin the next possession; preserve prior possession context.
+    starts_new_possession = df.groupby(["match_id", "period"], dropna=False)["possession"].transform(lambda s: s.ne(s.shift()))
+    recovery_mask = event_type.isin(["Ball Recovery", "Interception"])
+    prior_attack = df["previous_possession_team"]
+    prior_defence = df["actor_team"]
+    use_prior = recovery_mask & starts_new_possession & prior_attack.notna() & prior_defence.notna() & (prior_attack != prior_defence)
+    df.loc[use_prior, "attacking_team_before_action"] = prior_attack[use_prior]
+    df.loc[use_prior, "defending_team_before_action"] = prior_defence[use_prior]
+    df["action_was_under_opponent_possession"] = df["actor_team"].notna() & df["attacking_team_before_action"].notna() & (df["actor_team"] != df["attacking_team_before_action"])
+    df["action_retained_defensive_team_control"] = df["actor_team"].notna() & df["defending_team_before_action"].notna() & (df["actor_team"] == df["defending_team_before_action"]) & ~df["action_won_possession"]
+    df["event_semantics_known"] = event_type.isin(["Pressure", "Ball Recovery", "Interception", "Clearance", "Block", "Duel", "50/50", "Foul Committed"])
     df["event_time_seconds"] = event_time_seconds_df(df)
     return df
 

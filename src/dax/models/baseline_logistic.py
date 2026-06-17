@@ -10,12 +10,12 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import average_precision_score, roc_auc_score
+from sklearn.metrics import average_precision_score, brier_score_loss, log_loss, roc_auc_score
 from sklearn.model_selection import GroupKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-TARGET_COL = "target_shot_in_10s"
+TARGET_COL = "target_future_shot_10s"
 GROUP_COL = "match_id"
 
 
@@ -59,13 +59,13 @@ def default_variant_specs() -> list[VariantSpec]:
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
                 "freeze_support_ratio_10m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_nearest_distance",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_count",
-                "opponent_count",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_nearest_distance",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "visible_attacker_count",
+                "visible_defender_count",
+                "attacker_defender_ratio",
                 
                 "possession_elapsed_seconds",
                 
@@ -104,19 +104,19 @@ def default_variant_specs() -> list[VariantSpec]:
                 "is_deep_zone",
                 "is_high_zone",
                 "freeze_frame_count",
-                "freeze_teammate_count",
-                "freeze_opponent_count",
+                "visible_attacker_count",
+                "visible_defender_count",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
                 "freeze_support_ratio_10m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_nearest_distance",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_count",
-                "opponent_count",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_nearest_distance",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "visible_attacker_count",
+                "visible_defender_count",
+                "attacker_defender_ratio",
                 
                 "possession_elapsed_seconds",
                 
@@ -156,27 +156,27 @@ def default_variant_specs() -> list[VariantSpec]:
                 "is_deep_zone",
                 "is_high_zone",
                 "freeze_frame_count",
-                "freeze_teammate_count",
-                "freeze_opponent_count",
+                "visible_attacker_count",
+                "visible_defender_count",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
                 "freeze_support_ratio_10m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_nearest_distance",
-                "freeze_teammate_centroid_x",
-                "freeze_teammate_centroid_y",
-                "freeze_opponent_centroid_x",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_centroid_dy",
-                "freeze_opponent_centroid_dx",
-                "freeze_opponent_centroid_dy",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_count",
-                "opponent_count",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_nearest_distance",
+                "visible_attacker_centroid_x",
+                "visible_attacker_centroid_y",
+                "visible_defender_centroid_x",
+                "visible_defender_centroid_y",
+                "visible_attacker_centroid_dx",
+                "visible_attacker_centroid_dy",
+                "visible_defender_centroid_dx",
+                "visible_defender_centroid_dy",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "visible_attacker_count",
+                "visible_defender_count",
+                "attacker_defender_ratio",
                 
                 "possession_elapsed_seconds",
                 
@@ -206,16 +206,16 @@ def default_variant_specs() -> list[VariantSpec]:
                 "is_wide_lane",
                 "is_deep_zone",
                 "is_high_zone",
-                "freeze_teammate_count",
+                "visible_attacker_count",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_centroid_y",
+                "visible_attacker_centroid_dx",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "attacker_defender_ratio",
                 
             ],
         ),
@@ -243,16 +243,16 @@ def default_variant_specs() -> list[VariantSpec]:
                 "is_wide_lane",
                 "is_deep_zone",
                 "is_high_zone",
-                "freeze_teammate_count",
+                "visible_attacker_count",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_centroid_y",
+                "visible_attacker_centroid_dx",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "attacker_defender_ratio",
                 
                 
                 "phase_transitions_observed_so_far",
@@ -280,16 +280,16 @@ def default_variant_specs() -> list[VariantSpec]:
                 "is_wide_lane",
                 "is_deep_zone",
                 "is_high_zone",
-                "freeze_teammate_count",
+                "visible_attacker_count",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_centroid_y",
+                "visible_attacker_centroid_dx",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "attacker_defender_ratio",
                 
             ],
             c=0.6,
@@ -318,16 +318,16 @@ def default_variant_specs() -> list[VariantSpec]:
                 "is_wide_lane",
                 "is_deep_zone",
                 "is_high_zone",
-                "freeze_teammate_count",
+                "visible_attacker_count",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_centroid_y",
+                "visible_attacker_centroid_dx",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "attacker_defender_ratio",
                 
                 
                 "phase_transitions_observed_so_far",
@@ -427,18 +427,28 @@ def grouped_cv_scores(
                 "n_test": int(len(test_idx)),
                 "roc_auc": float(roc_auc_score(y_test, y_score)),
                 "avg_precision": float(average_precision_score(y_test, y_score)),
+                "log_loss": float(log_loss(y_test, y_score, labels=[0, 1])),
+                "brier_score": float(brier_score_loss(y_test, y_score)),
+                "train_positive_rate": float(y_train.mean()),
+                "test_positive_rate": float(y_test.mean()),
             }
         )
 
     mask = ~np.isnan(oof)
     overall_auc = float(roc_auc_score(y[mask], oof[mask]))
     overall_ap = float(average_precision_score(y[mask], oof[mask]))
+    overall_log_loss = float(log_loss(y[mask], oof[mask], labels=[0, 1]))
+    overall_brier = float(brier_score_loss(y[mask], oof[mask]))
 
     return {
         "fold_metrics": fold_rows,
         "oof_predictions": oof,
         "roc_auc": overall_auc,
         "avg_precision": overall_ap,
+        "log_loss": overall_log_loss,
+        "brier_score": overall_brier,
+        "target_mean": float(y[mask].mean()),
+        "target_zero_rate": float((y[mask] == 0).mean()),
     }
 
 
@@ -457,7 +467,7 @@ FUTURE_ONLY_FEATURES = {
     "possession_duration_total",
     "possession_event_count_total",
     "possession_progress_ratio",
-    "target_xt_10s",
+    "target_future_xg_10s",
 }
 
 

@@ -48,8 +48,9 @@ from dax.data.statsbomb_loader import (
     TARGET_COMPETITIONS,
     COMPETITIONS_WITH_360,
 )
+from dax.features.event_context import add_event_context, validate_event_context
 from dax.features.phase_segmentation import label_defensive_phases
-from dax.models.attacking_threat import add_shot_in_10s_target
+from dax.targets.short_horizon import add_future_xg_target, add_future_shot_target
 
 
 def save_json(data: list | dict, path: Path) -> None:
@@ -120,7 +121,7 @@ def stage_1_fetch_raw_data() -> None:
                 ff = load_360_json(mid)
                 if ff:
                     save_json(ff, DATA_RAW / "three-sixty" / f"{mid}.json")
-            except Exception as e:
+            except Exception:
                 pass  # 360 is optional
 
 
@@ -140,8 +141,12 @@ def stage_2_process_models() -> None:
         print("[ERROR] No events loaded. Stopping.")
         return
 
+    events_enriched = add_event_context(events_enriched)
+    context_issues = validate_event_context(events_enriched)
+    if context_issues:
+        raise ValueError(f"Event context validation failed: {context_issues}")
     save_parquet(events_enriched, DATA_PROCESSED / "events_enriched.parquet")
-    print(f"  Saved {len(events_enriched):,} enriched event rows")
+    print(f"  Saved {len(events_enriched):,} enriched event rows with event context")
 
     sort_cols = [
         c
@@ -165,12 +170,10 @@ def stage_2_process_models() -> None:
     save_parquet(df_phased, DATA_PROCESSED / "events_with_phases.parquet")
     print(f"  Phase distribution:\n{df_phased['phase_label'].value_counts().to_string()}")
 
-    # Attacking threat targets
-    print("\n[2c] Add attacking threat targets (shot_in_10s)")
-    # Ensure input to add_shot_in_10s_target is sorted
-    events_phased = df_phased.to_dict("records")
-    events_with_targets = add_shot_in_10s_target(events_phased)
-    df_targets = pd.DataFrame(events_with_targets)
+    # Short-horizon observed targets
+    print("\n[2c] Add future shot and observed future-xG targets")
+    df_targets = add_future_shot_target(df_phased)
+    df_targets = add_future_xg_target(df_targets)
     
     # Re-sort to guarantee order after target labeling
     sort_cols = [c for c in ["match_id", "period", "minute", "second", "index"] if c in df_targets.columns]
@@ -178,8 +181,10 @@ def stage_2_process_models() -> None:
         df_targets = df_targets.sort_values(sort_cols).reset_index(drop=True)
     
     save_parquet(df_targets, DATA_PROCESSED / "events_with_targets.parquet")
-    shot_rate = df_targets["target_shot_in_10s"].mean() * 100
-    print(f"  Shot-in-10s rate: {shot_rate:.2f}%")
+    shot_rate = df_targets["target_future_shot_10s"].mean() * 100
+    future_xg_mean = df_targets["target_future_xg_10s"].mean()
+    print(f"  Future-shot-10s rate: {shot_rate:.2f}%")
+    print(f"  Future-xG-10s mean: {future_xg_mean:.4f}")
 
     print("\n[2d] Summary statistics")
     summary = {
@@ -188,7 +193,8 @@ def stage_2_process_models() -> None:
         "matches": df_targets["match_id"].nunique(),
         "with_360": df_targets["has_360"].sum(),
         "phases": df_targets["phase_label"].nunique(),
-        "shot_in_10s_rate": shot_rate,
+        "future_shot_10s_rate": shot_rate,
+        "future_xg_10s_mean": future_xg_mean,
     }
     save_json(summary, DATA_PROCESSED / "summary.json")
     for k, v in summary.items():

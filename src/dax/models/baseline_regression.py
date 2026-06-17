@@ -1,7 +1,7 @@
-"""Baseline regression modeling utilities for DAx (xT-based target).
+"""Baseline regression modeling utilities for DAx (observed future-xG target).
 
-This module supports training regression models using xT_from_generic_grid
-as the continuous target instead of the binary target_shot_in_10s.
+This module supports training regression models using observed future xG
+as the continuous target instead of the binary target_future_shot_10s.
 
 This enables:
 - Dense target signal (all actions get xT scores, not sparse binary)
@@ -20,12 +20,7 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import Ridge, Lasso, LinearRegression
-from sklearn.metrics import (
-    mean_squared_error,
-    mean_absolute_error,
-    r2_score,
-    mean_absolute_percentage_error,
-)
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import GroupKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -48,7 +43,7 @@ class RegressionVariantSpec:
 
 
 def default_regression_specs() -> list[RegressionVariantSpec]:
-    """Return xT regression baseline variants (V0-V8)."""
+    """Return future-xG regression baseline variants (V0-V8)."""
     return [
         RegressionVariantSpec(
             name="v0_phase_only",
@@ -89,13 +84,13 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
                 "freeze_support_ratio_10m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_nearest_distance",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_count",
-                "opponent_count",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_nearest_distance",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "visible_attacker_count",
+                "visible_defender_count",
+                "attacker_defender_ratio",
                 
                 "possession_elapsed_seconds",
                 
@@ -136,19 +131,19 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "is_deep_zone",
                 "is_high_zone",
                 "freeze_frame_count",
-                "freeze_teammate_count",
-                "freeze_opponent_count",
+                "visible_attacker_count",
+                "visible_defender_count",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
                 "freeze_support_ratio_10m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_nearest_distance",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_count",
-                "opponent_count",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_nearest_distance",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "visible_attacker_count",
+                "visible_defender_count",
+                "attacker_defender_ratio",
                 
                 "possession_elapsed_seconds",
                 
@@ -190,27 +185,27 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "is_deep_zone",
                 "is_high_zone",
                 "freeze_frame_count",
-                "freeze_teammate_count",
-                "freeze_opponent_count",
+                "visible_attacker_count",
+                "visible_defender_count",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
                 "freeze_support_ratio_10m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_nearest_distance",
-                "freeze_teammate_centroid_x",
-                "freeze_teammate_centroid_y",
-                "freeze_opponent_centroid_x",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_centroid_dy",
-                "freeze_opponent_centroid_dx",
-                "freeze_opponent_centroid_dy",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_count",
-                "opponent_count",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_nearest_distance",
+                "visible_attacker_centroid_x",
+                "visible_attacker_centroid_y",
+                "visible_defender_centroid_x",
+                "visible_defender_centroid_y",
+                "visible_attacker_centroid_dx",
+                "visible_attacker_centroid_dy",
+                "visible_defender_centroid_dx",
+                "visible_defender_centroid_dy",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "visible_attacker_count",
+                "visible_defender_count",
+                "attacker_defender_ratio",
                 
                 "possession_elapsed_seconds",
                 
@@ -242,16 +237,16 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "is_wide_lane",
                 "is_deep_zone",
                 "is_high_zone",
-                "freeze_teammate_count",
+                "visible_attacker_count",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_centroid_y",
+                "visible_attacker_centroid_dx",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "attacker_defender_ratio",
                 
             ],
             alpha=0.0,
@@ -281,16 +276,16 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "is_wide_lane",
                 "is_deep_zone",
                 "is_high_zone",
-                "freeze_teammate_count",
+                "visible_attacker_count",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_centroid_y",
+                "visible_attacker_centroid_dx",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "attacker_defender_ratio",
                 
                 
                 "phase_transitions_observed_so_far",
@@ -320,16 +315,16 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "is_wide_lane",
                 "is_deep_zone",
                 "is_high_zone",
-                "freeze_teammate_count",
+                "visible_attacker_count",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_centroid_y",
+                "visible_attacker_centroid_dx",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "attacker_defender_ratio",
                 
             ],
             alpha=0.6,
@@ -359,16 +354,16 @@ def default_regression_specs() -> list[RegressionVariantSpec]:
                 "is_wide_lane",
                 "is_deep_zone",
                 "is_high_zone",
-                "freeze_teammate_count",
+                "visible_attacker_count",
                 "freeze_support_balance_5m",
                 "freeze_support_balance_10m",
                 "freeze_support_ratio_5m",
-                "freeze_teammate_nearest_distance",
-                "freeze_opponent_centroid_y",
-                "freeze_teammate_centroid_dx",
-                "freeze_teammate_spread",
-                "freeze_opponent_spread",
-                "teammate_opponent_ratio",
+                "visible_attacker_nearest_distance",
+                "visible_defender_centroid_y",
+                "visible_attacker_centroid_dx",
+                "visible_attacker_spread",
+                "visible_defender_spread",
+                "attacker_defender_ratio",
                 
                 
                 "phase_transitions_observed_so_far",
@@ -479,7 +474,10 @@ def grouped_cv_scores_regression(
                 "r2": float(r2_score(y_test, y_pred)),
                 "rmse": float(np.sqrt(mean_squared_error(y_test, y_pred))),
                 "mae": float(mean_absolute_error(y_test, y_pred)),
-                "mape": float(mean_absolute_percentage_error(y_test, y_pred)),
+                "spearman": float(spearmanr(y_test, y_pred).correlation),
+                "train_target_mean": float(y_train.mean()),
+                "test_target_mean": float(y_test.mean()),
+                "test_target_zero_rate": float((y_test == 0).mean()),
             }
         )
 
@@ -487,7 +485,6 @@ def grouped_cv_scores_regression(
     overall_r2 = float(r2_score(y[mask], oof[mask]))
     overall_rmse = float(np.sqrt(mean_squared_error(y[mask], oof[mask])))
     overall_mae = float(mean_absolute_error(y[mask], oof[mask]))
-    overall_mape = float(mean_absolute_percentage_error(y[mask], oof[mask]))
     overall_spearman = float(spearmanr(y[mask], oof[mask]).correlation)
 
     return {
@@ -496,8 +493,9 @@ def grouped_cv_scores_regression(
         "r2": overall_r2,
         "rmse": overall_rmse,
         "mae": overall_mae,
-        "mape": overall_mape,
         "spearman": overall_spearman,
+        "target_mean": float(y[mask].mean()),
+        "target_zero_rate": float((y[mask] == 0).mean()),
     }
 
 
