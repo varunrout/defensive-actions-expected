@@ -11,6 +11,10 @@ from pathlib import Path
 
 import nbformat as nbf
 
+from dax.analysis.notebook_aggregation import (
+    PLAYER_NOTEBOOK_AGGREGATION_FEATURES,
+    TEAM_NOTEBOOK_AGGREGATION_FEATURES,
+)
 
 NOTEBOOKS_DIR = Path(__file__).resolve().parents[2] / "notebooks"
 
@@ -23,7 +27,15 @@ def code(text: str):
     return nbf.v4.new_code_cell(textwrap.dedent(text).strip())
 
 
+def aggregation_lines(features: tuple[tuple[str, str, str], ...], indent: int = 20) -> str:
+    prefix = " " * indent
+    return "\n".join(
+        f"{prefix}{output}=('{source}', '{agg}')," for output, source, agg in features
+    )
+
+
 def create_team_clustering_notebook():
+    team_aggregation = aggregation_lines(TEAM_NOTEBOOK_AGGREGATION_FEATURES)
     nb = nbf.v4.new_notebook()
     nb.cells = [
         md(
@@ -126,21 +138,7 @@ def create_team_clustering_notebook():
             base = (
                 df.groupby(profile_key)
                 .agg(
-                    matches=('match_id', 'nunique'),
-                    actions=('event_id', 'size'),
-                    players=('player_id', 'nunique'),
-                    shot_rate=('target_future_shot_10s', 'mean'),
-                    mean_future_xg=('target_future_xg_10s', 'mean'),
-                    has_360_share=('has_360', 'mean'),
-                    counterpress_share=('counterpress', 'mean'),
-                    central_lane_share=('is_central_lane', 'mean'),
-                    wide_lane_share=('is_wide_lane', 'mean'),
-                    deep_zone_share=('is_deep_zone', 'mean'),
-                    high_zone_share=('is_high_zone', 'mean'),
-                    avg_goal_distance=('distance_to_attacking_goal', 'mean'),
-                    avg_support_balance_10m=('local_numerical_balance_10m', 'mean'),
-                    avg_support_ratio_10m=('attackers_within_10m', 'mean'),
-                    avg_nearest_attacker_distance=('nearest_attacker_distance', 'mean'),
+__TEAM_AGGREGATION__
                 )
                 .reset_index()
             )
@@ -167,7 +165,7 @@ def create_team_clustering_notebook():
             print(f'All profiles: {len(team_profiles)}')
             print(f'Profiles retained (matches >= {MIN_MATCHES}, actions >= {MIN_ACTIONS}): {len(profiles)}')
             display(profiles[['tournament', 'team', 'matches', 'actions', 'actions_per_match', 'shot_rate', 'mean_future_xg']].sort_values('shot_rate', ascending=False).round(4).head(12))
-            '''
+            '''.replace("__TEAM_AGGREGATION__", team_aggregation)
         ),
         md(
             """
@@ -398,6 +396,7 @@ def create_team_clustering_notebook():
 
 
 def create_player_archetype_notebook():
+    player_aggregation = aggregation_lines(PLAYER_NOTEBOOK_AGGREGATION_FEATURES)
     nb = nbf.v4.new_notebook()
     nb.cells = [
         md(
@@ -470,24 +469,7 @@ def create_player_archetype_notebook():
             base = (
                 df.groupby(profile_key)
                 .agg(
-                    player=('player', mode_or_unknown),
-                    primary_team=('team', mode_or_unknown),
-                    primary_position=('position', mode_or_unknown),
-                    position_group=('position_group', mode_or_unknown),
-                    matches=('match_id', 'nunique'),
-                    actions=('event_id', 'size'),
-                    shot_rate=('target_future_shot_10s', 'mean'),
-                    mean_future_xg=('target_future_xg_10s', 'mean'),
-                    has_360_share=('has_360', 'mean'),
-                    counterpress_share=('counterpress', 'mean'),
-                    central_lane_share=('is_central_lane', 'mean'),
-                    wide_lane_share=('is_wide_lane', 'mean'),
-                    deep_zone_share=('is_deep_zone', 'mean'),
-                    high_zone_share=('is_high_zone', 'mean'),
-                    avg_goal_distance=('distance_to_attacking_goal', 'mean'),
-                    avg_support_balance_10m=('local_numerical_balance_10m', 'mean'),
-                    avg_support_ratio_10m=('attackers_within_10m', 'mean'),
-                    avg_nearest_attacker_distance=('nearest_attacker_distance', 'mean'),
+__PLAYER_AGGREGATION__
                 )
                 .reset_index()
             )
@@ -514,7 +496,7 @@ def create_player_archetype_notebook():
             print(f'Profiles retained (actions >= {MIN_ACTIONS}, matches >= {MIN_MATCHES}): {len(profiles):,}')
             print(f'Action coverage retained: {profiles["actions"].sum() / player_profiles["actions"].sum() * 100:.1f}%')
             display(profiles[['player', 'primary_team', 'primary_position', 'position_group', 'matches', 'actions', 'actions_per_match', 'shot_rate', 'mean_future_xg']].sort_values('actions', ascending=False).head(15).round(4))
-            '''
+            '''.replace("__PLAYER_AGGREGATION__", player_aggregation)
         ),
         md(
             """
