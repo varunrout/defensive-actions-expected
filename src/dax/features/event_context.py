@@ -31,6 +31,25 @@ def _opponent_for_row(row: pd.Series, home_team_col: str, away_team_col: str) ->
     return None
 
 
+def _possession_sequence_for_group(group: pd.DataFrame) -> pd.Series:
+    change = pd.Series(False, index=group.index)
+    if "possession" in group.columns:
+        possession = pd.to_numeric(group["possession"], errors="coerce")
+        prev_possession = possession.shift(1)
+        change = change | (prev_possession.notna() & possession.notna() & (possession != prev_possession))
+        change = change | (prev_possession.isna() & possession.notna())
+    if "possession_team" in group.columns:
+        possession_team = group["possession_team"]
+        prev_possession_team = possession_team.shift(1)
+        change = change | (
+            prev_possession_team.notna() & possession_team.notna() & (possession_team != prev_possession_team)
+        )
+        change = change | (prev_possession_team.isna() & possession_team.notna())
+    if len(change):
+        change.iloc[0] = True
+    return change.cumsum().astype("Int64")
+
+
 def add_event_context(events: pd.DataFrame, home_team_col: str = "home_team", away_team_col: str = "away_team") -> pd.DataFrame:
     df = sort_events(events.copy())
     df["actor_team"] = df.get("team", df.get("team_name"))
@@ -40,17 +59,22 @@ def add_event_context(events: pd.DataFrame, home_team_col: str = "home_team", aw
 
     group_cols = ["match_id", "period"]
     event_type = df.get("event_type", df.get("type", pd.Series(index=df.index, dtype=object)))
+    seq_parts: list[pd.Series] = []
+    for _, group in df.groupby(group_cols, dropna=False, sort=False):
+        seq_parts.append(_possession_sequence_for_group(group))
+    if seq_parts:
+        df["possession_sequence_id"] = pd.concat(seq_parts).sort_index().astype("Int64")
+    else:
+        df["possession_sequence_id"] = pd.Series(index=df.index, dtype="Int64")
+
     df["previous_event_team"] = df.groupby(group_cols, dropna=False)["actor_team"].shift(1)
     df["previous_possession_team"] = df.groupby(group_cols, dropna=False)["possession_team"].shift(1)
     df["next_possession_team"] = df.groupby(group_cols, dropna=False)["possession_team"].shift(-1)
     df["possession_id_before_action"] = df.get("possession")
     df["previous_possession_id"] = df.groupby(group_cols, dropna=False)["possession"].shift(1) if "possession" in df else None
     df["possession_id_after_action"] = df.groupby(group_cols, dropna=False)["possession"].shift(-1) if "possession" in df else None
-    if "possession" in df:
-        previous_possession_id = df.groupby(group_cols, dropna=False)["possession"].shift(1)
-        df["event_starts_new_possession"] = previous_possession_id.notna() & (df["possession"] != previous_possession_id)
-    else:
-        df["event_starts_new_possession"] = False
+    previous_sequence_id = df.groupby(group_cols, dropna=False)["possession_sequence_id"].shift(1)
+    df["event_starts_new_possession"] = previous_sequence_id.notna() & (df["possession_sequence_id"] != previous_sequence_id)
 
     df["attacking_team_before_action"] = df["possession_team"]
     df["defending_team_before_action"] = df.apply(lambda r: _opponent_for_row(r, home_team_col, away_team_col), axis=1)
