@@ -16,3 +16,11 @@
 | Clustering | Cluster sizes/centroids/PCA/stability | clustering outputs | clustering output directory | Style-cluster diagnostics |
 
 All chart helpers label axes, handle empty inputs, save PNG, optionally save SVG, and close figures after saving.
+
+## mplsoccer pitch outputs
+
+Football pitch visualisations use `mplsoccer.Pitch` with StatsBomb coordinates: pitch length 120, pitch width 80, defensive goal at x=0 and attacking goal at x=120. The default orientation is horizontal and attacking direction is left to right.
+
+Primary spatial outputs include `outputs/analysis/spatial/all_actions_density.png`, `all_actions_scatter.png`, action-family density maps such as `pressure_density.png`, phase density maps, `possession_win_rate_map.png`, `future_shot_rate_map.png`, and `future_xg_map.png`. Rate maps mask cells below `minimum_spatial_bin_actions` and must be interpreted as descriptive spatial profiles, not tactical ground truth or performance estimates.
+
+The coarse 6x4 pitch grid remains available only as a technical diagnostic table/chart; active football analysis charts should use the mplsoccer pitch functions in `src/dax/analysis/pitch_plotting.py`.

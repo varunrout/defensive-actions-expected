@@ -310,3 +310,56 @@ def test_cli_chart_orchestration_creates_expected_files(tmp_path: Path) -> None:
     ]
     missing = [path for path in expected if not path.exists()]
     assert missing == []
+
+
+def test_generic_bar_chart_does_not_default_to_45_degree_labels(tmp_path: Path) -> None:
+    from dax.analysis.plotting import bar_chart
+
+    fig = bar_chart(pd.DataFrame({"category": ["A", "B"], "value": [1, 2]}), "category", "value", tmp_path / "bars.png", "Bars")
+    rotations = {tick.get_rotation() for tick in fig.axes[0].get_xticklabels()}
+    assert 45.0 not in rotations
+
+
+def test_display_labels_and_reduced_spatial_features() -> None:
+    from dax.analysis.config import load_analysis_config
+    from dax.analysis.plot_style import display_label
+
+    assert display_label("box_defence_share") == "Defensive-box exposure"
+    summary = build_player_summary(production_player_actions_fixture(players=8, actions_per_player=3), min_actions=1)
+    config = load_analysis_config(None)
+    config["minimum_player_actions"] = 1
+    _, _, metadata = prepare_clustering_matrix(summary, config)
+    assert "central_action_share" in metadata["selected_features"]
+    assert not any(feature.startswith("zone_") for feature in metadata["selected_features"])
+
+
+def test_mplsoccer_pitch_plotting_outputs_and_preserves_input(tmp_path: Path) -> None:
+    from dax.analysis.pitch_plotting import plot_pitch_density, plot_pitch_rate_map, plot_pitch_scatter
+
+    df = production_player_actions_fixture(players=4, actions_per_player=3)
+    before = df.copy(deep=True)
+    plot_pitch_scatter(df, tmp_path / "scatter.png", title="Scatter")
+    plot_pitch_density(df, tmp_path / "density.png", title="Density", bins=(12, 8))
+    plot_pitch_rate_map(df, tmp_path / "rate.png", value_col="target_future_shot_10s", title="Rate", min_bin_actions=50)
+    assert (tmp_path / "scatter.png").exists()
+    assert (tmp_path / "density.png").exists()
+    assert (tmp_path / "rate.png").exists()
+    pd.testing.assert_frame_equal(df, before)
+
+
+def test_k2_k3_and_position_outputs_created_by_cli(tmp_path: Path) -> None:
+    # The broader CLI chart test already runs clustering; assert the named analytical outputs too.
+    import subprocess
+    import sys
+
+    actions_path = tmp_path / "player.parquet"
+    summary_path = tmp_path / "summary.parquet"
+    matrix_path = tmp_path / "matrix.parquet"
+    production_player_actions_fixture(players=12, actions_per_player=4).to_parquet(actions_path, index=False)
+    config_path = tmp_path / "analysis.yaml"
+    config_path.write_text(Path("configs/analysis.yaml").read_text(encoding="utf-8").replace("minimum_player_actions: 30", "minimum_player_actions: 2").replace("minimum_action_threshold_sensitivity: [20, 30, 40, 50]", "minimum_action_threshold_sensitivity: [2, 3]"), encoding="utf-8")
+    subprocess.run([sys.executable, "scripts/build_player_summary.py", "--input", str(actions_path), "--output", str(summary_path), "--config", str(config_path), "--charts-dir", str(tmp_path / "players")], check=True)
+    subprocess.run([sys.executable, "scripts/run_player_clustering.py", "--input", str(summary_path), "--output-dir", str(tmp_path / "clustering"), "--matrix-output", str(matrix_path), "--config", str(config_path)], check=True)
+    assert (tmp_path / "clustering" / "k2_k3_comparison.csv").exists()
+    assert (tmp_path / "clustering" / "k2_k3_interpretation.md").exists()
+    assert (tmp_path / "clustering" / "by_position").exists()
