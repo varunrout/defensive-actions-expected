@@ -54,10 +54,13 @@ Thumbs.db
 !/outputs/validation/README.md
 /outputs/archive/pre_methodology_fix/**
 !/outputs/archive/pre_methodology_fix/README.md
+/outputs/features/**
+!/outputs/features/.gitkeep
 local_archive/
 mlruns/
 mlartifacts/
 outputs/oof/*.parquet
+outputs/**/*.parquet
 outputs/models/**/*.joblib
 mlflow.db
 mlflow.db-journal
