@@ -161,35 +161,43 @@ def log_json_artifact(mlflow: Any | None, obj: Any, path: str | Path, artifact_p
     return json_path
 
 
-INVALID_MODEL_NAME_CHARS = re.compile(r"[/:%\"']+")
+INVALID_MODEL_NAME_CHARS = re.compile(r"[^A-Za-z0-9_-]+")
 
 
 def sanitise_mlflow_model_name(value: str | None) -> str:
     """Return a MLflow logged-model compatible name.
 
-    Current MLflow logged-model names cannot contain slash, colon, period,
-    percent, or quote characters. Empty/all-invalid values receive a stable
-    fallback name.
+    Names are restricted to predictable alphanumeric, underscore, and hyphen
+    characters. Empty/all-invalid values receive a stable fallback name.
     """
 
-    raw = (value or "").strip().replace(".", "_")
+    raw = (value or "").strip()
     safe = INVALID_MODEL_NAME_CHARS.sub("_", raw)
     safe = re.sub(r"_+", "_", safe).strip("_")
     return safe or "model"
 
 
-def log_sklearn_model(mlflow: Any | None, model: Any, artifact_path: str) -> str | None:
-    """Log a scikit-learn compatible model and return the safe logged-model name."""
+def log_sklearn_model(mlflow: Any | None, model: Any, artifact_path: str, *, variant: str | None = None) -> dict[str, Any] | None:
+    """Log a scikit-learn compatible model and return MLflow model metadata.
+
+    Current MLflow versions prefer ``name=`` and ``sk_model=``. Older versions
+    used ``artifact_path=``. Both paths receive the same sanitised value.
+    """
 
     if mlflow is None:
         return None
     safe_model_name = sanitise_mlflow_model_name(artifact_path)
     try:
-        signature = inspect.signature(mlflow.sklearn.log_model)
-        if "name" in signature.parameters:
-            mlflow.sklearn.log_model(model, name=safe_model_name)
+        parameters = inspect.signature(mlflow.sklearn.log_model).parameters
+        kwargs: dict[str, Any] = {"sk_model": model}
+        if "name" in parameters:
+            kwargs["name"] = safe_model_name
+        elif "artifact_path" in parameters:
+            kwargs["artifact_path"] = safe_model_name
         else:
-            mlflow.sklearn.log_model(model, artifact_path=safe_model_name)
+            raise MLflowConfigurationError("mlflow.sklearn.log_model supports neither 'name' nor 'artifact_path'.")
+        model_info = mlflow.sklearn.log_model(**kwargs)
     except Exception as exc:  # noqa: BLE001 - model logging should not hide training results
-        raise MLflowConfigurationError(f"Failed to log sklearn model as {safe_model_name!r}.") from exc
-    return safe_model_name
+        variant_text = f" for variant {variant!r}" if variant else ""
+        raise MLflowConfigurationError(f"Failed to log sklearn model{variant_text} as {safe_model_name!r}.") from exc
+    return {"name": safe_model_name, "model_info": model_info, "model_uri": getattr(model_info, "model_uri", None)}

@@ -36,7 +36,7 @@ class FakeMlflow(types.SimpleNamespace):
         self.params = []
         self.metrics = []
         self.artifacts = []
-        self.sklearn = types.SimpleNamespace(log_model=lambda model, artifact_path=None, name=None: self.artifacts.append(("model", name or artifact_path)))
+        self.sklearn = types.SimpleNamespace(log_model=lambda sk_model=None, artifact_path=None, name=None: self.artifacts.append(("model", name or artifact_path)) or types.SimpleNamespace(model_uri=f"models:/{name or artifact_path}"))
         self.tracking = types.SimpleNamespace(MlflowClient=lambda tracking_uri=None: types.SimpleNamespace(search_experiments=lambda max_results=1: []))
 
     def set_tracking_uri(self, uri):
@@ -135,9 +135,11 @@ def test_sanitise_mlflow_model_name():
         "name.with.periods": "name_with_periods",
         "name%with%percent": "name_with_percent",
         "name\"with'quotes": "name_with_quotes",
+        r"name\with\backslash": "name_with_backslash",
+        "name with spaces": "name_with_spaces",
         "": "model",
         "////": "model",
-        "a///b:::c..d%%e": "a_b_c_d_e",
+        "--a///b:::c..d%%e--": "--a_b_c_d_e--",
     }
     for raw, expected in cases.items():
         assert sanitise_mlflow_model_name(raw) == expected
@@ -145,5 +147,7 @@ def test_sanitise_mlflow_model_name():
 
 def test_log_sklearn_model_uses_safe_model_name(monkeypatch):
     fake = FakeMlflow()
-    assert log_sklearn_model(fake, object(), "b0_constant/model") == "b0_constant_model"
+    result = log_sklearn_model(fake, object(), "b0_constant/model", variant="b0_constant")
+    assert result["name"] == "b0_constant_model"
+    assert result["model_uri"] == "models:/b0_constant_model"
     assert ("model", "b0_constant_model") in fake.artifacts
