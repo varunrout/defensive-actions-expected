@@ -11,6 +11,7 @@ from contextlib import AbstractContextManager
 from dataclasses import dataclass
 import inspect
 import json
+import math
 import os
 import re
 from pathlib import Path
@@ -116,16 +117,33 @@ def log_params(mlflow: Any | None, params: dict[str, Any]) -> None:
         mlflow.log_param(key, str(serialised)[:1000])
 
 
-def log_metrics(mlflow: Any | None, metrics: dict[str, Any], *, prefix: str = "") -> None:
-    """Log numeric metrics."""
+def log_metrics(mlflow: Any | None, metrics: dict[str, Any], *, prefix: str = "") -> list[str]:
+    """Log finite numeric metrics and mark undefined non-finite metrics.
 
+    Local metric tables are built before this helper is called, so NaN and
+    infinite analytical results remain preserved there. MLflow's SQLite metric
+    table cannot safely replay duplicate non-finite metric rows during model
+    logging, so only finite values are sent to ``mlflow.log_metric``.
+    """
+
+    skipped: list[str] = []
     if mlflow is None:
-        return
+        return skipped
     for key, value in metrics.items():
+        metric_name = f"{prefix}{key}"
         try:
-            mlflow.log_metric(f"{prefix}{key}", float(value))
+            metric_value = float(value)
         except (TypeError, ValueError):
             continue
+        if not math.isfinite(metric_value):
+            skipped.append(metric_name)
+            status_name = f"metric_status_{metric_name}"[:250]
+            mlflow.log_param(status_name, "undefined_non_finite")
+            if hasattr(mlflow, "set_tag"):
+                mlflow.set_tag(status_name, "undefined_non_finite")
+            continue
+        mlflow.log_metric(metric_name, metric_value)
+    return skipped
 
 
 def write_json_artifact(obj: Any, path: str | Path) -> Path:
@@ -238,6 +256,15 @@ def log_sklearn_model(
             kwargs["artifact_path"] = safe_model_name
         else:
             raise MLflowConfigurationError("mlflow.sklearn.log_model supports neither 'name' nor 'artifact_path'.")
+
+        replay_disable_options = {
+            "log_model_metrics": False,
+            "log_metrics": False,
+            "associate_logged_model_metrics": False,
+        }
+        for option, disabled_value in replay_disable_options.items():
+            if option in parameters:
+                kwargs[option] = disabled_value
         model_info = mlflow.sklearn.log_model(**kwargs)
     except Exception as exc:  # noqa: BLE001 - model logging should not hide training results
         variant_text = f" for variant {variant!r}" if variant else ""

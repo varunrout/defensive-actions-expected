@@ -169,3 +169,63 @@ def test_skops_requires_trusted_types():
     fake = FakeMlflow()
     with pytest.raises(MLflowConfigurationError, match="trusted-types"):
         log_sklearn_model(fake, object(), "b0_constant/model", serialization_format="skops")
+
+
+def test_log_metrics_skips_non_finite_and_records_status():
+    from dax.models.mlflow_tracking import log_metrics
+
+    fake = FakeMlflow()
+    fake.tags = []
+    fake.set_tag = lambda key, value: fake.tags.append((key, value))
+
+    metrics = {"finite": 1.25, "nan_metric": float("nan"), "pos_inf": float("inf"), "neg_inf": float("-inf"), "text": "not numeric"}
+    skipped = log_metrics(fake, metrics)
+
+    assert fake.metrics == [("finite", 1.25)]
+    assert skipped == ["nan_metric", "pos_inf", "neg_inf"]
+    assert ("metric_status_nan_metric", "undefined_non_finite") in fake.params
+    assert ("metric_status_pos_inf", "undefined_non_finite") in fake.params
+    assert ("metric_status_neg_inf", "undefined_non_finite") in fake.params
+    assert ("metric_status_nan_metric", "undefined_non_finite") in fake.tags
+    assert metrics["nan_metric"] != metrics["nan_metric"]
+
+
+def test_log_metrics_prefixes_status_names():
+    from dax.models.mlflow_tracking import log_metrics
+
+    fake = FakeMlflow()
+    skipped = log_metrics(fake, {"spearman": float("nan")}, prefix="fold_")
+
+    assert skipped == ["fold_spearman"]
+    assert fake.metrics == []
+    assert ("metric_status_fold_spearman", "undefined_non_finite") in fake.params
+
+
+def test_log_sklearn_model_disables_metric_replay_when_signature_supports_it():
+    fake = FakeMlflow()
+    calls = []
+
+    def log_model(sk_model=None, name=None, serialization_format=None, log_model_metrics=True):
+        calls.append({"name": name, "log_model_metrics": log_model_metrics, "serialization_format": serialization_format})
+        return types.SimpleNamespace(model_uri=f"models:/{name}")
+
+    fake.sklearn.log_model = log_model
+    result = log_sklearn_model(fake, object(), "r0_constant/model")
+
+    assert result["model_uri"] == "models:/r0_constant_model"
+    assert calls == [{"name": "r0_constant_model", "log_model_metrics": False, "serialization_format": "cloudpickle"}]
+
+
+def test_log_sklearn_model_does_not_pass_unsupported_metric_replay_option():
+    fake = FakeMlflow()
+    calls = []
+
+    def log_model(sk_model=None, name=None, serialization_format=None):
+        calls.append({"name": name, "serialization_format": serialization_format})
+        return types.SimpleNamespace(model_uri=f"models:/{name}")
+
+    fake.sklearn.log_model = log_model
+    result = log_sklearn_model(fake, object(), "r0_constant/model")
+
+    assert result["model_uri"] == "models:/r0_constant_model"
+    assert calls == [{"name": "r0_constant_model", "serialization_format": "cloudpickle"}]

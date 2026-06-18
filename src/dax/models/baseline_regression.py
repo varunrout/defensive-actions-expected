@@ -24,7 +24,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import GroupKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from scipy.stats import spearmanr
+from dax.models.evaluation import safe_spearman
 
 # Target configuration
 TARGET_COL = "target_future_xg_10s"
@@ -496,7 +496,7 @@ def grouped_cv_scores_regression(
                 "r2": float(r2_score(y_test, y_pred)),
                 "rmse": float(np.sqrt(mean_squared_error(y_test, y_pred))),
                 "mae": float(mean_absolute_error(y_test, y_pred)),
-                "spearman": float(spearmanr(y_test, y_pred).correlation),
+                "spearman": safe_spearman(y_test, y_pred),
                 "train_target_mean": float(y_train.mean()),
                 "test_target_mean": float(y_test.mean()),
                 "test_target_zero_rate": float((y_test == 0).mean()),
@@ -507,7 +507,7 @@ def grouped_cv_scores_regression(
     overall_r2 = float(r2_score(y[mask], oof[mask]))
     overall_rmse = float(np.sqrt(mean_squared_error(y[mask], oof[mask])))
     overall_mae = float(mean_absolute_error(y[mask], oof[mask]))
-    overall_spearman = float(spearmanr(y[mask], oof[mask]).correlation)
+    overall_spearman = safe_spearman(y[mask], oof[mask])
 
     return {
         "fold_metrics": fold_rows,
