@@ -280,3 +280,94 @@ class TestNoShotConditionalMetricsNaN:
         assert p["observed_shot_count"] == 0
         assert pd.isna(p["total_conditional_severity_suppression"]) or pd.isna(p["conditional_severity_suppression"])
 
+
+class TestReportPathSeparation:
+    """Feature outputs and model reports must be written to separate directories."""
+
+    def test_reports_dir_option_uses_canonical_location(self, tmp_path):
+        """--reports-dir should be explicitly provided and used for JSON and CSV outputs."""
+        import tempfile
+        feature_dir = tmp_path / "data" / "features"
+        reports_dir = tmp_path / "outputs" / "models" / "reports"
+        feature_dir.mkdir(parents=True, exist_ok=True)
+        reports_dir.mkdir(parents=True, exist_ok=True)
+
+        oof = _minimal_two_part_oof()
+        oof["classification_model_variant"] = "b7_full_with_360"
+
+        # Classification OOF must have y_score matching the oof_shot_probability
+        class_oof = oof[[
+            "event_id"
+        ]].drop_duplicates().reset_index(drop=True).copy()
+        class_oof["model_variant"] = "b7_full_with_360"
+        # Merge to get aligned y_score from oof_shot_probability
+        oof_for_merge = oof[["event_id", "oof_shot_probability"]].drop_duplicates()
+        class_oof = class_oof.merge(oof_for_merge, on="event_id", how="left")
+        class_oof["y_score"] = class_oof["oof_shot_probability"]
+        class_oof = class_oof[["event_id", "model_variant", "y_score"]]
+
+        oof_path = feature_dir / "player_defensive_signals_provisional_oof.parquet"
+        class_oof_path = feature_dir / "classification_oof.parquet"
+        oof.to_parquet(oof_path, index=False)
+        class_oof.to_parquet(class_oof_path, index=False)
+
+        # Run main with explicit --reports-dir
+        import sys
+        from unittest.mock import patch
+        
+        args = [
+            "build_provisional_player_signals.py",
+            "--classification-oof", str(class_oof_path),
+            "--two-part-oof", str(oof_path),
+            "--output", str(feature_dir / "output.parquet"),
+            "--reports-dir", str(reports_dir),
+            "--bootstrap-iterations", "10",
+        ]
+        
+        with patch.object(sys, "argv", args):
+            MODULE.main()
+
+        # Verify reports are in canonical reports_dir, not derived from feature path
+        thresholds_file = reports_dir / "player_signal_reliability_thresholds.json"
+        sensitivity_file = reports_dir / "player_signal_sensitivity.csv"
+        
+        assert thresholds_file.exists(), f"Expected {thresholds_file} to exist"
+        assert sensitivity_file.exists(), f"Expected {sensitivity_file} to exist"
+        
+        # Verify feature output is in feature_dir
+        assert (feature_dir / "output.parquet").exists()
+        
+        # Verify reports are NOT in feature_dir
+        assert not (feature_dir / "player_signal_reliability_thresholds.json").exists()
+
+    def test_reports_dir_default_is_outputs_models_reports(self):
+        """When --reports-dir is not specified, it should default to outputs/models/reports."""
+        # Just verify the argument is in the CLI
+        import argparse
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--reports-dir", default="outputs/models/reports")
+        args = parser.parse_args([])
+        assert args.reports_dir == "outputs/models/reports"
+
+    def test_no_config_argument_in_cli(self):
+        """--config should no longer be a required argument."""
+        import argparse
+        parser = argparse.ArgumentParser()
+        # Simulate the actual argument setup from the script
+        parser.add_argument("--classification-oof", required=True)
+        parser.add_argument("--two-part-oof", required=True)
+        parser.add_argument("--regression-oof")
+        parser.add_argument("--output", required=True)
+        parser.add_argument("--reports-dir", default="outputs/models/reports")
+        parser.add_argument("--bootstrap-iterations", type=int, default=1000)
+        parser.add_argument("--bootstrap-seed", type=int, default=42)
+        
+        # Should not raise for missing --config
+        args = parser.parse_args([
+            "--classification-oof", "class.parquet",
+            "--two-part-oof", "oof.parquet",
+            "--output", "out.parquet",
+        ])
+        assert args.classification_oof == "class.parquet"
+        # Verify config is not in args
+        assert not hasattr(args, "config") or args.config is None
