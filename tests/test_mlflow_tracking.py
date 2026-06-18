@@ -36,7 +36,12 @@ class FakeMlflow(types.SimpleNamespace):
         self.params = []
         self.metrics = []
         self.artifacts = []
-        self.sklearn = types.SimpleNamespace(log_model=lambda sk_model=None, artifact_path=None, name=None: self.artifacts.append(("model", name or artifact_path)) or types.SimpleNamespace(model_uri=f"models:/{name or artifact_path}"))
+        self.sklearn = types.SimpleNamespace(
+            SERIALIZATION_FORMAT_CLOUDPICKLE="cloudpickle",
+            SERIALIZATION_FORMAT_PICKLE="pickle",
+            SERIALIZATION_FORMAT_SKOPS="skops",
+            log_model=lambda sk_model=None, artifact_path=None, name=None, serialization_format=None: self.artifacts.append(("model", name or artifact_path, serialization_format)) or types.SimpleNamespace(model_uri=f"models:/{name or artifact_path}"),
+        )
         self.tracking = types.SimpleNamespace(MlflowClient=lambda tracking_uri=None: types.SimpleNamespace(search_experiments=lambda max_results=1: []))
 
     def set_tracking_uri(self, uri):
@@ -150,4 +155,17 @@ def test_log_sklearn_model_uses_safe_model_name(monkeypatch):
     result = log_sklearn_model(fake, object(), "b0_constant/model", variant="b0_constant")
     assert result["name"] == "b0_constant_model"
     assert result["model_uri"] == "models:/b0_constant_model"
-    assert ("model", "b0_constant_model") in fake.artifacts
+    assert ("model", "b0_constant_model", "cloudpickle") in fake.artifacts
+
+
+def test_log_sklearn_model_uses_pickle_when_requested():
+    fake = FakeMlflow()
+    result = log_sklearn_model(fake, object(), "r0_constant/model", serialization_format="pickle")
+    assert result["serialization_format"] == "pickle"
+    assert ("model", "r0_constant_model", "pickle") in fake.artifacts
+
+
+def test_skops_requires_trusted_types():
+    fake = FakeMlflow()
+    with pytest.raises(MLflowConfigurationError, match="trusted-types"):
+        log_sklearn_model(fake, object(), "b0_constant/model", serialization_format="skops")

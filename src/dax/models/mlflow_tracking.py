@@ -177,7 +177,41 @@ def sanitise_mlflow_model_name(value: str | None) -> str:
     return safe or "model"
 
 
-def log_sklearn_model(mlflow: Any | None, model: Any, artifact_path: str, *, variant: str | None = None) -> dict[str, Any] | None:
+
+def resolve_sklearn_serialization_format(
+    mlflow: Any,
+    requested: str = "cloudpickle",
+    *,
+    trusted_types: list[str] | None = None,
+) -> Any:
+    """Resolve an explicit MLflow sklearn serialization format.
+
+    CloudPickle is the repository default because the modelling package includes
+    trusted project-owned custom estimators. Skops requires an explicit trusted
+    types policy so the caller does not accidentally rely on a permissive load
+    path.
+    """
+
+    normalised = (requested or "cloudpickle").lower()
+    if normalised == "cloudpickle":
+        return getattr(mlflow.sklearn, "SERIALIZATION_FORMAT_CLOUDPICKLE", "cloudpickle")
+    if normalised == "pickle":
+        return getattr(mlflow.sklearn, "SERIALIZATION_FORMAT_PICKLE", "pickle")
+    if normalised == "skops":
+        if not trusted_types:
+            raise MLflowConfigurationError("skops serialization requires explicit trusted-types configuration.")
+        return getattr(mlflow.sklearn, "SERIALIZATION_FORMAT_SKOPS", "skops")
+    raise MLflowConfigurationError(f"Unsupported sklearn serialization format: {requested!r}.")
+
+def log_sklearn_model(
+    mlflow: Any | None,
+    model: Any,
+    artifact_path: str,
+    *,
+    variant: str | None = None,
+    serialization_format: str = "cloudpickle",
+    trusted_types: list[str] | None = None,
+) -> dict[str, Any] | None:
     """Log a scikit-learn compatible model and return MLflow model metadata.
 
     Current MLflow versions prefer ``name=`` and ``sk_model=``. Older versions
@@ -187,9 +221,17 @@ def log_sklearn_model(mlflow: Any | None, model: Any, artifact_path: str, *, var
     if mlflow is None:
         return None
     safe_model_name = sanitise_mlflow_model_name(artifact_path)
+    resolved_serialization_format = resolve_sklearn_serialization_format(
+        mlflow,
+        serialization_format,
+        trusted_types=trusted_types,
+    )
     try:
         parameters = inspect.signature(mlflow.sklearn.log_model).parameters
-        kwargs: dict[str, Any] = {"sk_model": model}
+        kwargs: dict[str, Any] = {
+            "sk_model": model,
+            "serialization_format": resolved_serialization_format,
+        }
         if "name" in parameters:
             kwargs["name"] = safe_model_name
         elif "artifact_path" in parameters:
@@ -200,4 +242,4 @@ def log_sklearn_model(mlflow: Any | None, model: Any, artifact_path: str, *, var
     except Exception as exc:  # noqa: BLE001 - model logging should not hide training results
         variant_text = f" for variant {variant!r}" if variant else ""
         raise MLflowConfigurationError(f"Failed to log sklearn model{variant_text} as {safe_model_name!r}.") from exc
-    return {"name": safe_model_name, "model_info": model_info, "model_uri": getattr(model_info, "model_uri", None)}
+    return {"name": safe_model_name, "model_info": model_info, "model_uri": getattr(model_info, "model_uri", None), "serialization_format": serialization_format}

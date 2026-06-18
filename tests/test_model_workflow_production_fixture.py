@@ -138,6 +138,7 @@ def test_enabled_mlflow_sqlite_tracking_integration(tmp_path: Path):
     bundle = joblib.load(bundle_path)
     assert bundle["mlflow_model_name"] == "b0_constant_model"
     assert bundle["mlflow_model_uri"]
+    assert bundle["mlflow_sklearn_serialization_format"] == "cloudpickle"
     assert any(run.data.metrics for run in nested)
     assert any(run.data.params for run in nested)
     if hasattr(client, "search_logged_models"):
@@ -181,3 +182,44 @@ def test_platt_and_isotonic_calibration_receive_only_outer_training_rows(monkeyp
         assert set(call["indices"]) == set(x_train.index)
         assert not outer_validation_indices.intersection(call["indices"])
         assert call["positives"] == 6
+
+
+@pytest.mark.skipif(importlib.util.find_spec("mlflow") is None, reason="MLflow is not installed in this environment")
+def test_genuine_mlflow_round_trips_custom_baselines_and_pipeline(tmp_path: Path):
+    import mlflow
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import StandardScaler
+
+    from dax.models.baselines import ConstantClassifier, ConstantRegressor
+    from dax.models.mlflow_tracking import log_sklearn_model
+
+    tracking_uri = f"sqlite:///{(tmp_path / 'mlflow.db').as_posix()}"
+    mlflow.set_tracking_uri(tracking_uri)
+    mlflow.set_experiment("baseline-roundtrip")
+
+    x_empty = pd.DataFrame(index=range(4))
+    y_class = pd.Series([0, 1, 1, 0])
+    y_reg = pd.Series([0.0, 0.2, 0.1, 0.0])
+    x_numeric = pd.DataFrame({"x": [0.0, 1.0, 2.0, 3.0]})
+
+    models = [
+        ("constant_classifier/model", ConstantClassifier().fit(x_empty, y_class), x_empty, "predict_proba"),
+        ("constant_regressor/model", ConstantRegressor().fit(x_empty, y_reg), x_empty, "predict"),
+        (
+            "standard_pipeline/model",
+            Pipeline([("scale", StandardScaler()), ("model", LogisticRegression())]).fit(x_numeric, y_class),
+            x_numeric,
+            "predict_proba",
+        ),
+    ]
+
+    with mlflow.start_run(run_name="roundtrip"):
+        for artifact_path, model, x_frame, predict_method in models:
+            result = log_sklearn_model(mlflow, model, artifact_path, serialization_format="cloudpickle")
+            assert result["serialization_format"] == "cloudpickle"
+            assert result["model_uri"]
+            loaded = mlflow.sklearn.load_model(result["model_uri"])
+            original_prediction = getattr(model, predict_method)(x_frame)
+            loaded_prediction = getattr(loaded, predict_method)(x_frame)
+            np.testing.assert_allclose(loaded_prediction, original_prediction)
