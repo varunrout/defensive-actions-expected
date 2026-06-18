@@ -62,6 +62,12 @@ def validate_classification_alignment(two_part_oof: pd.DataFrame, classification
 
 
 def build_player_aggregates(two_part_oof: pd.DataFrame) -> pd.DataFrame:
+    """Aggregate two-part OOF to player level.
+
+    The conditional_severity_reliability_flag is set to False here and must be
+    updated by calling apply_conditional_reliability_flag() after thresholds are
+    derived from the data.
+    """
     group_cols = player_groupby_cols(two_part_oof)
 
     aggregated = (
@@ -92,6 +98,8 @@ def build_player_aggregates(two_part_oof: pd.DataFrame) -> pd.DataFrame:
         aggregated["observed_xg_on_shots"] = np.nan
         aggregated["total_conditional_severity_suppression"] = np.nan
         aggregated["mean_conditional_severity_suppression_per_shot"] = np.nan
+        # Flag is always False when there are no shots; will be confirmed by
+        # apply_conditional_reliability_flag() after thresholds are known.
         aggregated["conditional_severity_reliability_flag"] = False
     else:
         shot_agg = (
@@ -109,11 +117,17 @@ def build_player_aggregates(two_part_oof: pd.DataFrame) -> pd.DataFrame:
         shot_agg["mean_conditional_severity_suppression_per_shot"] = (
             shot_agg["total_conditional_severity_suppression"] / shot_agg["observed_shot_count"].clip(lower=1)
         )
-        shot_agg["conditional_severity_reliability_flag"] = shot_agg["observed_shot_count"].ge(3)
+        # Reliability flag is provisional (False) until apply_conditional_reliability_flag()
+        # is called with data-derived thresholds.
+        shot_agg["conditional_severity_reliability_flag"] = False
 
         aggregated = aggregated.merge(shot_agg, on=group_cols, how="left")
         aggregated["observed_shot_count"] = aggregated["observed_shot_count"].fillna(0).astype(int)
-        aggregated["conditional_severity_reliability_flag"] = aggregated["conditional_severity_reliability_flag"].fillna(False)
+        aggregated["conditional_severity_reliability_flag"] = np.where(
+            aggregated["conditional_severity_reliability_flag"].isna(),
+            False,
+            aggregated["conditional_severity_reliability_flag"],
+        ).astype(bool)
 
     aggregated["conditional_severity_suppression"] = aggregated["mean_conditional_severity_suppression_per_shot"]
 
@@ -161,6 +175,11 @@ def derive_reliability_thresholds(player_signals: pd.DataFrame) -> dict[str, Any
             f"q{int(q * 100)}": float(series.quantile(q)) for q in quantiles
         }
 
+    # shots_medium is the data-derived conditional-severity shot threshold.
+    shots_medium = stats_by_metric["observed_shot_count"]["q50"]
+    # Ensure at least 1 observed shot is required (never trust a zero threshold).
+    conditional_severity_shot_threshold = max(int(shots_medium), 1)
+
     thresholds = {
         "actions_low": stats_by_metric["eligible_actions"]["q25"],
         "actions_medium": stats_by_metric["eligible_actions"]["q50"],
@@ -169,9 +188,24 @@ def derive_reliability_thresholds(player_signals: pd.DataFrame) -> dict[str, Any
         "matches_medium": stats_by_metric["represented_matches"]["q50"],
         "matches_high": stats_by_metric["represented_matches"]["q75"],
         "shots_low": stats_by_metric["observed_shot_count"]["q25"],
-        "shots_medium": stats_by_metric["observed_shot_count"]["q50"],
+        "shots_medium": shots_medium,
+        # Explicitly record the threshold used for conditional severity reliability.
+        "conditional_severity_shot_threshold": conditional_severity_shot_threshold,
     }
     return {"quantiles": stats_by_metric, "thresholds": thresholds}
+
+
+def apply_conditional_reliability_flag(player_signals: pd.DataFrame, thresholds: dict[str, Any]) -> pd.DataFrame:
+    """Apply the conditional severity reliability flag using the data-derived shot-count threshold.
+
+    The threshold is taken from thresholds["thresholds"]["conditional_severity_shot_threshold"],
+    which is derived from the observed-shot-count median of the player-signal population.
+    """
+    shot_threshold = int(thresholds["thresholds"].get("conditional_severity_shot_threshold", 1))
+    result = player_signals.copy()
+    if "observed_shot_count" in result.columns:
+        result["conditional_severity_reliability_flag"] = result["observed_shot_count"].ge(shot_threshold)
+    return result
 
 
 def assign_reliability_tier(player_signals: pd.DataFrame, thresholds: dict[str, Any]) -> pd.Series:
@@ -196,6 +230,14 @@ def bootstrap_player_suppression_match_level(
     n_bootstrap: int,
     seed: int,
 ) -> pd.DataFrame:
+    """Compute match-level bootstrap uncertainty for player-level suppression signals.
+
+    For each bootstrap iteration a single set of match IDs is sampled with
+    replacement.  All three suppression statistics (shot suppression, combined
+    xG suppression and conditional severity suppression) are then calculated
+    from that *same* resampled match population, ensuring that the resulting
+    confidence intervals are based on identical resampled data.
+    """
     group_cols = player_groupby_cols(two_part_oof)
 
     frame = two_part_oof.copy()
@@ -240,11 +282,43 @@ def bootstrap_player_suppression_match_level(
         if match_count == 0:
             continue
 
-        cond_group = cond_by_match
+        # Build conditional group for this player.
+        cond_group = cond_by_match.copy()
         for column in group_cols:
             cond_group = cond_group.loc[cond_group[column].eq(key_map[column])]
 
-        stat_samples = {
+        # Align arrays to the same match-ID order so we can resample once.
+        match_ids = group["match_id"].to_numpy()
+        group_indexed = group.set_index("match_id")
+
+        main_actions = group_indexed.loc[match_ids, "match_actions"].to_numpy(dtype=float)
+        main_shot_supp = group_indexed.loc[match_ids, "total_shot_suppression"].to_numpy(dtype=float)
+        main_combined_supp = group_indexed.loc[match_ids, "total_combined_xg_suppression"].to_numpy(dtype=float)
+
+        if not cond_group.empty:
+            cond_indexed = cond_group.set_index("match_id")
+            cond_supp_per_match = np.array(
+                [
+                    float(cond_indexed.loc[mid, "total_conditional_severity_suppression"])
+                    if mid in cond_indexed.index
+                    else np.nan
+                    for mid in match_ids
+                ],
+                dtype=float,
+            )
+            shot_rows_per_match = np.array(
+                [
+                    float(cond_indexed.loc[mid, "shot_rows_count"]) if mid in cond_indexed.index else 0.0
+                    for mid in match_ids
+                ],
+                dtype=float,
+            )
+        else:
+            cond_supp_per_match = np.full(len(match_ids), np.nan, dtype=float)
+            shot_rows_per_match = np.zeros(len(match_ids), dtype=float)
+
+        n = len(match_ids)
+        stat_samples: dict[str, list[float]] = {
             "total_shot_suppression": [],
             "mean_shot_suppression_per_action": [],
             "total_combined_xg_suppression": [],
@@ -253,33 +327,35 @@ def bootstrap_player_suppression_match_level(
             "mean_conditional_severity_suppression_per_shot": [],
         }
 
-        group_values = group[["match_actions", "total_shot_suppression", "total_combined_xg_suppression"]].to_numpy(dtype=float)
-        cond_values = cond_group[["shot_rows_count", "total_conditional_severity_suppression"]].to_numpy(dtype=float) if not cond_group.empty else np.empty((0, 2), dtype=float)
-
         for _ in range(n_bootstrap):
-            idx = rng.choice(len(group_values), size=len(group_values), replace=True)
-            sampled = group_values[idx]
-            total_actions = sampled[:, 0].sum()
-            total_shot_supp = sampled[:, 1].sum()
-            total_combined_supp = sampled[:, 2].sum()
+            # Sample match positions once; use the same sample for all statistics.
+            idx = rng.choice(n, size=n, replace=True)
+
+            total_actions = main_actions[idx].sum()
+            total_shot_supp = main_shot_supp[idx].sum()
+            total_combined_supp = main_combined_supp[idx].sum()
 
             stat_samples["total_shot_suppression"].append(total_shot_supp)
             stat_samples["mean_shot_suppression_per_action"].append(total_shot_supp / max(total_actions, 1.0))
             stat_samples["total_combined_xg_suppression"].append(total_combined_supp)
             stat_samples["mean_combined_xg_suppression_per_action"].append(total_combined_supp / max(total_actions, 1.0))
 
-            if len(cond_values) > 0:
-                cidx = rng.choice(len(cond_values), size=len(cond_values), replace=True)
-                sampled_cond = cond_values[cidx]
-                total_shot_rows = sampled_cond[:, 0].sum()
-                total_cond_supp = sampled_cond[:, 1].sum()
+            # Conditional severity uses the SAME idx, so the same matches are resampled.
+            sampled_cond = cond_supp_per_match[idx]
+            sampled_shot_rows = shot_rows_per_match[idx]
+            valid = np.isfinite(sampled_cond)
+            if valid.any():
+                total_cond_supp = sampled_cond[valid].sum()
+                total_shot_rows = sampled_shot_rows[valid].sum()
                 stat_samples["total_conditional_severity_suppression"].append(total_cond_supp)
-                stat_samples["mean_conditional_severity_suppression_per_shot"].append(total_cond_supp / max(total_shot_rows, 1.0))
+                stat_samples["mean_conditional_severity_suppression_per_shot"].append(
+                    total_cond_supp / max(total_shot_rows, 1.0)
+                )
             else:
                 stat_samples["total_conditional_severity_suppression"].append(np.nan)
                 stat_samples["mean_conditional_severity_suppression_per_shot"].append(np.nan)
 
-        row = {**key_map, "bootstrap_match_count": match_count}
+        row: dict[str, Any] = {**key_map, "bootstrap_match_count": match_count}
         for metric, values in stat_samples.items():
             arr = np.asarray(values, dtype=float)
             valid = arr[np.isfinite(arr)]
@@ -303,7 +379,12 @@ def bootstrap_player_suppression_match_level(
 
 
 def compute_player_sensitivity(player_signals: pd.DataFrame) -> pd.DataFrame:
-    """Compute within-output stability flags and ranking diagnostics."""
+    """Compute within-output stability flags and ranking diagnostics.
+
+    confidence_interval_overlap is True when the 95% bootstrap CI for a
+    player's total_combined_xg_suppression spans zero, meaning the suppression
+    estimate is not reliably distinguishable from zero.
+    """
 
     if player_signals.empty:
         return pd.DataFrame()
@@ -318,7 +399,18 @@ def compute_player_sensitivity(player_signals: pd.DataFrame) -> pd.DataFrame:
     kendall = float(out[["combined_xg_suppression", "mean_combined_xg_suppression"]].corr(method="kendall").iloc[0, 1])
     out["spearman_rank_correlation"] = spearman
     out["kendall_rank_correlation"] = kendall
-    out["confidence_interval_overlap"] = np.nan
+
+    # Compute CI overlap from bootstrap columns if available.
+    ci_lower_col = "total_combined_xg_suppression_ci95_lower"
+    ci_upper_col = "total_combined_xg_suppression_ci95_upper"
+    if ci_lower_col in player_signals.columns and ci_upper_col in player_signals.columns:
+        lower = player_signals[ci_lower_col].reindex(out.index)
+        upper = player_signals[ci_upper_col].reindex(out.index)
+        # True means the CI spans zero: the player's suppression is uncertain.
+        out["confidence_interval_overlap"] = lower.le(0) & upper.ge(0)
+    else:
+        out["confidence_interval_overlap"] = np.nan
+
     out["unstable_player_flag"] = out["rank_change_total_vs_mean"].gt(100) | out["suppression_sign_change_total_vs_mean"]
     return out
 
@@ -381,6 +473,11 @@ def main() -> None:
     player_signals["reliability_tier"] = assign_reliability_tier(player_signals, thresholds)
     player_signals["minimum_sample_flag"] = player_signals["reliability_tier"].eq("insufficient")
 
+    # Apply data-derived conditional severity reliability flag (replaces any hardcoded threshold).
+    player_signals = apply_conditional_reliability_flag(player_signals, thresholds)
+    conditional_shot_threshold = thresholds["thresholds"]["conditional_severity_shot_threshold"]
+    print(f"  Conditional severity shot threshold (data-derived, q50): {conditional_shot_threshold}")
+
     print("Computing match-level bootstrap uncertainty...")
     uncertainty = bootstrap_player_suppression_match_level(
         two_part_oof,
@@ -405,6 +502,7 @@ def main() -> None:
         "classification_variant": variant,
         "bootstrap_iterations": args.bootstrap_iterations,
         "bootstrap_seed": args.bootstrap_seed,
+        "conditional_severity_shot_threshold_used": conditional_shot_threshold,
         **thresholds,
     }
     thresholds_path.write_text(json.dumps(thresholds_payload, indent=2), encoding="utf-8")
@@ -415,6 +513,7 @@ def main() -> None:
     print(f"✓ Player signals saved to: {output_path}")
     print(f"  Rows: {len(player_signals)}")
     print(f"  Columns: {len(player_signals.columns)}")
+    print(f"  Conditional severity shot threshold (q50, data-derived): {conditional_shot_threshold}")
     print(f"  Reliability thresholds: {thresholds_path}")
     print(f"  Sensitivity report: {sensitivity_path}")
 

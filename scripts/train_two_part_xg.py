@@ -52,6 +52,43 @@ from dax.models.two_part_xg import (
 matplotlib.use("Agg", force=True)
 
 DEFAULT_CLASSIFICATION_VARIANTS = ["b7_full_with_360", "b6_full_without_360"]
+
+
+def _compute_match_level_suppression_ci(
+    oof: pd.DataFrame,
+    *,
+    n_bootstrap: int = 500,
+    seed: int = 42,
+) -> pd.DataFrame:
+    """Compute per-player bootstrap CI for combined_xg_suppression.
+
+    Returns a DataFrame with player_id, team, ci95_lower, ci95_upper.
+    """
+    group_cols = [c for c in ["player_id", "team"] if c in oof.columns]
+    if not group_cols:
+        return pd.DataFrame(columns=["ci95_lower", "ci95_upper"])
+    oof = oof.copy()
+    oof["supp_event"] = oof["combined_future_xg_prediction"] - oof["observed_future_xg"]
+    by_match = (
+        oof.groupby(group_cols + ["match_id"], dropna=False)
+        .agg(total_supp=("supp_event", "sum"))
+        .reset_index()
+    )
+    rng = np.random.RandomState(seed)
+    rows: list[dict] = []
+    for keys, group in by_match.groupby(group_cols, dropna=False):
+        if not isinstance(keys, tuple):
+            keys = (keys,)
+        key_map = dict(zip(group_cols, keys))
+        vals = group["total_supp"].to_numpy(dtype=float)
+        n = len(vals)
+        samples = np.array([vals[rng.choice(n, size=n, replace=True)].sum() for _ in range(n_bootstrap)])
+        rows.append({
+            **key_map,
+            "ci95_lower": float(np.percentile(samples, 2.5)),
+            "ci95_upper": float(np.percentile(samples, 97.5)),
+        })
+    return pd.DataFrame(rows)
 DEFAULT_REGRESSION_CONTRACT = "r4_full_with_360"
 BENCHMARK_VARIANTS = ["r0_constant", "r4_full_with_360", "r6_nonlinear_candidate"]
 
@@ -224,11 +261,15 @@ def selection_with_reasons(comparison: pd.DataFrame, benchmark: pd.DataFrame) ->
         ordered = frame.loc[subset_idx].sort_values("selection_score")
         preferred_idx = ordered.index[0]
 
-        r4_rows = benchmark.loc[
-            benchmark["classification_variant"].eq(classification_variant)
-            & benchmark["conditional_model"].eq(frame.loc[preferred_idx, "conditional_model"])
-            & benchmark["benchmark_variant"].eq("r4_full_with_360")
-        ]
+        r4_rows = (
+            benchmark.loc[
+                benchmark["classification_variant"].eq(classification_variant)
+                & benchmark["conditional_model"].eq(frame.loc[preferred_idx, "conditional_model"])
+                & benchmark["benchmark_variant"].eq("r4_full_with_360")
+            ]
+            if not benchmark.empty and "classification_variant" in benchmark.columns
+            else pd.DataFrame()
+        )
         if not r4_rows.empty:
             r4_row = r4_rows.iloc[0]
             better_or_equal = bool(
@@ -673,8 +714,11 @@ def main() -> None:
                             serialization_format="cloudpickle",
                         )
                         if mlflow_model is not None:
+                            # Update bundle with MLflow URI, resave, and re-log the
+                            # final bundle so the artifact and local file are identical.
                             bundle["mlflow_model_uri"] = mlflow_model.get("model_uri")
                             joblib.dump(bundle, bundle_path)
+                            log_artifact(mlflow, bundle_path, artifact_path=run_label)
 
     comparison_df = pd.DataFrame(all_rows)
     benchmark_df = pd.DataFrame(benchmark_rows)
@@ -758,118 +802,361 @@ def main() -> None:
         if key in variant_outputs:
             variant_outputs[key].to_parquet(dirs["oof"] / "two_part_future_xg_oof.parquet", index=False)
 
-    # Sensitivity output for player-level suppression stability
-    sensitivity_rows: list[dict[str, Any]] = []
-    if {"b7_full_with_360", "b6_full_without_360"}.issubset(set(classification_variants)):
-        def _preferred_variant(class_variant: str) -> tuple[str, pd.DataFrame] | None:
-            row = preferred_rows.loc[preferred_rows["classification_variant"].eq(class_variant)]
-            if row.empty:
-                return None
-            conditional_model = str(row.iloc[0]["conditional_model"])
-            oof = variant_outputs.get((class_variant, conditional_model))
-            return (conditional_model, oof) if oof is not None else None
-
-        preferred_b7 = _preferred_variant("b7_full_with_360")
-        preferred_b6 = _preferred_variant("b6_full_without_360")
-        if preferred_b7 is not None and preferred_b6 is not None:
-            r4 = load_regression_variant_oof(args.regression_oof, args.output_dir, "r4_full_with_360")
-            b7_player = preferred_b7[1].groupby(["player_id", "team"], dropna=False)[["combined_future_xg_prediction", "observed_future_xg"]].sum().reset_index()
-            b6_player = preferred_b6[1].groupby(["player_id", "team"], dropna=False)[["combined_future_xg_prediction", "observed_future_xg"]].sum().reset_index()
-            r4_player = r4.groupby(["player_id", "team"], dropna=False)[["y_pred", "y_true"]].sum().reset_index()
-            merged = b7_player.merge(b6_player, on=["player_id", "team"], suffixes=("_b7", "_b6"), how="inner")
-            merged = merged.merge(r4_player, on=["player_id", "team"], how="left")
-            merged["supp_b7"] = merged["combined_future_xg_prediction_b7"] - merged["observed_future_xg_b7"]
-            merged["supp_b6"] = merged["combined_future_xg_prediction_b6"] - merged["observed_future_xg_b6"]
-            merged["supp_r4"] = merged["y_pred"] - merged["y_true"]
-            merged["rank_b7"] = merged["supp_b7"].rank(ascending=False, method="min")
-            merged["rank_b6"] = merged["supp_b6"].rank(ascending=False, method="min")
-            merged["rank_change_b7_vs_b6"] = (merged["rank_b7"] - merged["rank_b6"]).abs()
-            merged["suppression_sign_change_b7_vs_b6"] = np.sign(merged["supp_b7"]) != np.sign(merged["supp_b6"])
-            merged["unstable_player_flag"] = merged["rank_change_b7_vs_b6"].gt(100) | merged["suppression_sign_change_b7_vs_b6"]
-            global_spearman = merged[["supp_b7", "supp_b6"]].corr(method="spearman").iloc[0, 1]
-            global_kendall = merged[["supp_b7", "supp_b6"]].corr(method="kendall").iloc[0, 1]
-            for _, row in merged.iterrows():
-                sensitivity_rows.append(
-                    {
-                        "player_id": row["player_id"],
-                        "team": row["team"],
-                        "suppression_b7": row["supp_b7"],
-                        "suppression_b6": row["supp_b6"],
-                        "suppression_r4": row["supp_r4"],
-                        "spearman_rank_correlation_b7_vs_b6": global_spearman,
-                        "kendall_rank_correlation_b7_vs_b6": global_kendall,
-                        "rank_change_b7_vs_b6": row["rank_change_b7_vs_b6"],
-                        "suppression_sign_change_b7_vs_b6": bool(row["suppression_sign_change_b7_vs_b6"]),
-                        "confidence_interval_overlap": np.nan,
-                        "unstable_player_flag": bool(row["unstable_player_flag"]),
-                    }
+    # If no candidate beat r4: save best exploratory OOF and label it clearly.
+    exploratory_oof_path: Path | None = None
+    exploratory_label: str | None = None
+    if preferred_rows.empty and variant_outputs:
+        exploratory_candidates = selection_df.loc[
+            selection_df["status"].isin(["insufficient evidence", "backup candidate"])
+        ].copy()
+        if exploratory_candidates.empty:
+            exploratory_candidates = selection_df.copy()
+        if not exploratory_candidates.empty:
+            # Use selection_score to pick the best exploratory candidate; lower is better.
+            if "selection_score" in exploratory_candidates.columns:
+                exploratory_candidates = exploratory_candidates.sort_values("selection_score")
+            best_exploratory = exploratory_candidates.iloc[0]
+            key = (str(best_exploratory["classification_variant"]), str(best_exploratory["conditional_model"]))
+            if key in variant_outputs:
+                exploratory_oof = variant_outputs[key]
+                exploratory_oof_path = dirs["oof"] / "two_part_future_xg_oof_exploratory.parquet"
+                exploratory_oof.to_parquet(exploratory_oof_path, index=False)
+                exploratory_label = f"{key[0]}/{key[1]}"
+                print(
+                    f"\nNOTE: No hurdle candidate beat r4 on shared-row metrics. "
+                    f"Saved exploratory OOF for '{exploratory_label}' to: {exploratory_oof_path}"
                 )
+
+    # ── Sensitivity analysis ──────────────────────────────────────────────────
+    sensitivity_rows: list[dict[str, Any]] = []
+
+    def _player_suppression(source_oof: pd.DataFrame, pred_col: str, obs_col: str) -> pd.DataFrame:
+        grp = source_oof.groupby(["player_id", "team"], dropna=False)
+        agg = grp[[pred_col, obs_col]].sum().reset_index()
+        agg["suppression"] = agg[pred_col] - agg[obs_col]
+        return agg
+
+    def _pair_rows(
+        name_a: str,
+        sup_a: pd.DataFrame,
+        name_b: str,
+        sup_b: pd.DataFrame,
+        ci_a: pd.DataFrame | None = None,
+        ci_b: pd.DataFrame | None = None,
+    ) -> list[dict[str, Any]]:
+        merged = sup_a.merge(sup_b, on=["player_id", "team"], suffixes=("_a", "_b"), how="inner")
+        if merged.empty:
+            return []
+        merged["rank_a"] = merged["suppression_a"].rank(ascending=False, method="min")
+        merged["rank_b"] = merged["suppression_b"].rank(ascending=False, method="min")
+        merged["rank_change"] = (merged["rank_a"] - merged["rank_b"]).abs()
+        merged["sign_change"] = np.sign(merged["suppression_a"]) != np.sign(merged["suppression_b"])
+        merged["unstable"] = merged["rank_change"].gt(100) | merged["sign_change"]
+        valid_a = merged["suppression_a"].dropna()
+        valid_b = merged["suppression_b"].dropna()
+        if len(valid_a) >= 2 and len(valid_b) >= 2:
+            spearman_val = float(merged[["suppression_a", "suppression_b"]].corr(method="spearman").iloc[0, 1])
+            kendall_val = float(merged[["suppression_a", "suppression_b"]].corr(method="kendall").iloc[0, 1])
+        else:
+            spearman_val = float("nan")
+            kendall_val = float("nan")
+        # CI overlap between model A and model B per player.
+        ci_merged: pd.DataFrame | None = None
+        if ci_a is not None and ci_b is not None and not ci_a.empty and not ci_b.empty:
+            ci_merged = ci_a.merge(ci_b, on=["player_id", "team"], suffixes=("_a", "_b"), how="inner")
+        out = []
+        for _, r in merged.iterrows():
+            ci_overlap = float("nan")
+            if ci_merged is not None:
+                ci_row = ci_merged.loc[
+                    ci_merged["player_id"].eq(r["player_id"]) & ci_merged["team"].eq(r["team"])
+                ]
+                if not ci_row.empty:
+                    lo_a = float(ci_row.iloc[0]["ci95_lower_a"])
+                    hi_a = float(ci_row.iloc[0]["ci95_upper_a"])
+                    lo_b = float(ci_row.iloc[0]["ci95_lower_b"])
+                    hi_b = float(ci_row.iloc[0]["ci95_upper_b"])
+                    ci_overlap = bool(lo_a <= hi_b and lo_b <= hi_a)
+            out.append({
+                "comparison_pair": f"{name_a}_vs_{name_b}",
+                "player_id": r["player_id"],
+                "team": r["team"],
+                f"suppression_{name_a}": r["suppression_a"],
+                f"suppression_{name_b}": r["suppression_b"],
+                f"rank_{name_a}": r["rank_a"],
+                f"rank_{name_b}": r["rank_b"],
+                "rank_change": r["rank_change"],
+                "suppression_sign_change": bool(r["sign_change"]),
+                "spearman_rank_correlation": spearman_val,
+                "kendall_rank_correlation": kendall_val,
+                "confidence_interval_overlap": ci_overlap,
+                "unstable_player_flag": bool(r["unstable"]),
+            })
+        return out
+
+    has_b7 = "b7_full_with_360" in classification_variants
+    has_b6 = "b6_full_without_360" in classification_variants
+
+    # Attempt to load r4 for comparisons.
+    r4_player_oof: pd.DataFrame | None = None
+    try:
+        r4_raw = load_regression_variant_oof(args.regression_oof, args.output_dir, "r4_full_with_360")
+        if {"player_id", "team", "y_pred", "y_true"}.issubset(r4_raw.columns):
+            r4_player_oof = r4_raw
+    except Exception:  # noqa: BLE001
+        pass
+
+    def _get_preferred_oof(class_variant: str) -> pd.DataFrame | None:
+        preferred_row = preferred_rows.loc[preferred_rows["classification_variant"].eq(class_variant)]
+        if preferred_row.empty:
+            # Fall back to best insufficient-evidence candidate.
+            ie_rows = selection_df.loc[
+                selection_df["classification_variant"].eq(class_variant)
+                & selection_df["status"].isin(["insufficient evidence", "backup candidate"])
+            ]
+            if ie_rows.empty:
+                return None
+            if "selection_score" in ie_rows.columns:
+                ie_rows = ie_rows.sort_values("selection_score")
+            preferred_row = ie_rows.head(1)
+        cond_model = str(preferred_row.iloc[0]["conditional_model"])
+        return variant_outputs.get((class_variant, cond_model))
+
+    b7_oof = _get_preferred_oof("b7_full_with_360") if has_b7 else None
+    b6_oof = _get_preferred_oof("b6_full_without_360") if has_b6 else None
+
+    if b7_oof is not None and b6_oof is not None:
+        sup_b7 = _player_suppression(b7_oof, "combined_future_xg_prediction", "observed_future_xg")
+        sup_b6 = _player_suppression(b6_oof, "combined_future_xg_prediction", "observed_future_xg")
+        ci_b7 = _compute_match_level_suppression_ci(b7_oof)
+        ci_b6 = _compute_match_level_suppression_ci(b6_oof)
+        sensitivity_rows.extend(_pair_rows("b7", sup_b7, "b6", sup_b6, ci_b7, ci_b6))
+
+        if r4_player_oof is not None:
+            sup_r4 = _player_suppression(r4_player_oof, "y_pred", "y_true")
+            ci_r4 = _compute_match_level_suppression_ci(
+                r4_player_oof.rename(columns={"y_pred": "combined_future_xg_prediction", "y_true": "observed_future_xg"})
+            )
+            sensitivity_rows.extend(_pair_rows("b7", sup_b7, "r4", sup_r4, ci_b7, ci_r4))
+            sensitivity_rows.extend(_pair_rows("b6", sup_b6, "r4", sup_r4, ci_b6, ci_r4))
+
+    # all eligible vs reliable_5m_visibility rows for the combined OOF.
+    for class_variant, src_oof in [(v, _get_preferred_oof(v)) for v in classification_variants]:
+        if src_oof is None:
+            continue
+        if "reliable_5m_visibility" not in src_oof.columns:
+            continue
+        reliable = src_oof.loc[src_oof["reliable_5m_visibility"].eq(True)].copy()
+        if reliable.empty or len(reliable) == len(src_oof):
+            continue
+        sup_all = _player_suppression(src_oof, "combined_future_xg_prediction", "observed_future_xg")
+        sup_rel = _player_suppression(reliable, "combined_future_xg_prediction", "observed_future_xg")
+        ci_all = _compute_match_level_suppression_ci(src_oof)
+        ci_rel = _compute_match_level_suppression_ci(reliable)
+        variant_tag = "b7" if class_variant == "b7_full_with_360" else "b6"
+        sensitivity_rows.extend(
+            _pair_rows(f"{variant_tag}_all", sup_all, f"{variant_tag}_reliable", sup_rel, ci_all, ci_rel)
+        )
 
     sensitivity_path = dirs["reports"] / "player_signal_sensitivity.csv"
     pd.DataFrame(sensitivity_rows).to_csv(sensitivity_path, index=False)
 
-    # Final markdown report
+    # ── Expanded evaluation report ───────────────────────────────────────────
     report_path = dirs["reports"] / "two_part_xg_evaluation.md"
+
+    def _fmt(val: Any, decimals: int = 4) -> str:
+        try:
+            f = float(val)
+            import math
+            return f"{f:.{decimals}f}" if math.isfinite(f) else str(val)
+        except (TypeError, ValueError):
+            return str(val)
+
+    has_preferred = not preferred_rows.empty
+    any_beats_r4 = (
+        has_preferred and
+        not benchmark_df.empty and
+        benchmark_df.loc[
+            benchmark_df["benchmark_variant"].eq("r4_full_with_360") &
+            benchmark_df["rows"].gt(0)
+        ].apply(
+            lambda r: safe_numeric(r.get("candidate_mae", np.nan)) <= safe_numeric(r.get("benchmark_mae", np.nan)),
+            axis=1,
+        ).any()
+    )
+
     lines = [
         "# Two-Part xG Evaluation",
         "",
         f"Generated: {datetime.now(timezone.utc).isoformat()}",
         "",
-        "## Dataset and OOF alignment",
+        "## 1. Dataset and OOF Alignment",
         "",
     ]
     for variant in classification_variants:
         source = classification_sources.get(variant)
         checked = checked_messages.get(variant, [])
         lines.append(f"- `{variant}` source: `{source}`")
-        lines.append(f"- `{variant}` checks: {len(checked)} paths")
-    lines += [
-        "",
-        "## Classification variant comparison (exact common rows)",
-        "",
-        f"- Output: `{comparison_path}`",
-        "",
-        "## Conditional model results",
-        "",
-        f"- Output: `{selection_path}`",
-        "",
-        "## Hurdle model results",
-        "",
-        f"- Output: `{benchmark_path}`",
-        "",
-        "## Fold stability",
-        "",
-        "- Reported via `fold_mean` and `fold_std` in comparison tables.",
-        "",
-        "## Decile ranking",
-        "",
-        "- Stored per variant as `*_combined_deciles.csv` under reports.",
-        "",
-        "## Diagnostics",
-        "",
-        f"- Charts saved under `{dirs['charts']}`",
-        "",
-        "## Model selection",
-        "",
-        "- Statuses: preferred candidate, backup candidate, reference baseline, insufficient evidence, rejected.",
-        "",
-        "## Player-signal reliability",
-        "",
-        "- Generated by the provisional player-signal CLI.",
-        "",
-        "## Sensitivity findings",
-        "",
-        f"- Output: `{sensitivity_path}`",
-        "",
-        "## Limitations",
-        "",
-        "- Reliability CI overlap is not computed in this CLI (left as NaN in sensitivity output).",
-        "- Interpretation should rely on common-row benchmark comparisons against r4/r6.",
-        "",
-        "## Merge recommendation",
-        "",
-        "- Review `two_part_vs_one_stage_common_rows.csv` and do not promote hurdle models unless multi-metric evidence beats one-stage references.",
-    ]
+        lines.append(f"- `{variant}` checked paths: {len(checked)}")
+
+    lines += ["", "## 2. Best Candidates", ""]
+    for cv in classification_variants:
+        pref = preferred_rows.loc[preferred_rows["classification_variant"].eq(cv)]
+        if not pref.empty:
+            r = pref.iloc[0]
+            lines.append(f"- **{cv}** preferred: `{r['conditional_model']}` "
+                         f"(MAE={_fmt(r.get('mae'))}, RMSE={_fmt(r.get('rmse'))}, "
+                         f"Spearman={_fmt(r.get('spearman'))}, "
+                         f"fold_std={_fmt(r.get('fold_std'))})")
+        else:
+            ie = selection_df.loc[
+                selection_df["classification_variant"].eq(cv) &
+                selection_df["status"].eq("insufficient evidence")
+            ]
+            if not ie.empty:
+                r = ie.iloc[0]
+                lines.append(f"- **{cv}** best insufficient-evidence: `{r['conditional_model']}` "
+                             f"(MAE={_fmt(r.get('mae'))}, status=insufficient evidence)")
+            else:
+                lines.append(f"- **{cv}**: no preferred or insufficient-evidence candidate found")
+
+    lines += ["", "## 3. r4 Benchmark Comparison (Exact Common Rows)", ""]
+    r4_bench = benchmark_df.loc[benchmark_df["benchmark_variant"].eq("r4_full_with_360") & benchmark_df["rows"].gt(0)]
+    if r4_bench.empty:
+        lines.append("- No shared rows found with r4 benchmark.")
+    else:
+        for _, r in r4_bench.iterrows():
+            delta_mae = safe_numeric(r.get("candidate_mae")) - safe_numeric(r.get("benchmark_mae"))
+            delta_rmse = safe_numeric(r.get("candidate_rmse")) - safe_numeric(r.get("benchmark_rmse"))
+            lines.append(
+                f"- `{r['classification_variant']}` / `{r['conditional_model']}` "
+                f"vs r4 ({int(r['rows'])} shared rows): "
+                f"ΔMAE={_fmt(delta_mae)} ({_fmt(r.get('candidate_mae'))} vs {_fmt(r.get('benchmark_mae'))}), "
+                f"ΔRMSE={_fmt(delta_rmse)} ({_fmt(r.get('candidate_rmse'))} vs {_fmt(r.get('benchmark_rmse'))}), "
+                f"candidate_nonzero_MAE={_fmt(r.get('candidate_nonzero_mae'))}"
+            )
+
+    lines += ["", "## 4. Conditional Severity Metrics", ""]
+    cond_cols = ["conditional_mae", "conditional_rmse", "conditional_r2", "conditional_spearman",
+                 "conditional_sample_count", "observed_conditional_mean", "predicted_conditional_mean"]
+    for cv in classification_variants:
+        cv_rows = selection_df.loc[
+            selection_df["classification_variant"].eq(cv) &
+            selection_df["status"].isin(["preferred candidate", "insufficient evidence"])
+        ]
+        if cv_rows.empty:
+            continue
+        r = cv_rows.iloc[0]
+        parts = [f"n_shots={_fmt(r.get('conditional_sample_count'), 0)}"]
+        for col in cond_cols:
+            if col in r.index:
+                parts.append(f"{col.replace('conditional_', '')}={_fmt(r.get(col))}")
+        lines.append(f"- **{cv}** / `{r['conditional_model']}`: {', '.join(parts)}")
+
+    lines += ["", "## 5. Hurdle Metrics (All Rows)", ""]
+    for cv in classification_variants:
+        cv_rows = selection_df.loc[
+            selection_df["classification_variant"].eq(cv) &
+            selection_df["status"].isin(["preferred candidate", "insufficient evidence"])
+        ]
+        if cv_rows.empty:
+            continue
+        r = cv_rows.iloc[0]
+        lines.append(
+            f"- **{cv}** / `{r['conditional_model']}`: "
+            f"MAE={_fmt(r.get('mae'))}, RMSE={_fmt(r.get('rmse'))}, R²={_fmt(r.get('r2'))}, "
+            f"Spearman={_fmt(r.get('spearman'))}, nonzero_MAE={_fmt(r.get('nonzero_mae'))}, "
+            f"nonzero_Spearman={_fmt(r.get('nonzero_spearman'))}, "
+            f"top10%_xG_capture={_fmt(r.get('top_decile_xg_capture'))}"
+        )
+
+    lines += ["", "## 6. Fold Stability", ""]
+    for cv in classification_variants:
+        cv_rows = selection_df.loc[
+            selection_df["classification_variant"].eq(cv) &
+            selection_df["status"].isin(["preferred candidate", "insufficient evidence"])
+        ]
+        if cv_rows.empty:
+            continue
+        r = cv_rows.iloc[0]
+        lines.append(
+            f"- **{cv}** / `{r['conditional_model']}`: "
+            f"fold_mean_MAE={_fmt(r.get('fold_mean'))}, fold_std_MAE={_fmt(r.get('fold_std'))}"
+        )
+
+    lines += ["", "## 7. xG Capture", ""]
+    for cv in classification_variants:
+        cv_rows = selection_df.loc[
+            selection_df["classification_variant"].eq(cv) &
+            selection_df["status"].isin(["preferred candidate", "insufficient evidence"])
+        ]
+        if cv_rows.empty:
+            continue
+        r = cv_rows.iloc[0]
+        lines.append(
+            f"- **{cv}**: top10%={_fmt(r.get('top_10_pct_xg_capture'))}, "
+            f"top20%={_fmt(r.get('top_20_pct_xg_capture'))}, "
+            f"top30%={_fmt(r.get('top_30_pct_xg_capture'))}"
+            if "top_20_pct_xg_capture" in r.index
+            else f"- **{cv}**: top10%={_fmt(r.get('top_decile_xg_capture'))}"
+        )
+
+    lines += ["", "## 8. Sensitivity Results", ""]
+    if sensitivity_rows:
+        sensitivity_df_report = pd.DataFrame(sensitivity_rows)
+        for pair in sorted(sensitivity_df_report["comparison_pair"].unique().tolist()):
+            pair_data = sensitivity_df_report.loc[sensitivity_df_report["comparison_pair"].eq(pair)]
+            spearman_val = pair_data["spearman_rank_correlation"].iloc[0] if not pair_data.empty else float("nan")
+            kendall_val = pair_data["kendall_rank_correlation"].iloc[0] if not pair_data.empty else float("nan")
+            sign_changes = int(pair_data["suppression_sign_change"].sum()) if "suppression_sign_change" in pair_data.columns else 0
+            unstable = int(pair_data["unstable_player_flag"].sum()) if "unstable_player_flag" in pair_data.columns else 0
+            ci_overlap_computed = not pair_data["confidence_interval_overlap"].isna().all() if "confidence_interval_overlap" in pair_data.columns else False
+            lines.append(
+                f"- **{pair}** ({len(pair_data)} players): "
+                f"Spearman={_fmt(spearman_val)}, Kendall={_fmt(kendall_val)}, "
+                f"sign_changes={sign_changes}, unstable={unstable}, "
+                f"CI_overlap_computed={'yes' if ci_overlap_computed else 'no'}"
+            )
+    else:
+        lines.append("- Sensitivity not computed (preferred candidates missing).")
+
+    lines += ["", "## 9. Reliability Thresholds", ""]
+    lines.append("- Derived from player-signal CLI (`build_provisional_player_signals.py`).")
+    lines.append("- Thresholds: `player_signal_reliability_thresholds.json`.")
+    lines.append("- conditional_severity_reliability_flag uses the data-derived q50 of observed_shot_count.")
+
+    lines += ["", "## 10. Model Selection Summary", ""]
+    lines.append(f"- Hurdle model improves on r4: **{'YES' if any_beats_r4 else 'NO'}**")
+    if not has_preferred:
+        lines.append("- **Player signals are EXPLORATORY ONLY**: no candidate beat r4 on all core error metrics.")
+        if exploratory_label:
+            lines.append(f"  Exploratory OOF saved: `{exploratory_oof_path}`  (candidate: `{exploratory_label}`)")
+    lines.append("")
+    lines.append("All candidate statuses:")
+    status_counts = selection_df["status"].value_counts().to_dict() if not selection_df.empty else {}
+    for status, count in sorted(status_counts.items()):
+        lines.append(f"- {status}: {count}")
+
+    lines += ["", "## 11. Merge Recommendation", ""]
+    if any_beats_r4:
+        lines.append(
+            "- At least one hurdle candidate **beats r4** on shared-row metrics. "
+            "Review the preferred candidate selection and conditional diagnostics before promoting."
+        )
+    else:
+        lines.append(
+            "- **No hurdle candidate beat r4** on shared-row core error metrics (MAE, RMSE, nonzero_MAE). "
+            "Do NOT promote hurdle model as default; treat all outputs as exploratory. "
+            "Consider richer feature contracts or extended training data before re-evaluation."
+        )
+
+    lines += ["", "## 12. Artifacts", ""]
+    lines.append(f"- Classification-variant comparison: `{comparison_path}`")
+    lines.append(f"- Common-row benchmark comparison: `{benchmark_path}`")
+    lines.append(f"- Selection table: `{selection_path}`")
+    lines.append(f"- Sensitivity report: `{sensitivity_path}`")
+    lines.append(f"- Diagnostics charts: `{dirs['charts']}`")
+
     report_path.write_text("\n".join(lines), encoding="utf-8")
 
     print("\nDone.")
