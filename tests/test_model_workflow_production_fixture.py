@@ -243,6 +243,8 @@ def test_constant_regression_spearman_does_not_warn():
 def test_regression_mlflow_sqlite_tracking_runs_twice_and_logs_constant_model(tmp_path: Path):
     import mlflow
 
+    config = load_model_config("configs/models.yaml")
+    expected_experiment_name = config["mlflow"]["regression_experiment"]
     data_path = tmp_path / "features.parquet"
     production_fixture().to_parquet(data_path, index=False)
     db_path = tmp_path / "regression-mlflow.db"
@@ -262,8 +264,9 @@ def test_regression_mlflow_sqlite_tracking_runs_twice_and_logs_constant_model(tm
         )
 
     client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
-    experiment = client.get_experiment_by_name("dax-shot-regression")
+    experiment = client.get_experiment_by_name(expected_experiment_name)
     assert experiment is not None
+    assert experiment.name == expected_experiment_name
     runs = client.search_runs([experiment.experiment_id])
     parent_ids = {result["parent_run_id"] for result in results}
     assert parent_ids.issubset({run.info.run_id for run in runs})
