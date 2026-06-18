@@ -18,13 +18,13 @@ def get_contracts(config:dict, task:str)->list[FeatureContract]:
         cats=list(raw.get("categorical_features",[])); nums=list(raw.get("numeric_features",[])); allf=cats+nums
         d=_dups(allf)
         if d: raise ValueError(f"Duplicate features in {name}: {d}")
-        scan_features(allf, selected_target=target)
+        scan_features(allf, selected_target=target, feature_scope=raw.get("feature_scope", "pre_action_context"))
         out.append(FeatureContract(task,name,target,raw["model_family"],raw.get("feature_scope","pre_action_context"),cats,nums,list(raw.get("required_features",[])),list(raw.get("optional_features",[])),list(raw.get("excluded_features",[])),dict(raw.get("hyperparameters",{})),bool(raw.get("requires_360",False)),int(raw.get("minimum_usable_rows",1))))
     return out
 def resolve_contract(df:pd.DataFrame, c:FeatureContract)->dict:
     req_missing=[f for f in c.required if f not in df.columns]
     if req_missing: raise ValueError(f"Missing required features for {c.name}: {req_missing}")
     cats=[f for f in c.categorical if f in df.columns]; nums=[f for f in c.numeric if f in df.columns]
-    final=list(dict.fromkeys(cats+nums)); scan_features(final, selected_target=c.target)
+    final=list(dict.fromkeys(cats+nums)); scan_features(final, selected_target=c.target, feature_scope=c.feature_scope)
     miss_opt=[f for f in c.optional if f not in df.columns]
     return {"requested_features":c.features,"available_features":[f for f in c.features if f in df.columns],"missing_required_features":req_missing,"missing_optional_features":miss_opt,"final_features":final,"categorical":cats,"numeric":nums,"rows_retained":int(len(df.dropna(subset=[c.target]))),"rows_excluded":int(df[c.target].isna().sum()),"feature_missingness":{f:float(df[f].isna().mean()) for f in final},"coverage_360":float(df.get("has_360",pd.Series([False]*len(df))).fillna(False).mean())}

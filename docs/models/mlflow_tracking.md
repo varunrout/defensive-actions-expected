@@ -1,13 +1,26 @@
-# Modelling documentation
+# MLflow tracking
 
-This modelling phase is leakage-safe and provisional. It uses `data/features/player_defensive_actions.parquet`, grouped validation by `match_id`, targets `target_future_shot_10s` and `target_future_xg_10s`, explicit contracts in `configs/models.yaml`, and MLflow tracking when enabled.
+MLflow is an optional modelling dependency. The modelling environment should be installed with:
 
-Local MLflow file tracking works without a server. To inspect runs in a UI, optionally run:
+```bash
+python -m pip install -e ".[dev,visualization,models]"
+```
+
+`configs/models.yaml` enables MLflow for modelling runs by default. Use `--no-mlflow-enabled` for local dry runs, legacy smoke tests, or environments where the `models` extra has not been installed. If MLflow is enabled but unavailable, the framework raises a clear error containing the installation command above.
+
+Tracking URI precedence is:
+
+1. explicit CLI `--tracking-uri`
+2. `MLFLOW_TRACKING_URI`
+3. `mlflow.tracking_uri` in the configuration
+4. MLflow's local default
+
+The code does not silently fall back to another destination when an explicit remote URI is supplied. Remote HTTP(S) stores are checked before training starts; unreachable stores raise an error.
+
+For a local UI, optionally run:
 
 ```bash
 mlflow server --port 5000
 ```
 
-Remote tracking can be configured with `MLFLOW_TRACKING_URI` or the `mlflow.tracking_uri` configuration value. If a remote URI is explicitly supplied, failures should be surfaced rather than silently redirected.
-
-Player signals are out-of-fold expected-versus-observed summaries only. They are not true DAx and are not causal estimates.
+A server is not required for local file tracking.

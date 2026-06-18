@@ -1,13 +1,9 @@
-# Modelling documentation
+# Validation methodology
 
-This modelling phase is leakage-safe and provisional. It uses `data/features/player_defensive_actions.parquet`, grouped validation by `match_id`, targets `target_future_shot_10s` and `target_future_xg_10s`, explicit contracts in `configs/models.yaml`, and MLflow tracking when enabled.
+Models predict opponent threat at the defensive-action timestamp. Primary variants use `pre_action_context`; post-action fields are diagnostic-only and prohibited from primary contracts.
 
-Local MLflow file tracking works without a server. To inspect runs in a UI, optionally run:
+Validation uses grouped folds by `match_id`. Each variant receives fold assignments over its eligible row population. For 360-specific variants, rows are filtered before folds are created using the variant eligibility rule. Fold metadata is saved separately from row-level OOF predictions so train-match lists are not repeated per row.
 
-```bash
-mlflow server --port 5000
-```
+For every fold, the framework records rows, matches, positive-shot support, non-zero future-xG support, target mean/prevalence, task metrics, fit time, and inference time. Aggregate model comparison rows include full-OOF metrics plus fold mean, standard deviation, minimum, and maximum summaries.
 
-Remote tracking can be configured with `MLFLOW_TRACKING_URI` or the `mlflow.tracking_uri` configuration value. If a remote URI is explicitly supplied, failures should be surfaced rather than silently redirected.
-
-Player signals are out-of-fold expected-versus-observed summaries only. They are not true DAx and are not causal estimates.
+Impossible splits fail clearly: classification validation folds must contain positive and negative targets, and regression validation folds must report non-zero future-xG support.
