@@ -60,6 +60,20 @@ def classification_metrics(y_true, y_score) -> dict[str, float]:
     }
 
 
+def safe_spearman(y_true, y_pred) -> float:
+    """Return Spearman correlation or NaN when inputs are constant/too short."""
+
+    y = np.asarray(y_true, dtype=float)
+    p = np.asarray(y_pred, dtype=float)
+    finite = np.isfinite(y) & np.isfinite(p)
+    y = y[finite]
+    p = p[finite]
+    if len(y) <= 1 or len(np.unique(y)) <= 1 or len(np.unique(p)) <= 1:
+        return float("nan")
+    value = spearmanr(y, p).statistic
+    return float(value) if not np.isnan(value) else float("nan")
+
+
 def regression_metrics(y_true, y_pred) -> dict[str, float]:
     """Return primary regression metrics, including zero/non-zero xG slices."""
 
@@ -67,7 +81,7 @@ def regression_metrics(y_true, y_pred) -> dict[str, float]:
     p = np.asarray(y_pred, dtype=float)
     nonzero = y > 0
     zero = ~nonzero
-    spearman = spearmanr(y, p).statistic if len(y) > 1 else np.nan
+    spearman = safe_spearman(y, p)
     return {
         "mae": float(mean_absolute_error(y, p)),
         "rmse": float(mean_squared_error(y, p) ** 0.5),
