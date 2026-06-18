@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import warnings
 from pathlib import Path
 
 import joblib
@@ -223,3 +224,65 @@ def test_genuine_mlflow_round_trips_custom_baselines_and_pipeline(tmp_path: Path
             original_prediction = getattr(model, predict_method)(x_frame)
             loaded_prediction = getattr(loaded, predict_method)(x_frame)
             np.testing.assert_allclose(loaded_prediction, original_prediction)
+
+
+def test_constant_regression_spearman_does_not_warn():
+    from scipy.stats import ConstantInputWarning
+
+    from dax.models.evaluation import regression_metrics
+
+    with warnings.catch_warnings(record=True) as recorded:
+        warnings.simplefilter("always")
+        metrics = regression_metrics([0.0, 0.1, 0.2, 0.3], [0.1, 0.1, 0.1, 0.1])
+
+    assert metrics["spearman"] != metrics["spearman"]
+    assert not any(isinstance(warning.message, ConstantInputWarning) for warning in recorded)
+
+
+@pytest.mark.skipif(importlib.util.find_spec("mlflow") is None, reason="MLflow is not installed in this environment")
+def test_regression_mlflow_sqlite_tracking_runs_twice_and_logs_constant_model(tmp_path: Path):
+    import mlflow
+
+    config = load_model_config("configs/models.yaml")
+    expected_experiment_name = config["mlflow"]["regression_experiment"]
+    data_path = tmp_path / "features.parquet"
+    production_fixture().to_parquet(data_path, index=False)
+    db_path = tmp_path / "regression-mlflow.db"
+    tracking_uri = f"sqlite:///{db_path.as_posix()}"
+
+    results = []
+    for run_idx in range(2):
+        results.append(
+            run_training(
+                "regression",
+                data_path,
+                output_dir=tmp_path / f"out-{run_idx}",
+                mlflow_enabled=True,
+                tracking_uri=tracking_uri,
+                n_splits=2,
+            )
+        )
+
+    client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
+    experiment = client.get_experiment_by_name(expected_experiment_name)
+    assert experiment is not None
+    assert experiment.name == expected_experiment_name
+    runs = client.search_runs([experiment.experiment_id])
+    parent_ids = {result["parent_run_id"] for result in results}
+    assert parent_ids.issubset({run.info.run_id for run in runs})
+    nested = [run for run in runs if run.data.tags.get("mlflow.parentRunId") in parent_ids]
+    assert nested
+    assert all(run.info.status == "FINISHED" for run in nested)
+    assert any(run.data.metrics for run in nested)
+
+    for run_idx in range(2):
+        oof_path = tmp_path / f"out-{run_idx}" / "oof" / "regression_oof.parquet"
+        assert oof_path.exists()
+        assert not pd.read_parquet(oof_path).empty
+        bundle = joblib.load(tmp_path / f"out-{run_idx}" / "models" / "regression" / "r0_constant.joblib")
+        assert bundle["mlflow_model_name"] == "r0_constant_model"
+        assert bundle["mlflow_model_uri"]
+        loaded_model = mlflow.sklearn.load_model(bundle["mlflow_model_uri"])
+        observed = loaded_model.predict(pd.DataFrame(index=range(3)))
+        expected = bundle["pipeline"].predict(pd.DataFrame(index=range(3)))
+        np.testing.assert_allclose(observed, expected)
