@@ -66,9 +66,9 @@ def test_mlflow_enabled_but_unavailable(monkeypatch):
 def test_mlflow_enabled_installed_and_run_nesting(monkeypatch):
     fake = FakeMlflow()
     monkeypatch.setitem(sys.modules, "mlflow", fake)
-    mlflow = configure_mlflow({"mlflow": {"enabled": True, "tracking_uri": "file:///tmp/mlruns-test"}}, enabled=True)
+    mlflow = configure_mlflow({"mlflow": {"enabled": True, "tracking_uri": "sqlite:////tmp/mlflow-test.db"}}, enabled=True)
     assert mlflow is fake
-    assert fake.tracking_uri == "file:///tmp/mlruns-test"
+    assert fake.tracking_uri == "sqlite:////tmp/mlflow-test.db"
     with start_parent_run(mlflow, "classification-exp", "parent") as parent:
         with start_variant_run(mlflow, "variant") as child:
             assert parent.info.run_id == "run-1"
@@ -82,11 +82,11 @@ def test_mlflow_enabled_installed_and_run_nesting(monkeypatch):
 def test_environment_and_explicit_tracking_uri_overrides(monkeypatch):
     fake = FakeMlflow()
     monkeypatch.setitem(sys.modules, "mlflow", fake)
-    monkeypatch.setenv("MLFLOW_TRACKING_URI", "file:///env-store")
-    configure_mlflow({"mlflow": {"enabled": True, "tracking_uri": "file:///config-store"}}, enabled=True)
-    assert fake.tracking_uri == "file:///env-store"
-    configure_mlflow({"mlflow": {"enabled": True, "tracking_uri": "file:///config-store"}}, enabled=True, tracking_uri="file:///explicit-store")
-    assert fake.tracking_uri == "file:///explicit-store"
+    monkeypatch.setenv("MLFLOW_TRACKING_URI", "sqlite:////tmp/env-mlflow.db")
+    configure_mlflow({"mlflow": {"enabled": True, "tracking_uri": "sqlite:////tmp/config-mlflow.db"}}, enabled=True)
+    assert fake.tracking_uri == "sqlite:////tmp/env-mlflow.db"
+    configure_mlflow({"mlflow": {"enabled": True, "tracking_uri": "sqlite:////tmp/config-mlflow.db"}}, enabled=True, tracking_uri="sqlite:////tmp/explicit-mlflow.db")
+    assert fake.tracking_uri == "sqlite:////tmp/explicit-mlflow.db"
     monkeypatch.delitem(sys.modules, "mlflow", raising=False)
 
 

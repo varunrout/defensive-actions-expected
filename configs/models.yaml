@@ -4,7 +4,7 @@ group_column: match_id
 identity_columns: [event_id, match_id, player_id, player_name, team, action_family, phase_label, position_group]
 mlflow:
   enabled: true
-  tracking_uri: null
+  tracking_uri: sqlite:///mlflow.db
   classification_experiment: dax-shot-classification
   regression_experiment: dax-future-xg-regression
   run_name_prefix: baseline
