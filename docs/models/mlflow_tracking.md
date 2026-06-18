@@ -36,3 +36,9 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000
 ```
 
 `MLFLOW_ALLOW_FILE_STORE=true` may be used only as a legacy compatibility escape hatch for old file-store experiments. SQLite is the recommended local backend.
+
+## Sklearn model serialization
+
+The default sklearn model serialization format is `cloudpickle` (`mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE`) because this repository contains trusted project-owned sklearn-compatible estimators such as `ConstantClassifier` and `ConstantRegressor`. CloudPickle avoids maintaining an external Skops trusted-type allowlist for these local classes.
+
+MLflow model artifacts should only be loaded from trusted, project-controlled tracking stores. If `skops` is selected in configuration, an explicit trusted-types policy is required and training should fail clearly when it is absent.

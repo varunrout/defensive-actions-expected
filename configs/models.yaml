@@ -11,6 +11,7 @@ mlflow:
   log_models: true
   log_artifacts: true
   autolog_sklearn: false
+  sklearn_serialization_format: cloudpickle
 classification:
   target: target_future_shot_10s
   variants:

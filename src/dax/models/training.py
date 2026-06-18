@@ -436,6 +436,7 @@ def train_variant(
             "mlflow_run_id": run_id,
             "mlflow_model_name": mlflow_model_name,
             "mlflow_model_uri": None,
+            "mlflow_sklearn_serialization_format": config.get("mlflow", {}).get("sklearn_serialization_format", "cloudpickle"),
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         joblib.dump(bundle, model_path)
@@ -521,10 +522,18 @@ def train_variant(
         log_artifacts(mlflow, [model_path, fold_metrics_path, oof_path, *fold_artifacts, *diagnostics_paths], artifact_path=contract.name)
         if not coefficient_table.empty:
             log_artifact(mlflow, coefficient_path, artifact_path=contract.name)
-        logged_model = log_sklearn_model(mlflow, final_model, artifact_path=f"{contract.name}/model", variant=contract.name)
+        logged_model = log_sklearn_model(
+            mlflow,
+            final_model,
+            artifact_path=f"{contract.name}/model",
+            variant=contract.name,
+            serialization_format=config.get("mlflow", {}).get("sklearn_serialization_format", "cloudpickle"),
+            trusted_types=config.get("mlflow", {}).get("skops_trusted_types"),
+        )
         if logged_model is not None:
             bundle["mlflow_model_name"] = logged_model["name"]
             bundle["mlflow_model_uri"] = logged_model["model_uri"]
+            bundle["mlflow_sklearn_serialization_format"] = logged_model["serialization_format"]
             joblib.dump(bundle, model_path)
 
     return VariantResult(contract.name, run_id, comparison_row, oof, [model_path, fold_metrics_path, oof_path])
