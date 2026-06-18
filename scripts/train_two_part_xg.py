@@ -1031,8 +1031,8 @@ def main() -> None:
             lines.append(
                 f"- `{r['classification_variant']}` / `{r['conditional_model']}` "
                 f"vs r4 ({int(r['rows'])} shared rows): "
-                f"ΔMAE={_fmt(delta_mae)} ({_fmt(r.get('candidate_mae'))} vs {_fmt(r.get('benchmark_mae'))}), "
-                f"ΔRMSE={_fmt(delta_rmse)} ({_fmt(r.get('candidate_rmse'))} vs {_fmt(r.get('benchmark_rmse'))}), "
+                f"delta_MAE={_fmt(delta_mae)} ({_fmt(r.get('candidate_mae'))} vs {_fmt(r.get('benchmark_mae'))}), "
+                f"delta_RMSE={_fmt(delta_rmse)} ({_fmt(r.get('candidate_rmse'))} vs {_fmt(r.get('benchmark_rmse'))}), "
                 f"candidate_nonzero_MAE={_fmt(r.get('candidate_nonzero_mae'))}"
             )
 
@@ -1064,7 +1064,7 @@ def main() -> None:
         r = cv_rows.iloc[0]
         lines.append(
             f"- **{cv}** / `{r['conditional_model']}`: "
-            f"MAE={_fmt(r.get('mae'))}, RMSE={_fmt(r.get('rmse'))}, R²={_fmt(r.get('r2'))}, "
+            f"MAE={_fmt(r.get('mae'))}, RMSE={_fmt(r.get('rmse'))}, R2={_fmt(r.get('r2'))}, "
             f"Spearman={_fmt(r.get('spearman'))}, nonzero_MAE={_fmt(r.get('nonzero_mae'))}, "
             f"nonzero_Spearman={_fmt(r.get('nonzero_spearman'))}, "
             f"top10%_xG_capture={_fmt(r.get('top_decile_xg_capture'))}"
@@ -1130,7 +1130,7 @@ def main() -> None:
     if not has_preferred:
         lines.append("- **Player signals are EXPLORATORY ONLY**: no candidate beat r4 on all core error metrics.")
         if exploratory_label:
-            lines.append(f"  Exploratory OOF saved: `{exploratory_oof_path}`  (candidate: `{exploratory_label}`)")
+            lines.append(f"- Exploratory OOF saved: `{exploratory_oof_path}` (candidate: `{exploratory_label}`)")
     lines.append("")
     lines.append("All candidate statuses:")
     status_counts = selection_df["status"].value_counts().to_dict() if not selection_df.empty else {}
