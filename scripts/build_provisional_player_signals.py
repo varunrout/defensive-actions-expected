@@ -451,8 +451,8 @@ def main() -> None:
     parser.add_argument("--classification-oof", required=True, help="Path to classification_oof.parquet")
     parser.add_argument("--two-part-oof", required=True, help="Path to two_part_future_xg_oof.parquet")
     parser.add_argument("--regression-oof", help="Path to regression_oof.parquet for optional context")
-    parser.add_argument("--config", required=True, help="Path to models.yaml")
     parser.add_argument("--output", required=True, help="Output path for player signals parquet")
+    parser.add_argument("--reports-dir", default="outputs/models/reports", help="Directory for reliability thresholds and sensitivity CSV")
     parser.add_argument("--bootstrap-iterations", type=int, default=1000)
     parser.add_argument("--bootstrap-seed", type=int, default=42)
     args = parser.parse_args()
@@ -494,8 +494,8 @@ def main() -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     player_signals.to_parquet(output_path, index=False)
 
-    # Save required reliability thresholds artifact.
-    reports_dir = output_path.parents[1] / "models" / "reports" if len(output_path.parents) >= 2 else output_path.parent
+    # Save required reliability thresholds and sensitivity artifacts to canonical reports directory.
+    reports_dir = Path(args.reports_dir)
     reports_dir.mkdir(parents=True, exist_ok=True)
     thresholds_path = reports_dir / "player_signal_reliability_thresholds.json"
     thresholds_payload = {
@@ -510,7 +510,7 @@ def main() -> None:
     sensitivity_path = reports_dir / "player_signal_sensitivity.csv"
     sensitivity.to_csv(sensitivity_path, index=False)
 
-    print(f"✓ Player signals saved to: {output_path}")
+    print(f"[OK] Player signals saved to: {output_path}")
     print(f"  Rows: {len(player_signals)}")
     print(f"  Columns: {len(player_signals.columns)}")
     print(f"  Conditional severity shot threshold (q50, data-derived): {conditional_shot_threshold}")
