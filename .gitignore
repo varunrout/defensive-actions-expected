@@ -55,3 +55,7 @@ Thumbs.db
 /outputs/archive/pre_methodology_fix/**
 !/outputs/archive/pre_methodology_fix/README.md
 local_archive/
+mlruns/
+mlartifacts/
+outputs/oof/*.parquet
+outputs/models/**/*.joblib

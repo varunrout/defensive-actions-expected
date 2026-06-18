@@ -1,322 +1,86 @@
 from __future__ import annotations
-
+from pathlib import Path
+from datetime import datetime, timezone
 import argparse
 import json
-from pathlib import Path
-
+import time
 import joblib
 import numpy as np
 import pandas as pd
+from .schemas import normalise_model_schema, validate_model_dataset, dataset_fingerprint
+from .feature_contracts import load_model_config, get_contracts, resolve_contract
+from .splits import make_grouped_folds, fold_summary
+from .classification import build_classifier
+from .regression import build_regressor
+from .evaluation import classification_metrics, regression_metrics
+from .mlflow_tracking import configure_mlflow,start_parent_run,start_variant_run,log_params,log_metrics,log_json_artifact,log_dataset_fingerprint
 
-from dax.models.baseline_logistic import (
-    GROUP_COL as LOGISTIC_GROUP_COL,
-    TARGET_COL as LOGISTIC_TARGET_COL,
-    build_pipeline,
-    coefficient_table as logistic_coefficient_table,
-    default_variant_specs,
-    grouped_cv_scores,
-    prepare_xyg,
-    resolve_columns as resolve_logistic_columns,
-)
-from dax.models.baseline_regression import (
-    GROUP_COL as REGRESSION_GROUP_COL,
-    TARGET_COL as REGRESSION_TARGET_COL,
-    build_regression_pipeline,
-    coefficient_table as regression_coefficient_table,
-    default_regression_specs,
-    grouped_cv_scores_regression,
-    prepare_xyg_regression,
-    resolve_columns as resolve_regression_columns,
-)
+def _git_sha():
+    import subprocess
+    try: return subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+    except Exception: return None
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_INPUT = REPO_ROOT / "data" / "features" / "player_defensive_actions.parquet"
+def run_training(task,input_path,config_path='configs/models.yaml',output_dir='outputs',mlflow_enabled=None,tracking_uri=None,n_splits=None,max_rows=None):
+    cfg=load_model_config(config_path); df=normalise_model_schema(pd.read_parquet(input_path))
+    if max_rows: df=df.head(max_rows).copy()
+    audit=validate_model_dataset(df); fp=dataset_fingerprint(input_path,df); folds=make_grouped_folds(df,cfg[task]['target'],cfg.get('group_column','match_id'),n_splits or cfg.get('folds',5),cfg.get('seed',42))
+    out=Path(output_dir); (out/'models/splits').mkdir(parents=True,exist_ok=True); (out/'oof').mkdir(parents=True,exist_ok=True); (out/'models/comparisons').mkdir(parents=True,exist_ok=True); (out/f'models/{task}').mkdir(parents=True,exist_ok=True)
+    folds.to_parquet(out/'models/splits/fold_assignments.parquet',index=False); fold_summary(df,cfg[task]['target'],folds).to_csv(out/f'models/{task}/fold_summary.csv',index=False)
+    ml=configure_mlflow(cfg, False if mlflow_enabled is None else mlflow_enabled, tracking_uri); exp=cfg['mlflow'][f'{task}_experiment'] if task in {'classification','regression'} else 'dax-models'
+    all_oof=[]; comparisons=[]
+    with start_parent_run(ml,exp,f"{cfg['mlflow'].get('run_name_prefix','baseline')}-{task}") as pr:
+      parent_id=getattr(getattr(pr,'info',None),'run_id',None); log_dataset_fingerprint(ml,fp)
+      for c in get_contracts(cfg,task):
+        try: resolved=resolve_contract(df,c)
+        except ValueError as e: comparisons.append({'variant':c.name,'model_family':c.model_family,'recommendation_status':f'skipped: {e}'}); continue
+        if audit.rows < c.minimum_usable_rows: continue
+        with start_variant_run(ml,c.name) as vr:
+          run_id=getattr(getattr(vr,'info',None),'run_id',None); t0=time.perf_counter(); preds=np.full(len(df),np.nan); train_matches_by_fold={}
+          for f in sorted(folds.fold.unique()):
+            val=folds.fold.eq(f).to_numpy(); tr=~val; train_matches_by_fold[int(f)]=sorted(map(str,df.loc[tr,'match_id'].unique()))
+            Xtr=df.loc[tr,resolved['final_features']] if resolved['final_features'] else pd.DataFrame(index=df.index[tr])
+            Xv=df.loc[val,resolved['final_features']] if resolved['final_features'] else pd.DataFrame(index=df.index[val])
+            ytr=df.loc[tr,c.target]
+            model=build_classifier(c,resolved) if task=='classification' else build_regressor(c,resolved); model.fit(Xtr,ytr)
+            preds[val]=model.predict_proba(Xv)[:,1] if task=='classification' else model.predict(Xv)
+          if task=='regression' and cfg['regression'].get('clip_negative_predictions',False): preds=np.clip(preds,0,None)
+          metrics=classification_metrics(df[c.target],preds) if task=='classification' else regression_metrics(df[c.target],preds)
+          final_model=build_classifier(c,resolved) if task=='classification' else build_regressor(c,resolved); X=df[resolved['final_features']] if resolved['final_features'] else pd.DataFrame(index=df.index); final_model.fit(X,df[c.target])
+          bundle={'pipeline':final_model,'target':c.target,'feature_contract':c.__dict__,'final_feature_list':resolved['final_features'],'preprocessing_metadata':resolved,'training_rows':len(df),'training_matches':audit.matches,'data_fingerprint':fp,'model_version':'0.1.0','git_commit_sha':_git_sha(),'mlflow_run_id':run_id,'timestamp':datetime.now(timezone.utc).isoformat()}
+          mp=out/f'models/{task}/{c.name}.joblib'; joblib.dump(bundle,mp)
+          ident=[col for col in ['event_id','match_id','player_id','player_name','team','action_family','phase_label','position_group'] if col in df.columns]
+          oof=df[ident].copy(); oof['y_true']=df[c.target].to_numpy(); oof['fold']=folds.fold.to_numpy(); oof['model_variant']=c.name; oof['model_family']=c.model_family; oof['mlflow_run_id']=run_id; oof['train_match_ids']=oof['fold'].map(train_matches_by_fold)
+          if task=='classification': oof['y_score']=preds
+          else: oof['y_pred']=preds; oof['residual']=oof['y_pred']-oof['y_true']
+          all_oof.append(oof); elapsed=time.perf_counter()-t0
+          comparisons.append({'variant':c.name,'model_family':c.model_family,'feature_count':len(resolved['final_features']),'rows':len(df),'matches':audit.matches,'training_time':elapsed,'inference_time':0.0,'requires_360':c.requires_360,'missing_features':';'.join(resolved['missing_optional_features']),'mlflow_run_id':run_id,'recommendation_status':'candidate',**metrics})
+          log_params(ml,{'target':c.target,'model_family':c.model_family,'model_variant':c.name,'feature_scope':c.feature_scope,'features':resolved['final_features'],'fold_count':folds.fold.nunique(),'seed':cfg.get('seed',42),'rows':len(df),'matches':audit.matches,'target_prevalence':audit.shot_rate,'coverage_360':resolved['coverage_360'],'hyperparameters':c.hyperparameters,'git_sha':_git_sha(),'data_fingerprint':fp}); log_metrics(ml,metrics); log_json_artifact(ml,{'contract':c.__dict__,'resolved':resolved},out/f'models/{task}/{c.name}_feature_contract.json')
+    if all_oof:
+      oof_all=pd.concat(all_oof,ignore_index=True); kind='classification' if task=='classification' else 'regression'; oof_all.to_parquet(out/f'oof/{kind}_oof.parquet',index=False)
+    comp=pd.DataFrame(comparisons); comp.to_csv(out/f'models/comparisons/{task}_model_comparison.csv',index=False)
+    return {'parent_run_id':parent_id,'comparison':str(out/f'models/comparisons/{task}_model_comparison.csv'),'comparison_frame':comp}
 
-
-def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train supported DAx baseline models.")
-    parser.add_argument("--task", choices=("all", "logistic", "regression"), default="all")
-    parser.add_argument("--input", type=str, default=str(DEFAULT_INPUT), help="Input player dataset parquet.")
-    parser.add_argument("--models-dir", type=str, default=str(REPO_ROOT / "outputs" / "models"))
-    parser.add_argument("--validation-dir", type=str, default=str(REPO_ROOT / "outputs" / "validation"))
-    parser.add_argument("--oof-dir", type=str, default=str(REPO_ROOT / "outputs" / "oof"))
-    parser.add_argument("--n-splits", type=int, default=5)
-    parser.add_argument("--max-rows", type=int, default=None)
-    parser.add_argument("--dry-run", action="store_true", help="Print the planned training task without running it.")
-    return parser.parse_args(argv)
-
-
-def _effective_splits(groups: pd.Series, requested: int) -> int:
-    unique_groups = int(groups.nunique())
-    if unique_groups < 2:
-        raise ValueError("Training requires at least two unique match_id groups.")
-    effective = min(requested, unique_groups)
-    if effective != requested:
-        print(f"[WARN] Requested n_splits={requested}, using {effective} because only {unique_groups} groups are available.")
-    return effective
-
-
-def train_logistic_models(
-    input_path: str | Path,
-    *,
-    models_dir: str | Path,
-    validation_dir: str | Path,
-    oof_dir: str | Path,
-    n_splits: int = 5,
-    max_rows: int | None = None,
-) -> Path:
-    input_file = Path(input_path)
-    if not input_file.exists():
-        raise FileNotFoundError(f"Missing input dataset: {input_file}")
-
-    models_path = Path(models_dir)
-    validation_path = Path(validation_dir)
-    oof_path = Path(oof_dir)
-    models_path.mkdir(parents=True, exist_ok=True)
-    validation_path.mkdir(parents=True, exist_ok=True)
-    oof_path.mkdir(parents=True, exist_ok=True)
-
-    df = pd.read_parquet(input_file)
-    if max_rows is not None:
-        df = df.head(max_rows).copy()
-
-    if LOGISTIC_TARGET_COL not in df.columns or LOGISTIC_GROUP_COL not in df.columns:
-        raise ValueError(f"Dataset must contain {LOGISTIC_TARGET_COL!r} and {LOGISTIC_GROUP_COL!r}")
-
-    effective_splits = _effective_splits(df[LOGISTIC_GROUP_COL], n_splits)
-    print("=" * 72)
-    print("TRAIN BASELINE LOGISTIC MODELS")
-    print("=" * 72)
-    print(f"Rows: {len(df):,}")
-    print(f"Matches: {df[LOGISTIC_GROUP_COL].nunique():,}")
-    print(f"Target rate: {df[LOGISTIC_TARGET_COL].mean() * 100:.3f}%")
-
-    summary: dict[str, object] = {
-        "input_path": str(input_file),
-        "rows": int(len(df)),
-        "matches": int(df[LOGISTIC_GROUP_COL].nunique()),
-        "target_rate": float(df[LOGISTIC_TARGET_COL].mean()),
-        "variants": {},
-    }
-    all_oof_rows: list[pd.DataFrame] = []
-
-    for spec in default_variant_specs():
-        resolved = resolve_logistic_columns(df, spec)
-        if not resolved.categorical and not resolved.numeric:
-            print(f"[SKIP] {resolved.name}: no usable columns found")
-            continue
-
-        x, y, groups = prepare_xyg(df, resolved)
-        pipeline = build_pipeline(resolved)
-        cv = grouped_cv_scores(x=x, y=y, groups=groups, pipeline=pipeline, n_splits=effective_splits)
-        pipeline.fit(x, y)
-
-        coefficients = logistic_coefficient_table(pipeline)
-        coefficients_path = validation_path / f"baseline_{resolved.name}_coefficients.csv"
-        coefficients.to_csv(coefficients_path, index=False)
-
-        model_path = models_path / f"logistic_{resolved.name}.joblib"
-        joblib.dump(
-            {
-                "variant": resolved.name,
-                "categorical": resolved.categorical,
-                "numeric": resolved.numeric,
-                "pipeline": pipeline,
-                "target": LOGISTIC_TARGET_COL,
-                "group": LOGISTIC_GROUP_COL,
-            },
-            model_path,
-        )
-
-        fold_df = pd.DataFrame(cv["fold_metrics"])
-        fold_path = validation_path / f"baseline_{resolved.name}_fold_metrics.csv"
-        fold_df.to_csv(fold_path, index=False)
-
-        oof = pd.DataFrame(
-            {
-                "variant": resolved.name,
-                "y_true": y.astype(int),
-                "y_score": np.asarray(cv["oof_predictions"], dtype=float),
-                "match_id": groups,
-            }
-        )
-        all_oof_rows.append(oof)
-
-        summary["variants"][resolved.name] = {
-            "categorical": resolved.categorical,
-            "numeric": resolved.numeric,
-            "roc_auc": float(cv["roc_auc"]),
-            "avg_precision": float(cv["avg_precision"]),
-            "model_path": str(model_path),
-            "coefficients_path": str(coefficients_path),
-            "fold_metrics_path": str(fold_path),
-        }
-        print(
-            f"[DONE] {resolved.name}: AUC={cv['roc_auc']:.4f}, AP={cv['avg_precision']:.4f}, "
-            f"features={len(resolved.categorical) + len(resolved.numeric)}"
-        )
-
-    if all_oof_rows:
-        all_oof = pd.concat(all_oof_rows, ignore_index=True)
-        logistic_oof = oof_path / "baseline_oof_predictions.parquet"
-        all_oof.to_parquet(logistic_oof, index=False)
-        summary["oof_path"] = str(logistic_oof)
-
-    summary_path = validation_path / "baseline_model_metrics.json"
-    summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
-    print("-" * 72)
-    print(f"Saved summary: {summary_path}")
-    print("Done.")
-    return summary_path
-
-
-def train_regression_models(
-    input_path: str | Path,
-    *,
-    models_dir: str | Path,
-    validation_dir: str | Path,
-    oof_dir: str | Path,
-    n_splits: int = 5,
-    max_rows: int | None = None,
-) -> Path:
-    input_file = Path(input_path)
-    if not input_file.exists():
-        raise FileNotFoundError(f"Missing input dataset: {input_file}")
-
-    models_path = Path(models_dir)
-    validation_path = Path(validation_dir)
-    oof_path = Path(oof_dir)
-    models_path.mkdir(parents=True, exist_ok=True)
-    validation_path.mkdir(parents=True, exist_ok=True)
-    oof_path.mkdir(parents=True, exist_ok=True)
-
-    df = pd.read_parquet(input_file)
-    if max_rows is not None:
-        df = df.head(max_rows).copy()
-
-    if REGRESSION_TARGET_COL not in df.columns or REGRESSION_GROUP_COL not in df.columns:
-        raise ValueError(f"Dataset must contain {REGRESSION_TARGET_COL!r} and {REGRESSION_GROUP_COL!r}")
-
-    effective_splits = _effective_splits(df[REGRESSION_GROUP_COL], n_splits)
-    print("=" * 72)
-    print("TRAIN BASELINE REGRESSION MODELS (FUTURE-XG TARGET)")
-    print("=" * 72)
-    print(f"Rows: {len(df):,}")
-    print(f"Matches: {df[REGRESSION_GROUP_COL].nunique():,}")
-    print(f"Target mean: {df[REGRESSION_TARGET_COL].mean():.4f}")
-
-    summary: dict[str, object] = {
-        "input_path": str(input_file),
-        "rows": int(len(df)),
-        "matches": int(df[REGRESSION_GROUP_COL].nunique()),
-        "target": REGRESSION_TARGET_COL,
-        "target_mean": float(df[REGRESSION_TARGET_COL].mean()),
-        "target_std": float(df[REGRESSION_TARGET_COL].std()),
-        "variants": {},
-    }
-    all_oof_rows: list[pd.DataFrame] = []
-
-    for spec in default_regression_specs():
-        resolved = resolve_regression_columns(df, spec)
-        if not resolved.categorical and not resolved.numeric:
-            print(f"[SKIP] {resolved.name}: no usable columns found")
-            continue
-
-        x, y, groups = prepare_xyg_regression(df, resolved)
-        pipeline = build_regression_pipeline(resolved)
-        cv = grouped_cv_scores_regression(x=x, y=y, groups=groups, pipeline=pipeline, n_splits=effective_splits)
-        pipeline.fit(x, y)
-
-        coefficients = regression_coefficient_table(pipeline)
-        coefficients_path = validation_path / f"regression_{resolved.name}_coefficients.csv"
-        coefficients.to_csv(coefficients_path, index=False)
-
-        model_path = models_path / f"regression_{resolved.name}.joblib"
-        joblib.dump(
-            {
-                "variant": resolved.name,
-                "model_type": resolved.model_type,
-                "categorical": resolved.categorical,
-                "numeric": resolved.numeric,
-                "pipeline": pipeline,
-                "target": REGRESSION_TARGET_COL,
-                "group": REGRESSION_GROUP_COL,
-            },
-            model_path,
-        )
-
-        fold_df = pd.DataFrame(cv["fold_metrics"])
-        fold_path = validation_path / f"regression_{resolved.name}_fold_metrics.csv"
-        fold_df.to_csv(fold_path, index=False)
-
-        oof = pd.DataFrame(
-            {
-                "variant": resolved.name,
-                "y_true": y.astype(float),
-                "y_pred": np.asarray(cv["oof_predictions"], dtype=float),
-                "match_id": groups,
-            }
-        )
-        all_oof_rows.append(oof)
-
-        summary["variants"][resolved.name] = {
-            "model_type": resolved.model_type,
-            "categorical": resolved.categorical,
-            "numeric": resolved.numeric,
-            "r2": float(cv["r2"]),
-            "rmse": float(cv["rmse"]),
-            "mae": float(cv["mae"]),
-            "spearman": float(cv["spearman"]),
-            "model_path": str(model_path),
-            "coefficients_path": str(coefficients_path),
-            "fold_metrics_path": str(fold_path),
-        }
-        print(
-            f"[DONE] {resolved.name}: R²={cv['r2']:.4f}, RMSE={cv['rmse']:.4f}, "
-            f"MAE={cv['mae']:.4f}, Spearman={cv['spearman']:.4f}, "
-            f"features={len(resolved.categorical) + len(resolved.numeric)}"
-        )
-
-    if all_oof_rows:
-        all_oof = pd.concat(all_oof_rows, ignore_index=True)
-        regression_oof = oof_path / "regression_oof_predictions.parquet"
-        all_oof.to_parquet(regression_oof, index=False)
-        summary["oof_path"] = str(regression_oof)
-
-    summary_path = validation_path / "regression_model_metrics.json"
-    summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
-    print("-" * 72)
-    print(f"Saved summary: {summary_path}")
-    print("Done.")
-    return summary_path
-
-
-def _task_paths(root: str | Path, leaf: str) -> Path:
-    return Path(root) / leaf
-
-
-def main(argv: list[str] | None = None) -> int:
-    args = parse_args(argv)
-    if args.dry_run:
-        print(f"[dry-run] train task={args.task} input={args.input}")
-        return 0
-
-    if args.task in {"all", "logistic"}:
-        train_logistic_models(
-            args.input,
-            models_dir=_task_paths(args.models_dir, "baseline"),
-            validation_dir=_task_paths(args.validation_dir, "baseline"),
-            oof_dir=_task_paths(args.oof_dir, "baseline"),
-            n_splits=args.n_splits,
-            max_rows=args.max_rows,
-        )
-    if args.task in {"all", "regression"}:
-        train_regression_models(
-            args.input,
-            models_dir=_task_paths(args.models_dir, "regression"),
-            validation_dir=_task_paths(args.validation_dir, "regression"),
-            oof_dir=_task_paths(args.oof_dir, "regression"),
-            n_splits=args.n_splits,
-            max_rows=args.max_rows,
-        )
-    return 0
+def main(argv=None):
+    p=argparse.ArgumentParser(); p.add_argument('--task',choices=['classification','regression','logistic','all'],required=True); p.add_argument('--input',default='data/features/player_defensive_actions.parquet'); p.add_argument('--config',default='configs/models.yaml'); p.add_argument('--output-dir',default='outputs'); p.add_argument('--models-dir'); p.add_argument('--validation-dir'); p.add_argument('--oof-dir'); p.add_argument('--mlflow-enabled',action=argparse.BooleanOptionalAction,default=None); p.add_argument('--tracking-uri'); p.add_argument('--n-splits',type=int); p.add_argument('--max-rows',type=int); a=p.parse_args(argv) 
+    tasks=['classification','regression'] if a.task=='all' else [('classification' if a.task=='logistic' else a.task)]
+    # Backward-compatible legacy directory flags are accepted; canonical output-dir is used.
+    for t in tasks:
+        res=run_training(t,a.input,a.config,a.output_dir,a.mlflow_enabled,a.tracking_uri,a.n_splits,a.max_rows)
+        print(res)
+        if a.validation_dir:
+            import json as _json
+            from pathlib import Path as _Path
+            legacy='baseline' if t=='classification' else 'regression'
+            d=_Path(a.validation_dir)/legacy; d.mkdir(parents=True,exist_ok=True)
+            rows=res['comparison_frame'].to_dict(orient='records') if hasattr(res['comparison_frame'],'to_dict') else []
+            variants={str(row.get('variant')):{**row, 'avg_precision': row.get('average_precision', row.get('avg_precision'))} for row in rows}
+            summary={'task':t,'rows': int(rows[0].get('rows',0)) if rows else 0,'matches': int(rows[0].get('matches',0)) if rows else 0,'target_rate': float(rows[0].get('positive_rate',0.0)) if rows else 0.0,'target_mean': float(rows[0].get('mean_observed',0.0)) if rows else 0.0,'variants':variants}
+            (d/('baseline_model_metrics.json' if t=='classification' else 'regression_model_metrics.json')).write_text(_json.dumps(summary,indent=2,default=str))
+            res['comparison_frame'].to_csv(d/('baseline_model_metrics_table.csv' if t=='classification' else 'regression_model_metrics_table.csv'),index=False)
+        if a.oof_dir:
+            from pathlib import Path as _Path
+            import shutil as _shutil
+            src=_Path(a.output_dir)/'oof'/('classification_oof.parquet' if t=='classification' else 'regression_oof.parquet')
+            _Path(a.oof_dir).mkdir(parents=True,exist_ok=True)
+            if src.exists(): _shutil.copy2(src, _Path(a.oof_dir)/src.name)
+if __name__=='__main__': main()
