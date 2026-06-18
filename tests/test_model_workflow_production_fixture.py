@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+import joblib
 import numpy as np
 import pandas as pd
 import pytest
@@ -132,13 +133,21 @@ def test_enabled_mlflow_sqlite_tracking_integration(tmp_path: Path):
     assert nested
     oof = pd.read_parquet(tmp_path / "out/oof/classification_oof.parquet")
     assert oof["mlflow_run_id"].notna().all()
-    bundle = next((tmp_path / "out/models/classification").glob("*.joblib"))
-    assert bundle.exists()
+    bundle_path = tmp_path / "out/models/classification/b0_constant.joblib"
+    assert bundle_path.exists()
+    bundle = joblib.load(bundle_path)
+    assert bundle["mlflow_model_name"] == "b0_constant_model"
+    assert bundle["mlflow_model_uri"]
     assert any(run.data.metrics for run in nested)
     assert any(run.data.params for run in nested)
     if hasattr(client, "search_logged_models"):
         logged_models = client.search_logged_models(experiment_ids=[experiment.experiment_id])
         assert any("b0_constant_model" in getattr(model, "name", "") for model in logged_models)
+    loaded_model = mlflow.sklearn.load_model(bundle["mlflow_model_uri"])
+    x = pd.DataFrame(index=range(3))
+    expected = bundle["pipeline"].predict_proba(x)[:, 1]
+    observed = loaded_model.predict_proba(x)[:, 1]
+    np.testing.assert_allclose(observed, expected)
 
 class FakeCalibratedCV:
     calls = []

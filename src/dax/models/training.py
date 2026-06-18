@@ -29,6 +29,7 @@ from .mlflow_tracking import (
     log_metrics,
     log_params,
     log_sklearn_model,
+    sanitise_mlflow_model_name,
     start_parent_run,
     start_variant_run,
 )
@@ -420,6 +421,7 @@ def train_variant(
         oof = build_oof_table(variant_df, contract, folds, predictions, run_id)
 
         model_path = paths["models"] / f"{contract.name}.joblib"
+        mlflow_model_name = sanitise_mlflow_model_name(f"{contract.name}/model")
         bundle = {
             "pipeline": final_model,
             "target": contract.target,
@@ -432,6 +434,8 @@ def train_variant(
             "model_version": "0.1.0",
             "git_commit_sha": git_sha(),
             "mlflow_run_id": run_id,
+            "mlflow_model_name": mlflow_model_name,
+            "mlflow_model_uri": None,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         joblib.dump(bundle, model_path)
@@ -517,7 +521,11 @@ def train_variant(
         log_artifacts(mlflow, [model_path, fold_metrics_path, oof_path, *fold_artifacts, *diagnostics_paths], artifact_path=contract.name)
         if not coefficient_table.empty:
             log_artifact(mlflow, coefficient_path, artifact_path=contract.name)
-        log_sklearn_model(mlflow, final_model, artifact_path=f"{contract.name}/model")
+        logged_model = log_sklearn_model(mlflow, final_model, artifact_path=f"{contract.name}/model", variant=contract.name)
+        if logged_model is not None:
+            bundle["mlflow_model_name"] = logged_model["name"]
+            bundle["mlflow_model_uri"] = logged_model["model_uri"]
+            joblib.dump(bundle, model_path)
 
     return VariantResult(contract.name, run_id, comparison_row, oof, [model_path, fold_metrics_path, oof_path])
 

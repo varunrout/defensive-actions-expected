@@ -37,3 +37,28 @@ def test_fingerprint_and_oof_signals(tmp_path):
  r=c.rename(columns={'y_score':'y_pred'}).copy(); r['y_true']=df.target_future_xg_10s; r['residual']=r.y_pred-r.y_true
  cp=tmp_path/'c.parquet'; rp=tmp_path/'r.parquet'; op=tmp_path/'signals.parquet'; c.to_parquet(cp); r.to_parquet(rp); out=build_player_signals(cp,rp,op,min_actions=2); assert op.exists() and 'minimum_sample_flag' in out.columns
  assert len(bootstrap_ci_by_match(c.assign(v=1.0),'v',n=5))==3
+
+
+def test_constant_estimators_are_sklearn_clone_and_joblib_compatible(tmp_path):
+    import joblib
+    import pandas as pd
+    from sklearn.base import clone
+
+    from dax.models.baselines import ConstantClassifier, ConstantRegressor
+
+    x = pd.DataFrame(index=range(4))
+    y_class = [0, 1, 1, 0]
+    y_reg = [0.0, 0.1, 0.2, 0.0]
+
+    classifier = clone(ConstantClassifier()).fit(x, y_class)
+    regressor = clone(ConstantRegressor(stat="median")).fit(x, y_reg)
+
+    class_path = tmp_path / "constant_classifier.joblib"
+    reg_path = tmp_path / "constant_regressor.joblib"
+    joblib.dump(classifier, class_path)
+    joblib.dump(regressor, reg_path)
+
+    loaded_classifier = joblib.load(class_path)
+    loaded_regressor = joblib.load(reg_path)
+    assert loaded_classifier.predict_proba(x).shape == (4, 2)
+    assert loaded_regressor.predict(x).shape == (4,)
