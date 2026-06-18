@@ -117,7 +117,8 @@ def test_isotonic_calibration_downgrades_by_failing_when_support_is_insufficient
 def test_enabled_mlflow_file_tracking_integration(tmp_path: Path):
     data_path = tmp_path / "features.parquet"
     production_fixture().to_parquet(data_path, index=False)
-    tracking_uri = (tmp_path / "mlruns").as_uri()
+    db_path = tmp_path / "mlflow.db"
+    tracking_uri = f"sqlite:///{db_path.as_posix()}"
     result = run_training("classification", data_path, output_dir=tmp_path / "out", mlflow_enabled=True, tracking_uri=tracking_uri, n_splits=2)
     import mlflow
 
