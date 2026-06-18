@@ -9,8 +9,10 @@ from __future__ import annotations
 
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
+import inspect
 import json
 import os
+import re
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -159,12 +161,35 @@ def log_json_artifact(mlflow: Any | None, obj: Any, path: str | Path, artifact_p
     return json_path
 
 
-def log_sklearn_model(mlflow: Any | None, model: Any, artifact_path: str) -> None:
-    """Log a scikit-learn compatible model when supported."""
+INVALID_MODEL_NAME_CHARS = re.compile(r"[/:%\"']+")
+
+
+def sanitise_mlflow_model_name(value: str | None) -> str:
+    """Return a MLflow logged-model compatible name.
+
+    Current MLflow logged-model names cannot contain slash, colon, period,
+    percent, or quote characters. Empty/all-invalid values receive a stable
+    fallback name.
+    """
+
+    raw = (value or "").strip().replace(".", "_")
+    safe = INVALID_MODEL_NAME_CHARS.sub("_", raw)
+    safe = re.sub(r"_+", "_", safe).strip("_")
+    return safe or "model"
+
+
+def log_sklearn_model(mlflow: Any | None, model: Any, artifact_path: str) -> str | None:
+    """Log a scikit-learn compatible model and return the safe logged-model name."""
 
     if mlflow is None:
-        return
+        return None
+    safe_model_name = sanitise_mlflow_model_name(artifact_path)
     try:
-        mlflow.sklearn.log_model(model, artifact_path=artifact_path)
+        signature = inspect.signature(mlflow.sklearn.log_model)
+        if "name" in signature.parameters:
+            mlflow.sklearn.log_model(model, name=safe_model_name)
+        else:
+            mlflow.sklearn.log_model(model, artifact_path=safe_model_name)
     except Exception as exc:  # noqa: BLE001 - model logging should not hide training results
-        raise MLflowConfigurationError(f"Failed to log sklearn model to MLflow artifact path {artifact_path!r}.") from exc
+        raise MLflowConfigurationError(f"Failed to log sklearn model as {safe_model_name!r}.") from exc
+    return safe_model_name

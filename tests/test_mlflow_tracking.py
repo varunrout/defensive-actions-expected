@@ -5,7 +5,15 @@ import types
 
 import pytest
 
-from dax.models.mlflow_tracking import INSTALL_COMMAND, MLflowConfigurationError, configure_mlflow, start_parent_run, start_variant_run
+from dax.models.mlflow_tracking import (
+    INSTALL_COMMAND,
+    MLflowConfigurationError,
+    configure_mlflow,
+    log_sklearn_model,
+    sanitise_mlflow_model_name,
+    start_parent_run,
+    start_variant_run,
+)
 
 
 class FakeRun:
@@ -28,7 +36,7 @@ class FakeMlflow(types.SimpleNamespace):
         self.params = []
         self.metrics = []
         self.artifacts = []
-        self.sklearn = types.SimpleNamespace(log_model=lambda model, artifact_path: self.artifacts.append(("model", artifact_path)))
+        self.sklearn = types.SimpleNamespace(log_model=lambda model, artifact_path=None, name=None: self.artifacts.append(("model", name or artifact_path)))
         self.tracking = types.SimpleNamespace(MlflowClient=lambda tracking_uri=None: types.SimpleNamespace(search_experiments=lambda max_results=1: []))
 
     def set_tracking_uri(self, uri):
@@ -64,6 +72,7 @@ def test_mlflow_enabled_but_unavailable(monkeypatch):
 
 
 def test_mlflow_enabled_installed_and_run_nesting(monkeypatch):
+    monkeypatch.delenv("MLFLOW_TRACKING_URI", raising=False)
     fake = FakeMlflow()
     monkeypatch.setitem(sys.modules, "mlflow", fake)
     mlflow = configure_mlflow({"mlflow": {"enabled": True, "tracking_uri": "sqlite:////tmp/mlflow-test.db"}}, enabled=True)
@@ -76,6 +85,24 @@ def test_mlflow_enabled_installed_and_run_nesting(monkeypatch):
     assert fake.experiments == ["classification-exp"]
     assert fake.runs[0]["nested"] is False
     assert fake.runs[1]["nested"] is True
+    monkeypatch.delitem(sys.modules, "mlflow", raising=False)
+
+
+def test_configuration_tracking_uri_used_without_env_or_explicit(monkeypatch):
+    monkeypatch.delenv("MLFLOW_TRACKING_URI", raising=False)
+    fake = FakeMlflow()
+    monkeypatch.setitem(sys.modules, "mlflow", fake)
+    configure_mlflow({"mlflow": {"enabled": True, "tracking_uri": "sqlite:////tmp/config-only.db"}}, enabled=True)
+    assert fake.tracking_uri == "sqlite:////tmp/config-only.db"
+    monkeypatch.delitem(sys.modules, "mlflow", raising=False)
+
+
+def test_no_tracking_uri_is_set_when_none_supplied(monkeypatch):
+    monkeypatch.delenv("MLFLOW_TRACKING_URI", raising=False)
+    fake = FakeMlflow()
+    monkeypatch.setitem(sys.modules, "mlflow", fake)
+    configure_mlflow({"mlflow": {"enabled": True, "tracking_uri": None}}, enabled=True)
+    assert fake.tracking_uri is None
     monkeypatch.delitem(sys.modules, "mlflow", raising=False)
 
 
@@ -99,3 +126,24 @@ def test_unreachable_remote_uri_fails(monkeypatch):
     with pytest.raises(MLflowConfigurationError, match="Unable to reach"):
         configure_mlflow({"mlflow": {"enabled": True}}, enabled=True, tracking_uri="http://127.0.0.1:1")
     monkeypatch.delitem(sys.modules, "mlflow", raising=False)
+
+
+def test_sanitise_mlflow_model_name():
+    cases = {
+        "b0_constant/model": "b0_constant_model",
+        "name:with:colon": "name_with_colon",
+        "name.with.periods": "name_with_periods",
+        "name%with%percent": "name_with_percent",
+        "name\"with'quotes": "name_with_quotes",
+        "": "model",
+        "////": "model",
+        "a///b:::c..d%%e": "a_b_c_d_e",
+    }
+    for raw, expected in cases.items():
+        assert sanitise_mlflow_model_name(raw) == expected
+
+
+def test_log_sklearn_model_uses_safe_model_name(monkeypatch):
+    fake = FakeMlflow()
+    assert log_sklearn_model(fake, object(), "b0_constant/model") == "b0_constant_model"
+    assert ("model", "b0_constant_model") in fake.artifacts

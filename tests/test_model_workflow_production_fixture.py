@@ -114,12 +114,13 @@ def test_isotonic_calibration_downgrades_by_failing_when_support_is_insufficient
 
 
 @pytest.mark.skipif(importlib.util.find_spec("mlflow") is None, reason="MLflow is not installed in this environment")
-def test_enabled_mlflow_file_tracking_integration(tmp_path: Path):
+def test_enabled_mlflow_sqlite_tracking_integration(tmp_path: Path):
     data_path = tmp_path / "features.parquet"
     production_fixture().to_parquet(data_path, index=False)
     db_path = tmp_path / "mlflow.db"
     tracking_uri = f"sqlite:///{db_path.as_posix()}"
     result = run_training("classification", data_path, output_dir=tmp_path / "out", mlflow_enabled=True, tracking_uri=tracking_uri, n_splits=2)
+    assert db_path.exists()
     import mlflow
 
     client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
@@ -135,6 +136,9 @@ def test_enabled_mlflow_file_tracking_integration(tmp_path: Path):
     assert bundle.exists()
     assert any(run.data.metrics for run in nested)
     assert any(run.data.params for run in nested)
+    if hasattr(client, "search_logged_models"):
+        logged_models = client.search_logged_models(experiment_ids=[experiment.experiment_id])
+        assert any("b0_constant_model" in getattr(model, "name", "") for model in logged_models)
 
 class FakeCalibratedCV:
     calls = []
