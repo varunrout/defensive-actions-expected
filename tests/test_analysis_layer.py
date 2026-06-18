@@ -479,3 +479,13 @@ def test_pitch_chart_long_title_layout_and_cluster_filenames(tmp_path: Path) -> 
     assert min(y_positions) <= 0.05
     plot_cluster_population_difference(df.iloc[:5], df, tmp_path / "cluster_0_spatial_difference_pitch.png", title="Cluster 0 density minus population")
     assert (tmp_path / "cluster_0_spatial_difference_pitch.png").exists()
+
+
+def test_matplotlib_uses_headless_agg_backend_for_charts(tmp_path: Path) -> None:
+    import matplotlib
+    from dax.analysis.plotting import bar_chart
+
+    assert matplotlib.get_backend().lower() == "agg"
+    output = tmp_path / "headless_bar.png"
+    bar_chart(pd.DataFrame({"category": ["A", "B"], "value": [1, 2]}), "category", "value", output, "Headless bar")
+    assert output.exists()
