@@ -8,11 +8,11 @@ def add_visibility_flag(df):
     return add_reliable_visibility(df)
 
 def box_defence_population(df, centre_backs_only=False):
-    out=add_visibility_flag(add_pitch_zones(df))
-    x,y=find_xy_columns(out); mask=out['coach_box_zone'].isin(['six-yard box','penalty-spot zone','central box','wide box'])
+    out=add_visibility_flag(add_pitch_zones(df, strict=True))
+    x,y=find_xy_columns(out); mask=out['coach_defensive_box_zone'].ne('outside defensive box')
     if centre_backs_only:
         pos=next((c for c in ['position_group','position','player_position'] if c in out.columns), None)
-        if pos: mask &= _contains(out[pos], ['centre','center','cb','central defender'])
+        if pos: mask &= _contains(out[pos], ['centre_back','centre back','center back','cb','central defender'])
     return out[mask].copy()
 
 def wide_defence_population(df):

@@ -160,6 +160,28 @@ def _sensitivity_tables(population: pd.DataFrame) -> dict[str, pd.DataFrame]:
 
 
 
+
+def _population_stage_counts(actions: pd.DataFrame, population: pd.DataFrame) -> dict[str, int | str | None]:
+    if actions.empty:
+        return {"all_defensive_actions": 0, "all_centre_back_actions": 0, "own_box_actions": 0, "centre_back_own_box_actions": 0, "phase_labelled_box_defence_actions": 0, "centre_back_phase_labelled_box_defence_actions": 0, "spatial_phase_overlap": 0, "coordinate_x_column": None, "coordinate_y_column": None}
+    pos = actions.get("position_group", pd.Series("", index=actions.index)).astype(str).str.lower()
+    cb_mask = pos.eq("centre_back") | pos.isin(["cb", "centre back", "center back"])
+    own_box_mask = actions.get("coach_defensive_box_zone", pd.Series("outside defensive box", index=actions.index)).ne("outside defensive box")
+    phase = actions.get("phase_label", pd.Series("", index=actions.index)).astype(str).str.lower().eq("box_defence")
+    xcol = actions["coach_coordinate_x_column"].iloc[0] if "coach_coordinate_x_column" in actions.columns and len(actions) else None
+    ycol = actions["coach_coordinate_y_column"].iloc[0] if "coach_coordinate_y_column" in actions.columns and len(actions) else None
+    return {
+        "all_defensive_actions": int(len(actions)),
+        "all_centre_back_actions": int(cb_mask.sum()),
+        "own_box_actions": int(own_box_mask.sum()),
+        "centre_back_own_box_actions": int((cb_mask & own_box_mask).sum()),
+        "phase_labelled_box_defence_actions": int(phase.sum()),
+        "centre_back_phase_labelled_box_defence_actions": int((cb_mask & phase).sum()),
+        "spatial_phase_overlap": int((cb_mask & own_box_mask & phase).sum()),
+        "coordinate_x_column": None if pd.isna(xcol) else str(xcol),
+        "coordinate_y_column": None if pd.isna(ycol) else str(ycol),
+    }
+
 def _write_category_video_files(population: pd.DataFrame, video_dir: Path) -> dict[str, int]:
     categories = {
         "clearance_relief.csv": population.get("coach_clearance_outcome", pd.Series(dtype=str)).eq("clearance relief"),
@@ -190,6 +212,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         actions, timeline = _prepare_data(args, paths.root)
         population = _augment_sequences(box_defence_population(actions, centre_backs_only=True), args.sequence_window_seconds)
+        stage_counts = _population_stage_counts(actions, population)
     except CoachAnalysisInputError as exc:
         if not args.allow_partial:
             write_json(paths.output_root / "execution_summary.json", execution_summary("failed", error=str(exc)))
@@ -197,9 +220,14 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         population = pd.DataFrame()
         timeline = {}
+        stage_counts = {"error": str(exc)}
+    if not args.allow_partial and (stage_counts.get("all_centre_back_actions", 0) == 0 or stage_counts.get("own_box_actions", 0) == 0 or stage_counts.get("centre_back_own_box_actions", 0) == 0):
+        write_json(paths.output_root / "execution_summary.json", execution_summary("failed", filter_stage_counts=stage_counts))
+        write_markdown_report(paths.output_root / "report.md", "Centre-back box-defence analysis", [("Filter-stage counts", f"```json\n{stage_counts}\n```")])
+        return 2
     reliable = apply_visibility_filter(population, reliable_only=True)
     wc_euros = population[population.get("coach_competition", pd.Series(dtype=str)).astype(str).str.contains("World Cup|Euros|Euro", case=False, na=False)].copy() if not population.empty else population
-    group_cols = ["coach_box_zone", "action_family", "event_type", "coach_clearance_outcome", "coach_block_outcome", "coach_pressure_outcome", "coach_duel_outcome", "coach_repeated_box_action", "coach_competition"]
+    group_cols = ["coach_defensive_box_zone", "action_family", "event_type", "coach_clearance_outcome", "coach_block_outcome", "coach_pressure_outcome", "coach_duel_outcome", "coach_repeated_box_action", "coach_competition"]
     generated = {}
     conclusion_records = []
     conclusion_groups = {"dangerous contexts": [], "suppression contexts": [], "possession-control contexts": [], "competition comparison": [], "visibility sensitivity": [], "model disagreement": []}
@@ -219,11 +247,11 @@ def main(argv: list[str] | None = None) -> int:
                     conclusion_groups["suppression contexts"].extend(sup_records)
                     conclusion_records.extend(sup_records)
     if not reliable.empty:
-        table = _metric_table(reliable, "coach_box_zone", args.bootstrap_samples, args.seed)
-        _save_table(table, tables / "reliable_visibility_by_box_zone.csv")
+        table = _metric_table(reliable, "coach_defensive_box_zone", args.bootstrap_samples, args.seed)
+        _save_table(table, tables / "reliable_visibility_by_defensive_box_zone.csv")
         metric = first_existing(table, ["future_xg_per_action", "future_shot_rate", "expected_future_xg"])
         if metric:
-            vis_records = data_derived_conclusions(table.rename(columns={"coach_box_zone": "subgroup"}), "subgroup", metric, top_n=3, min_actions=args.min_actions, min_matches=args.min_matches)
+            vis_records = data_derived_conclusions(table.rename(columns={"coach_defensive_box_zone": "subgroup"}), "subgroup", metric, top_n=3, min_actions=args.min_actions, min_matches=args.min_matches)
             conclusion_groups["visibility sensitivity"].extend(vis_records)
             conclusion_records.extend(vis_records)
     for name, table in _sensitivity_tables(population).items():
@@ -236,14 +264,15 @@ def main(argv: list[str] | None = None) -> int:
     _save_table(video, video_dir / "candidate_events.csv")
     category_video_counts = _write_category_video_files(population, video_dir)
     _save_table(label_rules(), tables / "tactical_label_rules.csv")
-    if "coach_box_zone" in population.columns:
-        zone_table = _metric_table(population, "coach_box_zone", args.bootstrap_samples, args.seed)
+    if "coach_defensive_box_zone" in population.columns:
+        zone_table = _metric_table(population, "coach_defensive_box_zone", args.bootstrap_samples, args.seed)
         metric = first_existing(zone_table, ["future_xg_per_action", "future_shot_rate", "expected_future_xg"])
         if metric:
-            horizontal_metric_chart(zone_table, "coach_box_zone", metric, "CB box-defence threat by mutually exclusive box zone", figures / "zone_threat_horizontal.png")
+            horizontal_metric_chart(zone_table, "coach_defensive_box_zone", metric, "CB box-defence threat by mutually exclusive defensive box zone", figures / "zone_threat_horizontal.png")
     action_pitch_map(population, "Centre-back box-defence actions", figures / "cb_box_defence_pitch_map.png")
     competition_counts = population["coach_competition"].value_counts().to_dict() if "coach_competition" in population.columns else {}
     sections = [
+        ("Filter-stage counts", f"```json\n{stage_counts}\n```"),
         ("Population", f"Centre-back box-defence actions: {len(population)}; matches: {population['match_id'].nunique() if 'match_id' in population.columns else 0}; World Cup/Euros rows: {len(wc_euros)}."),
         ("Processed event timeline", f"```json\n{timeline}\n```"),
         ("Competition counts", f"```json\n{competition_counts}\n```"),
@@ -258,7 +287,7 @@ def main(argv: list[str] | None = None) -> int:
         ("Video review", f"Candidate event table written with {len(video)} rows. Category files: {category_video_counts}."),
     ]
     write_markdown_report(paths.output_root / "report.md", "Centre-back box-defence analysis", sections)
-    write_json(paths.output_root / "execution_summary.json", execution_summary("completed", actions=int(len(population)), matches=int(population["match_id"].nunique()) if "match_id" in population.columns else 0, competition_counts=competition_counts, generated_tables=generated, data_derived_conclusions=conclusion_records, conclusion_groups=conclusion_groups, category_video_counts=category_video_counts, canonical_model_completeness={c: int(population[c].notna().sum()) for c in ["coach_expected_shot_b7", "coach_expected_shot_b6", "coach_expected_xg_r4", "coach_expected_xg_r6", "coach_expected_xg_two_part", "coach_observed_shot", "coach_observed_xg"] if c in population.columns}))
+    write_json(paths.output_root / "execution_summary.json", execution_summary("completed", filter_stage_counts=stage_counts, actions=int(len(population)), matches=int(population["match_id"].nunique()) if "match_id" in population.columns else 0, competition_counts=competition_counts, generated_tables=generated, data_derived_conclusions=conclusion_records, conclusion_groups=conclusion_groups, category_video_counts=category_video_counts, canonical_model_completeness={c: int(population[c].notna().sum()) for c in ["coach_expected_shot_b7", "coach_expected_shot_b6", "coach_expected_xg_r4", "coach_expected_xg_r6", "coach_expected_xg_two_part", "coach_observed_shot", "coach_observed_xg"] if c in population.columns}))
     return 0
 
 

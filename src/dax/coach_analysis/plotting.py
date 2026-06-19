@@ -9,11 +9,14 @@ def action_pitch_map(df: pd.DataFrame, title: str, path: str | Path | None=None)
         from mplsoccer import Pitch
         pitch=Pitch(pitch_type='statsbomb'); fig, ax=pitch.draw(figsize=(8,5))
         x,y=find_xy_columns(df)
-        if x and not df.empty: pitch.scatter(df[x], df[y], s=18, alpha=.55, ax=ax)
+        if x and not df.empty:
+            pitch.scatter(df[x], df[y], s=18, alpha=.55, ax=ax)
+            ax.set_xlim(0, 60)
     except Exception:
         fig, ax=plt.subplots(figsize=(8,5)); x,y=find_xy_columns(df)
         if x and not df.empty: ax.scatter(df[x], df[y], s=18, alpha=.55); ax.set_xlim(0,120); ax.set_ylim(0,80)
-    ax.set_title(f"{title}\nN={len(df)}")
+    matches = df["match_id"].nunique() if "match_id" in df.columns else 0
+    ax.set_title(f"{title}\nActions={len(df)} | Matches={matches} | Population: raw defensive coordinates")
     if path: fig.savefig(path, bbox_inches='tight', dpi=150)
     return fig, ax
 

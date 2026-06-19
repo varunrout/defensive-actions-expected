@@ -13,7 +13,7 @@ from dax.coach_analysis.populations import box_defence_population
 from dax.coach_analysis.reporting import data_derived_conclusions, write_markdown_report
 from dax.coach_analysis.timeline import add_next_events, normalise_processed_events, validate_processed_timeline
 from dax.coach_analysis.visibility import add_reliable_visibility, visibility_report
-from dax.coach_analysis.zones import add_pitch_zones, box_zone
+from dax.coach_analysis.zones import CoordinateError, add_pitch_zones, attacking_box_zone, defensive_box_zone, find_xy_columns
 
 
 def _load_script(name: str):
@@ -26,7 +26,7 @@ def _load_script(name: str):
 
 
 def sample_actions():
-    return pd.DataFrame({"match_id":[1,1,2,2],"event_id":[10,11,20,21],"x":[115,111,106,104],"y":[40,42,40,20],"position_group":["Centre Back","CB","Full Back","Centre Back"],"competition_label":["World Cup","World Cup","Euros","Euros"],"action_family":["Clearance","Block","Pressure","Duel"],"event_type":["Clearance","Block","Pressure","Duel"],"possession":[5,5,6,6],"team":["A","A","B","B"],"observed_future_xg":[0.0,.2,.05,.1],"expected_future_xg":[.1,.05,.03,.08],"observed_future_shot":[0,1,0,1],"expected_shot_probability":[.2,.1,.1,.2],"has_360":[True, False, True, True],"local_5m_region_fully_visible":[True, True, True, False],"local_10m_region_fully_visible":[True, True, True, True],"freeze_frame_roles_known":[True, True, False, True]})
+    return pd.DataFrame({"match_id":[1,1,2,2],"event_id":[10,11,20,21],"action_x":[5,11,106,17],"action_y":[40,42,40,20],"position_group":["Centre Back","CB","Full Back","Centre Back"],"competition_label":["World Cup","World Cup","Euros","Euros"],"action_family":["Clearance","Block","Pressure","Duel"],"event_type":["Clearance","Block","Pressure","Duel"],"possession":[5,5,6,6],"team":["A","A","B","B"],"observed_future_xg":[0.0,.2,.05,.1],"expected_future_xg":[.1,.05,.03,.08],"observed_future_shot":[0,1,0,1],"expected_shot_probability":[.2,.1,.1,.2],"has_360":[True, False, True, True],"local_5m_region_fully_visible":[True, True, True, False],"local_10m_region_fully_visible":[True, True, True, True],"freeze_frame_roles_known":[True, True, False, True]})
 
 
 def sample_events():
@@ -115,7 +115,7 @@ def test_true_sequence_outcomes_for_clearance_block_pressure():
     pop = cb._augment_sequences(box_defence_population(joined, centre_backs_only=True))
     assert "opposition recycle" in set(pop["coach_clearance_outcome"])
     assert "block followed by opposition rebound or shot" in set(pop["coach_block_outcome"])
-    pressure = cb._augment_sequences(joined[joined.event_type.eq("Pressure")])
+    pressure = cb._augment_sequences(pd.DataFrame({"event_type": ["Pressure"], "team": ["A"], "next_team": ["B"], "action_x": [10], "x": [10], "next_x": [20], "next_event_within_window": [True]}))
     assert "opposition progresses" in set(pressure["coach_pressure_outcome"])
 
 
@@ -139,8 +139,8 @@ def test_plotting_bootstrap_empty_cb_box_and_zones(tmp_path):
     assert box_defence_population(sample_actions().iloc[0:0], centre_backs_only=True).empty
     assert set(box_defence_population(sample_actions(), centre_backs_only=True)["position_group"]) == {"Centre Back", "CB"}
     zones = add_pitch_zones(sample_actions())
-    assert box_zone(115, 40) == "six-yard box"
-    assert {"six-yard box", "penalty-spot zone", "wide box"}.issubset(set(zones["coach_box_zone"]))
+    assert defensive_box_zone(5, 40) == "own six-yard box"
+    assert {"own six-yard box", "own penalty-spot/deep central zone", "own left/wide box"}.issubset(set(zones["coach_defensive_box_zone"]))
 
 
 def test_report_generation_and_no_hardcoded_football_conclusions(tmp_path):
@@ -164,7 +164,7 @@ def test_actual_oof_column_mapping_and_canonical_suppression():
 def test_clearance_out_of_play_not_recycled_and_repeated_window_outputs(tmp_path):
     cb = _load_script("01_analyze_cb_box_defence.py")
     actions = sample_actions().iloc[[0]].copy()
-    events = pd.DataFrame({"match_id":[1,1],"event_id":[10,99],"period":[1,1],"minute":[1,1],"second":[1,2],"team":["A","B"],"possession":[5,5],"event_type":["Clearance","Out"],"x":[115,120],"y":[40,80]})
+    events = pd.DataFrame({"match_id":[1,1],"event_id":[10,99],"period":[1,1],"minute":[1,1],"second":[1,2],"team":["A","B"],"possession":[5,5],"event_type":["Clearance","Out"],"x":[5,120],"y":[40,80]})
     pop = cb._augment_sequences(add_next_events(actions, events))
     assert pop.loc[0, "coach_clearance_outcome"] == "out of play"
     counts = cb._write_category_video_files(pd.DataFrame(), tmp_path)
@@ -212,7 +212,7 @@ def test_pressure_and_block_respect_time_window():
     cb = _load_script("01_analyze_cb_box_defence.py")
     actions = pd.DataFrame({
         "match_id": [1, 1], "event_id": [1, 3], "period": [1, 1],
-        "x": [50, 100], "y": [40, 40], "team": ["A", "A"],
+        "action_x": [10, 12], "action_y": [40, 40], "team": ["A", "A"],
         "event_type": ["Pressure", "Block"], "position_group": ["CB", "CB"],
         "possession": [1, 1],
     })
@@ -225,3 +225,41 @@ def test_pressure_and_block_respect_time_window():
     pop = cb._augment_sequences(add_next_events(actions, events, window_seconds=10), window_seconds=10)
     assert "no immediate continuation observed" in set(pop["coach_pressure_outcome"])
     assert "unresolved" in set(pop["coach_block_outcome"])
+
+
+def test_action_xy_discovery_and_defensive_attacking_zone_separation():
+    df = pd.DataFrame({"action_x": [5, 110], "action_y": [40, 40]})
+    assert find_xy_columns(df, strict=True) == ("action_x", "action_y")
+    zones = add_pitch_zones(df, strict=True)
+    assert zones.loc[0, "coach_defensive_box_zone"] == "own six-yard box"
+    assert zones.loc[1, "coach_defensive_box_zone"] == "outside defensive box"
+    assert attacking_box_zone(110, 40).startswith("attacking")
+    assert defensive_box_zone(110, 40) == "outside defensive box"
+
+
+def test_missing_coordinates_fail_clearly():
+    try:
+        add_pitch_zones(pd.DataFrame({"a": [1]}), strict=True)
+    except CoordinateError as exc:
+        assert "No supported coordinate pair" in str(exc)
+    else:
+        raise AssertionError("expected coordinate failure")
+
+
+def test_spatial_versus_phase_population_overlap_and_empty_cb_nonzero(tmp_path):
+    cb = _load_script("01_analyze_cb_box_defence.py")
+    actions = add_pitch_zones(pd.DataFrame({"match_id": [1, 1], "event_id": [1, 2], "action_x": [5, 50], "action_y": [40, 40], "position_group": ["centre_back", "centre_back"], "phase_label": ["box_defence", "box_defence"]}), strict=True)
+    counts = cb._population_stage_counts(actions, actions.iloc[[0]])
+    assert counts["centre_back_own_box_actions"] == 1
+    assert counts["centre_back_phase_labelled_box_defence_actions"] == 2
+    assert counts["spatial_phase_overlap"] == 1
+    out = tmp_path / "out"
+    code = cb.main(["--repo-root", str(tmp_path), "--output-root", str(out)])
+    assert code != 0
+
+
+def test_defensive_plot_half_orientation(tmp_path):
+    from dax.coach_analysis.plotting import action_pitch_map
+    df = pd.DataFrame({"action_x": [5, 10], "action_y": [40, 45], "match_id": [1, 1]})
+    _, ax = action_pitch_map(df, "Own-box test", tmp_path / "plot.png")
+    assert ax.get_xlim()[0] <= 0 and ax.get_xlim()[1] <= 60

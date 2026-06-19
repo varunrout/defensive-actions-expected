@@ -30,3 +30,7 @@ Generated reports, JSON summaries, figures, CSV tables, local data, OOF files an
 ## Methodology notes
 
 The scripts create canonical coach model columns (`coach_expected_shot_b7`, `coach_expected_shot_b6`, `coach_expected_xg_r4`, `coach_expected_xg_r6`, `coach_expected_xg_two_part`, `coach_observed_shot`, `coach_observed_xg`) from the selected OOF schemas. Variant selection is strict. Readiness reports native eligible-population coverage for 360 models and labels whether eligibility came from feature-contract fields or selected OOF event IDs. Processed-event sequence labels use next-event windows and do not link across periods. CB video-review outputs include category-specific CSV files for clearances, blocks, pressures, turnovers, high expected threat, observed threat above expected and repeated box actions.
+
+## Coordinate convention
+
+Coach-analysis scripts assume the StatsBomb 120 x 80 pitch frame. The canonical action coordinates in `player_defensive_actions.parquet` are `action_x` and `action_y`; these are checked before other fallback coordinate names. For centre-back box-defence analysis, the acting defensive team's own goal is treated as `x = 0`, so the own penalty area is `x <= 18` and `18 <= y <= 62`. The attacking penalty area is the opposite end, `x >= 102` and `18 <= y <= 62`. If an upstream pipeline direction-normalises coordinates differently, the selected coordinate columns and filter-stage counts in `execution_summary.json` should be checked before interpreting the report.
