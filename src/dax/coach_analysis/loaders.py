@@ -284,6 +284,24 @@ def validate_shared_row_coverage(
     }
 
 
+def _eligible_actions(actions: pd.DataFrame, *, requires_360: bool) -> pd.DataFrame:
+    if not requires_360:
+        return actions
+    mask = actions.get('has_360', False).fillna(False).eq(True)
+    if 'freeze_frame_roles_known' in actions.columns:
+        mask = mask & actions['freeze_frame_roles_known'].fillna(False).eq(True)
+    for feature in [
+        'visible_attacker_count',
+        'visible_defender_count',
+        'attacker_defender_ratio',
+        'nearest_attacker_distance',
+        'nearest_defender_distance',
+    ]:
+        if feature in actions.columns:
+            mask = mask & actions[feature].notna()
+    return actions.loc[mask].copy()
+
+
 def build_coach_analysis_frame(
     actions: pd.DataFrame,
     classification_oof: pd.DataFrame,
@@ -313,25 +331,25 @@ def build_coach_analysis_frame(
     )
     validations = {
         'classification_primary': validate_shared_row_coverage(
-            actions,
+            _eligible_actions(actions, requires_360=True),
             cls_primary,
             prediction_column='coach_expected_shot_probability',
             name='classification_primary',
         ),
         'classification_sensitivity': validate_shared_row_coverage(
-            actions,
+            _eligible_actions(actions, requires_360=False),
             cls_sensitivity,
             prediction_column='coach_expected_shot_probability_sensitivity',
             name='classification_sensitivity',
         ),
         'regression_primary': validate_shared_row_coverage(
-            actions,
+            _eligible_actions(actions, requires_360=True),
             reg_primary,
             prediction_column='coach_expected_future_xg_r4',
             name='regression_primary',
         ),
         'two_part_exploratory': validate_shared_row_coverage(
-            actions,
+            _eligible_actions(actions, requires_360=True),
             two_part,
             prediction_column='coach_expected_future_xg_two_part',
             name='two_part_exploratory',
@@ -340,7 +358,11 @@ def build_coach_analysis_frame(
 
     merged = actions.copy()
     for frame in (cls_primary, cls_sensitivity, reg_primary, two_part):
-        keep_cols = [column for column in frame.columns if column in EVENT_KEYS or column.startswith('coach_')]
+        keep_cols = [
+            column
+            for column in frame.columns
+            if column in EVENT_KEYS or (column.startswith('coach_') and column not in merged.columns)
+        ]
         merged = merged.merge(frame[keep_cols], on=EVENT_KEYS, how='left', validate='1:1')
     return merged, validations
 

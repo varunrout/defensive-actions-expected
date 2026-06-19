@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import numpy as np
 import pandas as pd
 
 def _event_time_seconds(frame: pd.DataFrame) -> pd.Series:
@@ -9,13 +11,11 @@ def _event_time_seconds(frame: pd.DataFrame) -> pd.Series:
     return minute * 60.0 + second
 
 
-def _next_rows(events: pd.DataFrame, action: pd.Series) -> pd.DataFrame:
-    same_group = (
-        events['match_id'].eq(action['match_id'])
-        & events['period'].eq(action['period'])
-        & events['event_index'].gt(action['event_index'])
-    )
-    return events.loc[same_group].sort_values('event_index')
+def _first_non_matching_team(team_values: np.ndarray, start: int, own_team: object) -> int | None:
+    for pos in range(start, len(team_values)):
+        if team_values[pos] != own_team:
+            return pos
+    return None
 
 
 def construct_sequences(
@@ -44,86 +44,98 @@ def construct_sequences(
 
     if events is None or events.empty:
         return out
-    event_required = {'match_id', 'period', 'event_index', 'team', 'type', 'possession'}
+    event_required = {'match_id', 'period', 'team', 'type', 'possession'}
+    if 'event_index' not in events.columns and 'index' not in events.columns:
+        raise ValueError("events_enriched missing required sequence column: event_index or index")
     missing = sorted(event_required.difference(events.columns))
     if missing:
         raise ValueError(f"events_enriched missing required sequence columns: {missing}")
     events_local = events.copy()
+    if 'event_index' not in events_local.columns and 'index' in events_local.columns:
+        events_local['event_index'] = events_local['index']
     events_local['event_time_seconds'] = _event_time_seconds(events_local)
     events_local['event_type'] = events_local['type'].astype(str)
 
-    next_event_type = []
-    next_opposition_type = []
-    second_opposition_type = []
-    attack_recycled = []
-    shot_followed = []
-    clearance_opp_recovery = []
-    block_rebound = []
-    recovery_turnover = []
-    pressure_progression = []
+    out['coach_next_event_type'] = pd.NA
+    out['coach_next_opposition_event_type'] = pd.NA
+    out['coach_second_opposition_event_type'] = pd.NA
+    out['coach_attack_recycled'] = False
+    out['coach_shot_followed'] = False
+    out['coach_clearance_followed_by_opposition_recovery'] = False
+    out['coach_block_followed_by_rebound'] = False
+    out['coach_recovery_followed_by_immediate_turnover'] = False
+    out['coach_pressure_followed_by_progression'] = False
 
-    for _, row in out.iterrows():
-        candidates = _next_rows(events_local, row)
-        opposition_team = row.get('attacking_team', None)
-        if candidates.empty:
-            next_event_type.append(pd.NA)
-            next_opposition_type.append(pd.NA)
-            second_opposition_type.append(pd.NA)
-            attack_recycled.append(False)
-            shot_followed.append(False)
-            clearance_opp_recovery.append(False)
-            block_rebound.append(False)
-            recovery_turnover.append(False)
-            pressure_progression.append(False)
+    events_local = events_local.sort_values(['match_id', 'period', 'event_index']).copy()
+    out_groups = out.groupby(['match_id', 'period'], dropna=False)
+
+    for (match_id, period), action_group in out_groups:
+        evg = events_local[(events_local['match_id'] == match_id) & (events_local['period'] == period)]
+        if evg.empty:
             continue
+        ev_idx = evg['event_index'].to_numpy(dtype=float)
+        ev_type = evg['event_type'].astype(str).to_numpy()
+        ev_type_lower = np.char.lower(ev_type.astype(str))
+        ev_team = evg['team'].to_numpy()
+        ev_time = evg['event_time_seconds'].to_numpy(dtype=float)
 
-        first_event = candidates.iloc[0]
-        next_event_type.append(first_event['event_type'])
+        team_to_positions: dict[object, np.ndarray] = {}
+        for team_value in pd.Series(ev_team).dropna().unique().tolist():
+            team_to_positions[team_value] = np.flatnonzero(ev_team == team_value)
 
-        if opposition_team is not None:
-            opposition_events = candidates[candidates['team'].eq(opposition_team)]
-        else:
-            opposition_events = candidates[candidates['team'].ne(row.get('team', None))]
+        for row in action_group.itertuples():
+            pos = int(np.searchsorted(ev_idx, float(row.event_index), side='right'))
+            if pos >= len(ev_idx):
+                continue
 
-        if opposition_events.empty:
-            next_opposition_type.append(pd.NA)
-            second_opposition_type.append(pd.NA)
-            opp_within_window = opposition_events
-        else:
-            next_opposition_type.append(opposition_events.iloc[0]['event_type'])
-            second_opposition_type.append(opposition_events.iloc[1]['event_type'] if len(opposition_events) > 1 else pd.NA)
-            opp_within_window = opposition_events[
-                opposition_events['event_time_seconds'].sub(row['coach_action_time_seconds']).le(recycle_window_seconds)
-            ]
+            out.at[row.Index, 'coach_next_event_type'] = ev_type[pos]
+            out.at[row.Index, 'coach_shot_followed'] = bool(np.any(ev_type_lower[pos:min(pos + 3, len(ev_type_lower))] == 'shot'))
 
-        attack_recycled.append(not opp_within_window.empty)
-        shot_followed.append(bool(candidates['event_type'].str.lower().eq('shot').head(3).any()))
+            opposition_team = getattr(row, 'attacking_team', None)
+            next_opp_pos: int | None = None
+            second_opp_pos: int | None = None
+            if opposition_team in team_to_positions:
+                team_positions = team_to_positions[opposition_team]
+                lookup = int(np.searchsorted(ev_idx[team_positions], float(row.event_index), side='right'))
+                if lookup < len(team_positions):
+                    next_opp_pos = int(team_positions[lookup])
+                if lookup + 1 < len(team_positions):
+                    second_opp_pos = int(team_positions[lookup + 1])
+            else:
+                own_team = getattr(row, 'team', None)
+                next_opp_pos = _first_non_matching_team(ev_team, pos, own_team)
+                if next_opp_pos is not None:
+                    second_opp_pos = _first_non_matching_team(ev_team, next_opp_pos + 1, own_team)
 
-        current_type = str(row.get('event_type', '')).lower()
-        current_family = str(row.get('action_family', '')).lower()
-        clearance_opp_recovery.append(
-            ('clearance' in current_type)
-            and bool(opposition_events['event_type'].str.lower().str.contains('recovery|interception').head(2).any())
-        )
-        block_rebound.append(
-            ('block' in current_type)
-            and bool(opposition_events['event_type'].str.lower().str.contains('shot|recovery').head(2).any())
-        )
-        recovery_turnover.append(
-            bool(('recovery' in current_family or 'interception' in current_family) and not opposition_events.head(1).empty)
-        )
-        pressure_progression.append(
-            ('pressure' in current_family)
-            and bool(opposition_events['event_type'].str.lower().str.contains('pass|carry|dribble').head(1).any())
-        )
+            if next_opp_pos is not None:
+                out.at[row.Index, 'coach_next_opposition_event_type'] = ev_type[next_opp_pos]
+                out.at[row.Index, 'coach_attack_recycled'] = bool(ev_time[next_opp_pos] - float(row.coach_action_time_seconds) <= recycle_window_seconds)
+            if second_opp_pos is not None:
+                out.at[row.Index, 'coach_second_opposition_event_type'] = ev_type[second_opp_pos]
 
-    out['coach_next_event_type'] = next_event_type
-    out['coach_next_opposition_event_type'] = next_opposition_type
-    out['coach_second_opposition_event_type'] = second_opposition_type
-    out['coach_attack_recycled'] = pd.Series(attack_recycled, index=out.index)
-    out['coach_shot_followed'] = pd.Series(shot_followed, index=out.index)
-    out['coach_clearance_followed_by_opposition_recovery'] = pd.Series(clearance_opp_recovery, index=out.index)
-    out['coach_block_followed_by_rebound'] = pd.Series(block_rebound, index=out.index)
-    out['coach_recovery_followed_by_immediate_turnover'] = pd.Series(recovery_turnover, index=out.index)
-    out['coach_pressure_followed_by_progression'] = pd.Series(pressure_progression, index=out.index)
+            current_type = str(getattr(row, 'event_type', '')).lower()
+            current_family = str(getattr(row, 'action_family', '')).lower()
+            opp_window_positions = []
+            if next_opp_pos is not None:
+                opp_window_positions.append(next_opp_pos)
+            if second_opp_pos is not None:
+                opp_window_positions.append(second_opp_pos)
+            opp_window_types = [ev_type_lower[p] for p in opp_window_positions]
+
+            out.at[row.Index, 'coach_clearance_followed_by_opposition_recovery'] = (
+                ('clearance' in current_type)
+                and any(('recovery' in typ) or ('interception' in typ) for typ in opp_window_types)
+            )
+            out.at[row.Index, 'coach_block_followed_by_rebound'] = (
+                ('block' in current_type)
+                and any(('shot' in typ) or ('recovery' in typ) for typ in opp_window_types)
+            )
+            out.at[row.Index, 'coach_recovery_followed_by_immediate_turnover'] = (
+                (('recovery' in current_family) or ('interception' in current_family)) and (next_opp_pos is not None)
+            )
+            out.at[row.Index, 'coach_pressure_followed_by_progression'] = (
+                ('pressure' in current_family)
+                and (next_opp_pos is not None)
+                and any(token in str(ev_type_lower[next_opp_pos]) for token in ('pass', 'carry', 'dribble'))
+            )
     return out
