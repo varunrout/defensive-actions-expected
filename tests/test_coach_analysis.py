@@ -7,11 +7,11 @@ import pandas as pd
 matplotlib.use("Agg")
 
 from dax.coach_analysis.bootstrap import match_level_bootstrap_ci
-from dax.coach_analysis.loaders import CoachAnalysisInputError, oof_coverage, select_required_two_part, select_required_variant, validate_unique_predictions, validate_schema
+from dax.coach_analysis.loaders import CoachAnalysisInputError, add_canonical_model_columns, input_status_from_paths, oof_coverage_for_variant, select_required_two_part, select_required_variant, validate_unique_predictions, validate_schema
 from dax.coach_analysis.plotting import horizontal_metric_chart
 from dax.coach_analysis.populations import box_defence_population
 from dax.coach_analysis.reporting import data_derived_conclusions, write_markdown_report
-from dax.coach_analysis.timeline import add_next_events, validate_processed_timeline
+from dax.coach_analysis.timeline import add_next_events, normalise_processed_events, validate_processed_timeline
 from dax.coach_analysis.visibility import add_reliable_visibility, visibility_report
 from dax.coach_analysis.zones import add_pitch_zones, box_zone
 
@@ -30,7 +30,7 @@ def sample_actions():
 
 
 def sample_events():
-    return pd.DataFrame({"match_id":[1,1,1,2,2,2],"event_id":[10,11,12,20,21,22],"period":[1,1,1,1,1,1],"minute":[1,1,1,2,2,2],"second":[1,2,3,1,2,3],"team":["A","B","B","B","B","C"],"possession":[5,5,5,6,6,7],"event_type":["Clearance","Block","Shot","Pressure","Duel","Pass"],"x":[115,111,110,106,115,104],"y":[40,42,40,40,20,40]})
+    return pd.DataFrame({"match_id":[1,1,1,2,2,2],"event_id":[10,11,12,20,21,22],"period":[1,1,1,1,1,1],"minute":[1,1,1,2,2,2],"second":[1,2,3,1,2,3],"team":["A","B","B","B","C","C"],"possession":[5,5,5,6,6,7],"event_type":["Clearance","Block","Shot","Pressure","Duel","Pass"],"x":[115,111,110,106,115,104],"y":[40,42,40,40,20,40]})
 
 
 def test_explicit_path_parsing_and_defaults():
@@ -80,11 +80,13 @@ def test_duplicate_prediction_rejection():
         raise AssertionError("expected duplicate failure")
 
 
-def test_oof_coverage_and_sensitivities():
+def test_360_native_population_coverage_and_custom_input_status(tmp_path):
     preds = pd.DataFrame({"match_id":[1,2],"event_id":[10,20],"fold":[0,1]})
-    coverage = oof_coverage(sample_actions(), preds)
-    assert coverage["missing_predictions"] == 2
-    assert coverage["folds"] == [0, 1]
+    coverage = oof_coverage_for_variant(sample_actions(), preds, "b7_full_with_360")
+    assert coverage["native_eligible_actions"] == 3
+    assert coverage["missing_eligible_predictions"] == 1
+    status = input_status_from_paths({"actions": Path("custom.parquet")}, tmp_path)
+    assert status.loc[0, "path"] == "custom.parquet"
 
 
 def test_boolean_visibility_coverage():
@@ -94,20 +96,26 @@ def test_boolean_visibility_coverage():
     assert report["columns"]["has_360"]["true"] == 3
 
 
-def test_processed_event_timeline_validation():
-    report = validate_processed_timeline(sample_events())
+def test_processed_event_timeline_validation_id_normalisation_and_no_cross_period():
+    events = sample_events().rename(columns={"event_id": "id"})
+    normalised = normalise_processed_events(events)
+    assert "event_id" in normalised.columns
+    report = validate_processed_timeline(events)
     assert report["next_event_sequence_possible"] is True
     assert report["duplicate_event_ids"] == 0
+    two_periods = pd.DataFrame({"match_id":[1,1],"event_id":[1,2],"period":[1,2],"minute":[45,45],"second":[0,1]})
+    linked = add_next_events(two_periods, two_periods)
+    assert linked.loc[linked.event_id.eq(1), "next_event_id"].isna().all()
 
 
 def test_true_sequence_outcomes_for_clearance_block_pressure():
     cb = _load_script("01_analyze_cb_box_defence.py")
     joined = add_next_events(sample_actions(), sample_events())
     pop = cb._augment_sequences(box_defence_population(joined, centre_backs_only=True))
-    assert "clearance recycled" in set(pop["coach_clearance_outcome"])
-    assert "block followed by rebound" in set(pop["coach_block_outcome"])
+    assert "opposition recycle" in set(pop["coach_clearance_outcome"])
+    assert "block followed by opposition rebound or shot" in set(pop["coach_block_outcome"])
     pressure = cb._augment_sequences(joined[joined.event_type.eq("Pressure")])
-    assert "pressure followed by progression" in set(pressure["coach_pressure_outcome"])
+    assert "opposition progresses" in set(pressure["coach_pressure_outcome"])
 
 
 def test_competition_label_handling():
@@ -142,3 +150,28 @@ def test_report_generation_and_no_hardcoded_football_conclusions(tmp_path):
     conclusions = data_derived_conclusions(table, "subgroup", "metric")
     assert conclusions[0]["subgroup"] == "A"
     assert all("subgroup" in c and "metric" in c for c in conclusions)
+
+
+def test_actual_oof_column_mapping_and_canonical_suppression():
+    frame = pd.DataFrame({"b7_y_score":[.3],"b6_y_score":[.2],"r4_y_pred":[.05],"r6_y_pred":[.04],"two_part_combined_future_xg_prediction":[.06],"two_part_observed_future_shot":[0],"two_part_observed_future_xg":[0.0]})
+    out = add_canonical_model_columns(frame)
+    assert out.loc[0, "coach_expected_shot_b7"] == .3
+    assert out.loc[0, "coach_expected_xg_two_part"] == .06
+    assert out.loc[0, "coach_observed_xg"] == 0.0
+
+
+def test_clearance_out_of_play_not_recycled_and_repeated_window_outputs(tmp_path):
+    cb = _load_script("01_analyze_cb_box_defence.py")
+    actions = sample_actions().iloc[[0]].copy()
+    events = pd.DataFrame({"match_id":[1,1],"event_id":[10,99],"period":[1,1],"minute":[1,1],"second":[1,2],"team":["A","B"],"possession":[5,5],"event_type":["Clearance","Out"],"x":[115,120],"y":[40,80]})
+    pop = cb._augment_sequences(add_next_events(actions, events))
+    assert pop.loc[0, "coach_clearance_outcome"] == "out of play"
+    counts = cb._write_category_video_files(pd.DataFrame(), tmp_path)
+    assert "clearance_relief.csv" in counts
+    assert (tmp_path / "block_rebound.csv").exists()
+
+
+def test_separated_conclusion_semantics():
+    table = pd.DataFrame({"subgroup":["danger"],"future_xg_per_action":[.2],"actions":[50],"matches":[5],"ci_low":[.1],"ci_high":[.3]})
+    conclusions = data_derived_conclusions(table, "subgroup", "future_xg_per_action")
+    assert conclusions[0]["metric"] == "future_xg_per_action"

@@ -11,13 +11,13 @@ import pandas as pd
 from dax.coach_analysis.bootstrap import add_match_bootstrap_by_group
 from dax.coach_analysis.execution import add_model_selection_args, build_common_parser, execution_summary, resolve_paths
 from dax.coach_analysis.labels import label_rules
-from dax.coach_analysis.loaders import CoachAnalysisInputError, join_oof_strict, require_table, select_required_two_part, select_required_variant, validate_unique_predictions
+from dax.coach_analysis.loaders import CoachAnalysisInputError, add_canonical_model_columns, join_oof_strict, normalise_event_id, require_table, select_required_two_part, select_required_variant, validate_unique_predictions
 from dax.coach_analysis.metrics import add_suppression, first_existing, summary_table
 from dax.coach_analysis.plotting import action_pitch_map, horizontal_metric_chart
 from dax.coach_analysis.populations import apply_visibility_filter, box_defence_population
 from dax.coach_analysis.reporting import data_derived_conclusions, markdown_table, render_conclusions, write_json, write_markdown_report
 from dax.coach_analysis.representative_events import select_representative_events
-from dax.coach_analysis.timeline import add_next_events, validate_processed_timeline
+from dax.coach_analysis.timeline import add_next_events, normalise_processed_events, validate_processed_timeline
 
 KEYS = ["match_id", "event_id"]
 
@@ -63,14 +63,14 @@ def _canonical_competition(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _prepare_data(args, root: Path) -> tuple[pd.DataFrame, dict]:
-    actions = require_table(args.actions_input, root)
-    events = require_table(args.processed_events_input, root)
+    actions = normalise_event_id(require_table(args.actions_input, root))
+    events = normalise_processed_events(require_table(args.processed_events_input, root))
     timeline = validate_processed_timeline(events)
     if not timeline["next_event_sequence_possible"]:
         raise CoachAnalysisInputError("Processed events cannot support next-event sequence construction.")
     joined = join_oof_strict(actions, _select_prediction_sets(args, root), KEYS)
-    with_next = add_next_events(joined, events)
-    return add_suppression(_canonical_competition(with_next)), timeline
+    with_next = add_next_events(joined, events, window_seconds=args.sequence_window_seconds)
+    return add_suppression(add_canonical_model_columns(_canonical_competition(with_next))), timeline
 
 
 def _event_text(df: pd.DataFrame, prefix: str = "") -> pd.Series:
@@ -78,32 +78,46 @@ def _event_text(df: pd.DataFrame, prefix: str = "") -> pd.Series:
     return df[col].astype(str).str.lower() if col else pd.Series("", index=df.index)
 
 
-def _augment_sequences(population: pd.DataFrame) -> pd.DataFrame:
+def _augment_sequences(population: pd.DataFrame, window_seconds: float = 10.0) -> pd.DataFrame:
     out = population.copy()
     action = _event_text(out)
     next_text = _event_text(out, "next_")
     second_text = _event_text(out, "second_next_")
-    same_possession = out.get("next_possession", pd.Series(pd.NA, index=out.index)).eq(out.get("possession", pd.Series(pd.NA, index=out.index)))
-    same_team_next = out.get("next_team", pd.Series(pd.NA, index=out.index)).eq(out.get("team", pd.Series(pd.NA, index=out.index)))
-    out["coach_possession_secured"] = same_team_next.fillna(False) & ~same_possession.fillna(True)
+    next_team = out.get("next_team", pd.Series(pd.NA, index=out.index))
+    action_team = out.get("team", pd.Series(pd.NA, index=out.index))
+    same_team_next = next_team.eq(action_team)
+    won_flag = out.get("action_won_possession", out.get("possession_won", pd.Series(False, index=out.index))).fillna(False).astype(bool)
+    changed_flag = out.get("action_changed_possession", pd.Series(False, index=out.index)).fillna(False).astype(bool)
+    out["coach_possession_secured"] = same_team_next.fillna(False) | won_flag | changed_flag
     out["coach_clearance_outcome"] = "not clearance"
     out.loc[action.str.contains("clearance") & out["coach_possession_secured"], "coach_clearance_outcome"] = "clearance relief"
-    out.loc[action.str.contains("clearance") & ~out["coach_possession_secured"], "coach_clearance_outcome"] = "clearance recycled"
+    out.loc[action.str.contains("clearance") & next_text.str.contains("out|stoppage|throw|corner|goal kick"), "coach_clearance_outcome"] = "out of play"
+    out.loc[action.str.contains("clearance") & out["coach_clearance_outcome"].eq("not clearance") & next_team.ne(action_team) & out.get("next_event_within_window", pd.Series(False, index=out.index)).fillna(False), "coach_clearance_outcome"] = "opposition recycle"
+    out.loc[action.str.contains("clearance") & out["coach_clearance_outcome"].eq("not clearance"), "coach_clearance_outcome"] = "contested continuation"
+    out.loc[action.str.contains("clearance") & next_team.isna(), "coach_clearance_outcome"] = "unknown"
     out["coach_block_outcome"] = "not block"
-    out.loc[action.str.contains("block") & (next_text.str.contains("shot|rebound") | second_text.str.contains("shot|rebound")), "coach_block_outcome"] = "block followed by rebound"
-    out.loc[action.str.contains("block") & out["coach_block_outcome"].eq("not block"), "coach_block_outcome"] = "block without immediate rebound"
+    out.loc[action.str.contains("block") & next_team.ne(action_team) & (next_text.str.contains("shot|rebound") | second_text.str.contains("shot|rebound")), "coach_block_outcome"] = "block followed by opposition rebound or shot"
+    out.loc[action.str.contains("block") & out["coach_possession_secured"], "coach_block_outcome"] = "block followed by defensive recovery"
+    out.loc[action.str.contains("block") & next_text.str.contains("out|stoppage|whistle"), "coach_block_outcome"] = "block followed by stoppage"
+    out.loc[action.str.contains("block") & out["coach_block_outcome"].eq("not block"), "coach_block_outcome"] = "unresolved"
     next_x = pd.to_numeric(out.get("next_x", out.get("next_location_x", pd.Series(pd.NA, index=out.index))), errors="coerce")
     x = pd.to_numeric(out.get("x", out.get("location_x", pd.Series(pd.NA, index=out.index))), errors="coerce")
-    progressed = next_x.gt(x + 5)
+    direction = out.get("attack_direction", pd.Series(1, index=out.index)).fillna(1).replace({"left_to_right": 1, "right_to_left": -1})
+    signed_dx = (next_x - x) * pd.to_numeric(direction, errors="coerce").fillna(1)
+    opposition_next = next_team.ne(action_team)
     out["coach_pressure_outcome"] = "not pressure"
-    out.loc[action.str.contains("pressure") & progressed.fillna(False), "coach_pressure_outcome"] = "pressure followed by progression"
-    out.loc[action.str.contains("pressure") & ~progressed.fillna(False), "coach_pressure_outcome"] = "pressure delayed/no progression"
-    out["coach_immediate_re_turnover"] = same_team_next.fillna(False) & out.get("second_next_team", pd.Series(pd.NA, index=out.index)).ne(out.get("team", pd.Series(pd.NA, index=out.index)))
+    out.loc[action.str.contains("pressure") & out["coach_possession_secured"], "coach_pressure_outcome"] = "defensive turnover"
+    out.loc[action.str.contains("pressure") & opposition_next & signed_dx.gt(5), "coach_pressure_outcome"] = "opposition progresses"
+    out.loc[action.str.contains("pressure") & opposition_next & signed_dx.between(-5, 5), "coach_pressure_outcome"] = "opposition recycles sideways"
+    out.loc[action.str.contains("pressure") & opposition_next & signed_dx.lt(-5), "coach_pressure_outcome"] = "opposition forced backward"
+    out.loc[action.str.contains("pressure") & next_team.isna(), "coach_pressure_outcome"] = "unknown"
+    out["coach_immediate_re_turnover"] = out["coach_possession_secured"] & out.get("second_next_team", pd.Series(pd.NA, index=out.index)).ne(action_team)
     out["coach_duel_outcome"] = "not duel"
     out.loc[action.str.contains("duel") & out["coach_possession_secured"], "coach_duel_outcome"] = "duel won and secured"
     out.loc[action.str.contains("duel") & ~out["coach_possession_secured"], "coach_duel_outcome"] = "duel unresolved/lost"
     if {"match_id", "possession"}.issubset(out.columns):
-        out["coach_repeated_box_action"] = out.groupby(["match_id", "possession"]).cumcount().gt(0)
+        previous_time = out.groupby(["match_id", "period", "possession"], dropna=False)["coach_event_seconds"].shift(1) if "coach_event_seconds" in out.columns and "period" in out.columns else pd.Series(pd.NA, index=out.index)
+        out["coach_repeated_box_action"] = (out["coach_event_seconds"] - previous_time).le(window_seconds) if "coach_event_seconds" in out.columns else False
     else:
         out["coach_repeated_box_action"] = False
     return out
@@ -122,9 +136,9 @@ def _metric_table(population: pd.DataFrame, group_col: str, n_boot: int, seed: i
 
 def _sensitivity_tables(population: pd.DataFrame) -> dict[str, pd.DataFrame]:
     specs = {
-        "b7_vs_b6_expected_shot": ["b7_expected_shot_probability", "b6_expected_shot_probability", "b7_y_pred_proba", "b6_y_pred_proba"],
-        "r4_vs_r6_expected_xg": ["r4_expected_future_xg", "r6_expected_future_xg", "r4_y_pred", "r6_y_pred"],
-        "r4_vs_two_part_expected_xg": ["r4_expected_future_xg", "two_part_expected_future_xg", "r4_y_pred", "two_part_y_pred"],
+        "b7_vs_b6_expected_shot": ["coach_expected_shot_b7", "coach_expected_shot_b6"],
+        "r4_vs_r6_expected_xg": ["coach_expected_xg_r4", "coach_expected_xg_r6"],
+        "r4_vs_two_part_expected_xg": ["coach_expected_xg_r4", "coach_expected_xg_two_part"],
     }
     out = {}
     for name, cols in specs.items():
@@ -138,6 +152,28 @@ def _sensitivity_tables(population: pd.DataFrame) -> dict[str, pd.DataFrame]:
     return out
 
 
+
+def _write_category_video_files(population: pd.DataFrame, video_dir: Path) -> dict[str, int]:
+    categories = {
+        "clearance_relief.csv": population.get("coach_clearance_outcome", pd.Series(dtype=str)).eq("clearance relief"),
+        "clearance_recycled.csv": population.get("coach_clearance_outcome", pd.Series(dtype=str)).eq("opposition recycle"),
+        "block_rebound.csv": population.get("coach_block_outcome", pd.Series(dtype=str)).eq("block followed by opposition rebound or shot"),
+        "pressure_progression.csv": population.get("coach_pressure_outcome", pd.Series(dtype=str)).eq("opposition progresses"),
+        "immediate_re_turnover.csv": population.get("coach_immediate_re_turnover", pd.Series(dtype=bool)).fillna(False).astype(bool),
+        "high_expected_threat_no_shot.csv": population.get("coach_expected_shot_b7", pd.Series(dtype=float)).gt(population.get("coach_expected_shot_b7", pd.Series(dtype=float)).quantile(0.75)) & population.get("coach_observed_shot", pd.Series(dtype=float)).eq(0),
+        "observed_threat_above_expected.csv": population.get("coach_observed_xg", pd.Series(dtype=float)).gt(population.get("coach_expected_xg_r4", pd.Series(dtype=float))),
+        "repeated_box_actions.csv": population.get("coach_repeated_box_action", pd.Series(dtype=bool)).fillna(False).astype(bool),
+    }
+    counts = {}
+    for filename, mask in categories.items():
+        subset = population[mask.reindex(population.index, fill_value=False)] if not population.empty else population
+        if "match_id" in subset.columns:
+            subset = subset.sort_values("match_id").groupby("match_id", as_index=False, group_keys=False).head(2)
+        table = select_representative_events(subset, n=20, reason=filename.replace(".csv", "").replace("_", " "))
+        _save_table(table, video_dir / filename)
+        counts[filename] = len(table)
+    return counts
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     paths = resolve_paths(args, "cb_box_defence")
@@ -146,7 +182,7 @@ def main(argv: list[str] | None = None) -> int:
     video_dir = paths.child("video_review")
     try:
         actions, timeline = _prepare_data(args, paths.root)
-        population = _augment_sequences(box_defence_population(actions, centre_backs_only=True))
+        population = _augment_sequences(box_defence_population(actions, centre_backs_only=True), args.sequence_window_seconds)
     except CoachAnalysisInputError as exc:
         if not args.allow_partial:
             write_json(paths.output_root / "execution_summary.json", execution_summary("failed", error=str(exc)))
@@ -159,6 +195,7 @@ def main(argv: list[str] | None = None) -> int:
     group_cols = ["coach_box_zone", "action_family", "event_type", "coach_clearance_outcome", "coach_block_outcome", "coach_pressure_outcome", "coach_duel_outcome", "coach_repeated_box_action", "coach_competition"]
     generated = {}
     conclusion_records = []
+    conclusion_groups = {"dangerous contexts": [], "suppression contexts": [], "possession-control contexts": [], "competition comparison": [], "visibility sensitivity": [], "model disagreement": []}
     for col in group_cols:
         if col in population.columns:
             table = _metric_table(population, col, args.bootstrap_samples, args.seed)
@@ -166,16 +203,31 @@ def main(argv: list[str] | None = None) -> int:
             generated[col] = len(table)
             metric = first_existing(table, ["future_xg_per_action", "future_shot_rate", "expected_future_xg"])
             if metric:
-                conclusion_records.extend(data_derived_conclusions(table.rename(columns={col: "subgroup"}), "subgroup", metric, top_n=3, min_actions=args.min_actions, min_matches=args.min_matches))
+                records = data_derived_conclusions(table.rename(columns={col: "subgroup"}), "subgroup", metric, top_n=3, min_actions=args.min_actions, min_matches=args.min_matches)
+                conclusion_records.extend(records)
+                group_name = "competition comparison" if col == "coach_competition" else "possession-control contexts" if col in {"coach_clearance_outcome", "coach_duel_outcome"} else "dangerous contexts"
+                conclusion_groups[group_name].extend(records)
+                if "xg_suppression" in table.columns:
+                    sup_records = data_derived_conclusions(table.rename(columns={col: "subgroup"}), "subgroup", "xg_suppression", top_n=3, min_actions=args.min_actions, min_matches=args.min_matches)
+                    conclusion_groups["suppression contexts"].extend(sup_records)
+                    conclusion_records.extend(sup_records)
     if not reliable.empty:
         table = _metric_table(reliable, "coach_box_zone", args.bootstrap_samples, args.seed)
         _save_table(table, tables / "reliable_visibility_by_box_zone.csv")
+        metric = first_existing(table, ["future_xg_per_action", "future_shot_rate", "expected_future_xg"])
+        if metric:
+            vis_records = data_derived_conclusions(table.rename(columns={"coach_box_zone": "subgroup"}), "subgroup", metric, top_n=3, min_actions=args.min_actions, min_matches=args.min_matches)
+            conclusion_groups["visibility sensitivity"].extend(vis_records)
+            conclusion_records.extend(vis_records)
     for name, table in _sensitivity_tables(population).items():
         _save_table(table, tables / f"{name}.csv")
         if not table.empty and table["rows"].iloc[0]:
-            conclusion_records.append({"subgroup": name, "metric": "mean_difference", "value": float(table["mean_difference"].iloc[0]), "comparison_value": 0.0, "difference": float(table["mean_difference"].iloc[0]), "actions": int(table["rows"].iloc[0]), "matches": int(population["match_id"].nunique()) if "match_id" in population.columns else 0, "ci_low": None, "ci_high": None, "minimum_sample_warning": "" if table["rows"].iloc[0] >= args.min_actions else f"low action sample: {table['rows'].iloc[0]} < {args.min_actions}"})
+            record = {"subgroup": name, "metric": "mean_difference", "value": float(table["mean_difference"].iloc[0]), "comparison_value": 0.0, "difference": float(table["mean_difference"].iloc[0]), "actions": int(table["rows"].iloc[0]), "matches": int(population["match_id"].nunique()) if "match_id" in population.columns else 0, "ci_low": None, "ci_high": None, "minimum_sample_warning": "" if table["rows"].iloc[0] >= args.min_actions else f"low action sample: {table['rows'].iloc[0]} < {args.min_actions}"}
+            conclusion_records.append(record)
+            conclusion_groups["model disagreement"].append(record)
     video = select_representative_events(population, n=20, reason="CB box-defence candidate for video review")
     _save_table(video, video_dir / "candidate_events.csv")
+    category_video_counts = _write_category_video_files(population, video_dir)
     _save_table(label_rules(), tables / "tactical_label_rules.csv")
     if "coach_box_zone" in population.columns:
         zone_table = _metric_table(population, "coach_box_zone", args.bootstrap_samples, args.seed)
@@ -189,12 +241,17 @@ def main(argv: list[str] | None = None) -> int:
         ("Processed event timeline", f"```json\n{timeline}\n```"),
         ("Competition counts", f"```json\n{competition_counts}\n```"),
         ("Generated tables", markdown_table(pd.DataFrame([{"table": k, "rows": v} for k, v in generated.items()]))),
-        ("Data-derived conclusions", render_conclusions(conclusion_records)),
+        ("Dangerous contexts", render_conclusions(conclusion_groups["dangerous contexts"])),
+        ("Suppression contexts", render_conclusions(conclusion_groups["suppression contexts"])),
+        ("Possession-control contexts", render_conclusions(conclusion_groups["possession-control contexts"])),
+        ("Competition comparison", render_conclusions(conclusion_groups["competition comparison"])),
+        ("Visibility sensitivity", render_conclusions(conclusion_groups["visibility sensitivity"])),
+        ("Model disagreement", render_conclusions(conclusion_groups["model disagreement"])),
         ("Reliable-visibility sensitivity", f"Reliable-visibility subset actions: {len(reliable)}."),
-        ("Video review", f"Candidate event table written with {len(video)} rows."),
+        ("Video review", f"Candidate event table written with {len(video)} rows. Category files: {category_video_counts}."),
     ]
     write_markdown_report(paths.output_root / "report.md", "Centre-back box-defence analysis", sections)
-    write_json(paths.output_root / "execution_summary.json", execution_summary("completed", actions=int(len(population)), matches=int(population["match_id"].nunique()) if "match_id" in population.columns else 0, competition_counts=competition_counts, generated_tables=generated, data_derived_conclusions=conclusion_records))
+    write_json(paths.output_root / "execution_summary.json", execution_summary("completed", actions=int(len(population)), matches=int(population["match_id"].nunique()) if "match_id" in population.columns else 0, competition_counts=competition_counts, generated_tables=generated, data_derived_conclusions=conclusion_records, conclusion_groups=conclusion_groups, category_video_counts=category_video_counts, canonical_model_completeness={c: int(population[c].notna().sum()) for c in ["coach_expected_shot_b7", "coach_expected_shot_b6", "coach_expected_xg_r4", "coach_expected_xg_r6", "coach_expected_xg_two_part", "coach_observed_shot", "coach_observed_xg"] if c in population.columns}))
     return 0
 
 

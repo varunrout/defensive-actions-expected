@@ -33,6 +33,7 @@ def build_common_parser(description: str) -> argparse.ArgumentParser:
     parser.add_argument("--bootstrap-samples", type=int, default=1000)
     parser.add_argument("--min-actions", type=int, default=30)
     parser.add_argument("--min-matches", type=int, default=5)
+    parser.add_argument("--sequence-window-seconds", type=float, default=10.0)
     return parser
 
 

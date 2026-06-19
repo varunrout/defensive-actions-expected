@@ -215,3 +215,74 @@ def join_oof_strict(actions: pd.DataFrame, predictions: list[tuple[str, pd.DataF
         cols = [c for c in pred.columns if c in keys or c not in out.columns]
         out = out.merge(pred[cols], on=keys, how='left', validate='m:1')
     return out
+
+CANONICAL_MODEL_COLUMNS = [
+    'coach_expected_shot_b7', 'coach_expected_shot_b6', 'coach_expected_xg_r4',
+    'coach_expected_xg_r6', 'coach_expected_xg_two_part', 'coach_observed_shot',
+    'coach_observed_xg',
+]
+
+
+def normalise_event_id(df: pd.DataFrame) -> pd.DataFrame:
+    out = df.copy()
+    if 'event_id' not in out.columns and 'id' in out.columns:
+        out = out.rename(columns={'id': 'event_id'})
+    return out
+
+
+def input_status_from_paths(paths: dict[str, Path], root: Path | None = None) -> pd.DataFrame:
+    rows = []
+    base = root or repo_root()
+    for name, path in paths.items():
+        p = Path(path)
+        full = p if p.is_absolute() else base / p
+        rows.append({'name': name, 'path': str(path), 'exists': full.exists()})
+    return pd.DataFrame(rows)
+
+
+def add_canonical_model_columns(df: pd.DataFrame) -> pd.DataFrame:
+    out = df.copy()
+    mappings = {
+        'coach_expected_shot_b7': ['b7_y_score', 'b7_y_pred_proba', 'b7_expected_shot_probability'],
+        'coach_expected_shot_b6': ['b6_y_score', 'b6_y_pred_proba', 'b6_expected_shot_probability'],
+        'coach_expected_xg_r4': ['r4_y_pred', 'r4_expected_future_xg'],
+        'coach_expected_xg_r6': ['r6_y_pred', 'r6_expected_future_xg'],
+        'coach_expected_xg_two_part': ['two_part_combined_future_xg_prediction', 'two_part_y_pred', 'two_part_expected_future_xg'],
+        'coach_observed_shot': ['two_part_observed_future_shot', 'b7_y_true', 'b6_y_true', 'observed_future_shot', 'future_shot'],
+        'coach_observed_xg': ['two_part_observed_future_xg', 'r4_y_true', 'r6_y_true', 'observed_future_xg', 'future_xg'],
+    }
+    for target, sources in mappings.items():
+        src = next((c for c in sources if c in out.columns), None)
+        if src:
+            out[target] = pd.to_numeric(out[src], errors='coerce')
+    return out
+
+
+def eligible_actions_for_variant(actions: pd.DataFrame, variant: str) -> pd.DataFrame:
+    if 'with_360' in str(variant) and 'has_360' in actions.columns:
+        return actions[actions['has_360'].fillna(False).astype(bool)].copy()
+    return actions.copy()
+
+
+def oof_coverage_for_variant(actions: pd.DataFrame, preds: pd.DataFrame, variant: str, keys: list[str] | None = None) -> dict:
+    keys = keys or [k for k in EVENT_KEYS if k in actions.columns and k in preds.columns]
+    if not keys:
+        return {'all_actions': len(actions), 'native_eligible_actions': 0, 'predicted_actions': len(preds), 'missing_eligible_predictions': None, 'native_coverage_rate': None, 'all_action_coverage_rate': None, 'match_coverage': None, 'common_row_coverage': None}
+    eligible = eligible_actions_for_variant(actions, variant)
+    action_keys = actions[keys].drop_duplicates()
+    eligible_keys = eligible[keys].drop_duplicates()
+    pred_keys = preds[keys].drop_duplicates()
+    eligible_matched = eligible_keys.merge(pred_keys, on=keys)
+    all_matched = action_keys.merge(pred_keys, on=keys)
+    action_matches = set(eligible['match_id'].dropna()) if 'match_id' in eligible.columns else set()
+    pred_matches = set(preds['match_id'].dropna()) if 'match_id' in preds.columns else set()
+    return {
+        'all_actions': int(len(action_keys)),
+        'native_eligible_actions': int(len(eligible_keys)),
+        'predicted_actions': int(len(pred_keys)),
+        'missing_eligible_predictions': int(len(eligible_keys) - len(eligible_matched)),
+        'native_coverage_rate': float(len(eligible_matched) / len(eligible_keys)) if len(eligible_keys) else None,
+        'all_action_coverage_rate': float(len(all_matched) / len(action_keys)) if len(action_keys) else None,
+        'match_coverage': float(len(action_matches & pred_matches) / len(action_matches)) if action_matches else None,
+        'common_row_coverage': float(len(eligible_matched) / len(pred_keys)) if len(pred_keys) else None,
+    }
