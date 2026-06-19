@@ -96,7 +96,9 @@ def _augment_sequences(population: pd.DataFrame, window_seconds: float = 10.0) -
     out.loc[action.str.contains("clearance") & out["coach_clearance_outcome"].eq("not clearance"), "coach_clearance_outcome"] = "contested continuation"
     out.loc[action.str.contains("clearance") & next_team.isna(), "coach_clearance_outcome"] = "unknown"
     out["coach_block_outcome"] = "not block"
-    out.loc[action.str.contains("block") & next_team.ne(action_team) & (next_text.str.contains("shot|rebound") | second_text.str.contains("shot|rebound")), "coach_block_outcome"] = "block followed by opposition rebound or shot"
+    next_within = out.get("next_event_within_window", pd.Series(False, index=out.index)).fillna(False).astype(bool)
+    second_within = out.get("second_next_event_within_window", pd.Series(False, index=out.index)).fillna(False).astype(bool)
+    out.loc[action.str.contains("block") & next_team.ne(action_team) & ((next_text.str.contains("shot|rebound") & next_within) | (second_text.str.contains("shot|rebound") & second_within)), "coach_block_outcome"] = "block followed by opposition rebound or shot"
     out.loc[action.str.contains("block") & out["coach_possession_secured"], "coach_block_outcome"] = "block followed by defensive recovery"
     out.loc[action.str.contains("block") & next_text.str.contains("out|stoppage|whistle"), "coach_block_outcome"] = "block followed by stoppage"
     out.loc[action.str.contains("block") & out["coach_block_outcome"].eq("not block"), "coach_block_outcome"] = "unresolved"
@@ -107,17 +109,22 @@ def _augment_sequences(population: pd.DataFrame, window_seconds: float = 10.0) -
     opposition_next = next_team.ne(action_team)
     out["coach_pressure_outcome"] = "not pressure"
     out.loc[action.str.contains("pressure") & out["coach_possession_secured"], "coach_pressure_outcome"] = "defensive turnover"
-    out.loc[action.str.contains("pressure") & opposition_next & signed_dx.gt(5), "coach_pressure_outcome"] = "opposition progresses"
-    out.loc[action.str.contains("pressure") & opposition_next & signed_dx.between(-5, 5), "coach_pressure_outcome"] = "opposition recycles sideways"
-    out.loc[action.str.contains("pressure") & opposition_next & signed_dx.lt(-5), "coach_pressure_outcome"] = "opposition forced backward"
+    out.loc[action.str.contains("pressure") & opposition_next & next_within & signed_dx.gt(5), "coach_pressure_outcome"] = "opposition progresses"
+    out.loc[action.str.contains("pressure") & opposition_next & next_within & signed_dx.between(-5, 5), "coach_pressure_outcome"] = "opposition recycles sideways"
+    out.loc[action.str.contains("pressure") & opposition_next & next_within & signed_dx.lt(-5), "coach_pressure_outcome"] = "opposition forced backward"
+    out.loc[action.str.contains("pressure") & opposition_next & ~next_within, "coach_pressure_outcome"] = "no immediate continuation observed"
     out.loc[action.str.contains("pressure") & next_team.isna(), "coach_pressure_outcome"] = "unknown"
     out["coach_immediate_re_turnover"] = out["coach_possession_secured"] & out.get("second_next_team", pd.Series(pd.NA, index=out.index)).ne(action_team)
     out["coach_duel_outcome"] = "not duel"
     out.loc[action.str.contains("duel") & out["coach_possession_secured"], "coach_duel_outcome"] = "duel won and secured"
     out.loc[action.str.contains("duel") & ~out["coach_possession_secured"], "coach_duel_outcome"] = "duel unresolved/lost"
     if {"match_id", "possession"}.issubset(out.columns):
-        previous_time = out.groupby(["match_id", "period", "possession"], dropna=False)["coach_event_seconds"].shift(1) if "coach_event_seconds" in out.columns and "period" in out.columns else pd.Series(pd.NA, index=out.index)
-        out["coach_repeated_box_action"] = (out["coach_event_seconds"] - previous_time).le(window_seconds) if "coach_event_seconds" in out.columns else False
+        original_index = out.index
+        sort_cols = [c for c in ["match_id", "period", "possession", "coach_event_seconds", "event_index"] if c in out.columns]
+        ordered = out.sort_values(sort_cols).copy() if sort_cols else out.copy()
+        previous_time = ordered.groupby(["match_id", "period", "possession"], dropna=False)["coach_event_seconds"].shift(1) if "coach_event_seconds" in ordered.columns and "period" in ordered.columns else pd.Series(pd.NA, index=ordered.index)
+        repeated = (ordered["coach_event_seconds"] - previous_time).le(window_seconds) if "coach_event_seconds" in ordered.columns else pd.Series(False, index=ordered.index)
+        out["coach_repeated_box_action"] = repeated.reindex(original_index).fillna(False).astype(bool)
     else:
         out["coach_repeated_box_action"] = False
     return out
@@ -127,7 +134,7 @@ def _metric_table(population: pd.DataFrame, group_col: str, n_boot: int, seed: i
     if population.empty or group_col not in population.columns:
         return pd.DataFrame()
     table = summary_table(population, [group_col])
-    metric = first_existing(population, ["observed_future_xg", "future_xg", "xg_within_10s", "y_true_xg"])
+    metric = first_existing(population, ["coach_observed_xg", "target_future_xg_10s", "observed_future_xg", "future_xg", "xg_within_10s", "y_true_xg"])
     if metric:
         ci = add_match_bootstrap_by_group(population, [group_col], metric, n_boot=n_boot, seed=seed)
         table = table.merge(ci[[group_col, "ci_low", "ci_high"]], on=group_col, how="left")

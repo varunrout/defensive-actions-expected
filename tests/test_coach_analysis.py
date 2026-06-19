@@ -83,8 +83,9 @@ def test_duplicate_prediction_rejection():
 def test_360_native_population_coverage_and_custom_input_status(tmp_path):
     preds = pd.DataFrame({"match_id":[1,2],"event_id":[10,20],"fold":[0,1]})
     coverage = oof_coverage_for_variant(sample_actions(), preds, "b7_full_with_360")
-    assert coverage["native_eligible_actions"] == 3
-    assert coverage["missing_eligible_predictions"] == 1
+    assert coverage["native_eligible_actions"] == 2
+    assert coverage["missing_eligible_predictions"] == 0
+    assert "derived from selected OOF event IDs" in coverage["eligibility_method"]
     status = input_status_from_paths({"actions": Path("custom.parquet")}, tmp_path)
     assert status.loc[0, "path"] == "custom.parquet"
 
@@ -175,3 +176,52 @@ def test_separated_conclusion_semantics():
     table = pd.DataFrame({"subgroup":["danger"],"future_xg_per_action":[.2],"actions":[50],"matches":[5],"ci_low":[.1],"ci_high":[.3]})
     conclusions = data_derived_conclusions(table, "subgroup", "future_xg_per_action")
     assert conclusions[0]["metric"] == "future_xg_per_action"
+
+
+def test_grouped_bootstrap_ci_non_null_for_canonical_observed_xg():
+    from dax.coach_analysis.bootstrap import add_match_bootstrap_by_group
+
+    frame = pd.DataFrame({
+        "match_id": [1, 1, 2, 2, 3, 3],
+        "group": ["A", "A", "A", "A", "A", "A"],
+        "coach_observed_xg": [0.0, 0.1, 0.2, 0.0, 0.1, 0.3],
+    })
+    out = add_match_bootstrap_by_group(frame, ["group"], "coach_observed_xg", n_boot=50, seed=2)
+    assert out.loc[0, "ci_low"] == out.loc[0, "ci_low"]
+    assert out.loc[0, "ci_high"] == out.loc[0, "ci_high"]
+
+
+def test_possession_control_canonical_from_real_feature_names():
+    frame = pd.DataFrame({
+        "action_won_possession": [False, True, False],
+        "action_changed_possession": [False, False, True],
+        "possession_won": [False, False, False],
+        "won_possession": [False, False, False],
+    })
+    out = add_canonical_model_columns(frame)
+    assert out["coach_possession_controlled"].tolist() == [False, True, True]
+
+
+def test_default_processed_event_path_is_pipeline_output():
+    script = _load_script("00_check_coach_analysis_readiness.py")
+    args = script.parse_args([])
+    assert str(args.processed_events_input) == "data/processed/events_with_targets.parquet"
+
+
+def test_pressure_and_block_respect_time_window():
+    cb = _load_script("01_analyze_cb_box_defence.py")
+    actions = pd.DataFrame({
+        "match_id": [1, 1], "event_id": [1, 3], "period": [1, 1],
+        "x": [50, 100], "y": [40, 40], "team": ["A", "A"],
+        "event_type": ["Pressure", "Block"], "position_group": ["CB", "CB"],
+        "possession": [1, 1],
+    })
+    events = pd.DataFrame({
+        "match_id": [1, 1, 1, 1], "event_id": [1, 2, 3, 4], "period": [1, 1, 1, 1],
+        "minute": [0, 0, 0, 0], "second": [0, 20, 30, 45],
+        "team": ["A", "B", "A", "B"], "possession": [1, 1, 1, 1],
+        "event_type": ["Pressure", "Pass", "Block", "Shot"], "x": [50, 80, 100, 110], "y": [40, 40, 40, 40],
+    })
+    pop = cb._augment_sequences(add_next_events(actions, events, window_seconds=10), window_seconds=10)
+    assert "no immediate continuation observed" in set(pop["coach_pressure_outcome"])
+    assert "unresolved" in set(pop["coach_block_outcome"])

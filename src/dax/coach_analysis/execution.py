@@ -23,7 +23,7 @@ def build_common_parser(description: str) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--repo-root", type=Path, default=None, help="Repository root. Defaults to auto-discovery.")
     parser.add_argument("--actions-input", type=Path, default=Path("data/features/player_defensive_actions.parquet"))
-    parser.add_argument("--processed-events-input", type=Path, default=Path("data/processed/events.parquet"))
+    parser.add_argument("--processed-events-input", type=Path, default=Path("data/processed/events_with_targets.parquet"))
     parser.add_argument("--classification-oof", type=Path, default=Path("outputs/oof/classification_oof.parquet"))
     parser.add_argument("--regression-oof", type=Path, default=Path("outputs/oof/regression_oof.parquet"))
     parser.add_argument("--two-part-oof", type=Path, default=Path("outputs/oof/two_part_future_xg_oof_exploratory.parquet"))

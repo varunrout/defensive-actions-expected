@@ -20,8 +20,13 @@ python scripts/coach_analysis/00_check_coach_analysis_readiness.py
 python scripts/coach_analysis/01_analyze_cb_box_defence.py
 ```
 
-Both scripts accept explicit path arguments for defensive actions, processed events, classification OOF, regression OOF, two-part OOF and output root. They are deterministic by default (`--seed 7`) and do not retrain models or modify source datasets.
+Both scripts accept explicit path arguments for defensive actions, processed events (default `data/processed/events_with_targets.parquet`), classification OOF, regression OOF, two-part OOF and output root. They are deterministic by default (`--seed 7`) and do not retrain models or modify source datasets.
 
 ## Output policy
 
 Generated reports, JSON summaries, figures, CSV tables, local data, OOF files and model artifacts should not be committed.
+
+
+## Methodology notes
+
+The scripts create canonical coach model columns (`coach_expected_shot_b7`, `coach_expected_shot_b6`, `coach_expected_xg_r4`, `coach_expected_xg_r6`, `coach_expected_xg_two_part`, `coach_observed_shot`, `coach_observed_xg`) from the selected OOF schemas. Variant selection is strict. Readiness reports native eligible-population coverage for 360 models and labels whether eligibility came from feature-contract fields or selected OOF event IDs. Processed-event sequence labels use next-event windows and do not link across periods. CB video-review outputs include category-specific CSV files for clearances, blocks, pressures, turnovers, high expected threat, observed threat above expected and repeated box actions.

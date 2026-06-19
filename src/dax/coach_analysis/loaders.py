@@ -248,27 +248,56 @@ def add_canonical_model_columns(df: pd.DataFrame) -> pd.DataFrame:
         'coach_expected_xg_r4': ['r4_y_pred', 'r4_expected_future_xg'],
         'coach_expected_xg_r6': ['r6_y_pred', 'r6_expected_future_xg'],
         'coach_expected_xg_two_part': ['two_part_combined_future_xg_prediction', 'two_part_y_pred', 'two_part_expected_future_xg'],
-        'coach_observed_shot': ['two_part_observed_future_shot', 'b7_y_true', 'b6_y_true', 'observed_future_shot', 'future_shot'],
-        'coach_observed_xg': ['two_part_observed_future_xg', 'r4_y_true', 'r6_y_true', 'observed_future_xg', 'future_xg'],
+        'coach_observed_shot': ['two_part_observed_future_shot', 'target_future_shot_10s', 'b7_y_true', 'b6_y_true', 'observed_future_shot', 'future_shot'],
+        'coach_observed_xg': ['two_part_observed_future_xg', 'target_future_xg_10s', 'r4_y_true', 'r6_y_true', 'observed_future_xg', 'future_xg'],
     }
     for target, sources in mappings.items():
         src = next((c for c in sources if c in out.columns), None)
         if src:
             out[target] = pd.to_numeric(out[src], errors='coerce')
+    possession_sources = ['action_won_possession', 'action_changed_possession', 'possession_won', 'won_possession']
+    available = [c for c in possession_sources if c in out.columns]
+    if available:
+        out['coach_possession_controlled'] = out[available].fillna(False).astype(bool).any(axis=1)
     return out
 
 
+NATIVE_360_ELIGIBILITY_FIELDS = [
+    'has_360', 'freeze_frame_roles_known', 'local_5m_region_fully_visible',
+    'local_10m_region_fully_visible', 'nearest_attacker_distance', 'nearest_defender_distance',
+]
+
+
+def eligibility_for_variant(actions: pd.DataFrame, preds: pd.DataFrame, variant: str, keys: list[str]) -> tuple[pd.DataFrame, list[str], str]:
+    if 'with_360' not in str(variant):
+        return actions.copy(), [], 'all rows: variant does not require 360 context'
+    fields = [c for c in NATIVE_360_ELIGIBILITY_FIELDS if c in actions.columns]
+    required_core = {'has_360', 'freeze_frame_roles_known'}
+    geometry_present = any(c in actions.columns for c in ['nearest_attacker_distance', 'nearest_defender_distance'])
+    if required_core.issubset(actions.columns) and geometry_present:
+        mask = actions['has_360'].fillna(False).astype(bool) & actions['freeze_frame_roles_known'].fillna(False).astype(bool)
+        for col in [c for c in ['local_5m_region_fully_visible', 'local_10m_region_fully_visible'] if c in actions.columns]:
+            mask &= actions[col].fillna(False).astype(bool)
+        for col in [c for c in ['nearest_attacker_distance', 'nearest_defender_distance'] if c in actions.columns]:
+            mask &= actions[col].notna()
+        return actions[mask].copy(), fields, 'native 360 contract from feature columns'
+    if keys and set(keys).issubset(preds.columns) and set(keys).issubset(actions.columns):
+        eligible_keys = preds[keys].drop_duplicates()
+        eligible = actions.merge(eligible_keys, on=keys, how='inner')
+        return eligible, fields, 'derived from selected OOF event IDs because full native 360 contract fields were unavailable'
+    return actions.iloc[0:0].copy(), fields, 'unable to determine native 360 eligibility'
+
+
 def eligible_actions_for_variant(actions: pd.DataFrame, variant: str) -> pd.DataFrame:
-    if 'with_360' in str(variant) and 'has_360' in actions.columns:
-        return actions[actions['has_360'].fillna(False).astype(bool)].copy()
-    return actions.copy()
+    eligible, _, _ = eligibility_for_variant(actions, pd.DataFrame(), variant, [k for k in EVENT_KEYS if k in actions.columns])
+    return eligible
 
 
 def oof_coverage_for_variant(actions: pd.DataFrame, preds: pd.DataFrame, variant: str, keys: list[str] | None = None) -> dict:
     keys = keys or [k for k in EVENT_KEYS if k in actions.columns and k in preds.columns]
     if not keys:
-        return {'all_actions': len(actions), 'native_eligible_actions': 0, 'predicted_actions': len(preds), 'missing_eligible_predictions': None, 'native_coverage_rate': None, 'all_action_coverage_rate': None, 'match_coverage': None, 'common_row_coverage': None}
-    eligible = eligible_actions_for_variant(actions, variant)
+        return {'all_actions': len(actions), 'native_eligible_actions': 0, 'predicted_actions': len(preds), 'missing_eligible_predictions': None, 'native_coverage_rate': None, 'all_action_coverage_rate': None, 'match_coverage': None, 'common_row_coverage': None, 'eligibility_fields': [], 'eligibility_method': 'missing join keys'}
+    eligible, eligibility_fields, eligibility_method = eligibility_for_variant(actions, preds, variant, keys)
     action_keys = actions[keys].drop_duplicates()
     eligible_keys = eligible[keys].drop_duplicates()
     pred_keys = preds[keys].drop_duplicates()
@@ -285,4 +314,6 @@ def oof_coverage_for_variant(actions: pd.DataFrame, preds: pd.DataFrame, variant
         'all_action_coverage_rate': float(len(all_matched) / len(action_keys)) if len(action_keys) else None,
         'match_coverage': float(len(action_matches & pred_matches) / len(action_matches)) if action_matches else None,
         'common_row_coverage': float(len(eligible_matched) / len(pred_keys)) if len(pred_keys) else None,
+        'eligibility_fields': eligibility_fields,
+        'eligibility_method': eligibility_method,
     }
