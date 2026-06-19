@@ -22,7 +22,13 @@ class CoachAnalysisPaths:
 def build_common_parser(description: str) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--repo-root", type=Path, default=None, help="Repository root. Defaults to auto-discovery.")
+    parser.add_argument("--actions-input", type=Path, default=Path("data/features/player_defensive_actions.parquet"))
+    parser.add_argument("--processed-events-input", type=Path, default=Path("data/processed/events.parquet"))
+    parser.add_argument("--classification-oof", type=Path, default=Path("outputs/oof/classification_oof.parquet"))
+    parser.add_argument("--regression-oof", type=Path, default=Path("outputs/oof/regression_oof.parquet"))
+    parser.add_argument("--two-part-oof", type=Path, default=Path("outputs/oof/two_part_future_xg_oof_exploratory.parquet"))
     parser.add_argument("--output-root", type=Path, default=None, help="Output directory for this analysis.")
+    parser.add_argument("--allow-partial", action="store_true", help="Write diagnostic reports instead of failing on readiness errors.")
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--bootstrap-samples", type=int, default=1000)
     parser.add_argument("--min-actions", type=int, default=30)
@@ -48,5 +54,6 @@ def add_model_selection_args(parser: argparse.ArgumentParser) -> argparse.Argume
     parser.add_argument("--classification-sensitivity", default="b6_full_without_360")
     parser.add_argument("--regression-variant", default="r4_full_with_360")
     parser.add_argument("--regression-sensitivity", default="r6_nonlinear_candidate")
-    parser.add_argument("--two-part-variant", default="exploratory_two_part")
+    parser.add_argument("--two-part-classification-variant", default="b7_full_with_360")
+    parser.add_argument("--two-part-conditional-variant", default="conditional_tweedie")
     return parser

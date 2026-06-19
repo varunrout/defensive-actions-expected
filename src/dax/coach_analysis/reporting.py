@@ -45,6 +45,8 @@ def data_derived_conclusions(
     metric_col: str,
     comparison_col: str | None = None,
     top_n: int = 5,
+    min_actions: int = MIN_SAMPLE_ACTIONS,
+    min_matches: int = MIN_SAMPLE_MATCHES,
 ) -> list[dict[str, Any]]:
     """Generate conclusion records from calculated rows only.
 
@@ -77,7 +79,7 @@ def data_derived_conclusions(
                 "matches": int(row.get("matches", 0)),
                 "ci_low": None if pd.isna(row.get("ci_low", pd.NA)) else float(row.get("ci_low")),
                 "ci_high": None if pd.isna(row.get("ci_high", pd.NA)) else float(row.get("ci_high")),
-                "minimum_sample_warning": sample_warning(int(row.get("actions", 0)), int(row.get("matches", 0))),
+                "minimum_sample_warning": sample_warning(int(row.get("actions", 0)), int(row.get("matches", 0)), min_actions, min_matches),
             }
         )
     return records

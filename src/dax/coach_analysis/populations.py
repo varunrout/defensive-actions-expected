@@ -1,12 +1,11 @@
 from __future__ import annotations
 import pandas as pd
 from .zones import add_pitch_zones, find_xy_columns
+from .visibility import add_reliable_visibility
 
 def _contains(s, terms): return s.astype(str).str.lower().str.contains('|'.join(terms), na=False)
 def add_visibility_flag(df):
-    out=df.copy(); cols=[c for c in out.columns if 'visible' in c.lower() or '360' in c.lower()]
-    out['coach_reliable_visibility']=out[cols].notna().any(axis=1) if cols else False
-    return out
+    return add_reliable_visibility(df)
 
 def box_defence_population(df, centre_backs_only=False):
     out=add_visibility_flag(add_pitch_zones(df))

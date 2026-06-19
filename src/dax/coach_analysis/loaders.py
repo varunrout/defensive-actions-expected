@@ -131,3 +131,87 @@ def oof_coverage(actions: pd.DataFrame, preds: pd.DataFrame, keys: list[str] | N
         'fold_count': len(folds),
     })
     return alignment
+
+class CoachAnalysisInputError(ValueError):
+    """Raised when required coach-analysis inputs or variants are invalid."""
+
+
+def require_table(path: str | Path, root: Path | None = None, required: bool = True) -> pd.DataFrame:
+    p = Path(path)
+    if not p.is_absolute():
+        p = (root or repo_root()) / p
+    if not p.exists():
+        if required:
+            raise CoachAnalysisInputError(f"Required input is missing: {p}")
+        return pd.DataFrame()
+    return pd.read_parquet(p) if p.suffix == '.parquet' else pd.read_csv(p)
+
+
+def variant_columns_for(kind: str) -> list[str]:
+    if kind == 'two_part':
+        return ['classification_model_variant', 'conditional_model_variant']
+    return ['model_variant', 'variant', 'candidate', 'model_name', 'run_name']
+
+
+def available_variants(df: pd.DataFrame, kind: str = 'single') -> list[str] | list[tuple[str, str]]:
+    if df.empty:
+        return []
+    if kind == 'two_part' and {'classification_model_variant', 'conditional_model_variant'}.issubset(df.columns):
+        pairs = df[['classification_model_variant', 'conditional_model_variant']].drop_duplicates()
+        return sorted([tuple(x) for x in pairs.to_numpy()])
+    col = next((c for c in variant_columns_for(kind) if c in df.columns), None)
+    if col is None:
+        return ['<no variant column>'] if not df.empty else []
+    return sorted(df[col].dropna().astype(str).unique().tolist())
+
+
+def select_required_variant(df: pd.DataFrame, variant: str, kind: str = 'single', label: str = 'model') -> pd.DataFrame:
+    if df.empty:
+        raise CoachAnalysisInputError(f"No rows available for {label}; required variant {variant!r}.")
+    col = next((c for c in variant_columns_for(kind) if c in df.columns), None)
+    if col is None:
+        raise CoachAnalysisInputError(f"No variant column found for {label}; available columns: {list(df.columns)}")
+    selected = df[df[col].astype(str).eq(variant)].copy()
+    if selected.empty:
+        raise CoachAnalysisInputError(f"Required {label} variant {variant!r} unavailable. Available variants: {available_variants(df, kind)}")
+    selected.attrs['variant_selection'] = f'{col} == {variant}'
+    return selected
+
+
+def select_required_two_part(df: pd.DataFrame, classification_variant: str, conditional_variant: str) -> pd.DataFrame:
+    required = {'classification_model_variant', 'conditional_model_variant'}
+    if df.empty:
+        raise CoachAnalysisInputError('No rows available for two-part OOF predictions.')
+    if not required.issubset(df.columns):
+        raise CoachAnalysisInputError(f"Two-part OOF requires columns {sorted(required)}; available columns: {list(df.columns)}")
+    mask = df['classification_model_variant'].astype(str).eq(classification_variant) & df['conditional_model_variant'].astype(str).eq(conditional_variant)
+    selected = df[mask].copy()
+    if selected.empty:
+        raise CoachAnalysisInputError(
+            f"Required two-part variant pair ({classification_variant!r}, {conditional_variant!r}) unavailable. "
+            f"Available pairs: {available_variants(df, 'two_part')}"
+        )
+    selected.attrs['variant_selection'] = f'classification_model_variant == {classification_variant}; conditional_model_variant == {conditional_variant}'
+    return selected
+
+
+def validate_unique_predictions(preds: pd.DataFrame, keys: list[str] | None = None, label: str = 'predictions') -> None:
+    keys = keys or [k for k in EVENT_KEYS if k in preds.columns]
+    if not keys or not set(keys).issubset(preds.columns):
+        raise CoachAnalysisInputError(f"{label} missing prediction keys {EVENT_KEYS}; available columns: {list(preds.columns)}")
+    dupes = preds[preds.duplicated(keys, keep=False)]
+    if not dupes.empty:
+        examples = dupes[keys].head(10).to_dict('records')
+        raise CoachAnalysisInputError(f"{label} contains duplicate predictions for {keys}; examples: {examples}")
+
+
+def join_oof_strict(actions: pd.DataFrame, predictions: list[tuple[str, pd.DataFrame]], keys: list[str] | None = None) -> pd.DataFrame:
+    keys = keys or [k for k in EVENT_KEYS if k in actions.columns]
+    out = actions.copy()
+    if not keys:
+        raise CoachAnalysisInputError('Actions table has no match_id/event_id keys for OOF joining.')
+    for label, pred in predictions:
+        validate_unique_predictions(pred, keys, label)
+        cols = [c for c in pred.columns if c in keys or c not in out.columns]
+        out = out.merge(pred[cols], on=keys, how='left', validate='m:1')
+    return out
