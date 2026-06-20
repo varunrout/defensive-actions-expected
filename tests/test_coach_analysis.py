@@ -263,3 +263,64 @@ def test_defensive_plot_half_orientation(tmp_path):
     df = pd.DataFrame({"action_x": [5, 10], "action_y": [40, 45], "match_id": [1, 1]})
     _, ax = action_pitch_map(df, "Own-box test", tmp_path / "plot.png")
     assert ax.get_xlim()[0] <= 0 and ax.get_xlim()[1] <= 60
+
+
+def _write_minimal_cli_inputs(tmp_path: Path, actions: pd.DataFrame) -> dict[str, Path]:
+    events = pd.DataFrame({
+        "match_id": [1, 1], "event_id": [1, 2], "period": [1, 1], "minute": [0, 0], "second": [1, 2],
+        "team": ["A", "B"], "possession": [1, 1], "event_type": ["Clearance", "Pass"], "x": [5, 20], "y": [40, 40],
+    })
+    cls = pd.DataFrame({
+        "match_id": [1, 1], "event_id": [1, 1], "model_variant": ["b7_full_with_360", "b6_full_without_360"],
+        "y_score": [0.2, 0.1], "y_true": [0, 0], "fold": [0, 0],
+    })
+    reg = pd.DataFrame({
+        "match_id": [1, 1], "event_id": [1, 1], "model_variant": ["r4_full_with_360", "r6_nonlinear_candidate"],
+        "y_pred": [0.05, 0.04], "y_true": [0.0, 0.0], "fold": [0, 0],
+    })
+    two = pd.DataFrame({
+        "match_id": [1], "event_id": [1], "classification_model_variant": ["b7_full_with_360"],
+        "conditional_model_variant": ["conditional_tweedie"], "combined_future_xg_prediction": [0.06],
+        "observed_future_xg": [0.0], "observed_future_shot": [0], "fold": [0],
+    })
+    paths = {}
+    for name, frame in {"actions": actions, "events": events, "cls": cls, "reg": reg, "two": two}.items():
+        path = tmp_path / f"{name}.parquet"
+        frame.to_parquet(path, index=False)
+        paths[name] = path
+    return paths
+
+
+def test_stage_counts_use_zoned_full_action_frame_and_summary_coordinates(tmp_path):
+    cb = _load_script("01_analyze_cb_box_defence.py")
+    actions = pd.DataFrame({
+        "match_id": [1, 1, 1], "event_id": [1, 3, 4], "action_x": [5, 5, 50], "action_y": [40, 42, 40],
+        "position_group": ["centre_back", "full_back", "centre_back"], "phase_label": ["box_defence", "box_defence", "box_defence"],
+        "team": ["A", "A", "A"], "possession": [1, 1, 2], "event_type": ["Clearance", "Block", "Pressure"],
+    })
+    zoned = add_pitch_zones(actions, strict=True)
+    population = box_defence_population(zoned, centre_backs_only=True)
+    counts = cb._population_stage_counts(zoned, population)
+    assert counts["own_box_actions"] == 2
+    assert counts["centre_back_own_box_actions"] == len(population) == 1
+    assert counts["coordinate_x_column"] == "action_x"
+    assert counts["coordinate_y_column"] == "action_y"
+
+
+def test_missing_coordinates_exit_code_2_structured_report(tmp_path):
+    cb = _load_script("01_analyze_cb_box_defence.py")
+    actions = pd.DataFrame({
+        "match_id": [1], "event_id": [1], "position_group": ["centre_back"], "phase_label": ["box_defence"],
+        "team": ["A"], "possession": [1], "event_type": ["Clearance"],
+    })
+    paths = _write_minimal_cli_inputs(tmp_path, actions)
+    out = tmp_path / "out"
+    code = cb.main([
+        "--repo-root", str(tmp_path), "--actions-input", str(paths["actions"]), "--processed-events-input", str(paths["events"]),
+        "--classification-oof", str(paths["cls"]), "--regression-oof", str(paths["reg"]), "--two-part-oof", str(paths["two"]),
+        "--output-root", str(out),
+    ])
+    assert code == 2
+    summary = (out / "execution_summary.json").read_text()
+    assert "No supported coordinate pair" in summary
+    assert (out / "report.md").exists()

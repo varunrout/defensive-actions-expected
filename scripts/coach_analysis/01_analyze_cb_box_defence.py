@@ -18,6 +18,7 @@ from dax.coach_analysis.populations import apply_visibility_filter, box_defence_
 from dax.coach_analysis.reporting import data_derived_conclusions, markdown_table, render_conclusions, write_json, write_markdown_report
 from dax.coach_analysis.representative_events import select_representative_events
 from dax.coach_analysis.timeline import add_next_events, normalise_processed_events, validate_processed_timeline
+from dax.coach_analysis.zones import CoordinateError, add_pitch_zones
 
 KEYS = ["match_id", "event_id"]
 
@@ -211,9 +212,10 @@ def main(argv: list[str] | None = None) -> int:
     video_dir = paths.child("video_review")
     try:
         actions, timeline = _prepare_data(args, paths.root)
-        population = _augment_sequences(box_defence_population(actions, centre_backs_only=True), args.sequence_window_seconds)
-        stage_counts = _population_stage_counts(actions, population)
-    except CoachAnalysisInputError as exc:
+        zoned_actions = add_pitch_zones(actions, strict=True)
+        population = _augment_sequences(box_defence_population(zoned_actions, centre_backs_only=True), args.sequence_window_seconds)
+        stage_counts = _population_stage_counts(zoned_actions, population)
+    except (CoachAnalysisInputError, CoordinateError) as exc:
         if not args.allow_partial:
             write_json(paths.output_root / "execution_summary.json", execution_summary("failed", error=str(exc)))
             write_markdown_report(paths.output_root / "report.md", "Centre-back box-defence analysis", [("Error", str(exc))])
