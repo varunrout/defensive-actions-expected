@@ -324,3 +324,15 @@ def test_missing_coordinates_exit_code_2_structured_report(tmp_path):
     summary = (out / "execution_summary.json").read_text()
     assert "No supported coordinate pair" in summary
     assert (out / "report.md").exists()
+
+
+def test_immediate_re_turnover_missing_second_next_is_na_safe():
+    cb = _load_script("01_analyze_cb_box_defence.py")
+    frame = pd.DataFrame({
+        "event_type": ["Clearance"],
+        "team": ["A"],
+        "next_team": ["A"],
+        "possession_won": [True],
+    })
+    out = cb._augment_sequences(frame)
+    assert out.loc[0, "coach_immediate_re_turnover"] is False or not bool(out.loc[0, "coach_immediate_re_turnover"])

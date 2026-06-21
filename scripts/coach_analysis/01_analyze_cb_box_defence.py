@@ -115,7 +115,21 @@ def _augment_sequences(population: pd.DataFrame, window_seconds: float = 10.0) -
     out.loc[action.str.contains("pressure") & opposition_next & next_within & signed_dx.lt(-5), "coach_pressure_outcome"] = "opposition forced backward"
     out.loc[action.str.contains("pressure") & opposition_next & ~next_within, "coach_pressure_outcome"] = "no immediate continuation observed"
     out.loc[action.str.contains("pressure") & next_team.isna(), "coach_pressure_outcome"] = "unknown"
-    out["coach_immediate_re_turnover"] = out["coach_possession_secured"] & out.get("second_next_team", pd.Series(pd.NA, index=out.index)).ne(action_team)
+    second_next_team = (
+        out["second_next_team"].astype("string")
+        if "second_next_team" in out.columns
+        else pd.Series("", index=out.index, dtype="string")
+    )
+    second_next_within_window = (
+        out["second_next_event_within_window"].fillna(False).astype(bool)
+        if "second_next_event_within_window" in out.columns
+        else pd.Series(False, index=out.index)
+    )
+    out["coach_immediate_re_turnover"] = (
+        out["coach_possession_secured"].fillna(False).astype(bool)
+        & second_next_within_window
+        & second_next_team.ne(action_team.astype("string")).fillna(False)
+    )
     out["coach_duel_outcome"] = "not duel"
     out.loc[action.str.contains("duel") & out["coach_possession_secured"], "coach_duel_outcome"] = "duel won and secured"
     out.loc[action.str.contains("duel") & ~out["coach_possession_secured"], "coach_duel_outcome"] = "duel unresolved/lost"
