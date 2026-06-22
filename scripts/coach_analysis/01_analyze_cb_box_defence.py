@@ -56,11 +56,19 @@ def _select_prediction_sets(args, root: Path) -> list[tuple[str, pd.DataFrame]]:
     return selected
 
 
-def _first_non_empty_source(df: pd.DataFrame, candidates: list[str]) -> str | None:
+def _clean_metadata_series(series: pd.Series) -> pd.Series:
+    cleaned = series.astype("string").str.strip()
+    return cleaned.mask(cleaned.isna() | cleaned.eq("") | cleaned.str.lower().eq("nan"))
+
+
+def _coalesce_metadata_aliases(df: pd.DataFrame, candidates: list[str]) -> pd.Series:
+    values = pd.Series(pd.NA, index=df.index, dtype="string")
     for col in candidates:
-        if col in df.columns and df[col].notna().any():
-            return col
-    return None
+        if col not in df.columns:
+            continue
+        candidate = _clean_metadata_series(df[col])
+        values = values.where(values.notna(), candidate)
+    return values.fillna("unknown")
 
 
 def _canonical_competition(df: pd.DataFrame) -> pd.DataFrame:
@@ -81,12 +89,7 @@ def _canonical_competition(df: pd.DataFrame) -> pd.DataFrame:
         "coach_season_id": ["season_id"],
     }
     for target, candidates in aliases.items():
-        source = _first_non_empty_source(out, candidates)
-        if source:
-            out[target] = out[source].where(out[source].notna(), "unknown").astype(str)
-            out.loc[out[target].str.strip().eq("") | out[target].str.lower().eq("nan"), target] = "unknown"
-        else:
-            out[target] = "unknown"
+        out[target] = _coalesce_metadata_aliases(out, candidates)
     return out
 
 
@@ -198,22 +201,32 @@ def _phase_spatial_diagnostic(stage_counts: dict[str, int | str | None]) -> dict
     }
 
 
-def _sensitivity_warning(name: str, population: pd.DataFrame, cols: list[str], rows: int) -> str:
+def _sensitivity_warning(
+    population: pd.DataFrame,
+    cols: list[str],
+    comparison_mask: pd.Series,
+    min_actions: int,
+    min_matches: int,
+) -> str:
+    rows = int(comparison_mask.sum())
+    comparison_matches = int(population.loc[comparison_mask, "match_id"].nunique()) if "match_id" in population.columns else 0
     warnings = []
     if rows and len(cols) == 2 and all(c in population.columns for c in cols):
-        a = pd.to_numeric(population[cols[0]], errors="coerce")
-        b = pd.to_numeric(population[cols[1]], errors="coerce")
-        compared = pd.concat([a, b], axis=1).dropna()
-        if not compared.empty and compared.iloc[:, 0].equals(compared.iloc[:, 1]):
+        compared = population.loc[comparison_mask, cols]
+        a = pd.to_numeric(compared[cols[0]], errors="coerce")
+        b = pd.to_numeric(compared[cols[1]], errors="coerce")
+        if not compared.empty and a.reset_index(drop=True).equals(b.reset_index(drop=True)):
             warnings.append("validation-mode limitation: sensitivity variant is identical to the primary variant; do not interpret zero disagreement as model robustness")
+    if rows < min_actions:
+        warnings.append(f"validation-mode limitation: smoke-sized sensitivity action sample: {rows} < {min_actions}")
+    if comparison_matches < min_matches:
+        warnings.append(f"validation-mode limitation: smoke-sized sensitivity match sample: {comparison_matches} < {min_matches}")
     if len(population) and rows < len(population):
         warnings.append(f"validation-mode limitation: sensitivity comparison covers {rows} of {len(population)} selected actions")
-    if len(population) and population.get("match_id", pd.Series(dtype=object)).nunique() <= 1:
-        warnings.append("validation-mode limitation: smoke-sized sensitivity sample; portfolio conclusions require full OOF coverage")
     return "; ".join(warnings)
 
 
-def _sensitivity_tables(population: pd.DataFrame) -> dict[str, pd.DataFrame]:
+def _sensitivity_tables(population: pd.DataFrame, min_actions: int = 30, min_matches: int = 5) -> dict[str, pd.DataFrame]:
     specs = {
         "b7_vs_b6_expected_shot": ["coach_expected_shot_b7", "coach_expected_shot_b6"],
         "r4_vs_r6_expected_xg": ["coach_expected_xg_r4", "coach_expected_xg_r6"],
@@ -225,10 +238,12 @@ def _sensitivity_tables(population: pd.DataFrame) -> dict[str, pd.DataFrame]:
         if pairs:
             a, b = pairs[0]
             diff = pd.to_numeric(population[a], errors="coerce") - pd.to_numeric(population[b], errors="coerce")
-            rows = int(diff.notna().sum())
-            out[name] = pd.DataFrame({"comparison": [name], "rows": [rows], "mean_difference": [float(diff.mean())], "warning": [_sensitivity_warning(name, population, [a, b], rows)]})
+            comparison_mask = diff.notna()
+            rows = int(comparison_mask.sum())
+            matches = int(population.loc[comparison_mask, "match_id"].nunique()) if "match_id" in population.columns else 0
+            out[name] = pd.DataFrame({"comparison": [name], "rows": [rows], "matches": [matches], "mean_difference": [float(diff.mean())], "warning": [_sensitivity_warning(population, [a, b], comparison_mask, min_actions, min_matches)]})
         else:
-            out[name] = pd.DataFrame({"comparison": [name], "rows": [0], "mean_difference": [pd.NA], "warning": ["validation-mode limitation: required sensitivity columns are unavailable"]})
+            out[name] = pd.DataFrame({"comparison": [name], "rows": [0], "matches": [0], "mean_difference": [pd.NA], "warning": ["validation-mode limitation: required sensitivity columns are unavailable"]})
     return out
 
 
@@ -330,7 +345,7 @@ def main(argv: list[str] | None = None) -> int:
             conclusion_groups["visibility sensitivity"].extend(vis_records)
             conclusion_records.extend(vis_records)
     sensitivity_warnings = {}
-    for name, table in _sensitivity_tables(population).items():
+    for name, table in _sensitivity_tables(population, min_actions=args.min_actions, min_matches=args.min_matches).items():
         if not table.empty and table.get("warning") is not None:
             warning = str(table["warning"].iloc[0])
             if warning:

@@ -341,15 +341,22 @@ def test_immediate_re_turnover_missing_second_next_is_na_safe():
 def test_competition_metadata_propagation_and_unknown_fallback():
     cb = _load_script("01_analyze_cb_box_defence.py")
     frame = pd.DataFrame({
-        "competition_label": ["World Cup 2022", None],
-        "competition_stage": ["Group Stage", "Final"],
-        "season_name": ["2022", "2024"],
-        "competition_id": [43, 55],
+        "competition_label": ["World Cup 2022", None, "", "nan"],
+        "competition": ["ignored", "Euro 2024", "Copa", None],
+        "competition_name": ["ignored", "ignored", "ignored", "Fallback Cup"],
+        "competition_stage": ["Group Stage", None, "", "nan"],
+        "stage": ["ignored", "Final", "Semi-final", None],
+        "stage_name": ["ignored", "ignored", "ignored", "Quarter-final"],
+        "season_name": ["2022", None, "", "nan"],
+        "season": ["ignored", "2024", None, "2025"],
+        "season_id": [106, 282, 7, 9],
+        "competition_id": [43, None, "", "nan"],
     })
     out = cb._canonical_competition(frame)
-    assert out["coach_competition"].tolist() == ["World Cup 2022", "unknown"]
-    assert out["coach_competition_stage"].tolist() == ["Group Stage", "Final"]
-    assert out["coach_season"].tolist() == ["2022", "2024"]
+    assert out["coach_competition"].tolist() == ["World Cup 2022", "Euro 2024", "Copa", "Fallback Cup"]
+    assert out["coach_competition_stage"].tolist() == ["Group Stage", "Final", "Semi-final", "Quarter-final"]
+    assert out["coach_season"].tolist() == ["2022", "2024", "7", "2025"]
+    assert out["coach_competition_id"].tolist() == ["43", "unknown", "unknown", "unknown"]
     assert cb._canonical_competition(pd.DataFrame({"match_id": [1]})).loc[0, "coach_competition"] == "unknown"
 
 
@@ -379,8 +386,24 @@ def test_identical_sensitivity_variant_warning_behavior():
         "coach_expected_xg_r6": [0.01, 0.02],
         "coach_expected_xg_two_part": [0.03, 0.04],
     })
-    tables = cb._sensitivity_tables(population)
+    tables = cb._sensitivity_tables(population, min_actions=1, min_matches=1)
     warning = tables["b7_vs_b6_expected_shot"].loc[0, "warning"]
     assert tables["b7_vs_b6_expected_shot"].loc[0, "mean_difference"] == 0.0
     assert "identical to the primary variant" in warning
-    assert "validation-mode limitation" in warning
+    assert "do not interpret zero disagreement as model robustness" in warning
+
+
+def test_smoke_sized_sensitivity_warns_below_report_thresholds():
+    cb = _load_script("01_analyze_cb_box_defence.py")
+    population = pd.DataFrame({
+        "match_id": [1, 2, 3, 4] * 5,
+        "coach_expected_shot_b7": [0.2] * 20,
+        "coach_expected_shot_b6": [0.1] * 20,
+        "coach_expected_xg_r4": [0.01] * 20,
+        "coach_expected_xg_r6": [0.02] * 20,
+        "coach_expected_xg_two_part": [0.03] * 20,
+    })
+    tables = cb._sensitivity_tables(population, min_actions=30, min_matches=5)
+    warning = tables["b7_vs_b6_expected_shot"].loc[0, "warning"]
+    assert "smoke-sized sensitivity action sample: 20 < 30" in warning
+    assert "smoke-sized sensitivity match sample: 4 < 5" in warning
