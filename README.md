@@ -62,6 +62,10 @@ Compatibility wrappers remain active for migration-safe legacy commands at:
 - **Geometry:** After normalisation, attacking goal is `(120, 40)` and defending goal is `(0, 40)`.
 - **Phases:** Defensive phases are `rule_based_proxy` labels with confidence/rule metadata, not confirmed tactical truth.
 
+## Documentation
+
+Start with the [documentation index](docs/README.md) for project overview, roadmap, methodology, coach-analysis notes, current results, limitations and implementation workflows.
+
 ## Repository layout
 
 ```text
