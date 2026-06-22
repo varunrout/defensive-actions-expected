@@ -336,3 +336,51 @@ def test_immediate_re_turnover_missing_second_next_is_na_safe():
     })
     out = cb._augment_sequences(frame)
     assert out.loc[0, "coach_immediate_re_turnover"] is False or not bool(out.loc[0, "coach_immediate_re_turnover"])
+
+
+def test_competition_metadata_propagation_and_unknown_fallback():
+    cb = _load_script("01_analyze_cb_box_defence.py")
+    frame = pd.DataFrame({
+        "competition_label": ["World Cup 2022", None],
+        "competition_stage": ["Group Stage", "Final"],
+        "season_name": ["2022", "2024"],
+        "competition_id": [43, 55],
+    })
+    out = cb._canonical_competition(frame)
+    assert out["coach_competition"].tolist() == ["World Cup 2022", "unknown"]
+    assert out["coach_competition_stage"].tolist() == ["Group Stage", "Final"]
+    assert out["coach_season"].tolist() == ["2022", "2024"]
+    assert cb._canonical_competition(pd.DataFrame({"match_id": [1]})).loc[0, "coach_competition"] == "unknown"
+
+
+def test_phase_spatial_diagnostic_labels_primary_population():
+    cb = _load_script("01_analyze_cb_box_defence.py")
+    diagnostic = cb._phase_spatial_diagnostic({
+        "centre_back_own_box_actions": 1442,
+        "centre_back_phase_labelled_box_defence_actions": 2615,
+        "spatial_phase_overlap": 0,
+        "coordinate_x_column": "action_x",
+        "coordinate_y_column": "action_y",
+    })
+    assert diagnostic["primary_population"] == "spatial_own_box_centre_back_actions"
+    assert diagnostic["spatial_own_box_centre_back_actions"] == 1442
+    assert diagnostic["phase_labelled_box_defence_centre_back_actions"] == 2615
+    assert diagnostic["overlap_count"] == 0
+    assert "not forced to match" in diagnostic["interpretation"]
+
+
+def test_identical_sensitivity_variant_warning_behavior():
+    cb = _load_script("01_analyze_cb_box_defence.py")
+    population = pd.DataFrame({
+        "match_id": [1, 1],
+        "coach_expected_shot_b7": [0.2, 0.3],
+        "coach_expected_shot_b6": [0.2, 0.3],
+        "coach_expected_xg_r4": [0.01, 0.02],
+        "coach_expected_xg_r6": [0.01, 0.02],
+        "coach_expected_xg_two_part": [0.03, 0.04],
+    })
+    tables = cb._sensitivity_tables(population)
+    warning = tables["b7_vs_b6_expected_shot"].loc[0, "warning"]
+    assert tables["b7_vs_b6_expected_shot"].loc[0, "mean_difference"] == 0.0
+    assert "identical to the primary variant" in warning
+    assert "validation-mode limitation" in warning

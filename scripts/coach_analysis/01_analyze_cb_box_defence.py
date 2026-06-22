@@ -56,10 +56,37 @@ def _select_prediction_sets(args, root: Path) -> list[tuple[str, pd.DataFrame]]:
     return selected
 
 
+def _first_non_empty_source(df: pd.DataFrame, candidates: list[str]) -> str | None:
+    for col in candidates:
+        if col in df.columns and df[col].notna().any():
+            return col
+    return None
+
+
 def _canonical_competition(df: pd.DataFrame) -> pd.DataFrame:
+    """Expose competition metadata under stable coach-analysis column names.
+
+    The processed StatsBomb pipeline carries competition metadata as
+    competition_label, competition_id and season_id on action rows. Some
+    historical extracts use competition/competition_name and season/season_name
+    instead, so the coach-analysis layer accepts all known aliases and falls
+    back to unknown only when metadata is genuinely absent or null.
+    """
     out = df.copy()
-    source = first_existing(out, ["competition_label", "competition", "competition_name"])
-    out["coach_competition"] = out[source].astype(str) if source else "unknown"
+    aliases = {
+        "coach_competition": ["competition_label", "competition", "competition_name"],
+        "coach_competition_stage": ["competition_stage", "stage", "stage_name"],
+        "coach_season": ["season_name", "season", "season_id"],
+        "coach_competition_id": ["competition_id"],
+        "coach_season_id": ["season_id"],
+    }
+    for target, candidates in aliases.items():
+        source = _first_non_empty_source(out, candidates)
+        if source:
+            out[target] = out[source].where(out[source].notna(), "unknown").astype(str)
+            out.loc[out[target].str.strip().eq("") | out[target].str.lower().eq("nan"), target] = "unknown"
+        else:
+            out[target] = "unknown"
     return out
 
 
@@ -156,6 +183,36 @@ def _metric_table(population: pd.DataFrame, group_col: str, n_boot: int, seed: i
     return table
 
 
+def _phase_spatial_diagnostic(stage_counts: dict[str, int | str | None]) -> dict[str, int | str | None]:
+    spatial = int(stage_counts.get("centre_back_own_box_actions", 0) or 0)
+    phase = int(stage_counts.get("centre_back_phase_labelled_box_defence_actions", 0) or 0)
+    overlap = int(stage_counts.get("spatial_phase_overlap", 0) or 0)
+    return {
+        "primary_population": "spatial_own_box_centre_back_actions",
+        "spatial_own_box_centre_back_actions": spatial,
+        "phase_labelled_box_defence_centre_back_actions": phase,
+        "overlap_count": overlap,
+        "coordinate_x_column": stage_counts.get("coordinate_x_column"),
+        "coordinate_y_column": stage_counts.get("coordinate_y_column"),
+        "interpretation": "Spatial own-box centre-back analysis is the primary population. Phase-labelled box_defence is retained as a diagnostic because it can use a different upstream tactical definition or coordinate normalisation; overlap is not forced to match.",
+    }
+
+
+def _sensitivity_warning(name: str, population: pd.DataFrame, cols: list[str], rows: int) -> str:
+    warnings = []
+    if rows and len(cols) == 2 and all(c in population.columns for c in cols):
+        a = pd.to_numeric(population[cols[0]], errors="coerce")
+        b = pd.to_numeric(population[cols[1]], errors="coerce")
+        compared = pd.concat([a, b], axis=1).dropna()
+        if not compared.empty and compared.iloc[:, 0].equals(compared.iloc[:, 1]):
+            warnings.append("validation-mode limitation: sensitivity variant is identical to the primary variant; do not interpret zero disagreement as model robustness")
+    if len(population) and rows < len(population):
+        warnings.append(f"validation-mode limitation: sensitivity comparison covers {rows} of {len(population)} selected actions")
+    if len(population) and population.get("match_id", pd.Series(dtype=object)).nunique() <= 1:
+        warnings.append("validation-mode limitation: smoke-sized sensitivity sample; portfolio conclusions require full OOF coverage")
+    return "; ".join(warnings)
+
+
 def _sensitivity_tables(population: pd.DataFrame) -> dict[str, pd.DataFrame]:
     specs = {
         "b7_vs_b6_expected_shot": ["coach_expected_shot_b7", "coach_expected_shot_b6"],
@@ -168,9 +225,10 @@ def _sensitivity_tables(population: pd.DataFrame) -> dict[str, pd.DataFrame]:
         if pairs:
             a, b = pairs[0]
             diff = pd.to_numeric(population[a], errors="coerce") - pd.to_numeric(population[b], errors="coerce")
-            out[name] = pd.DataFrame({"comparison": [name], "rows": [int(diff.notna().sum())], "mean_difference": [float(diff.mean())]})
+            rows = int(diff.notna().sum())
+            out[name] = pd.DataFrame({"comparison": [name], "rows": [rows], "mean_difference": [float(diff.mean())], "warning": [_sensitivity_warning(name, population, [a, b], rows)]})
         else:
-            out[name] = pd.DataFrame({"comparison": [name], "rows": [0], "mean_difference": [pd.NA]})
+            out[name] = pd.DataFrame({"comparison": [name], "rows": [0], "mean_difference": [pd.NA], "warning": ["validation-mode limitation: required sensitivity columns are unavailable"]})
     return out
 
 
@@ -241,9 +299,10 @@ def main(argv: list[str] | None = None) -> int:
         write_json(paths.output_root / "execution_summary.json", execution_summary("failed", filter_stage_counts=stage_counts))
         write_markdown_report(paths.output_root / "report.md", "Centre-back box-defence analysis", [("Filter-stage counts", f"```json\n{stage_counts}\n```")])
         return 2
+    phase_spatial_diagnostic = _phase_spatial_diagnostic(stage_counts)
     reliable = apply_visibility_filter(population, reliable_only=True)
     wc_euros = population[population.get("coach_competition", pd.Series(dtype=str)).astype(str).str.contains("World Cup|Euros|Euro", case=False, na=False)].copy() if not population.empty else population
-    group_cols = ["coach_defensive_box_zone", "action_family", "event_type", "coach_clearance_outcome", "coach_block_outcome", "coach_pressure_outcome", "coach_duel_outcome", "coach_repeated_box_action", "coach_competition"]
+    group_cols = ["coach_defensive_box_zone", "action_family", "event_type", "coach_clearance_outcome", "coach_block_outcome", "coach_pressure_outcome", "coach_duel_outcome", "coach_repeated_box_action", "coach_competition", "coach_competition_stage", "coach_season"]
     generated = {}
     conclusion_records = []
     conclusion_groups = {"dangerous contexts": [], "suppression contexts": [], "possession-control contexts": [], "competition comparison": [], "visibility sensitivity": [], "model disagreement": []}
@@ -270,10 +329,17 @@ def main(argv: list[str] | None = None) -> int:
             vis_records = data_derived_conclusions(table.rename(columns={"coach_defensive_box_zone": "subgroup"}), "subgroup", metric, top_n=3, min_actions=args.min_actions, min_matches=args.min_matches)
             conclusion_groups["visibility sensitivity"].extend(vis_records)
             conclusion_records.extend(vis_records)
+    sensitivity_warnings = {}
     for name, table in _sensitivity_tables(population).items():
+        if not table.empty and table.get("warning") is not None:
+            warning = str(table["warning"].iloc[0])
+            if warning:
+                sensitivity_warnings[name] = warning
         _save_table(table, tables / f"{name}.csv")
         if not table.empty and table["rows"].iloc[0]:
             record = {"subgroup": name, "metric": "mean_difference", "value": float(table["mean_difference"].iloc[0]), "comparison_value": 0.0, "difference": float(table["mean_difference"].iloc[0]), "actions": int(table["rows"].iloc[0]), "matches": int(population["match_id"].nunique()) if "match_id" in population.columns else 0, "ci_low": None, "ci_high": None, "minimum_sample_warning": "" if table["rows"].iloc[0] >= args.min_actions else f"low action sample: {table['rows'].iloc[0]} < {args.min_actions}"}
+            if name in sensitivity_warnings:
+                record["minimum_sample_warning"] = "; ".join(x for x in [record["minimum_sample_warning"], sensitivity_warnings[name]] if x)
             conclusion_records.append(record)
             conclusion_groups["model disagreement"].append(record)
     video = select_representative_events(population, n=20, reason="CB box-defence candidate for video review")
@@ -287,11 +353,17 @@ def main(argv: list[str] | None = None) -> int:
             horizontal_metric_chart(zone_table, "coach_defensive_box_zone", metric, "CB box-defence threat by mutually exclusive defensive box zone", figures / "zone_threat_horizontal.png")
     action_pitch_map(population, "Centre-back box-defence actions", figures / "cb_box_defence_pitch_map.png")
     competition_counts = population["coach_competition"].value_counts().to_dict() if "coach_competition" in population.columns else {}
+    competition_metadata_counts = {
+        col: population[col].value_counts(dropna=False).to_dict()
+        for col in ["coach_competition", "coach_competition_stage", "coach_season"]
+        if col in population.columns
+    }
     sections = [
         ("Filter-stage counts", f"```json\n{stage_counts}\n```"),
-        ("Population", f"Centre-back box-defence actions: {len(population)}; matches: {population['match_id'].nunique() if 'match_id' in population.columns else 0}; World Cup/Euros rows: {len(wc_euros)}."),
+        ("Phase vs spatial box-defence diagnostic", f"```json\n{phase_spatial_diagnostic}\n```"),
+        ("Population", f"Primary population is spatial own-box centre-back actions: {len(population)}; matches: {population['match_id'].nunique() if 'match_id' in population.columns else 0}; World Cup/Euros rows: {len(wc_euros)}. Phase-label overlap is diagnostic only, not ground truth."),
         ("Processed event timeline", f"```json\n{timeline}\n```"),
-        ("Competition counts", f"```json\n{competition_counts}\n```"),
+        ("Competition metadata counts", f"```json\n{competition_metadata_counts}\n```"),
         ("Generated tables", markdown_table(pd.DataFrame([{"table": k, "rows": v} for k, v in generated.items()]))),
         ("Dangerous contexts", render_conclusions(conclusion_groups["dangerous contexts"])),
         ("Suppression contexts", render_conclusions(conclusion_groups["suppression contexts"])),
@@ -299,11 +371,12 @@ def main(argv: list[str] | None = None) -> int:
         ("Competition comparison", render_conclusions(conclusion_groups["competition comparison"])),
         ("Visibility sensitivity", render_conclusions(conclusion_groups["visibility sensitivity"])),
         ("Model disagreement", render_conclusions(conclusion_groups["model disagreement"])),
+        ("Model-sensitivity validation warnings", f"```json\n{sensitivity_warnings}\n```"),
         ("Reliable-visibility sensitivity", f"Reliable-visibility subset actions: {len(reliable)}."),
         ("Video review", f"Candidate event table written with {len(video)} rows. Category files: {category_video_counts}."),
     ]
     write_markdown_report(paths.output_root / "report.md", "Centre-back box-defence analysis", sections)
-    write_json(paths.output_root / "execution_summary.json", execution_summary("completed", filter_stage_counts=stage_counts, actions=int(len(population)), matches=int(population["match_id"].nunique()) if "match_id" in population.columns else 0, competition_counts=competition_counts, generated_tables=generated, data_derived_conclusions=conclusion_records, conclusion_groups=conclusion_groups, category_video_counts=category_video_counts, canonical_model_completeness={c: int(population[c].notna().sum()) for c in ["coach_expected_shot_b7", "coach_expected_shot_b6", "coach_expected_xg_r4", "coach_expected_xg_r6", "coach_expected_xg_two_part", "coach_observed_shot", "coach_observed_xg"] if c in population.columns}))
+    write_json(paths.output_root / "execution_summary.json", execution_summary("completed", filter_stage_counts=stage_counts, phase_spatial_diagnostic=phase_spatial_diagnostic, actions=int(len(population)), matches=int(population["match_id"].nunique()) if "match_id" in population.columns else 0, competition_counts=competition_counts, competition_metadata_counts=competition_metadata_counts, model_sensitivity_warnings=sensitivity_warnings, generated_tables=generated, data_derived_conclusions=conclusion_records, conclusion_groups=conclusion_groups, category_video_counts=category_video_counts, canonical_model_completeness={c: int(population[c].notna().sum()) for c in ["coach_expected_shot_b7", "coach_expected_shot_b6", "coach_expected_xg_r4", "coach_expected_xg_r6", "coach_expected_xg_two_part", "coach_observed_shot", "coach_observed_xg"] if c in population.columns}))
     return 0
 
 
