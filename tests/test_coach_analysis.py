@@ -205,7 +205,7 @@ def test_possession_control_canonical_from_real_feature_names():
 def test_default_processed_event_path_is_pipeline_output():
     script = _load_script("00_check_coach_analysis_readiness.py")
     args = script.parse_args([])
-    assert str(args.processed_events_input) == "data/processed/events_with_targets.parquet"
+    assert args.processed_events_input == Path("data/processed/events_with_targets.parquet")
 
 
 def test_pressure_and_block_respect_time_window():
