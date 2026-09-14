@@ -3,13 +3,19 @@
 Builds a 360-only table of anonymous defender-slots observed in the freeze
 frame of attacking on-ball events (Pass, Carry, Dribble, Shot). This is a
 descriptive, observational signal about defensive positioning -- it makes no
-causal claim about what a defender's positioning "caused". Player identity is
-deliberately out of scope here (defender-slots are anonymous within a frame);
-that is a later phase.
+causal claim about what a defender's positioning "caused". Player identity
+is deliberately out of scope, permanently -- this project works at the
+position/role/archetype level, not the named-player level. Where identity
+would otherwise be needed, a per-frame functional role label
+(_functional_roles) is used instead, inferred purely from a defender-slot's
+position relative to its own team's other visible defenders in that same
+frame -- no lineup join, no cross-frame tracking of any kind.
 """
 from __future__ import annotations
 from itertools import groupby
 from typing import Any
+
+import pandas as pd
 
 from dax.features.player_defense import (
     _as_float,
@@ -22,12 +28,18 @@ from dax.features.player_defense import (
     _pitch_zone,
     _visibility_features,
 )
+from dax.targets.short_horizon import add_future_shot_target, add_future_xg_target
 
 
 ON_BALL_EVENT_TYPES = {"Pass", "Carry", "Dribble", "Shot"}
 TOP_K_OPTIONS = 3
 OPTION_DENSITY_RADIUS_M = 10.0
 LANE_SCREENING_DISTANCE_THRESHOLD_M = 2.0
+OPTION_MATCH_DISTANCE_THRESHOLD_M = 5.0
+DEEP_RATIO_MAX = 1.0 / 3.0
+ADVANCED_RATIO_MIN = 2.0 / 3.0
+CENTRAL_RATIO_MAX = 1.0 / 3.0
+WIDE_RATIO_MIN = 2.0 / 3.0
 
 
 def _event_type(row: dict[str, Any]) -> str | None:
@@ -74,6 +86,65 @@ def _zone_defensive_value(defender_x: float, defender_y: float) -> dict[str, Any
         "defender_zone": _pitch_zone(defender_x, defender_y),
         "zone_defensive_value": 1.0 / (1.0 + distance_to_defending_goal),
     }
+
+
+def _functional_roles(defenders: list[tuple[float, float]]) -> list[str]:
+    """Classify each defender-slot's role relative to its OWN team's other
+    visible defenders in this same freeze frame -- no player identity, no
+    lineup join, no cross-frame tracking of any kind.
+
+    "Deep"/"advanced" and "central"/"wide" only mean anything relative to
+    the defenders visible in this frame, not absolute pitch coordinates --
+    a deep block and a high line both have a "deepest" member.
+
+    depth_ratio min-max-normalises x across the group (0 = deepest of the
+    group, i.e. closest to the defending goal at x=0; 1 = most advanced of
+    the group). When every visible defender shares the same x, depth
+    carries no signal and depth_ratio is fixed at 0.5 (neither deep nor
+    advanced) rather than guessing.
+
+    lateral_ratio is each defender's absolute deviation from the group's
+    mean y, divided by the largest such deviation in the group (0 = most
+    central, 1 = most wide). When every visible defender shares the same y,
+    lateral_ratio is fixed at 0 (nobody is wide relative to a group with no
+    width).
+
+    Buckets (first match wins; anything else is "unclassified" -- never a
+    silent default):
+      - last_line:      deep (depth_ratio <= 1/3) and central (lateral_ratio <= 1/3)
+      - wide_cover:      deep (depth_ratio <= 1/3) and wide (lateral_ratio >= 2/3)
+      - central_screen:  advanced (depth_ratio >= 2/3) and central (lateral_ratio <= 1/3)
+
+    Fewer than two visible defenders means there is nothing to be "relative
+    to", so every slot is unclassified.
+    """
+    n = len(defenders)
+    if n < 2:
+        return ["unclassified" for _ in defenders]
+    xs = [x for x, _ in defenders]
+    ys = [y for _, y in defenders]
+    min_x, max_x = min(xs), max(xs)
+    mean_y = sum(ys) / n
+    deviations = [abs(y - mean_y) for y in ys]
+    max_deviation = max(deviations)
+
+    roles = []
+    for x, deviation in zip(xs, deviations, strict=False):
+        depth_ratio = 0.5 if max_x == min_x else (x - min_x) / (max_x - min_x)
+        lateral_ratio = 0.0 if max_deviation == 0 else deviation / max_deviation
+        is_deep = depth_ratio <= DEEP_RATIO_MAX
+        is_advanced = depth_ratio >= ADVANCED_RATIO_MIN
+        is_central = lateral_ratio <= CENTRAL_RATIO_MAX
+        is_wide = lateral_ratio >= WIDE_RATIO_MIN
+        if is_deep and is_central:
+            roles.append("last_line")
+        elif is_deep and is_wide:
+            roles.append("wide_cover")
+        elif is_advanced and is_central:
+            roles.append("central_screen")
+        else:
+            roles.append("unclassified")
+    return roles
 
 
 def _rank_option_candidates(attackers: list[tuple[float, float]], defenders: list[tuple[float, float]], k: int = TOP_K_OPTIONS) -> list[dict[str, Any]]:
@@ -147,6 +218,91 @@ def _lane_occlusion_features(defender_x: float, defender_y: float, carrier_x: fl
     return features
 
 
+def _compute_targets(events: list[dict[str, Any]]) -> dict[int, tuple[int, float]]:
+    """Per-event future-shot/future-xG targets, keyed by each event's own
+    position in the input list (matching the enumerate() index used to
+    build indexed_events below).
+
+    Delegates entirely to the existing add_future_shot_target /
+    add_future_xg_target (dax.targets.short_horizon), which already scores
+    each event from its own timestamp forward within its own possession --
+    this is a per-row computation, not a per-possession broadcast. It must
+    run over the FULL event list, not just a has_360 subset a caller may
+    have pre-filtered: a shot recorded on a non-360 event still needs to
+    count towards a nearby 360 event's 10s window, or the target would be
+    understated.
+    """
+    events_df = pd.DataFrame(events)
+    if events_df.empty:
+        return {}
+    events_df["_orig_idx"] = range(len(events_df))
+    if "shot_statsbomb_xg" not in events_df.columns:
+        # add_future_xg_target does `df.get(xg_column, 0.0).fillna(...)`, which
+        # only works when the column exists (even if all-NaN); a genuinely
+        # absent column returns the float default, not a Series.
+        events_df["shot_statsbomb_xg"] = 0.0
+    possession_column = "possession_sequence_id" if "possession_sequence_id" in events_df.columns else "possession"
+    targeted = add_future_shot_target(events_df, possession_column=possession_column)
+    targeted = add_future_xg_target(targeted, possession_column=possession_column)
+    return {
+        int(orig_idx): (int(shot), float(xg))
+        for orig_idx, shot, xg in zip(targeted["_orig_idx"], targeted["target_future_shot_10s"], targeted["target_future_xg_10s"], strict=False)
+    }
+
+
+def _next_event_locations(indexed_events: list[tuple[int, dict[str, Any]]]) -> dict[int, tuple[float, float] | None]:
+    """The real next event's location for each event, by its own position
+    in the input list -- never the possession's eventual outcome. None at
+    the end of a match/period, when there is no next event to compare.
+    """
+    locations: dict[int, tuple[float, float] | None] = {}
+    for pos, (orig_idx, row) in enumerate(indexed_events):
+        next_location = None
+        if pos + 1 < len(indexed_events):
+            next_orig_idx, next_row = indexed_events[pos + 1]
+            if row.get("match_id") == next_row.get("match_id") and row.get("period") == next_row.get("period"):
+                next_location = _location(next_row)
+        locations[orig_idx] = next_location
+    return locations
+
+
+def _screened_option_was_avoided(lane_occlusion: dict[str, Any], next_location: tuple[float, float] | None) -> bool | None:
+    """Did the real next event in the data land somewhere other than the
+    option this defender-slot was screening most tightly?
+
+    "Most tightly screened" = whichever of the top-ranked options has this
+    defender's highest lane_screening_score_option_i. A match is decided by
+    proximity of the next event's location to that option's snapshotted
+    freeze-frame coordinates (within OPTION_MATCH_DISTANCE_THRESHOLD_M) --
+    no receiver identity is tracked, so this is a coarse spatial proxy, not
+    a confirmed pass-completion match. Descriptive only: this does not
+    claim the screening caused the option to be avoided.
+
+    None when there is no next event in the data (end of period/match) or
+    this defender had no ranked option to screen at all.
+    """
+    if next_location is None:
+        return None
+    best_rank = None
+    best_score = None
+    for rank in range(1, TOP_K_OPTIONS + 1):
+        score = lane_occlusion.get(f"lane_screening_score_option_{rank}")
+        if score is None:
+            continue
+        if best_score is None or score > best_score:
+            best_score = score
+            best_rank = rank
+    if best_rank is None:
+        return None
+    target_x = lane_occlusion.get(f"top_option_{best_rank}_target_x")
+    target_y = lane_occlusion.get(f"top_option_{best_rank}_target_y")
+    if target_x is None or target_y is None:
+        return None
+    next_x, next_y = next_location
+    matched = _distance(next_x, next_y, target_x, target_y) <= OPTION_MATCH_DISTANCE_THRESHOLD_M
+    return not matched
+
+
 def build_passive_defense_rows(events: list[dict[str, Any]], only_with_360: bool = True, verbose: bool = False) -> list[dict[str, Any]]:
     """Return one row per (defending-team player-slot, attacking on-ball event).
 
@@ -157,12 +313,14 @@ def build_passive_defense_rows(events: list[dict[str, Any]], only_with_360: bool
         return []
     indexed_events = list(enumerate(events))
     indexed_events.sort(key=lambda pair: (int(pair[1].get("match_id") or -1), int(pair[1].get("period") or -1), int(pair[1].get("index") if pair[1].get("index") is not None else pair[0])))
+    target_lookup = _compute_targets(events)
+    next_location_lookup = _next_event_locations(indexed_events)
     rows: list[dict[str, Any]] = []
     for (match_id, period, possession), group_iter in groupby(indexed_events, key=lambda pair: (pair[1].get("match_id"), pair[1].get("period"), _possession_group_key(pair[1]))):
         group = list(group_iter)
         if not group:
             continue
-        for order_in_possession, (_, row) in enumerate(group):
+        for order_in_possession, (orig_idx, row) in enumerate(group):
             event_type = _event_type(row)
             if only_with_360 and not row.get("has_360"):
                 continue
@@ -180,6 +338,9 @@ def build_passive_defense_rows(events: list[dict[str, Any]], only_with_360: bool
             attackers, defenders = _freeze_frame_points(freeze_frame, True)
             options = _rank_option_candidates(attackers, defenders)
             coverage_counts = _coverage_counts(defenders, carrier_x, carrier_y, options)
+            functional_roles = _functional_roles(defenders)
+            target_future_shot_10s, target_future_xg_10s = target_lookup.get(orig_idx, (None, None))
+            next_location = next_location_lookup.get(orig_idx)
             for defender_slot_index, (defender_x, defender_y) in enumerate(defenders):
                 visibility = _visibility_features(row.get("visible_area"), defender_x, defender_y, ball_x, ball_y)
                 goal_metrics = _goal_metrics(defender_x, defender_y)
@@ -210,6 +371,10 @@ def build_passive_defense_rows(events: list[dict[str, Any]], only_with_360: bool
                     "engagement_distance_to_carrier": _distance(defender_x, defender_y, carrier_x, carrier_y),
                     **lane_occlusion,
                     "overload_score": coverage_counts[defender_slot_index],
+                    "defender_functional_role": functional_roles[defender_slot_index],
+                    "target_future_shot_10s": target_future_shot_10s,
+                    "target_future_xg_10s": target_future_xg_10s,
+                    "screened_option_was_avoided": _screened_option_was_avoided(lane_occlusion, next_location),
                 })
     if verbose:
         print(f"[Passive Defense] Built {len(rows)} defender-slot rows")

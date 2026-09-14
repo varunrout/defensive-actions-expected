@@ -50,18 +50,23 @@ def build_passive_defense_dataset(
     if "has_360" not in df.columns:
         raise ValueError("Input parquet must contain a 'has_360' column.")
 
-    df = df[df["has_360"].eq(True)].copy()
     df = df.sort_values(["match_id", "period", "index"]).reset_index(drop=True)
 
     if max_matches is not None:
         match_ids = df["match_id"].drop_duplicates().head(max_matches)
         df = df[df["match_id"].isin(match_ids)].copy()
 
+    # Deliberately NOT filtered to has_360 events here: build_passive_defense_rows
+    # needs the full per-match event stream (including non-360 events) to compute
+    # leakage-safe per-row future-shot/future-xG targets -- a shot recorded on a
+    # non-360 event still has to count towards a nearby 360 event's 10s window.
+    # The has_360 filter for which events become row-anchors happens inside
+    # build_passive_defense_rows itself (only_with_360=True below).
     if verbose:
         print("\n" + "=" * 72)
         print("PASSIVE DEFENSE DATASET BUILD")
         print("=" * 72)
-        print(f"Loaded {len(df):,} 360 events")
+        print(f"Loaded {len(df):,} events ({int(df['has_360'].eq(True).sum()):,} with 360)")
 
     rows = build_passive_defense_rows(df.to_dict("records"), only_with_360=True, verbose=verbose)
     if not rows:

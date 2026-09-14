@@ -223,3 +223,133 @@ def test_lane_occlusion_features_with_no_attackers_are_null_and_overload_zero():
         assert out[f"lane_screening_score_option_{rank}"] is None
     assert out["screens_top_option"] is None
     assert out["overload_score"] == 0
+
+
+# --- Functional role labelling ---------------------------------------------
+#
+# Roles are inferred purely from a defender-slot's depth/width RANK relative
+# to its own team's other visible defenders in the same frame -- never
+# absolute pitch coordinates. See _functional_roles' docstring for the
+# depth_ratio / lateral_ratio formulas and thresholds.
+
+def test_functional_role_back_four_shape():
+    # depth (x): two deepest (0, 0), one mid (15), one most advanced (30)
+    # lateral (y): two central (45, 35, both near mean), one wide (70)
+    row = _pass_row(id="back_four", freeze_frame=[
+        {"teammate": False, "location": [0.0, 45.0]},   # deep + central -> last_line
+        {"teammate": False, "location": [0.0, 70.0]},   # deep + wide -> wide_cover
+        {"teammate": False, "location": [30.0, 35.0]},  # advanced + central -> central_screen
+        {"teammate": False, "location": [15.0, 10.0]},  # mid depth -> unclassified
+    ])
+    rows = build_passive_defense_rows([row])
+    roles = {r["defender_slot_index"]: r["defender_functional_role"] for r in rows}
+    assert roles[0] == "last_line"
+    assert roles[1] == "wide_cover"
+    assert roles[2] == "central_screen"
+    assert roles[3] == "unclassified"
+
+
+def test_functional_role_compact_block_is_unclassified_when_depth_is_degenerate():
+    # All three defenders share the same x -- no depth signal at all, so
+    # nobody can be "deep" or "advanced" relative to the others.
+    row = _pass_row(id="compact_block", freeze_frame=[
+        {"teammate": False, "location": [10.0, 38.0]},
+        {"teammate": False, "location": [10.0, 40.0]},
+        {"teammate": False, "location": [10.0, 42.0]},
+    ])
+    rows = build_passive_defense_rows([row])
+    roles = {r["defender_slot_index"]: r["defender_functional_role"] for r in rows}
+    assert set(roles.values()) == {"unclassified"}
+
+
+def test_functional_role_stretched_transition_shape():
+    row = _pass_row(id="transition", freeze_frame=[
+        {"teammate": False, "location": [5.0, 42.0]},   # deep + central -> last_line
+        {"teammate": False, "location": [55.0, 5.0]},   # advanced + wide -> unclassified
+        {"teammate": False, "location": [50.0, 38.0]},  # advanced + central -> central_screen
+        {"teammate": False, "location": [8.0, 75.0]},   # deep + wide -> wide_cover
+    ])
+    rows = build_passive_defense_rows([row])
+    roles = {r["defender_slot_index"]: r["defender_functional_role"] for r in rows}
+    assert roles[0] == "last_line"
+    assert roles[1] == "unclassified"
+    assert roles[2] == "central_screen"
+    assert roles[3] == "wide_cover"
+
+
+def test_functional_role_unclassified_with_fewer_than_two_defenders():
+    row = _pass_row(id="lone_defender", freeze_frame=[
+        {"teammate": False, "location": [10.0, 40.0]},
+    ])
+    rows = build_passive_defense_rows([row])
+    assert rows[0]["defender_functional_role"] == "unclassified"
+
+
+# --- Outcome columns: per-row, not per-possession ---------------------------
+
+def test_target_columns_are_computed_per_row_not_broadcast_across_possession():
+    # Same possession, same match/period. A shot happens at t=8s. Anchor A
+    # (t=0s) has the shot inside its own 10s window; anchor B (t=20s) does
+    # not -- the shot is in B's past. A broadcast-across-possession bug
+    # would give both the same (1, 0.4) target instead of this asymmetry.
+    anchor_a = _pass_row(id="anchor_a", index=1, second=0)
+    shot_event = _pass_row(id="shot_event", index=2, second=8)
+    shot_event.update({"event_type": "Shot", "has_360": False, "freeze_frame": None, "shot_statsbomb_xg": 0.4})
+    anchor_b = _pass_row(id="anchor_b", index=3, second=20)
+
+    rows = build_passive_defense_rows([anchor_a, shot_event, anchor_b])
+    row_a = next(r for r in rows if r["event_id"] == "anchor_a")
+    row_b = next(r for r in rows if r["event_id"] == "anchor_b")
+
+    assert row_a["target_future_shot_10s"] == 1
+    assert math.isclose(row_a["target_future_xg_10s"], 0.4)
+    assert row_b["target_future_shot_10s"] == 0
+    assert math.isclose(row_b["target_future_xg_10s"], 0.0)
+
+
+def test_target_columns_use_full_event_stream_even_when_shot_lacks_360():
+    # The shot itself is has_360=False and therefore never becomes its own
+    # anchor row -- but it must still be visible to anchor_a's horizon scan.
+    anchor_a = _pass_row(id="anchor_a", index=1, second=0)
+    shot_event = _pass_row(id="shot_event", index=2, second=5)
+    shot_event.update({"event_type": "Shot", "has_360": False, "freeze_frame": None, "shot_statsbomb_xg": 0.1})
+
+    rows = build_passive_defense_rows([anchor_a, shot_event])
+    assert all(r["event_id"] != "shot_event" for r in rows)
+    row_a = next(r for r in rows if r["event_id"] == "anchor_a")
+    assert row_a["target_future_shot_10s"] == 1
+
+
+# --- screened_option_was_avoided --------------------------------------------
+
+def test_screened_option_was_avoided_false_when_next_event_matches_screened_option():
+    anchor = _lane_fixture_row(id="anchor", index=1, second=0)
+    next_event = {
+        "match_id": 1, "period": 1, "index": 2, "minute": 0, "second": 1,
+        "id": "next", "event_type": "Pass", "team": "A",
+        "location": [99.0, 41.0],  # close to top_option_1's target (100, 40)
+        "has_360": False,
+    }
+    rows = build_passive_defense_rows([anchor, next_event])
+    d0 = next(r for r in rows if r["defender_slot_index"] == 0)
+    assert d0["screened_option_was_avoided"] is False
+
+
+def test_screened_option_was_avoided_true_when_next_event_goes_elsewhere():
+    anchor = _lane_fixture_row(id="anchor", index=1, second=0)
+    next_event = {
+        "match_id": 1, "period": 1, "index": 2, "minute": 0, "second": 1,
+        "id": "next", "event_type": "Pass", "team": "A",
+        "location": [10.0, 10.0],  # far from every ranked option
+        "has_360": False,
+    }
+    rows = build_passive_defense_rows([anchor, next_event])
+    d0 = next(r for r in rows if r["defender_slot_index"] == 0)
+    assert d0["screened_option_was_avoided"] is True
+
+
+def test_screened_option_was_avoided_is_none_when_no_next_event():
+    anchor = _lane_fixture_row(id="anchor", index=1, second=0)
+    rows = build_passive_defense_rows([anchor])
+    d0 = next(r for r in rows if r["defender_slot_index"] == 0)
+    assert d0["screened_option_was_avoided"] is None
