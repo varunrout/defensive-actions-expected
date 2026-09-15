@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resolving the Review Tier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.dataset-block { margin-top: 56px; padding-top: 36px; border-top: 2px solid var(--border); }
+.dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.dataset-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  margin: 0 0 4px;
+}
+.dataset-substat { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 12.5px; margin: 0 0 18px; }
+.method-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 16px 0 40px;
+}
+@media (max-width: 980px) { .method-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .method-strip { grid-template-columns: 1fr; } }
+.method-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.method-card .m-name {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: block;
+}
+.method-card p { margin: 0; font-size: 12.5px; color: var(--text-secondary); }
+.tier-section { margin: 12px 0 44px; }
+.tier-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+.tier-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.tier-dot.drop { background: var(--pos); }
+.tier-dot.collapse { background: var(--amber); }
+.tier-dot.review { background: var(--neg); }
+.tier-dot.distinct { background: var(--good); }
+.tier-note { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; }
+.corr-ledger { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.corr-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 160px 76px 96px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.corr-row:last-child { border-bottom: none; }
+.corr-row:hover { background: var(--plane); }
+@media (max-width: 760px) {
+  .corr-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 14px; }
+}
+.corr-pair { color: var(--text-primary); font-weight: 600; }
+.corr-pair .arrow { color: var(--text-muted); font-weight: 400; margin: 0 4px; }
+.corr-method {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.corr-mag-track { position: relative; height: 8px; background: var(--gridline); border-radius: 4px; }
+.corr-mag-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; }
+.corr-mag-fill.drop { background: var(--pos); }
+.corr-mag-fill.collapse { background: var(--amber); }
+.corr-mag-fill.review { background: var(--neg); }
+.corr-mag-fill.distinct { background: var(--good); }
+.corr-value { font-family: "JetBrains Mono", monospace; font-weight: 600; text-align: right; }
+.verdict-chip {
+  justify-self: end;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verdict-chip.drop { background: rgba(227,73,72,0.14); color: var(--pos); }
+.verdict-chip.collapse { background: var(--amber-wash); color: var(--amber); }
+.verdict-chip.review { background: rgba(42,120,214,0.12); color: var(--neg); }
+.verdict-chip.distinct { background: var(--good-wash); color: var(--good); }
+.closing-note {
+  margin-top: 24px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.closing-note b { color: var(--text-primary); }
+
+.rule-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+.rule-banner b { color: var(--text-primary); }
+.framework-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 40px; }
+@media (max-width: 760px) { .framework-grid { grid-template-columns: 1fr; } }
+.framework-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.framework-card .f-type {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: block;
+}
+.framework-card h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.framework-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0 0 10px; }
+.framework-card .example {
+  font-size: 12.5px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+}
+.framework-card .example b { color: var(--text-primary); }
+
+.hcall-panel {
+  background: var(--amber-wash);
+  border: 1px solid rgba(237,161,0,0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 20px 0 40px;
+}
+.hcall-panel > .hp-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.hcall-panel > .hp-note { font-size: 13px; color: var(--text-secondary); margin: 0 0 16px; }
+.hcall-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.hcall-item:last-child { margin-bottom: 0; }
+.hcall-item .hp-pair { font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.hcall-item .hp-reason { color: var(--text-secondary); }
+
+.table-scroll { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+.evidence-ledger { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 12.5px; border: none; border-radius: 0; }
+.evidence-ledger th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.evidence-ledger td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); background: var(--surface); }
+.evidence-ledger tr:last-child td { border-bottom: none; }
+.evidence-ledger td:first-child { color: var(--text-primary); font-weight: 600; }
+
+.path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+@media (max-width: 760px) { .path-grid { grid-template-columns: 1fr; } }
+.path-card { border-radius: 10px; padding: 16px 18px; border: 1px solid var(--border); }
+.path-card.do-now { background: var(--good-wash); border-color: rgba(47,158,91,0.35); }
+.path-card.defer { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.path-card .p-label {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+.path-card.do-now .p-label { color: var(--good); }
+.path-card.defer .p-label { color: var(--amber); }
+.path-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
+.recommendation {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--good);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+.recommendation b { color: var(--text-primary); }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">REVIEW METHODOLOGY</p>
+  <h1 class="title">Resolving the Review Tier</h1>
+  <p class="dek">How every REVIEW-tier correlation pair was resolved -- not just the final answer. Companion to CORRELATION_ATLAS.html, not a duplicate of it.</p>
+  <div class="statbar"><div class="stat"><b>11</b><span>active review pairs</span></div><div class="stat"><b>26</b><span>passive review pairs</span></div><div class="stat"><b>36</b><span>needs human call</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+
+<div class="rule-banner"><b>Correlation says two features move together -- never which one (or whether either)
+matters.</b> Every verdict on this page traces to a lift number (the actual shot-rate difference), not the
+r-value alone. The r-value only got a pair onto this list; it never decided the verdict.</div>
+
+<h2 style="margin-top:36px;">The four relationship types</h2>
+<div class="framework-grid">
+<div class="framework-card">
+  <span class="f-type">Type 1</span>
+  <h3>Boolean vs. its continuous parent</h3>
+  <p>Boolean↔continuous pair, |r| ≥ 0.75, and the continuous side isn&#x27;t itself scheduled for removal elsewhere. Structural call, no lift lookup needed.</p>
+  <p><b>Verdict rule:</b> Drop the boolean, keep the continuous.</p>
+  <div class="example">No Type 1 example resolved in this run.</div>
+</div>
+<div class="framework-card">
+  <span class="f-type">Type 2</span>
+  <h3>Boolean vs. boolean, same rough concept</h3>
+  <p>Both boolean, r ≥ 0.5. Checked in order: opposite-sign lift → keep both. Same sign with one flag a near-total subset of the other (containment ≥ 90%) → keep the higher-signal flag. Same sign, lift diff &lt; 1.0pp → near-identical, drop the broader flag. Same sign, diff ≥ 3.0pp, no subset → keep both. Diff between 1.0pp and 3.0pp → needs_human_call.</p>
+  <p><b>Verdict rule:</b> Depends on lift comparison -- see evidence ledger below.</p>
+  <div class="example">No Type 2 drop example in this run.</div>
+</div>
+<div class="framework-card">
+  <span class="f-type">Type 3</span>
+  <h3>Categorical vs. its correlated continuous feature</h3>
+  <p>Conceptual, not statistical: does the categorical column carry information beyond what&#x27;s already in the continuous measurement, or is it just a bucketed relabeling of the same thing? Default is keep both; flagged needs_human_call only when η &gt; 0.85 (strong sign of relabeling).</p>
+  <p><b>Verdict rule:</b> Keep both by default; needs_human_call above the eta threshold.</p>
+  <div class="example"><b>period</b> vs <b>match_time_seconds</b>: η=0.8658 (lives in the COLLAPSE tier under this codebase's thresholds, not REVIEW -- see note below).</div>
+</div>
+<div class="framework-card">
+  <span class="f-type">Type 4</span>
+  <h3>State-persistence pairs</h3>
+  <p>Same base column paired with its own _prev_event / lagged version, detected by name pattern.</p>
+  <p><b>Verdict rule:</b> Keep both, always -- this is autocorrelation, not redundancy.</p>
+  <div class="example">phase_label vs phase_label_prev_event (Cramer's V, COLLAPSE tier) -- kept both; this is the persistence relationship this rule protects, even though categorical pairs land in COLLAPSE rather than REVIEW under this codebase's tier thresholds.</div>
+</div></div>
+
+<div class="hcall-panel">
+  <p class="hp-title">needs_human_call -- 36 pairs across both datasets (10 active, 26 passive)</p>
+  <p class="hp-note">These pairs did not resolve automatically. Both lift values (or the reason no lift test applies) are included so a human can decide without re-deriving anything.</p>
+  <div class="hcall-item"><div class="hp-pair">[active] nearest_defender_distance ↔ defenders_within_5m <span style="color:var(--text-muted); font-weight:400;">(spearman, r=-0.8458)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[active] nearest_attacker_distance ↔ attackers_within_5m <span style="color:var(--text-muted); font-weight:400;">(spearman, r=-0.7113)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[active] nearest_defender_distance ↔ defenders_within_10m <span style="color:var(--text-muted); font-weight:400;">(spearman, r=-0.7046)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[active] angle_to_attacking_goal ↔ attacking_goal_centrality <span style="color:var(--text-muted); font-weight:400;">(spearman, r=-0.6589)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[active] angle_to_attacking_goal ↔ distance_to_attacking_box <span style="color:var(--text-muted); font-weight:400;">(spearman, r=-0.6175)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[active] attacker_defender_ratio ↔ visible_attacker_count <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.6077)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[active] defenders_within_5m ↔ defenders_within_10m <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.6046)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[active] attacker_spread ↔ defender_spread <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.5813)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[active] attackers_within_5m ↔ attackers_within_10m <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.505)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[active] is_in_defending_box ↔ distance_to_attacking_box <span style="color:var(--text-muted); font-weight:400;">(point_biserial, r=0.5108)</span></div><div class="hp-reason">Boolean-continuous pair below the Type-1 structural threshold (|r|=0.5108 &lt; 0.75); no automated rule applies and is_in_defending_box&#x27;s fate isn&#x27;t otherwise determined.</div></div><div class="hcall-item"><div class="hp-pair">[passive] top_option_1_threat_score ↔ top_option_2_threat_score <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.8885)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] top_option_1_threat_score ↔ top_option_3_threat_score <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.8253)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] angle_to_attacking_goal ↔ attacking_goal_centrality <span style="color:var(--text-muted); font-weight:400;">(spearman, r=-0.8249)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] top_option_1_dy ↔ top_option_1_angle_from_ball <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.8218)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] ball_x ↔ top_option_1_threat_score <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.8202)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] defender_x ↔ ball_x <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.8051)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] top_option_2_dy ↔ top_option_2_angle_from_ball <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.7875)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] top_option_3_dy ↔ top_option_3_angle_from_ball <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.7767)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] ball_y ↔ top_option_1_dy <span style="color:var(--text-muted); font-weight:400;">(spearman, r=-0.7676)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] ball_x ↔ top_option_2_threat_score <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.7457)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] engagement_distance_to_carrier ↔ lane_screening_score_option_2 <span style="color:var(--text-muted); font-weight:400;">(spearman, r=-0.7167)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] ball_x ↔ top_option_3_threat_score <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.7136)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] defender_x ↔ top_option_1_threat_score <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.712)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] engagement_distance_to_carrier ↔ lane_screening_score_option_1 <span style="color:var(--text-muted); font-weight:400;">(spearman, r=-0.7095)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] engagement_distance_to_carrier ↔ lane_screening_score_option_3 <span style="color:var(--text-muted); font-weight:400;">(spearman, r=-0.6927)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] defender_x ↔ top_option_3_threat_score <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.6569)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] ball_y ↔ top_option_2_dy <span style="color:var(--text-muted); font-weight:400;">(spearman, r=-0.6548)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] defender_x ↔ top_option_2_threat_score <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.6481)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] ball_y ↔ top_option_1_angle_from_ball <span style="color:var(--text-muted); font-weight:400;">(spearman, r=-0.6237)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] lane_screening_score_option_1 ↔ lane_screening_score_option_2 <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.6181)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] ball_y ↔ top_option_3_dy <span style="color:var(--text-muted); font-weight:400;">(spearman, r=-0.5992)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] lane_screening_score_option_1 ↔ lane_screening_score_option_3 <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.5832)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] lane_screening_score_option_2 ↔ lane_screening_score_option_3 <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.56)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] defender_y ↔ ball_y <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.5365)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] defender_x ↔ angle_to_attacking_goal <span style="color:var(--text-muted); font-weight:400;">(spearman, r=0.5241)</span></div><div class="hp-reason">Continuous&lt;-&gt;continuous pair; none of the four defined relationship types apply (not boolean, not categorical, not a name-pattern persistence pair) -- no automated rule covers this combination. May be a candidate for structural feature-engineering review rather than a simple drop/keep call.</div></div><div class="hcall-item"><div class="hp-pair">[passive] is_wide_lane ↔ attacking_goal_centrality <span style="color:var(--text-muted); font-weight:400;">(point_biserial, r=-0.6527)</span></div><div class="hp-reason">Boolean-continuous pair below the Type-1 structural threshold (|r|=0.6527 &lt; 0.75); no automated rule applies and is_wide_lane&#x27;s fate isn&#x27;t otherwise determined.</div></div>
+</div>
+
+<h2>Evidence ledger</h2>
+<p>Every Type 1 pair (boolean vs. its continuous parent) and Type 2 pair (boolean vs. boolean), with the evidence used and the resulting verdict.</p>
+
+<h3>Type 1 -- boolean vs. continuous parent</h3>
+<div class="table-scroll"><table class="evidence-ledger">
+<tr><th>Boolean</th><th>Continuous parent</th><th>r</th><th>Verdict</th></tr>
+
+</table></div>
+
+<h3 style="margin-top:28px;">Type 2 -- boolean vs. boolean</h3>
+<div class="table-scroll"><table class="evidence-ledger">
+<tr><th>Pair</th><th>Lift A</th><th>Lift B</th><th>Diff</th><th>Verdict</th></tr>
+
+<tr>
+  <td>action_was_under_opponent_possession ↔ action_retained_defensive_team_control</td>
+  <td>-1.969pp</td>
+  <td>0.716pp</td>
+  <td>2.685pp</td>
+  <td>keep_both</td>
+</tr>
+</table></div>
+
+
+<h2>Structural Redesign</h2>
+<p>Some REVIEW-tier (and adjacent) pairs aren't redundancy problems at all -- the fix is "measure this differently,"
+not "drop one side." Two root causes show up in this run: absolute pitch coordinates encoded near a moving
+reference point (the ball), and several ranked/repeated columns describing the same real-world cluster of objects
+(ranked attacking options).</p>
+
+<h3 style="margin-top:28px;">Worked example: passive-side <code>top_option_1/2/3_*</code> family</h3>
+<p><code>top_option_{1,2,3}_target_x/y</code> are stored as absolute pitch coordinates, which is why they
+correlate strongly with <code>ball_x</code> and with each other -- the same absolute position means something
+different depending on where the ball is. This shows up as 3 needs_human_call pair(s) in this
+run, including:</p>
+<ul><li><code>ball_x</code> ↔ <code>top_option_1_threat_score</code> (r=0.8202)</li><li><code>ball_x</code> ↔ <code>top_option_2_threat_score</code> (r=0.7457)</li><li><code>ball_x</code> ↔ <code>top_option_3_threat_score</code> (r=0.7136)</li></ul>
+
+<div class="path-grid">
+  <div class="path-card do-now">
+    <span class="p-label">Do now</span>
+    <p>Ball-relative coordinate transform: replace <code>top_option_n_target_x/y</code> with
+    <code>top_option_n_dx/dy</code> (offset from the ball), <code>top_option_n_distance_from_ball</code>, and
+    <code>top_option_n_angle_from_ball</code>. Unambiguous, loses no information, and is cheap to compute --
+    see prompt 4/4 Part A. Correlation with <code>ball_x</code> should drop out of COLLAPSE/REVIEW once applied.</p>
+  </div>
+  <div class="path-card defer">
+    <span class="p-label">Defer</span>
+    <p>Collapsing <code>top_option_2/3_*</code> into aggregate "backup option" features (max threat score, spread
+    vs rank 1) is a real tradeoff -- it may throw away signal a model would otherwise use. Gated behind
+    <code>PASSIVE_COLLAPSE_OPTION_RANKS</code> (default <code>False</code>) until a baseline model's feature
+    importance says whether ranks 2-3 are pulling their weight. See prompt 4/4 Part B.</p>
+  </div>
+</div>
+<div class="recommendation"><b>Recommendation:</b> apply the ball-relative transform now (Part A) -- it is
+strictly an encoding fix with no tradeoff. Do not collapse ranks 2-3 (Part B) until a baseline model's feature
+importance is available; correlation alone cannot tell you whether they're pulling weight.</div>
+
+
+</div>
+</div>
+</body>
+</html>

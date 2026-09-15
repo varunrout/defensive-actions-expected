@@ -32,6 +32,8 @@ ROLE_FEATURE_NAMES = {
     "local_numerical_balance_5m",
     "local_numerical_balance_10m",
     "attacker_defender_ratio",
+    "defender_attacker_gap_x",
+    "defender_attacker_gap_y",
 }
 def _is_missing(value: Any) -> bool:
     return value is None or value != value
@@ -313,11 +315,22 @@ def _visibility_features(
         "visibility_limited": band in {"missing", "low"},
     }
 
+def _exclude_actor_from_frame(frame: Any) -> list[Any]:
+    """Drop the acting player's own freeze-frame entry (StatsBomb 360 data
+    marks it with "actor": True) before it can be treated as one of its own
+    support players. Left in, the actor -- always on the defending side for
+    a defensive-action row -- would be its own "nearest defender" at
+    distance ~0, and would inflate every defender-count/centroid/spread
+    column derived from the same candidate pool.
+    """
+    return [player for player in _safe_list(frame) if not (isinstance(player, dict) and player.get("actor") is True)]
+
+
 def _support_features(frame: Any, x: float, y: float, ball_x: float | None, actor_is_attacking: bool | None, visibility: dict[str, Any]) -> dict[str, Any]:
     roles_known = actor_is_attacking is not None
     if not roles_known:
         return {"freeze_frame_roles_known": False, **{name: None for name in ROLE_FEATURE_NAMES}}
-    attackers, defenders = _freeze_frame_points(frame, actor_is_attacking)
+    attackers, defenders = _freeze_frame_points(_exclude_actor_from_frame(frame), actor_is_attacking)
     a_centroid = _centroid(attackers)
     d_centroid = _centroid(defenders)
     a5 = _density(attackers, x, y, 5.0)
@@ -343,6 +356,14 @@ def _support_features(frame: Any, x: float, y: float, ball_x: float | None, acto
         "attacker_centroid_y": a_centroid[1],
         "defender_centroid_x": d_centroid[0],
         "defender_centroid_y": d_centroid[1],
+        # Defensive-shape-relative-to-attacking-shape gap (correlation
+        # analysis: reports/eda/CORRELATION_ANALYSIS.json COLLAPSE cluster 2,
+        # r=0.984/0.94 between the raw centroids). The two centroids
+        # correlate because both blocks occupy similar pitch space, not
+        # because they duplicate each other -- dropping either loses "whose
+        # shape", so this is a merge (derived feature), not a drop-to-one.
+        "defender_attacker_gap_x": None if a_centroid[0] is None or d_centroid[0] is None else d_centroid[0] - a_centroid[0],
+        "defender_attacker_gap_y": None if a_centroid[1] is None or d_centroid[1] is None else d_centroid[1] - a_centroid[1],
         "attacker_spread": _spread(attackers, a_centroid),
         "defender_spread": _spread(defenders, d_centroid),
         "defenders_between_ball_and_attacking_goal": sum(1 for px, _ in defenders if ball_x is not None and px >= ball_x),
@@ -404,6 +425,11 @@ def build_player_defensive_actions(events: list[dict[str, Any]], only_with_360: 
             ball_x = _as_float(row.get("ball_x"))
             ball_y = _as_float(row.get("ball_y"))
             visibility = _visibility_features(row.get("visible_area"), action_x, action_y, ball_x, ball_y)
+            # action_inside_visible_area is dropped from the output below: in
+            # this table action_x/action_y ARE ball_x/ball_y (both are the
+            # event's own location -- see statsbomb_loader's ball_x/ball_y
+            # derivation), so it is always identical to ball_inside_visible_area.
+            del visibility["action_inside_visible_area"]
             support = _support_features(row.get("freeze_frame"), action_x, action_y, ball_x, actor_is_attacking, visibility)
             goal_metrics = _goal_metrics(action_x, action_y)
             if require_targets:
@@ -447,6 +473,15 @@ def build_player_defensive_actions(events: list[dict[str, Any]], only_with_360: 
                 "action_won_possession": bool(row.get("action_won_possession")),
                 "action_retained_defensive_team_control": bool(row.get("action_retained_defensive_team_control")),
                 "action_was_under_opponent_possession": bool(row.get("action_was_under_opponent_possession")),
+                # action_x/action_y are numerically identical to ball_x/ball_y
+                # in this table (both derive from the event's own location --
+                # see statsbomb_loader's ball_x/ball_y derivation) but are
+                # KEPT here: they are required/canonical column names across
+                # the modeling and analysis pipeline (dax.models.schemas,
+                # dax.models.specs, baseline_regression.py, baseline_logistic.py,
+                # dax.models.leakage, dax.analysis.*, dax.coach_analysis.zones,
+                # analysis.player_features.*). Dropping them is a separate,
+                # dedicated task that has to update all of those together.
                 "action_x": action_x,
                 "action_y": action_y,
                 "action_zone": _pitch_zone(action_x, action_y),

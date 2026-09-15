@@ -1,0 +1,75 @@
+{
+  "confirmed_counts": {
+    "active": 34,
+    "active_expected": 34,
+    "active_matches_expected": true,
+    "passive": 38,
+    "passive_expected": 38,
+    "passive_matches_expected": true
+  },
+  "changes_since_last_full_run": [
+    {
+      "change": "defender_functional_role bucket fix (prompt 8)",
+      "detail": "4 categories -> 5: added advanced_wide (the previously-missing deep x wide quadrant), renamed the residual n>=2 fallback from unclassified to mid_block. unclassified now reserved exclusively for n<2.",
+      "feature_count_impact": "none (category-count change on an existing categorical column, not a column add/drop)"
+    },
+    {
+      "change": "V2 methodology-gap fixes (prompt 7)",
+      "detail": "Added a categorical REVIEW band to correlation.py's tiering and Type 5/Type 6 review resolution logic. V1 pipeline (correlation.py, generate_review_analysis.py) reverted to its pre-V2 state after a scoping correction; V2 lives in separate _v2-suffixed modules.",
+      "feature_count_impact": "none (V1 candidate lists untouched; V2 is a parallel analysis track)"
+    },
+    {
+      "change": "VIF drop (prompt 9 Part B)",
+      "detail": "local_numerical_balance_5m/10m dropped from the active candidate list -- near-exact linear combination of attackers_within_Nm - defenders_within_Nm (already kept), invisible to pairwise correlation, caught by VIF (condition number ~1.36e15 pre-drop, unbounded VIF for 6 columns).",
+      "feature_count_impact": "active: 36 -> 34"
+    },
+    {
+      "change": "Leakage drop (prompt 10 Part C)",
+      "detail": "has_screened_outcome dropped from the passive candidate list -- censoring-mechanism proxy for target_future_shot_10s's own 10s window being truncated at end-of-period/match (chi2=136.5, p=1.54e-31), not defensive signal.",
+      "feature_count_impact": "passive: 39 -> 38"
+    },
+    {
+      "change": "Football sanity check (prompt 11)",
+      "detail": "Validation-only pass (recomputation checks against stored values). No feature-list or pipeline changes.",
+      "feature_count_impact": "none"
+    },
+    {
+      "change": "Passive archetype clustering (prompt 12)",
+      "detail": "New analysis module (src/dax/analysis/passive_archetypes.py) clustering within each defender_functional_role bucket. Does not touch feature_config.py's candidate lists.",
+      "feature_count_impact": "none"
+    },
+    {
+      "change": "Canonical match-grouped split (prompt 13)",
+      "detail": "Frozen TEST/CV match assignment for model training. Does not touch feature_config.py's candidate lists.",
+      "feature_count_impact": "none"
+    }
+  ],
+  "correlation_diff": {
+    "active": {
+      "n_pairs_before": 25,
+      "n_pairs_after": 25,
+      "n_added": 0,
+      "n_removed": 0,
+      "n_tier_changed": 0,
+      "added_pairs": [],
+      "removed_pairs": [],
+      "tier_changed_pairs": [],
+      "newly_risky_pairs": []
+    },
+    "passive": {
+      "n_pairs_before": 31,
+      "n_pairs_after": 31,
+      "n_added": 0,
+      "n_removed": 0,
+      "n_tier_changed": 0,
+      "added_pairs": [],
+      "removed_pairs": [],
+      "tier_changed_pairs": [],
+      "newly_risky_pairs": []
+    }
+  },
+  "diff_is_empty": true,
+  "any_newly_risky_pairs_found": false,
+  "part_b_triggered": false,
+  "verdict": "No new DROP/COLLAPSE crossings found -- the locked feature set is internally consistent after all landed changes."
+}

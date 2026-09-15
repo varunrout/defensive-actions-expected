@@ -1,4 +1,5 @@
 import math
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -10,6 +11,7 @@ from dax.features.player_defense import (
     build_player_defensive_actions,
 )
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 FULL = [0, 0, 120, 0, 120, 80, 0, 80]
 SMALL = [40, 20, 80, 20, 80, 60, 40, 60]
 
@@ -50,6 +52,45 @@ def test_unknown_role_context_returns_missing_role_features():
     assert support["visible_attacker_count"] is None
     assert support["visible_defender_count"] is None
     assert support["defenders_between_ball_and_attacking_goal"] is None
+    assert support["defender_attacker_gap_x"] is None
+    assert support["defender_attacker_gap_y"] is None
+
+
+def test_defender_attacker_gap_is_defender_centroid_minus_attacker_centroid():
+    # Attackers at (10, 10) and (30, 10) -> centroid (20, 10).
+    # Defenders at (50, 40) and (70, 60) -> centroid (60, 50).
+    # gap = defender_centroid - attacker_centroid = (40, 40).
+    support = _support_features(
+        [
+            {"teammate": True, "location": [10, 10]},
+            {"teammate": True, "location": [30, 10]},
+            {"teammate": False, "location": [50, 40]},
+            {"teammate": False, "location": [70, 60]},
+        ],
+        x=15,
+        y=15,
+        ball_x=15,
+        actor_is_attacking=True,
+        visibility=_visibility_features(FULL, 15, 15, 15, 15),
+    )
+    assert math.isclose(support["attacker_centroid_x"], 20.0)
+    assert math.isclose(support["defender_centroid_x"], 60.0)
+    assert math.isclose(support["defender_attacker_gap_x"], 40.0)
+    assert math.isclose(support["defender_attacker_gap_y"], 40.0)
+
+
+def test_defender_attacker_gap_is_none_without_defenders_or_attackers():
+    support = _support_features(
+        [{"teammate": True, "location": [10, 10]}],
+        x=15,
+        y=15,
+        ball_x=15,
+        actor_is_attacking=True,
+        visibility=_visibility_features(FULL, 15, 15, 15, 15),
+    )
+    assert support["defender_centroid_x"] is None
+    assert support["defender_attacker_gap_x"] is None
+    assert support["defender_attacker_gap_y"] is None
 
 
 def test_local_visibility_middle_large_polygon():
@@ -160,3 +201,112 @@ def test_malformed_polygon_from_bad_pairs_is_not_visible():
     out = _visibility_features([None, 0, 10, None, 0, 10], 5, 5, 5, 5)
     assert out["visibility_quality_band"] == "missing"
     assert out["local_5m_region_fully_visible"] is False
+
+
+# --- Fix 1: the acting player must never be their own "nearest defender" ---
+#
+# StatsBomb 360 freeze frames include the acting player's own position as a
+# "teammate": True entry marked "actor": True. Since actor_is_attacking is
+# always False for a defensive-action row (the actor IS the defending
+# team), that self-entry used to land straight in the "defenders" candidate
+# pool, giving nearest_defender_distance (and defender_centroid_x/y,
+# defender_spread, visible_defender_count, and everything else built from
+# the same pool) a spurious near-zero self-distance in most rows. There is
+# no player_id on freeze-frame entries in this codebase's 360 data model
+# (defender-slots are inherently anonymous), so the acting-player identity
+# check is against the "actor": True marker instead.
+
+def test_nearest_defender_distance_excludes_actors_own_freeze_frame_entry():
+    row = _targeted_row(freeze_frame=[
+        {"teammate": True, "actor": True, "location": [70, 40]},  # the acting player's own entry
+    ])
+    out = pd.DataFrame(build_player_defensive_actions([row]))
+    assert pd.isna(out.loc[0, "nearest_defender_distance"])
+    assert out.loc[0, "visible_defender_count"] == 0
+
+
+def test_nearest_defender_distance_uses_genuine_defender_not_self():
+    row = _targeted_row(freeze_frame=[
+        {"teammate": True, "actor": True, "location": [70, 40]},   # self -- must be excluded
+        {"teammate": True, "actor": False, "location": [75, 40]},  # genuine teammate/defender, 5m away
+        {"teammate": False, "actor": False, "location": [90, 40]},  # attacker, unaffected by the fix
+    ])
+    out = pd.DataFrame(build_player_defensive_actions([row]))
+    assert math.isclose(out.loc[0, "nearest_defender_distance"], 5.0)
+    assert out.loc[0, "visible_defender_count"] == 1
+    # defender_centroid_x/y and defender_spread share the same pool -- must
+    # reflect only the genuine defender, not an average with the actor's
+    # own (zero-distance) position.
+    assert math.isclose(out.loc[0, "defender_centroid_x"], 75.0)
+    assert math.isclose(out.loc[0, "defender_centroid_y"], 40.0)
+    assert math.isclose(out.loc[0, "defender_spread"], 0.0)
+    assert math.isclose(out.loc[0, "nearest_attacker_distance"], 20.0)
+
+
+def test_freeze_frame_entries_without_an_actor_marker_are_unaffected():
+    # Entries with no "actor" key at all (the norm in older fixtures/tests
+    # that predate this fix) must not be excluded -- only an explicit
+    # "actor": True marks the acting player's own entry.
+    row = _targeted_row(freeze_frame=[
+        {"teammate": True, "location": [72, 40]},
+    ])
+    out = pd.DataFrame(build_player_defensive_actions([row]))
+    assert math.isclose(out.loc[0, "nearest_defender_distance"], 2.0)
+
+
+def test_nearest_defender_distance_distribution_is_sane_on_real_dataset():
+    path = REPO_ROOT / "data" / "features" / "player_defensive_actions.parquet"
+    if not path.exists():
+        pytest.skip("Built player_defensive_actions.parquet is not present in this environment.")
+    df = pd.read_parquet(path)
+    near_zero_fraction = (df["nearest_defender_distance"] < 0.01).mean()
+    # Verified before the fix: 73.6% of rows were < 0.01m (median ~2e-6m) --
+    # the actor measuring distance to itself. nearest_attacker_distance,
+    # unaffected by the bug, was 20.0% -- used here as a rough sanity
+    # ceiling for what "genuinely close" looks like without self-reference.
+    assert near_zero_fraction < 0.25
+
+
+# --- Fix 2: no column should be a silent duplicate of another -------------
+
+def _find_duplicate_column_pairs(df: pd.DataFrame) -> list[tuple[str, str]]:
+    duplicates = []
+    columns = list(df.columns)
+    for i, col_a in enumerate(columns):
+        for col_b in columns[i + 1:]:
+            if df[col_a].equals(df[col_b]):
+                duplicates.append((col_a, col_b))
+    return duplicates
+
+
+def test_no_duplicate_columns_on_real_player_defensive_actions_dataset():
+    path = REPO_ROOT / "data" / "features" / "player_defensive_actions.parquet"
+    if not path.exists():
+        pytest.skip("Built player_defensive_actions.parquet is not present in this environment.")
+    df = pd.read_parquet(path)
+    known_exceptions = {
+        # Deliberate: kept for the modeling/analysis pipeline (see
+        # build_player_dataset.py) even though byte-identical to ball_x/ball_y.
+        frozenset({"action_x", "ball_x"}),
+        frozenset({"action_y", "ball_y"}),
+        # Pre-existing duplicates found by this generic scan but NOT part of
+        # the verified fix this test was added for -- flagged, not dropped,
+        # since dropping them wasn't requested/verified against consumers.
+        # has_360/freeze_frame_roles_known: both happen to be constant-True
+        # for this table (build_player_defensive_actions only emits
+        # has_360=True rows, and freeze_frame_roles_known is True whenever
+        # actor_is_attacking is known) -- a coincidence of current filtering,
+        # not a structural guarantee like the pairs above.
+        frozenset({"has_360", "freeze_frame_roles_known"}),
+        # team/actor_team: event_context.add_event_context sets
+        # actor_team = df.get("team", ...), i.e. a literal copy.
+        frozenset({"team", "actor_team"}),
+        # action_changed_possession/action_ended_possession: player_defense.py
+        # falls back to action_changed_possession's value whenever an
+        # upstream "action_ended_possession" field is absent, which it
+        # currently always is.
+        frozenset({"action_changed_possession", "action_ended_possession"}),
+    }
+    duplicates = _find_duplicate_column_pairs(df)
+    unexpected = [pair for pair in duplicates if frozenset(pair) not in known_exceptions]
+    assert unexpected == [], f"Unexpected duplicate columns found: {unexpected}"

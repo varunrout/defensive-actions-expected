@@ -1,0 +1,149 @@
+{
+  "canonical_split_path": "outputs\\models\\splits\\match_assignment.json",
+  "n_matches_total": 115,
+  "n_test_matches": 23,
+  "n_train_val_matches": 92,
+  "n_folds": 5,
+  "method_note": "Per match, per leg, target_future_shot_10s rate; combined as the average of each leg's own percentile rank (not either leg's raw rate alone) into one combined_rank per match. train_test_split(matches, test_size=0.20, stratify=qcut(combined_rank, 4), random_state=42) -> TEST/TRAIN+VAL. StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42) on the TRAIN+VAL pool, grouped by match_id, stratified on the row-level target (active leg).",
+  "legs": {
+    "active": {
+      "parquet_path": "data/features/player_defensive_actions.parquet",
+      "n_rows_total": 56068,
+      "n_matches_total": 115,
+      "overall_shot_rate_pct": 7.791,
+      "by_split": [
+        {
+          "split": "test",
+          "n_matches": 23,
+          "n_rows": 10660,
+          "shot_rate_pct": 7.205
+        },
+        {
+          "split": "fold0",
+          "n_matches": 18,
+          "n_rows": 8450,
+          "shot_rate_pct": 8.97
+        },
+        {
+          "split": "fold1",
+          "n_matches": 20,
+          "n_rows": 10053,
+          "shot_rate_pct": 8.256
+        },
+        {
+          "split": "fold2",
+          "n_matches": 17,
+          "n_rows": 8753,
+          "shot_rate_pct": 7.209
+        },
+        {
+          "split": "fold3",
+          "n_matches": 19,
+          "n_rows": 9342,
+          "shot_rate_pct": 8.06
+        },
+        {
+          "split": "fold4",
+          "n_matches": 18,
+          "n_rows": 8810,
+          "shot_rate_pct": 7.128
+        }
+      ]
+    },
+    "passive": {
+      "parquet_path": "data/features/passive_defense.parquet",
+      "n_rows_total": 1593181,
+      "n_matches_total": 115,
+      "overall_shot_rate_pct": 5.966,
+      "by_split": [
+        {
+          "split": "test",
+          "n_matches": 23,
+          "n_rows": 315807,
+          "shot_rate_pct": 5.51
+        },
+        {
+          "split": "fold0",
+          "n_matches": 18,
+          "n_rows": 241162,
+          "shot_rate_pct": 6.565
+        },
+        {
+          "split": "fold1",
+          "n_matches": 20,
+          "n_rows": 279561,
+          "shot_rate_pct": 6.464
+        },
+        {
+          "split": "fold2",
+          "n_matches": 17,
+          "n_rows": 227329,
+          "shot_rate_pct": 5.816
+        },
+        {
+          "split": "fold3",
+          "n_matches": 19,
+          "n_rows": 258944,
+          "shot_rate_pct": 6.146
+        },
+        {
+          "split": "fold4",
+          "n_matches": 18,
+          "n_rows": 270378,
+          "shot_rate_pct": 5.402
+        }
+      ]
+    }
+  },
+  "integrity_checks": [
+    {
+      "name": "every_match_accounted_for_exactly_once",
+      "description": "All 115 matches present, no duplicate keys.",
+      "passed": true,
+      "detail": "115 matches, 115 unique keys"
+    },
+    {
+      "name": "labels_are_test_or_a_valid_fold",
+      "description": "Every label is \"test\" or \"fold0\"..\"fold4\".",
+      "passed": true,
+      "detail": "all labels valid"
+    },
+    {
+      "name": "test_match_count",
+      "description": "Exactly 23 matches held out as TEST.",
+      "passed": true,
+      "detail": "23 TEST matches"
+    },
+    {
+      "name": "no_test_match_in_any_cv_fold",
+      "description": "No TEST match also appears in a CV fold.",
+      "passed": true,
+      "detail": "no overlap"
+    },
+    {
+      "name": "all_five_folds_present",
+      "description": "TRAIN+VAL matches cover all 5 folds.",
+      "passed": true,
+      "detail": "folds present: ['fold0', 'fold1', 'fold2', 'fold3', 'fold4']"
+    },
+    {
+      "name": "train_val_match_count",
+      "description": "Exactly 92 matches in the TRAIN+VAL pool.",
+      "passed": true,
+      "detail": "92 TRAIN+VAL matches"
+    },
+    {
+      "name": "fold_sizes_reasonably_balanced",
+      "description": "Each fold has 10-30 matches (known result: 17-20).",
+      "passed": true,
+      "detail": "fold0=18, fold1=20, fold2=17, fold3=19, fold4=18"
+    },
+    {
+      "name": "no_match_in_two_cv_folds",
+      "description": "No match's fold membership is ambiguous or duplicated.",
+      "passed": true,
+      "detail": "dict keys are unique by construction; verified no key maps to multiple labels"
+    }
+  ],
+  "all_integrity_checks_passed": true
+}

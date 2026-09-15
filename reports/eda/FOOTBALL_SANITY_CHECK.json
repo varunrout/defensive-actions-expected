@@ -1,0 +1,60 @@
+{
+  "dataset": "passive",
+  "parquet_path": "data\\features\\passive_defense.parquet",
+  "n_rows": 1593181,
+  "substitution_note": "Phase 7 calls for checking feature values against match video, which isn't available outside this repo's own tooling. Substitute used here: reimplement each documented formula independently from raw geometry, then compare against the real stored output on every row of the actual rebuilt parquet -- a different, arguably stricter check than eyeballing a sample of clips, since it covers every row rather than a handful someone picked to look at. This is still only a partial substitute: real video validation of specific flagged moments is a separate, still-open step.",
+  "coverage_gap": "marking_tightness and is_goal_side_of_nearest_attacker are NOT independently checkable by this script. Both need the full list of visible attackers per frame, and this parquet only exports the top-3 ranked passing options, which aren't necessarily the same set as \"all visible attackers\" (an attacker can be visible without being one of the top-3 ranked pass targets). Recomputing them from what's actually exported would not be an independent check -- it would just re-derive the same already-stored inputs. This is an open gap, not a silent omission.",
+  "checks": [
+    {
+      "check": "defender_functional_role",
+      "method": "Reimplemented _functional_roles bucket logic (tercile thresholds 1/3, 2/3) grouped by event_id, purely from defender_x/defender_y; compared row-for-row against the stored column (reindexed to the original frame's index, not raw array position).",
+      "n_rows_checked": 1593181,
+      "n_mismatches": 0,
+      "known_result": "0 mismatches across all 1,593,181 rows",
+      "matches_known_result": true,
+      "mismatch_examples": []
+    },
+    {
+      "check": "lane_screening_score_option_1",
+      "method": "Reimplemented point-to-segment distance from defender_x/y to the ball_x/y -> top_option_1_target_x/y segment, then 1/(1+distance). Compared against the stored column on a fixed-seed sample (floating-point noise expected, not exact equality).",
+      "n_rows_checked": 50000,
+      "sample_seed": 42,
+      "max_abs_difference": 0.0,
+      "known_result": "max absolute difference ~2.2e-16 (floating-point noise) on a 50,000-row sample",
+      "matches_known_result": true
+    },
+    {
+      "check": "screens_top_option",
+      "method": "Same recomputed distance as check 2, thresholded at LANE_SCREENING_DISTANCE_THRESHOLD_M (2.0m). Compared against the stored boolean column.",
+      "n_rows_checked": 50000,
+      "sample_seed": 42,
+      "n_match": 50000,
+      "match_pct": 100.0,
+      "known_result": "100% match",
+      "matches_known_result": true
+    },
+    {
+      "check": "overload_score",
+      "method": "Structural invariant, not a value recompute: sum(overload_score) per event_id must equal that event's count of valid (non-null threat_score) ranked options (0-3), since each ranked option credits exactly one nearest defender-slot.",
+      "n_events_checked": 198354,
+      "n_violations": 0,
+      "known_result": "0 violations across all 198,354 events",
+      "matches_known_result": true,
+      "violation_examples": []
+    }
+  ],
+  "example_frames": {
+    "clean_screen": {
+      "event_id": "aa753822-d476-46e7-afce-e42512904e51",
+      "source": "cited (still valid)"
+    },
+    "overload": {
+      "event_id": "0974dcb2-9e86-44d4-8fc2-72c4f4467325",
+      "source": "cited (still valid)"
+    },
+    "last_line_rich": {
+      "event_id": "e37e4108-58d8-43c4-b186-fa646e59d5a8",
+      "source": "cited (still valid)"
+    }
+  }
+}

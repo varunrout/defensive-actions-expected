@@ -1,0 +1,331 @@
+{
+  "dataset": "passive",
+  "parquet_path": "data/features/passive_defense.parquet",
+  "n_rows": 1593181,
+  "target_col": "target_future_shot_10s",
+  "methodology": "Each candidate feature is cut into quartiles (pd.qcut, 4 bins). The marginal table shows shot rate per quartile, unconditioned. The stratified table repeats this within each quartile of the proposed confound. If the marginal gradient survives (same direction, comparable magnitude) inside every confound stratum, conditioning on the confound does not explain the reversal away -- it is not a pure selection artefact of that specific confound. This tests one candidate confound at a time; it does not rule out others.",
+  "tests": [
+    {
+      "name": "marking_tightness_vs_zone_defensive_value",
+      "title": "Marking tightness reversal",
+      "marginal_column": "marking_tightness",
+      "confound_column": "zone_defensive_value",
+      "proposed_confound_reason": "tight marking only happens because the zone's already dangerous",
+      "marginal_table": [
+        {
+          "bin": "Q1 tightest",
+          "n": 398296,
+          "shots": 30198,
+          "rate": 7.582
+        },
+        {
+          "bin": "Q2",
+          "n": 398295,
+          "shots": 24441,
+          "rate": 6.136
+        },
+        {
+          "bin": "Q3",
+          "n": 398295,
+          "shots": 21028,
+          "rate": 5.28
+        },
+        {
+          "bin": "Q4 loosest",
+          "n": 398295,
+          "shots": 19381,
+          "rate": 4.866
+        }
+      ],
+      "stratified_table": [
+        {
+          "stratum": "Z1 calmest",
+          "bins": [
+            {
+              "bin": "Q1 tightest",
+              "n": 113359,
+              "shots": 10983,
+              "rate": 9.689
+            },
+            {
+              "bin": "Q2",
+              "n": 100914,
+              "shots": 8270,
+              "rate": 8.195
+            },
+            {
+              "bin": "Q3",
+              "n": 92435,
+              "shots": 6781,
+              "rate": 7.336
+            },
+            {
+              "bin": "Q4 loosest",
+              "n": 91588,
+              "shots": 6229,
+              "rate": 6.801
+            }
+          ],
+          "first_to_last_delta_pp": -2.888
+        },
+        {
+          "stratum": "Z2",
+          "bins": [
+            {
+              "bin": "Q1 tightest",
+              "n": 81256,
+              "shots": 2023,
+              "rate": 2.49
+            },
+            {
+              "bin": "Q2",
+              "n": 95938,
+              "shots": 2291,
+              "rate": 2.388
+            },
+            {
+              "bin": "Q3",
+              "n": 107993,
+              "shots": 2486,
+              "rate": 2.302
+            },
+            {
+              "bin": "Q4 loosest",
+              "n": 113108,
+              "shots": 2758,
+              "rate": 2.438
+            }
+          ],
+          "first_to_last_delta_pp": -0.052
+        },
+        {
+          "stratum": "Z3",
+          "bins": [
+            {
+              "bin": "Q1 tightest",
+              "n": 80534,
+              "shots": 2406,
+              "rate": 2.988
+            },
+            {
+              "bin": "Q2",
+              "n": 98512,
+              "shots": 2956,
+              "rate": 3.001
+            },
+            {
+              "bin": "Q3",
+              "n": 109992,
+              "shots": 3189,
+              "rate": 2.899
+            },
+            {
+              "bin": "Q4 loosest",
+              "n": 109257,
+              "shots": 3160,
+              "rate": 2.892
+            }
+          ],
+          "first_to_last_delta_pp": -0.096
+        },
+        {
+          "stratum": "Z4 most dangerous",
+          "bins": [
+            {
+              "bin": "Q1 tightest",
+              "n": 123147,
+              "shots": 14786,
+              "rate": 12.007
+            },
+            {
+              "bin": "Q2",
+              "n": 102931,
+              "shots": 10924,
+              "rate": 10.613
+            },
+            {
+              "bin": "Q3",
+              "n": 87875,
+              "shots": 8572,
+              "rate": 9.755
+            },
+            {
+              "bin": "Q4 loosest",
+              "n": 84342,
+              "shots": 7234,
+              "rate": 8.577
+            }
+          ],
+          "first_to_last_delta_pp": -3.43
+        }
+      ],
+      "verdict": {
+        "verdict": "no",
+        "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
+        "n_strata_reversal_survives": 4,
+        "n_strata_total": 4
+      }
+    },
+    {
+      "name": "lane_screening_vs_top_option_1_threat_score",
+      "title": "Lane screening reversal",
+      "marginal_column": "lane_screening_score_option_1",
+      "confound_column": "top_option_1_threat_score",
+      "proposed_confound_reason": "a threatening top option only exists when danger is already high",
+      "marginal_table": [
+        {
+          "bin": "Q1 least",
+          "n": 398296,
+          "shots": 16233,
+          "rate": 4.076
+        },
+        {
+          "bin": "Q2",
+          "n": 398295,
+          "shots": 22754,
+          "rate": 5.713
+        },
+        {
+          "bin": "Q3",
+          "n": 398295,
+          "shots": 26695,
+          "rate": 6.702
+        },
+        {
+          "bin": "Q4 most screened",
+          "n": 398295,
+          "shots": 29366,
+          "rate": 7.373
+        }
+      ],
+      "stratified_table": [
+        {
+          "stratum": "T1 low",
+          "bins": [
+            {
+              "bin": "Q1 least",
+              "n": 75493,
+              "shots": 6652,
+              "rate": 8.811
+            },
+            {
+              "bin": "Q2",
+              "n": 94485,
+              "shots": 9783,
+              "rate": 10.354
+            },
+            {
+              "bin": "Q3",
+              "n": 108728,
+              "shots": 11573,
+              "rate": 10.644
+            },
+            {
+              "bin": "Q4 most screened",
+              "n": 119590,
+              "shots": 12864,
+              "rate": 10.757
+            }
+          ],
+          "first_to_last_delta_pp": 1.946
+        },
+        {
+          "stratum": "T2",
+          "bins": [
+            {
+              "bin": "Q1 least",
+              "n": 102262,
+              "shots": 3411,
+              "rate": 3.336
+            },
+            {
+              "bin": "Q2",
+              "n": 106198,
+              "shots": 4194,
+              "rate": 3.949
+            },
+            {
+              "bin": "Q3",
+              "n": 97950,
+              "shots": 4194,
+              "rate": 4.282
+            },
+            {
+              "bin": "Q4 most screened",
+              "n": 91885,
+              "shots": 4188,
+              "rate": 4.558
+            }
+          ],
+          "first_to_last_delta_pp": 1.222
+        },
+        {
+          "stratum": "T3",
+          "bins": [
+            {
+              "bin": "Q1 least",
+              "n": 107096,
+              "shots": 2714,
+              "rate": 2.534
+            },
+            {
+              "bin": "Q2",
+              "n": 101616,
+              "shots": 3301,
+              "rate": 3.249
+            },
+            {
+              "bin": "Q3",
+              "n": 97248,
+              "shots": 3890,
+              "rate": 4.0
+            },
+            {
+              "bin": "Q4 most screened",
+              "n": 92343,
+              "shots": 4265,
+              "rate": 4.619
+            }
+          ],
+          "first_to_last_delta_pp": 2.085
+        },
+        {
+          "stratum": "T4 high",
+          "bins": [
+            {
+              "bin": "Q1 least",
+              "n": 113445,
+              "shots": 3456,
+              "rate": 3.046
+            },
+            {
+              "bin": "Q2",
+              "n": 95996,
+              "shots": 5476,
+              "rate": 5.704
+            },
+            {
+              "bin": "Q3",
+              "n": 94369,
+              "shots": 7038,
+              "rate": 7.458
+            },
+            {
+              "bin": "Q4 most screened",
+              "n": 94477,
+              "shots": 8049,
+              "rate": 8.52
+            }
+          ],
+          "first_to_last_delta_pp": 5.474
+        }
+      ],
+      "verdict": {
+        "verdict": "no",
+        "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
+        "n_strata_reversal_survives": 4,
+        "n_strata_total": 4
+      }
+    }
+  ]
+}

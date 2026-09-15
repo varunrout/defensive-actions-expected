@@ -1,0 +1,800 @@
+{
+  "dataset": "passive",
+  "parquet_path": "data/features/passive_defense.parquet",
+  "n_rows_total": 1593181,
+  "buckets_clustered": [
+    "last_line",
+    "wide_cover",
+    "central_screen",
+    "advanced_wide",
+    "mid_block"
+  ],
+  "buckets_excluded": [
+    "unclassified"
+  ],
+  "exclusion_reason": "unclassified is the n<2 structural case (nothing to be \"relative to\"), not a behavioural population to find archetypes within.",
+  "feature_columns": [
+    "marking_tightness",
+    "engagement_distance_to_carrier",
+    "zone_defensive_value",
+    "angle_to_attacking_goal",
+    "attacking_goal_centrality",
+    "overload_score",
+    "lane_screening_score_option_1",
+    "lane_screening_score_option_2",
+    "lane_screening_score_option_3",
+    "top_option_1_threat_score",
+    "top_option_2_threat_score",
+    "top_option_3_threat_score",
+    "is_goal_side_of_nearest_attacker",
+    "is_wide_lane",
+    "has_option_2",
+    "has_option_3"
+  ],
+  "feature_exclusion_note": "defender_x/defender_y are deliberately excluded from the feature set -- those already define bucket membership via _functional_roles' tercile split. Clustering asks what varies WITHIN a role, not the role itself.",
+  "sampling_limitation": "For tractability, each bucket is clustered on a sample of at most 30,000 rows (fixed seed 42), not the full population -- mid_block alone has 838,270 rows. This is an explicit, named limitation, not a silent shortcut: cluster sizes/shares/shot-rates below are computed on the sample, not the full bucket.",
+  "method_note": "Median-impute missing, StandardScaler. KMeans swept over k in {2,3,4,5} (n_init=10, fixed seed), selected via the same percentile-rank multi-metric approach as dax.analysis.clustering.evaluate_cluster_solutions (silhouette, Calinski-Harabasz, inverse Davies-Bouldin, size balance) minus the subsample-stability term. Final model refit at the selected k with n_init=20 for stability. Cluster archetypes are named from their top standardised-difference features, not by arbitrary KMeans label index (0/1 are not consistent in meaning across buckets or reruns).",
+  "non_causal_note": "Shot-rate differences between clusters within a bucket are associations, not evidence that any behaviour \"causes\" or \"prevents\" shots. This applies to every finding here, and especially to the central_screen engaged-vs-disengaged gap and the wide_cover/advanced_wide wide-lane direction flip, which are the findings most likely to get over-read as causal in a coaching context.",
+  "buckets": {
+    "last_line": {
+      "bucket": "last_line",
+      "n_rows_total": 216551,
+      "n_rows_sampled": 30000,
+      "sampled": true,
+      "sample_n_limit": 30000,
+      "bucket_mean_shot_rate_pct": 5.77,
+      "bucket_mean_xg": 0.00614,
+      "k_evaluation": [
+        {
+          "k": 2,
+          "silhouette": 0.3069492382935785,
+          "calinski_harabasz": 4791.584871599009,
+          "davies_bouldin": 1.8609470326557582,
+          "min_cluster_size": 5938,
+          "max_cluster_size": 24062,
+          "size_balance": 0.2467791538525476,
+          "selection_score": 0.6875
+        },
+        {
+          "k": 3,
+          "silhouette": 0.31039454224263674,
+          "calinski_harabasz": 4268.239665095562,
+          "davies_bouldin": 1.5957977499315537,
+          "min_cluster_size": 1775,
+          "max_cluster_size": 22721,
+          "size_balance": 0.07812156155098807,
+          "selection_score": 0.6875
+        },
+        {
+          "k": 4,
+          "silhouette": 0.3107862953431306,
+          "calinski_harabasz": 4079.4512775908115,
+          "davies_bouldin": 1.3331338060137334,
+          "min_cluster_size": 400,
+          "max_cluster_size": 22573,
+          "size_balance": 0.017720285296593277,
+          "selection_score": 0.6875
+        },
+        {
+          "k": 5,
+          "silhouette": 0.16033207342228714,
+          "calinski_harabasz": 4114.29977385978,
+          "davies_bouldin": 1.37708476436493,
+          "min_cluster_size": 2,
+          "max_cluster_size": 15933,
+          "size_balance": 0.00012552563861168643,
+          "selection_score": 0.4375
+        }
+      ],
+      "selected_k": 2,
+      "clusters": [
+        {
+          "cluster_id": 0,
+          "name": "low overload, low lane screening  opt 1",
+          "n": 24067,
+          "share_of_bucket_sample": 80.22,
+          "shot_rate_pct": 6.091,
+          "xg_mean": 0.00624,
+          "shot_rate_delta_vs_bucket_pp": 0.321,
+          "standardised_feature_diffs": {
+            "marking_tightness": 0.0809,
+            "engagement_distance_to_carrier": 0.2569,
+            "zone_defensive_value": 0.0655,
+            "angle_to_attacking_goal": -0.1396,
+            "attacking_goal_centrality": 0.1127,
+            "overload_score": -0.3639,
+            "lane_screening_score_option_1": -0.3119,
+            "lane_screening_score_option_2": -0.2994,
+            "lane_screening_score_option_3": -0.2996,
+            "top_option_1_threat_score": 0.0267,
+            "top_option_2_threat_score": 0.0338,
+            "top_option_3_threat_score": 0.0181,
+            "is_goal_side_of_nearest_attacker": 0.1148,
+            "is_wide_lane": -0.0989,
+            "has_option_2": 0.0031,
+            "has_option_3": 0.0033
+          },
+          "top_distinguishing_features": [
+            {
+              "feature": "overload_score",
+              "standardised_diff": -0.3639
+            },
+            {
+              "feature": "lane_screening_score_option_1",
+              "standardised_diff": -0.3119
+            },
+            {
+              "feature": "lane_screening_score_option_3",
+              "standardised_diff": -0.2996
+            },
+            {
+              "feature": "lane_screening_score_option_2",
+              "standardised_diff": -0.2994
+            },
+            {
+              "feature": "engagement_distance_to_carrier",
+              "standardised_diff": 0.2569
+            }
+          ]
+        },
+        {
+          "cluster_id": 1,
+          "name": "high overload, high lane screening  opt 1",
+          "n": 5933,
+          "share_of_bucket_sample": 19.78,
+          "shot_rate_pct": 4.467,
+          "xg_mean": 0.00574,
+          "shot_rate_delta_vs_bucket_pp": -1.303,
+          "standardised_feature_diffs": {
+            "marking_tightness": -0.3281,
+            "engagement_distance_to_carrier": -1.0422,
+            "zone_defensive_value": -0.2658,
+            "angle_to_attacking_goal": 0.5664,
+            "attacking_goal_centrality": -0.457,
+            "overload_score": 1.4761,
+            "lane_screening_score_option_1": 1.2651,
+            "lane_screening_score_option_2": 1.2146,
+            "lane_screening_score_option_3": 1.2153,
+            "top_option_1_threat_score": -0.1082,
+            "top_option_2_threat_score": -0.137,
+            "top_option_3_threat_score": -0.0732,
+            "is_goal_side_of_nearest_attacker": -0.4655,
+            "is_wide_lane": 0.401,
+            "has_option_2": -0.0125,
+            "has_option_3": -0.0134
+          },
+          "top_distinguishing_features": [
+            {
+              "feature": "overload_score",
+              "standardised_diff": 1.4761
+            },
+            {
+              "feature": "lane_screening_score_option_1",
+              "standardised_diff": 1.2651
+            },
+            {
+              "feature": "lane_screening_score_option_3",
+              "standardised_diff": 1.2153
+            },
+            {
+              "feature": "lane_screening_score_option_2",
+              "standardised_diff": 1.2146
+            },
+            {
+              "feature": "engagement_distance_to_carrier",
+              "standardised_diff": -1.0422
+            }
+          ]
+        }
+      ]
+    },
+    "wide_cover": {
+      "bucket": "wide_cover",
+      "n_rows_total": 168924,
+      "n_rows_sampled": 30000,
+      "sampled": true,
+      "sample_n_limit": 30000,
+      "bucket_mean_shot_rate_pct": 4.71,
+      "bucket_mean_xg": 0.00464,
+      "k_evaluation": [
+        {
+          "k": 2,
+          "silhouette": 0.2722524032504313,
+          "calinski_harabasz": 5276.607627143752,
+          "davies_bouldin": 1.8958667298614862,
+          "min_cluster_size": 8037,
+          "max_cluster_size": 21963,
+          "size_balance": 0.3659336156262806,
+          "selection_score": 0.8125
+        },
+        {
+          "k": 5,
+          "silhouette": 0.2601043349785193,
+          "calinski_harabasz": 5037.257897622123,
+          "davies_bouldin": 1.102316396799384,
+          "min_cluster_size": 7,
+          "max_cluster_size": 20105,
+          "size_balance": 0.0003481720964934096,
+          "selection_score": 0.6875
+        },
+        {
+          "k": 3,
+          "silhouette": 0.22629230352070573,
+          "calinski_harabasz": 4985.3783396519075,
+          "davies_bouldin": 1.8059631215918743,
+          "min_cluster_size": 2940,
+          "max_cluster_size": 18634,
+          "size_balance": 0.15777610818933133,
+          "selection_score": 0.5
+        },
+        {
+          "k": 4,
+          "silhouette": 0.2577254699319548,
+          "calinski_harabasz": 4966.411663700585,
+          "davies_bouldin": 1.3469556457550163,
+          "min_cluster_size": 2253,
+          "max_cluster_size": 20082,
+          "size_balance": 0.11219002091425156,
+          "selection_score": 0.5
+        }
+      ],
+      "selected_k": 2,
+      "clusters": [
+        {
+          "cluster_id": 0,
+          "name": "low is wide lane, high attacking goal centrality",
+          "n": 21963,
+          "share_of_bucket_sample": 73.21,
+          "shot_rate_pct": 4.134,
+          "xg_mean": 0.00382,
+          "shot_rate_delta_vs_bucket_pp": -0.576,
+          "standardised_feature_diffs": {
+            "marking_tightness": 0.1794,
+            "engagement_distance_to_carrier": 0.3489,
+            "zone_defensive_value": 0.0772,
+            "angle_to_attacking_goal": -0.3256,
+            "attacking_goal_centrality": 0.3688,
+            "overload_score": -0.265,
+            "lane_screening_score_option_1": -0.2588,
+            "lane_screening_score_option_2": -0.2619,
+            "lane_screening_score_option_3": -0.2592,
+            "top_option_1_threat_score": 0.0385,
+            "top_option_2_threat_score": 0.062,
+            "top_option_3_threat_score": 0.0633,
+            "is_goal_side_of_nearest_attacker": 0.0895,
+            "is_wide_lane": -0.4281,
+            "has_option_2": 0.0123,
+            "has_option_3": 0.0142
+          },
+          "top_distinguishing_features": [
+            {
+              "feature": "is_wide_lane",
+              "standardised_diff": -0.4281
+            },
+            {
+              "feature": "attacking_goal_centrality",
+              "standardised_diff": 0.3688
+            },
+            {
+              "feature": "engagement_distance_to_carrier",
+              "standardised_diff": 0.3489
+            },
+            {
+              "feature": "angle_to_attacking_goal",
+              "standardised_diff": -0.3256
+            },
+            {
+              "feature": "overload_score",
+              "standardised_diff": -0.265
+            }
+          ]
+        },
+        {
+          "cluster_id": 1,
+          "name": "high is wide lane, low attacking goal centrality",
+          "n": 8037,
+          "share_of_bucket_sample": 26.79,
+          "shot_rate_pct": 6.283,
+          "xg_mean": 0.00688,
+          "shot_rate_delta_vs_bucket_pp": 1.573,
+          "standardised_feature_diffs": {
+            "marking_tightness": -0.4903,
+            "engagement_distance_to_carrier": -0.9534,
+            "zone_defensive_value": -0.2111,
+            "angle_to_attacking_goal": 0.8897,
+            "attacking_goal_centrality": -1.0078,
+            "overload_score": 0.7241,
+            "lane_screening_score_option_1": 0.7072,
+            "lane_screening_score_option_2": 0.7158,
+            "lane_screening_score_option_3": 0.7083,
+            "top_option_1_threat_score": -0.1052,
+            "top_option_2_threat_score": -0.1695,
+            "top_option_3_threat_score": -0.173,
+            "is_goal_side_of_nearest_attacker": -0.2447,
+            "is_wide_lane": 1.1698,
+            "has_option_2": -0.0336,
+            "has_option_3": -0.0388
+          },
+          "top_distinguishing_features": [
+            {
+              "feature": "is_wide_lane",
+              "standardised_diff": 1.1698
+            },
+            {
+              "feature": "attacking_goal_centrality",
+              "standardised_diff": -1.0078
+            },
+            {
+              "feature": "engagement_distance_to_carrier",
+              "standardised_diff": -0.9534
+            },
+            {
+              "feature": "angle_to_attacking_goal",
+              "standardised_diff": 0.8897
+            },
+            {
+              "feature": "overload_score",
+              "standardised_diff": 0.7241
+            }
+          ]
+        }
+      ]
+    },
+    "central_screen": {
+      "bucket": "central_screen",
+      "n_rows_total": 213043,
+      "n_rows_sampled": 30000,
+      "sampled": true,
+      "sample_n_limit": 30000,
+      "bucket_mean_shot_rate_pct": 5.403,
+      "bucket_mean_xg": 0.00587,
+      "k_evaluation": [
+        {
+          "k": 2,
+          "silhouette": 0.22401000916242758,
+          "calinski_harabasz": 4039.8912520970216,
+          "davies_bouldin": 2.2611190461214035,
+          "min_cluster_size": 8732,
+          "max_cluster_size": 21268,
+          "size_balance": 0.41056987022757196,
+          "selection_score": 0.8125
+        },
+        {
+          "k": 5,
+          "silhouette": 0.19819312402980646,
+          "calinski_harabasz": 3805.4333085800863,
+          "davies_bouldin": 1.3290960620865202,
+          "min_cluster_size": 5,
+          "max_cluster_size": 18465,
+          "size_balance": 0.00027078256160303275,
+          "selection_score": 0.75
+        },
+        {
+          "k": 3,
+          "silhouette": 0.19216255656191836,
+          "calinski_harabasz": 3667.7682952581877,
+          "davies_bouldin": 1.9783090839693773,
+          "min_cluster_size": 2070,
+          "max_cluster_size": 19243,
+          "size_balance": 0.10757158447227563,
+          "selection_score": 0.5
+        },
+        {
+          "k": 4,
+          "silhouette": 0.19186538799476582,
+          "calinski_harabasz": 3670.216482759246,
+          "davies_bouldin": 1.505807053916834,
+          "min_cluster_size": 5,
+          "max_cluster_size": 19055,
+          "size_balance": 0.0002623983206507478,
+          "selection_score": 0.4375
+        }
+      ],
+      "selected_k": 2,
+      "clusters": [
+        {
+          "cluster_id": 0,
+          "name": "high overload, low engagement distance to carrier",
+          "n": 8729,
+          "share_of_bucket_sample": 29.1,
+          "shot_rate_pct": 3.987,
+          "xg_mean": 0.00473,
+          "shot_rate_delta_vs_bucket_pp": -1.417,
+          "standardised_feature_diffs": {
+            "marking_tightness": -0.3406,
+            "engagement_distance_to_carrier": -0.7448,
+            "zone_defensive_value": -0.1957,
+            "angle_to_attacking_goal": 0.1824,
+            "attacking_goal_centrality": -0.1522,
+            "overload_score": 1.1037,
+            "lane_screening_score_option_1": 0.6865,
+            "lane_screening_score_option_2": 0.7235,
+            "lane_screening_score_option_3": 0.7417,
+            "top_option_1_threat_score": 0.5186,
+            "top_option_2_threat_score": 0.602,
+            "top_option_3_threat_score": 0.544,
+            "is_goal_side_of_nearest_attacker": 0.4009,
+            "is_wide_lane": 0.1018,
+            "has_option_2": 0.0129,
+            "has_option_3": 0.0194
+          },
+          "top_distinguishing_features": [
+            {
+              "feature": "overload_score",
+              "standardised_diff": 1.1037
+            },
+            {
+              "feature": "engagement_distance_to_carrier",
+              "standardised_diff": -0.7448
+            },
+            {
+              "feature": "lane_screening_score_option_3",
+              "standardised_diff": 0.7417
+            },
+            {
+              "feature": "lane_screening_score_option_2",
+              "standardised_diff": 0.7235
+            },
+            {
+              "feature": "lane_screening_score_option_1",
+              "standardised_diff": 0.6865
+            }
+          ]
+        },
+        {
+          "cluster_id": 1,
+          "name": "low overload, high engagement distance to carrier",
+          "n": 21271,
+          "share_of_bucket_sample": 70.9,
+          "shot_rate_pct": 5.985,
+          "xg_mean": 0.00634,
+          "shot_rate_delta_vs_bucket_pp": 0.581,
+          "standardised_feature_diffs": {
+            "marking_tightness": 0.1398,
+            "engagement_distance_to_carrier": 0.3056,
+            "zone_defensive_value": 0.0803,
+            "angle_to_attacking_goal": -0.0748,
+            "attacking_goal_centrality": 0.0625,
+            "overload_score": -0.4529,
+            "lane_screening_score_option_1": -0.2817,
+            "lane_screening_score_option_2": -0.2969,
+            "lane_screening_score_option_3": -0.3044,
+            "top_option_1_threat_score": -0.2128,
+            "top_option_2_threat_score": -0.247,
+            "top_option_3_threat_score": -0.2233,
+            "is_goal_side_of_nearest_attacker": -0.1645,
+            "is_wide_lane": -0.0418,
+            "has_option_2": -0.0053,
+            "has_option_3": -0.0079
+          },
+          "top_distinguishing_features": [
+            {
+              "feature": "overload_score",
+              "standardised_diff": -0.4529
+            },
+            {
+              "feature": "engagement_distance_to_carrier",
+              "standardised_diff": 0.3056
+            },
+            {
+              "feature": "lane_screening_score_option_3",
+              "standardised_diff": -0.3044
+            },
+            {
+              "feature": "lane_screening_score_option_2",
+              "standardised_diff": -0.2969
+            },
+            {
+              "feature": "lane_screening_score_option_1",
+              "standardised_diff": -0.2817
+            }
+          ]
+        }
+      ]
+    },
+    "advanced_wide": {
+      "bucket": "advanced_wide",
+      "n_rows_total": 155367,
+      "n_rows_sampled": 30000,
+      "sampled": true,
+      "sample_n_limit": 30000,
+      "bucket_mean_shot_rate_pct": 5.467,
+      "bucket_mean_xg": 0.00547,
+      "k_evaluation": [
+        {
+          "k": 2,
+          "silhouette": 0.2540288145892784,
+          "calinski_harabasz": 5054.553255147538,
+          "davies_bouldin": 2.0578820860845073,
+          "min_cluster_size": 8992,
+          "max_cluster_size": 21008,
+          "size_balance": 0.428027418126428,
+          "selection_score": 0.8125
+        },
+        {
+          "k": 5,
+          "silhouette": 0.23505254293846314,
+          "calinski_harabasz": 4622.781042926869,
+          "davies_bouldin": 1.1465643134549368,
+          "min_cluster_size": 7,
+          "max_cluster_size": 20016,
+          "size_balance": 0.00034972022382094326,
+          "selection_score": 0.6875
+        },
+        {
+          "k": 3,
+          "silhouette": 0.21644640208710741,
+          "calinski_harabasz": 4591.052941005899,
+          "davies_bouldin": 1.8583076708393993,
+          "min_cluster_size": 3919,
+          "max_cluster_size": 18490,
+          "size_balance": 0.21195240670632776,
+          "selection_score": 0.5
+        },
+        {
+          "k": 4,
+          "silhouette": 0.23230959658281125,
+          "calinski_harabasz": 4531.9409173514905,
+          "davies_bouldin": 1.413023195080922,
+          "min_cluster_size": 1547,
+          "max_cluster_size": 20012,
+          "size_balance": 0.07730361782930242,
+          "selection_score": 0.5
+        }
+      ],
+      "selected_k": 2,
+      "clusters": [
+        {
+          "cluster_id": 0,
+          "name": "low is wide lane, high attacking goal centrality",
+          "n": 20976,
+          "share_of_bucket_sample": 69.92,
+          "shot_rate_pct": 5.564,
+          "xg_mean": 0.0058,
+          "shot_rate_delta_vs_bucket_pp": 0.097,
+          "standardised_feature_diffs": {
+            "marking_tightness": 0.2177,
+            "engagement_distance_to_carrier": 0.363,
+            "zone_defensive_value": 0.1128,
+            "angle_to_attacking_goal": -0.3483,
+            "attacking_goal_centrality": 0.3919,
+            "overload_score": -0.2964,
+            "lane_screening_score_option_1": -0.2205,
+            "lane_screening_score_option_2": -0.2355,
+            "lane_screening_score_option_3": -0.2616,
+            "top_option_1_threat_score": -0.1525,
+            "top_option_2_threat_score": -0.1496,
+            "top_option_3_threat_score": -0.1291,
+            "is_goal_side_of_nearest_attacker": -0.1162,
+            "is_wide_lane": -0.4354,
+            "has_option_2": -0.0066,
+            "has_option_3": -0.0041
+          },
+          "top_distinguishing_features": [
+            {
+              "feature": "is_wide_lane",
+              "standardised_diff": -0.4354
+            },
+            {
+              "feature": "attacking_goal_centrality",
+              "standardised_diff": 0.3919
+            },
+            {
+              "feature": "engagement_distance_to_carrier",
+              "standardised_diff": 0.363
+            },
+            {
+              "feature": "angle_to_attacking_goal",
+              "standardised_diff": -0.3483
+            },
+            {
+              "feature": "overload_score",
+              "standardised_diff": -0.2964
+            }
+          ]
+        },
+        {
+          "cluster_id": 1,
+          "name": "high is wide lane, low attacking goal centrality",
+          "n": 9024,
+          "share_of_bucket_sample": 30.08,
+          "shot_rate_pct": 5.242,
+          "xg_mean": 0.00472,
+          "shot_rate_delta_vs_bucket_pp": -0.225,
+          "standardised_feature_diffs": {
+            "marking_tightness": -0.5061,
+            "engagement_distance_to_carrier": -0.8438,
+            "zone_defensive_value": -0.2622,
+            "angle_to_attacking_goal": 0.8095,
+            "attacking_goal_centrality": -0.911,
+            "overload_score": 0.689,
+            "lane_screening_score_option_1": 0.5125,
+            "lane_screening_score_option_2": 0.5473,
+            "lane_screening_score_option_3": 0.608,
+            "top_option_1_threat_score": 0.3545,
+            "top_option_2_threat_score": 0.3476,
+            "top_option_3_threat_score": 0.3001,
+            "is_goal_side_of_nearest_attacker": 0.27,
+            "is_wide_lane": 1.0122,
+            "has_option_2": 0.0153,
+            "has_option_3": 0.0096
+          },
+          "top_distinguishing_features": [
+            {
+              "feature": "is_wide_lane",
+              "standardised_diff": 1.0122
+            },
+            {
+              "feature": "attacking_goal_centrality",
+              "standardised_diff": -0.911
+            },
+            {
+              "feature": "engagement_distance_to_carrier",
+              "standardised_diff": -0.8438
+            },
+            {
+              "feature": "angle_to_attacking_goal",
+              "standardised_diff": 0.8095
+            },
+            {
+              "feature": "overload_score",
+              "standardised_diff": 0.689
+            }
+          ]
+        }
+      ]
+    },
+    "mid_block": {
+      "bucket": "mid_block",
+      "n_rows_total": 838270,
+      "n_rows_sampled": 30000,
+      "sampled": true,
+      "sample_n_limit": 30000,
+      "bucket_mean_shot_rate_pct": 6.187,
+      "bucket_mean_xg": 0.00597,
+      "k_evaluation": [
+        {
+          "k": 2,
+          "silhouette": 0.2531493463831313,
+          "calinski_harabasz": 4846.179548251199,
+          "davies_bouldin": 2.0467918594976084,
+          "min_cluster_size": 8398,
+          "max_cluster_size": 21602,
+          "size_balance": 0.3887602999722248,
+          "selection_score": 0.75
+        },
+        {
+          "k": 4,
+          "silhouette": 0.27937457415407174,
+          "calinski_harabasz": 4075.061606224636,
+          "davies_bouldin": 1.438345596494463,
+          "min_cluster_size": 1154,
+          "max_cluster_size": 21400,
+          "size_balance": 0.053925233644859814,
+          "selection_score": 0.6875
+        },
+        {
+          "k": 3,
+          "silhouette": 0.2272401285797479,
+          "calinski_harabasz": 4328.285681614978,
+          "davies_bouldin": 1.8866297957126357,
+          "min_cluster_size": 4351,
+          "max_cluster_size": 19124,
+          "size_balance": 0.2275151641915917,
+          "selection_score": 0.625
+        },
+        {
+          "k": 5,
+          "silhouette": 0.21794376825154185,
+          "calinski_harabasz": 4067.6486119057536,
+          "davies_bouldin": 1.3228028366785032,
+          "min_cluster_size": 1,
+          "max_cluster_size": 17740,
+          "size_balance": 5.636978579481398e-05,
+          "selection_score": 0.4375
+        }
+      ],
+      "selected_k": 2,
+      "clusters": [
+        {
+          "cluster_id": 0,
+          "name": "high attacking goal centrality, low is wide lane",
+          "n": 21602,
+          "share_of_bucket_sample": 72.01,
+          "shot_rate_pct": 6.12,
+          "xg_mean": 0.00584,
+          "shot_rate_delta_vs_bucket_pp": -0.067,
+          "standardised_feature_diffs": {
+            "marking_tightness": 0.1524,
+            "engagement_distance_to_carrier": 0.3287,
+            "zone_defensive_value": 0.1058,
+            "angle_to_attacking_goal": -0.3214,
+            "attacking_goal_centrality": 0.3571,
+            "overload_score": -0.3327,
+            "lane_screening_score_option_1": -0.2894,
+            "lane_screening_score_option_2": -0.296,
+            "lane_screening_score_option_3": -0.2919,
+            "top_option_1_threat_score": -0.0593,
+            "top_option_2_threat_score": -0.0378,
+            "top_option_3_threat_score": -0.0216,
+            "is_goal_side_of_nearest_attacker": 0.0172,
+            "is_wide_lane": -0.3448,
+            "has_option_2": -0.0022,
+            "has_option_3": -0.0014
+          },
+          "top_distinguishing_features": [
+            {
+              "feature": "attacking_goal_centrality",
+              "standardised_diff": 0.3571
+            },
+            {
+              "feature": "is_wide_lane",
+              "standardised_diff": -0.3448
+            },
+            {
+              "feature": "overload_score",
+              "standardised_diff": -0.3327
+            },
+            {
+              "feature": "engagement_distance_to_carrier",
+              "standardised_diff": 0.3287
+            },
+            {
+              "feature": "angle_to_attacking_goal",
+              "standardised_diff": -0.3214
+            }
+          ]
+        },
+        {
+          "cluster_id": 1,
+          "name": "low attacking goal centrality, high is wide lane",
+          "n": 8398,
+          "share_of_bucket_sample": 27.99,
+          "shot_rate_pct": 6.359,
+          "xg_mean": 0.0063,
+          "shot_rate_delta_vs_bucket_pp": 0.172,
+          "standardised_feature_diffs": {
+            "marking_tightness": -0.3921,
+            "engagement_distance_to_carrier": -0.8455,
+            "zone_defensive_value": -0.2721,
+            "angle_to_attacking_goal": 0.8269,
+            "attacking_goal_centrality": -0.9185,
+            "overload_score": 0.8559,
+            "lane_screening_score_option_1": 0.7443,
+            "lane_screening_score_option_2": 0.7615,
+            "lane_screening_score_option_3": 0.7507,
+            "top_option_1_threat_score": 0.1526,
+            "top_option_2_threat_score": 0.0972,
+            "top_option_3_threat_score": 0.0555,
+            "is_goal_side_of_nearest_attacker": -0.0443,
+            "is_wide_lane": 0.8868,
+            "has_option_2": 0.0058,
+            "has_option_3": 0.0035
+          },
+          "top_distinguishing_features": [
+            {
+              "feature": "attacking_goal_centrality",
+              "standardised_diff": -0.9185
+            },
+            {
+              "feature": "is_wide_lane",
+              "standardised_diff": 0.8868
+            },
+            {
+              "feature": "overload_score",
+              "standardised_diff": 0.8559
+            },
+            {
+              "feature": "engagement_distance_to_carrier",
+              "standardised_diff": -0.8455
+            },
+            {
+              "feature": "angle_to_attacking_goal",
+              "standardised_diff": 0.8269
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
