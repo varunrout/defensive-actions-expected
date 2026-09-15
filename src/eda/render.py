@@ -619,7 +619,7 @@ def findings_grid(cards: list[str]) -> str:
 
 
 def html_shell(*, eyebrow: str, title: str, dek: str, stats: list[tuple[str, str]], body: str, footer: str) -> str:
-    stat_html = "".join(f'<div class="stat"><b>{esc(v)}</b><span>{esc(l)}</span></div>' for v, l in stats)
+    stat_html = "".join(f'<div class="stat"><b>{esc(v)}</b><span>{esc(label)}</span></div>' for v, label in stats)
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -648,7 +648,7 @@ def html_shell(*, eyebrow: str, title: str, dek: str, stats: list[tuple[str, str
 
 def render_article(*, eyebrow: str, title: str, dek: str, stats: list[tuple[str, str]], body_html: str, extra_css: str = "") -> str:
     """Render a long-form narrative report (prose + tables) in the same shared design system."""
-    stat_html = "".join(f'<div class="stat"><b>{esc(v)}</b><span>{esc(l)}</span></div>' for v, l in stats)
+    stat_html = "".join(f'<div class="stat"><b>{esc(v)}</b><span>{esc(label)}</span></div>' for v, label in stats)
     return f"""<!doctype html>
 <html lang="en">
 <head>

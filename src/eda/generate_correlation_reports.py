@@ -43,7 +43,6 @@ def _fmt_pair_name(p: dict) -> str:
 
 def _corr_row(p: dict, tier: str) -> str:
     magnitude = min(100.0, p["abs_value"] * 100)
-    verdict_label = p.get("downgraded_from_drop") and "collapse*" or tier
     chip_label = tier.upper() + (" *" if p.get("downgraded_from_drop") else "")
     title = f'{p["feature_a"]} vs {p["feature_b"]}: {p["method"]} = {p["value"]} (n={p["n"]})'
     if p.get("downgraded_from_drop"):
@@ -85,8 +84,8 @@ def _dataset_block(ds_key: str, ds: dict) -> str:
     dataset_cfg = DATASETS[ds_key]
     tc = ds["tier_counts"]
     stat_html = "".join(
-        f'<div class="stat"><b>{v}</b><span>{l}</span></div>'
-        for v, l in [
+        f'<div class="stat"><b>{v}</b><span>{label}</span></div>'
+        for v, label in [
             (f"{ds['n_rows_used']:,}", "rows used" + (" (sampled)" if ds["sampled"] else "")),
             (ds["n_features"], "features"),
             (tc["drop"], "drop"),
@@ -280,7 +279,6 @@ def build_review_methodology(review_data: dict, correlation_data: dict) -> str:
     passive = review_data["datasets"]["passive"]
 
     type1_example = _find_example(active, "drop_boolean", 1) or _find_example(passive, "drop_boolean", 1)
-    type2_keep_example = _find_example(active, "keep_both", 2)
     type2_drop_example = _find_example(active, "drop_", 2)
     type3_example = None
     for ds in (active, passive):
