@@ -22,6 +22,7 @@ from dax.features.player_defense import (
     _as_float,
     _distance,
     _distance_point_to_segment,
+    _exclude_actor_from_frame,
     _freeze_frame_points,
     _goal_metrics,
     _location,
@@ -376,7 +377,7 @@ def build_passive_defense_rows(events: list[dict[str, Any]], only_with_360: bool
             defending_team = _none_if_missing(row.get("defending_team_before_action")) or _none_if_missing(row.get("defending_team"))
             ball_x = _as_float(row.get("ball_x"))
             ball_y = _as_float(row.get("ball_y"))
-            attackers, defenders = _freeze_frame_points(freeze_frame, True)
+            attackers, defenders = _freeze_frame_points(_exclude_actor_from_frame(freeze_frame), True)
             options = _rank_option_candidates(attackers, defenders)
             coverage_counts = _coverage_counts(defenders, carrier_x, carrier_y, options)
             functional_roles = _functional_roles(defenders)
