@@ -1,0 +1,123 @@
+{
+  "dataset": "passive",
+  "parquet_path": "data/features/passive_defense.parquet",
+  "n_rows": 1593181,
+  "target_col": "target_future_shot_10s",
+  "methodology": "Part A confirms known-leaky columns are excluded and scans the full parquet schema for any other leakage-suggestive column name not already accounted for. Parts B-D quantify three specific candidate-feature risks with a groupby shot-rate split and, where relevant, a chi-square test of independence -- not a claim of causation, a statistical description of whether the split is consistent with the target's own forward-looking construction leaking into the feature.",
+  "part_a_known_leaky_scan": {
+    "known_leaky_columns": {
+      "target_future_shot_10s": {
+        "in_candidate_list": false,
+        "verdict": "excluded"
+      },
+      "target_future_xg_10s": {
+        "in_candidate_list": false,
+        "verdict": "excluded"
+      },
+      "screened_option_was_avoided": {
+        "in_candidate_list": false,
+        "verdict": "excluded"
+      }
+    },
+    "all_leakage_suggestive_column_names": [
+      "has_screened_outcome",
+      "screened_option_was_avoided",
+      "target_future_shot_10s",
+      "target_future_xg_10s"
+    ],
+    "n_columns_scanned_total": 73,
+    "unexpected_leaky_columns_in_candidate_list": [],
+    "verdict": "clean"
+  },
+  "part_b_screened_option_was_avoided": {
+    "column": "screened_option_was_avoided",
+    "target_col": "target_future_shot_10s",
+    "by_value": {
+      "False": {
+        "n": 47668,
+        "rate": 5.882
+      },
+      "True": {
+        "n": 1542932,
+        "rate": 5.978
+      }
+    },
+    "delta_pp": 0.096,
+    "verdict": "kept-excluded-conceptually; empirically near-flat correlation, confirms low leakage risk for this specific pair",
+    "note": "screened_option_was_avoided is excluded from the candidate list on conceptual/structural grounds (both it and the target are forward-looking from the anchor event) regardless of this empirical result -- this measurement is informational only, not the basis for the exclusion."
+  },
+  "part_c_has_screened_outcome": {
+    "column": "has_screened_outcome",
+    "target_col": "target_future_shot_10s",
+    "by_value": {
+      "False": {
+        "n": 2581,
+        "rate": 0.504
+      },
+      "True": {
+        "n": 1590600,
+        "rate": 5.975
+      }
+    },
+    "crosstab": [
+      [
+        2568,
+        13
+      ],
+      [
+        1495565,
+        95035
+      ]
+    ],
+    "crosstab_index": [
+      "False",
+      "True"
+    ],
+    "crosstab_columns": [
+      "0",
+      "1"
+    ],
+    "chi2": 136.51658708889934,
+    "p_value": 1.5382329772718693e-31,
+    "dof": 1,
+    "ratio_true_to_false": 11.86,
+    "verdict": "excluded -- censoring-mechanism proxy",
+    "explanation": "has_screened_outcome is False only when screened_option_was_avoided could not be computed (end of period/match, no next event in the data to compare against). Those rows show a 11.86x lower shot rate (0.504% vs 5.975%, chi2 p=1.538e-31) -- not because nothing defensively interesting happened, but because target_future_shot_10s's own 10-second measurement window was truncated by the match/period ending, making a false negative (no time left for a shot) far more likely than a genuine successful defensive outcome. A model fed this feature would learn to predict near-zero shot probability whenever the target's own measurement window was cut short -- circular with the target's construction, not causal, not useful, and it would look like a strong feature in offline evaluation while encoding nothing about defending."
+  },
+  "part_d_has_option_2_3": {
+    "has_option_2": {
+      "column": "has_option_2",
+      "target_col": "target_future_shot_10s",
+      "by_value": {
+        "False": {
+          "n": 279,
+          "rate": 14.695
+        },
+        "True": {
+          "n": 1592902,
+          "rate": 5.964
+        }
+      },
+      "ratio_false_to_true": 2.46,
+      "verdict": "flagged-for-follow-up",
+      "explanation": "has_option_2=False shows a 2.46x HIGHER shot rate than True -- the opposite shape from has_screened_outcome. This is about the CURRENT freeze frame (whether a 2nd/3rd ranked passing option was visible right now), not about whether the 10s forward window was computable, so it is not the same censoring-mechanism artefact. Plausible as real signal (fewer passing options can mean a more direct, more urgent attack) rather than a target-construction artefact -- kept as a candidate feature. Worth testing the same way as the marking-tightness/lane-screening reversals (does conditioning on some third variable explain it away), but that is separate follow-up work, not part of this audit."
+    },
+    "has_option_3": {
+      "column": "has_option_3",
+      "target_col": "target_future_shot_10s",
+      "by_value": {
+        "False": {
+          "n": 2181,
+          "rate": 15.131
+        },
+        "True": {
+          "n": 1591000,
+          "rate": 5.953
+        }
+      },
+      "ratio_false_to_true": 2.54,
+      "verdict": "flagged-for-follow-up",
+      "explanation": "has_option_3=False shows a 2.54x HIGHER shot rate than True -- the opposite shape from has_screened_outcome. This is about the CURRENT freeze frame (whether a 2nd/3rd ranked passing option was visible right now), not about whether the 10s forward window was computable, so it is not the same censoring-mechanism artefact. Plausible as real signal (fewer passing options can mean a more direct, more urgent attack) rather than a target-construction artefact -- kept as a candidate feature. Worth testing the same way as the marking-tightness/lane-screening reversals (does conditioning on some third variable explain it away), but that is separate follow-up work, not part of this audit."
+    }
+  }
+}
