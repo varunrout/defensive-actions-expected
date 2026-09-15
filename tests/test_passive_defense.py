@@ -1,9 +1,17 @@
 import math
+from pathlib import Path
 
 import pandas as pd
+import pytest
 
+from dax.features.add_missingness_flags import (
+    EXPECTED_FALSE_COUNTS,
+    add_passive_defense_flags,
+    add_player_defensive_actions_flags,
+)
 from dax.features.passive_defense import build_passive_defense_rows
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 FULL = [0, 0, 120, 0, 120, 80, 0, 80]
 
 
@@ -225,6 +233,49 @@ def test_lane_occlusion_features_with_no_attackers_are_null_and_overload_zero():
     assert out["overload_score"] == 0
 
 
+# --- Ball-relative option features -------------------------------------
+#
+# top_option_n_target_x/y are absolute pitch coordinates, which is why they
+# correlated strongly with ball_x/ball_y and with each other (see
+# reports/eda/CORRELATION_ANALYSIS.json). The ball-relative dx/dy/distance/
+# angle features carry the same information without that confound. Fixture:
+# ball at (60, 40); A1=(100, 40) -> dx=40, dy=0; A2=(100, 60) -> dx=40, dy=20.
+
+def test_ball_relative_option_features_match_absolute_targets_minus_ball():
+    rows = build_passive_defense_rows([_lane_fixture_row()])
+    row = rows[0]
+
+    assert math.isclose(row["top_option_1_dx"], 40.0)
+    assert math.isclose(row["top_option_1_dy"], 0.0)
+    assert math.isclose(row["top_option_1_distance_from_ball"], 40.0)
+    assert math.isclose(row["top_option_1_angle_from_ball"], 0.0, abs_tol=1e-9)
+
+    assert math.isclose(row["top_option_2_dx"], 40.0)
+    assert math.isclose(row["top_option_2_dy"], 20.0)
+    assert math.isclose(row["top_option_2_distance_from_ball"], math.hypot(40.0, 20.0))
+    assert math.isclose(row["top_option_2_angle_from_ball"], math.atan2(20.0, 40.0))
+
+    # only two attackers in the frame -> no third option, ball-relative
+    # features for rank 3 stay null just like the absolute target columns.
+    assert row["top_option_3_dx"] is None
+    assert row["top_option_3_dy"] is None
+    assert row["top_option_3_distance_from_ball"] is None
+    assert row["top_option_3_angle_from_ball"] is None
+
+
+def test_ball_relative_option_features_null_when_no_attackers():
+    row = _lane_fixture_row(freeze_frame=[
+        {"teammate": False, "location": [80.0, 40.0]},
+    ])
+    rows = build_passive_defense_rows([row])
+    out = rows[0]
+    for rank in (1, 2, 3):
+        assert out[f"top_option_{rank}_dx"] is None
+        assert out[f"top_option_{rank}_dy"] is None
+        assert out[f"top_option_{rank}_distance_from_ball"] is None
+        assert out[f"top_option_{rank}_angle_from_ball"] is None
+
+
 # --- Functional role labelling ---------------------------------------------
 #
 # Roles are inferred purely from a defender-slot's depth/width RANK relative
@@ -239,19 +290,21 @@ def test_functional_role_back_four_shape():
         {"teammate": False, "location": [0.0, 45.0]},   # deep + central -> last_line
         {"teammate": False, "location": [0.0, 70.0]},   # deep + wide -> wide_cover
         {"teammate": False, "location": [30.0, 35.0]},  # advanced + central -> central_screen
-        {"teammate": False, "location": [15.0, 10.0]},  # mid depth -> unclassified
+        {"teammate": False, "location": [15.0, 10.0]},  # mid depth, wide -> mid_block (measured, not extreme on depth)
     ])
     rows = build_passive_defense_rows([row])
     roles = {r["defender_slot_index"]: r["defender_functional_role"] for r in rows}
     assert roles[0] == "last_line"
     assert roles[1] == "wide_cover"
     assert roles[2] == "central_screen"
-    assert roles[3] == "unclassified"
+    assert roles[3] == "mid_block"
 
 
-def test_functional_role_compact_block_is_unclassified_when_depth_is_degenerate():
+def test_functional_role_compact_block_is_mid_block_when_depth_is_degenerate():
     # All three defenders share the same x -- no depth signal at all, so
-    # nobody can be "deep" or "advanced" relative to the others.
+    # nobody can be "deep" or "advanced" relative to the others. n >= 2, so
+    # this is a measured-and-ordinary case (mid_block), not "unclassified"
+    # -- unclassified is reserved exclusively for n < 2.
     row = _pass_row(id="compact_block", freeze_frame=[
         {"teammate": False, "location": [10.0, 38.0]},
         {"teammate": False, "location": [10.0, 40.0]},
@@ -259,25 +312,39 @@ def test_functional_role_compact_block_is_unclassified_when_depth_is_degenerate(
     ])
     rows = build_passive_defense_rows([row])
     roles = {r["defender_slot_index"]: r["defender_functional_role"] for r in rows}
-    assert set(roles.values()) == {"unclassified"}
+    assert set(roles.values()) == {"mid_block"}
 
 
 def test_functional_role_stretched_transition_shape():
     row = _pass_row(id="transition", freeze_frame=[
         {"teammate": False, "location": [5.0, 42.0]},   # deep + central -> last_line
-        {"teammate": False, "location": [55.0, 5.0]},   # advanced + wide -> unclassified
+        {"teammate": False, "location": [55.0, 5.0]},   # advanced + wide -> advanced_wide
         {"teammate": False, "location": [50.0, 38.0]},  # advanced + central -> central_screen
         {"teammate": False, "location": [8.0, 75.0]},   # deep + wide -> wide_cover
     ])
     rows = build_passive_defense_rows([row])
     roles = {r["defender_slot_index"]: r["defender_functional_role"] for r in rows}
     assert roles[0] == "last_line"
-    assert roles[1] == "unclassified"
+    assert roles[1] == "advanced_wide"
     assert roles[2] == "central_screen"
     assert roles[3] == "wide_cover"
 
 
+def test_functional_role_advanced_wide_quadrant():
+    # The fourth corner: advanced AND wide -- a high, wide-pressing
+    # defender (overlapping full-back / winger tracking back high).
+    row = _pass_row(id="advanced_wide", freeze_frame=[
+        {"teammate": False, "location": [0.0, 40.0]},   # deep anchor, gives the group depth spread
+        {"teammate": False, "location": [50.0, 5.0]},    # advanced + wide -> advanced_wide
+    ])
+    rows = build_passive_defense_rows([row])
+    roles = {r["defender_slot_index"]: r["defender_functional_role"] for r in rows}
+    assert roles[1] == "advanced_wide"
+
+
 def test_functional_role_unclassified_with_fewer_than_two_defenders():
+    # unclassified is reserved exclusively for n < 2 (nothing to be
+    # "relative to") -- never used for a measured-but-ordinary row.
     row = _pass_row(id="lone_defender", freeze_frame=[
         {"teammate": False, "location": [10.0, 40.0]},
     ])
@@ -353,3 +420,67 @@ def test_screened_option_was_avoided_is_none_when_no_next_event():
     rows = build_passive_defense_rows([anchor])
     d0 = next(r for r in rows if r["defender_slot_index"] == 0)
     assert d0["screened_option_was_avoided"] is None
+
+
+# --- Missingness flags (dax.features.add_missingness_flags) ----------------
+#
+# Flags are structural (freeze-frame had too few attackers, no next event
+# existed, this was a possession's first event), not random missingness.
+# Counts against the real built datasets are checked separately, below.
+
+def test_add_passive_defense_flags_matches_notnull_semantics():
+    df = pd.DataFrame({
+        "top_option_2_threat_score": [0.1, None, 0.2],
+        "top_option_3_threat_score": [None, None, 0.05],
+        "screened_option_was_avoided": [True, False, None],
+    })
+    out = add_passive_defense_flags(df, validate=False)
+    assert out["has_option_2"].tolist() == [True, False, True]
+    assert out["has_option_3"].tolist() == [False, False, True]
+    assert out["has_screened_outcome"].tolist() == [True, True, False]
+    # existing columns are untouched
+    pd.testing.assert_series_equal(out["top_option_2_threat_score"], df["top_option_2_threat_score"])
+
+
+def test_add_player_defensive_actions_flags_matches_spec_semantics():
+    df = pd.DataFrame({
+        "visible_attacker_count": [0, 3, None],
+        "visible_defender_count": [2, 0, None],
+        "phase_label_prev_event": ["settled_mid_block_proxy", None, "box_defence"],
+    })
+    out = add_player_defensive_actions_flags(df, validate=False)
+    assert out["has_visible_attacker"].tolist() == [False, True, False]
+    assert out["has_visible_defender"].tolist() == [True, False, False]
+    assert out["has_previous_event"].tolist() == [True, False, True]
+
+
+def test_flag_validation_fails_loudly_on_count_mismatch():
+    # A tiny synthetic frame will never match the real dataset's verified
+    # False-counts (279 / 2181 / 2581) -- validation must raise, not
+    # silently write flags that no longer mean what they're documented to.
+    df = pd.DataFrame({
+        "top_option_2_threat_score": [0.1, 0.2],
+        "top_option_3_threat_score": [0.1, 0.2],
+        "screened_option_was_avoided": [True, False],
+    })
+    with pytest.raises(ValueError, match="has_option_2"):
+        add_passive_defense_flags(df, validate=True)
+
+
+def test_flag_counts_match_verified_values_on_real_datasets():
+    passive_path = REPO_ROOT / "data" / "features" / "passive_defense.parquet"
+    active_path = REPO_ROOT / "data" / "features" / "player_defensive_actions.parquet"
+    if not passive_path.exists() or not active_path.exists():
+        pytest.skip("Built feature parquet files are not present in this environment.")
+
+    passive = add_passive_defense_flags(pd.read_parquet(passive_path))
+    assert len(passive) == 1_593_181
+    assert int((~passive["has_option_2"]).sum()) == EXPECTED_FALSE_COUNTS["has_option_2"] == 279
+    assert int((~passive["has_option_3"]).sum()) == EXPECTED_FALSE_COUNTS["has_option_3"] == 2181
+    assert int((~passive["has_screened_outcome"]).sum()) == EXPECTED_FALSE_COUNTS["has_screened_outcome"] == 2581
+
+    active = add_player_defensive_actions_flags(pd.read_parquet(active_path))
+    assert len(active) == 56_068
+    assert int((~active["has_visible_attacker"]).sum()) == EXPECTED_FALSE_COUNTS["has_visible_attacker"] == 31
+    assert int((~active["has_visible_defender"]).sum()) == EXPECTED_FALSE_COUNTS["has_visible_defender"] == 76
+    assert int((~active["has_previous_event"]).sum()) == EXPECTED_FALSE_COUNTS["has_previous_event"] == 4534

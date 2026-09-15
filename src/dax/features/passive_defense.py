@@ -13,6 +13,7 @@ frame -- no lineup join, no cross-frame tracking of any kind.
 """
 from __future__ import annotations
 from itertools import groupby
+from math import atan2, hypot
 from typing import Any
 
 import pandas as pd
@@ -109,14 +110,22 @@ def _functional_roles(defenders: list[tuple[float, float]]) -> list[str]:
     lateral_ratio is fixed at 0 (nobody is wide relative to a group with no
     width).
 
-    Buckets (first match wins; anything else is "unclassified" -- never a
-    silent default):
+    Buckets (first match wins; every combination of depth x laterality is
+    covered, so there is no silent default among rows that can be measured):
       - last_line:      deep (depth_ratio <= 1/3) and central (lateral_ratio <= 1/3)
       - wide_cover:      deep (depth_ratio <= 1/3) and wide (lateral_ratio >= 2/3)
       - central_screen:  advanced (depth_ratio >= 2/3) and central (lateral_ratio <= 1/3)
+      - advanced_wide:   advanced (depth_ratio >= 2/3) and wide (lateral_ratio >= 2/3)
+      - mid_block:       everything else with n >= 2 -- measured, and simply not in the
+                          extreme third on one or both axes (ordinary mid-block
+                          positioning), not a measurement failure.
 
-    Fewer than two visible defenders means there is nothing to be "relative
-    to", so every slot is unclassified.
+    "unclassified" is reserved exclusively for n < 2 (fewer than two visible
+    defenders means there is nothing to be "relative to", so every slot in
+    that frame is unclassified). unclassified and mid_block mean different
+    things -- couldn't-measure vs. measured-and-ordinary -- and must never be
+    treated as interchangeable downstream (e.g. neither "missing" imputation
+    nor a shot-rate comparison should conflate the two).
     """
     n = len(defenders)
     if n < 2:
@@ -142,8 +151,10 @@ def _functional_roles(defenders: list[tuple[float, float]]) -> list[str]:
             roles.append("wide_cover")
         elif is_advanced and is_central:
             roles.append("central_screen")
+        elif is_advanced and is_wide:
+            roles.append("advanced_wide")
         else:
-            roles.append("unclassified")
+            roles.append("mid_block")
     return roles
 
 
@@ -303,6 +314,36 @@ def _screened_option_was_avoided(lane_occlusion: dict[str, Any], next_location: 
     return not matched
 
 
+def _ball_relative_option_features(lane_occlusion: dict[str, Any], ball_x: float | None, ball_y: float | None) -> dict[str, Any]:
+    """Ball-relative (dx/dy/distance/angle) version of each ranked option's
+    absolute target coordinates.
+
+    top_option_n_target_x/y are absolute pitch coordinates, which is why they
+    correlate strongly with ball_x and with each other (correlation analysis:
+    reports/eda/CORRELATION_ANALYSIS.json) -- the same absolute position means
+    something different depending on where the ball is. These relative
+    features carry the same underlying information without that confound.
+    The raw _target_x/_target_y columns are kept alongside these (not
+    replaced) so the correlation re-check has both to compare.
+    """
+    features: dict[str, Any] = {}
+    for rank in range(1, TOP_K_OPTIONS + 1):
+        target_x = lane_occlusion.get(f"top_option_{rank}_target_x")
+        target_y = lane_occlusion.get(f"top_option_{rank}_target_y")
+        if ball_x is None or ball_y is None or target_x is None or target_y is None:
+            dx = dy = distance_from_ball = angle_from_ball = None
+        else:
+            dx = target_x - ball_x
+            dy = target_y - ball_y
+            distance_from_ball = hypot(dx, dy)
+            angle_from_ball = atan2(dy, dx)
+        features[f"top_option_{rank}_dx"] = dx
+        features[f"top_option_{rank}_dy"] = dy
+        features[f"top_option_{rank}_distance_from_ball"] = distance_from_ball
+        features[f"top_option_{rank}_angle_from_ball"] = angle_from_ball
+    return features
+
+
 def build_passive_defense_rows(events: list[dict[str, Any]], only_with_360: bool = True, verbose: bool = False) -> list[dict[str, Any]]:
     """Return one row per (defending-team player-slot, attacking on-ball event).
 
@@ -347,6 +388,7 @@ def build_passive_defense_rows(events: list[dict[str, Any]], only_with_360: bool
                 marking = _marking_features(defender_x, defender_y, attackers)
                 zone = _zone_defensive_value(defender_x, defender_y)
                 lane_occlusion = _lane_occlusion_features(defender_x, defender_y, carrier_x, carrier_y, options)
+                ball_relative_options = _ball_relative_option_features(lane_occlusion, ball_x, ball_y)
                 rows.append({
                     "match_id": match_id,
                     "period": period,
@@ -362,14 +404,20 @@ def build_passive_defense_rows(events: list[dict[str, Any]], only_with_360: bool
                     "defender_y": defender_y,
                     "ball_x": ball_x,
                     "ball_y": ball_y,
-                    "carrier_x": carrier_x,
-                    "carrier_y": carrier_y,
+                    # carrier_x/carrier_y are intentionally not emitted as
+                    # columns: the on-ball event's location IS the ball
+                    # location, so they are always identical to ball_x/
+                    # ball_y -- ball_x/ball_y is the canonical column.
+                    # carrier_x/carrier_y remain as local variables above,
+                    # used by _rank_option_candidates/_coverage_counts/
+                    # _lane_occlusion_features/engagement_distance_to_carrier.
                     **goal_metrics,
                     **visibility,
                     **marking,
                     **zone,
                     "engagement_distance_to_carrier": _distance(defender_x, defender_y, carrier_x, carrier_y),
                     **lane_occlusion,
+                    **ball_relative_options,
                     "overload_score": coverage_counts[defender_slot_index],
                     "defender_functional_role": functional_roles[defender_slot_index],
                     "target_future_shot_10s": target_future_shot_10s,
