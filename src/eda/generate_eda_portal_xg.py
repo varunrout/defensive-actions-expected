@@ -1,17 +1,12 @@
-"""CLI entrypoint: build a single-tab portal shell (reports/eda/INDEX.html)
-that lists every formal EDA report in one sidebar, grouped by pipeline
-stage, each opening in an embedded pane -- so reading through the whole
-EDA trail never requires more than one browser tab.
-
-Pure HTML navigation (<a target="viewer">, no JavaScript required) so it
-works even with scripts disabled; a small amount of JS only handles
-highlighting the active link. The report list is generated from what's
-actually on disk in reports/eda/, not a hand-maintained list that can drift
--- any file present but not in REPORT_GROUPS below is still listed, under
-"Other reports", so nothing silently disappears from the portal.
+"""CLI entrypoint: build a single-tab portal shell (reports/eda_xg/INDEX.html)
+for the CONTINUOUS-target (target_future_xg_10s) report collection -- a
+separate portal from reports/eda/INDEX.html (the binary-target one), mirroring
+its structure exactly. Kept separate on purpose: different target, different
+scale, different reports -- growing this list later (e.g. a category/boolean
+atlas against xG) should never get tangled with the binary-target trail.
 
 Usage:
-    python -m src.eda.generate_eda_portal
+    python -m src.eda.generate_eda_portal_xg
 """
 
 from __future__ import annotations
@@ -21,52 +16,32 @@ from pathlib import Path
 from src.eda.render import FONT_LINKS, esc
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-REPORTS_DIR = REPO_ROOT / "reports" / "eda"
+REPORTS_DIR = REPO_ROOT / "reports" / "eda_xg"
 OUTPUT_PATH = REPORTS_DIR / "INDEX.html"
 
-DEFAULT_REPORT = "EDA_PIPELINE_LOG.html"
+DEFAULT_REPORT = "active_numerical_target_atlas.html"
 
-# (group title, [(filename, label), ...]) -- order here is the order shown
-# in the sidebar. A file present on disk but not listed here still appears,
-# under "Other reports", so nothing is silently hidden.
 REPORT_GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
-    ("Overview", [
-        ("EDA_PIPELINE_LOG.html", "Pipeline Audit Trail"),
+    ("Base EDA vs xG (reconstructed 51/44 pool)", [
+        ("active_category_atlas.html", "Active -- Category Atlas (xG)"),
+        ("active_flag_ledger.html", "Active -- Flag Ledger (xG)"),
+        ("active_distribution_atlas.html", "Active -- Distribution Atlas (reconstructed pool)"),
+        ("active_numerical_target_atlas.html", "Active -- Numerical XG Target Atlas"),
+        ("passive_category_atlas.html", "Passive -- Category Atlas (xG)"),
+        ("passive_flag_ledger.html", "Passive -- Flag Ledger (xG)"),
+        ("passive_distribution_atlas.html", "Passive -- Distribution Atlas (reconstructed pool)"),
+        ("passive_numerical_target_atlas.html", "Passive -- Numerical XG Target Atlas"),
     ]),
-    ("Base EDA (stage 00)", [
-        ("EDA_ANALYSIS.html", "Narrative Summary"),
-        ("active_category_atlas.html", "Active -- Category Atlas"),
-        ("active_flag_ledger.html", "Active -- Flag Ledger"),
-        ("active_distribution_atlas.html", "Active -- Distribution Atlas"),
-        ("active_distribution_atlas_reconstructed.html", "Active -- Distribution Atlas (reconstructed pool)"),
-        ("active_numerical_target_atlas.html", "Active -- Numerical Target Atlas"),
-        ("passive_category_atlas.html", "Passive -- Category Atlas"),
-        ("passive_flag_ledger.html", "Passive -- Flag Ledger"),
-        ("passive_distribution_atlas.html", "Passive -- Distribution Atlas"),
-        ("passive_distribution_atlas_reconstructed.html", "Passive -- Distribution Atlas (reconstructed pool)"),
-        ("passive_numerical_target_atlas.html", "Passive -- Numerical Target Atlas"),
-    ]),
-    ("Correlation & Review", [
+    ("Correlation & VIF (target-independent, mirrored)", [
         ("CORRELATION_ATLAS.html", "Correlation Atlas -- V1 (51/44, stage 01)"),
-        ("REVIEW_METHODOLOGY.html", "Review Methodology -- V1"),
         ("CORRELATION_ATLAS_V2.html", "Correlation Atlas -- V2 (36/39, stage 07)"),
-        ("REVIEW_METHODOLOGY_V2.html", "Review Methodology -- V2"),
         ("CORRELATION_ATLAS_V3.html", "Correlation Atlas -- V3 (34/38, train+val only)"),
-    ]),
-    ("Redundancy checks", [
         ("VIF_ANALYSIS.html", "Multicollinearity (VIF)"),
-        ("CONFOUND_ANALYSIS.html", "Confound (Reversal) Testing"),
-        ("LEAKAGE_AUDIT.html", "Leakage Audit"),
     ]),
-    ("Validation", [
-        ("FOOTBALL_SANITY_CHECK.html", "Football Sanity Check"),
-    ]),
-    ("Modelling infrastructure", [
-        ("PASSIVE_ARCHETYPES.html", "Passive Archetype Clustering"),
-        ("SPLIT_VALIDATION.html", "Canonical Match-Grouped Split"),
-    ]),
-    ("Confirmation", [
-        ("FEATURE_LOCK_CONFIRMATION.html", "Post-Lock Correlation Confirmation"),
+    ("Redundancy / leakage / confound vs xG", [
+        ("REVIEW_METHODOLOGY.html", "Review Methodology (xG lift)"),
+        ("LEAKAGE_AUDIT.html", "Leakage Audit (xG)"),
+        ("CONFOUND_ANALYSIS.html", "Confound (Reversal) Testing (xG)"),
     ]),
 ]
 
@@ -114,6 +89,7 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text-p
 .sb-file { display: block; font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); margin-top: 1px; }
 .viewer-pane { background: var(--surface); }
 .viewer-pane iframe { width: 100%; height: 100%; border: none; display: block; }
+.sb-note { font-size: 11px; color: var(--text-muted); padding: 10px; line-height: 1.5; border-top: 1px solid var(--border); margin-top: 12px; }
 """
 
 PORTAL_JS = """
@@ -165,19 +141,21 @@ def build_portal() -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EDA Report Portal</title>
+<title>EDA Report Portal -- xG (Continuous Target)</title>
 {FONT_LINKS}
 <style>{PORTAL_CSS}</style>
 </head>
 <body>
 <div class="shell">
   <div class="sidebar">
-    <p class="sb-title">EDA Report Portal</p>
-    <p class="sb-subtitle">{n_reports} reports, one tab</p>
+    <p class="sb-title">EDA Report Portal -- xG</p>
+    <p class="sb-subtitle">{n_reports} report(s), continuous target only</p>
     {nav_html}
+    <p class="sb-note">Separate from the binary-target portal (reports/eda/INDEX.html) -- different target
+    (target_future_xg_10s), different scale, different thresholds.</p>
   </div>
   <div class="viewer-pane">
-    <iframe id="viewer" name="viewer" src="{esc(DEFAULT_REPORT)}" title="Selected EDA report"></iframe>
+    <iframe id="viewer" name="viewer" src="{esc(DEFAULT_REPORT)}" title="Selected xG EDA report"></iframe>
   </div>
 </div>
 <script>{PORTAL_JS}</script>
@@ -186,6 +164,7 @@ def build_portal() -> str:
 
 
 def main() -> None:
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     html = build_portal()
     OUTPUT_PATH.write_text(html, encoding="utf-8")
     print(f"Wrote {OUTPUT_PATH}")

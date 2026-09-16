@@ -1,0 +1,106 @@
+{
+  "dataset": "passive",
+  "parquet_path": "data/features/passive_defense.parquet",
+  "n_rows": 1593181,
+  "target_col": "target_future_xg_10s",
+  "methodology": "Part A (target-independent schema/naming scan) is reused unchanged from the binary-target audit. Parts B-D are redone against target_future_xg_10s: groupby mean xG instead of shot-rate percentage, Welch's t-test instead of chi-square (xG is continuous, not categorical).",
+  "part_a_known_leaky_scan": {
+    "known_leaky_columns": {
+      "target_future_shot_10s": {
+        "in_candidate_list": false,
+        "verdict": "excluded"
+      },
+      "target_future_xg_10s": {
+        "in_candidate_list": false,
+        "verdict": "excluded"
+      },
+      "screened_option_was_avoided": {
+        "in_candidate_list": false,
+        "verdict": "excluded"
+      }
+    },
+    "all_leakage_suggestive_column_names": [
+      "has_screened_outcome",
+      "screened_option_was_avoided",
+      "target_future_shot_10s",
+      "target_future_xg_10s"
+    ],
+    "n_columns_scanned_total": 75,
+    "unexpected_leaky_columns_in_candidate_list": [],
+    "verdict": "clean"
+  },
+  "part_b_screened_option_was_avoided": {
+    "column": "screened_option_was_avoided",
+    "target_col": "target_future_xg_10s",
+    "by_value": {
+      "False": {
+        "n": 38523,
+        "mean_xg": 0.006653
+      },
+      "True": {
+        "n": 1551798,
+        "mean_xg": 0.005977
+      }
+    },
+    "delta": -0.000676,
+    "t_stat": -3.0771637525210758,
+    "p_value": 0.0020912081662471317,
+    "verdict": "kept-excluded-conceptually; empirically near-flat xG difference, confirms low leakage risk for this specific pair",
+    "note": "Excluded from the candidate list on conceptual/structural grounds regardless of this empirical result -- informational only."
+  },
+  "part_c_has_screened_outcome": {
+    "column": "has_screened_outcome",
+    "target_col": "target_future_xg_10s",
+    "by_value": {
+      "False": {
+        "n": 2860,
+        "mean_xg": 0.004605
+      },
+      "True": {
+        "n": 1590321,
+        "mean_xg": 0.005994
+      }
+    },
+    "ratio_true_to_false": 1.3,
+    "t_stat": 2.0222197458288735,
+    "p_value": 0.043246202630200625,
+    "verdict": "excluded -- censoring-mechanism proxy (structural exclusion holds; empirical strength differs from the binary-target audit)",
+    "explanation": "Same censoring mechanism as the binary-target audit (False rows have their forward window truncated by match/period end), but MUCH weaker empirically against xG: only a 1.3x lower mean xG (0.004605 vs 0.005994, Welch's t-test p=4.325e-02) -- barely significant, versus the binary target's ~12x ratio at p=1.5e-31. The exclusion still holds on structural grounds (the mechanism doesn't depend on which target is used), but don't cite this xG number as equally strong evidence -- it isn't. Plausible reason: xG is heavily right-skewed and this group has only n=2,860 rows, so the mean is noisier and less separated than the binary rate was."
+  },
+  "part_d_has_option_2_3": {
+    "has_option_2": {
+      "column": "has_option_2",
+      "target_col": "target_future_xg_10s",
+      "by_value": {
+        "False": {
+          "n": 2181,
+          "mean_xg": 0.016843
+        },
+        "True": {
+          "n": 1591000,
+          "mean_xg": 0.005976
+        }
+      },
+      "ratio_false_to_true": 2.82,
+      "verdict": "flagged-for-follow-up",
+      "explanation": "has_option_2=False shows a 2.82x higher mean xG than True -- same direction as the binary-target audit. About the current freeze frame, not future-window computability; kept as a candidate feature, flagged for the same follow-up confound testing."
+    },
+    "has_option_3": {
+      "column": "has_option_3",
+      "target_col": "target_future_xg_10s",
+      "by_value": {
+        "False": {
+          "n": 11398,
+          "mean_xg": 0.024306
+        },
+        "True": {
+          "n": 1581783,
+          "mean_xg": 0.005859
+        }
+      },
+      "ratio_false_to_true": 4.15,
+      "verdict": "flagged-for-follow-up",
+      "explanation": "has_option_3=False shows a 4.15x higher mean xG than True -- same direction as the binary-target audit. About the current freeze frame, not future-window computability; kept as a candidate feature, flagged for the same follow-up confound testing."
+    }
+  }
+}

@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Passive Dataset Confound (Reversal) Testing (xG)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.test-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.test-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.test-title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 24px; margin: 0 0 6px; }
+.test-subnote { color: var(--text-muted); font-size: 13px; margin: 0 0 24px; }
+.qchart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
+.qchart-card h4 { font-family: "Archivo", sans-serif; font-size: 14.5px; margin: 0 0 4px; }
+.qchart-card .qc-note { color: var(--text-muted); font-size: 12px; margin: 0 0 16px; }
+.qbar-row { display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 0 4px; }
+.qbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.qbar-val { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.qbar-fill { width: 100%; max-width: 56px; background: var(--neg); border-radius: 4px 4px 0 0; min-height: 2px; }
+.qbar-label { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; text-align: center; line-height: 1.3; }
+.qbar-n { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); }
+.stratum-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 700px) { .stratum-grid { grid-template-columns: 1fr; } }
+.stratum-card { background: var(--plane); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.stratum-card h5 { font-family: "JetBrains Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--accent); margin: 0 0 4px; }
+.stratum-delta { font-size: 11.5px; color: var(--text-muted); margin: 0 0 12px; }
+.stratum-delta b { color: var(--text-primary); }
+.qbar-row.small { height: 90px; gap: 8px; }
+.qbar-row.small .qbar-fill { max-width: 40px; }
+.verdict-banner { border-radius: 10px; padding: 16px 20px; margin: 8px 0 28px; font-size: 14px; }
+.verdict-banner.v-no { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); }
+.verdict-banner.v-yes { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); }
+.verdict-banner.v-partially { background: rgba(42,120,214,0.10); border: 1px solid rgba(42,120,214,0.3); }
+.verdict-banner b { color: var(--text-primary); }
+.caveat-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 20px 24px; margin-top: 32px; }
+.caveat-box h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.caveat-box ul { margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary); }
+.caveat-box li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">CONFOUND ANALYSIS -- XG</p>
+  <h1 class="title">Passive Dataset Confound (Reversal) Testing (xG)</h1>
+  <p class="dek">The continuous-target counterpart to CONFOUND_ANALYSIS.html -- same two reversal tests, same quartile-stratification method, against mean xG instead of shot-rate percentage.</p>
+  <div class="statbar"><div class="stat"><b>1,593,181</b><span>rows (passive)</span></div><div class="stat"><b>2</b><span>reversals tested</span></div><div class="stat"><b>1</b><span>diverge from binary-target verdict</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+
+<div class="test-block">
+  <h2 class="test-title">Marking tightness reversal (xG)</h2>
+  <p class="test-subnote">Proposed confound: <code>zone_defensive_value</code> -- tight marking only happens because the zone&#x27;s already dangerous</p>
+  
+<div class="finding flag" style="margin:16px 0;">
+<span class="tag">diverges from the binary-target audit</span>
+<p>Binary target verdict: <b>no</b>. xG verdict: <b>partially</b>. Same
+stratification, same features -- the two targets genuinely disagree here. Don't assume the binary-target
+conclusion carries over.</p>
+</div>
+  <div class="verdict-banner v-partially">
+  <b>Verdict: PARTIALLY</b> &mdash; The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.
+  (2/4 strata)
+  </div>
+  <div class="qchart-card">
+    <h4>Marginal mean xG by marking_tightness quartile</h4>
+    <p class="qc-note">Unconditioned.</p>
+    <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">0.00747</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q1 tightest</span>
+  <span class="qbar-n">n=398,226</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00593</span>
+  <div class="qbar-fill" style="height:79.38185710462939%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=398,225</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00535</span>
+  <div class="qbar-fill" style="height:71.55472303987156%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=398,225</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00519</span>
+  <div class="qbar-fill" style="height:69.42734814021942%"></div>
+  <span class="qbar-label">Q4 loosest</span>
+  <span class="qbar-n">n=398,226</span>
+</div></div>
+  </div>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>Z1 calmest</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.002904</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.01013</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q1 tightest</span>
+  <span class="qbar-n">n=111,416</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00861</span>
+  <div class="qbar-fill" style="height:84.97235387045815%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=98,776</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00768</span>
+  <div class="qbar-fill" style="height:75.81951026856241%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=92,649</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00722</span>
+  <div class="qbar-fill" style="height:71.32701421800948%"></div>
+  <span class="qbar-label">Q4 loosest</span>
+  <span class="qbar-n">n=95,338</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>Z2</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.000203</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.00242</span>
+  <div class="qbar-fill" style="height:92.26961157654226%"></div>
+  <span class="qbar-label">Q1 tightest</span>
+  <span class="qbar-n">n=79,242</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00240</span>
+  <div class="qbar-fill" style="height:91.24143183549126%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=97,504</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00232</span>
+  <div class="qbar-fill" style="height:88.2711348057883%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=108,994</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00263</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q4 loosest</span>
+  <span class="qbar-n">n=112,540</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>Z3</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.000377</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.00253</span>
+  <div class="qbar-fill" style="height:86.45051194539249%"></div>
+  <span class="qbar-label">Q1 tightest</span>
+  <span class="qbar-n">n=79,210</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00263</span>
+  <div class="qbar-fill" style="height:89.82935153583618%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=100,080</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00293</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=110,685</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00291</span>
+  <div class="qbar-fill" style="height:99.31740614334471%"></div>
+  <span class="qbar-label">Q4 loosest</span>
+  <span class="qbar-n">n=108,287</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>Z4 most dangerous</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.001986</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.01134</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q1 tightest</span>
+  <span class="qbar-n">n=128,358</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00997</span>
+  <div class="qbar-fill" style="height:87.95871559633028%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=101,865</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00979</span>
+  <div class="qbar-fill" style="height:86.39731827805223%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=85,897</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00935</span>
+  <div class="qbar-fill" style="height:82.48059280169372%"></div>
+  <span class="qbar-label">Q4 loosest</span>
+  <span class="qbar-n">n=82,061</span>
+</div></div>
+</div></div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">Lane screening reversal (xG)</h2>
+  <p class="test-subnote">Proposed confound: <code>top_option_1_threat_score</code> -- a threatening top option only exists when danger is already high</p>
+  
+  <div class="verdict-banner v-no">
+  <b>Verdict: NO</b> &mdash; The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+  (4/4 strata)
+  </div>
+  <div class="qchart-card">
+    <h4>Marginal mean xG by lane_screening_score_option_1 quartile</h4>
+    <p class="qc-note">Unconditioned.</p>
+    <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">0.00358</span>
+  <div class="qbar-fill" style="height:43.594111205742784%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=398,226</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00539</span>
+  <div class="qbar-fill" style="height:65.62842194914224%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=398,225</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00675</span>
+  <div class="qbar-fill" style="height:82.11461248327046%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=398,225</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00822</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=398,226</span>
+</div></div>
+  </div>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>T1 low</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.004346</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.00773</span>
+  <div class="qbar-fill" style="height:64.02317880794702%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=72,710</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00971</span>
+  <div class="qbar-fill" style="height:80.33940397350993%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=95,373</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.01079</span>
+  <div class="qbar-fill" style="height:89.31291390728477%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=109,474</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.01208</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=120,673</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T2</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.001800</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.00305</span>
+  <div class="qbar-fill" style="height:62.87128712871287%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=105,790</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00380</span>
+  <div class="qbar-fill" style="height:78.38283828382838%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=105,080</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00431</span>
+  <div class="qbar-fill" style="height:88.8407590759076%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=96,722</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00485</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=90,634</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T3</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.003138</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.00219</span>
+  <div class="qbar-fill" style="height:41.14778694673669%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=109,721</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00314</span>
+  <div class="qbar-fill" style="height:58.88972243060765%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=101,154</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00405</span>
+  <div class="qbar-fill" style="height:75.91897974493624%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=96,155</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00533</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=91,190</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T4 high</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.006554</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.00274</span>
+  <div class="qbar-fill" style="height:29.473797481975684%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=110,005</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00523</span>
+  <div class="qbar-fill" style="height:56.311201979984936%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=96,618</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00731</span>
+  <div class="qbar-fill" style="height:78.61831486064781%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=95,874</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00929</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=95,729</span>
+</div></div>
+</div></div>
+</div>
+</div>
+</div>
+</body>
+</html>
