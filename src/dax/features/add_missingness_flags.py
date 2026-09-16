@@ -24,9 +24,15 @@ ACTIVE_DEFAULT = DATA_FEATURES / "player_defensive_actions.parquet"
 # what was checked -- fail loudly rather than silently document the wrong
 # thing.
 EXPECTED_FALSE_COUNTS = {
-    "has_option_2": 279,
-    "has_option_3": 2181,
-    "has_screened_outcome": 2581,
+    # has_option_2/3 were 279/2181 before the actor-exclusion fix in
+    # passive_defense.py (commit d7035be): the on-ball actor was being
+    # counted as its own extra attacker candidate, inflating the option
+    # pool by one and pushing the "not enough options" boundary out by one
+    # rank. With the actor removed, has_option_2's false count now equals
+    # the old has_option_3 count (2181) almost exactly, as expected.
+    "has_option_2": 2181,
+    "has_option_3": 11398,
+    "has_screened_outcome": 2860,
     # has_visible_attacker/has_visible_defender were 17/27 before the
     # actor-self-reference fix in player_defense.py's _support_features
     # (nearest_defender_distance & co. no longer count the acting player as

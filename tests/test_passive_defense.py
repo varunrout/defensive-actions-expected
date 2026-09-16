@@ -456,7 +456,7 @@ def test_add_player_defensive_actions_flags_matches_spec_semantics():
 
 def test_flag_validation_fails_loudly_on_count_mismatch():
     # A tiny synthetic frame will never match the real dataset's verified
-    # False-counts (279 / 2181 / 2581) -- validation must raise, not
+    # False-counts (2181 / 11398 / 2860) -- validation must raise, not
     # silently write flags that no longer mean what they're documented to.
     df = pd.DataFrame({
         "top_option_2_threat_score": [0.1, 0.2],
@@ -475,9 +475,9 @@ def test_flag_counts_match_verified_values_on_real_datasets():
 
     passive = add_passive_defense_flags(pd.read_parquet(passive_path))
     assert len(passive) == 1_593_181
-    assert int((~passive["has_option_2"]).sum()) == EXPECTED_FALSE_COUNTS["has_option_2"] == 279
-    assert int((~passive["has_option_3"]).sum()) == EXPECTED_FALSE_COUNTS["has_option_3"] == 2181
-    assert int((~passive["has_screened_outcome"]).sum()) == EXPECTED_FALSE_COUNTS["has_screened_outcome"] == 2581
+    assert int((~passive["has_option_2"]).sum()) == EXPECTED_FALSE_COUNTS["has_option_2"] == 2181
+    assert int((~passive["has_option_3"]).sum()) == EXPECTED_FALSE_COUNTS["has_option_3"] == 11398
+    assert int((~passive["has_screened_outcome"]).sum()) == EXPECTED_FALSE_COUNTS["has_screened_outcome"] == 2860
 
     active = add_player_defensive_actions_flags(pd.read_parquet(active_path))
     assert len(active) == 56_068
