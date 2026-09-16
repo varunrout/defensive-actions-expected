@@ -568,6 +568,81 @@ CONFOUND_CSS = """
 .caveat-box li { margin-bottom: 4px; }
 """
 
+NUMERICAL_ATLAS_CSS = """
+.numfeat-list { display: flex; flex-direction: column; gap: 12px; }
+.numfeat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+.numfeat-card.is-dropped { border-left: 4px solid var(--amber); }
+.numfeat-card.is-locked { border-left: 4px solid var(--good); }
+.numfeat-card.is-unreliable { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.numfeat-card.is-inconsistent { box-shadow: inset 0 0 0 1px rgba(227,73,72,0.4); }
+.numfeat-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-bottom: 6px;
+}
+.numfeat-rank { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-muted); }
+.numfeat-name { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 15.5px; color: var(--text-primary); }
+.nf-badge {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.nf-badge.locked { background: var(--good-wash); color: var(--good); }
+.nf-badge.dropped { background: var(--amber-wash); color: var(--amber); }
+.nf-badge.type { background: var(--plane); color: var(--text-secondary); }
+.nf-badge.unreliable { background: rgba(227,73,72,0.14); color: var(--pos); }
+.nf-badge.inconsistent { background: rgba(227,73,72,0.14); color: var(--pos); }
+.numfeat-stats {
+  display: flex; flex-wrap: wrap; gap: 14px 22px;
+  font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.numfeat-stats b { color: var(--text-primary); }
+.numfeat-reason, .numfeat-note { font-size: 12.5px; color: var(--text-secondary); margin: 4px 0; }
+.numfeat-note { color: var(--amber); }
+.numfeat-card summary {
+  cursor: pointer;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--neg);
+  margin-top: 6px;
+  outline: none;
+}
+.numfeat-card summary::-webkit-details-marker { color: var(--neg); }
+.numbin-rows { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+.numbin-row {
+  display: grid; grid-template-columns: 1fr 3fr auto; align-items: center; gap: 10px;
+  font-size: 11.5px; color: var(--text-secondary);
+}
+.numbin-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.numbin-track { position: relative; height: 9px; background: var(--gridline); border-radius: 4px; }
+.numbin-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; background: var(--neg); }
+.numbin-refline { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber); }
+.numbin-val { font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 600; color: var(--text-primary); text-align: right; }
+.numfeat-consistency {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-size: 12.5px; color: var(--text-secondary);
+}
+.numfeat-consistency .cverdict { font-weight: 700; }
+.numfeat-consistency .cverdict.ok { color: var(--good); }
+.numfeat-consistency .cverdict.bad { color: var(--pos); }
+.numsplit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+@media (max-width: 700px) { .numsplit-grid { grid-template-columns: 1fr; } }
+.numsplit-card { background: var(--plane); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.numsplit-card h5 { font-family: "JetBrains Mono", monospace; font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); margin: 0 0 6px; }
+"""
+
 VIF_CSS = """
 .vif-dataset-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
 .vif-dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
@@ -618,7 +693,7 @@ def findings_grid(cards: list[str]) -> str:
     return f'<div class="findings">{"".join(cards)}</div>'
 
 
-def html_shell(*, eyebrow: str, title: str, dek: str, stats: list[tuple[str, str]], body: str, footer: str) -> str:
+def html_shell(*, eyebrow: str, title: str, dek: str, stats: list[tuple[str, str]], body: str, footer: str, extra_css: str = "") -> str:
     stat_html = "".join(f'<div class="stat"><b>{esc(v)}</b><span>{esc(label)}</span></div>' for v, label in stats)
     return f"""<!doctype html>
 <html lang="en">
@@ -627,7 +702,7 @@ def html_shell(*, eyebrow: str, title: str, dek: str, stats: list[tuple[str, str
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)}</title>
 {FONT_LINKS}
-<style>{CSS}</style>
+<style>{CSS}{extra_css}</style>
 </head>
 <body>
 <div class="masthead"><div class="masthead-inner">
@@ -939,3 +1014,190 @@ def _discrete_card(col: str, d: dict) -> str:
   <div><b>{d['n']:,}</b>n</div>
 </div>
 </div>"""
+
+
+# ---------------------------------------------------------------------------
+# Numerical Target Atlas
+# ---------------------------------------------------------------------------
+
+def _numbin_rows(bins: list[dict]) -> str:
+    if not bins:
+        return '<p class="section-note">no bins produced</p>'
+    rates = [b["shot_rate_pct"] for b in bins]
+    max_rate = max(rates + [0.0]) * 1.15 or 1.0
+    avg_rate = sum(b["shot_rate_pct"] * b["n"] for b in bins) / max(sum(b["n"] for b in bins), 1)
+    ref_pct = max(0.0, min(100.0, (avg_rate / max_rate) * 100))
+    rows = []
+    for b in bins:
+        fill_pct = max(0.0, min(100.0, (b["shot_rate_pct"] / max_rate) * 100))
+        rows.append(f"""
+<div class="numbin-row" title="{esc(b['bin'])}: n={b['n']}, shot rate={b['shot_rate_pct']:.2f}%">
+  <span class="numbin-label">{esc(b['bin'])}</span>
+  <div class="numbin-track">
+    <div class="numbin-fill" style="width:{fill_pct:.2f}%"></div>
+    <div class="numbin-refline" style="left:{ref_pct:.2f}%"></div>
+  </div>
+  <span class="numbin-val">{b['shot_rate_pct']:.2f}% <span style="color:var(--text-muted); font-weight:400;">n={b['n']}</span></span>
+</div>""")
+    return f'<div class="numbin-rows">{"".join(rows)}</div>'
+
+
+def _consistency_block(check: dict) -> str:
+    if not check.get("checked"):
+        return f'<p class="numfeat-consistency">Train/test consistency not checked: {esc(check.get("reason", ""))}.</p>'
+    verdict_cls = "ok" if check["consistent"] else "bad"
+    verdict_text = "consistent" if check["consistent"] else "INCONSISTENT"
+    return f"""
+<div class="numfeat-consistency">
+  <span class="cverdict {verdict_cls}">{verdict_text}</span> across train/val and test splits (canonical match assignment).
+  <div class="numsplit-grid">
+    <div class="numsplit-card">
+      <h5>train + val &mdash; {esc(check['train_val_shape'])}</h5>
+      {_numbin_rows(check['train_val_bins'])}
+    </div>
+    <div class="numsplit-card">
+      <h5>test &mdash; {esc(check['test_shape'])}</h5>
+      {_numbin_rows(check['test_bins'])}
+    </div>
+  </div>
+</div>"""
+
+
+def _numfeat_card(rank: int, f: dict) -> str:
+    is_dropped = f["status"] == "dropped"
+    is_unreliable = bool(f.get("unreliable_note"))
+    is_inconsistent = f["consistency_check"].get("checked") and not f["consistency_check"].get("consistent")
+
+    classes = ["numfeat-card", "is-dropped" if is_dropped else "is-locked"]
+    if is_unreliable:
+        classes.append("is-unreliable")
+    if is_inconsistent:
+        classes.append("is-inconsistent")
+
+    badges = [f'<span class="nf-badge {"dropped" if is_dropped else "locked"}">{"DROPPED" if is_dropped else "LOCKED"}</span>']
+    badges.append(f'<span class="nf-badge type">{esc(f["type"])}</span>')
+    if is_unreliable:
+        badges.append('<span class="nf-badge unreliable">UNRELIABLE</span>')
+    if is_inconsistent:
+        badges.append('<span class="nf-badge inconsistent">SPLIT-INCONSISTENT</span>')
+
+    if f["pearson_r"] is None:
+        stats_html = f'<div class="numfeat-stats"><span>{esc(f["shape"])} &mdash; n={f["n_rows_used"]}</span></div>'
+        bins_html = ""
+        consistency_html = ""
+    else:
+        stats_html = (
+            '<div class="numfeat-stats">'
+            f'<span>pearson r <b>{f["pearson_r"]:+.3f}</b></span>'
+            f'<span>spearman &rho; <b>{f["spearman_rho"]:+.3f}</b></span>'
+            f'<span>shape <b>{esc(f["shape"])}</b></span>'
+            f'<span>bin range <b>{f["bin_range_pp"]:.2f}pp</b></span>'
+            f'<span>n <b>{f["n_rows_used"]:,}</b></span>'
+            f'<span>{esc(f["binning_method"])}</span>'
+            "</div>"
+        )
+        bins_html = _numbin_rows(f["bins"])
+        consistency_html = _consistency_block(f["consistency_check"])
+
+    reason_html = f'<p class="numfeat-reason"><b>Dropped:</b> {esc(f["reason"])}</p>' if is_dropped and f.get("reason") else ""
+    note_html = f'<p class="numfeat-note">{esc(f["unreliable_note"])}</p>' if is_unreliable else ""
+
+    return f"""
+<div class="{' '.join(classes)}">
+  <div class="numfeat-head">
+    <span class="numfeat-rank">#{rank}</span>
+    <span class="numfeat-name">{esc(f['feature'])}</span>
+    {''.join(badges)}
+  </div>
+  {stats_html}
+  {reason_html}
+  {note_html}
+  <details><summary>binned shot-rate curve &amp; train/test consistency</summary>
+  {bins_html}
+  {consistency_html}
+  </details>
+</div>"""
+
+
+def render_numerical_target_atlas(dataset_cfg: dict, output: dict) -> str:
+    features = output["features"]
+    cards = "".join(_numfeat_card(i + 1, f) for i, f in enumerate(features))
+
+    top = features[0] if features else None
+    findings = []
+    if top and top["pearson_r"] is not None:
+        findings.append(
+            finding_card(
+                "top signal",
+                top["feature"],
+                f"has the strongest target relationship in the pool (spearman &rho;={top['spearman_rho']:+.3f}, "
+                f"{esc(top['shape'])}), currently <b>{esc(top['status'])}</b> in the locked candidate set.",
+            )
+        )
+    strong_dropped = [
+        f for f in features
+        if f["status"] == "dropped" and f["pearson_r"] is not None and abs(f["spearman_rho"]) >= output["rho_threshold"]
+    ]
+    if strong_dropped:
+        f = max(strong_dropped, key=lambda f: abs(f["spearman_rho"]))
+        findings.append(
+            finding_card(
+                "dropped but strong",
+                f["feature"],
+                f"was dropped from the locked candidate set ({esc(f['reason'] or '')}) but still shows spearman "
+                f"&rho;={f['spearman_rho']:+.3f} ({esc(f['shape'])}) against the target.",
+                flag=True,
+            )
+        )
+    if output["n_features_flagged_inconsistent"] > 0:
+        findings.append(
+            finding_card(
+                "split inconsistency",
+                f"{output['n_features_flagged_inconsistent']} of {output['n_features_checked_for_consistency']} checked features",
+                "show a different shape classification between the train/val split and the held-out test split -- "
+                "treat these patterns with caution rather than as a clean finding.",
+                flag=True,
+            )
+        )
+    for f in features:
+        if f.get("unreliable_note"):
+            findings.append(finding_card("data issue", f["feature"], esc(f["unreliable_note"]), flag=True))
+
+    pool = output["pool_construction"]
+    body = findings_grid(findings) + \
+        '\n<h2 class="section-title">Numerical Target Atlas</h2>' \
+        '<p class="section-note">Ranked by |spearman &rho;| against the target. Each card expands to its binned ' \
+        'shot-rate curve (amber marker = row-weighted average rate) and, for features clearing the consistency ' \
+        'threshold, a train/val vs test split comparison.</p>' \
+        f'<div class="numfeat-list">{cards}</div>'
+
+    footer = f"""
+<p><b>Pool construction:</b> {pool['n_locked']} locked numerical candidates (feature_config.py) union
+{pool['n_dropped']} numerical candidates dropped by the redundancy/VIF correlation pass = {pool['n_total']}
+reconstructed features analyzed. This is a read-only pass over that wider pool -- it does not reinstate or
+re-drop anything in feature_config.py's locked candidate list.</p>
+<p><b>Correlation:</b> Pearson and Spearman rho against {esc(output['target'])}. <b>Binning:</b> quantile deciles
+(pd.qcut, duplicates dropped) for continuous features, exact value for discrete features with &le;15 unique values.
+<b>Shape:</b> flat (range&lt;1.5pp) / U-shaped / inverse-U (ends-vs-middle margin &ge;1.5pp) / monotonic
+increasing or decreasing (|spearman rho(bin index, rate)|&ge;0.7) / no-clear-pattern.</p>
+<p><b>Train/test consistency:</b> checked for every feature with |spearman rho| &ge; {output['rho_threshold']}
+or a binned-curve range &gt; {output['range_threshold_pp']}pp, against the canonical match-level split
+(outputs/models/splits/match_assignment.json). A feature is flagged inconsistent if its shape classification
+differs between the train+val split and the held-out test split.</p>
+"""
+
+    return html_shell(
+        eyebrow=f"NUMERICAL TARGET ATLAS · {dataset_cfg['label'].upper()}",
+        title=f"{dataset_cfg['label']}: Numerical Target Atlas",
+        dek=f"Every numerical candidate feature -- locked and dropped -- ranked by its relationship to "
+            f"{esc(output['target'])}, {esc(dataset_cfg['row_description'])}.",
+        stats=[
+            (str(output["n_features_analyzed"]), "features analyzed"),
+            (str(pool["n_locked"]), "locked"),
+            (str(pool["n_dropped"]), "dropped"),
+            (str(output["n_features_flagged_inconsistent"]), "split-inconsistent"),
+        ],
+        body=body,
+        footer=footer,
+        extra_css=NUMERICAL_ATLAS_CSS,
+    )
