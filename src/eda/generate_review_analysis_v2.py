@@ -33,7 +33,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.eda import compute_stats as cs
-from src.eda.feature_config import DATASETS
+from src.eda.feature_config_v2_historical import DATASETS_V2_HISTORICAL as DATASETS
 from src.eda.feature_config_v2 import FAMILY_GROUPS, PART_B_RESOLVED_PAIRS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]

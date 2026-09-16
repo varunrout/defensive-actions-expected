@@ -532,26 +532,184 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <p class="eyebrow">CORRELATION ATLAS</p>
   <h1 class="title">Feature Correlation Atlas</h1>
   <p class="dek">Mixed-type association matrix for both feature datasets, classified into DROP / COLLAPSE / REVIEW / DISTINCT tiers using the type-matched method for each pair -- never a single Pearson matrix across continuous, boolean and categorical columns.</p>
-  <div class="statbar"><div class="stat"><b>0</b><span>drop (both datasets)</span></div><div class="stat"><b>19</b><span>collapse</span></div><div class="stat"><b>37</b><span>review</span></div><div class="stat"><b>1181</b><span>distinct (full count)</span></div></div>
+  <div class="statbar"><div class="stat"><b>5</b><span>drop (both datasets)</span></div><div class="stat"><b>102</b><span>collapse</span></div><div class="stat"><b>161</b><span>review</span></div><div class="stat"><b>1932</b><span>distinct (full count)</span></div></div>
 </div></div>
 <div class="wrap">
 <div class="article">
-<div class="method-strip"><div class="method-card"><span class="m-name">Spearman ρ</span><p><b>continuous ↔ continuous</b><br>Monotonic rank correlation, robust to the heavy right-skew present in several features (e.g. top_option_1_threat_score skew 7.91) where Pearson would understate the relationship.</p></div><div class="method-card"><span class="m-name">phi</span><p><b>boolean ↔ boolean</b><br>Pearson r computed directly on the 0/1-encoded columns.</p></div><div class="method-card"><span class="m-name">point-biserial r</span><p><b>boolean ↔ continuous</b><br>Correlation between a binary grouping and a continuous variable; equivalent to Pearson r with one side coded 0/1.</p></div><div class="method-card"><span class="m-name">Cramer&#x27;s V</span><p><b>categorical ↔ categorical</b><br>Bias-corrected association strength from a chi-square test on the crosstab; 0 = independent, 1 = perfectly associated. Boolean columns are treated as 2-level categoricals when paired with a categorical column.</p></div><div class="method-card"><span class="m-name">correlation ratio η</span><p><b>categorical ↔ continuous</b><br>Share of the continuous column&#x27;s variance explained by categorical group membership (sqrt of eta-squared).</p></div></div>
+
+<div class="finding flag" style="margin-bottom:24px;">
+<span class="tag">this is a reconstruction, not the live pipeline's current state</span>
+<p>This is stage 01's <b>original</b> candidate list -- 51 active / 44 passive, before any redundancy-driven
+drop had landed -- reconstructed from <code>feature_config_v1_historical.py</code> against the current
+parquets, since the original JSON snapshot no longer exists on disk (it was overwritten during a later
+confirmation pass). <a href="CORRELATION_ATLAS_V2.html" style="color:var(--neg);">CORRELATION_ATLAS_V2.html</a>
+is stage 07's snapshot (36/39, after the structural-redesign and collapse-tier stages but before VIF/leakage);
+<a href="CORRELATION_ATLAS_V3.html" style="color:var(--neg);">CORRELATION_ATLAS_V3.html</a> is the final locked
+list (34/38), scored on TRAIN+VAL matches only. FEATURE_LOCK_CONFIRMATION.html documents the full count-by-count
+history and is where the live pipeline's actual current state is confirmed.</p>
+</div><div class="method-strip"><div class="method-card"><span class="m-name">Spearman ρ</span><p><b>continuous ↔ continuous</b><br>Monotonic rank correlation, robust to the heavy right-skew present in several features (e.g. top_option_1_threat_score skew 7.91) where Pearson would understate the relationship.</p></div><div class="method-card"><span class="m-name">phi</span><p><b>boolean ↔ boolean</b><br>Pearson r computed directly on the 0/1-encoded columns.</p></div><div class="method-card"><span class="m-name">point-biserial r</span><p><b>boolean ↔ continuous</b><br>Correlation between a binary grouping and a continuous variable; equivalent to Pearson r with one side coded 0/1.</p></div><div class="method-card"><span class="m-name">Cramer&#x27;s V</span><p><b>categorical ↔ categorical</b><br>Bias-corrected association strength from a chi-square test on the crosstab; 0 = independent, 1 = perfectly associated. Boolean columns are treated as 2-level categoricals when paired with a categorical column.</p></div><div class="method-card"><span class="m-name">correlation ratio η</span><p><b>categorical ↔ continuous</b><br>Share of the continuous column&#x27;s variance explained by categorical group membership (sqrt of eta-squared).</p></div></div>
 <div class="dataset-block">
   <h2 class="dataset-title">Active Defensive Actions</h2>
   <p class="dataset-substat">data/features/player_defensive_actions.parquet · one row per actual defensive action</p>
-  <div class="statbar" style="margin-bottom:28px;"><div class="stat"><b>56,068</b><span>rows used</span></div><div class="stat"><b>34</b><span>features</span></div><div class="stat"><b>0</b><span>drop</span></div><div class="stat"><b>14</b><span>collapse</span></div><div class="stat"><b>11</b><span>review</span></div><div class="stat"><b>527</b><span>distinct</span></div></div>
+  <div class="statbar" style="margin-bottom:28px;"><div class="stat"><b>56,068</b><span>rows used</span></div><div class="stat"><b>51</b><span>features</span></div><div class="stat"><b>3</b><span>drop</span></div><div class="stat"><b>56</b><span>collapse</span></div><div class="stat"><b>57</b><span>review</span></div><div class="stat"><b>1150</b><span>distinct</span></div></div>
   
 <div class="tier-section">
-  <div class="tier-heading"><span class="tier-dot drop"></span>Exact duplicates — 0 pairs</div>
+  <div class="tier-heading"><span class="tier-dot drop"></span>Exact duplicates — 3 pairs</div>
   <p class="tier-note">|r| ≥ 0.98 confirmed > 0.999 (or Cramer's V > 0.99 / η > 0.995) — one side is mathematically derived from the other. Delete one side without further analysis.</p>
-  <div class="corr-ledger"><div class="corr-row"><span class="corr-pair">None</span></div></div>
+  <div class="corr-ledger">
+<div class="corr-row" title="event_type vs action_family: cramers_v = 1.0 (n=56068)">
+  <span class="corr-pair">event_type<span class="arrow">↔</span>action_family</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill drop" style="width:100.0%"></div></div>
+  <span class="corr-value">+1.000</span>
+  <span class="verdict-chip drop">DROP</span>
+</div>
+<div class="corr-row" title="attacking_goal_centrality vs distance_to_center_line: spearman = -1.0 (n=56068)">
+  <span class="corr-pair">attacking_goal_centrality<span class="arrow">↔</span>distance_to_center_line</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill drop" style="width:100.0%"></div></div>
+  <span class="corr-value">-1.000</span>
+  <span class="verdict-chip drop">DROP</span>
+</div>
+<div class="corr-row" title="position vs position_group: cramers_v = 0.9999 (n=56068)">
+  <span class="corr-pair">position<span class="arrow">↔</span>position_group</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill drop" style="width:100.0%"></div></div>
+  <span class="corr-value">+1.000</span>
+  <span class="verdict-chip drop">DROP</span>
+</div></div>
 </div>
   
 <div class="tier-section">
-  <div class="tier-heading"><span class="tier-dot collapse"></span>Near-perfect cluster — 14 pairs</div>
+  <div class="tier-heading"><span class="tier-dot collapse"></span>Near-perfect cluster — 56 pairs</div>
   <p class="tier-note">0.90 ≤ |r| < 0.98, or 0.4 ≤ Cramer's V, or 0.6 ≤ η < 0.98 — the same underlying signal restated. Worth collapsing into fewer features, not a pure duplicate.</p>
   <div class="corr-ledger">
+<div class="corr-row" title="distance_to_defending_goal vs distance_to_defending_box: spearman = 0.9959 (n=56068) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">distance_to_defending_goal<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:99.6%"></div></div>
+  <span class="corr-value">+0.996</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_box vs distance_to_attacking_goal: spearman = 0.9951 (n=56068) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">distance_to_attacking_box<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:99.5%"></div></div>
+  <span class="corr-value">+0.995</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_box vs distance_to_defending_box: spearman = -0.9912 (n=56068) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">distance_to_attacking_box<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:99.1%"></div></div>
+  <span class="corr-value">-0.991</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="attacker_centroid_x vs defender_centroid_x: spearman = 0.9839 (n=55963) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">attacker_centroid_x<span class="arrow">↔</span>defender_centroid_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:98.4%"></div></div>
+  <span class="corr-value">+0.984</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_box vs distance_to_defending_goal: spearman = -0.9823 (n=56068) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">distance_to_attacking_box<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:98.2%"></div></div>
+  <span class="corr-value">-0.982</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_goal vs distance_to_defending_box: spearman = -0.9821 (n=56068) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">distance_to_attacking_goal<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:98.2%"></div></div>
+  <span class="corr-value">-0.982</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_goal vs distance_to_defending_goal: spearman = -0.9665 (n=56068)">
+  <span class="corr-pair">distance_to_attacking_goal<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:96.7%"></div></div>
+  <span class="corr-value">-0.967</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="possession_elapsed_seconds vs events_elapsed_in_possession: spearman = 0.9515 (n=56068)">
+  <span class="corr-pair">possession_elapsed_seconds<span class="arrow">↔</span>events_elapsed_in_possession</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:95.2%"></div></div>
+  <span class="corr-value">+0.952</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs distance_to_attacking_box: correlation_ratio = 0.945 (n=56068)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>distance_to_attacking_box</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:94.5%"></div></div>
+  <span class="corr-value">+0.945</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs distance_to_defending_box: correlation_ratio = 0.944 (n=56068)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:94.4%"></div></div>
+  <span class="corr-value">+0.944</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs distance_to_attacking_goal: correlation_ratio = 0.9412 (n=56068)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:94.1%"></div></div>
+  <span class="corr-value">+0.941</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs distance_to_defending_goal: correlation_ratio = 0.9406 (n=56068)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:94.1%"></div></div>
+  <span class="corr-value">+0.941</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="attacker_centroid_y vs defender_centroid_y: spearman = 0.9399 (n=55963)">
+  <span class="corr-pair">attacker_centroid_y<span class="arrow">↔</span>defender_centroid_y</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:94.0%"></div></div>
+  <span class="corr-value">+0.940</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="possession_elapsed_seconds vs phase_transitions_observed_so_far: spearman = 0.9097 (n=56068)">
+  <span class="corr-pair">possession_elapsed_seconds<span class="arrow">↔</span>phase_transitions_observed_so_far</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:91.0%"></div></div>
+  <span class="corr-value">+0.910</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="events_elapsed_in_possession vs phase_transitions_observed_so_far: spearman = 0.902 (n=56068)">
+  <span class="corr-pair">events_elapsed_in_possession<span class="arrow">↔</span>phase_transitions_observed_so_far</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:90.2%"></div></div>
+  <span class="corr-value">+0.902</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs is_deep_zone: cramers_v = 0.8801 (n=56068)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>is_deep_zone</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:88.0%"></div></div>
+  <span class="corr-value">+0.880</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs attacking_goal_centrality: correlation_ratio = 0.8679 (n=56068)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>attacking_goal_centrality</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:86.8%"></div></div>
+  <span class="corr-value">+0.868</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs distance_to_center_line: correlation_ratio = 0.8679 (n=56068)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>distance_to_center_line</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:86.8%"></div></div>
+  <span class="corr-value">+0.868</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
 <div class="corr-row" title="period vs match_time_seconds: correlation_ratio = 0.8658 (n=56068)">
   <span class="corr-pair">period<span class="arrow">↔</span>match_time_seconds</span>
   <span class="corr-method">correlation_ratio</span>
@@ -559,11 +717,116 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">+0.866</span>
   <span class="verdict-chip collapse">COLLAPSE</span>
 </div>
+<div class="corr-row" title="phase_label vs distance_to_defending_box: correlation_ratio = 0.8569 (n=56068)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:85.7%"></div></div>
+  <span class="corr-value">+0.857</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs distance_to_defending_goal: correlation_ratio = 0.8542 (n=56068)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:85.4%"></div></div>
+  <span class="corr-value">+0.854</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
 <div class="corr-row" title="phase_label vs distance_to_attacking_box: correlation_ratio = 0.8531 (n=56068)">
   <span class="corr-pair">phase_label<span class="arrow">↔</span>distance_to_attacking_box</span>
   <span class="corr-method">correlation_ratio</span>
   <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:85.3%"></div></div>
   <span class="corr-value">+0.853</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs distance_to_attacking_goal: correlation_ratio = 0.8514 (n=56068)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:85.1%"></div></div>
+  <span class="corr-value">+0.851</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs is_high_zone: cramers_v = 0.8132 (n=56068)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>is_high_zone</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:81.3%"></div></div>
+  <span class="corr-value">+0.813</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs is_central_lane: cramers_v = 0.8048 (n=56068)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>is_central_lane</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:80.5%"></div></div>
+  <span class="corr-value">+0.805</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs attacker_centroid_x: correlation_ratio = 0.8044 (n=56037)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>attacker_centroid_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:80.4%"></div></div>
+  <span class="corr-value">+0.804</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs is_deep_zone: cramers_v = 0.8037 (n=56068)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>is_deep_zone</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:80.4%"></div></div>
+  <span class="corr-value">+0.804</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs is_high_zone: cramers_v = 0.8033 (n=56068)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>is_high_zone</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:80.3%"></div></div>
+  <span class="corr-value">+0.803</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs defender_centroid_x: correlation_ratio = 0.803 (n=55992)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>defender_centroid_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:80.3%"></div></div>
+  <span class="corr-value">+0.803</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs angle_to_attacking_goal: correlation_ratio = 0.7978 (n=56068)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>angle_to_attacking_goal</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:79.8%"></div></div>
+  <span class="corr-value">+0.798</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs defender_centroid_x: correlation_ratio = 0.7293 (n=55992)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>defender_centroid_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:72.9%"></div></div>
+  <span class="corr-value">+0.729</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs attacker_centroid_x: correlation_ratio = 0.7132 (n=56037)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>attacker_centroid_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:71.3%"></div></div>
+  <span class="corr-value">+0.713</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs attacker_centroid_y: correlation_ratio = 0.6853 (n=56037)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>attacker_centroid_y</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:68.5%"></div></div>
+  <span class="corr-value">+0.685</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs defender_centroid_y: correlation_ratio = 0.6782 (n=55992)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>defender_centroid_y</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:67.8%"></div></div>
+  <span class="corr-value">+0.678</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs is_wide_lane: cramers_v = 0.6715 (n=56068)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>is_wide_lane</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:67.2%"></div></div>
+  <span class="corr-value">+0.671</span>
   <span class="verdict-chip collapse">COLLAPSE</span>
 </div>
 <div class="corr-row" title="phase_label vs is_in_attacking_box: cramers_v = 0.6646 (n=56068)">
@@ -578,6 +841,20 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-method">cramers_v</span>
   <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:65.0%"></div></div>
   <span class="corr-value">+0.650</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs is_in_defending_box: cramers_v = 0.6458 (n=56068)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>is_in_defending_box</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:64.6%"></div></div>
+  <span class="corr-value">+0.646</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_zone vs is_in_attacking_box: cramers_v = 0.6451 (n=56068)">
+  <span class="corr-pair">action_zone<span class="arrow">↔</span>is_in_attacking_box</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:64.5%"></div></div>
+  <span class="corr-value">+0.645</span>
   <span class="verdict-chip collapse">COLLAPSE</span>
 </div>
 <div class="corr-row" title="phase_label vs angle_to_attacking_goal: correlation_ratio = 0.6265 (n=56068)">
@@ -601,11 +878,25 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">+0.596</span>
   <span class="verdict-chip collapse">COLLAPSE</span>
 </div>
+<div class="corr-row" title="phase_label_prev_event vs is_high_zone: cramers_v = 0.5841 (n=51534)">
+  <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>is_high_zone</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:58.4%"></div></div>
+  <span class="corr-value">+0.584</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
 <div class="corr-row" title="phase_label vs is_in_defending_box: cramers_v = 0.581 (n=56068)">
   <span class="corr-pair">phase_label<span class="arrow">↔</span>is_in_defending_box</span>
   <span class="corr-method">cramers_v</span>
   <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:58.1%"></div></div>
   <span class="corr-value">+0.581</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs is_wide_lane: cramers_v = 0.5744 (n=56068)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>is_wide_lane</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:57.4%"></div></div>
+  <span class="corr-value">+0.574</span>
   <span class="verdict-chip collapse">COLLAPSE</span>
 </div>
 <div class="corr-row" title="phase_label vs counterpress: cramers_v = 0.5714 (n=56068)">
@@ -622,6 +913,20 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">+0.558</span>
   <span class="verdict-chip collapse">COLLAPSE</span>
 </div>
+<div class="corr-row" title="action_family vs action_retained_defensive_team_control: cramers_v = 0.5492 (n=56068)">
+  <span class="corr-pair">action_family<span class="arrow">↔</span>action_retained_defensive_team_control</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:54.9%"></div></div>
+  <span class="corr-value">+0.549</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label_prev_event vs is_deep_zone: cramers_v = 0.5203 (n=51534)">
+  <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>is_deep_zone</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:52.0%"></div></div>
+  <span class="corr-value">+0.520</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
 <div class="corr-row" title="phase_label_prev_event vs counterpress: cramers_v = 0.4984 (n=51534)">
   <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>counterpress</span>
   <span class="corr-method">cramers_v</span>
@@ -629,11 +934,25 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">+0.498</span>
   <span class="verdict-chip collapse">COLLAPSE</span>
 </div>
+<div class="corr-row" title="phase_label vs action_zone: cramers_v = 0.472 (n=56068)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>action_zone</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:47.2%"></div></div>
+  <span class="corr-value">+0.472</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
 <div class="corr-row" title="phase_label_prev_event vs is_in_attacking_box: cramers_v = 0.4378 (n=51534)">
   <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>is_in_attacking_box</span>
   <span class="corr-method">cramers_v</span>
   <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:43.8%"></div></div>
   <span class="corr-value">+0.438</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label_prev_event vs is_wide_lane: cramers_v = 0.424 (n=51534)">
+  <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>is_wide_lane</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:42.4%"></div></div>
+  <span class="corr-value">+0.424</span>
   <span class="verdict-chip collapse">COLLAPSE</span>
 </div>
 <div class="corr-row" title="event_type vs action_was_under_opponent_possession: cramers_v = 0.4212 (n=56068)">
@@ -649,13 +968,34 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:41.9%"></div></div>
   <span class="corr-value">+0.419</span>
   <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="action_family vs action_was_under_opponent_possession: cramers_v = 0.4163 (n=56068)">
+  <span class="corr-pair">action_family<span class="arrow">↔</span>action_was_under_opponent_possession</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:41.6%"></div></div>
+  <span class="corr-value">+0.416</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
 </div></div>
 </div>
   
 <div class="tier-section">
-  <div class="tier-heading"><span class="tier-dot review"></span>Moderate redundancy — 11 pairs</div>
+  <div class="tier-heading"><span class="tier-dot review"></span>Moderate redundancy — 57 pairs</div>
   <p class="tier-note">0.5 ≤ |r| < 0.90 for continuous/boolean pairs — not resolved by the correlation script itself; see REVIEW_METHODOLOGY.html for how each pair here was resolved using shot-rate lift as evidence.</p>
   <div class="corr-ledger">
+<div class="corr-row" title="is_central_lane vs attacking_goal_centrality: point_biserial = 0.8542 (n=56068)">
+  <span class="corr-pair">is_central_lane<span class="arrow">↔</span>attacking_goal_centrality</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:85.4%"></div></div>
+  <span class="corr-value">+0.854</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_central_lane vs distance_to_center_line: point_biserial = -0.8542 (n=56068)">
+  <span class="corr-pair">is_central_lane<span class="arrow">↔</span>distance_to_center_line</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:85.4%"></div></div>
+  <span class="corr-value">-0.854</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
 <div class="corr-row" title="action_was_under_opponent_possession vs action_retained_defensive_team_control: phi = 0.8472 (n=56068)">
   <span class="corr-pair">action_was_under_opponent_possession<span class="arrow">↔</span>action_retained_defensive_team_control</span>
   <span class="corr-method">phi</span>
@@ -670,11 +1010,144 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">-0.846</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
+<div class="corr-row" title="distance_to_defending_box vs attacker_centroid_x: spearman = 0.8426 (n=56037)">
+  <span class="corr-pair">distance_to_defending_box<span class="arrow">↔</span>attacker_centroid_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:84.3%"></div></div>
+  <span class="corr-value">+0.843</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_box vs attacker_centroid_x: spearman = -0.8415 (n=56037)">
+  <span class="corr-pair">distance_to_attacking_box<span class="arrow">↔</span>attacker_centroid_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:84.2%"></div></div>
+  <span class="corr-value">-0.842</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_defending_box vs defender_centroid_x: spearman = 0.8399 (n=55992)">
+  <span class="corr-pair">distance_to_defending_box<span class="arrow">↔</span>defender_centroid_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:84.0%"></div></div>
+  <span class="corr-value">+0.840</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_box vs defender_centroid_x: spearman = -0.839 (n=55992)">
+  <span class="corr-pair">distance_to_attacking_box<span class="arrow">↔</span>defender_centroid_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:83.9%"></div></div>
+  <span class="corr-value">-0.839</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_defending_goal vs attacker_centroid_x: spearman = 0.8364 (n=56037)">
+  <span class="corr-pair">distance_to_defending_goal<span class="arrow">↔</span>attacker_centroid_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:83.6%"></div></div>
+  <span class="corr-value">+0.836</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_goal vs attacker_centroid_x: spearman = -0.8352 (n=56037)">
+  <span class="corr-pair">distance_to_attacking_goal<span class="arrow">↔</span>attacker_centroid_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:83.5%"></div></div>
+  <span class="corr-value">-0.835</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_defending_goal vs defender_centroid_x: spearman = 0.8335 (n=55992)">
+  <span class="corr-pair">distance_to_defending_goal<span class="arrow">↔</span>defender_centroid_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:83.4%"></div></div>
+  <span class="corr-value">+0.834</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_goal vs defender_centroid_x: spearman = -0.8329 (n=55992)">
+  <span class="corr-pair">distance_to_attacking_goal<span class="arrow">↔</span>defender_centroid_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:83.3%"></div></div>
+  <span class="corr-value">-0.833</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_wide_lane vs attacking_goal_centrality: point_biserial = -0.7851 (n=56068)">
+  <span class="corr-pair">is_wide_lane<span class="arrow">↔</span>attacking_goal_centrality</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:78.5%"></div></div>
+  <span class="corr-value">-0.785</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_wide_lane vs distance_to_center_line: point_biserial = 0.7851 (n=56068)">
+  <span class="corr-pair">is_wide_lane<span class="arrow">↔</span>distance_to_center_line</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:78.5%"></div></div>
+  <span class="corr-value">+0.785</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_high_zone vs distance_to_defending_box: point_biserial = 0.7485 (n=56068)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:74.9%"></div></div>
+  <span class="corr-value">+0.749</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs distance_to_attacking_box: point_biserial = 0.7373 (n=56068)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>distance_to_attacking_box</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:73.7%"></div></div>
+  <span class="corr-value">+0.737</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="defenders_within_10m vs local_numerical_balance_10m: spearman = -0.7321 (n=43199)">
+  <span class="corr-pair">defenders_within_10m<span class="arrow">↔</span>local_numerical_balance_10m</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:73.2%"></div></div>
+  <span class="corr-value">-0.732</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_high_zone vs distance_to_defending_goal: point_biserial = 0.7242 (n=56068)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:72.4%"></div></div>
+  <span class="corr-value">+0.724</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_high_zone vs distance_to_attacking_goal: point_biserial = -0.7207 (n=56068)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:72.1%"></div></div>
+  <span class="corr-value">-0.721</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="angle_to_attacking_goal vs distance_to_defending_goal: spearman = 0.7175 (n=56068)">
+  <span class="corr-pair">angle_to_attacking_goal<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:71.8%"></div></div>
+  <span class="corr-value">+0.718</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="defenders_within_5m vs local_numerical_balance_5m: spearman = -0.714 (n=52138)">
+  <span class="corr-pair">defenders_within_5m<span class="arrow">↔</span>local_numerical_balance_5m</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:71.4%"></div></div>
+  <span class="corr-value">-0.714</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
 <div class="corr-row" title="nearest_attacker_distance vs attackers_within_5m: spearman = -0.7113 (n=52107)">
   <span class="corr-pair">nearest_attacker_distance<span class="arrow">↔</span>attackers_within_5m</span>
   <span class="corr-method">spearman</span>
   <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:71.1%"></div></div>
   <span class="corr-value">-0.711</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs distance_to_attacking_goal: point_biserial = 0.7107 (n=56068)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:71.1%"></div></div>
+  <span class="corr-value">+0.711</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs distance_to_defending_goal: point_biserial = -0.7086 (n=56068)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:70.9%"></div></div>
+  <span class="corr-value">-0.709</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
 <div class="corr-row" title="nearest_defender_distance vs defenders_within_10m: spearman = -0.7046 (n=43146)">
@@ -684,11 +1157,46 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">-0.705</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
+<div class="corr-row" title="is_high_zone vs distance_to_attacking_box: point_biserial = -0.7016 (n=56068)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>distance_to_attacking_box</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:70.2%"></div></div>
+  <span class="corr-value">-0.702</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs distance_to_defending_box: point_biserial = -0.6888 (n=56068)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:68.9%"></div></div>
+  <span class="corr-value">-0.689</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="angle_to_attacking_goal vs distance_to_defending_box: spearman = 0.6671 (n=56068)">
+  <span class="corr-pair">angle_to_attacking_goal<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:66.7%"></div></div>
+  <span class="corr-value">+0.667</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
 <div class="corr-row" title="angle_to_attacking_goal vs attacking_goal_centrality: spearman = -0.6589 (n=56068)">
   <span class="corr-pair">angle_to_attacking_goal<span class="arrow">↔</span>attacking_goal_centrality</span>
   <span class="corr-method">spearman</span>
   <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:65.9%"></div></div>
   <span class="corr-value">-0.659</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="angle_to_attacking_goal vs distance_to_center_line: spearman = 0.6589 (n=56068)">
+  <span class="corr-pair">angle_to_attacking_goal<span class="arrow">↔</span>distance_to_center_line</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:65.9%"></div></div>
+  <span class="corr-value">+0.659</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="attackers_within_5m vs local_numerical_balance_5m: spearman = 0.6202 (n=52138)">
+  <span class="corr-pair">attackers_within_5m<span class="arrow">↔</span>local_numerical_balance_5m</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:62.0%"></div></div>
+  <span class="corr-value">+0.620</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
 <div class="corr-row" title="angle_to_attacking_goal vs distance_to_attacking_box: spearman = -0.6175 (n=56068)">
@@ -698,11 +1206,39 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">-0.618</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
+<div class="corr-row" title="is_high_zone vs attacker_centroid_x: point_biserial = 0.6161 (n=56037)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>attacker_centroid_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:61.6%"></div></div>
+  <span class="corr-value">+0.616</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_high_zone vs defender_centroid_x: point_biserial = 0.6118 (n=55992)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>defender_centroid_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:61.2%"></div></div>
+  <span class="corr-value">+0.612</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_in_attacking_box vs is_high_zone: phi = 0.6077 (n=56068)">
+  <span class="corr-pair">is_in_attacking_box<span class="arrow">↔</span>is_high_zone</span>
+  <span class="corr-method">phi</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:60.8%"></div></div>
+  <span class="corr-value">+0.608</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
 <div class="corr-row" title="attacker_defender_ratio vs visible_attacker_count: spearman = 0.6077 (n=56068)">
   <span class="corr-pair">attacker_defender_ratio<span class="arrow">↔</span>visible_attacker_count</span>
   <span class="corr-method">spearman</span>
   <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:60.8%"></div></div>
   <span class="corr-value">+0.608</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_in_defending_box vs is_deep_zone: phi = 0.6072 (n=56068)">
+  <span class="corr-pair">is_in_defending_box<span class="arrow">↔</span>is_deep_zone</span>
+  <span class="corr-method">phi</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:60.7%"></div></div>
+  <span class="corr-value">+0.607</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
 <div class="corr-row" title="defenders_within_5m vs defenders_within_10m: spearman = 0.6046 (n=43199)">
@@ -712,11 +1248,109 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">+0.605</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
+<div class="corr-row" title="is_deep_zone vs defender_centroid_x: point_biserial = -0.5999 (n=55992)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>defender_centroid_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:60.0%"></div></div>
+  <span class="corr-value">-0.600</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs attacker_centroid_x: point_biserial = -0.5994 (n=56037)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>attacker_centroid_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:59.9%"></div></div>
+  <span class="corr-value">-0.599</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
 <div class="corr-row" title="attacker_spread vs defender_spread: spearman = 0.5813 (n=55963)">
   <span class="corr-pair">attacker_spread<span class="arrow">↔</span>defender_spread</span>
   <span class="corr-method">spearman</span>
   <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:58.1%"></div></div>
   <span class="corr-value">+0.581</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="nearest_defender_distance vs local_numerical_balance_5m: spearman = 0.5739 (n=52064)">
+  <span class="corr-pair">nearest_defender_distance<span class="arrow">↔</span>local_numerical_balance_5m</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:57.4%"></div></div>
+  <span class="corr-value">+0.574</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_high_zone vs angle_to_attacking_goal: point_biserial = 0.5736 (n=56068)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>angle_to_attacking_goal</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:57.4%"></div></div>
+  <span class="corr-value">+0.574</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="action_was_under_opponent_possession vs local_numerical_balance_5m: point_biserial = 0.558 (n=52138)">
+  <span class="corr-pair">action_was_under_opponent_possession<span class="arrow">↔</span>local_numerical_balance_5m</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:55.8%"></div></div>
+  <span class="corr-value">+0.558</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="angle_to_attacking_goal vs distance_to_attacking_goal: spearman = -0.5507 (n=56068)">
+  <span class="corr-pair">angle_to_attacking_goal<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:55.1%"></div></div>
+  <span class="corr-value">-0.551</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_in_attacking_box vs distance_to_attacking_goal: point_biserial = -0.5488 (n=56068)">
+  <span class="corr-pair">is_in_attacking_box<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:54.9%"></div></div>
+  <span class="corr-value">-0.549</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="angle_to_attacking_goal vs attacker_centroid_x: spearman = 0.547 (n=56037)">
+  <span class="corr-pair">angle_to_attacking_goal<span class="arrow">↔</span>attacker_centroid_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:54.7%"></div></div>
+  <span class="corr-value">+0.547</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="nearest_defender_distance vs local_numerical_balance_10m: spearman = 0.5451 (n=43146)">
+  <span class="corr-pair">nearest_defender_distance<span class="arrow">↔</span>local_numerical_balance_10m</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:54.5%"></div></div>
+  <span class="corr-value">+0.545</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="angle_to_attacking_goal vs defender_centroid_x: spearman = 0.5443 (n=55992)">
+  <span class="corr-pair">angle_to_attacking_goal<span class="arrow">↔</span>defender_centroid_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:54.4%"></div></div>
+  <span class="corr-value">+0.544</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_central_lane vs is_wide_lane: phi = -0.5394 (n=56068)">
+  <span class="corr-pair">is_central_lane<span class="arrow">↔</span>is_wide_lane</span>
+  <span class="corr-method">phi</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:53.9%"></div></div>
+  <span class="corr-value">-0.539</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_in_defending_box vs distance_to_defending_goal: point_biserial = -0.5332 (n=56068)">
+  <span class="corr-pair">is_in_defending_box<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:53.3%"></div></div>
+  <span class="corr-value">-0.533</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_in_attacking_box vs distance_to_defending_box: point_biserial = 0.5243 (n=56068)">
+  <span class="corr-pair">is_in_attacking_box<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:52.4%"></div></div>
+  <span class="corr-value">+0.524</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="action_retained_defensive_team_control vs local_numerical_balance_5m: point_biserial = 0.5128 (n=52138)">
+  <span class="corr-pair">action_retained_defensive_team_control<span class="arrow">↔</span>local_numerical_balance_5m</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:51.3%"></div></div>
+  <span class="corr-value">+0.513</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
 <div class="corr-row" title="is_in_defending_box vs distance_to_attacking_box: point_biserial = 0.5108 (n=56068)">
@@ -726,17 +1360,31 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">+0.511</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
+<div class="corr-row" title="local_numerical_balance_5m vs local_numerical_balance_10m: spearman = 0.5086 (n=43199)">
+  <span class="corr-pair">local_numerical_balance_5m<span class="arrow">↔</span>local_numerical_balance_10m</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:50.9%"></div></div>
+  <span class="corr-value">+0.509</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
 <div class="corr-row" title="attackers_within_5m vs attackers_within_10m: spearman = 0.505 (n=43199)">
   <span class="corr-pair">attackers_within_5m<span class="arrow">↔</span>attackers_within_10m</span>
   <span class="corr-method">spearman</span>
   <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:50.5%"></div></div>
   <span class="corr-value">+0.505</span>
   <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="attacker_defender_ratio vs local_numerical_balance_10m: spearman = 0.5027 (n=43199)">
+  <span class="corr-pair">attacker_defender_ratio<span class="arrow">↔</span>local_numerical_balance_10m</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:50.3%"></div></div>
+  <span class="corr-value">+0.503</span>
+  <span class="verdict-chip review">REVIEW</span>
 </div></div>
 </div>
   
 <div class="tier-section">
-  <div class="tier-heading"><span class="tier-dot distinct"></span>Confirmed distinct — 527 pairs (top 10 shown by magnitude)</div>
+  <div class="tier-heading"><span class="tier-dot distinct"></span>Confirmed distinct — 1150 pairs (top 10 shown by magnitude)</div>
   <p class="tier-note">Below every threshold above. No action needed — top pairs by magnitude shown here so the report shows what was checked and cleared, not just silence.</p>
   <div class="corr-ledger">
 <div class="corr-row" title="event_type vs nearest_attacker_distance: correlation_ratio = 0.5443 (n=56037)">
@@ -746,11 +1394,60 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">+0.544</span>
   <span class="verdict-chip distinct">DISTINCT</span>
 </div>
+<div class="corr-row" title="action_family vs nearest_attacker_distance: correlation_ratio = 0.544 (n=56037)">
+  <span class="corr-pair">action_family<span class="arrow">↔</span>nearest_attacker_distance</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:54.4%"></div></div>
+  <span class="corr-value">+0.544</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
+<div class="corr-row" title="phase_label_prev_event vs phase_transitions_observed_so_far: correlation_ratio = 0.5089 (n=51534)">
+  <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>phase_transitions_observed_so_far</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:50.9%"></div></div>
+  <span class="corr-value">+0.509</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
+<div class="corr-row" title="phase_label_prev_event vs distance_to_defending_box: correlation_ratio = 0.505 (n=51534)">
+  <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:50.5%"></div></div>
+  <span class="corr-value">+0.505</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
+<div class="corr-row" title="phase_label_prev_event vs defender_centroid_x: correlation_ratio = 0.5025 (n=51464)">
+  <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>defender_centroid_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:50.2%"></div></div>
+  <span class="corr-value">+0.502</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
+<div class="corr-row" title="phase_label_prev_event vs distance_to_attacking_goal: correlation_ratio = 0.5015 (n=51534)">
+  <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:50.1%"></div></div>
+  <span class="corr-value">+0.501</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
 <div class="corr-row" title="phase_label_prev_event vs distance_to_attacking_box: correlation_ratio = 0.5008 (n=51534)">
   <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>distance_to_attacking_box</span>
   <span class="corr-method">correlation_ratio</span>
   <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:50.1%"></div></div>
   <span class="corr-value">+0.501</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
+<div class="corr-row" title="phase_label_prev_event vs attacker_centroid_x: correlation_ratio = 0.5005 (n=51519)">
+  <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>attacker_centroid_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:50.0%"></div></div>
+  <span class="corr-value">+0.500</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
+<div class="corr-row" title="phase_label_prev_event vs distance_to_defending_goal: correlation_ratio = 0.4994 (n=51534)">
+  <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:49.9%"></div></div>
+  <span class="corr-value">+0.499</span>
   <span class="verdict-chip distinct">DISTINCT</span>
 </div>
 <div class="corr-row" title="event_type vs nearest_defender_distance: correlation_ratio = 0.4985 (n=55992)">
@@ -759,78 +1456,190 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:49.9%"></div></div>
   <span class="corr-value">+0.498</span>
   <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="is_in_attacking_box vs distance_to_attacking_box: point_biserial = -0.4775 (n=56068)">
-  <span class="corr-pair">is_in_attacking_box<span class="arrow">↔</span>distance_to_attacking_box</span>
-  <span class="corr-method">point_biserial</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:47.8%"></div></div>
-  <span class="corr-value">-0.477</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="phase_label vs attacking_goal_centrality: correlation_ratio = 0.4724 (n=56068)">
-  <span class="corr-pair">phase_label<span class="arrow">↔</span>attacking_goal_centrality</span>
-  <span class="corr-method">correlation_ratio</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:47.2%"></div></div>
-  <span class="corr-value">+0.472</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="phase_label vs defender_spread: correlation_ratio = 0.4621 (n=55992)">
-  <span class="corr-pair">phase_label<span class="arrow">↔</span>defender_spread</span>
-  <span class="corr-method">correlation_ratio</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:46.2%"></div></div>
-  <span class="corr-value">+0.462</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="attacker_defender_ratio vs visible_defender_count: spearman = -0.4604 (n=56068)">
-  <span class="corr-pair">attacker_defender_ratio<span class="arrow">↔</span>visible_defender_count</span>
-  <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:46.0%"></div></div>
-  <span class="corr-value">-0.460</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="phase_label_prev_event vs possession_elapsed_seconds: correlation_ratio = 0.4528 (n=51534)">
-  <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>possession_elapsed_seconds</span>
-  <span class="corr-method">correlation_ratio</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:45.3%"></div></div>
-  <span class="corr-value">+0.453</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="phase_label_prev_event vs defender_spread: correlation_ratio = 0.4468 (n=51464)">
-  <span class="corr-pair">phase_label_prev_event<span class="arrow">↔</span>defender_spread</span>
-  <span class="corr-method">correlation_ratio</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:44.7%"></div></div>
-  <span class="corr-value">+0.447</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="phase_label vs attacker_spread: correlation_ratio = 0.4352 (n=56037)">
-  <span class="corr-pair">phase_label<span class="arrow">↔</span>attacker_spread</span>
-  <span class="corr-method">correlation_ratio</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:43.5%"></div></div>
-  <span class="corr-value">+0.435</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
 </div></div>
 </div>
 </div>
 <div class="dataset-block">
   <h2 class="dataset-title">Passive / Off-Ball Defensive Positioning</h2>
   <p class="dataset-substat">data/features/passive_defense.parquet · one row per visible defender-slot per on-ball attacking event</p>
-  <div class="statbar" style="margin-bottom:28px;"><div class="stat"><b>300,000</b><span>rows used (sampled)</span></div><div class="stat"><b>38</b><span>features</span></div><div class="stat"><b>0</b><span>drop</span></div><div class="stat"><b>5</b><span>collapse</span></div><div class="stat"><b>26</b><span>review</span></div><div class="stat"><b>654</b><span>distinct</span></div></div>
+  <div class="statbar" style="margin-bottom:28px;"><div class="stat"><b>300,000</b><span>rows used (sampled)</span></div><div class="stat"><b>44</b><span>features</span></div><div class="stat"><b>2</b><span>drop</span></div><div class="stat"><b>46</b><span>collapse</span></div><div class="stat"><b>104</b><span>review</span></div><div class="stat"><b>782</b><span>distinct</span></div></div>
   
 <div class="tier-section">
-  <div class="tier-heading"><span class="tier-dot drop"></span>Exact duplicates — 0 pairs</div>
+  <div class="tier-heading"><span class="tier-dot drop"></span>Exact duplicates — 2 pairs</div>
   <p class="tier-note">|r| ≥ 0.98 confirmed > 0.999 (or Cramer's V > 0.99 / η > 0.995) — one side is mathematically derived from the other. Delete one side without further analysis.</p>
-  <div class="corr-ledger"><div class="corr-row"><span class="corr-pair">None</span></div></div>
+  <div class="corr-ledger">
+<div class="corr-row" title="attacking_goal_centrality vs distance_to_center_line: spearman = -1.0 (n=300000)">
+  <span class="corr-pair">attacking_goal_centrality<span class="arrow">↔</span>distance_to_center_line</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill drop" style="width:100.0%"></div></div>
+  <span class="corr-value">-1.000</span>
+  <span class="verdict-chip drop">DROP</span>
+</div>
+<div class="corr-row" title="zone_defensive_value vs distance_to_defending_goal: spearman = -1.0 (n=300000)">
+  <span class="corr-pair">zone_defensive_value<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill drop" style="width:100.0%"></div></div>
+  <span class="corr-value">-1.000</span>
+  <span class="verdict-chip drop">DROP</span>
+</div></div>
 </div>
   
 <div class="tier-section">
-  <div class="tier-heading"><span class="tier-dot collapse"></span>Near-perfect cluster — 5 pairs</div>
+  <div class="tier-heading"><span class="tier-dot collapse"></span>Near-perfect cluster — 46 pairs</div>
   <p class="tier-note">0.90 ≤ |r| < 0.98, or 0.4 ≤ Cramer's V, or 0.6 ≤ η < 0.98 — the same underlying signal restated. Worth collapsing into fewer features, not a pure duplicate.</p>
   <div class="corr-ledger">
-<div class="corr-row" title="top_option_2_threat_score vs top_option_3_threat_score: spearman = 0.9024 (n=299619)">
-  <span class="corr-pair">top_option_2_threat_score<span class="arrow">↔</span>top_option_3_threat_score</span>
+<div class="corr-row" title="defender_x vs distance_to_attacking_box: spearman = -0.9994 (n=300000) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">defender_x<span class="arrow">↔</span>distance_to_attacking_box</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:90.2%"></div></div>
-  <span class="corr-value">+0.902</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:99.9%"></div></div>
+  <span class="corr-value">-0.999</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="defender_x vs distance_to_defending_box: spearman = 0.9986 (n=300000) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">defender_x<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:99.9%"></div></div>
+  <span class="corr-value">+0.999</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_box vs distance_to_defending_box: spearman = -0.9975 (n=300000) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">distance_to_attacking_box<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:99.8%"></div></div>
+  <span class="corr-value">-0.998</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_box vs distance_to_attacking_goal: spearman = 0.9964 (n=300000) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">distance_to_attacking_box<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:99.6%"></div></div>
+  <span class="corr-value">+0.996</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="defender_x vs distance_to_attacking_goal: spearman = -0.9946 (n=300000) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">defender_x<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:99.5%"></div></div>
+  <span class="corr-value">-0.995</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="zone_defensive_value vs distance_to_defending_box: spearman = -0.9944 (n=300000) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">zone_defensive_value<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:99.4%"></div></div>
+  <span class="corr-value">-0.994</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="distance_to_defending_box vs distance_to_defending_goal: spearman = 0.9944 (n=300000) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">distance_to_defending_box<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:99.4%"></div></div>
+  <span class="corr-value">+0.994</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="defender_x vs zone_defensive_value: spearman = -0.9909 (n=300000) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">defender_x<span class="arrow">↔</span>zone_defensive_value</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:99.1%"></div></div>
+  <span class="corr-value">-0.991</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="defender_x vs distance_to_defending_goal: spearman = 0.9909 (n=300000) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">defender_x<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:99.1%"></div></div>
+  <span class="corr-value">+0.991</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="distance_to_defending_box vs distance_to_attacking_goal: spearman = -0.9909 (n=300000) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">distance_to_defending_box<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:99.1%"></div></div>
+  <span class="corr-value">-0.991</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="zone_defensive_value vs distance_to_attacking_box: spearman = 0.9887 (n=300000) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">zone_defensive_value<span class="arrow">↔</span>distance_to_attacking_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:98.9%"></div></div>
+  <span class="corr-value">+0.989</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_box vs distance_to_defending_goal: spearman = -0.9887 (n=300000) -- cleared the raw DROP threshold but not the near-1.0 confirm check, downgraded to COLLAPSE">
+  <span class="corr-pair">distance_to_attacking_box<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:98.9%"></div></div>
+  <span class="corr-value">-0.989</span>
+  <span class="verdict-chip collapse">COLLAPSE *</span>
+</div>
+<div class="corr-row" title="zone_defensive_value vs distance_to_attacking_goal: spearman = 0.9748 (n=300000)">
+  <span class="corr-pair">zone_defensive_value<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:97.5%"></div></div>
+  <span class="corr-value">+0.975</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_goal vs distance_to_defending_goal: spearman = -0.9748 (n=300000)">
+  <span class="corr-pair">distance_to_attacking_goal<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:97.5%"></div></div>
+  <span class="corr-value">-0.975</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs distance_to_defending_box: correlation_ratio = 0.9295 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:93.0%"></div></div>
+  <span class="corr-value">+0.929</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs distance_to_attacking_box: correlation_ratio = 0.9269 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>distance_to_attacking_box</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:92.7%"></div></div>
+  <span class="corr-value">+0.927</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs defender_x: correlation_ratio = 0.9244 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>defender_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:92.4%"></div></div>
+  <span class="corr-value">+0.924</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs distance_to_defending_goal: correlation_ratio = 0.9241 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:92.4%"></div></div>
+  <span class="corr-value">+0.924</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs distance_to_attacking_goal: correlation_ratio = 0.9231 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:92.3%"></div></div>
+  <span class="corr-value">+0.923</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs defender_y: correlation_ratio = 0.8279 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>defender_y</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:82.8%"></div></div>
+  <span class="corr-value">+0.828</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs attacking_goal_centrality: correlation_ratio = 0.8243 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>attacking_goal_centrality</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:82.4%"></div></div>
+  <span class="corr-value">+0.824</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs distance_to_center_line: correlation_ratio = 0.8242 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>distance_to_center_line</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:82.4%"></div></div>
+  <span class="corr-value">+0.824</span>
   <span class="verdict-chip collapse">COLLAPSE</span>
 </div>
 <div class="corr-row" title="phase_label vs ball_x: correlation_ratio = 0.7989 (n=300000)">
@@ -840,11 +1649,137 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">+0.799</span>
   <span class="verdict-chip collapse">COLLAPSE</span>
 </div>
+<div class="corr-row" title="defender_zone vs angle_to_attacking_goal: correlation_ratio = 0.787 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>angle_to_attacking_goal</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:78.7%"></div></div>
+  <span class="corr-value">+0.787</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs top_option_3_target_x: correlation_ratio = 0.7764 (n=297837)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:77.6%"></div></div>
+  <span class="corr-value">+0.776</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs is_central_lane: cramers_v = 0.7733 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>is_central_lane</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:77.3%"></div></div>
+  <span class="corr-value">+0.773</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs top_option_2_target_x: correlation_ratio = 0.7571 (n=299619)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:75.7%"></div></div>
+  <span class="corr-value">+0.757</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs is_high_zone: cramers_v = 0.7541 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>is_high_zone</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:75.4%"></div></div>
+  <span class="corr-value">+0.754</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs top_option_1_target_x: correlation_ratio = 0.7513 (n=299943)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>top_option_1_target_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:75.1%"></div></div>
+  <span class="corr-value">+0.751</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs ball_x: correlation_ratio = 0.7426 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>ball_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:74.3%"></div></div>
+  <span class="corr-value">+0.743</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs is_deep_zone: cramers_v = 0.7337 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>is_deep_zone</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:73.4%"></div></div>
+  <span class="corr-value">+0.734</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs top_option_2_target_x: correlation_ratio = 0.6779 (n=299619)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:67.8%"></div></div>
+  <span class="corr-value">+0.678</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs top_option_3_target_x: correlation_ratio = 0.6762 (n=297837)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:67.6%"></div></div>
+  <span class="corr-value">+0.676</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
 <div class="corr-row" title="phase_label vs defender_x: correlation_ratio = 0.6756 (n=300000)">
   <span class="corr-pair">phase_label<span class="arrow">↔</span>defender_x</span>
   <span class="corr-method">correlation_ratio</span>
   <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:67.6%"></div></div>
   <span class="corr-value">+0.676</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs distance_to_defending_box: correlation_ratio = 0.6713 (n=300000)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:67.1%"></div></div>
+  <span class="corr-value">+0.671</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs distance_to_attacking_goal: correlation_ratio = 0.6705 (n=300000)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:67.0%"></div></div>
+  <span class="corr-value">+0.670</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs distance_to_defending_goal: correlation_ratio = 0.6705 (n=300000)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:67.0%"></div></div>
+  <span class="corr-value">+0.670</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs distance_to_attacking_box: correlation_ratio = 0.6702 (n=300000)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>distance_to_attacking_box</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:67.0%"></div></div>
+  <span class="corr-value">+0.670</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs top_option_1_target_x: correlation_ratio = 0.6694 (n=299943)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>top_option_1_target_x</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:66.9%"></div></div>
+  <span class="corr-value">+0.669</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs is_wide_lane: cramers_v = 0.5685 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>is_wide_lane</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:56.9%"></div></div>
+  <span class="corr-value">+0.569</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs is_high_zone: cramers_v = 0.5635 (n=300000)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>is_high_zone</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:56.4%"></div></div>
+  <span class="corr-value">+0.564</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="phase_label vs is_deep_zone: cramers_v = 0.5408 (n=300000)">
+  <span class="corr-pair">phase_label<span class="arrow">↔</span>is_deep_zone</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:54.1%"></div></div>
+  <span class="corr-value">+0.541</span>
   <span class="verdict-chip collapse">COLLAPSE</span>
 </div>
 <div class="corr-row" title="phase_label vs is_in_attacking_box: cramers_v = 0.4881 (n=300000)">
@@ -860,22 +1795,148 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:48.6%"></div></div>
   <span class="corr-value">+0.486</span>
   <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs is_in_attacking_box: cramers_v = 0.4863 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>is_in_attacking_box</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:48.6%"></div></div>
+  <span class="corr-value">+0.486</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
+</div>
+<div class="corr-row" title="defender_zone vs is_in_defending_box: cramers_v = 0.4618 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>is_in_defending_box</span>
+  <span class="corr-method">cramers_v</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill collapse" style="width:46.2%"></div></div>
+  <span class="corr-value">+0.462</span>
+  <span class="verdict-chip collapse">COLLAPSE</span>
 </div></div>
 </div>
   
 <div class="tier-section">
-  <div class="tier-heading"><span class="tier-dot review"></span>Moderate redundancy — 26 pairs</div>
+  <div class="tier-heading"><span class="tier-dot review"></span>Moderate redundancy — 104 pairs</div>
   <p class="tier-note">0.5 ≤ |r| < 0.90 for continuous/boolean pairs — not resolved by the correlation script itself; see REVIEW_METHODOLOGY.html for how each pair here was resolved using shot-rate lift as evidence.</p>
   <div class="corr-ledger">
-<div class="corr-row" title="top_option_1_threat_score vs top_option_2_threat_score: spearman = 0.8885 (n=299943)">
-  <span class="corr-pair">top_option_1_threat_score<span class="arrow">↔</span>top_option_2_threat_score</span>
+<div class="corr-row" title="top_option_1_threat_score vs top_option_1_target_x: spearman = 0.8975 (n=299943)">
+  <span class="corr-pair">top_option_1_threat_score<span class="arrow">↔</span>top_option_1_target_x</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:88.8%"></div></div>
-  <span class="corr-value">+0.888</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:89.8%"></div></div>
+  <span class="corr-value">+0.897</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="top_option_1_threat_score vs top_option_3_threat_score: spearman = 0.8253 (n=299619)">
-  <span class="corr-pair">top_option_1_threat_score<span class="arrow">↔</span>top_option_3_threat_score</span>
+<div class="corr-row" title="top_option_2_threat_score vs top_option_3_threat_score: spearman = 0.8874 (n=297837)">
+  <span class="corr-pair">top_option_2_threat_score<span class="arrow">↔</span>top_option_3_threat_score</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:88.7%"></div></div>
+  <span class="corr-value">+0.887</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_1_target_x vs top_option_2_target_x: spearman = 0.8782 (n=299619)">
+  <span class="corr-pair">top_option_1_target_x<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:87.8%"></div></div>
+  <span class="corr-value">+0.878</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_1_threat_score vs top_option_2_threat_score: spearman = 0.8747 (n=299619)">
+  <span class="corr-pair">top_option_1_threat_score<span class="arrow">↔</span>top_option_2_threat_score</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:87.5%"></div></div>
+  <span class="corr-value">+0.875</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="ball_x vs top_option_1_target_x: spearman = 0.8708 (n=299943)">
+  <span class="corr-pair">ball_x<span class="arrow">↔</span>top_option_1_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:87.1%"></div></div>
+  <span class="corr-value">+0.871</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="ball_x vs top_option_2_target_x: spearman = 0.8582 (n=299619)">
+  <span class="corr-pair">ball_x<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:85.8%"></div></div>
+  <span class="corr-value">+0.858</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_central_lane vs attacking_goal_centrality: point_biserial = 0.8489 (n=300000)">
+  <span class="corr-pair">is_central_lane<span class="arrow">↔</span>attacking_goal_centrality</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:84.9%"></div></div>
+  <span class="corr-value">+0.849</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_central_lane vs distance_to_center_line: point_biserial = -0.8486 (n=300000)">
+  <span class="corr-pair">is_central_lane<span class="arrow">↔</span>distance_to_center_line</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:84.9%"></div></div>
+  <span class="corr-value">-0.849</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_2_target_x vs top_option_3_target_x: spearman = 0.8403 (n=297837)">
+  <span class="corr-pair">top_option_2_target_x<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:84.0%"></div></div>
+  <span class="corr-value">+0.840</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="ball_x vs top_option_3_target_x: spearman = 0.8395 (n=297837)">
+  <span class="corr-pair">ball_x<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:84.0%"></div></div>
+  <span class="corr-value">+0.840</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="defender_x vs top_option_3_target_x: spearman = 0.8335 (n=297837)">
+  <span class="corr-pair">defender_x<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:83.4%"></div></div>
+  <span class="corr-value">+0.834</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="screens_top_option vs lane_screening_score_option_1: point_biserial = 0.833 (n=299943)">
+  <span class="corr-pair">screens_top_option<span class="arrow">↔</span>lane_screening_score_option_1</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:83.3%"></div></div>
+  <span class="corr-value">+0.833</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_box vs top_option_3_target_x: spearman = -0.8328 (n=297837)">
+  <span class="corr-pair">distance_to_attacking_box<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:83.3%"></div></div>
+  <span class="corr-value">-0.833</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_1_target_x vs top_option_3_target_x: spearman = 0.8324 (n=297837)">
+  <span class="corr-pair">top_option_1_target_x<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:83.2%"></div></div>
+  <span class="corr-value">+0.832</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_defending_box vs top_option_3_target_x: spearman = 0.8321 (n=297837)">
+  <span class="corr-pair">distance_to_defending_box<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:83.2%"></div></div>
+  <span class="corr-value">+0.832</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_goal vs top_option_3_target_x: spearman = -0.8279 (n=297837)">
+  <span class="corr-pair">distance_to_attacking_goal<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:82.8%"></div></div>
+  <span class="corr-value">-0.828</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="zone_defensive_value vs top_option_3_target_x: spearman = -0.825 (n=297837)">
+  <span class="corr-pair">zone_defensive_value<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:82.5%"></div></div>
+  <span class="corr-value">-0.825</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_defending_goal vs top_option_3_target_x: spearman = 0.825 (n=297837)">
+  <span class="corr-pair">distance_to_defending_goal<span class="arrow">↔</span>top_option_3_target_x</span>
   <span class="corr-method">spearman</span>
   <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:82.5%"></div></div>
   <span class="corr-value">+0.825</span>
@@ -888,18 +1949,102 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">-0.825</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="top_option_1_dy vs top_option_1_angle_from_ball: spearman = 0.8218 (n=300000)">
-  <span class="corr-pair">top_option_1_dy<span class="arrow">↔</span>top_option_1_angle_from_ball</span>
+<div class="corr-row" title="angle_to_attacking_goal vs distance_to_center_line: spearman = 0.8249 (n=300000)">
+  <span class="corr-pair">angle_to_attacking_goal<span class="arrow">↔</span>distance_to_center_line</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:82.2%"></div></div>
-  <span class="corr-value">+0.822</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:82.5%"></div></div>
+  <span class="corr-value">+0.825</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="ball_x vs top_option_1_threat_score: spearman = 0.8202 (n=300000)">
-  <span class="corr-pair">ball_x<span class="arrow">↔</span>top_option_1_threat_score</span>
+<div class="corr-row" title="defender_x vs top_option_1_target_x: spearman = 0.8204 (n=299943)">
+  <span class="corr-pair">defender_x<span class="arrow">↔</span>top_option_1_target_x</span>
   <span class="corr-method">spearman</span>
   <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:82.0%"></div></div>
   <span class="corr-value">+0.820</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_box vs top_option_1_target_x: spearman = -0.8201 (n=299943)">
+  <span class="corr-pair">distance_to_attacking_box<span class="arrow">↔</span>top_option_1_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:82.0%"></div></div>
+  <span class="corr-value">-0.820</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_defending_box vs top_option_1_target_x: spearman = 0.8187 (n=299943)">
+  <span class="corr-pair">distance_to_defending_box<span class="arrow">↔</span>top_option_1_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:81.9%"></div></div>
+  <span class="corr-value">+0.819</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_goal vs top_option_1_target_x: spearman = -0.8171 (n=299943)">
+  <span class="corr-pair">distance_to_attacking_goal<span class="arrow">↔</span>top_option_1_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:81.7%"></div></div>
+  <span class="corr-value">-0.817</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="defender_x vs top_option_2_target_x: spearman = 0.8161 (n=299619)">
+  <span class="corr-pair">defender_x<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:81.6%"></div></div>
+  <span class="corr-value">+0.816</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_box vs top_option_2_target_x: spearman = -0.8156 (n=299619)">
+  <span class="corr-pair">distance_to_attacking_box<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:81.6%"></div></div>
+  <span class="corr-value">-0.816</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_defending_box vs top_option_2_target_x: spearman = 0.8146 (n=299619)">
+  <span class="corr-pair">distance_to_defending_box<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:81.5%"></div></div>
+  <span class="corr-value">+0.815</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_attacking_goal vs top_option_2_target_x: spearman = -0.8117 (n=299619)">
+  <span class="corr-pair">distance_to_attacking_goal<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:81.2%"></div></div>
+  <span class="corr-value">-0.812</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="zone_defensive_value vs top_option_1_target_x: spearman = -0.8099 (n=299943)">
+  <span class="corr-pair">zone_defensive_value<span class="arrow">↔</span>top_option_1_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:81.0%"></div></div>
+  <span class="corr-value">-0.810</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_defending_goal vs top_option_1_target_x: spearman = 0.8099 (n=299943)">
+  <span class="corr-pair">distance_to_defending_goal<span class="arrow">↔</span>top_option_1_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:81.0%"></div></div>
+  <span class="corr-value">+0.810</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_2_threat_score vs top_option_1_target_x: spearman = 0.8071 (n=299619)">
+  <span class="corr-pair">top_option_2_threat_score<span class="arrow">↔</span>top_option_1_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:80.7%"></div></div>
+  <span class="corr-value">+0.807</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="zone_defensive_value vs top_option_2_target_x: spearman = -0.8069 (n=299619)">
+  <span class="corr-pair">zone_defensive_value<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:80.7%"></div></div>
+  <span class="corr-value">-0.807</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="distance_to_defending_goal vs top_option_2_target_x: spearman = 0.8069 (n=299619)">
+  <span class="corr-pair">distance_to_defending_goal<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:80.7%"></div></div>
+  <span class="corr-value">+0.807</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
 <div class="corr-row" title="defender_x vs ball_x: spearman = 0.8051 (n=300000)">
@@ -909,81 +2054,256 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">+0.805</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="top_option_2_dy vs top_option_2_angle_from_ball: spearman = 0.7875 (n=299943)">
-  <span class="corr-pair">top_option_2_dy<span class="arrow">↔</span>top_option_2_angle_from_ball</span>
+<div class="corr-row" title="top_option_1_threat_score vs top_option_3_threat_score: spearman = 0.8049 (n=297837)">
+  <span class="corr-pair">top_option_1_threat_score<span class="arrow">↔</span>top_option_3_threat_score</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:78.8%"></div></div>
-  <span class="corr-value">+0.787</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:80.5%"></div></div>
+  <span class="corr-value">+0.805</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="top_option_3_dy vs top_option_3_angle_from_ball: spearman = 0.7767 (n=299619)">
-  <span class="corr-pair">top_option_3_dy<span class="arrow">↔</span>top_option_3_angle_from_ball</span>
+<div class="corr-row" title="ball_x vs distance_to_attacking_box: spearman = -0.8045 (n=300000)">
+  <span class="corr-pair">ball_x<span class="arrow">↔</span>distance_to_attacking_box</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:77.7%"></div></div>
-  <span class="corr-value">+0.777</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:80.5%"></div></div>
+  <span class="corr-value">-0.804</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="ball_y vs top_option_1_dy: spearman = -0.7676 (n=300000)">
-  <span class="corr-pair">ball_y<span class="arrow">↔</span>top_option_1_dy</span>
+<div class="corr-row" title="ball_x vs distance_to_defending_box: spearman = 0.8032 (n=300000)">
+  <span class="corr-pair">ball_x<span class="arrow">↔</span>distance_to_defending_box</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:76.8%"></div></div>
-  <span class="corr-value">-0.768</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:80.3%"></div></div>
+  <span class="corr-value">+0.803</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="ball_x vs top_option_2_threat_score: spearman = 0.7457 (n=299943)">
+<div class="corr-row" title="ball_x vs distance_to_attacking_goal: spearman = -0.8009 (n=300000)">
+  <span class="corr-pair">ball_x<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:80.1%"></div></div>
+  <span class="corr-value">-0.801</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_1_threat_score vs top_option_2_target_x: spearman = 0.7996 (n=299619)">
+  <span class="corr-pair">top_option_1_threat_score<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:80.0%"></div></div>
+  <span class="corr-value">+0.800</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="ball_x vs top_option_1_threat_score: spearman = 0.7992 (n=299943)">
+  <span class="corr-pair">ball_x<span class="arrow">↔</span>top_option_1_threat_score</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:79.9%"></div></div>
+  <span class="corr-value">+0.799</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="ball_x vs zone_defensive_value: spearman = -0.7948 (n=300000)">
+  <span class="corr-pair">ball_x<span class="arrow">↔</span>zone_defensive_value</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:79.5%"></div></div>
+  <span class="corr-value">-0.795</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="ball_x vs distance_to_defending_goal: spearman = 0.7948 (n=300000)">
+  <span class="corr-pair">ball_x<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:79.5%"></div></div>
+  <span class="corr-value">+0.795</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_3_threat_score vs top_option_1_target_x: spearman = 0.7787 (n=297837)">
+  <span class="corr-pair">top_option_3_threat_score<span class="arrow">↔</span>top_option_1_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:77.9%"></div></div>
+  <span class="corr-value">+0.779</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_1_threat_score vs top_option_3_target_x: spearman = 0.7519 (n=297837)">
+  <span class="corr-pair">top_option_1_threat_score<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:75.2%"></div></div>
+  <span class="corr-value">+0.752</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_2_threat_score vs top_option_2_target_x: spearman = 0.7432 (n=299619)">
+  <span class="corr-pair">top_option_2_threat_score<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:74.3%"></div></div>
+  <span class="corr-value">+0.743</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_3_threat_score vs top_option_2_target_x: spearman = 0.7261 (n=297837)">
+  <span class="corr-pair">top_option_3_threat_score<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:72.6%"></div></div>
+  <span class="corr-value">+0.726</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="ball_x vs top_option_2_threat_score: spearman = 0.7131 (n=299619)">
   <span class="corr-pair">ball_x<span class="arrow">↔</span>top_option_2_threat_score</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:74.6%"></div></div>
-  <span class="corr-value">+0.746</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:71.3%"></div></div>
+  <span class="corr-value">+0.713</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="engagement_distance_to_carrier vs lane_screening_score_option_2: spearman = -0.7167 (n=299943)">
-  <span class="corr-pair">engagement_distance_to_carrier<span class="arrow">↔</span>lane_screening_score_option_2</span>
-  <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:71.7%"></div></div>
-  <span class="corr-value">-0.717</span>
-  <span class="verdict-chip review">REVIEW</span>
-</div>
-<div class="corr-row" title="ball_x vs top_option_3_threat_score: spearman = 0.7136 (n=299619)">
-  <span class="corr-pair">ball_x<span class="arrow">↔</span>top_option_3_threat_score</span>
-  <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:71.4%"></div></div>
-  <span class="corr-value">+0.714</span>
-  <span class="verdict-chip review">REVIEW</span>
-</div>
-<div class="corr-row" title="defender_x vs top_option_1_threat_score: spearman = 0.712 (n=300000)">
+<div class="corr-row" title="defender_x vs top_option_1_threat_score: spearman = 0.7078 (n=299943)">
   <span class="corr-pair">defender_x<span class="arrow">↔</span>top_option_1_threat_score</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:71.2%"></div></div>
-  <span class="corr-value">+0.712</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:70.8%"></div></div>
+  <span class="corr-value">+0.708</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="engagement_distance_to_carrier vs lane_screening_score_option_1: spearman = -0.7095 (n=300000)">
+<div class="corr-row" title="top_option_1_threat_score vs distance_to_attacking_box: spearman = -0.7077 (n=299943)">
+  <span class="corr-pair">top_option_1_threat_score<span class="arrow">↔</span>distance_to_attacking_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:70.8%"></div></div>
+  <span class="corr-value">-0.708</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_1_threat_score vs distance_to_defending_box: spearman = 0.706 (n=299943)">
+  <span class="corr-pair">top_option_1_threat_score<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:70.6%"></div></div>
+  <span class="corr-value">+0.706</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_1_threat_score vs distance_to_attacking_goal: spearman = -0.7054 (n=299943)">
+  <span class="corr-pair">top_option_1_threat_score<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:70.5%"></div></div>
+  <span class="corr-value">-0.705</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_1_threat_score vs zone_defensive_value: spearman = -0.6976 (n=299943)">
+  <span class="corr-pair">top_option_1_threat_score<span class="arrow">↔</span>zone_defensive_value</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:69.8%"></div></div>
+  <span class="corr-value">-0.698</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_1_threat_score vs distance_to_defending_goal: spearman = 0.6976 (n=299943)">
+  <span class="corr-pair">top_option_1_threat_score<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:69.8%"></div></div>
+  <span class="corr-value">+0.698</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="engagement_distance_to_carrier vs lane_screening_score_option_1: spearman = -0.6897 (n=299943)">
   <span class="corr-pair">engagement_distance_to_carrier<span class="arrow">↔</span>lane_screening_score_option_1</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:71.0%"></div></div>
-  <span class="corr-value">-0.710</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:69.0%"></div></div>
+  <span class="corr-value">-0.690</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="engagement_distance_to_carrier vs lane_screening_score_option_3: spearman = -0.6927 (n=299619)">
-  <span class="corr-pair">engagement_distance_to_carrier<span class="arrow">↔</span>lane_screening_score_option_3</span>
+<div class="corr-row" title="is_deep_zone vs distance_to_attacking_box: point_biserial = 0.6864 (n=300000)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>distance_to_attacking_box</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:68.6%"></div></div>
+  <span class="corr-value">+0.686</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="ball_x vs top_option_3_threat_score: spearman = 0.6852 (n=297837)">
+  <span class="corr-pair">ball_x<span class="arrow">↔</span>top_option_3_threat_score</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:69.3%"></div></div>
-  <span class="corr-value">-0.693</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:68.5%"></div></div>
+  <span class="corr-value">+0.685</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="defender_x vs top_option_3_threat_score: spearman = 0.6569 (n=299619)">
+<div class="corr-row" title="engagement_distance_to_carrier vs lane_screening_score_option_2: spearman = -0.6782 (n=299619)">
+  <span class="corr-pair">engagement_distance_to_carrier<span class="arrow">↔</span>lane_screening_score_option_2</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:67.8%"></div></div>
+  <span class="corr-value">-0.678</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_2_threat_score vs top_option_3_target_x: spearman = 0.6778 (n=297837)">
+  <span class="corr-pair">top_option_2_threat_score<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:67.8%"></div></div>
+  <span class="corr-value">+0.678</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs defender_x: point_biserial = -0.6748 (n=300000)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>defender_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:67.5%"></div></div>
+  <span class="corr-value">-0.675</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs distance_to_attacking_goal: point_biserial = 0.6724 (n=300000)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:67.2%"></div></div>
+  <span class="corr-value">+0.672</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs distance_to_defending_goal: point_biserial = -0.6669 (n=300000)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:66.7%"></div></div>
+  <span class="corr-value">-0.667</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_3_threat_score vs distance_to_attacking_goal: spearman = -0.6663 (n=297837)">
+  <span class="corr-pair">top_option_3_threat_score<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:66.6%"></div></div>
+  <span class="corr-value">-0.666</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_in_defending_box vs zone_defensive_value: point_biserial = 0.6661 (n=300000)">
+  <span class="corr-pair">is_in_defending_box<span class="arrow">↔</span>zone_defensive_value</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:66.6%"></div></div>
+  <span class="corr-value">+0.666</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_high_zone vs distance_to_defending_box: point_biserial = 0.6656 (n=300000)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:66.6%"></div></div>
+  <span class="corr-value">+0.666</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_3_threat_score vs distance_to_attacking_box: spearman = -0.6655 (n=297837)">
+  <span class="corr-pair">top_option_3_threat_score<span class="arrow">↔</span>distance_to_attacking_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:66.5%"></div></div>
+  <span class="corr-value">-0.665</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="defender_x vs top_option_3_threat_score: spearman = 0.6649 (n=297837)">
   <span class="corr-pair">defender_x<span class="arrow">↔</span>top_option_3_threat_score</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:65.7%"></div></div>
-  <span class="corr-value">+0.657</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:66.5%"></div></div>
+  <span class="corr-value">+0.665</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="ball_y vs top_option_2_dy: spearman = -0.6548 (n=299943)">
-  <span class="corr-pair">ball_y<span class="arrow">↔</span>top_option_2_dy</span>
+<div class="corr-row" title="top_option_3_threat_score vs distance_to_defending_box: spearman = 0.6623 (n=297837)">
+  <span class="corr-pair">top_option_3_threat_score<span class="arrow">↔</span>distance_to_defending_box</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:65.5%"></div></div>
-  <span class="corr-value">-0.655</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:66.2%"></div></div>
+  <span class="corr-value">+0.662</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_3_threat_score vs top_option_3_target_x: spearman = 0.6564 (n=297837)">
+  <span class="corr-pair">top_option_3_threat_score<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:65.6%"></div></div>
+  <span class="corr-value">+0.656</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs distance_to_defending_box: point_biserial = -0.6544 (n=300000)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:65.4%"></div></div>
+  <span class="corr-value">-0.654</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_wide_lane vs distance_to_center_line: point_biserial = 0.653 (n=300000)">
+  <span class="corr-pair">is_wide_lane<span class="arrow">↔</span>distance_to_center_line</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:65.3%"></div></div>
+  <span class="corr-value">+0.653</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
 <div class="corr-row" title="is_wide_lane vs attacking_goal_centrality: point_biserial = -0.6527 (n=300000)">
@@ -993,46 +2313,200 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">-0.653</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="defender_x vs top_option_2_threat_score: spearman = 0.6481 (n=299943)">
+<div class="corr-row" title="is_high_zone vs defender_x: point_biserial = 0.6521 (n=300000)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>defender_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:65.2%"></div></div>
+  <span class="corr-value">+0.652</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_3_threat_score vs zone_defensive_value: spearman = -0.6515 (n=297837)">
+  <span class="corr-pair">top_option_3_threat_score<span class="arrow">↔</span>zone_defensive_value</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:65.1%"></div></div>
+  <span class="corr-value">-0.651</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_3_threat_score vs distance_to_defending_goal: spearman = 0.6515 (n=297837)">
+  <span class="corr-pair">top_option_3_threat_score<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:65.1%"></div></div>
+  <span class="corr-value">+0.651</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_2_threat_score vs distance_to_attacking_box: spearman = -0.6497 (n=299619)">
+  <span class="corr-pair">top_option_2_threat_score<span class="arrow">↔</span>distance_to_attacking_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:65.0%"></div></div>
+  <span class="corr-value">-0.650</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_2_threat_score vs distance_to_attacking_goal: spearman = -0.6495 (n=299619)">
+  <span class="corr-pair">top_option_2_threat_score<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:65.0%"></div></div>
+  <span class="corr-value">-0.649</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="defender_x vs top_option_2_threat_score: spearman = 0.6493 (n=299619)">
   <span class="corr-pair">defender_x<span class="arrow">↔</span>top_option_2_threat_score</span>
   <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:64.9%"></div></div>
+  <span class="corr-value">+0.649</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_high_zone vs distance_to_defending_goal: point_biserial = 0.6476 (n=300000)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">point_biserial</span>
   <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:64.8%"></div></div>
   <span class="corr-value">+0.648</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="ball_y vs top_option_1_angle_from_ball: spearman = -0.6237 (n=300000)">
-  <span class="corr-pair">ball_y<span class="arrow">↔</span>top_option_1_angle_from_ball</span>
+<div class="corr-row" title="engagement_distance_to_carrier vs lane_screening_score_option_3: spearman = -0.6475 (n=297837)">
+  <span class="corr-pair">engagement_distance_to_carrier<span class="arrow">↔</span>lane_screening_score_option_3</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:62.4%"></div></div>
-  <span class="corr-value">-0.624</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:64.8%"></div></div>
+  <span class="corr-value">-0.647</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="lane_screening_score_option_1 vs lane_screening_score_option_2: spearman = 0.6181 (n=299943)">
+<div class="corr-row" title="top_option_2_threat_score vs distance_to_defending_box: spearman = 0.6469 (n=299619)">
+  <span class="corr-pair">top_option_2_threat_score<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:64.7%"></div></div>
+  <span class="corr-value">+0.647</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_high_zone vs distance_to_attacking_goal: point_biserial = -0.6438 (n=300000)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>distance_to_attacking_goal</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:64.4%"></div></div>
+  <span class="corr-value">-0.644</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_2_threat_score vs zone_defensive_value: spearman = -0.6373 (n=299619)">
+  <span class="corr-pair">top_option_2_threat_score<span class="arrow">↔</span>zone_defensive_value</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:63.7%"></div></div>
+  <span class="corr-value">-0.637</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="top_option_2_threat_score vs distance_to_defending_goal: spearman = 0.6373 (n=299619)">
+  <span class="corr-pair">top_option_2_threat_score<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:63.7%"></div></div>
+  <span class="corr-value">+0.637</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_high_zone vs distance_to_attacking_box: point_biserial = -0.6316 (n=300000)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>distance_to_attacking_box</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:63.2%"></div></div>
+  <span class="corr-value">-0.632</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="lane_screening_score_option_1 vs lane_screening_score_option_2: spearman = 0.6065 (n=299619)">
   <span class="corr-pair">lane_screening_score_option_1<span class="arrow">↔</span>lane_screening_score_option_2</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:61.8%"></div></div>
-  <span class="corr-value">+0.618</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:60.7%"></div></div>
+  <span class="corr-value">+0.607</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="ball_y vs top_option_3_dy: spearman = -0.5992 (n=299619)">
-  <span class="corr-pair">ball_y<span class="arrow">↔</span>top_option_3_dy</span>
+<div class="corr-row" title="angle_to_attacking_goal vs zone_defensive_value: spearman = -0.6043 (n=300000)">
+  <span class="corr-pair">angle_to_attacking_goal<span class="arrow">↔</span>zone_defensive_value</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:59.9%"></div></div>
-  <span class="corr-value">-0.599</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:60.4%"></div></div>
+  <span class="corr-value">-0.604</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="lane_screening_score_option_1 vs lane_screening_score_option_3: spearman = 0.5832 (n=299619)">
+<div class="corr-row" title="angle_to_attacking_goal vs distance_to_defending_goal: spearman = 0.6043 (n=300000)">
+  <span class="corr-pair">angle_to_attacking_goal<span class="arrow">↔</span>distance_to_defending_goal</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:60.4%"></div></div>
+  <span class="corr-value">+0.604</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs top_option_1_target_x: point_biserial = -0.591 (n=299943)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>top_option_1_target_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:59.1%"></div></div>
+  <span class="corr-value">-0.591</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_central_lane vs angle_to_attacking_goal: point_biserial = -0.571 (n=300000)">
+  <span class="corr-pair">is_central_lane<span class="arrow">↔</span>angle_to_attacking_goal</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:57.1%"></div></div>
+  <span class="corr-value">-0.571</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs top_option_2_target_x: point_biserial = -0.5696 (n=299619)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:57.0%"></div></div>
+  <span class="corr-value">-0.570</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs ball_x: point_biserial = -0.5691 (n=300000)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>ball_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:56.9%"></div></div>
+  <span class="corr-value">-0.569</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs top_option_3_target_x: point_biserial = -0.5664 (n=297837)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:56.6%"></div></div>
+  <span class="corr-value">-0.566</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="lane_screening_score_option_1 vs lane_screening_score_option_3: spearman = 0.5641 (n=297837)">
   <span class="corr-pair">lane_screening_score_option_1<span class="arrow">↔</span>lane_screening_score_option_3</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:58.3%"></div></div>
-  <span class="corr-value">+0.583</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:56.4%"></div></div>
+  <span class="corr-value">+0.564</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
-<div class="corr-row" title="lane_screening_score_option_2 vs lane_screening_score_option_3: spearman = 0.56 (n=299619)">
+<div class="corr-row" title="is_in_attacking_box vs is_high_zone: phi = 0.5629 (n=300000)">
+  <span class="corr-pair">is_in_attacking_box<span class="arrow">↔</span>is_high_zone</span>
+  <span class="corr-method">phi</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:56.3%"></div></div>
+  <span class="corr-value">+0.563</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_high_zone vs top_option_3_target_x: point_biserial = 0.5562 (n=297837)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>top_option_3_target_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:55.6%"></div></div>
+  <span class="corr-value">+0.556</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_deep_zone vs zone_defensive_value: point_biserial = 0.5489 (n=300000)">
+  <span class="corr-pair">is_deep_zone<span class="arrow">↔</span>zone_defensive_value</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:54.9%"></div></div>
+  <span class="corr-value">+0.549</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_in_defending_box vs is_deep_zone: phi = 0.5449 (n=300000)">
+  <span class="corr-pair">is_in_defending_box<span class="arrow">↔</span>is_deep_zone</span>
+  <span class="corr-method">phi</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:54.5%"></div></div>
+  <span class="corr-value">+0.545</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="lane_screening_score_option_2 vs lane_screening_score_option_3: spearman = 0.5408 (n=297837)">
   <span class="corr-pair">lane_screening_score_option_2<span class="arrow">↔</span>lane_screening_score_option_3</span>
   <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:56.0%"></div></div>
-  <span class="corr-value">+0.560</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:54.1%"></div></div>
+  <span class="corr-value">+0.541</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="angle_to_attacking_goal vs distance_to_defending_box: spearman = 0.5375 (n=300000)">
+  <span class="corr-pair">angle_to_attacking_goal<span class="arrow">↔</span>distance_to_defending_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:53.8%"></div></div>
+  <span class="corr-value">+0.537</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
 <div class="corr-row" title="defender_y vs ball_y: spearman = 0.5365 (n=300000)">
@@ -1042,87 +2516,108 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span class="corr-value">+0.536</span>
   <span class="verdict-chip review">REVIEW</span>
 </div>
+<div class="corr-row" title="is_high_zone vs top_option_2_target_x: point_biserial = 0.5323 (n=299619)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>top_option_2_target_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:53.2%"></div></div>
+  <span class="corr-value">+0.532</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="is_high_zone vs ball_x: point_biserial = 0.5246 (n=300000)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>ball_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:52.5%"></div></div>
+  <span class="corr-value">+0.525</span>
+  <span class="verdict-chip review">REVIEW</span>
+</div>
 <div class="corr-row" title="defender_x vs angle_to_attacking_goal: spearman = 0.5241 (n=300000)">
   <span class="corr-pair">defender_x<span class="arrow">↔</span>angle_to_attacking_goal</span>
   <span class="corr-method">spearman</span>
   <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:52.4%"></div></div>
   <span class="corr-value">+0.524</span>
   <span class="verdict-chip review">REVIEW</span>
+</div>
+<div class="corr-row" title="angle_to_attacking_goal vs distance_to_attacking_box: spearman = -0.5147 (n=300000)">
+  <span class="corr-pair">angle_to_attacking_goal<span class="arrow">↔</span>distance_to_attacking_box</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill review" style="width:51.5%"></div></div>
+  <span class="corr-value">-0.515</span>
+  <span class="verdict-chip review">REVIEW</span>
 </div></div>
 </div>
   
 <div class="tier-section">
-  <div class="tier-heading"><span class="tier-dot distinct"></span>Confirmed distinct — 654 pairs (top 10 shown by magnitude)</div>
+  <div class="tier-heading"><span class="tier-dot distinct"></span>Confirmed distinct — 782 pairs (top 10 shown by magnitude)</div>
   <p class="tier-note">Below every threshold above. No action needed — top pairs by magnitude shown here so the report shows what was checked and cleared, not just silence.</p>
   <div class="corr-ledger">
-<div class="corr-row" title="phase_label vs top_option_3_threat_score: correlation_ratio = 0.5124 (n=299619)">
+<div class="corr-row" title="defender_zone vs top_option_3_threat_score: correlation_ratio = 0.5701 (n=297837)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>top_option_3_threat_score</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:57.0%"></div></div>
+  <span class="corr-value">+0.570</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
+<div class="corr-row" title="defender_zone vs top_option_2_threat_score: correlation_ratio = 0.5342 (n=299619)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>top_option_2_threat_score</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:53.4%"></div></div>
+  <span class="corr-value">+0.534</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
+<div class="corr-row" title="defender_zone vs zone_defensive_value: correlation_ratio = 0.5318 (n=300000)">
+  <span class="corr-pair">defender_zone<span class="arrow">↔</span>zone_defensive_value</span>
+  <span class="corr-method">correlation_ratio</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:53.2%"></div></div>
+  <span class="corr-value">+0.532</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
+<div class="corr-row" title="phase_label vs top_option_3_threat_score: correlation_ratio = 0.4982 (n=297837)">
   <span class="corr-pair">phase_label<span class="arrow">↔</span>top_option_3_threat_score</span>
   <span class="corr-method">correlation_ratio</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:51.2%"></div></div>
-  <span class="corr-value">+0.512</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:49.8%"></div></div>
+  <span class="corr-value">+0.498</span>
   <span class="verdict-chip distinct">DISTINCT</span>
 </div>
-<div class="corr-row" title="phase_label vs top_option_2_threat_score: correlation_ratio = 0.5076 (n=299943)">
+<div class="corr-row" title="is_high_zone vs top_option_1_target_x: point_biserial = 0.4924 (n=299943)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>top_option_1_target_x</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:49.2%"></div></div>
+  <span class="corr-value">+0.492</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
+<div class="corr-row" title="phase_label vs top_option_2_threat_score: correlation_ratio = 0.489 (n=299619)">
   <span class="corr-pair">phase_label<span class="arrow">↔</span>top_option_2_threat_score</span>
   <span class="corr-method">correlation_ratio</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:50.8%"></div></div>
-  <span class="corr-value">+0.508</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:48.9%"></div></div>
+  <span class="corr-value">+0.489</span>
   <span class="verdict-chip distinct">DISTINCT</span>
 </div>
-<div class="corr-row" title="lane_screening_score_option_1 vs overload_score: spearman = 0.4822 (n=300000)">
+<div class="corr-row" title="lane_screening_score_option_3 vs overload_score: spearman = 0.4872 (n=297837)">
+  <span class="corr-pair">lane_screening_score_option_3<span class="arrow">↔</span>overload_score</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:48.7%"></div></div>
+  <span class="corr-value">+0.487</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
+<div class="corr-row" title="is_high_zone vs angle_to_attacking_goal: point_biserial = 0.4866 (n=300000)">
+  <span class="corr-pair">is_high_zone<span class="arrow">↔</span>angle_to_attacking_goal</span>
+  <span class="corr-method">point_biserial</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:48.7%"></div></div>
+  <span class="corr-value">+0.487</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
+<div class="corr-row" title="lane_screening_score_option_2 vs overload_score: spearman = 0.4838 (n=299619)">
+  <span class="corr-pair">lane_screening_score_option_2<span class="arrow">↔</span>overload_score</span>
+  <span class="corr-method">spearman</span>
+  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:48.4%"></div></div>
+  <span class="corr-value">+0.484</span>
+  <span class="verdict-chip distinct">DISTINCT</span>
+</div>
+<div class="corr-row" title="lane_screening_score_option_1 vs overload_score: spearman = 0.4824 (n=299943)">
   <span class="corr-pair">lane_screening_score_option_1<span class="arrow">↔</span>overload_score</span>
   <span class="corr-method">spearman</span>
   <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:48.2%"></div></div>
   <span class="corr-value">+0.482</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="lane_screening_score_option_3 vs overload_score: spearman = 0.4816 (n=299619)">
-  <span class="corr-pair">lane_screening_score_option_3<span class="arrow">↔</span>overload_score</span>
-  <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:48.2%"></div></div>
-  <span class="corr-value">+0.482</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="lane_screening_score_option_2 vs overload_score: spearman = 0.4755 (n=299943)">
-  <span class="corr-pair">lane_screening_score_option_2<span class="arrow">↔</span>overload_score</span>
-  <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:47.5%"></div></div>
-  <span class="corr-value">+0.475</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="ball_y vs top_option_2_angle_from_ball: spearman = -0.471 (n=299943)">
-  <span class="corr-pair">ball_y<span class="arrow">↔</span>top_option_2_angle_from_ball</span>
-  <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:47.1%"></div></div>
-  <span class="corr-value">-0.471</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="top_option_1_dx vs top_option_2_dx: spearman = 0.4544 (n=299943)">
-  <span class="corr-pair">top_option_1_dx<span class="arrow">↔</span>top_option_2_dx</span>
-  <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:45.4%"></div></div>
-  <span class="corr-value">+0.454</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="engagement_distance_to_carrier vs overload_score: spearman = -0.4543 (n=300000)">
-  <span class="corr-pair">engagement_distance_to_carrier<span class="arrow">↔</span>overload_score</span>
-  <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:45.4%"></div></div>
-  <span class="corr-value">-0.454</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="top_option_1_dy vs top_option_3_dy: spearman = 0.4514 (n=299619)">
-  <span class="corr-pair">top_option_1_dy<span class="arrow">↔</span>top_option_3_dy</span>
-  <span class="corr-method">spearman</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:45.1%"></div></div>
-  <span class="corr-value">+0.451</span>
-  <span class="verdict-chip distinct">DISTINCT</span>
-</div>
-<div class="corr-row" title="is_in_defending_box vs defender_x: point_biserial = -0.4494 (n=300000)">
-  <span class="corr-pair">is_in_defending_box<span class="arrow">↔</span>defender_x</span>
-  <span class="corr-method">point_biserial</span>
-  <div class="corr-mag-track"><div class="corr-mag-fill distinct" style="width:44.9%"></div></div>
-  <span class="corr-value">-0.449</span>
   <span class="verdict-chip distinct">DISTINCT</span>
 </div></div>
 </div>

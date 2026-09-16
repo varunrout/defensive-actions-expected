@@ -1,6 +1,14 @@
-"""CLI entrypoint: render CORRELATION_ANALYSIS.json and REVIEW_ANALYSIS.json
-as two self-contained HTML reports, in the same shared design system as the
-other reports/eda/*.html files.
+"""CLI entrypoint: render CORRELATION_ANALYSIS_V1_HISTORICAL.json and
+REVIEW_ANALYSIS_V1_HISTORICAL.json (stage 01's original 51/44-feature
+candidate lists) as two self-contained HTML reports -- this is what
+CORRELATION_ATLAS.html / REVIEW_METHODOLOGY.html actually show: V1's
+original scope, not the current locked list.
+
+CORRELATION_ANALYSIS.json / REVIEW_ANALYSIS.json (the current/final-list,
+full-population files) are untouched by this script -- they remain the
+"after" snapshot generate_feature_lock_confirmation.py's stage-14 diff reads
+from its own, separate CORRELATION_PATH constant. Only this file's source
+changed, not the underlying JSON those other files still point at.
 
 Usage:
     python -m src.eda.generate_correlation_reports
@@ -16,8 +24,8 @@ from src.eda.render import esc
 from src.eda.feature_config import DATASETS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CORRELATION_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS.json"
-REVIEW_PATH = REPO_ROOT / "reports" / "eda" / "REVIEW_ANALYSIS.json"
+CORRELATION_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS_V1_HISTORICAL.json"
+REVIEW_PATH = REPO_ROOT / "reports" / "eda" / "REVIEW_ANALYSIS_V1_HISTORICAL.json"
 ATLAS_OUTPUT = REPO_ROOT / "reports" / "eda" / "CORRELATION_ATLAS.html"
 METHODOLOGY_OUTPUT = REPO_ROOT / "reports" / "eda" / "REVIEW_METHODOLOGY.html"
 
@@ -113,7 +121,19 @@ def build_correlation_atlas(data: dict) -> str:
     total_review = sum(d["tier_counts"]["review"] for d in datasets.values())
     total_distinct = sum(d["tier_counts"]["distinct_total"] for d in datasets.values())
 
-    body = _method_strip()
+    body = """
+<div class="finding flag" style="margin-bottom:24px;">
+<span class="tag">this is a reconstruction, not the live pipeline's current state</span>
+<p>This is stage 01's <b>original</b> candidate list -- 51 active / 44 passive, before any redundancy-driven
+drop had landed -- reconstructed from <code>feature_config_v1_historical.py</code> against the current
+parquets, since the original JSON snapshot no longer exists on disk (it was overwritten during a later
+confirmation pass). <a href="CORRELATION_ATLAS_V2.html" style="color:var(--neg);">CORRELATION_ATLAS_V2.html</a>
+is stage 07's snapshot (36/39, after the structural-redesign and collapse-tier stages but before VIF/leakage);
+<a href="CORRELATION_ATLAS_V3.html" style="color:var(--neg);">CORRELATION_ATLAS_V3.html</a> is the final locked
+list (34/38), scored on TRAIN+VAL matches only. FEATURE_LOCK_CONFIRMATION.html documents the full count-by-count
+history and is where the live pipeline's actual current state is confirmed.</p>
+</div>"""
+    body += _method_strip()
     for ds_key in ("active", "passive"):
         body += _dataset_block(ds_key, datasets[ds_key])
 
@@ -257,15 +277,15 @@ run, including:</p>
     <span class="p-label">Do now</span>
     <p>Ball-relative coordinate transform: replace <code>top_option_n_target_x/y</code> with
     <code>top_option_n_dx/dy</code> (offset from the ball), <code>top_option_n_distance_from_ball</code>, and
-    <code>top_option_n_angle_from_ball</code>. Unambiguous, loses no information, and is cheap to compute --
-    see prompt 4/4 Part A. Correlation with <code>ball_x</code> should drop out of COLLAPSE/REVIEW once applied.</p>
+    <code>top_option_n_angle_from_ball</code>. Unambiguous, loses no information, and is cheap to compute.
+    Correlation with <code>ball_x</code> should drop out of COLLAPSE/REVIEW once applied.</p>
   </div>
   <div class="path-card defer">
     <span class="p-label">Defer</span>
     <p>Collapsing <code>top_option_2/3_*</code> into aggregate "backup option" features (max threat score, spread
     vs rank 1) is a real tradeoff -- it may throw away signal a model would otherwise use. Gated behind
     <code>PASSIVE_COLLAPSE_OPTION_RANKS</code> (default <code>False</code>) until a baseline model's feature
-    importance says whether ranks 2-3 are pulling their weight. See prompt 4/4 Part B.</p>
+    importance says whether ranks 2-3 are pulling their weight.</p>
   </div>
 </div>
 <div class="recommendation"><b>Recommendation:</b> apply the ball-relative transform now (Part A) -- it is

@@ -147,6 +147,7 @@ def main() -> None:
         "legs": {"active": active_summary, "passive": passive_summary},
         "integrity_checks": integrity,
         "all_integrity_checks_passed": all(c["passed"] for c in integrity),
+        "match_assignment": {mid: assignment[mid] for mid in sorted(assignment, key=int)},
     }
 
     OUTPUT_PATH.write_text(json.dumps(output, indent=2), encoding="utf-8")

@@ -32,8 +32,8 @@ FAMILY_GROUPS_PASSIVE = [
         "reason_tag": "ranked-option threat score, different rank",
         "always_needs_human_call": True,
         "always_reason": (
-            "Cluster 5 (prompt 5/5 & 6/6): deliberately deferred to baseline-model feature-importance evidence "
-            "(PASSIVE_COLLAPSE_OPTION_RANKS, prompt 4/4 Part B), not resolved by correlation alone -- stays "
+            "Cluster 5: deliberately deferred to baseline-model feature-importance evidence "
+            "(PASSIVE_COLLAPSE_OPTION_RANKS), not resolved by correlation alone -- stays "
             "needs_human_call regardless of |r|."
         ),
     },

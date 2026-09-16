@@ -337,6 +337,14 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 .ba-card h4 { font-family: "Archivo", sans-serif; font-size: 14px; margin: 0 0 12px; }
 .ba-card.before h4 { color: var(--pos); }
 .ba-card.after h4 { color: var(--good); }
+
+.vif-unbounded-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; font-weight: 700;
+  color: var(--pos); background: rgba(227,73,72,0.12); border: 1px solid rgba(227,73,72,0.35);
+  border-radius: 4px; padding: 2px 6px; letter-spacing: 0.02em;
+}
+.cond-badge.severe { border-color: rgba(227,73,72,0.4); color: var(--pos); background: rgba(227,73,72,0.08); }
+.cond-badge.warn { border-color: rgba(237,161,0,0.4); color: var(--amber); background: var(--amber-wash); }
 </style>
 </head>
 <body>
@@ -361,11 +369,11 @@ feature. VIF ≥ 10 (R² ≥ 0.9) is conventionally severe; this report also mar
 <div class="vif-dataset-block">
   <h2 class="dataset-title">Active Defensive Actions</h2>
   <p class="dataset-substat">data/features/player_defensive_actions.parquet</p>
-  <div class="statbar" style="margin-bottom:20px;">
+  <div class="statbar" style="margin-bottom:10px;">
     <div class="stat"><b>43,130</b><span>complete-case rows</span></div>
     <div class="stat"><b>26</b><span>features in VIF</span></div>
-    <div class="stat"><b>4.817e+01</b><span>correlation matrix condition #</span></div>
   </div>
+  <div style="margin-bottom:20px;"><span class="cond-badge ">correlation-matrix condition number: 4.817e+01</span></div>
   <div class="finding" style="margin-bottom:20px;">
   <span class="tag">limitation</span>
   <p>Categorical features are excluded from this VIF pass -- VIF is defined over numeric regressors (continuous + discrete + boolean only). A categorical column collinear with a numeric cluster would not be caught here. This is a known limitation of this analysis, not a silent omission.</p>
@@ -574,11 +582,11 @@ requires complete cases across every candidate column at once) — not truly con
 <div class="vif-dataset-block">
   <h2 class="dataset-title">Passive / Off-Ball Defensive Positioning</h2>
   <p class="dataset-substat">data/features/passive_defense.parquet</p>
-  <div class="statbar" style="margin-bottom:20px;">
+  <div class="statbar" style="margin-bottom:10px;">
     <div class="stat"><b>1,591,000</b><span>complete-case rows</span></div>
     <div class="stat"><b>33</b><span>features in VIF</span></div>
-    <div class="stat"><b>6.177e+01</b><span>correlation matrix condition #</span></div>
   </div>
+  <div style="margin-bottom:20px;"><span class="cond-badge ">correlation-matrix condition number: 6.177e+01</span></div>
   <div class="finding" style="margin-bottom:20px;">
   <span class="tag">limitation</span>
   <p>Categorical features are excluded from this VIF pass -- VIF is defined over numeric regressors (continuous + discrete + boolean only). A categorical column collinear with a numeric cluster would not be caught here. This is a known limitation of this analysis, not a silent omission.</p>
@@ -849,42 +857,42 @@ requires complete cases across every candidate column at once) — not truly con
   <div class="vif-track">
     <div class="vif-fill severe" style="width:100.0%"></div>
   </div>
-  <span class="vif-value">∞</span>
+  <span class="vif-value"><span class="vif-unbounded-badge">UNBOUNDED</span></span>
 </div>
 <div class="vif-row">
   <span class="vif-label" title="defenders_within_5m">defenders_within_5m</span>
   <div class="vif-track">
     <div class="vif-fill severe" style="width:100.0%"></div>
   </div>
-  <span class="vif-value">∞</span>
+  <span class="vif-value"><span class="vif-unbounded-badge">UNBOUNDED</span></span>
 </div>
 <div class="vif-row">
   <span class="vif-label" title="attackers_within_10m">attackers_within_10m</span>
   <div class="vif-track">
     <div class="vif-fill severe" style="width:100.0%"></div>
   </div>
-  <span class="vif-value">∞</span>
+  <span class="vif-value"><span class="vif-unbounded-badge">UNBOUNDED</span></span>
 </div>
 <div class="vif-row">
   <span class="vif-label" title="defenders_within_10m">defenders_within_10m</span>
   <div class="vif-track">
     <div class="vif-fill severe" style="width:100.0%"></div>
   </div>
-  <span class="vif-value">∞</span>
+  <span class="vif-value"><span class="vif-unbounded-badge">UNBOUNDED</span></span>
 </div>
 <div class="vif-row">
   <span class="vif-label" title="local_numerical_balance_10m">local_numerical_balance_10m</span>
   <div class="vif-track">
     <div class="vif-fill severe" style="width:100.0%"></div>
   </div>
-  <span class="vif-value">∞</span>
+  <span class="vif-value"><span class="vif-unbounded-badge">UNBOUNDED</span></span>
 </div>
 <div class="vif-row">
   <span class="vif-label" title="local_numerical_balance_5m">local_numerical_balance_5m</span>
   <div class="vif-track">
     <div class="vif-fill severe" style="width:100.0%"></div>
   </div>
-  <span class="vif-value">∞</span>
+  <span class="vif-value"><span class="vif-unbounded-badge">UNBOUNDED</span></span>
 </div>
 <div class="vif-row">
   <span class="vif-label" title="action_retained_defensive_team_control">action_retained_defensive_team_control</span>

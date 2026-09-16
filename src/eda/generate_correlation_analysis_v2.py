@@ -1,9 +1,13 @@
-"""V2 (prompt 7/7) CLI entrypoint: compute the mixed-type correlation/
-association matrix for both feature datasets and classify every pair into
-DROP / COLLAPSE / REVIEW / DISTINCT, using correlation_v2's extended tiering
-(categorical methods get their own REVIEW band). Writes a separate
-CORRELATION_ANALYSIS_V2.json -- the V1 output (CORRELATION_ANALYSIS.json,
-produced by generate_correlation_analysis.py + correlation.py) is untouched.
+"""V2 CLI entrypoint: compute the mixed-type correlation/association matrix
+for both feature datasets and classify every pair into DROP / COLLAPSE /
+REVIEW / DISTINCT, using correlation_v2's extended tiering (categorical
+methods get their own REVIEW band). Uses feature_config_v2_historical's
+36/39-feature lists -- stage 07's actual state (after the structural-redesign
+and collapse-tier/raw-coordinate-drop stages, before VIF/leakage) -- not
+feature_config.py's current final lists, so CORRELATION_ANALYSIS_V2.json
+reflects what V2 originally ran on. Writes a separate CORRELATION_ANALYSIS_V2.json
+-- the V1 output (CORRELATION_ANALYSIS_V1_HISTORICAL.json / CORRELATION_ANALYSIS.json)
+is untouched.
 
 Usage:
     python -m src.eda.generate_correlation_analysis_v2
@@ -19,7 +23,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.eda import correlation_v2 as corr
-from src.eda.feature_config import DATASETS
+from src.eda.feature_config_v2_historical import DATASETS_V2_HISTORICAL as DATASETS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS_V2.json"

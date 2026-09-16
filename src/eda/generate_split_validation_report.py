@@ -26,6 +26,73 @@ SPLIT_LABELS = {
     "fold4": "Fold 4",
 }
 
+# Per-fold colours, siblings of the shared palette (--f0..--f4) so the grid
+# doesn't compete with the --pos/--neg/--amber/--good vocabulary used
+# elsewhere; TEST reuses --amber since every other table already marks TEST
+# rows with the amber wash.
+FOLD_COLOR_VARS = ["var(--f0)", "var(--f1)", "var(--f2)", "var(--f3)", "var(--f4)"]
+
+SPLIT_CSS = """
+:root { --f0: #3b6e8f; --f1: #4f8f6e; --f2: #a3843a; --f3: #7a5a9e; --f4: #a1516f; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --f0: #6fa3c4; --f1: #7dc19c; --f2: #d1ab5f; --f3: #a98cd1; --f4: #d0839e; }
+}
+:root[data-theme="dark"] { --f0: #6fa3c4; --f1: #7dc19c; --f2: #d1ab5f; --f3: #a98cd1; --f4: #d0839e; }
+
+.match-grid-frame { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 8px 0 8px; }
+.match-grid-caption { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-muted); text-align: center; padding-top: 12px; border-top: 1px dashed var(--gridline); margin-top: 10px; }
+.match-legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 28px; }
+.match-legend-chip { display: flex; align-items: center; gap: 7px; font-family: "JetBrains Mono", monospace; font-size: 11px; padding: 5px 10px 5px 8px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); }
+.match-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+"""
+
+
+def _fold_color(label: str) -> str:
+    if label == "test":
+        return "var(--amber)"
+    return FOLD_COLOR_VARS[int(label.replace("fold", "")) % len(FOLD_COLOR_VARS)]
+
+
+def _match_grid_svg(match_assignment: dict[str, str]) -> str:
+    """Every one of the 115 matches as one tile, coloured by split
+    assignment -- generated straight from match_assignment.json, not
+    illustrative. Static SVG (no client-side JS), matching every other
+    report's server-rendered-only approach."""
+    match_ids = sorted(match_assignment.keys(), key=int)
+    cols, cell, gap, ox, oy = 15, 60, 8, 20, 20
+    rows = -(-len(match_ids) // cols)
+
+    tiles = []
+    for idx, mid in enumerate(match_ids):
+        col, row = idx % cols, idx // cols
+        x, y = ox + col * cell, oy + row * cell
+        color = _fold_color(match_assignment[mid])
+        opacity = "1" if match_assignment[mid] == "test" else "0.85"
+        tiles.append(
+            f'<rect x="{x}" y="{y}" width="{cell - gap}" height="{cell - gap}" rx="4" '
+            f'fill="{color}" opacity="{opacity}"></rect>'
+            f'<text x="{x + (cell - gap) / 2}" y="{y + (cell - gap) / 2 + 4}" '
+            f'text-anchor="middle" font-size="10" font-family="JetBrains Mono, monospace" '
+            f'fill="#fff" opacity="0.9">{esc(mid[-3:])}</text>'
+        )
+
+    legend = [("test", "Test (held out, 23 matches)")] + [(f"fold{i}", f"Fold {i} (CV)") for i in range(5)]
+    legend_html = "".join(
+        f'<div class="match-legend-chip"><span class="match-legend-dot" '
+        f'style="background:{_fold_color(key)}"></span>{esc(label)}</div>'
+        for key, label in legend
+    )
+
+    return f"""
+<div class="match-grid-frame">
+  <svg viewBox="0 0 {ox * 2 + cols * cell} {oy * 2 + rows * cell + 20}" role="img"
+       aria-label="Grid of all 115 matches, each one tile coloured by its split assignment.">
+    {''.join(tiles)}
+  </svg>
+  <p class="match-grid-caption">115 matches, one tile each &mdash; coloured by split assignment, read straight from match_assignment.json.</p>
+</div>
+<div class="match-legend">{legend_html}</div>"""
+
 
 def _leg_table(leg_key: str, leg: dict) -> str:
     max_rate = max((r["shot_rate_pct"] or 0) for r in leg["by_split"]) * 1.15 or 1.0
@@ -88,6 +155,10 @@ def build_report(data: dict) -> str:
 across {data['n_folds']} folds.
 </div>
 
+<h2>Every match, one tile</h2>
+<p class="section-note">Same split, drawn instead of tabulated -- read straight from the frozen match_assignment.json.</p>
+{_match_grid_svg(data['match_assignment'])}
+
 <h2>Integrity checks</h2>
 <p class="section-note">Mirrors tests/test_canonical_split.py -- these run as real regression tests, not one-off prints; this report surfaces the same checks for readability.</p>
 {_integrity_ledger(data['integrity_checks'])}
@@ -118,7 +189,7 @@ silently break comparability between the active and passive legs and between pas
             (f"{sum(1 for c in data['integrity_checks'] if c['passed'])}/{len(data['integrity_checks'])}", "integrity checks passed"),
         ],
         body_html=body,
-        extra_css=render.CORR_CSS + render.VIF_CSS,
+        extra_css=render.CORR_CSS + render.VIF_CSS + SPLIT_CSS,
     )
 
 

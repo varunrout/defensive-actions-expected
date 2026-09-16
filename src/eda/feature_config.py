@@ -141,12 +141,12 @@ REDUNDANCY_DROPPED_PASSIVE = {
     # don't). The underlying target_x/y computation stays in
     # passive_defense.py (dx = target_x - ball_x needs it as an intermediate
     # value) -- only removed from the candidate feature list here.
-    "top_option_1_target_x": "Raw absolute coordinate, superseded by ball-relative top_option_1_dx/dy/distance_from_ball/angle_from_ball (prompt 4/4 Part A); correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy -- see prompt 6/6",
-    "top_option_1_target_y": "Raw absolute coordinate, superseded by ball-relative top_option_1_dx/dy/distance_from_ball/angle_from_ball (prompt 4/4 Part A); correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy -- see prompt 6/6",
-    "top_option_2_target_x": "Raw absolute coordinate, superseded by ball-relative top_option_2_dx/dy/distance_from_ball/angle_from_ball (prompt 4/4 Part A); correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy -- see prompt 6/6",
-    "top_option_2_target_y": "Raw absolute coordinate, superseded by ball-relative top_option_2_dx/dy/distance_from_ball/angle_from_ball (prompt 4/4 Part A); correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy -- see prompt 6/6",
-    "top_option_3_target_x": "Raw absolute coordinate, superseded by ball-relative top_option_3_dx/dy/distance_from_ball/angle_from_ball (prompt 4/4 Part A); correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy -- see prompt 6/6",
-    "top_option_3_target_y": "Raw absolute coordinate, superseded by ball-relative top_option_3_dx/dy/distance_from_ball/angle_from_ball (prompt 4/4 Part A); correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy -- see prompt 6/6",
+    "top_option_1_target_x": "Raw absolute coordinate, superseded by ball-relative top_option_1_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
+    "top_option_1_target_y": "Raw absolute coordinate, superseded by ball-relative top_option_1_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
+    "top_option_2_target_x": "Raw absolute coordinate, superseded by ball-relative top_option_2_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
+    "top_option_2_target_y": "Raw absolute coordinate, superseded by ball-relative top_option_2_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
+    "top_option_3_target_x": "Raw absolute coordinate, superseded by ball-relative top_option_3_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
+    "top_option_3_target_y": "Raw absolute coordinate, superseded by ball-relative top_option_3_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
 }
 
 # Part B (deferred): whether to collapse top_option_2/3_* into aggregate

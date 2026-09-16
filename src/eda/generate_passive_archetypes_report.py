@@ -61,7 +61,47 @@ PASSIVE_CSS = """
 .cc-full { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 6px 0 0; padding-top: 6px; border-top: 1px dashed var(--border); }
 .cc-full .drift { color: var(--amber); font-weight: 700; }
 .drift-callout { margin: 20px 0 32px; }
+.cc-name { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 15px; color: var(--cluster-color, var(--text-primary)); margin: 0 0 2px; }
+.cc-mechanical { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); margin: 0 0 3px; }
 """
+
+# Human-readable archetype names, keyed by (bucket, dominant feature, sign of
+# its standardised diff) rather than by cluster_id -- cluster_id is an
+# arbitrary KMeans label that can swap between 0/1 on a rerun, but which
+# feature dominates in which direction is a stable fact about the cluster's
+# behaviour. Curated once, by hand, from the current PASSIVE_ARCHETYPES.json;
+# falls back to the mechanical name (never breaks) if a rerun's dominant
+# feature isn't in this table -- e.g. a new bucket, or the top feature
+# changing because the underlying data changed.
+ENGAGEMENT_FAMILY = {
+    "overload_score",
+    "lane_screening_score_option_1",
+    "lane_screening_score_option_2",
+    "lane_screening_score_option_3",
+}
+HUMAN_ARCHETYPE_NAMES: dict[tuple[str, str, bool], str] = {
+    ("last_line", "overload_score", True): "The Sweeper",
+    ("last_line", "overload_score", False): "The Last Man",
+    ("wide_cover", "is_wide_lane", True): "The Touchline Screen",
+    ("wide_cover", "is_wide_lane", False): "The Tucked Cover",
+    ("central_screen", "overload_score", True): "The Lane Blocker",
+    ("central_screen", "overload_score", False): "The Passive Screen",
+    ("advanced_wide", "is_wide_lane", True): "The Touchline Presser",
+    ("advanced_wide", "is_wide_lane", False): "The Tucked Winger",
+    ("mid_block", "attacking_goal_centrality", True): "The Holding Central",
+    ("mid_block", "attacking_goal_centrality", False): "The Covering Wide",
+}
+
+
+def _human_archetype_name(bucket_key: str, top_features: list[dict]) -> str | None:
+    for entry in top_features:
+        feature = entry["feature"]
+        if feature in ENGAGEMENT_FAMILY:
+            feature = "overload_score"  # any member of the family is read the same way
+        key = (bucket_key, feature, entry["standardised_diff"] > 0)
+        if key in HUMAN_ARCHETYPE_NAMES:
+            return HUMAN_ARCHETYPE_NAMES[key]
+    return None
 
 
 def _cluster_color(idx: int) -> str:
@@ -93,7 +133,7 @@ def _cluster_full_population_line(cluster_full: dict | None) -> str:
     )
 
 
-def _cluster_card(cluster: dict, idx: int, n_clusters: int, cluster_full: dict | None) -> str:
+def _cluster_card(cluster: dict, idx: int, n_clusters: int, cluster_full: dict | None, bucket_key: str) -> str:
     own_color = _cluster_color(idx)
     other_color = _cluster_color(idx + 1) if n_clusters > 1 else own_color
     max_abs = max((abs(d["standardised_diff"]) for d in cluster["top_distinguishing_features"]), default=1.0) or 1.0
@@ -101,11 +141,17 @@ def _cluster_card(cluster: dict, idx: int, n_clusters: int, cluster_full: dict |
     delta = cluster["shot_rate_delta_vs_bucket_pp"]
     delta_str = f"{delta:+.2f}pp vs bucket" if delta else "at bucket average"
 
+    human_name = _human_archetype_name(bucket_key, cluster["top_distinguishing_features"])
+    name_html = (
+        f'<p class="cc-name">{esc(human_name)}</p><p class="cc-mechanical">{esc(cluster["name"])}</p>'
+        if human_name else f'<p class="cc-archetype">{esc(cluster["name"])}</p>'
+    )
+
     return f"""
 <div class="cluster-card" style="--cluster-color:{own_color};">
   <div class="cc-head">
     <div>
-      <p class="cc-archetype">{esc(cluster['name'])}</p>
+      {name_html}
       <p class="cc-n">n={cluster['n']:,} &middot; {cluster['share_of_bucket_sample']}% of sample</p>
     </div>
     <div class="cc-rate">
@@ -143,7 +189,7 @@ def _bucket_section(bucket_key: str, b: dict) -> str:
     n_clusters = len(b["clusters"])
     full_by_id = {c["cluster_id"]: c for c in b.get("full_population", {}).get("clusters_full", [])}
     cluster_cards = "".join(
-        _cluster_card(c, i, n_clusters, full_by_id.get(c["cluster_id"])) for i, c in enumerate(b["clusters"])
+        _cluster_card(c, i, n_clusters, full_by_id.get(c["cluster_id"]), bucket_key) for i, c in enumerate(b["clusters"])
     )
 
     stats = f"""

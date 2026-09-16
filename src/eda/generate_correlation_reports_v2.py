@@ -21,6 +21,8 @@ from src.eda.feature_config import DATASETS
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CORRELATION_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS_V2.json"
 REVIEW_PATH = REPO_ROOT / "reports" / "eda" / "REVIEW_ANALYSIS_V2.json"
+V1_CORRELATION_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS_V1_HISTORICAL.json"
+V1_REVIEW_PATH = REPO_ROOT / "reports" / "eda" / "REVIEW_ANALYSIS_V1_HISTORICAL.json"
 ATLAS_OUTPUT = REPO_ROOT / "reports" / "eda" / "CORRELATION_ATLAS_V2.html"
 METHODOLOGY_OUTPUT = REPO_ROOT / "reports" / "eda" / "REVIEW_METHODOLOGY_V2.html"
 
@@ -109,14 +111,50 @@ def _dataset_block(ds_key: str, ds: dict) -> str:
 </div>"""
 
 
-def build_correlation_atlas(data: dict) -> str:
+def _v1_vs_v2_banner(v1_data: dict | None, v2_data: dict) -> str:
+    """Computed live from both JSONs on every render -- never a hand-typed
+    number that can drift. V1 (stage 01) and V2 (stage 07) are genuinely
+    different snapshots: the feature-count drop between them is real
+    (structural-redesign + collapse-tier + raw-coordinate-drop landed in
+    between), and V2 also fixed a methodology gap (no categorical REVIEW
+    band existed yet at V1)."""
+    if v1_data is None:
+        return ""
+    rows = []
+    for ds_key in ("active", "passive"):
+        v1_ds, v2_ds = v1_data["datasets"][ds_key], v2_data["datasets"][ds_key]
+        rows.append(
+            f'<tr><td>{esc(ds_key.title())}</td>'
+            f'<td>{v1_ds["n_features"]}</td><td>{v2_ds["n_features"]}</td>'
+            f'<td>{v1_ds["tier_counts"]["review"]}</td><td>{v2_ds["tier_counts"]["review"]}</td>'
+            f'<td>{v2_ds["n_features"] - v1_ds["n_features"]:+d}</td></tr>'
+        )
+    return f"""
+<div class="finding" style="margin-bottom:24px;">
+<span class="tag">what changed vs V1</span>
+<p>V1 (<a href="CORRELATION_ATLAS.html" style="color:var(--neg);">CORRELATION_ATLAS.html</a>) is stage 01's
+original 51/44-feature scope; this page is stage 07's 36/39, after the structural-redesign and
+collapse-tier/raw-coordinate-drop stages already ran. Two things changed between them, not one: the feature
+count actually dropped, <b>and</b> V2 adds a categorical REVIEW band (Cramer's V 0.3-0.4, &eta; 0.5-0.6) that
+V1's tiering has no equivalent for. See
+<a href="CORRELATION_ATLAS_V3.html" style="color:var(--neg);">CORRELATION_ATLAS_V3.html</a> for the final
+locked list (34/38), scored on TRAIN+VAL matches only.</p>
+<div class="table-scroll"><table class="evidence-ledger" style="margin-top:10px;">
+<tr><th>Dataset</th><th>Features (V1)</th><th>Features (V2)</th><th>Review pairs (V1)</th><th>Review pairs (V2)</th><th>Feature-count diff</th></tr>
+{''.join(rows)}
+</table></div>
+</div>"""
+
+
+def build_correlation_atlas(data: dict, v1_data: dict | None = None) -> str:
     datasets = data["datasets"]
     total_drop = sum(d["tier_counts"]["drop"] for d in datasets.values())
     total_collapse = sum(d["tier_counts"]["collapse"] for d in datasets.values())
     total_review = sum(d["tier_counts"]["review"] for d in datasets.values())
     total_distinct = sum(d["tier_counts"]["distinct_total"] for d in datasets.values())
 
-    body = _method_strip()
+    body = _v1_vs_v2_banner(v1_data, data)
+    body += _method_strip()
     for ds_key in ("active", "passive"):
         body += _dataset_block(ds_key, datasets[ds_key])
 
@@ -254,13 +292,13 @@ not "drop one side." Two root causes showed up in the passive-side <code>top_opt
 pitch coordinates encoded near a moving reference point (the ball), and several ranked/repeated columns describing
 the same real-world cluster of objects (ranked attacking options).</p>
 
-<h3 style="margin-top:28px;">Part A -- DONE (prompt 4/4 + 6/6)</h3>
+<h3 style="margin-top:28px;">Part A -- DONE</h3>
 <p><code>top_option_{{1,2,3}}_target_x/y</code> were absolute pitch coordinates, which is why they correlated
 0.68-0.88 with <code>ball_x</code> and with each other -- the same absolute position meant something different
 depending on where the ball was. Replaced with <code>top_option_n_dx/dy</code> (offset from the ball),
-<code>top_option_n_distance_from_ball</code>, and <code>top_option_n_angle_from_ball</code> (prompt 4/4 Part A),
-kept alongside the raw columns during a transition period, then the raw <code>target_x/y</code> columns were
-dropped from the candidate feature list once the fix was confirmed working (prompt 6/6) -- correlation with
+<code>top_option_n_distance_from_ball</code>, and <code>top_option_n_angle_from_ball</code>, kept alongside
+the raw columns during a transition period, then the raw <code>target_x/y</code> columns were dropped from the
+candidate feature list once the fix was confirmed working -- correlation with
 <code>ball_x</code>/<code>defender_x</code> is gone from the output entirely, not just re-tiered.</p>
 
 <h3 style="margin-top:28px;">Part B -- still deferred, Cluster 5 ({len(cluster5_pairs)} pairs)</h3>
@@ -290,7 +328,24 @@ together.</div>
 """
 
 
-def build_review_methodology(review_data: dict, correlation_data: dict) -> str:
+def _hcall_backlog_banner(v1_review: dict | None, v2_review: dict) -> str:
+    if v1_review is None:
+        return ""
+    n_v1 = sum(len(ds["needs_human_call"]) for ds in v1_review["datasets"].values())
+    n_v2 = sum(len(ds["needs_human_call"]) for ds in v2_review["datasets"].values())
+    return f"""
+<div class="finding flag" style="margin-bottom:24px;">
+<span class="tag">backlog vs V1</span>
+<p>V1's needs_human_call backlog was <b>{n_v1} pairs</b>, on the 51/44-feature scope
+(<a href="REVIEW_METHODOLOGY.html" style="color:var(--amber);">REVIEW_METHODOLOGY.html</a>). This page's backlog
+is <b>{n_v2}</b> pairs, on the smaller 36/39-feature scope -- the two numbers aren't purely a methodology
+comparison, since most of the drop is fewer features/pairs existing at all by stage 07, not Types 5/6 resolving
+more. The remaining {n_v2} are genuinely open questions (mostly the passive-side
+<code>top_option_2/3_threat_score</code> family), not gaps in the resolution logic.</p>
+</div>"""
+
+
+def build_review_methodology(review_data: dict, correlation_data: dict, v1_review_data: dict | None = None) -> str:
     active = review_data["datasets"]["active"]
     passive = review_data["datasets"]["passive"]
 
@@ -340,13 +395,14 @@ def build_review_methodology(review_data: dict, correlation_data: dict) -> str:
     n_hcall_active = len(active["needs_human_call"])
     n_hcall_passive = len(passive["needs_human_call"])
 
-    body = f"""
+    body = _hcall_backlog_banner(v1_review_data, review_data)
+    body += f"""
 <div class="rule-banner"><b>Correlation says two features move together -- never which one (or whether either)
 matters.</b> Every verdict on this page traces to a lift number (the actual shot-rate difference), not the
 r-value alone. The r-value only got a pair onto this list; it never decided the verdict.</div>
 
 <h2 style="margin-top:36px;">The five relationship types</h2>
-<p class="section-note">Types 1, 2 and 4 are from V1 (prompts 1/4-2/4); Types 5 and 6 (V2, prompt 7/7) close the two gaps V1 left open -- categorical pairs that were tiered and then never processed, and a blanket "no rule" fallback for continuous↔continuous pairs.</p>
+<p class="section-note">Types 1, 2 and 4 are from V1; Types 5 and 6 (V2) close the two gaps V1 left open -- categorical pairs that were tiered and then never processed, and a blanket "no rule" fallback for continuous↔continuous pairs.</p>
 <div class="framework-grid">{framework_html}</div>
 
 <div class="hcall-panel">
@@ -393,12 +449,14 @@ r-value alone. The r-value only got a pair onto this list; it never decided the 
 def main() -> None:
     correlation_data = json.loads(CORRELATION_PATH.read_text(encoding="utf-8"))
     review_data = json.loads(REVIEW_PATH.read_text(encoding="utf-8"))
+    v1_correlation_data = json.loads(V1_CORRELATION_PATH.read_text(encoding="utf-8")) if V1_CORRELATION_PATH.exists() else None
+    v1_review_data = json.loads(V1_REVIEW_PATH.read_text(encoding="utf-8")) if V1_REVIEW_PATH.exists() else None
 
-    atlas_html = build_correlation_atlas(correlation_data)
+    atlas_html = build_correlation_atlas(correlation_data, v1_correlation_data)
     ATLAS_OUTPUT.write_text(atlas_html, encoding="utf-8")
     print(f"Wrote {ATLAS_OUTPUT}")
 
-    methodology_html = build_review_methodology(review_data, correlation_data)
+    methodology_html = build_review_methodology(review_data, correlation_data, v1_review_data)
     METHODOLOGY_OUTPUT.write_text(methodology_html, encoding="utf-8")
     print(f"Wrote {METHODOLOGY_OUTPUT}")
 

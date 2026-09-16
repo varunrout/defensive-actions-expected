@@ -21,6 +21,23 @@ OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "VIF_ANALYSIS.html"
 THRESHOLD_LOW = 5
 THRESHOLD_HIGH = 10
 
+VIF_EXTRA_CSS = """
+.vif-unbounded-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; font-weight: 700;
+  color: var(--pos); background: rgba(227,73,72,0.12); border: 1px solid rgba(227,73,72,0.35);
+  border-radius: 4px; padding: 2px 6px; letter-spacing: 0.02em;
+}
+.cond-badge.severe { border-color: rgba(227,73,72,0.4); color: var(--pos); background: rgba(227,73,72,0.08); }
+.cond-badge.warn { border-color: rgba(237,161,0,0.4); color: var(--amber); background: var(--amber-wash); }
+"""
+
+
+def _condition_badge(cond: float | None, converged: bool) -> str:
+    if not converged or cond is None:
+        return '<span class="cond-badge severe">condition number: &infin; (SVD did not converge)</span>'
+    sev = "severe" if cond >= 1e10 else "warn" if cond >= 1e5 else ""
+    return f'<span class="cond-badge {sev}">correlation-matrix condition number: {cond:.3e}</span>'
+
 
 def _vif_severity(v: float | None) -> str:
     if v is None:
@@ -43,7 +60,10 @@ def _vif_chart(vif_list: list[dict], max_display: float | None = None, show_lege
     for v in vif_list:
         sev = _vif_severity(v["vif"])
         cls = f"vif-fill {sev}".strip()
-        val_str = f"{v['vif']:.2f}" if v["vif"] is not None else "∞"
+        val_str = (
+            f'<span class="vif-unbounded-badge">UNBOUNDED</span>' if v["vif"] is None
+            else f"{v['vif']:.2f}"
+        )
         width = pct(v["vif"]) if v["vif"] is not None else 100.0
         rows.append(f"""
 <div class="vif-row">
@@ -72,8 +92,6 @@ def _vif_chart(vif_list: list[dict], max_display: float | None = None, show_lege
 
 def _dataset_section(ds_key: str, ds: dict) -> str:
     dataset_cfg = DATASETS[ds_key]
-    cond = ds["condition_number"]
-    cond_str = "∞ (SVD did not converge)" if not ds["svd_converged"] else f"{cond:.3e}"
 
     constant_note = ""
     if ds["constant_columns_excluded"]:
@@ -90,11 +108,11 @@ requires complete cases across every candidate column at once) — not truly con
 <div class="vif-dataset-block">
   <h2 class="dataset-title">{esc(dataset_cfg['label'])}</h2>
   <p class="dataset-substat">{esc(dataset_cfg['parquet_path'])}</p>
-  <div class="statbar" style="margin-bottom:20px;">
+  <div class="statbar" style="margin-bottom:10px;">
     <div class="stat"><b>{ds['n_rows_used']:,}</b><span>complete-case rows</span></div>
     <div class="stat"><b>{ds['n_features_used_in_vif']}</b><span>features in VIF</span></div>
-    <div class="stat"><b>{cond_str}</b><span>correlation matrix condition #</span></div>
   </div>
+  <div style="margin-bottom:20px;">{_condition_badge(ds["condition_number"], ds["svd_converged"])}</div>
   <div class="finding" style="margin-bottom:20px;">
   <span class="tag">limitation</span>
   <p>{esc(ds['categorical_excluded_caveat'])}</p>
@@ -170,7 +188,7 @@ feature. VIF ≥ 10 (R² ≥ 0.9) is conventionally severe; this report also mar
             (datasets["passive"]["n_features_used_in_vif"], "passive features (VIF)"),
         ],
         body_html=body,
-        extra_css=render.VIF_CSS,
+        extra_css=render.VIF_CSS + VIF_EXTRA_CSS,
     )
 
 
