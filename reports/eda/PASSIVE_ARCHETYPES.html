@@ -583,6 +583,10 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 .bar-fill.pos { left: 50%; }
 .bar-fill.neg { right: 50%; }
 .bar-value { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); text-align: right; }
+
+.cc-full { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 6px 0 0; padding-top: 6px; border-top: 1px dashed var(--border); }
+.cc-full .drift { color: var(--amber); font-weight: 700; }
+.drift-callout { margin: 20px 0 32px; }
 </style>
 </head>
 <body>
@@ -597,12 +601,13 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 
 <div class="finding flag" style="margin-bottom:24px;">
 <span class="tag">sampling limitation</span>
-<p>For tractability, each bucket is clustered on a sample of at most 30,000 rows (fixed seed 42), not the full population -- mid_block alone has 838,270 rows. This is an explicit, named limitation, not a silent shortcut: cluster sizes/shares/shot-rates below are computed on the sample, not the full bucket.</p>
+<p>For tractability, each bucket is clustered on a sample of at most 30,000 rows (fixed seed 42), not the full population -- mid_block alone has 838,270 rows. This is an explicit, named limitation, not a silent shortcut: cluster sizes/shares/shot-rates below are computed on the sample, not the full bucket. The fitted pipeline is then reused (transform + predict only, no refitting) to label every row in the bucket, and each cluster&#x27;s &#x27;full_population&#x27; block reports the same stats recomputed over that full population, so the two can be compared directly.</p>
 </div>
 <div class="finding" style="margin-bottom:32px;">
 <span class="tag">method</span>
 <p>Median-impute missing, StandardScaler. KMeans swept over k in {2,3,4,5} (n_init=10, fixed seed), selected via the same percentile-rank multi-metric approach as dax.analysis.clustering.evaluate_cluster_solutions (silhouette, Calinski-Harabasz, inverse Davies-Bouldin, size balance) minus the subsample-stability term. Final model refit at the selected k with n_init=20 for stability. Cluster archetypes are named from their top standardised-difference features, not by arbitrary KMeans label index (0/1 are not consistent in meaning across buckets or reruns).</p>
 </div>
+<div class="finding" style="margin-bottom:32px;"><span class="tag">full population check</span><p>No cluster's full-population shot rate or share disagreed meaningfully with its sample-based figure -- the ≤30,000-row samples were representative.</p></div>
 
 <div class="bucket-section">
   <div class="bucket-head">
@@ -623,113 +628,115 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 
 <tr style="background:var(--good-wash);">
   <td>2 &larr; selected</td>
-  <td>0.307</td>
-  <td>4791.6</td>
-  <td>1.861</td>
-  <td>0.247</td>
-  <td>0.688</td>
+  <td>0.299</td>
+  <td>4615.3</td>
+  <td>1.947</td>
+  <td>0.256</td>
+  <td>0.812</td>
 </tr>
 <tr>
   <td>3</td>
-  <td>0.310</td>
-  <td>4268.2</td>
-  <td>1.596</td>
-  <td>0.078</td>
-  <td>0.688</td>
+  <td>0.192</td>
+  <td>4114.2</td>
+  <td>1.979</td>
+  <td>0.277</td>
+  <td>0.562</td>
 </tr>
 <tr>
   <td>4</td>
-  <td>0.311</td>
-  <td>4079.5</td>
-  <td>1.333</td>
-  <td>0.018</td>
-  <td>0.688</td>
+  <td>0.194</td>
+  <td>4057.4</td>
+  <td>1.516</td>
+  <td>0.001</td>
+  <td>0.562</td>
 </tr>
 <tr>
   <td>5</td>
-  <td>0.160</td>
-  <td>4114.3</td>
-  <td>1.377</td>
-  <td>0.000</td>
-  <td>0.438</td>
+  <td>0.190</td>
+  <td>4121.7</td>
+  <td>1.301</td>
+  <td>0.001</td>
+  <td>0.562</td>
 </tr>
 </table></div>
   <div class="cluster-grid">
 <div class="cluster-card" style="--cluster-color:var(--neg);">
   <div class="cc-head">
     <div>
-      <p class="cc-archetype">low overload, low lane screening  opt 1</p>
-      <p class="cc-n">n=24,067 &middot; 80.22% of sample</p>
+      <p class="cc-archetype">high overload, high lane screening  opt 1</p>
+      <p class="cc-n">n=6,109 &middot; 20.36% of sample</p>
     </div>
     <div class="cc-rate">
-      <b>6.091%</b>
-      <span class="delta">+0.32pp vs bucket</span>
+      <b>4.682%</b>
+      <span class="delta">-1.09pp vs bucket</span>
     </div>
   </div>
   <div class="bars">
 <div class="bar-row">
   <div class="bar-label" title="overload score">overload score</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:50.00%; background:var(--amber);"></div></div>
-  <div class="bar-value">-0.36</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:50.00%; background:var(--neg);"></div></div>
+  <div class="bar-value">+1.47</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="lane screening score option 1">lane screening score option 1</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:42.86%; background:var(--amber);"></div></div>
-  <div class="bar-value">-0.31</div>
-</div>
-<div class="bar-row">
-  <div class="bar-label" title="lane screening score option 3">lane screening score option 3</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:41.17%; background:var(--amber);"></div></div>
-  <div class="bar-value">-0.30</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:41.97%; background:var(--neg);"></div></div>
+  <div class="bar-value">+1.23</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="lane screening score option 2">lane screening score option 2</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:41.14%; background:var(--amber);"></div></div>
-  <div class="bar-value">-0.30</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:40.89%; background:var(--neg);"></div></div>
+  <div class="bar-value">+1.20</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label" title="lane screening score option 3">lane screening score option 3</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:39.85%; background:var(--neg);"></div></div>
+  <div class="bar-value">+1.17</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:35.30%; background:var(--neg);"></div></div>
-  <div class="bar-value">+0.26</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:34.17%; background:var(--amber);"></div></div>
+  <div class="bar-value">-1.00</div>
 </div></div>
+  <p class="cc-full">full population: n=44,286 &middot; 20.45% of bucket &middot; shot rate 5.121%</p>
 </div>
 <div class="cluster-card" style="--cluster-color:var(--amber);">
   <div class="cc-head">
     <div>
-      <p class="cc-archetype">high overload, high lane screening  opt 1</p>
-      <p class="cc-n">n=5,933 &middot; 19.78% of sample</p>
+      <p class="cc-archetype">low overload, low lane screening  opt 1</p>
+      <p class="cc-n">n=23,891 &middot; 79.64% of sample</p>
     </div>
     <div class="cc-rate">
-      <b>4.467%</b>
-      <span class="delta">-1.30pp vs bucket</span>
+      <b>6.048%</b>
+      <span class="delta">+0.28pp vs bucket</span>
     </div>
   </div>
   <div class="bars">
 <div class="bar-row">
   <div class="bar-label" title="overload score">overload score</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:50.00%; background:var(--amber);"></div></div>
-  <div class="bar-value">+1.48</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:50.00%; background:var(--neg);"></div></div>
+  <div class="bar-value">-0.38</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="lane screening score option 1">lane screening score option 1</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:42.85%; background:var(--amber);"></div></div>
-  <div class="bar-value">+1.27</div>
-</div>
-<div class="bar-row">
-  <div class="bar-label" title="lane screening score option 3">lane screening score option 3</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:41.17%; background:var(--amber);"></div></div>
-  <div class="bar-value">+1.22</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:41.96%; background:var(--neg);"></div></div>
+  <div class="bar-value">-0.32</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="lane screening score option 2">lane screening score option 2</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:41.14%; background:var(--amber);"></div></div>
-  <div class="bar-value">+1.21</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:40.89%; background:var(--neg);"></div></div>
+  <div class="bar-value">-0.31</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label" title="lane screening score option 3">lane screening score option 3</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:39.85%; background:var(--neg);"></div></div>
+  <div class="bar-value">-0.30</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:35.30%; background:var(--neg);"></div></div>
-  <div class="bar-value">-1.04</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:34.18%; background:var(--amber);"></div></div>
+  <div class="bar-value">+0.26</div>
 </div></div>
+  <p class="cc-full">full population: n=172,265 &middot; 79.55% of bucket &middot; shot rate 5.854%</p>
 </div></div>
 </div>
 <div class="bucket-section">
@@ -751,34 +758,34 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 
 <tr style="background:var(--good-wash);">
   <td>2 &larr; selected</td>
-  <td>0.272</td>
-  <td>5276.6</td>
-  <td>1.896</td>
-  <td>0.366</td>
+  <td>0.262</td>
+  <td>4988.6</td>
+  <td>1.987</td>
+  <td>0.376</td>
   <td>0.812</td>
 </tr>
 <tr>
   <td>5</td>
-  <td>0.260</td>
-  <td>5037.3</td>
-  <td>1.102</td>
-  <td>0.000</td>
+  <td>0.250</td>
+  <td>4819.2</td>
+  <td>1.182</td>
+  <td>0.003</td>
   <td>0.688</td>
 </tr>
 <tr>
   <td>3</td>
-  <td>0.226</td>
-  <td>4985.4</td>
-  <td>1.806</td>
-  <td>0.158</td>
+  <td>0.223</td>
+  <td>4722.3</td>
+  <td>1.852</td>
+  <td>0.147</td>
   <td>0.500</td>
 </tr>
 <tr>
   <td>4</td>
-  <td>0.258</td>
-  <td>4966.4</td>
-  <td>1.347</td>
-  <td>0.112</td>
+  <td>0.243</td>
+  <td>4615.9</td>
+  <td>1.412</td>
+  <td>0.128</td>
   <td>0.500</td>
 </tr>
 </table></div>
@@ -787,77 +794,79 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <div class="cc-head">
     <div>
       <p class="cc-archetype">low is wide lane, high attacking goal centrality</p>
-      <p class="cc-n">n=21,963 &middot; 73.21% of sample</p>
+      <p class="cc-n">n=21,796 &middot; 72.65% of sample</p>
     </div>
     <div class="cc-rate">
-      <b>4.134%</b>
-      <span class="delta">-0.58pp vs bucket</span>
+      <b>4.161%</b>
+      <span class="delta">-0.55pp vs bucket</span>
     </div>
   </div>
   <div class="bars">
 <div class="bar-row">
   <div class="bar-label" title="is wide lane">is wide lane</div>
   <div class="bar-track"><div class="bar-fill neg" style="width:50.00%; background:var(--amber);"></div></div>
-  <div class="bar-value">-0.43</div>
+  <div class="bar-value">-0.47</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="attacking goal centrality">attacking goal centrality</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:43.07%; background:var(--neg);"></div></div>
-  <div class="bar-value">+0.37</div>
-</div>
-<div class="bar-row">
-  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:40.75%; background:var(--neg);"></div></div>
-  <div class="bar-value">+0.35</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:42.68%; background:var(--neg);"></div></div>
+  <div class="bar-value">+0.40</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="angle to attacking goal">angle to attacking goal</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:38.03%; background:var(--amber);"></div></div>
-  <div class="bar-value">-0.33</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:38.11%; background:var(--amber);"></div></div>
+  <div class="bar-value">-0.35</div>
 </div>
 <div class="bar-row">
-  <div class="bar-label" title="overload score">overload score</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:30.95%; background:var(--amber);"></div></div>
-  <div class="bar-value">-0.27</div>
+  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:35.12%; background:var(--neg);"></div></div>
+  <div class="bar-value">+0.33</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label" title="lane screening score option 2">lane screening score option 2</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:26.71%; background:var(--amber);"></div></div>
+  <div class="bar-value">-0.25</div>
 </div></div>
+  <p class="cc-full">full population: n=122,849 &middot; 72.72% of bucket &middot; shot rate 4.355%</p>
 </div>
 <div class="cluster-card" style="--cluster-color:var(--amber);">
   <div class="cc-head">
     <div>
       <p class="cc-archetype">high is wide lane, low attacking goal centrality</p>
-      <p class="cc-n">n=8,037 &middot; 26.79% of sample</p>
+      <p class="cc-n">n=8,204 &middot; 27.35% of sample</p>
     </div>
     <div class="cc-rate">
-      <b>6.283%</b>
-      <span class="delta">+1.57pp vs bucket</span>
+      <b>6.168%</b>
+      <span class="delta">+1.46pp vs bucket</span>
     </div>
   </div>
   <div class="bars">
 <div class="bar-row">
   <div class="bar-label" title="is wide lane">is wide lane</div>
   <div class="bar-track"><div class="bar-fill pos" style="width:50.00%; background:var(--amber);"></div></div>
-  <div class="bar-value">+1.17</div>
+  <div class="bar-value">+1.24</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="attacking goal centrality">attacking goal centrality</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:43.08%; background:var(--neg);"></div></div>
-  <div class="bar-value">-1.01</div>
-</div>
-<div class="bar-row">
-  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:40.75%; background:var(--neg);"></div></div>
-  <div class="bar-value">-0.95</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:42.69%; background:var(--neg);"></div></div>
+  <div class="bar-value">-1.06</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="angle to attacking goal">angle to attacking goal</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:38.03%; background:var(--amber);"></div></div>
-  <div class="bar-value">+0.89</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:38.12%; background:var(--amber);"></div></div>
+  <div class="bar-value">+0.94</div>
 </div>
 <div class="bar-row">
-  <div class="bar-label" title="overload score">overload score</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:30.95%; background:var(--amber);"></div></div>
-  <div class="bar-value">+0.72</div>
+  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:35.13%; background:var(--neg);"></div></div>
+  <div class="bar-value">-0.87</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label" title="lane screening score option 2">lane screening score option 2</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:26.72%; background:var(--amber);"></div></div>
+  <div class="bar-value">+0.66</div>
 </div></div>
+  <p class="cc-full">full population: n=46,075 &middot; 27.28% of bucket &middot; shot rate 5.725%</p>
 </div></div>
 </div>
 <div class="bucket-section">
@@ -879,34 +888,34 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 
 <tr style="background:var(--good-wash);">
   <td>2 &larr; selected</td>
-  <td>0.224</td>
-  <td>4039.9</td>
-  <td>2.261</td>
-  <td>0.411</td>
+  <td>0.219</td>
+  <td>3832.0</td>
+  <td>2.330</td>
+  <td>0.391</td>
   <td>0.812</td>
 </tr>
 <tr>
-  <td>5</td>
-  <td>0.198</td>
-  <td>3805.4</td>
-  <td>1.329</td>
-  <td>0.000</td>
-  <td>0.750</td>
+  <td>4</td>
+  <td>0.185</td>
+  <td>3603.0</td>
+  <td>1.744</td>
+  <td>0.009</td>
+  <td>0.688</td>
 </tr>
 <tr>
   <td>3</td>
-  <td>0.192</td>
-  <td>3667.8</td>
-  <td>1.978</td>
-  <td>0.108</td>
-  <td>0.500</td>
+  <td>0.174</td>
+  <td>3509.9</td>
+  <td>2.053</td>
+  <td>0.112</td>
+  <td>0.562</td>
 </tr>
 <tr>
-  <td>4</td>
-  <td>0.192</td>
-  <td>3670.2</td>
-  <td>1.506</td>
-  <td>0.000</td>
+  <td>5</td>
+  <td>0.127</td>
+  <td>3491.4</td>
+  <td>1.632</td>
+  <td>0.002</td>
   <td>0.438</td>
 </tr>
 </table></div>
@@ -914,78 +923,80 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 <div class="cluster-card" style="--cluster-color:var(--neg);">
   <div class="cc-head">
     <div>
-      <p class="cc-archetype">high overload, low engagement distance to carrier</p>
-      <p class="cc-n">n=8,729 &middot; 29.1% of sample</p>
+      <p class="cc-archetype">low overload, low lane screening  opt 3</p>
+      <p class="cc-n">n=21,574 &middot; 71.91% of sample</p>
     </div>
     <div class="cc-rate">
-      <b>3.987%</b>
-      <span class="delta">-1.42pp vs bucket</span>
+      <b>5.854%</b>
+      <span class="delta">+0.45pp vs bucket</span>
     </div>
   </div>
   <div class="bars">
 <div class="bar-row">
   <div class="bar-label" title="overload score">overload score</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:50.00%; background:var(--neg);"></div></div>
-  <div class="bar-value">+1.10</div>
-</div>
-<div class="bar-row">
-  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:33.74%; background:var(--amber);"></div></div>
-  <div class="bar-value">-0.74</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:50.00%; background:var(--amber);"></div></div>
+  <div class="bar-value">-0.45</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="lane screening score option 3">lane screening score option 3</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:33.60%; background:var(--neg);"></div></div>
-  <div class="bar-value">+0.74</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:34.86%; background:var(--amber);"></div></div>
+  <div class="bar-value">-0.31</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="lane screening score option 2">lane screening score option 2</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:32.78%; background:var(--neg);"></div></div>
-  <div class="bar-value">+0.72</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:34.14%; background:var(--amber);"></div></div>
+  <div class="bar-value">-0.31</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="lane screening score option 1">lane screening score option 1</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:31.10%; background:var(--neg);"></div></div>
-  <div class="bar-value">+0.69</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:32.99%; background:var(--amber);"></div></div>
+  <div class="bar-value">-0.30</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:32.23%; background:var(--neg);"></div></div>
+  <div class="bar-value">+0.29</div>
 </div></div>
+  <p class="cc-full">full population: n=153,019 &middot; 71.83% of bucket &middot; shot rate 6.276%</p>
 </div>
 <div class="cluster-card" style="--cluster-color:var(--amber);">
   <div class="cc-head">
     <div>
-      <p class="cc-archetype">low overload, high engagement distance to carrier</p>
-      <p class="cc-n">n=21,271 &middot; 70.9% of sample</p>
+      <p class="cc-archetype">high overload, high lane screening  opt 3</p>
+      <p class="cc-n">n=8,426 &middot; 28.09% of sample</p>
     </div>
     <div class="cc-rate">
-      <b>5.985%</b>
-      <span class="delta">+0.58pp vs bucket</span>
+      <b>4.249%</b>
+      <span class="delta">-1.16pp vs bucket</span>
     </div>
   </div>
   <div class="bars">
 <div class="bar-row">
   <div class="bar-label" title="overload score">overload score</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:50.00%; background:var(--neg);"></div></div>
-  <div class="bar-value">-0.45</div>
-</div>
-<div class="bar-row">
-  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:33.74%; background:var(--amber);"></div></div>
-  <div class="bar-value">+0.31</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:50.00%; background:var(--amber);"></div></div>
+  <div class="bar-value">+1.15</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="lane screening score option 3">lane screening score option 3</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:33.61%; background:var(--neg);"></div></div>
-  <div class="bar-value">-0.30</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:34.86%; background:var(--amber);"></div></div>
+  <div class="bar-value">+0.80</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="lane screening score option 2">lane screening score option 2</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:32.78%; background:var(--neg);"></div></div>
-  <div class="bar-value">-0.30</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:34.14%; background:var(--amber);"></div></div>
+  <div class="bar-value">+0.78</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="lane screening score option 1">lane screening score option 1</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:31.10%; background:var(--neg);"></div></div>
-  <div class="bar-value">-0.28</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:32.99%; background:var(--amber);"></div></div>
+  <div class="bar-value">+0.76</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:32.23%; background:var(--neg);"></div></div>
+  <div class="bar-value">-0.74</div>
 </div></div>
+  <p class="cc-full">full population: n=60,024 &middot; 28.17% of bucket &middot; shot rate 4.455%</p>
 </div></div>
 </div>
 <div class="bucket-section">
@@ -1007,34 +1018,34 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 
 <tr style="background:var(--good-wash);">
   <td>2 &larr; selected</td>
-  <td>0.254</td>
-  <td>5054.6</td>
-  <td>2.058</td>
-  <td>0.428</td>
+  <td>0.243</td>
+  <td>4763.5</td>
+  <td>2.148</td>
+  <td>0.427</td>
   <td>0.812</td>
 </tr>
 <tr>
   <td>5</td>
-  <td>0.235</td>
-  <td>4622.8</td>
-  <td>1.147</td>
-  <td>0.000</td>
+  <td>0.230</td>
+  <td>4463.8</td>
+  <td>1.248</td>
+  <td>0.003</td>
   <td>0.688</td>
 </tr>
 <tr>
   <td>3</td>
-  <td>0.216</td>
-  <td>4591.1</td>
-  <td>1.858</td>
-  <td>0.212</td>
+  <td>0.206</td>
+  <td>4332.6</td>
+  <td>1.905</td>
+  <td>0.207</td>
   <td>0.500</td>
 </tr>
 <tr>
   <td>4</td>
-  <td>0.232</td>
-  <td>4531.9</td>
-  <td>1.413</td>
-  <td>0.077</td>
+  <td>0.212</td>
+  <td>4283.0</td>
+  <td>1.496</td>
+  <td>0.003</td>
   <td>0.500</td>
 </tr>
 </table></div>
@@ -1043,77 +1054,79 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <div class="cc-head">
     <div>
       <p class="cc-archetype">low is wide lane, high attacking goal centrality</p>
-      <p class="cc-n">n=20,976 &middot; 69.92% of sample</p>
+      <p class="cc-n">n=21,019 &middot; 70.06% of sample</p>
     </div>
     <div class="cc-rate">
-      <b>5.564%</b>
-      <span class="delta">+0.10pp vs bucket</span>
+      <b>5.619%</b>
+      <span class="delta">+0.15pp vs bucket</span>
     </div>
   </div>
   <div class="bars">
 <div class="bar-row">
   <div class="bar-label" title="is wide lane">is wide lane</div>
   <div class="bar-track"><div class="bar-fill neg" style="width:50.00%; background:var(--amber);"></div></div>
-  <div class="bar-value">-0.44</div>
+  <div class="bar-value">-0.46</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="attacking goal centrality">attacking goal centrality</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:45.00%; background:var(--neg);"></div></div>
-  <div class="bar-value">+0.39</div>
-</div>
-<div class="bar-row">
-  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:41.69%; background:var(--neg);"></div></div>
-  <div class="bar-value">+0.36</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:44.36%; background:var(--neg);"></div></div>
+  <div class="bar-value">+0.41</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="angle to attacking goal">angle to attacking goal</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:40.00%; background:var(--amber);"></div></div>
-  <div class="bar-value">-0.35</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:39.64%; background:var(--amber);"></div></div>
+  <div class="bar-value">-0.37</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:36.13%; background:var(--neg);"></div></div>
+  <div class="bar-value">+0.34</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="overload score">overload score</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:34.04%; background:var(--amber);"></div></div>
-  <div class="bar-value">-0.30</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:28.12%; background:var(--amber);"></div></div>
+  <div class="bar-value">-0.26</div>
 </div></div>
+  <p class="cc-full">full population: n=109,018 &middot; 70.17% of bucket &middot; shot rate 5.43%</p>
 </div>
 <div class="cluster-card" style="--cluster-color:var(--amber);">
   <div class="cc-head">
     <div>
       <p class="cc-archetype">high is wide lane, low attacking goal centrality</p>
-      <p class="cc-n">n=9,024 &middot; 30.08% of sample</p>
+      <p class="cc-n">n=8,981 &middot; 29.94% of sample</p>
     </div>
     <div class="cc-rate">
-      <b>5.242%</b>
-      <span class="delta">-0.23pp vs bucket</span>
+      <b>5.111%</b>
+      <span class="delta">-0.36pp vs bucket</span>
     </div>
   </div>
   <div class="bars">
 <div class="bar-row">
   <div class="bar-label" title="is wide lane">is wide lane</div>
   <div class="bar-track"><div class="bar-fill pos" style="width:50.00%; background:var(--amber);"></div></div>
-  <div class="bar-value">+1.01</div>
+  <div class="bar-value">+1.09</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="attacking goal centrality">attacking goal centrality</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:45.00%; background:var(--neg);"></div></div>
-  <div class="bar-value">-0.91</div>
-</div>
-<div class="bar-row">
-  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:41.68%; background:var(--neg);"></div></div>
-  <div class="bar-value">-0.84</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:44.37%; background:var(--neg);"></div></div>
+  <div class="bar-value">-0.96</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="angle to attacking goal">angle to attacking goal</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:39.99%; background:var(--amber);"></div></div>
-  <div class="bar-value">+0.81</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:39.63%; background:var(--amber);"></div></div>
+  <div class="bar-value">+0.86</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:36.13%; background:var(--neg);"></div></div>
+  <div class="bar-value">-0.79</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="overload score">overload score</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:34.03%; background:var(--amber);"></div></div>
-  <div class="bar-value">+0.69</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:28.12%; background:var(--amber);"></div></div>
+  <div class="bar-value">+0.61</div>
 </div></div>
+  <p class="cc-full">full population: n=46,349 &middot; 29.83% of bucket &middot; shot rate 5.31%</p>
 </div></div>
 </div>
 <div class="bucket-section">
@@ -1135,113 +1148,115 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 
 <tr style="background:var(--good-wash);">
   <td>2 &larr; selected</td>
-  <td>0.253</td>
-  <td>4846.2</td>
-  <td>2.047</td>
-  <td>0.389</td>
+  <td>0.247</td>
+  <td>4648.7</td>
+  <td>2.162</td>
+  <td>0.414</td>
   <td>0.750</td>
 </tr>
 <tr>
-  <td>4</td>
-  <td>0.279</td>
-  <td>4075.1</td>
-  <td>1.438</td>
-  <td>0.054</td>
-  <td>0.688</td>
-</tr>
-<tr>
-  <td>3</td>
-  <td>0.227</td>
-  <td>4328.3</td>
-  <td>1.887</td>
-  <td>0.228</td>
+  <td>5</td>
+  <td>0.278</td>
+  <td>4122.2</td>
+  <td>1.242</td>
+  <td>0.001</td>
   <td>0.625</td>
 </tr>
 <tr>
-  <td>5</td>
-  <td>0.218</td>
-  <td>4067.6</td>
-  <td>1.323</td>
-  <td>0.000</td>
-  <td>0.438</td>
+  <td>3</td>
+  <td>0.223</td>
+  <td>4193.3</td>
+  <td>1.918</td>
+  <td>0.229</td>
+  <td>0.562</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>0.227</td>
+  <td>4130.6</td>
+  <td>1.485</td>
+  <td>0.002</td>
+  <td>0.562</td>
 </tr>
 </table></div>
   <div class="cluster-grid">
 <div class="cluster-card" style="--cluster-color:var(--neg);">
   <div class="cc-head">
     <div>
-      <p class="cc-archetype">high attacking goal centrality, low is wide lane</p>
-      <p class="cc-n">n=21,602 &middot; 72.01% of sample</p>
+      <p class="cc-archetype">high attacking goal centrality, low angle to attacking goal</p>
+      <p class="cc-n">n=21,211 &middot; 70.7% of sample</p>
     </div>
     <div class="cc-rate">
-      <b>6.12%</b>
-      <span class="delta">-0.07pp vs bucket</span>
+      <b>6.129%</b>
+      <span class="delta">-0.06pp vs bucket</span>
     </div>
   </div>
   <div class="bars">
 <div class="bar-row">
   <div class="bar-label" title="attacking goal centrality">attacking goal centrality</div>
   <div class="bar-track"><div class="bar-fill pos" style="width:50.00%; background:var(--neg);"></div></div>
-  <div class="bar-value">+0.36</div>
+  <div class="bar-value">+0.37</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label" title="angle to attacking goal">angle to attacking goal</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:48.37%; background:var(--amber);"></div></div>
+  <div class="bar-value">-0.36</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="is wide lane">is wide lane</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:48.28%; background:var(--amber);"></div></div>
-  <div class="bar-value">-0.34</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:47.01%; background:var(--amber);"></div></div>
+  <div class="bar-value">-0.35</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="overload score">overload score</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:46.58%; background:var(--amber);"></div></div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:43.96%; background:var(--amber);"></div></div>
   <div class="bar-value">-0.33</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:46.02%; background:var(--neg);"></div></div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:43.52%; background:var(--neg);"></div></div>
   <div class="bar-value">+0.33</div>
-</div>
-<div class="bar-row">
-  <div class="bar-label" title="angle to attacking goal">angle to attacking goal</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:45.00%; background:var(--amber);"></div></div>
-  <div class="bar-value">-0.32</div>
 </div></div>
+  <p class="cc-full">full population: n=596,965 &middot; 71.21% of bucket &middot; shot rate 6.514%</p>
 </div>
 <div class="cluster-card" style="--cluster-color:var(--amber);">
   <div class="cc-head">
     <div>
-      <p class="cc-archetype">low attacking goal centrality, high is wide lane</p>
-      <p class="cc-n">n=8,398 &middot; 27.99% of sample</p>
+      <p class="cc-archetype">low attacking goal centrality, high angle to attacking goal</p>
+      <p class="cc-n">n=8,789 &middot; 29.3% of sample</p>
     </div>
     <div class="cc-rate">
-      <b>6.359%</b>
-      <span class="delta">+0.17pp vs bucket</span>
+      <b>6.326%</b>
+      <span class="delta">+0.14pp vs bucket</span>
     </div>
   </div>
   <div class="bars">
 <div class="bar-row">
   <div class="bar-label" title="attacking goal centrality">attacking goal centrality</div>
   <div class="bar-track"><div class="bar-fill neg" style="width:50.00%; background:var(--neg);"></div></div>
-  <div class="bar-value">-0.92</div>
-</div>
-<div class="bar-row">
-  <div class="bar-label" title="is wide lane">is wide lane</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:48.27%; background:var(--amber);"></div></div>
-  <div class="bar-value">+0.89</div>
-</div>
-<div class="bar-row">
-  <div class="bar-label" title="overload score">overload score</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:46.59%; background:var(--amber);"></div></div>
-  <div class="bar-value">+0.86</div>
-</div>
-<div class="bar-row">
-  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
-  <div class="bar-track"><div class="bar-fill neg" style="width:46.03%; background:var(--neg);"></div></div>
-  <div class="bar-value">-0.85</div>
+  <div class="bar-value">-0.90</div>
 </div>
 <div class="bar-row">
   <div class="bar-label" title="angle to attacking goal">angle to attacking goal</div>
-  <div class="bar-track"><div class="bar-fill pos" style="width:45.01%; background:var(--amber);"></div></div>
-  <div class="bar-value">+0.83</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:48.37%; background:var(--amber);"></div></div>
+  <div class="bar-value">+0.87</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label" title="is wide lane">is wide lane</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:47.01%; background:var(--amber);"></div></div>
+  <div class="bar-value">+0.85</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label" title="overload score">overload score</div>
+  <div class="bar-track"><div class="bar-fill pos" style="width:43.96%; background:var(--amber);"></div></div>
+  <div class="bar-value">+0.79</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label" title="engagement distance to carrier">engagement distance to carrier</div>
+  <div class="bar-track"><div class="bar-fill neg" style="width:43.52%; background:var(--neg);"></div></div>
+  <div class="bar-value">-0.79</div>
 </div></div>
+  <p class="cc-full">full population: n=241,305 &middot; 28.79% of bucket &middot; shot rate 6.28%</p>
 </div></div>
 </div>
 <div class="closing-note" style="margin-top:40px;">

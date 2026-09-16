@@ -57,6 +57,10 @@ PASSIVE_CSS = """
 .bar-fill.pos { left: 50%; }
 .bar-fill.neg { right: 50%; }
 .bar-value { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); text-align: right; }
+
+.cc-full { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 6px 0 0; padding-top: 6px; border-top: 1px dashed var(--border); }
+.cc-full .drift { color: var(--amber); font-weight: 700; }
+.drift-callout { margin: 20px 0 32px; }
 """
 
 
@@ -78,7 +82,18 @@ def _bar_row(feature: str, diff: float, max_abs: float, own_color: str, other_co
 </div>"""
 
 
-def _cluster_card(cluster: dict, idx: int, n_clusters: int) -> str:
+def _cluster_full_population_line(cluster_full: dict | None) -> str:
+    if cluster_full is None:
+        return ""
+    drift_note = ' <span class="drift">drift flagged</span>' if cluster_full["drift_flag"] else ""
+    return (
+        f'<p class="cc-full">full population: n={cluster_full["n_full"]:,} &middot; '
+        f'{cluster_full["share_of_bucket_full_pct"]}% of bucket &middot; '
+        f'shot rate {cluster_full["shot_rate_pct_full"]}%{drift_note}</p>'
+    )
+
+
+def _cluster_card(cluster: dict, idx: int, n_clusters: int, cluster_full: dict | None) -> str:
     own_color = _cluster_color(idx)
     other_color = _cluster_color(idx + 1) if n_clusters > 1 else own_color
     max_abs = max((abs(d["standardised_diff"]) for d in cluster["top_distinguishing_features"]), default=1.0) or 1.0
@@ -99,6 +114,7 @@ def _cluster_card(cluster: dict, idx: int, n_clusters: int) -> str:
     </div>
   </div>
   <div class="bars">{rows}</div>
+  {_cluster_full_population_line(cluster_full)}
 </div>"""
 
 
@@ -125,7 +141,10 @@ def _k_eval_table(evaluation: list[dict], selected_k: int) -> str:
 def _bucket_section(bucket_key: str, b: dict) -> str:
     label = BUCKET_LABELS.get(bucket_key, bucket_key)
     n_clusters = len(b["clusters"])
-    cluster_cards = "".join(_cluster_card(c, i, n_clusters) for i, c in enumerate(b["clusters"]))
+    full_by_id = {c["cluster_id"]: c for c in b.get("full_population", {}).get("clusters_full", [])}
+    cluster_cards = "".join(
+        _cluster_card(c, i, n_clusters, full_by_id.get(c["cluster_id"])) for i, c in enumerate(b["clusters"])
+    )
 
     stats = f"""
 <div>n = {b['n_rows_total']:,} in bucket</div>
@@ -148,6 +167,30 @@ def _bucket_section(bucket_key: str, b: dict) -> str:
 </div>"""
 
 
+def _drift_callout(drift_flags: list[dict]) -> str:
+    if not drift_flags:
+        return (
+            '<div class="finding" style="margin-bottom:32px;">'
+            '<span class="tag">full population check</span>'
+            "<p>No cluster's full-population shot rate or share disagreed meaningfully with its sample-based "
+            "figure -- the ≤30,000-row samples were representative.</p></div>"
+        )
+    rows = "".join(
+        f"<li><b>{esc(BUCKET_LABELS.get(f['bucket'], f['bucket']))}</b> &mdash; {esc(f['name'])}: "
+        f"shot rate {f['shot_rate_pct_sample']}% (sample) vs {f['shot_rate_pct_full']}% (full), "
+        f"delta {f['sample_vs_full_shot_rate_delta_pp']:+.2f}pp; "
+        f"share {f['share_of_bucket_sample_pct']}% (sample) vs {f['share_of_bucket_full_pct']}% (full), "
+        f"delta {f['sample_vs_full_share_delta_pp']:+.2f}pp</li>"
+        for f in drift_flags
+    )
+    return (
+        '<div class="finding flag drift-callout">'
+        '<span class="tag">sample vs full population drift</span>'
+        f"<p>{len(drift_flags)} cluster(s) showed the sample wasn't fully representative of the bucket:</p>"
+        f"<ul>{rows}</ul></div>"
+    )
+
+
 def build_report(data: dict) -> str:
     body = f"""
 <div class="finding flag" style="margin-bottom:24px;">
@@ -158,6 +201,7 @@ def build_report(data: dict) -> str:
 <span class="tag">method</span>
 <p>{esc(data['method_note'])}</p>
 </div>
+{_drift_callout(data.get('full_population_drift_flags', []))}
 """
     for bucket_key in data["buckets_clustered"]:
         body += _bucket_section(bucket_key, data["buckets"][bucket_key])
