@@ -215,3 +215,141 @@ directly.
   generated on disk by `scripts/train_active_binary_baseline.py` and are
   reproducible from a single command; only code and `reports/eda/*` changes
   are committed.
+
+## 8. Post-lock validation (v1_unweighted)
+
+Run by `scripts/validate_active_binary_baselines.py` (single command, no split
+recomputation, no hyperparameter changes, existing comparison/held-out-readout
+CSVs untouched). Full outputs under `outputs/models/validation/`. One
+deviation from the brief: `defender_functional_role` does not exist on
+`data/features/player_defensive_actions.parquet` (the ACTIVE dataset these
+baselines train on) -- it is a PASSIVE-leg-only column
+(`src/dax/features/passive_defense.py`, `PASSIVE["categorical"]` in
+`feature_config.py`). Item 4 below uses `position` instead, the closest
+per-player categorical actually present in `ACTIVE["categorical"]`.
+
+### 8.1 Is the v1 pick statistically justified?
+
+Paired over the same 5 canonical CV folds (`significance_v1_vs_v2_v3.json`),
+refitting all three variants fold-by-fold:
+
+| Comparison | Mean &Delta; PR-AUC | Std &Delta; | Paired t (p) | Wilcoxon (p) |
+|---|---|---|---|---|
+| v1 vs v2 | +0.0142 | 0.0031 | t=10.26, **p=0.0005** | W=0, p=0.0625 |
+| v1 vs v3 | +0.0182 | 0.0070 | t=5.81, **p=0.0044** | W=0, p=0.0625 |
+
+v1 beats both v2 and v3 in **5 of 5 folds** on PR-AUC. The paired t-test says
+the gap is statistically significant at the conventional 0.05 threshold for
+both comparisons. The Wilcoxon signed-rank test lands at **0.0625 for both**
+-- stated plainly, this is *not* below 0.05, but 0.0625 is also the exact
+minimum p-value Wilcoxon can produce with only 5 paired samples where every
+pair has the same sign (there is no smaller rank-sum configuration to reach
+with n=5). So the non-parametric test gives the strongest signal it is
+mathematically capable of giving at this sample size, without crossing the
+conventional threshold on its own. Read together: the t-test result is
+significant, the Wilcoxon result is consistent with but not independently
+significant of that conclusion, and the practical signal (5/5 folds, every
+fold same direction, mean gap 3-5x the per-fold std) supports treating v1's
+CV edge as real rather than fold noise -- with the honest caveat that 5 folds
+is a small sample for any significance test and this is not overwhelming
+statistical proof.
+
+### 8.2 Does v1 hold up across tournaments?
+
+`tournament_stratified_v1.json`. First finding: **only 2 tournaments are
+actually represented in the active dataset**, not 3. UEFA Euro 2020
+(`data/raw/matches/55_43.json`, 51 matches) contributes **zero** rows to
+`player_defensive_actions.parquet` -- confirmed by checking its 51 match IDs
+against the dataset's `match_id` column directly (0 overlap). The dataset's
+115 matches are FIFA World Cup 2022 (64) and UEFA Euro 2024 (51) only. This
+is a property of the upstream feature dataset, not a bug in this validation
+script.
+
+| Tournament | Held-out rows/matches | PR-AUC | ROC-AUC | Log loss | Brier | ECE |
+|---|---|---|---|---|---|---|
+| FIFA World Cup 2022 | 6,711 / 14 | 0.3596 | 0.8334 | 0.1872 | 0.0506 | 0.0106 |
+| UEFA Euro 2024 | 3,949 / 9 | 0.3913 | 0.7971 | 0.2343 | 0.0638 | 0.0158 |
+
+Train+val composition: 50 WC2022 matches / 42 Euro2024 matches. v1 performs
+comparably on both held-out slices -- PR-AUC is actually slightly *higher* on
+the smaller Euro 2024 slice (0.391 vs 0.360), ROC-AUC slightly lower (0.797 vs
+0.833), and calibration stays tight on both (ECE 0.011 / 0.016). No sign of
+the model being tournament-specific or overfit to World Cup patterns. (Both
+slices clear the >=2-matches/>=2-positives bar for a stable PR-AUC readout;
+neither is flagged as too-thin.)
+
+### 8.3 Does v1 survive a real player-disjoint split?
+
+`player_disjoint_v1.json`. 964 unique players in train+val; 5-fold
+`GroupKFold` on `player_id` (test-set matches excluded throughout --
+the frozen held-out test set was not touched by this check).
+`player_overlap_train_test == 0` confirmed and asserted for every fold
+(193/193/193/192/193 held-out players per fold).
+
+| | PR-AUC | ROC-AUC | Log loss | Brier | ECE |
+|---|---|---|---|---|---|
+| Match-grouped CV (original) | 0.3521 | 0.8177 | 0.2209 | 0.0614 | 0.0036 |
+| Player-disjoint CV (this check) | 0.3586 &plusmn; 0.0243 | 0.8202 &plusmn; 0.0075 | 0.2198 &plusmn; 0.0088 | 0.0611 &plusmn; 0.0031 | 0.0055 &plusmn; 0.0013 |
+
+The player-disjoint PR-AUC (0.359) is **not meaningfully different** from the
+match-grouped CV PR-AUC (0.352) -- a +0.007 difference, well inside the
+player-disjoint run's own fold std (&plusmn;0.024) and smaller than the
+match-grouped run's own fold std (&plusmn;0.018). Every other metric (ROC-AUC,
+log loss, Brier, ECE) is likewise within noise of the original. **This
+supports, and does not overturn, the Prompt 31 leakage-clearance finding**:
+training on a subset of players and testing on entirely unseen players costs
+v1 nothing measurable, which is what "no player-identity leakage" predicts.
+Prompt 31's own check only confirmed fold *balance*; this is the first time
+v1 has actually been fit and scored on a genuinely player-disjoint split, and
+it holds.
+
+### 8.4 Where does v1 systematically miss?
+
+`error_analysis_v1.json`, held-out test set (10,660 rows / 23 matches), same
+v1 fit as 8.2.
+
+**By `phase_label`:** PR-AUC ranges from a low of 0.077 (`wide_defending_proxy`,
+n=980, positive rate 2.0%) and 0.090 (`settled_mid_block_proxy`, n=1,896,
+positive rate 2.6%) up to 0.506 (`box_defence`, n=1,694, positive rate 15.0%)
+and 0.403 (`high_press_proxy`, n=1,775, positive rate 14.4%). The pattern is
+consistent, not surprising: **PR-AUC tracks positive rate almost directly**
+-- the phases with the rarest positives are also where the model is worst at
+ranking them, which is the expected behaviour of a PR-based metric on
+imbalanced slices rather than a phase-specific model weakness. Calibration is
+good everywhere (gaps mostly <=0.012) except `transition_defence` (gap
++0.025, model over-predicts by about 60% relative to its 4.1% positive rate
+in that slice) -- the one phase worth a closer look if this model is used
+for per-phase probability thresholds.
+
+**By `position`** (substituting for `defender_functional_role`, see above):
+performance is broadly consistent across the 24 on-pitch positions (PR-AUC
+mostly 0.28-0.61, ROC-AUC mostly 0.77-0.92), with the widest calibration gaps
+on the smallest slices -- `Right Attacking Midfield` (n=62, gap -0.061,
+under-predicting) and `Left Attacking Midfield` (n=66, gap -0.028) are both
+under 70 rows and should be read as noisy, not as evidence of a real
+attacking-midfield-specific bias. `Goalkeeper` (n=173) has the lowest positive
+rate (1.7%) and correspondingly the most volatile PR-AUC (0.181) among
+larger slices, consistent with the same rate-tracks-PR-AUC pattern seen in
+`phase_label`. No position group shows a large, well-supported (n>200)
+calibration gap in the way `transition_defence` does among phases.
+
+### 8.5 Chart integrity
+
+Automated pass, not a visual audit: all 16 expected PNGs
+(4 variants &times; {`calibration_curve`, `precision_recall_curve`,
+`roc_curve`, `prediction_distribution`}) exist, are non-empty, and are
+pixel-dimension-consistent per chart type across all 4 variants (896&times;644
+throughout, per the styling pass in the prior commit). No missing, near-zero,
+unreadable, or inconsistently-sized files.
+
+### 8.6 Bottom line
+
+v1_unweighted's pick is well-supported: its CV edge over v2/v3 is real by a
+paired t-test (and at the strongest non-parametric signal 5 folds can give),
+it performs comparably across both tournaments actually present in the
+dataset, and a genuine player-disjoint split reproduces its match-grouped CV
+performance within noise -- reinforcing rather than undermining the Prompt 31
+leakage-clearance conclusion. Its main known weakness is PR-AUC degrading on
+low-positive-rate phase slices (`wide_defending_proxy`,
+`settled_mid_block_proxy`), which is an expected consequence of class
+imbalance within those slices rather than a defect specific to this model.
