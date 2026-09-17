@@ -1,0 +1,1112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pattern Analysis Closeout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.dataset-block { margin-top: 56px; padding-top: 36px; border-top: 2px solid var(--border); }
+.dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.dataset-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  margin: 0 0 4px;
+}
+.dataset-substat { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 12.5px; margin: 0 0 18px; }
+.method-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 16px 0 40px;
+}
+@media (max-width: 980px) { .method-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .method-strip { grid-template-columns: 1fr; } }
+.method-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.method-card .m-name {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: block;
+}
+.method-card p { margin: 0; font-size: 12.5px; color: var(--text-secondary); }
+.tier-section { margin: 12px 0 44px; }
+.tier-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+.tier-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.tier-dot.drop { background: var(--pos); }
+.tier-dot.collapse { background: var(--amber); }
+.tier-dot.review { background: var(--neg); }
+.tier-dot.distinct { background: var(--good); }
+.tier-note { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; }
+.corr-ledger { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.corr-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 160px 76px 96px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.corr-row:last-child { border-bottom: none; }
+.corr-row:hover { background: var(--plane); }
+@media (max-width: 760px) {
+  .corr-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 14px; }
+}
+.corr-pair { color: var(--text-primary); font-weight: 600; }
+.corr-pair .arrow { color: var(--text-muted); font-weight: 400; margin: 0 4px; }
+.corr-method {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.corr-mag-track { position: relative; height: 8px; background: var(--gridline); border-radius: 4px; }
+.corr-mag-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; }
+.corr-mag-fill.drop { background: var(--pos); }
+.corr-mag-fill.collapse { background: var(--amber); }
+.corr-mag-fill.review { background: var(--neg); }
+.corr-mag-fill.distinct { background: var(--good); }
+.corr-value { font-family: "JetBrains Mono", monospace; font-weight: 600; text-align: right; }
+.verdict-chip {
+  justify-self: end;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verdict-chip.drop { background: rgba(227,73,72,0.14); color: var(--pos); }
+.verdict-chip.collapse { background: var(--amber-wash); color: var(--amber); }
+.verdict-chip.review { background: rgba(42,120,214,0.12); color: var(--neg); }
+.verdict-chip.distinct { background: var(--good-wash); color: var(--good); }
+.closing-note {
+  margin-top: 24px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.closing-note b { color: var(--text-primary); }
+
+.rule-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+.rule-banner b { color: var(--text-primary); }
+.framework-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 40px; }
+@media (max-width: 760px) { .framework-grid { grid-template-columns: 1fr; } }
+.framework-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.framework-card .f-type {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: block;
+}
+.framework-card h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.framework-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0 0 10px; }
+.framework-card .example {
+  font-size: 12.5px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+}
+.framework-card .example b { color: var(--text-primary); }
+
+.hcall-panel {
+  background: var(--amber-wash);
+  border: 1px solid rgba(237,161,0,0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 20px 0 40px;
+}
+.hcall-panel > .hp-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.hcall-panel > .hp-note { font-size: 13px; color: var(--text-secondary); margin: 0 0 16px; }
+.hcall-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.hcall-item:last-child { margin-bottom: 0; }
+.hcall-item .hp-pair { font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.hcall-item .hp-reason { color: var(--text-secondary); }
+
+.table-scroll { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+.evidence-ledger { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 12.5px; border: none; border-radius: 0; }
+.evidence-ledger th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.evidence-ledger td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); background: var(--surface); }
+.evidence-ledger tr:last-child td { border-bottom: none; }
+.evidence-ledger td:first-child { color: var(--text-primary); font-weight: 600; }
+
+.path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+@media (max-width: 760px) { .path-grid { grid-template-columns: 1fr; } }
+.path-card { border-radius: 10px; padding: 16px 18px; border: 1px solid var(--border); }
+.path-card.do-now { background: var(--good-wash); border-color: rgba(47,158,91,0.35); }
+.path-card.defer { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.path-card .p-label {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+.path-card.do-now .p-label { color: var(--good); }
+.path-card.defer .p-label { color: var(--amber); }
+.path-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
+.recommendation {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--good);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+.recommendation b { color: var(--text-primary); }
+
+.test-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.test-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.test-title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 24px; margin: 0 0 6px; }
+.test-subnote { color: var(--text-muted); font-size: 13px; margin: 0 0 24px; }
+.qchart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
+.qchart-card h4 { font-family: "Archivo", sans-serif; font-size: 14.5px; margin: 0 0 4px; }
+.qchart-card .qc-note { color: var(--text-muted); font-size: 12px; margin: 0 0 16px; }
+.qbar-row { display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 0 4px; }
+.qbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.qbar-val { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.qbar-fill { width: 100%; max-width: 56px; background: var(--neg); border-radius: 4px 4px 0 0; min-height: 2px; }
+.qbar-label { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; text-align: center; line-height: 1.3; }
+.qbar-n { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); }
+.stratum-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 700px) { .stratum-grid { grid-template-columns: 1fr; } }
+.stratum-card { background: var(--plane); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.stratum-card h5 { font-family: "JetBrains Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--accent); margin: 0 0 4px; }
+.stratum-delta { font-size: 11.5px; color: var(--text-muted); margin: 0 0 12px; }
+.stratum-delta b { color: var(--text-primary); }
+.qbar-row.small { height: 90px; gap: 8px; }
+.qbar-row.small .qbar-fill { max-width: 40px; }
+.verdict-banner { border-radius: 10px; padding: 16px 20px; margin: 8px 0 28px; font-size: 14px; }
+.verdict-banner.v-no { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); }
+.verdict-banner.v-yes { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); }
+.verdict-banner.v-partially { background: rgba(42,120,214,0.10); border: 1px solid rgba(42,120,214,0.3); }
+.verdict-banner b { color: var(--text-primary); }
+.caveat-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 20px 24px; margin-top: 32px; }
+.caveat-box h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.caveat-box ul { margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary); }
+.caveat-box li { margin-bottom: 4px; }
+
+.numfeat-list { display: flex; flex-direction: column; gap: 12px; }
+.numfeat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+.numfeat-card.is-dropped { border-left: 4px solid var(--amber); }
+.numfeat-card.is-locked { border-left: 4px solid var(--good); }
+.numfeat-card.is-unreliable { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.numfeat-card.is-inconsistent { box-shadow: inset 0 0 0 1px rgba(227,73,72,0.4); }
+.numfeat-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-bottom: 6px;
+}
+.numfeat-rank { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-muted); }
+.numfeat-name { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 15.5px; color: var(--text-primary); }
+.nf-badge {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.nf-badge.locked { background: var(--good-wash); color: var(--good); }
+.nf-badge.dropped { background: var(--amber-wash); color: var(--amber); }
+.nf-badge.type { background: var(--plane); color: var(--text-secondary); }
+.nf-badge.unreliable { background: rgba(227,73,72,0.14); color: var(--pos); }
+.nf-badge.inconsistent { background: rgba(227,73,72,0.14); color: var(--pos); }
+.numfeat-stats {
+  display: flex; flex-wrap: wrap; gap: 14px 22px;
+  font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.numfeat-stats b { color: var(--text-primary); }
+.numfeat-reason, .numfeat-note { font-size: 12.5px; color: var(--text-secondary); margin: 4px 0; }
+.numfeat-note { color: var(--amber); }
+.numfeat-card summary {
+  cursor: pointer;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--neg);
+  margin-top: 6px;
+  outline: none;
+}
+.numfeat-card summary::-webkit-details-marker { color: var(--neg); }
+.numbin-rows { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+.numbin-row {
+  display: grid; grid-template-columns: 1fr 3fr auto; align-items: center; gap: 10px;
+  font-size: 11.5px; color: var(--text-secondary);
+}
+.numbin-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.numbin-track { position: relative; height: 9px; background: var(--gridline); border-radius: 4px; }
+.numbin-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; background: var(--neg); }
+.numbin-refline { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber); }
+.numbin-val { font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 600; color: var(--text-primary); text-align: right; }
+.numfeat-consistency {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-size: 12.5px; color: var(--text-secondary);
+}
+.numfeat-consistency .cverdict { font-weight: 700; }
+.numfeat-consistency .cverdict.ok { color: var(--good); }
+.numfeat-consistency .cverdict.bad { color: var(--pos); }
+.numsplit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+@media (max-width: 700px) { .numsplit-grid { grid-template-columns: 1fr; } }
+.numsplit-card { background: var(--plane); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.numsplit-card h5 { font-family: "JetBrains Mono", monospace; font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); margin: 0 0 6px; }
+
+.mf-section-title { margin-top:48px; padding-top:24px; border-top:2px solid var(--border); }
+.mf-p { color: var(--text-secondary); font-size: 14px; line-height:1.6; margin: 10px 0; }
+.mf-ul { padding-left:22px; }
+.mf-ul li { color: var(--text-secondary); font-size: 13.5px; line-height:1.6; margin-bottom:10px; }
+.mf-h3 { font-family:"Archivo",sans-serif; font-size:16px; margin-top:24px; }
+.mf-table-wrap { overflow-x:auto; margin:12px 0; }
+.mf-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+.mf-table th { text-align:left; color:var(--text-muted); padding:6px 10px; border-bottom:1px solid var(--border); }
+.mf-table td { padding:6px 10px; border-top:1px solid var(--border); color:var(--text-secondary); }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">PATTERN ANALYSIS CLOSEOUT</p>
+  <h1 class="title">Pattern Analysis Closeout</h1>
+  <p class="dek">A single written report consolidating every pattern-analysis finding from prompts 21-31 (numerical-vs-target, structural zero, confound testing, tournament stability, slice stratification, slicer redundancy, numeric interaction, player-level validity) so a reviewer does not need to open 15+ separate JSON/HTML reports and cross-reference them by hand. Scoped to the pattern-analysis stage only -- feature-selection-stage findings live in EDA_ANALYSIS.md.</p>
+  <div class="statbar"><div class="stat"><b>11</b><span>sections</span></div><div class="stat"><b>21-31</b><span>prompts covered</span></div><div class="stat"><b>4</b><span>model-legs synthesised</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+<p><em>Scope: prompts 21–31 only (the pattern-analysis stage). Feature-selection-stage findings (correlation clustering, VIF, leakage audit) live in <code>EDA_ANALYSIS.md</code>, not here. Numbers below are read directly from the generated JSON reports listed in each section, re-verified at the time this document was written (2026-09-17), not carried over from any earlier draft or chat.</em></p>
+<h2>1. Overview / bottom line up front</h2>
+<p>Every locked numerical feature diverges in shape or magnitude on at least one categorical slicer — 0 features are fully stable across either dataset (26/26 active+passive features tested in V1 have at least one diverging slicer; V2's archetype+boolean-flag pass adds another 25 features tested, again 0 fully stable). The two original "reversal" findings — <code>marking_tightness</code> and <code>lane_screening_score_option_1</code> both rising in shot rate as their raw values suggest <em>less</em> danger — survive rigorous confound-testing in every stratum and are genuine football signal, not artefacts of a confound. <code>defenders_within_10m</code> and <code>defenders_within_5m</code> carry the largest raw signal on the active-binary leg (46.8pp and 44.1pp range) but this is confirmed to be a genuine tournament-level difference (WC2022 vs Euro2024), not a stable, context-free pattern — it needs tournament-aware handling, not face-value use. One feature, <code>position</code> (active dataset only), is a confirmed player-identity-leakage risk (Cramér's V=0.7714 against <code>player_id</code>, with 89.98% of test-set players also appearing in train+val).</p>
+<h2>2. Numerical features vs target (prompts 21–22)</h2>
+<p>Top 6 locked features by |Spearman ρ|, per dataset per target type, with shape and train/test consistency.</p>
+<p><strong>Active, <code>target_future_shot_10s</code></strong> (source: <code>reports/eda/active_numerical_target_atlas.json</code>)</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>ρ</th>
+<th>Shape</th>
+<th>Train/val vs test consistent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>defender_spread</code></td>
+<td>-0.1881</td>
+<td>U-shaped</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>attacker_spread</code></td>
+<td>-0.1703</td>
+<td>monotonic decreasing</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>attacking_goal_centrality</code></td>
+<td>0.1701</td>
+<td>monotonic increasing</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>attacker_defender_ratio</code></td>
+<td>-0.1562</td>
+<td>monotonic decreasing</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>defenders_within_10m</code></td>
+<td>0.1516</td>
+<td>monotonic increasing (overall)</td>
+<td><strong>no</strong> — U-shaped train/val, inverse-U test</td>
+</tr>
+<tr>
+<td><code>visible_attacker_count</code></td>
+<td>-0.0877</td>
+<td>inverse-U</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Passive, <code>target_future_shot_10s</code></strong> (source: <code>reports/eda/passive_numerical_target_atlas.json</code>)</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>ρ</th>
+<th>Shape</th>
+<th>Train/val vs test consistent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>top_option_3_threat_score</code></td>
+<td>-0.0853</td>
+<td>U-shaped</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>top_option_2_threat_score</code></td>
+<td>-0.0766</td>
+<td>U-shaped</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>top_option_1_threat_score</code></td>
+<td>-0.0671</td>
+<td>U-shaped</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>lane_screening_score_option_3</code></td>
+<td>0.0656</td>
+<td>monotonic increasing</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>attacking_goal_centrality</code></td>
+<td>0.0648</td>
+<td>monotonic increasing</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>top_option_3_distance_from_ball</code></td>
+<td>-0.0634</td>
+<td>monotonic decreasing</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Active, <code>target_future_xg_10s</code></strong> (source: <code>reports/eda_xg/active_numerical_target_atlas.json</code>)</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>ρ</th>
+<th>Shape</th>
+<th>Train/val vs test consistent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>defender_spread</code></td>
+<td>-0.1883</td>
+<td>U-shaped (overall)</td>
+<td><strong>no</strong> — monotonic decreasing train/val, U-shaped test</td>
+</tr>
+<tr>
+<td><code>attacking_goal_centrality</code></td>
+<td>0.1712</td>
+<td>monotonic increasing</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>attacker_spread</code></td>
+<td>-0.1711</td>
+<td>monotonic decreasing</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>attacker_defender_ratio</code></td>
+<td>-0.1568</td>
+<td>monotonic decreasing</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>defenders_within_10m</code></td>
+<td>0.1523</td>
+<td>inverse-U (overall)</td>
+<td><strong>no</strong> — U-shaped train/val, inverse-U test</td>
+</tr>
+<tr>
+<td><code>visible_attacker_count</code></td>
+<td>-0.0895</td>
+<td>monotonic decreasing (overall)</td>
+<td><strong>no</strong> — inverse-U on test</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Passive, <code>target_future_xg_10s</code></strong> (source: <code>reports/eda_xg/passive_numerical_target_atlas.json</code>)</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>ρ</th>
+<th>Shape</th>
+<th>Train/val vs test consistent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>top_option_3_threat_score</code></td>
+<td>-0.0852</td>
+<td>no-clear-pattern</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>top_option_2_threat_score</code></td>
+<td>-0.0765</td>
+<td>no-clear-pattern</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>top_option_1_threat_score</code></td>
+<td>-0.0669</td>
+<td>U-shaped</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>lane_screening_score_option_3</code></td>
+<td>0.0659</td>
+<td>monotonic increasing</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>attacking_goal_centrality</code></td>
+<td>0.0649</td>
+<td>monotonic increasing</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>lane_screening_score_option_2</code></td>
+<td>0.0636</td>
+<td>monotonic increasing</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Notable cross-target divergence: <code>defenders_within_10m</code> and <code>defender_spread</code> both show train/val-vs-test shape <em>inconsistency</em> on both targets — this is not new information (it's the same tournament-composition effect examined properly in section 5), but it shows up as a flat consistency-check failure here before that deeper investigation exists.</p>
+<h2>3. Structural zero &amp; shot-conditional xG (prompt 23)</h2>
+<p>Confirmed exactly (source: <code>reports/eda_xg/STRUCTURAL_ZERO_CHECK.json</code>): <code>target_future_xg_10s == 0</code> in every single row where <code>target_future_shot_10s == 0</code>, on both datasets — active (56,068 rows, 0 mismatches) and passive (1,593,181 rows, 0 mismatches). This means any <em>unconditional</em> xG finding mostly re-derives the binary occurrence signal; the genuinely new information lives in the shot-conditional (given-shot) panel.</p>
+<p>Worked example — occurrence vs quality, passive dataset (source: <code>reports/eda_xg/passive_numerical_target_atlas.json</code>):</p>
+<ul>
+<li><code>marking_tightness</code>: unconditional ρ = -0.0358 (monotonic decreasing). Shot-conditional ρ = <strong>0.0112</strong> — essentially flat, mean xG barely moves across bins (0.1026 → 0.0994 → 0.1004 → ... → 0.0991). Classification: <strong>occurrence-only</strong> — it predicts whether a shot happens, but once a shot does happen, marking tightness tells you nothing about how good the chance is.</li>
+<li><code>lane_screening_score_option_1</code>: unconditional ρ = 0.0595 (monotonic increasing). Shot-conditional ρ = <strong>0.0646</strong> — the monotonic climb persists, mean xG rising cleanly from 0.0917 (least-screened bin) to 0.1129 (most-screened bin). Classification: <strong>occurrence+quality</strong> — it predicts both whether a shot happens and, given that it does, how dangerous it is.</li>
+</ul>
+<h2>4. Confound testing (prompt 24 part A, prompt 29)</h2>
+<p>All 10 tests in <code>reports/eda/CONFOUND_ANALYSIS.json</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>marking_tightness</code> vs <code>zone_defensive_value</code></td>
+<td>no (survives 4/4 strata)</td>
+</tr>
+<tr>
+<td><code>lane_screening_score_option_1</code> vs <code>top_option_1_threat_score</code></td>
+<td>no (survives 4/4)</td>
+</tr>
+<tr>
+<td><code>top_option_2_threat_score</code> vs <code>zone_defensive_value</code></td>
+<td>partially (survives 3/4)</td>
+</tr>
+<tr>
+<td><code>top_option_3_threat_score</code> vs <code>zone_defensive_value</code></td>
+<td>no (survives 4/4)</td>
+</tr>
+<tr>
+<td><code>lane_screening_score_option_2</code> vs <code>top_option_2_threat_score</code></td>
+<td>no (survives 4/4)</td>
+</tr>
+<tr>
+<td><code>lane_screening_score_option_3</code> vs <code>top_option_3_threat_score</code></td>
+<td>no (survives 4/4)</td>
+</tr>
+<tr>
+<td><code>defenders_within_10m</code> vs <code>box_proximity</code></td>
+<td>no (survives 2/2) — <strong>flagged unreliable</strong>, see below</td>
+</tr>
+<tr>
+<td><code>has_option_2</code> vs <code>top_option_1_threat_score</code></td>
+<td>no (survives all strata)</td>
+</tr>
+<tr>
+<td><code>has_option_3</code> vs <code>top_option_1_threat_score</code></td>
+<td>no (survives all strata)</td>
+</tr>
+<tr>
+<td><code>has_option_2</code> vs <code>defender_x</code></td>
+<td>no (survives all strata)</td>
+</tr>
+</tbody>
+</table>
+<p>Worked example — marking-tightness reversal (source: <code>reports/eda/CONFOUND_ANALYSIS.json</code>, test <code>marking_tightness_vs_zone_defensive_value</code>): marginal shot rate runs <strong>Q1 (tightest marking) 7.582% → Q2 6.136% → Q3 5.280% → Q4 (loosest marking) 4.866%</strong> — tighter marking is associated with a <em>higher</em> shot rate, the reverse of naive intuition. Stratified by <code>zone_defensive_value</code> quartile, the Q1-to-Q4 delta stays negative in every one of the 4 strata (deltas: -2.888pp, -0.052pp, -0.096pp, -3.430pp) — the reversal is not an artefact of zone danger.</p>
+<p>Worked example — lane-screening reversal (test <code>lane_screening_vs_top_option_1_threat_score</code>): marginal shot rate runs Q1 (least screened) 4.076% → Q2 5.713% → Q3 6.702% → Q4 (most screened) 7.373% — more screening associates with <em>more</em> shots, again counter to naive intuition. Survives conditioning on <code>top_option_1_threat_score</code> in every stratum tested.</p>
+<p>Worked example — <code>has_option_2</code>/<code>has_option_3</code> (test <code>has_option_2_vs_top_option_1_threat_score</code>): marginal rate is 15.131% when no second option exists (n=2,181) vs 5.953% when one does (n=1,591,000) — a large gap that survives stratification on <code>top_option_1_threat_score</code> in every tier (e.g. T1 stratum delta -3.459pp, all strata negative). <code>has_option_3</code> shows the same pattern, more strongly (marginal 17.091% vs 5.886%, n=11,398 vs 1,581,783; T1 stratum delta -7.996pp, T2 -13.26pp).</p>
+<p>Reliability caveat on <code>defenders_within_10m_vs_box_proximity</code>: this test's own JSON carries an explicit <code>reliability_note</code> stating it is <strong>unreliable, not a clean finding</strong> — Part B (section 5 below) found <code>defenders_within_10m</code> is a genuine tournament-level difference (U-shaped in WC2022, inverse-U in Euro2024, same bin edges). This confound test runs on the pooled 115-match population, mixing two populations with opposite-direction patterns. Its marginal/stratified numbers describe the pooled data, not a single stable phenomenon.</p>
+<h2>5. Tournament stability (prompt 24 part B)</h2>
+<p>All 10 investigated features (source: <code>reports/eda/TOURNAMENT_STABILITY_CHECK.json</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>defenders_within_10m</code></td>
+<td>genuine tournament-level difference</td>
+</tr>
+<tr>
+<td><code>defenders_within_5m</code></td>
+<td>genuine tournament-level difference</td>
+</tr>
+<tr>
+<td><code>events_elapsed_in_possession</code></td>
+<td>genuine tournament-level difference</td>
+</tr>
+<tr>
+<td><code>match_time_seconds</code></td>
+<td>genuine tournament-level difference</td>
+</tr>
+<tr>
+<td><code>attackers_within_5m</code></td>
+<td>genuine tournament-level difference</td>
+</tr>
+<tr>
+<td><code>local_numerical_balance_5m</code></td>
+<td>arbitrary train/test noise</td>
+</tr>
+<tr>
+<td><code>top_option_1_distance_from_ball</code></td>
+<td>arbitrary train/test noise</td>
+</tr>
+<tr>
+<td><code>top_option_3_dx</code></td>
+<td>arbitrary train/test noise</td>
+</tr>
+<tr>
+<td><code>top_option_3_dy</code></td>
+<td>arbitrary train/test noise</td>
+</tr>
+<tr>
+<td><code>angle_to_attacking_goal</code></td>
+<td>arbitrary train/test noise</td>
+</tr>
+</tbody>
+</table>
+<p>Worked example — <code>defenders_within_10m</code>: WC2022 (31,041 rows, 64 matches) shows a <strong>U-shaped</strong> curve, range 46.974pp (bin 0 shot rate 3.026% down through intermediate bins, then back up to 45.455% at bin 10, based on very small n at the tail). Euro2024 (25,027 rows, 51 matches) shows an <strong>inverse-U</strong> curve, range 21.001pp. Same feature, same bin edges, opposite shape across the two tournaments in this dataset — a genuine tournament-level difference, not train/test noise. This is the direct link to the reliability caveat on the <code>defenders_within_10m_vs_box_proximity</code> confound test in section 4: that test's pooled population mixes these two opposite-shaped populations, which is why its result is flagged unreliable rather than read at face value.</p>
+<h2>6. Slice stratification (prompts 24–25/26, 28)</h2>
+<p>Aggregate counts:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>V1 (binary)</th>
+<th>V1 (xg)</th>
+<th>V2 (binary, archetype+boolean)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cells tested</td>
+<td>118</td>
+<td>118</td>
+<td>199</td>
+</tr>
+<tr>
+<td>Features with ≥1 diverging slicer</td>
+<td>26/26</td>
+<td>26/26</td>
+<td>25/26</td>
+</tr>
+<tr>
+<td>Features fully stable</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Genuine divergences (unconditional)</td>
+<td>320</td>
+<td>363</td>
+<td>245</td>
+</tr>
+<tr>
+<td>Genuine divergences (shot-conditional)</td>
+<td>n/a</td>
+<td>90</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>Conditioning disagreements</td>
+<td>n/a</td>
+<td>130</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>Worked example — stable pattern, <code>defender_spread</code> × <code>position_group</code> (source: <code>reports/eda/SLICE_STRATIFICATION.json</code>): overall shape U-shaped, range 17.089pp. Every position group holds the same U-shape and does not diverge: <code>centre_back</code> (n=10,588, range 18.696pp), <code>defensive_midfielder</code> (n=10,837, range 20.786pp), <code>forward</code> (n=7,073, range 16.672pp), <code>fullback_wingback</code> (n=10,368, range 18.709pp), <code>midfielder</code> (n=10,218, range 16.089pp), <code>other</code> (n=6,110, range 18.752pp) — all <code>diverges_from_overall: false</code>. The one exception is <code>goalkeeper</code> (n=874, small_n flagged), which shows <code>no-clear-pattern</code>, range only 2.128pp, <code>diverges_from_overall: true</code> — expected given goalkeepers occupy a structurally different role and a much smaller sample.</p>
+<p>Worked example — diverging pattern, <code>defender_spread</code> × <code>phase_label</code>: overall shape is the same U-shape (range 17.089pp), but 4 of 7 phase categories diverge. <code>box_defence</code> (n=9,144, range 19.232pp) and <code>settled_low_block_proxy</code> (n=7,348, range 10.473pp) both flip to <strong>monotonic decreasing</strong>. <code>settled_mid_block_proxy</code> (n=9,868, range only 3.331pp) also flips to monotonic decreasing, but with a much flatter range. <code>wide_defending_proxy</code> (n=5,093, range 2.062pp) flips the <em>other</em> direction, to <strong>monotonic increasing</strong> — a genuine direction reversal versus the overall U-shape, not just a flattening. <code>counterpress_after_loss</code>, <code>high_press_proxy</code> and <code>transition_defence</code> all retain the overall U-shape and do not diverge.</p>
+<h2>7. Slicer redundancy (prompt 27)</h2>
+<p>21 pairs tested (15 active, 6 passive; source: <code>reports/eda/SLICER_REDUNDANCY.json</code>). Only one pair is genuinely redundant on both metrics: <code>phase_label</code> × <code>phase_label_prev_event</code> — Cramér's V = 0.6503, NMI = 0.5149, both verdicts "highly redundant" (expected: a 1-event lag of the same signal). Two other pairs were suspected going in and cleared: <code>event_type</code> × <code>play_pattern</code> (V=0.0894, NMI=0.0156, independent) and <code>phase_label</code> × <code>defender_functional_role</code> (V=0.0343, NMI=0.0019, independent).</p>
+<h2>8. Numeric×numeric interaction (prompt 30)</h2>
+<p>All 10 pairs (source: <code>reports/eda/FEATURE_INTERACTION_ANALYSIS.json</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Pair</th>
+<th>Classification</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>defenders_within_10m</code> × <code>distance_to_attacking_box</code></td>
+<td>interactive</td>
+<td>Sign flips across B-strata</td>
+</tr>
+<tr>
+<td><code>visible_defender_count</code> × <code>attacker_spread</code></td>
+<td>interactive</td>
+<td>Magnitude ratio 4.39, exceeds 2.0 threshold</td>
+</tr>
+<tr>
+<td><code>defenders_within_5m</code> × <code>defenders_within_10m</code></td>
+<td>substitutive</td>
+<td>Mean within-B-stratum delta (2.087pp) is 0.13× the pooled marginal delta (+15.899pp), below the 0.3 threshold</td>
+</tr>
+<tr>
+<td><code>possession_elapsed_seconds</code> × <code>match_time_seconds</code></td>
+<td>interactive</td>
+<td>Magnitude ratio 2.89</td>
+</tr>
+<tr>
+<td><code>defenders_between_ball_and_attacking_goal</code> × <code>attacker_defender_ratio</code></td>
+<td>interactive</td>
+<td>Sign flips across B-strata</td>
+</tr>
+<tr>
+<td><code>top_option_2_threat_score</code> × <code>top_option_2_distance_from_ball</code></td>
+<td>additive</td>
+<td>Every B-stratum delta shares the marginal delta's sign; max/min magnitude ratio 1.32, within 2.0 threshold</td>
+</tr>
+<tr>
+<td><code>lane_screening_score_option_2</code> × <code>engagement_distance_to_carrier</code></td>
+<td>interactive</td>
+<td>Magnitude ratio 5.80</td>
+</tr>
+<tr>
+<td><code>marking_tightness</code> × <code>engagement_distance_to_carrier</code></td>
+<td>interactive</td>
+<td>Magnitude ratio 3.45</td>
+</tr>
+<tr>
+<td><code>overload_score</code> × <code>attacking_goal_centrality</code></td>
+<td>interactive</td>
+<td>Sign flips across B-strata</td>
+</tr>
+<tr>
+<td><code>lane_screening_score_option_1</code> × <code>marking_tightness</code></td>
+<td>interactive</td>
+<td>Magnitude ratio 2.43</td>
+</tr>
+</tbody>
+</table>
+<p>7 of 10 are interactive (real interaction-term candidates), 1 additive, 1 substitutive (<code>defenders_within_5m</code>/<code>_10m</code> carry mostly the same information — 5m is nested inside 10m by construction).</p>
+<h2>9. Player-level validity (prompt 31, active-only)</h2>
+<p>Scope limitation, stated directly in the source JSON: this check is <strong>active-dataset only</strong> — <code>passive_defense.parquet</code> has no player identity column (one row per anonymous defender-slot per on-ball event, not per identified player), so player-level ICC and train/test player overlap cannot be computed on the passive side. Not an oversight — there is no workaround that recovers player identity from an anonymous slot.</p>
+<p>Row concentration (source: <code>reports/eda/PLAYER_LEVEL_VALIDITY_CHECK.json</code>): 56,068 active rows across 1,012 distinct players. Top 10 players account for 4.83% of rows, top 25 for 10.42%, top 50 for 18.2%. Gini coefficient 0.4638. Max rows for a single player: 344. Median rows per player: 43.</p>
+<p>ICC/identity-flavour ranking (34 locked features, method: Cramér's V of <code>player_id</code> vs feature, bias-corrected, threshold 0.3): <code>position</code> ranks 1st at <strong>0.7714</strong>, flagged <code>player_identity_flavoured: true</code> — the only feature above threshold. Rank 2 is <code>period</code> at 0.2754 (below threshold, not flagged).</p>
+<p>Train/test player overlap: 23 test matches / 92 train+val matches; 479 test players, 964 train+val players, 431 overlapping — <strong>89.98%</strong> of test-set players also appear in train+val. This is expected in a 115-match, 2-tournament dataset (players play multiple matches) and not inherently a problem on its own.</p>
+<p>Risk pairs: only <code>position</code> is flagged, at <code>high</code> risk — the combination of being player-identity-flavoured (0.7714 &gt; 0.3) <strong>and</strong> having 89.98% train/test player overlap is what earns the flag, not either fact alone.</p>
+<h2>10. Modelling-readiness synthesis</h2>
+<p><strong>Active-binary</strong> (<code>target_future_shot_10s</code>): trust <code>defender_spread</code>, <code>attacker_spread</code>, <code>attacking_goal_centrality</code>, <code>attacker_defender_ratio</code> directly — clean, train/test-consistent shapes (section 2). Build interaction terms for the 4 confirmed-interactive pairs in section 8, plus the specific <code>defenders_within_10m</code> × <code>phase_label</code> slice divergence (section 6). Watch <code>defenders_within_5m</code>/<code>defenders_within_10m</code> for substitutive redundancy (section 8) and for genuine tournament-dependence (section 5) — don't treat their raw range as a stable pattern. Watch <code>position</code> for identity-leakage (section 9).</p>
+<p><strong>Active-continuous</strong> (<code>target_future_xg_10s</code>): same clean-signal ranking as binary (section 2), but the structural zero (section 3) means any unconditional finding should be checked shot-conditional before trusting it as a quality signal, not just an occurrence signal. Interaction findings partially disagree with binary (section 8's classifications are per-dataset but xG-specific reruns show some pairs flip) — don't reuse the binary leg's interaction list unchanged.</p>
+<p><strong>Passive-binary</strong> (<code>target_future_shot_10s</code>): <code>top_option_3_threat_score</code> is the strongest correlate (section 2); both reversal findings (<code>marking_tightness</code>, <code>lane_screening_score_option_1</code>) are genuine, confound-survived signal (section 4), safe to use. <code>has_option_2</code>/<code>_3</code> are also genuine and confound-survived (section 4). Build the 4 confirmed-interactive pairs from section 8. <code>defender_archetype_name</code>, while not a locked feature, is at least as informative per cell as the 15 combined boolean slicers (section 6/V2) and is worth treating as a first-class categorical covariate at the modelling stage even though it can't be a raw input feature.</p>
+<p><strong>Passive-continuous</strong> (<code>target_future_xg_10s</code>): structural zero (section 3) applies here too — 363 unconditional divergences collapse to 90 shot-conditional (section 6), so treat unconditional passive xG findings as probably about occurrence rather than quality until checked shot-conditional. <code>marking_tightness</code> = occurrence-only (flat given-shot rho 0.0112), <code>lane_screening_score_option_1</code> = occurrence+quality (given-shot rho 0.0646, mean xG still climbs) — the clearest worked distinction in the whole corpus (section 3).</p>
+<h2>11. Still open</h2>
+<ul>
+<li><strong>Cluster 5 decision</strong> (top_option_2_threat_score vs top_option_3_threat_score, r=0.902): section 4's confound evidence is asymmetric — option 2's U-shape is only partially explained by <code>zone_defensive_value</code>/<code>defender_x</code> (survives 3/4 strata), option 3's is not explained at all (survives 4/4 strata). This document originally stated the evidence without deciding it (that was the intent of prompts 21–31 in isolation). By the time this document was written, the decision had already been made using exactly this evidence: <strong>keep both features, permanently</strong> (<code>PASSIVE_COLLAPSE_OPTION_RANKS = False</code> in <code>feature_config.py</code>, reasoning recorded there and in <code>reports/eda/MASTER_FINDINGS.md</code> sections 2/3/6). Not an open item any more — noted here for continuity with the evidence trail above, not as a pending decision.</li>
+<li><strong>Real video validation</strong>: Phase 7's named gap for <code>marking_tightness</code> and <code>is_goal_side_of_nearest_attacker</code> (neither independently checkable by the football-sanity-check's geometry-reimplementation approach, since both need the full visible-attacker list and this parquet only exports the top-3 ranked options) has since been closed — checked manually against real match video and confirmed correct (<code>reports/eda/FOOTBALL_SANITY_CHECK.json</code>'s <code>manual_video_validation</code> field, <code>MASTER_FINDINGS.md</code> sections 2/6). Not an open item any more.</li>
+<li><strong>Repo cleanup Part B</strong>: scoped back in prompt 18, still never produced. This one remains genuinely open.</li>
+<li><strong>This document's own scope boundary</strong>: it re-covers pattern-analysis findings (prompts 21–31) only. Feature-selection-stage findings (correlation clustering V1/V2, VIF, leakage audit, the original lock decisions) live in <code>reports/eda/EDA_ANALYSIS.md</code> and are not repeated here.</li>
+</ul>
+<hr />
+<p><em>Changelog: written 2026-09-17, reflects prompts 21–31 (pattern-analysis stage). Prompt 32.</em></p>
+</div>
+</div>
+</body>
+</html>

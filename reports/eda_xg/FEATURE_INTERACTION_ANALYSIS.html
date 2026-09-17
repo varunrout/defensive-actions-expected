@@ -1128,6 +1128,10 @@ assume the unconditional conclusion carries over to chance quality.</p>
   <td>Q1 &rarr; Q4</td>
   <td>20,519</td>
 </tr></tbody></table>
+<div style="margin-top:28px;padding:16px 20px;border:1px solid rgba(47,158,91,0.35);background:rgba(47,158,91,0.08);border-radius:8px;">
+<h4 style="margin-top:0;">Given-shot threshold -- decided 2026-09-17</h4>
+<p>All 10 pairs classify as <b>inconclusive</b> on the given-shot panel (every pair's marginal delta sits below its dataset's min_marginal_delta_given_shot threshold). Decision: accept 10/10 inconclusive as final -- the threshold is FLAT_MARGIN_RATIO (0.5) &times; each dataset's own shot-conditional mean xG, the same relative convention already used for the unconditional panel, and loosening it specifically because these pairs fail to clear it would be tuning the threshold to the result rather than following a principled threshold. No further tuning planned for this analysis. See FEATURE_INTERACTION_ANALYSIS.json's <code>given_shot_threshold_decision</code> field for the full reasoning.</p>
+</div>
 </div>
 
 </div>

@@ -56,5 +56,10 @@
       "event_id": "e37e4108-58d8-43c4-b186-fa646e59d5a8",
       "source": "cited (still valid)"
     }
+  },
+  "manual_video_validation": {
+    "date": "2026-09-17",
+    "status": "completed",
+    "note": "The two features this script could not independently re-derive -- marking_tightness and is_goal_side_of_nearest_attacker -- have since been checked manually against real match video by Varun and confirmed correct. This closes the football-sanity validation gap named above; it is not an automated check and is not re-run by this script."
   }
 }

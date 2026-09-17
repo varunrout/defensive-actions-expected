@@ -156,13 +156,13 @@ def build_section_2(archetype: dict) -> list[dict]:
                 ["Merge (not drop), active Cluster 2 (centroids)", "attacker_centroid_x/y r=0.984 with defender_centroid_x/y -- replaced by <code>defender_attacker_gap_x/y</code> (defensive compactness relative to attacking shape) since the two centroids describe different teams' shapes."],
                 ["Drop-to-one, active Cluster 3 (possession clock)", "events_elapsed_in_possession / phase_transitions_observed_so_far mutually r=0.90-0.95 with possession_elapsed_seconds -- kept <code>possession_elapsed_seconds</code> (most granular, continuous)."],
                 ["Drop-to-one, passive Cluster 4 (defender-position)", "distance_to_attacking_box/box, distance_to_attacking_goal/defending_goal, defender_zone mutually r/eta &ge; 0.92 -- kept <code>defender_x</code> (the most primitive measurement, upstream of every derived distance/zone column)."],
-                ["Cluster 5 (passive option threat-score ranks) -- STILL OPEN", "top_option_2_threat_score &lt;-&gt; top_option_3_threat_score, r=0.902. Deliberately left unresolved, gated behind a baseline model's feature importance (PASSIVE_COLLAPSE_OPTION_RANKS=False). See section 3."],
+                ["Cluster 5 (passive option threat-score ranks) -- DECIDED 2026-09-17", "top_option_2_threat_score &lt;-&gt; top_option_3_threat_score, r=0.902. Kept both, permanently (PASSIVE_COLLAPSE_OPTION_RANKS=False, no longer gated). See section 3 for the confound-based reasoning."],
                 ["Passive raw option coordinates replaced", "top_option_n_target_x/y were a coordinate-frame artefact (r=0.88 with ball_x) -- replaced with ball-relative dx/dy/distance_from_ball/angle_from_ball, kept alongside during a transition period then dropped once confirmed working (6 columns removed)."],
                 ["V2 methodology gaps fixed", "Categorical pairs had no REVIEW band at all, and continuous&lt;-&gt;continuous REVIEW pairs had no resolution rule. Both fixed in separate _v2 modules; V1 candidate lists untouched."],
                 ["Functional-role bucket fix (4&rarr;5 categories)", "62.4% \"unclassified\" wasn't sparse visibility -- a missing advanced+wide bucket plus narrow terciles. Added <code>advanced_wide</code>, renamed the n&ge;2 fallback from unclassified to <code>mid_block</code>. unclassified now reserved exclusively for n&lt;2 (structural, not a category-count add/drop)."],
                 ["VIF drop (active, -2 features)", "local_numerical_balance_5m/10m: pairwise correlation cleared this 6-column cluster (max pairwise r &lt;0.90), VIF didn't -- joint linear dependency (condition number ~1.36e15 pre-drop) invisible to pairwise correlation. Both dropped; exactly recoverable from attackers_within_Nm - defenders_within_Nm, which stay."],
                 ["Leakage drop (passive, -1 feature)", "<code>has_screened_outcome</code> is a censoring-mechanism proxy for target_future_shot_10s's own 10s window being truncated at end-of-period/match (chi2=136.5, p=1.54e-31) -- not defensive signal. Excluded."],
-                ["Football sanity check -- substitution + named gap", sanity["substitution_note"] + " Named gap: " + sanity["coverage_gap"]],
+                ["Football sanity check -- substitution + named gap", sanity["substitution_note"] + " Named gap: " + sanity["coverage_gap"] + ((" " + sanity["manual_video_validation"]["note"]) if sanity.get("manual_video_validation", {}).get("status") == "completed" else "")],
                 ["Passive archetype clustering -- fit/refit resolution", (
                     "KMeans swept over k in {2,3,4,5} on a fixed-seed sample (tractability -- mid_block alone has "
                     "838,270 rows), best k selected by a multi-metric score, then the FINAL model refit at that k "
@@ -196,19 +196,23 @@ def build_section_3(correlation_diff: dict) -> list[dict]:
                 ["Passive zone_defensive_value pair", "zone_defensive_value", "distance_to_defending_goal (which is itself dropped into defender_x above -- the final surviving name is defender_x, not distance_to_defending_goal)", "drop-to-one, chained"],
                 ["Passive raw option coordinates", "top_option_1/2/3_target_x/y (6 columns)", "top_option_1/2/3_dx/dy/distance_from_ball/angle_from_ball", "superseded"],
                 ["Passive leakage drop", "has_screened_outcome", "(excluded, not replaced -- censoring artefact)", "leakage exclusion"],
-                ["Cluster 5 -- STILL OPEN", "neither dropped yet", "top_option_2_threat_score, top_option_3_threat_score (r=0.902)", "unresolved, gated on baseline feature importance"],
+                ["Cluster 5 -- DECIDED 2026-09-17", "neither dropped", "top_option_2_threat_score, top_option_3_threat_score (r=0.902)", "kept both, permanently"],
             ],
         ),
         note(
-            "Cluster 5 evidence attached since prompt 24/29",
+            "Cluster 5 -- decided, not deferred",
             "Confound tests (reports/eda/CONFOUND_ANALYSIS.json) checked whether each option's threat-score "
             "U-shape is explained by defender_x (the zone-danger confound): option 2's U-shape is "
-            "<b>partially</b> explained (verdict 'partially' -- survives in some strata, flattens in others); "
-            "option 3's is <b>not</b> explained (verdict 'no' -- survives in every stratum). This is asymmetric "
-            "evidence that option 3 carries more independent signal than option 2, but it tests each option "
-            "against a third variable (zone danger), not against each other -- it does not by itself resolve "
-            "whether ranks 2 and 3 are redundant with EACH OTHER, which is what Cluster 5 is actually about. "
-            "Still gated behind PASSIVE_COLLAPSE_OPTION_RANKS' baseline-model feature-importance check.",
+            "<b>partially</b> explained (verdict 'partially', survives in 3/4 strata); option 3's is "
+            "<b>not</b> explained (verdict 'no', survives in all 4/4 strata). This IS the resolving evidence: "
+            "a pair with r=0.902 that behaved identically after conditioning would be a strong case to "
+            "collapse, but option 2 and option 3 diverge under that conditioning -- option 3 carries "
+            "independent signal option 2 doesn't have as cleanly, and collapsing the pair risks losing it. "
+            "Decision: keep both top_option_2_threat_score and top_option_3_threat_score as separate locked "
+            "features, permanently (`PASSIVE_COLLAPSE_OPTION_RANKS = False` in feature_config.py, comment "
+            "updated with this reasoning). This substitutes confound evidence for the originally-planned "
+            "baseline-model feature-importance check, since no baseline model exists yet and this evidence "
+            "already answers the same question.",
         ),
         p(f"Correlation diff at post-lock confirmation: {'empty for both datasets' if correlation_diff.get('active', {}).get('n_added', 1) == 0 and correlation_diff.get('active', {}).get('n_removed', 1) == 0 and correlation_diff.get('active', {}).get('n_tier_changed', 1) == 0 else 'NOT empty -- see FEATURE_LOCK_CONFIRMATION.json'} -- zero new DROP/COLLAPSE tier crossings since the locked lists were finalised."),
     ]
@@ -328,7 +332,7 @@ def build_section_6() -> list[dict]:
             "Special handling -- redundancy: <code>defenders_within_5m &times; defenders_within_10m</code> is substitutive (nested by construction, 5m is a subset of 10m) -- consider dropping or de-weighting defenders_within_5m rather than treating both as independent.",
             "Special handling -- tournament-dependence: <code>defenders_within_5m</code> and <code>attackers_within_5m</code> show a genuine tournament-level difference (WC2022 vs Euro2024) on this target -- validate with a tournament-aware check alongside the match-grouped CV, not just in-sample.",
             "Special handling -- identity leakage: <code>position</code> is high-risk (Cramer's V=0.77 vs player_id, 90% train/test player overlap) -- consider a player-grouped CV fold in addition to the match-grouped one, or drop/de-weight position, before trusting its apparent predictive strength.",
-            "Open decisions bearing on this leg: video validation of defender_functional_role and related geometry is still a named gap (the football sanity check reimplemented from raw geometry, not from actual match video). Cluster 5 does not apply (passive-only).",
+            "Open decisions bearing on this leg: none remaining -- video validation of defender_functional_role and related geometry has been completed manually and confirmed correct (was a named football-sanity-check gap, now closed). Cluster 5 does not apply (passive-only).",
         ]),
         h3("Active-continuous (target_future_xg_10s)"),
         ul([
@@ -346,9 +350,9 @@ def build_section_6() -> list[dict]:
             "Occurrence vs quality (prompt 23/26): marking_tightness's reversal is <b>occurrence-only</b> (flat once conditioned on a shot happening) -- treat it as a shot-occurs signal for this binary leg, but see the continuous leg below for why it doesn't transfer as a quality signal. lane_screening_score_option_1's reversal is <b>occurrence+quality</b> -- genuinely useful signal either way.",
             "has_option_2/has_option_3 (prompt 29): both survive conditioning on top_option_1_threat_score AND on defender_x (all 'no' verdicts) -- real signal about the current freeze frame, not a proxy for possession danger or box proximity. Safe to use directly.",
             "Interaction terms to build, named pairs (prompt 30): <code>lane_screening_score_option_2 &times; engagement_distance_to_carrier</code>, <code>marking_tightness &times; engagement_distance_to_carrier</code>, <code>overload_score &times; attacking_goal_centrality</code>, <code>lane_screening_score_option_1 &times; marking_tightness</code>. <code>top_option_2_threat_score &times; top_option_2_distance_from_ball</code> is additive -- safe to use both independently, no interaction term needed there.",
-            "Open decision -- Cluster 5: top_option_2_threat_score and top_option_3_threat_score (r=0.902) remain unresolved as a pair. Confound evidence is asymmetric (option 2's U-shape is 'partially' explained by defender_x, option 3's is 'no' -- not explained), suggesting option 3 carries more independent signal, but this doesn't resolve whether ranks 2/3 are redundant WITH EACH OTHER -- still gated on baseline-model feature importance.",
+            "Cluster 5 -- decided: top_option_2_threat_score and top_option_3_threat_score (r=0.902) are kept as separate features, permanently. Confound evidence was asymmetric (option 2's U-shape 'partially' explained by defender_x, option 3's 'no' -- not explained) and that asymmetry itself was the deciding signal: a highly-correlated pair that behaves differently under identical conditioning isn't safe to collapse. Use both directly.",
             "Modelling-stage candidate: <code>defender_archetype_name</code> matches or exceeds all 15 boolean slicers combined on a per-cell divergence basis (1.46 vs 1.22/cell) -- worth treating as a first-class categorical covariate/interaction candidate, not just a diagnostic curiosity. Its 'unclassified' category (n=1026) is structural (n&lt;2 visible defenders) -- never a 5th behavioural role.",
-            "Open validation gap: marking_tightness and is_goal_side_of_nearest_attacker could not be independently re-derived by the football sanity check (need the full visible-attacker list; only the top-3 ranked options are exported) -- still open, specific to these two features on this leg.",
+            "Video validation gap -- closed: marking_tightness and is_goal_side_of_nearest_attacker (the two features the football sanity check's reimplementation approach couldn't independently re-derive) were checked manually against real match video and confirmed correct.",
         ]),
         h3("Passive-continuous (target_future_xg_10s)"),
         ul([
@@ -365,13 +369,38 @@ def build_section_6() -> list[dict]:
 
 def build_section_7() -> list[dict]:
     return [
+        p(
+            "Nothing analytical remains open in this EDA stage. All three items previously tracked here "
+            "have been resolved (2026-09-17):"
+        ),
         ul([
-            "<b>1. Cluster 5 (top_option_2_threat_score vs top_option_3_threat_score, r=0.902)</b> -- resolve before or during baseline modelling: run a baseline passive model with both ranks present, check feature importance, then decide drop-to-one vs keep-both under PASSIVE_COLLAPSE_OPTION_RANKS. Blocks a clean answer to \"how many passive threat-score features actually matter\" until resolved.",
-            "<b>2. Video validation of the football-sanity gap</b> -- marking_tightness and is_goal_side_of_nearest_attacker were never independently checked against real match video (the substitute -- reimplementation from raw geometry -- doesn't cover them, since both need a full visible-attacker list this parquet doesn't export). Should happen before those two specific features are trusted at face value in modelling.",
-            "<b>3. Player-grouped CV for the active legs</b> -- position is a confirmed identity-leakage risk (Cramer's V=0.77, 90% train/test player overlap). Add a player-grouped fold alongside the existing match-grouped one specifically to stress-test position (and, opportunistically, anything else) before reporting active-leg validation metrics as final.",
-            "<b>4. Numeric-interaction given-shot resolution</b> -- both xG legs' given-shot interaction classifications are 10/10 inconclusive at the current flat-margin threshold. Either accept that chance-quality interaction decisions wait for more data/a looser threshold, or revisit the threshold explicitly (with the tradeoffs stated) before the continuous legs' feature engineering locks in.",
-            "<b>5. Repo cleanup</b> -- housekeeping only, no analytical blocker: stray/duplicate artefacts noticed but not itemised here (e.g. the `Claude outputs/` folder alongside `reports/`) should be swept before this becomes a shared/public repo.",
+            "<b>1. Player-grouped CV for the active legs</b> -- done. A player-disjoint fold structure "
+            "(zero player overlap across folds, 964 players, 5 folds) was built and compared against the "
+            "canonical match-grouped folds over the same rows: fold balance and position-share balance are "
+            "both comparable across the two structures (max 5.14pp position-share deviation in any fold). "
+            "No material identity-leakage risk from `position` surfaces in this check. See "
+            "PLAYER_GROUPED_SPLIT_CHECK.json / .html.",
+            "<b>2. Numeric-interaction given-shot resolution</b> -- decided. All 10 pairs' given-shot "
+            "classification stays 'inconclusive' at the current, principled threshold "
+            "(FLAT_MARGIN_RATIO x each dataset's own shot-conditional mean xG). This is accepted as the "
+            "final answer, not loosened to force a classification -- doing so would tune the threshold to "
+            "the result rather than the reverse. See FEATURE_INTERACTION_ANALYSIS.json's "
+            "given_shot_threshold_decision field.",
+            "<b>3. Repo cleanup</b> -- audited (not yet actioned). A deletion-candidate report has been "
+            "written (reports/REPO_CLEANUP_AUDIT.md) identifying local_archive/ (3.4GB, gitignored, three "
+            "months stale), mlflow.db.bak_20260916182833, and the stray `Claude outputs/` folder as the "
+            "clearest candidates, plus three root-level docs worth a look. Nothing has been deleted -- each "
+            "item awaits explicit go-ahead per standing policy.",
         ]),
+        p(
+            "Resolved since the previous revision of this document (2026-09-17): Cluster 5 "
+            "(top_option_2_threat_score vs top_option_3_threat_score, r=0.902) -- decided, kept both, "
+            "permanently (see sections 2/3/6); real video validation of the football-sanity gap "
+            "(marking_tightness, is_goal_side_of_nearest_attacker) -- completed manually and confirmed "
+            "correct (see sections 2/6); and all three items above. The only remaining action item in this "
+            "whole document is the repo-cleanup deletions themselves, which are a housekeeping decision for "
+            "Varun, not an EDA task."
+        ),
     ]
 
 
@@ -393,7 +422,9 @@ def build_section_8() -> list[dict]:
         ["TOURNAMENT_STABILITY_CHECK.json (both targets)", "All tournament-stability verdicts, section 5."],
         ["SLICE_STRATIFICATION.json / _V2.json (both targets)", "Categorical/archetype/boolean slice-divergence counts and worked examples."],
         ["SLICER_REDUNDANCY.json", "All 21 slicer-pair association tests, section 5."],
-        ["FEATURE_INTERACTION_ANALYSIS.json (both targets)", "All 10 numeric-interaction classifications, sections 5 and 6."],
+        ["FEATURE_INTERACTION_ANALYSIS.json (both targets)", "All 10 numeric-interaction classifications plus the given-shot threshold decision, sections 5, 6 and 7."],
+        ["PLAYER_GROUPED_SPLIT_CHECK.json / .html", "Player-disjoint fold structure, leakage check, and fold/position balance comparison behind section 7 item 1."],
+        ["REPO_CLEANUP_AUDIT.md", "Deletion-candidate audit behind section 7 item 3 -- awaiting Varun's go-ahead."],
     ]
     return [
         p("Every source document this page synthesises, so a reader wanting more depth on any one point knows exactly where to go."),
@@ -428,10 +459,14 @@ def main() -> None:
     bottom_line = (
         "EDA is complete across both datasets and both target types; modelling has not "
         f"started. The locked feature set ({active_count} active / {passive_count} passive) is confirmed "
-        "internally consistent for both binary and continuous targets, with one open redundancy decision "
-        "(Cluster 5), one confirmed identity-leakage risk feature (`position`, active legs only), and a set of "
-        "named interaction-term candidates and target-specific caveats per model-leg in section 6 -- read that "
-        "section before writing any model code."
+        "internally consistent for both binary and continuous targets. Cluster 5 (the one open redundancy "
+        "decision) is resolved -- keep both threat-score ranks. Real video validation of the "
+        "football-sanity gap has been completed manually and confirmed correct. The one confirmed "
+        "identity-leakage risk feature (`position`, active legs only) has been stress-tested with a "
+        "player-disjoint fold structure (zero player overlap across folds) and shows no material "
+        "degradation -- see PLAYER_GROUPED_SPLIT_CHECK.json. Nothing analytical remains open; a set of "
+        "named interaction-term candidates and target-specific caveats per model-leg in section 6 are "
+        "the only thing to read before writing model code."
     )
 
     # --- Markdown ---

@@ -2908,5 +2908,12 @@
       "classification_given_shot": "inconclusive",
       "classification_reason_given_shot": "Pooled marginal delta (+0.016825) is below the 0.050212 minimum to classify confidently."
     }
-  ]
+  ],
+  "given_shot_threshold_decision": {
+    "date": "2026-09-17",
+    "status": "decided",
+    "question": "All 10 numeric x numeric pairs classify as 'inconclusive' on the shot-conditional (given-shot) xG panel -- every pair's marginal_a_delta_given_shot sits below its dataset's min_marginal_delta_given_shot_by_dataset threshold (active: 0.052053, passive: 0.050212), several by an order of magnitude (e.g. marking_tightness x engagement_distance_to_carrier: -0.000116). Should FLAT_MARGIN_RATIO / the given-shot threshold be loosened to force a classification on any of these?",
+    "decision": "No. 10/10 inconclusive is accepted as the final, genuine empirical answer at the current threshold. The threshold is not arbitrary -- it is FLAT_MARGIN_RATIO (0.5) x each dataset's own shot-conditional mean xG, the same relative convention already used and justified for the unconditional panel and for the binary-target leg. Loosening it specifically because these 10 pairs fail to clear it would be tuning the threshold to the result rather than the result following from a principled threshold -- exactly the kind of post-hoc adjustment this project's confound/threshold methodology has consistently avoided elsewhere (see CONFOUND_ANALYSIS.md, feature_interaction thresholds). The underlying finding is itself informative: once conditioned on a shot actually occurring, these numeric feature pairs do not show a detectable non-additive (interactive/substitutive) relationship in xG at a meaningfully-sized effect -- xG-given-shot is a much noisier, lower-signal target than shot occurrence itself, and 10/10 flat is consistent with that, not a methodology failure.",
+    "closes": "Numeric x numeric interaction analysis (prompt 30) -- both the unconditional and given-shot panels are now final; no further threshold tuning planned for this analysis."
+  }
 }

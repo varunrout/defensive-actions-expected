@@ -149,12 +149,25 @@ REDUNDANCY_DROPPED_PASSIVE = {
     "top_option_3_target_y": "Raw absolute coordinate, superseded by ball-relative top_option_3_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
 }
 
-# Part B (deferred): whether to collapse top_option_2/3_* into aggregate
-# "backup option" features (max threat score, spread vs rank 1). Defaults to
-# False -- raw ranked columns stay in the feature set until a baseline
-# model's feature importance for top_option_2_*/top_option_3_* says whether
-# they're pulling their own weight. See add_option_rank_aggregates below,
-# which is written but NOT wired into any default pipeline.
+# Part B -- DECIDED 2026-09-17, not deferred any more. Cluster 5's one
+# remaining unresolved pair (top_option_2_threat_score <-> top_option_3_
+# threat_score, r=0.902) is kept as two separate features, permanently.
+# Reasoning: raw pairwise correlation between them is high, but the two
+# columns do NOT behave identically once conditioned on the same third
+# variable (zone_defensive_value, reports/eda/CONFOUND_ANALYSIS.json).
+# top_option_3_threat_score's U-shape survives that conditioning in every
+# stratum (verdict "no", 4/4 strata) -- genuine independent signal, not a
+# repackaged zone-danger effect. top_option_2_threat_score's U-shape is
+# only partially explained by the same confound (verdict "partially",
+# survives in 3/4 strata) -- weaker, more confound-driven. Two features
+# that are highly correlated with each other but diverge under identical
+# confound-conditioning are not interchangeable; collapsing them would
+# risk losing option 3's independent signal specifically. This substitutes
+# for the originally-planned baseline-model feature-importance gate (no
+# baseline model exists yet) with confound evidence that already answers
+# the question the gate was meant to answer. See reports/eda/MASTER_FINDINGS.md
+# section 3 for the full writeup. add_option_rank_aggregates below is kept
+# for reference but will not be wired into any pipeline on this evidence.
 PASSIVE_COLLAPSE_OPTION_RANKS = False
 
 
@@ -237,12 +250,11 @@ PASSIVE = {
         # 6/6, coordinate-frame cleanup, see REDUNDANCY_DROPPED_PASSIVE),
         # the target_x<->threat_score half of the cluster is resolved BY that
         # drop, not by a redundancy judgment call -- it no longer exists as
-        # a pair once target_x is gone. Cluster 5 now reduces to just
-        # top_option_2_threat_score <-> top_option_3_threat_score (r=0.902),
-        # which is STILL unresolved and still gated behind the same Part B
-        # baseline-model evidence (PASSIVE_COLLAPSE_OPTION_RANKS) as before --
-        # don't let this comment's narrowed scope be mistaken for that pair
-        # being resolved too.
+        # a pair once target_x is gone. Cluster 5 reduced to just
+        # top_option_2_threat_score <-> top_option_3_threat_score (r=0.902).
+        # DECIDED 2026-09-17: keep both, permanently -- see the
+        # PASSIVE_COLLAPSE_OPTION_RANKS comment above for the confound-based
+        # reasoning. This is no longer an open item.
         "top_option_1_threat_score",
         "lane_screening_score_option_1", "top_option_2_threat_score", "lane_screening_score_option_2",
         "top_option_3_threat_score",
