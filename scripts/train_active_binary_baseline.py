@@ -91,6 +91,18 @@ NUMERIC_INTERACTION_PAIRS = [
 ]
 CATEGORICAL_INTERACTION = ("defenders_within_10m", "phase_label")
 
+# -- Rung 1 of the model ladder (prompt 39): quadratic terms for the 4 features
+# EDA confirmed have a U-shaped (non-monotonic) relationship with the target
+# -- a plain logistic coefficient structurally cannot represent a U-shape.
+QUADRATIC_FEATURES = [
+    "defender_spread",
+    "distance_to_attacking_box",
+    "visible_defender_count",
+    "defenders_between_ball_and_attacking_goal",
+]
+for _qf in QUADRATIC_FEATURES:
+    assert _qf in NUMERIC_COLS, f"{_qf} must be one of the locked numeric features"
+
 
 def load_data() -> pd.DataFrame:
     df = pd.read_parquet(DATA_PATH)
@@ -109,11 +121,17 @@ class DesignMatrixBuilder:
     StandardScaler, boolean -> passthrough (already 0/1, no scaling).
     Optionally appends explicit interaction terms (v3 only), built from the
     already-fitted standardized numeric block and one-hot categorical block
-    so there is no additional leakage risk.
+    so there is no additional leakage risk. Optionally appends quadratic
+    terms (v1b_quadratic only) for the 4 EDA-confirmed U-shaped features --
+    each is the square of that feature's already-imputed-and-scaled column,
+    not the raw value, so the added columns stay on a comparable numeric
+    scale to the rest of the design matrix (standard practice for
+    polynomial terms on standardized inputs).
     """
 
-    def __init__(self, add_interactions: bool = False):
+    def __init__(self, add_interactions: bool = False, add_quadratic: bool = False):
         self.add_interactions = add_interactions
+        self.add_quadratic = add_quadratic
         self.ohe = OneHotEncoder(handle_unknown="ignore")
         self.num_imputer = SimpleImputer(strategy="median")
         self.num_scaler = StandardScaler()
@@ -173,6 +191,18 @@ class DesignMatrixBuilder:
             blocks.append(inter_block)
             names.extend(inter_names)
 
+        if self.add_quadratic:
+            quad_block_cols = []
+            quad_names = []
+            for feat in QUADRATIC_FEATURES:
+                std_col = num_block[:, num_names.index(feat)]
+                quad_block_cols.append(std_col ** 2)
+                quad_names.append(f"quad__{feat}")
+
+            quad_block = np.column_stack(quad_block_cols)
+            blocks.append(quad_block)
+            names.extend(quad_names)
+
         x = np.column_stack(blocks)
         return x, names
 
@@ -185,7 +215,8 @@ def fit_predict_fold(train_df, test_df, y_train, y_test, variant: str):
         return score, None, None
 
     add_interactions = variant == "v3_weighted_interactions"
-    builder = DesignMatrixBuilder(add_interactions=add_interactions).fit(train_df)
+    add_quadratic = variant == "v1b_quadratic"
+    builder = DesignMatrixBuilder(add_interactions=add_interactions, add_quadratic=add_quadratic).fit(train_df)
     x_train, feature_names = builder.transform(train_df)
     x_test, _ = builder.transform(test_df)
 
