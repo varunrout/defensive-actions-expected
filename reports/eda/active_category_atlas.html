@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Active Defensive Actions: Category Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">CATEGORY ATLAS · ACTIVE DEFENSIVE ACTIONS</p>
+  <h1 class="title">Active Defensive Actions: Category Atlas</h1>
+  <p class="dek">Shot rate by category across every categorical column, one row per actual defensive action.</p>
+  <div class="statbar"><div class="stat"><b>56,068</b><span>rows</span></div><div class="stat"><b>7.79%</b><span>base rate</span></div><div class="stat"><b>6</b><span>categorical columns</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="findings"><div class="finding"><span class="tag">signal</span><p><b>play_pattern: From Counter</b> &mdash; correlates with a 21.01% shot rate (n=752), vs a 7.79% dataset base rate.</p></div><div class="finding flag"><span class="tag">data issue</span><p><b>action_x / action_y duplicate ball_x / ball_y</b> &mdash; verified 100%-identical as of this pass -- a known unresolved data issue, so both columns are excluded from every report rather than silently double-counted.</p></div><div class="finding flag"><span class="tag">confound</span><p><b>Camera-visibility columns excluded</b> &mdash; visibility/coverage columns show real statistical lift, but that reflects camera coverage of crowded, dangerous zones -- not a defensive signal -- so they are excluded from every report.</p></div></div>
+<h2 class="section-title">Category Atlas</h2><p class="section-note">One card per categorical column. Bars = groupby-mean shot rate against the full row population per category (never filter-to-shots-then-distribute).</p>
+<div class="card" style="margin-bottom:16px;">
+<h3>phase_label</h3>
+<p class="subnote">shot rate by category &middot; dashed marker = dataset base rate (7.79%)</p>
+
+<div class="catbar-row" title="box_defence: n=9144, shots=1451, rate=15.87%">
+  <div class="catbar-label"><span>box_defence</span><span class="n">n=9144</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:42.69%"></div>
+  </div>
+  <span class="rate-val">15.87%</span>
+</div>
+<div class="catbar-row" title="high_press_proxy: n=9094, shots=1386, rate=15.24%">
+  <div class="catbar-label"><span>high_press_proxy</span><span class="n">n=9094</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:83.52%"></div>
+    <div class="catbar-refline" style="left:42.69%"></div>
+  </div>
+  <span class="rate-val">15.24%</span>
+</div>
+<div class="catbar-row" title="transition_defence: n=5699, shots=341, rate=5.98%">
+  <div class="catbar-label"><span>transition_defence</span><span class="n">n=5699</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:32.79%"></div>
+    <div class="catbar-refline" style="left:42.69%"></div>
+  </div>
+  <span class="rate-val">5.98%</span>
+</div>
+<div class="catbar-row" title="settled_low_block_proxy: n=7348, shots=428, rate=5.82%">
+  <div class="catbar-label"><span>settled_low_block_proxy</span><span class="n">n=7348</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:31.92%"></div>
+    <div class="catbar-refline" style="left:42.69%"></div>
+  </div>
+  <span class="rate-val">5.82%</span>
+</div>
+<div class="catbar-row" title="counterpress_after_loss: n=9822, shots=360, rate=3.67%">
+  <div class="catbar-label"><span>counterpress_after_loss</span><span class="n">n=9822</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:20.09%"></div>
+    <div class="catbar-refline" style="left:42.69%"></div>
+  </div>
+  <span class="rate-val">3.67%</span>
+</div>
+<div class="catbar-row" title="settled_mid_block_proxy: n=9868, shots=303, rate=3.07%">
+  <div class="catbar-label"><span>settled_mid_block_proxy</span><span class="n">n=9868</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:16.83%"></div>
+    <div class="catbar-refline" style="left:42.69%"></div>
+  </div>
+  <span class="rate-val">3.07%</span>
+</div>
+<div class="catbar-row" title="wide_defending_proxy: n=5093, shots=99, rate=1.94%">
+  <div class="catbar-label"><span>wide_defending_proxy</span><span class="n">n=5093</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:10.65%"></div>
+    <div class="catbar-refline" style="left:42.69%"></div>
+  </div>
+  <span class="rate-val">1.94%</span>
+</div>
+</div>
+<div class="card" style="margin-bottom:16px;">
+<h3>position</h3>
+<p class="subnote">shot rate by category &middot; dashed marker = dataset base rate (7.79%)</p>
+
+<div class="catbar-row" title="Left Center Back: n=4619, shots=531, rate=11.50%">
+  <div class="catbar-label"><span>Left Center Back</span><span class="n">n=4619</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">11.50%</span>
+</div>
+<div class="catbar-row" title="Center Back: n=1424, shots=163, rate=11.45%">
+  <div class="catbar-label"><span>Center Back</span><span class="n">n=1424</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.58%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">11.45%</span>
+</div>
+<div class="catbar-row" title="Right Center Back: n=4545, shots=463, rate=10.19%">
+  <div class="catbar-label"><span>Right Center Back</span><span class="n">n=4545</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:77.06%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">10.19%</span>
+</div>
+<div class="catbar-row" title="Right Back: n=3465, shots=301, rate=8.69%">
+  <div class="catbar-label"><span>Right Back</span><span class="n">n=3465</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:65.71%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">8.69%</span>
+</div>
+<div class="catbar-row" title="Left Defensive Midfield: n=4131, shots=352, rate=8.52%">
+  <div class="catbar-label"><span>Left Defensive Midfield</span><span class="n">n=4131</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:64.45%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">8.52%</span>
+</div>
+<div class="catbar-row" title="Center Defensive Midfield: n=2309, shots=192, rate=8.32%">
+  <div class="catbar-label"><span>Center Defensive Midfield</span><span class="n">n=2309</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:62.90%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">8.32%</span>
+</div>
+<div class="catbar-row" title="Left Attacking Midfield: n=586, shots=48, rate=8.19%">
+  <div class="catbar-label"><span>Left Attacking Midfield</span><span class="n">n=586</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:61.96%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">8.19%</span>
+</div>
+<div class="catbar-row" title="Left Back: n=3574, shots=285, rate=7.97%">
+  <div class="catbar-label"><span>Left Back</span><span class="n">n=3574</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:60.32%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">7.97%</span>
+</div>
+<div class="catbar-row" title="Right Wing Back: n=1679, shots=133, rate=7.92%">
+  <div class="catbar-label"><span>Right Wing Back</span><span class="n">n=1679</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:59.92%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">7.92%</span>
+</div>
+<div class="catbar-row" title="Right Defensive Midfield: n=4397, shots=346, rate=7.87%">
+  <div class="catbar-label"><span>Right Defensive Midfield</span><span class="n">n=4397</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:59.52%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">7.87%</span>
+</div>
+<div class="catbar-row" title="Right Center Midfield: n=2227, shots=162, rate=7.27%">
+  <div class="catbar-label"><span>Right Center Midfield</span><span class="n">n=2227</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:55.02%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">7.27%</span>
+</div>
+<div class="catbar-row" title="Left Wing Back: n=1650, shots=120, rate=7.27%">
+  <div class="catbar-label"><span>Left Wing Back</span><span class="n">n=1650</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:55.01%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">7.27%</span>
+</div>
+<div class="catbar-row" title="Center Attacking Midfield: n=2352, shots=162, rate=6.89%">
+  <div class="catbar-label"><span>Center Attacking Midfield</span><span class="n">n=2352</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:52.10%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">6.89%</span>
+</div>
+<div class="catbar-row" title="Right Midfield: n=1120, shots=74, rate=6.61%">
+  <div class="catbar-label"><span>Right Midfield</span><span class="n">n=1120</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:49.98%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">6.61%</span>
+</div>
+<div class="catbar-row" title="Right Wing: n=3190, shots=207, rate=6.49%">
+  <div class="catbar-label"><span>Right Wing</span><span class="n">n=3190</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:49.08%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">6.49%</span>
+</div>
+<div class="catbar-row" title="Right Center Forward: n=1296, shots=80, rate=6.17%">
+  <div class="catbar-label"><span>Right Center Forward</span><span class="n">n=1296</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:46.69%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">6.17%</span>
+</div>
+<div class="catbar-row" title="Left Wing: n=2920, shots=180, rate=6.16%">
+  <div class="catbar-label"><span>Left Wing</span><span class="n">n=2920</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:46.63%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">6.16%</span>
+</div>
+<div class="catbar-row" title="Left Center Forward: n=1350, shots=82, rate=6.07%">
+  <div class="catbar-label"><span>Left Center Forward</span><span class="n">n=1350</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:45.94%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">6.07%</span>
+</div>
+<div class="catbar-row" title="Left Midfield: n=1073, shots=65, rate=6.06%">
+  <div class="catbar-label"><span>Left Midfield</span><span class="n">n=1073</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:45.82%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">6.06%</span>
+</div>
+<div class="catbar-row" title="Left Center Midfield: n=2251, shots=136, rate=6.04%">
+  <div class="catbar-label"><span>Left Center Midfield</span><span class="n">n=2251</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:45.70%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">6.04%</span>
+</div>
+<div class="catbar-row" title="Right Attacking Midfield: n=609, shots=35, rate=5.75%">
+  <div class="catbar-label"><span>Right Attacking Midfield</span><span class="n">n=609</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:43.47%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">5.75%</span>
+</div>
+<div class="catbar-row" title="Center Forward: n=4427, shots=244, rate=5.51%">
+  <div class="catbar-label"><span>Center Forward</span><span class="n">n=4427</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:41.69%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">5.51%</span>
+</div>
+<div class="catbar-row" title="Goalkeeper: n=874, shots=7, rate=0.80%">
+  <div class="catbar-label"><span>Goalkeeper</span><span class="n">n=874</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:6.06%"></div>
+    <div class="catbar-refline" style="left:58.93%"></div>
+  </div>
+  <span class="rate-val">0.80%</span>
+</div>
+</div>
+<div class="card" style="margin-bottom:16px;">
+<h3>event_type</h3>
+<p class="subnote">shot rate by category &middot; dashed marker = dataset base rate (7.79%)</p>
+
+<div class="catbar-row" title="Ball Recovery: n=8932, shots=926, rate=10.37%">
+  <div class="catbar-label"><span>Ball Recovery</span><span class="n">n=8932</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:65.34%"></div>
+  </div>
+  <span class="rate-val">10.37%</span>
+</div>
+<div class="catbar-row" title="Clearance: n=4187, shots=424, rate=10.13%">
+  <div class="catbar-label"><span>Clearance</span><span class="n">n=4187</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:84.94%"></div>
+    <div class="catbar-refline" style="left:65.34%"></div>
+  </div>
+  <span class="rate-val">10.13%</span>
+</div>
+<div class="catbar-row" title="Duel: n=6432, shots=597, rate=9.28%">
+  <div class="catbar-label"><span>Duel</span><span class="n">n=6432</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:77.85%"></div>
+    <div class="catbar-refline" style="left:65.34%"></div>
+  </div>
+  <span class="rate-val">9.28%</span>
+</div>
+<div class="catbar-row" title="Pressure: n=27478, shots=2015, rate=7.33%">
+  <div class="catbar-label"><span>Pressure</span><span class="n">n=27478</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:61.51%"></div>
+    <div class="catbar-refline" style="left:65.34%"></div>
+  </div>
+  <span class="rate-val">7.33%</span>
+</div>
+<div class="catbar-row" title="Block: n=3889, shots=266, rate=6.84%">
+  <div class="catbar-label"><span>Block</span><span class="n">n=3889</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:57.37%"></div>
+    <div class="catbar-refline" style="left:65.34%"></div>
+  </div>
+  <span class="rate-val">6.84%</span>
+</div>
+<div class="catbar-row" title="50/50: n=478, shots=28, rate=5.86%">
+  <div class="catbar-label"><span>50/50</span><span class="n">n=478</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:49.13%"></div>
+    <div class="catbar-refline" style="left:65.34%"></div>
+  </div>
+  <span class="rate-val">5.86%</span>
+</div>
+<div class="catbar-row" title="Interception: n=2029, shots=76, rate=3.75%">
+  <div class="catbar-label"><span>Interception</span><span class="n">n=2029</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:31.42%"></div>
+    <div class="catbar-refline" style="left:65.34%"></div>
+  </div>
+  <span class="rate-val">3.75%</span>
+</div>
+<div class="catbar-row" title="Foul Committed: n=2643, shots=36, rate=1.36%">
+  <div class="catbar-label"><span>Foul Committed</span><span class="n">n=2643</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:11.42%"></div>
+    <div class="catbar-refline" style="left:65.34%"></div>
+  </div>
+  <span class="rate-val">1.36%</span>
+</div>
+</div>
+<div class="card" style="margin-bottom:16px;">
+<h3>play_pattern</h3>
+<p class="subnote">shot rate by category &middot; dashed marker = dataset base rate (7.79%)</p>
+
+<div class="catbar-row" title="From Counter: n=752, shots=158, rate=21.01%">
+  <div class="catbar-label"><span>From Counter</span><span class="n">n=752</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:32.24%"></div>
+  </div>
+  <span class="rate-val">21.01%</span>
+</div>
+<div class="catbar-row" title="From Corner: n=3090, shots=617, rate=19.97%">
+  <div class="catbar-label"><span>From Corner</span><span class="n">n=3090</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:82.64%"></div>
+    <div class="catbar-refline" style="left:32.24%"></div>
+  </div>
+  <span class="rate-val">19.97%</span>
+</div>
+<div class="catbar-row" title="From Free Kick: n=8093, shots=737, rate=9.11%">
+  <div class="catbar-label"><span>From Free Kick</span><span class="n">n=8093</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:37.69%"></div>
+    <div class="catbar-refline" style="left:32.24%"></div>
+  </div>
+  <span class="rate-val">9.11%</span>
+</div>
+<div class="catbar-row" title="From Throw In: n=12349, shots=949, rate=7.68%">
+  <div class="catbar-label"><span>From Throw In</span><span class="n">n=12349</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:31.81%"></div>
+    <div class="catbar-refline" style="left:32.24%"></div>
+  </div>
+  <span class="rate-val">7.68%</span>
+</div>
+<div class="catbar-row" title="From Keeper: n=1428, shots=88, rate=6.16%">
+  <div class="catbar-label"><span>From Keeper</span><span class="n">n=1428</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:25.50%"></div>
+    <div class="catbar-refline" style="left:32.24%"></div>
+  </div>
+  <span class="rate-val">6.16%</span>
+</div>
+<div class="catbar-row" title="From Goal Kick: n=4417, shots=269, rate=6.09%">
+  <div class="catbar-label"><span>From Goal Kick</span><span class="n">n=4417</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:25.21%"></div>
+    <div class="catbar-refline" style="left:32.24%"></div>
+  </div>
+  <span class="rate-val">6.09%</span>
+</div>
+<div class="catbar-row" title="Regular Play: n=24253, shots=1473, rate=6.07%">
+  <div class="catbar-label"><span>Regular Play</span><span class="n">n=24253</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:25.14%"></div>
+    <div class="catbar-refline" style="left:32.24%"></div>
+  </div>
+  <span class="rate-val">6.07%</span>
+</div>
+<div class="catbar-row" title="Other: n=251, shots=12, rate=4.78%">
+  <div class="catbar-label"><span>Other</span><span class="n">n=251</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:19.79%"></div>
+    <div class="catbar-refline" style="left:32.24%"></div>
+  </div>
+  <span class="rate-val">4.78%</span>
+</div>
+<div class="catbar-row" title="From Kick Off: n=1435, shots=65, rate=4.53%">
+  <div class="catbar-label"><span>From Kick Off</span><span class="n">n=1435</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:18.75%"></div>
+    <div class="catbar-refline" style="left:32.24%"></div>
+  </div>
+  <span class="rate-val">4.53%</span>
+</div>
+</div>
+<div class="card" style="margin-bottom:16px;">
+<h3>phase_label_prev_event</h3>
+<p class="subnote">shot rate by category &middot; dashed marker = dataset base rate (7.79%)</p>
+
+<div class="catbar-row" title="box_defence: n=6887, shots=1185, rate=17.21%">
+  <div class="catbar-label"><span>box_defence</span><span class="n">n=6887</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:39.37%"></div>
+  </div>
+  <span class="rate-val">17.21%</span>
+</div>
+<div class="catbar-row" title="high_press_proxy: n=9701, shots=1482, rate=15.28%">
+  <div class="catbar-label"><span>high_press_proxy</span><span class="n">n=9701</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:77.21%"></div>
+    <div class="catbar-refline" style="left:39.37%"></div>
+  </div>
+  <span class="rate-val">15.28%</span>
+</div>
+<div class="catbar-row" title="settled_low_block_proxy: n=5762, shots=368, rate=6.39%">
+  <div class="catbar-label"><span>settled_low_block_proxy</span><span class="n">n=5762</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:32.28%"></div>
+    <div class="catbar-refline" style="left:39.37%"></div>
+  </div>
+  <span class="rate-val">6.39%</span>
+</div>
+<div class="catbar-row" title="transition_defence: n=5201, shots=318, rate=6.11%">
+  <div class="catbar-label"><span>transition_defence</span><span class="n">n=5201</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:30.90%"></div>
+    <div class="catbar-refline" style="left:39.37%"></div>
+  </div>
+  <span class="rate-val">6.11%</span>
+</div>
+<div class="catbar-row" title="settled_mid_block_proxy: n=8880, shots=396, rate=4.46%">
+  <div class="catbar-label"><span>settled_mid_block_proxy</span><span class="n">n=8880</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:22.54%"></div>
+    <div class="catbar-refline" style="left:39.37%"></div>
+  </div>
+  <span class="rate-val">4.46%</span>
+</div>
+<div class="catbar-row" title="counterpress_after_loss: n=9923, shots=409, rate=4.12%">
+  <div class="catbar-label"><span>counterpress_after_loss</span><span class="n">n=9923</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:20.83%"></div>
+    <div class="catbar-refline" style="left:39.37%"></div>
+  </div>
+  <span class="rate-val">4.12%</span>
+</div>
+<div class="catbar-row" title="wide_defending_proxy: n=5180, shots=123, rate=2.37%">
+  <div class="catbar-label"><span>wide_defending_proxy</span><span class="n">n=5180</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:12.00%"></div>
+    <div class="catbar-refline" style="left:39.37%"></div>
+  </div>
+  <span class="rate-val">2.37%</span>
+</div>
+<div class="catbar-row" title="(missing): n=4534, shots=87, rate=1.92%">
+  <div class="catbar-label"><span>(missing)</span><span class="n">n=4534</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:9.70%"></div>
+    <div class="catbar-refline" style="left:39.37%"></div>
+  </div>
+  <span class="rate-val">1.92%</span>
+</div>
+</div>
+<div class="card" style="margin-bottom:16px;">
+<h3>period</h3>
+<p class="subnote">shot rate by category &middot; dashed marker = dataset base rate (7.79%)</p>
+
+<div class="catbar-row" title="3: n=703, shots=65, rate=9.25%">
+  <div class="catbar-label"><span>3</span><span class="n">n=703</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:73.27%"></div>
+  </div>
+  <span class="rate-val">9.25%</span>
+</div>
+<div class="catbar-row" title="2: n=27915, shots=2362, rate=8.46%">
+  <div class="catbar-label"><span>2</span><span class="n">n=27915</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:79.58%"></div>
+    <div class="catbar-refline" style="left:73.27%"></div>
+  </div>
+  <span class="rate-val">8.46%</span>
+</div>
+<div class="catbar-row" title="4: n=783, shots=66, rate=8.43%">
+  <div class="catbar-label"><span>4</span><span class="n">n=783</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:79.27%"></div>
+    <div class="catbar-refline" style="left:73.27%"></div>
+  </div>
+  <span class="rate-val">8.43%</span>
+</div>
+<div class="catbar-row" title="1: n=26667, shots=1875, rate=7.03%">
+  <div class="catbar-label"><span>1</span><span class="n">n=26667</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:66.13%"></div>
+    <div class="catbar-refline" style="left:73.27%"></div>
+  </div>
+  <span class="rate-val">7.03%</span>
+</div>
+</div>
+</div>
+<footer>
+
+<p><b>Lift</b> = shot rate when a flag is True minus shot rate when it is False, in percentage points,
+against the dataset base rate of 7.79%. <b>Skew</b> is the sample skewness
+(scipy.stats.skew) of the full (unclipped) column. Continuous histograms use 24 equal-width bins from the
+column minimum to its 99th percentile; rows above p99 are counted as "extreme" but never dropped from the
+reported mean/median/skew. Boolean groups (True or False) with n &lt; 500 are flagged as small-n rather than
+excluded. All findings describe correlation/association, never causation.</p>
+<p><b>Excluded from this report:</b></p>
+<ul><li><b>visibility_quality_band</b> &mdash; camera/360-tracking-coverage metadata, not a football signal (confound: crowded/dangerous zones are both harder to fully capture on camera and where shots cluster)</li><li><b>ball_inside_visible_area</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>action_inside_visible_area</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>local_5m_region_fully_visible</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>local_10m_region_fully_visible</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>visibility_limited</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>visible_area_polygon_area</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>visible_area_fraction_of_pitch</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>freeze_frame_count</b> &mdash; data-collection artifact, not a defensive feature</li><li><b>carrier_x</b> &mdash; verified 100%-duplicate of ball_x (already dropped from the passive parquet)</li><li><b>carrier_y</b> &mdash; verified 100%-duplicate of ball_y (already dropped from the passive parquet)</li><li><b>action_x</b> &mdash; verified 100%-duplicate of ball_x as of this pass -- known unresolved data issue</li><li><b>action_y</b> &mdash; verified 100%-duplicate of ball_y as of this pass -- known unresolved data issue</li><li><b>action_changed_possession</b> &mdash; structural zero (0.00% shot rate by target-window definition), not a genuine finding</li><li><b>action_ended_possession</b> &mdash; structural zero (0.00% shot rate by target-window definition), not a genuine finding</li><li><b>action_won_possession</b> &mdash; structural zero (0.00% shot rate by target-window definition), not a genuine finding</li><li><b>is_central_lane</b> &mdash; Type 1 REVIEW resolution: point-biserial r=0.854 vs attacking_goal_centrality (kept)</li><li><b>is_wide_lane</b> &mdash; Type 1 REVIEW resolution: point-biserial r=-0.785 vs attacking_goal_centrality (kept)</li><li><b>is_high_zone</b> &mdash; Type 2 REVIEW resolution: near-total subset of is_in_attacking_box (kept, higher lift +11.99pp vs +7.22pp)</li><li><b>is_deep_zone</b> &mdash; Type 2 REVIEW resolution: near-total subset of is_in_defending_box (kept, higher lift +12.04pp vs +7.22pp)</li><li><b>position_group</b> &mdash; CORRELATION_ANALYSIS DROP tier: Cramer&#x27;s V=1.0 vs position (kept, more granular)</li><li><b>action_family</b> &mdash; CORRELATION_ANALYSIS DROP tier: Cramer&#x27;s V=1.0 vs event_type (kept, more granular)</li><li><b>distance_to_center_line</b> &mdash; CORRELATION_ANALYSIS DROP tier: Spearman r=-1.0 vs attacking_goal_centrality (kept)</li><li><b>distance_to_attacking_goal</b> &mdash; Cluster 1 (goal-proximity, drop-to-one): mutually r/eta &gt;= 0.94 with distance_to_attacking_box, distance_to_defending_goal/box, action_zone -- kept distance_to_attacking_box (is_in_attacking_box lift +11.99pp is the most predictive single cut)</li><li><b>distance_to_defending_goal</b> &mdash; Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal</li><li><b>distance_to_defending_box</b> &mdash; Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal</li><li><b>action_zone</b> &mdash; Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal</li><li><b>attacker_centroid_x</b> &mdash; Cluster 2 (attacker/defender centroid, MERGE not drop): r=0.984 with defender_centroid_x -- replaced by defender_attacker_gap_x/y (defensive compactness relative to attacking shape), not simply dropped, since the two centroids describe different teams&#x27; shapes</li><li><b>attacker_centroid_y</b> &mdash; Cluster 2 (attacker/defender centroid, MERGE not drop): see attacker_centroid_x</li><li><b>defender_centroid_x</b> &mdash; Cluster 2 (attacker/defender centroid, MERGE not drop): see attacker_centroid_x</li><li><b>defender_centroid_y</b> &mdash; Cluster 2 (attacker/defender centroid, MERGE not drop): see attacker_centroid_x</li><li><b>events_elapsed_in_possession</b> &mdash; Cluster 3 (possession clock, drop-to-one): mutually r=0.90-0.95 with possession_elapsed_seconds/phase_transitions_observed_so_far -- kept possession_elapsed_seconds (most granular, continuous)</li><li><b>phase_transitions_observed_so_far</b> &mdash; Cluster 3 (possession clock, drop-to-one): see events_elapsed_in_possession</li><li><b>local_numerical_balance_5m</b> &mdash; VIF analysis: near-exact linear combination of attackers_within_5m - defenders_within_5m (both kept); joint multicollinearity invisible to pairwise correlation, caught by VIF, not a COLLAPSE/REVIEW tier verdict -- see reports/eda/VIF_ANALYSIS.json</li><li><b>local_numerical_balance_10m</b> &mdash; VIF analysis: near-exact linear combination of attackers_within_10m - defenders_within_10m (both kept); joint multicollinearity invisible to pairwise correlation, caught by VIF, not a COLLAPSE/REVIEW tier verdict -- see reports/eda/VIF_ANALYSIS.json</li></ul>
+
+</footer>
+</body>
+</html>

@@ -1,0 +1,543 @@
+{
+  "datasets": {
+    "active": {
+      "dataset": "active",
+      "n_rows_used": 43130,
+      "n_rows_dropped_for_na": 12938,
+      "n_features": 28,
+      "n_features_used_in_vif": 26,
+      "categorical_excluded_caveat": "Categorical features are excluded from this VIF pass -- VIF is defined over numeric regressors (continuous + discrete + boolean only). A categorical column collinear with a numeric cluster would not be caught here. This is a known limitation of this analysis, not a silent omission.",
+      "constant_columns_excluded": [
+        {
+          "feature": "has_visible_attacker",
+          "reason": "Constant (1.0 for all 43130 complete-case rows) after listwise deletion across the full candidate set -- not truly constant in the full dataset; this flag's False rows are exactly the rows where some other candidate column is null by construction, so complete-case deletion removes every row where the flag is False. VIF and pairwise correlation are undefined for a constant column; excluded from this computation rather than reported as a bogus near-zero VIF."
+        },
+        {
+          "feature": "has_visible_defender",
+          "reason": "Constant (1.0 for all 43130 complete-case rows) after listwise deletion across the full candidate set -- not truly constant in the full dataset; this flag's False rows are exactly the rows where some other candidate column is null by construction, so complete-case deletion removes every row where the flag is False. VIF and pairwise correlation are undefined for a constant column; excluded from this computation rather than reported as a bogus near-zero VIF."
+        }
+      ],
+      "condition_number": 48.168769251012996,
+      "svd_converged": true,
+      "vif": [
+        {
+          "feature": "action_retained_defensive_team_control",
+          "vif": 5.856724658986043
+        },
+        {
+          "feature": "action_was_under_opponent_possession",
+          "vif": 5.702731926138413
+        },
+        {
+          "feature": "visible_defender_count",
+          "vif": 5.118759338921025
+        },
+        {
+          "feature": "angle_to_attacking_goal",
+          "vif": 4.9819307676615665
+        },
+        {
+          "feature": "attacker_defender_ratio",
+          "vif": 4.567759036563958
+        },
+        {
+          "feature": "visible_attacker_count",
+          "vif": 4.0600614722015225
+        },
+        {
+          "feature": "distance_to_attacking_box",
+          "vif": 3.998810426023342
+        },
+        {
+          "feature": "attacking_goal_centrality",
+          "vif": 3.886027018215911
+        },
+        {
+          "feature": "defenders_within_10m",
+          "vif": 3.3531676389764633
+        },
+        {
+          "feature": "nearest_defender_distance",
+          "vif": 2.3769559701539382
+        },
+        {
+          "feature": "defenders_within_5m",
+          "vif": 2.366211243343342
+        },
+        {
+          "feature": "attacker_spread",
+          "vif": 2.2652425059466794
+        },
+        {
+          "feature": "attackers_within_10m",
+          "vif": 2.220387046860233
+        },
+        {
+          "feature": "defender_spread",
+          "vif": 2.1898325576227853
+        },
+        {
+          "feature": "nearest_attacker_distance",
+          "vif": 2.140445210431989
+        },
+        {
+          "feature": "attackers_within_5m",
+          "vif": 2.0411065816234464
+        },
+        {
+          "feature": "is_in_defending_box",
+          "vif": 1.9768979233173976
+        },
+        {
+          "feature": "is_in_attacking_box",
+          "vif": 1.909628557353087
+        },
+        {
+          "feature": "has_previous_event",
+          "vif": 1.8571965536260053
+        },
+        {
+          "feature": "defenders_between_ball_and_attacking_goal",
+          "vif": 1.6528547202380777
+        },
+        {
+          "feature": "counterpress",
+          "vif": 1.3571515685227826
+        },
+        {
+          "feature": "defender_attacker_gap_x",
+          "vif": 1.335683206436384
+        },
+        {
+          "feature": "phase_changed_since_prev_event",
+          "vif": 1.3306064360207783
+        },
+        {
+          "feature": "possession_elapsed_seconds",
+          "vif": 1.1991940110955848
+        },
+        {
+          "feature": "match_time_seconds",
+          "vif": 1.012323099087899
+        },
+        {
+          "feature": "defender_attacker_gap_y",
+          "vif": 1.0026269431557255
+        }
+      ],
+      "before_after": {
+        "dropped_columns": [
+          "local_numerical_balance_10m",
+          "local_numerical_balance_5m"
+        ],
+        "root_cause": "local_numerical_balance_5m is a near-exact linear combination of two columns already kept (attackers_within_5m - defenders_within_5m); local_numerical_balance_10m likewise for the 10m pair. Pairwise correlation never surfaced this (max pairwise r among the six flagged columns was well under 0.90) because the redundancy is a JOINT linear dependency across three columns at once, not a pairwise one -- exactly what VIF catches and simple correlation cannot.",
+        "before": {
+          "n_features": 30,
+          "condition_number": 1364156003678912.8,
+          "svd_converged": true,
+          "constant_columns_excluded": [
+            {
+              "feature": "has_visible_attacker",
+              "reason": "Constant (1.0 for all 43130 complete-case rows) after listwise deletion across the full candidate set -- not truly constant in the full dataset; this flag's False rows are exactly the rows where some other candidate column is null by construction, so complete-case deletion removes every row where the flag is False. VIF and pairwise correlation are undefined for a constant column; excluded from this computation rather than reported as a bogus near-zero VIF."
+            },
+            {
+              "feature": "has_visible_defender",
+              "reason": "Constant (1.0 for all 43130 complete-case rows) after listwise deletion across the full candidate set -- not truly constant in the full dataset; this flag's False rows are exactly the rows where some other candidate column is null by construction, so complete-case deletion removes every row where the flag is False. VIF and pairwise correlation are undefined for a constant column; excluded from this computation rather than reported as a bogus near-zero VIF."
+            }
+          ],
+          "max_vif": 5.85672465898604,
+          "vif": [
+            {
+              "feature": "attackers_within_5m",
+              "vif": null
+            },
+            {
+              "feature": "defenders_within_5m",
+              "vif": null
+            },
+            {
+              "feature": "attackers_within_10m",
+              "vif": null
+            },
+            {
+              "feature": "defenders_within_10m",
+              "vif": null
+            },
+            {
+              "feature": "local_numerical_balance_10m",
+              "vif": null
+            },
+            {
+              "feature": "local_numerical_balance_5m",
+              "vif": null
+            },
+            {
+              "feature": "action_retained_defensive_team_control",
+              "vif": 5.85672465898604
+            },
+            {
+              "feature": "action_was_under_opponent_possession",
+              "vif": 5.702731926138413
+            },
+            {
+              "feature": "visible_defender_count",
+              "vif": 5.118759338921025
+            },
+            {
+              "feature": "angle_to_attacking_goal",
+              "vif": 4.9819307676615665
+            },
+            {
+              "feature": "attacker_defender_ratio",
+              "vif": 4.567759036563953
+            },
+            {
+              "feature": "visible_attacker_count",
+              "vif": 4.0600614722015225
+            },
+            {
+              "feature": "distance_to_attacking_box",
+              "vif": 3.998810426023342
+            },
+            {
+              "feature": "attacking_goal_centrality",
+              "vif": 3.8860270182159127
+            },
+            {
+              "feature": "nearest_defender_distance",
+              "vif": 2.3769559701539382
+            },
+            {
+              "feature": "attacker_spread",
+              "vif": 2.2652425059466794
+            },
+            {
+              "feature": "defender_spread",
+              "vif": 2.1898325576227853
+            },
+            {
+              "feature": "nearest_attacker_distance",
+              "vif": 2.140445210431989
+            },
+            {
+              "feature": "is_in_defending_box",
+              "vif": 1.9768979233173976
+            },
+            {
+              "feature": "is_in_attacking_box",
+              "vif": 1.909628557353087
+            },
+            {
+              "feature": "has_previous_event",
+              "vif": 1.8571965536260056
+            },
+            {
+              "feature": "defenders_between_ball_and_attacking_goal",
+              "vif": 1.6528547202380777
+            },
+            {
+              "feature": "counterpress",
+              "vif": 1.3571515685227826
+            },
+            {
+              "feature": "defender_attacker_gap_x",
+              "vif": 1.335683206436384
+            },
+            {
+              "feature": "phase_changed_since_prev_event",
+              "vif": 1.3306064360207785
+            },
+            {
+              "feature": "possession_elapsed_seconds",
+              "vif": 1.1991940110955848
+            },
+            {
+              "feature": "match_time_seconds",
+              "vif": 1.012323099087899
+            },
+            {
+              "feature": "defender_attacker_gap_y",
+              "vif": 1.0026269431557255
+            }
+          ]
+        },
+        "after": {
+          "n_features": 28,
+          "condition_number": 48.168769251012996,
+          "svd_converged": true,
+          "constant_columns_excluded": [
+            {
+              "feature": "has_visible_attacker",
+              "reason": "Constant (1.0 for all 43130 complete-case rows) after listwise deletion across the full candidate set -- not truly constant in the full dataset; this flag's False rows are exactly the rows where some other candidate column is null by construction, so complete-case deletion removes every row where the flag is False. VIF and pairwise correlation are undefined for a constant column; excluded from this computation rather than reported as a bogus near-zero VIF."
+            },
+            {
+              "feature": "has_visible_defender",
+              "reason": "Constant (1.0 for all 43130 complete-case rows) after listwise deletion across the full candidate set -- not truly constant in the full dataset; this flag's False rows are exactly the rows where some other candidate column is null by construction, so complete-case deletion removes every row where the flag is False. VIF and pairwise correlation are undefined for a constant column; excluded from this computation rather than reported as a bogus near-zero VIF."
+            }
+          ],
+          "max_vif": 5.856724658986043,
+          "vif": [
+            {
+              "feature": "action_retained_defensive_team_control",
+              "vif": 5.856724658986043
+            },
+            {
+              "feature": "action_was_under_opponent_possession",
+              "vif": 5.702731926138413
+            },
+            {
+              "feature": "visible_defender_count",
+              "vif": 5.118759338921025
+            },
+            {
+              "feature": "angle_to_attacking_goal",
+              "vif": 4.9819307676615665
+            },
+            {
+              "feature": "attacker_defender_ratio",
+              "vif": 4.567759036563958
+            },
+            {
+              "feature": "visible_attacker_count",
+              "vif": 4.0600614722015225
+            },
+            {
+              "feature": "distance_to_attacking_box",
+              "vif": 3.998810426023342
+            },
+            {
+              "feature": "attacking_goal_centrality",
+              "vif": 3.886027018215911
+            },
+            {
+              "feature": "defenders_within_10m",
+              "vif": 3.3531676389764633
+            },
+            {
+              "feature": "nearest_defender_distance",
+              "vif": 2.3769559701539382
+            },
+            {
+              "feature": "defenders_within_5m",
+              "vif": 2.366211243343342
+            },
+            {
+              "feature": "attacker_spread",
+              "vif": 2.2652425059466794
+            },
+            {
+              "feature": "attackers_within_10m",
+              "vif": 2.220387046860233
+            },
+            {
+              "feature": "defender_spread",
+              "vif": 2.1898325576227853
+            },
+            {
+              "feature": "nearest_attacker_distance",
+              "vif": 2.140445210431989
+            },
+            {
+              "feature": "attackers_within_5m",
+              "vif": 2.0411065816234464
+            },
+            {
+              "feature": "is_in_defending_box",
+              "vif": 1.9768979233173976
+            },
+            {
+              "feature": "is_in_attacking_box",
+              "vif": 1.909628557353087
+            },
+            {
+              "feature": "has_previous_event",
+              "vif": 1.8571965536260053
+            },
+            {
+              "feature": "defenders_between_ball_and_attacking_goal",
+              "vif": 1.6528547202380777
+            },
+            {
+              "feature": "counterpress",
+              "vif": 1.3571515685227826
+            },
+            {
+              "feature": "defender_attacker_gap_x",
+              "vif": 1.335683206436384
+            },
+            {
+              "feature": "phase_changed_since_prev_event",
+              "vif": 1.3306064360207783
+            },
+            {
+              "feature": "possession_elapsed_seconds",
+              "vif": 1.1991940110955848
+            },
+            {
+              "feature": "match_time_seconds",
+              "vif": 1.012323099087899
+            },
+            {
+              "feature": "defender_attacker_gap_y",
+              "vif": 1.0026269431557255
+            }
+          ]
+        }
+      }
+    },
+    "passive": {
+      "dataset": "passive",
+      "n_rows_used": 1591000,
+      "n_rows_dropped_for_na": 2181,
+      "n_features": 35,
+      "n_features_used_in_vif": 33,
+      "categorical_excluded_caveat": "Categorical features are excluded from this VIF pass -- VIF is defined over numeric regressors (continuous + discrete + boolean only). A categorical column collinear with a numeric cluster would not be caught here. This is a known limitation of this analysis, not a silent omission.",
+      "constant_columns_excluded": [
+        {
+          "feature": "has_option_2",
+          "reason": "Constant (1.0 for all 1591000 complete-case rows) after listwise deletion across the full candidate set -- not truly constant in the full dataset; this flag's False rows are exactly the rows where some other candidate column is null by construction, so complete-case deletion removes every row where the flag is False. VIF and pairwise correlation are undefined for a constant column; excluded from this computation rather than reported as a bogus near-zero VIF."
+        },
+        {
+          "feature": "has_option_3",
+          "reason": "Constant (1.0 for all 1591000 complete-case rows) after listwise deletion across the full candidate set -- not truly constant in the full dataset; this flag's False rows are exactly the rows where some other candidate column is null by construction, so complete-case deletion removes every row where the flag is False. VIF and pairwise correlation are undefined for a constant column; excluded from this computation rather than reported as a bogus near-zero VIF."
+        }
+      ],
+      "condition_number": 61.773029908394385,
+      "svd_converged": true,
+      "vif": [
+        {
+          "feature": "ball_x",
+          "vif": 7.635828634199623
+        },
+        {
+          "feature": "defender_x",
+          "vif": 6.947663637015881
+        },
+        {
+          "feature": "top_option_2_threat_score",
+          "vif": 6.066717099919872
+        },
+        {
+          "feature": "top_option_3_threat_score",
+          "vif": 5.45346197767999
+        },
+        {
+          "feature": "ball_y",
+          "vif": 5.3623140368241025
+        },
+        {
+          "feature": "angle_to_attacking_goal",
+          "vif": 5.3374857941545155
+        },
+        {
+          "feature": "attacking_goal_centrality",
+          "vif": 4.7994535139434324
+        },
+        {
+          "feature": "top_option_1_dy",
+          "vif": 3.9731451659312422
+        },
+        {
+          "feature": "top_option_2_dy",
+          "vif": 3.291425346809194
+        },
+        {
+          "feature": "top_option_3_dy",
+          "vif": 2.9472918807785975
+        },
+        {
+          "feature": "top_option_1_angle_from_ball",
+          "vif": 2.692476867847525
+        },
+        {
+          "feature": "top_option_2_angle_from_ball",
+          "vif": 2.364775495264695
+        },
+        {
+          "feature": "top_option_3_angle_from_ball",
+          "vif": 2.210158116756115
+        },
+        {
+          "feature": "top_option_1_dx",
+          "vif": 1.9752756518096988
+        },
+        {
+          "feature": "overload_score",
+          "vif": 1.949311604270271
+        },
+        {
+          "feature": "top_option_1_threat_score",
+          "vif": 1.8924316642624783
+        },
+        {
+          "feature": "engagement_distance_to_carrier",
+          "vif": 1.852037898304436
+        },
+        {
+          "feature": "is_wide_lane",
+          "vif": 1.7726337535093288
+        },
+        {
+          "feature": "lane_screening_score_option_2",
+          "vif": 1.7448310830971951
+        },
+        {
+          "feature": "lane_screening_score_option_1",
+          "vif": 1.7421655513488328
+        },
+        {
+          "feature": "lane_screening_score_option_3",
+          "vif": 1.7279598338418585
+        },
+        {
+          "feature": "top_option_2_dx",
+          "vif": 1.6343000770048488
+        },
+        {
+          "feature": "is_in_defending_box",
+          "vif": 1.5349888158380247
+        },
+        {
+          "feature": "top_option_3_dx",
+          "vif": 1.5035830428692691
+        },
+        {
+          "feature": "is_in_attacking_box",
+          "vif": 1.4879988236744623
+        },
+        {
+          "feature": "defender_y",
+          "vif": 1.463020264074127
+        },
+        {
+          "feature": "top_option_1_distance_from_ball",
+          "vif": 1.3420862801550366
+        },
+        {
+          "feature": "defender_slot_index",
+          "vif": 1.3258630111414111
+        },
+        {
+          "feature": "top_option_3_distance_from_ball",
+          "vif": 1.211837964501028
+        },
+        {
+          "feature": "top_option_2_distance_from_ball",
+          "vif": 1.193589683081965
+        },
+        {
+          "feature": "marking_tightness",
+          "vif": 1.160945835170774
+        },
+        {
+          "feature": "is_goal_side_of_nearest_attacker",
+          "vif": 1.1379934108679046
+        },
+        {
+          "feature": "has_screened_outcome",
+          "vif": 1.0002625080749645
+        }
+      ]
+    }
+  }
+}

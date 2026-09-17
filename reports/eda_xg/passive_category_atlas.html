@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Passive / Off-Ball Defensive Positioning: Category Atlas (xG)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.xg-card.locked { border-left: 4px solid var(--good); }
+.xg-card.dropped { border-left: 4px solid var(--amber); }
+.xg-status-badge { font-family: "JetBrains Mono", monospace; font-size: 9.5px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px; font-weight: 700; margin-left: 8px; vertical-align: middle; }
+.xg-status-badge.locked { background: var(--good-wash); color: var(--good); }
+.xg-status-badge.dropped { background: var(--amber-wash); color: var(--amber); }
+.xg-reason { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 2px 0 10px; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">CATEGORY ATLAS -- XG &middot; PASSIVE / OFF-BALL DEFENSIVE POSITIONING</p>
+  <h1 class="title">Passive / Off-Ball Defensive Positioning: Category Atlas (xG)</h1>
+  <p class="dek">Mean target_future_xg_10s by category, reconstructed pre-drop pool, one row per visible defender-slot per on-ball attacking event.</p>
+  <div class="statbar"><div class="stat"><b>1,593,181</b><span>rows</span></div><div class="stat"><b>0.00599</b><span>mean xG</span></div><div class="stat"><b>0.10042</b><span>mean xG given shot</span></div><div class="stat"><b>5</b><span>categorical columns</span></div><div class="stat"><b>1</b><span>dropped, still shown</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="findings"><div class="finding"><span class="tag">pool</span><p><b>5 categorical columns (4 locked + 1 dropped-but-included)</b> &mdash; reconstructed pre-drop 51/44-era pool, not the current locked list -- same discipline as the numerical xG atlas.</p></div><div class="finding"><span class="tag">scale</span><p><b>mean target_future_xg_10s = 0.00599</b> &mdash; heavily zero-inflated continuous target -- values here are mean xG per category, not a percentage.</p></div><div class="finding"><span class="tag">conditional</span><p><b>mean target_future_xg_10s given a shot = 0.10042</b> &mdash; each card also expands to a shot-conditional breakdown (target_future_shot_10s==1 only) -- asks whether a category relates to how good the chance was, not just whether one occurred.</p></div></div>
+<h2 class="section-title">Category Atlas -- xG</h2><p class="section-note">One card per categorical column, reconstructed pre-drop pool. Green border = locked (current candidate list), amber = dropped (still shown, reason inline). Bars = groupby-mean xG against the full row population per category. Expand a card for the shot-conditional panel.</p>
+<div class="card xg-card locked" style="margin-bottom:16px;">
+<h3>defender_functional_role <span class="xg-status-badge locked">LOCKED</span></h3>
+
+<p class="subnote">Unconditional -- mean xG by category, dashed marker = dataset mean xG (0.00599)</p>
+
+<div class="catbar-row" title="mid_block: n=838270, xg_sum=5331.889, mean_xg=0.00636">
+  <div class="catbar-label"><span>mid_block</span><span class="n">n=838270</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:81.91%"></div>
+  </div>
+  <span class="rate-val">0.00636</span>
+</div>
+<div class="catbar-row" title="central_screen: n=213043, xg_sum=1273.054, mean_xg=0.00598">
+  <div class="catbar-label"><span>central_screen</span><span class="n">n=213043</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:81.69%"></div>
+    <div class="catbar-refline" style="left:81.91%"></div>
+  </div>
+  <span class="rate-val">0.00598</span>
+</div>
+<div class="catbar-row" title="last_line: n=216551, xg_sum=1282.077, mean_xg=0.00592">
+  <div class="catbar-label"><span>last_line</span><span class="n">n=216551</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:80.94%"></div>
+    <div class="catbar-refline" style="left:81.91%"></div>
+  </div>
+  <span class="rate-val">0.00592</span>
+</div>
+<div class="catbar-row" title="advanced_wide: n=155367, xg_sum=852.007, mean_xg=0.00548">
+  <div class="catbar-label"><span>advanced_wide</span><span class="n">n=155367</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:74.97%"></div>
+    <div class="catbar-refline" style="left:81.91%"></div>
+  </div>
+  <span class="rate-val">0.00548</span>
+</div>
+<div class="catbar-row" title="wide_cover: n=168924, xg_sum=806.016, mean_xg=0.00477">
+  <div class="catbar-label"><span>wide_cover</span><span class="n">n=168924</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:65.23%"></div>
+    <div class="catbar-refline" style="left:81.91%"></div>
+  </div>
+  <span class="rate-val">0.00477</span>
+</div>
+<div class="catbar-row" title="unclassified: n=1026, xg_sum=0.113, mean_xg=0.00011">
+  <div class="catbar-label"><span>unclassified</span><span class="n">n=1026</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:1.51%"></div>
+    <div class="catbar-refline" style="left:81.91%"></div>
+  </div>
+  <span class="rate-val">0.00011</span>
+</div>
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=95,048) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on target_future_shot_10s==1 -- mean xG by category on the
+shot-only subset, dashed marker = shot-only mean xG (0.10042). Much smaller n; small-sample
+categories flagged, not hidden.</p>
+
+<div class="catbar-row" title="last_line: n=12352, xg_sum=1282.077, mean_xg=0.10380">
+  <div class="catbar-label"><span>last_line</span><span class="n">n=12352</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:84.13%"></div>
+  </div>
+  <span class="rate-val">0.10380</span>
+</div>
+<div class="catbar-row" title="central_screen: n=12278, xg_sum=1273.054, mean_xg=0.10369">
+  <div class="catbar-label"><span>central_screen</span><span class="n">n=12278</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.86%"></div>
+    <div class="catbar-refline" style="left:84.13%"></div>
+  </div>
+  <span class="rate-val">0.10369</span>
+</div>
+<div class="catbar-row" title="advanced_wide: n=8381, xg_sum=852.007, mean_xg=0.10166">
+  <div class="catbar-label"><span>advanced_wide</span><span class="n">n=8381</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:85.17%"></div>
+    <div class="catbar-refline" style="left:84.13%"></div>
+  </div>
+  <span class="rate-val">0.10166</span>
+</div>
+<div class="catbar-row" title="wide_cover: n=7988, xg_sum=806.016, mean_xg=0.10090">
+  <div class="catbar-label"><span>wide_cover</span><span class="n">n=7988</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:84.53%"></div>
+    <div class="catbar-refline" style="left:84.13%"></div>
+  </div>
+  <span class="rate-val">0.10090</span>
+</div>
+<div class="catbar-row" title="mid_block: n=54044, xg_sum=5331.889, mean_xg=0.09866">
+  <div class="catbar-label"><span>mid_block</span><span class="n">n=54044</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:82.65%"></div>
+    <div class="catbar-refline" style="left:84.13%"></div>
+  </div>
+  <span class="rate-val">0.09866</span>
+</div>
+<div class="catbar-row" title="unclassified: n=5, xg_sum=0.113, mean_xg=0.02266">
+  <div class="catbar-label"><span>unclassified</span><span class="n">n=5</span><span class="small-n-badge">small n</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:18.98%"></div>
+    <div class="catbar-refline" style="left:84.13%"></div>
+  </div>
+  <span class="rate-val">0.02266</span>
+</div>
+</details>
+</div>
+<div class="card xg-card dropped" style="margin-bottom:16px;">
+<h3>defender_zone <span class="xg-status-badge dropped">DROPPED</span></h3>
+<p class="xg-reason"><b>Why dropped:</b> Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box</p>
+<p class="subnote">Unconditional -- mean xG by category, dashed marker = dataset mean xG (0.00599)</p>
+
+<div class="catbar-row" title="attacking_third_center: n=258246, xg_sum=2724.618, mean_xg=0.01055">
+  <div class="catbar-label"><span>attacking_third_center</span><span class="n">n=258246</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:49.38%"></div>
+  </div>
+  <span class="rate-val">0.01055</span>
+</div>
+<div class="catbar-row" title="defensive_third_center: n=403528, xg_sum=3893.741, mean_xg=0.00965">
+  <div class="catbar-label"><span>defensive_third_center</span><span class="n">n=403528</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:79.53%"></div>
+    <div class="catbar-refline" style="left:49.38%"></div>
+  </div>
+  <span class="rate-val">0.00965</span>
+</div>
+<div class="catbar-row" title="attacking_third_right_flank: n=44089, xg_sum=254.821, mean_xg=0.00578">
+  <div class="catbar-label"><span>attacking_third_right_flank</span><span class="n">n=44089</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:47.64%"></div>
+    <div class="catbar-refline" style="left:49.38%"></div>
+  </div>
+  <span class="rate-val">0.00578</span>
+</div>
+<div class="catbar-row" title="defensive_third_left_flank: n=58792, xg_sum=323.791, mean_xg=0.00551">
+  <div class="catbar-label"><span>defensive_third_left_flank</span><span class="n">n=58792</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:45.39%"></div>
+    <div class="catbar-refline" style="left:49.38%"></div>
+  </div>
+  <span class="rate-val">0.00551</span>
+</div>
+<div class="catbar-row" title="attacking_third_left_flank: n=41424, xg_sum=222.369, mean_xg=0.00537">
+  <div class="catbar-label"><span>attacking_third_left_flank</span><span class="n">n=41424</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:44.24%"></div>
+    <div class="catbar-refline" style="left:49.38%"></div>
+  </div>
+  <span class="rate-val">0.00537</span>
+</div>
+<div class="catbar-row" title="defensive_third_right_flank: n=60950, xg_sum=294.351, mean_xg=0.00483">
+  <div class="catbar-label"><span>defensive_third_right_flank</span><span class="n">n=60950</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:39.80%"></div>
+    <div class="catbar-refline" style="left:49.38%"></div>
+  </div>
+  <span class="rate-val">0.00483</span>
+</div>
+<div class="catbar-row" title="middle_third_center: n=510835, xg_sum=1298.987, mean_xg=0.00254">
+  <div class="catbar-label"><span>middle_third_center</span><span class="n">n=510835</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:20.96%"></div>
+    <div class="catbar-refline" style="left:49.38%"></div>
+  </div>
+  <span class="rate-val">0.00254</span>
+</div>
+<div class="catbar-row" title="middle_third_left_flank: n=105177, xg_sum=262.844, mean_xg=0.00250">
+  <div class="catbar-label"><span>middle_third_left_flank</span><span class="n">n=105177</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:20.60%"></div>
+    <div class="catbar-refline" style="left:49.38%"></div>
+  </div>
+  <span class="rate-val">0.00250</span>
+</div>
+<div class="catbar-row" title="middle_third_right_flank: n=110140, xg_sum=269.634, mean_xg=0.00245">
+  <div class="catbar-label"><span>middle_third_right_flank</span><span class="n">n=110140</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:20.18%"></div>
+    <div class="catbar-refline" style="left:49.38%"></div>
+  </div>
+  <span class="rate-val">0.00245</span>
+</div>
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=95,048) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on target_future_shot_10s==1 -- mean xG by category on the
+shot-only subset, dashed marker = shot-only mean xG (0.10042). Much smaller n; small-sample
+categories flagged, not hidden.</p>
+
+<div class="catbar-row" title="attacking_third_center: n=25498, xg_sum=2724.618, mean_xg=0.10686">
+  <div class="catbar-label"><span>attacking_third_center</span><span class="n">n=25498</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.10686</span>
+</div>
+<div class="catbar-row" title="middle_third_left_flank: n=2496, xg_sum=262.844, mean_xg=0.10531">
+  <div class="catbar-label"><span>middle_third_left_flank</span><span class="n">n=2496</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:85.70%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.10531</span>
+</div>
+<div class="catbar-row" title="middle_third_right_flank: n=2659, xg_sum=269.634, mean_xg=0.10140">
+  <div class="catbar-label"><span>middle_third_right_flank</span><span class="n">n=2659</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:82.52%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.10140</span>
+</div>
+<div class="catbar-row" title="defensive_third_center: n=39125, xg_sum=3893.741, mean_xg=0.09952">
+  <div class="catbar-label"><span>defensive_third_center</span><span class="n">n=39125</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:80.99%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.09952</span>
+</div>
+<div class="catbar-row" title="middle_third_center: n=13095, xg_sum=1298.987, mean_xg=0.09920">
+  <div class="catbar-label"><span>middle_third_center</span><span class="n">n=13095</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:80.72%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.09920</span>
+</div>
+<div class="catbar-row" title="attacking_third_right_flank: n=2674, xg_sum=254.821, mean_xg=0.09530">
+  <div class="catbar-label"><span>attacking_third_right_flank</span><span class="n">n=2674</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:77.55%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.09530</span>
+</div>
+<div class="catbar-row" title="attacking_third_left_flank: n=2373, xg_sum=222.369, mean_xg=0.09371">
+  <div class="catbar-label"><span>attacking_third_left_flank</span><span class="n">n=2373</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:76.26%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.09371</span>
+</div>
+<div class="catbar-row" title="defensive_third_left_flank: n=3563, xg_sum=323.791, mean_xg=0.09088">
+  <div class="catbar-label"><span>defensive_third_left_flank</span><span class="n">n=3563</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:73.95%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.09088</span>
+</div>
+<div class="catbar-row" title="defensive_third_right_flank: n=3565, xg_sum=294.351, mean_xg=0.08257">
+  <div class="catbar-label"><span>defensive_third_right_flank</span><span class="n">n=3565</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:67.19%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.08257</span>
+</div>
+</details>
+</div>
+<div class="card xg-card locked" style="margin-bottom:16px;">
+<h3>on_ball_event_type <span class="xg-status-badge locked">LOCKED</span></h3>
+
+<p class="subnote">Unconditional -- mean xG by category, dashed marker = dataset mean xG (0.00599)</p>
+
+<div class="catbar-row" title="Shot: n=24496, xg_sum=313.310, mean_xg=0.01279">
+  <div class="catbar-label"><span>Shot</span><span class="n">n=24496</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:40.73%"></div>
+  </div>
+  <span class="rate-val">0.01279</span>
+</div>
+<div class="catbar-row" title="Dribble: n=21436, xg_sum=273.981, mean_xg=0.01278">
+  <div class="catbar-label"><span>Dribble</span><span class="n">n=21436</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.90%"></div>
+    <div class="catbar-refline" style="left:40.73%"></div>
+  </div>
+  <span class="rate-val">0.01278</span>
+</div>
+<div class="catbar-row" title="Pass: n=833016, xg_sum=4833.294, mean_xg=0.00580">
+  <div class="catbar-label"><span>Pass</span><span class="n">n=833016</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:39.45%"></div>
+    <div class="catbar-refline" style="left:40.73%"></div>
+  </div>
+  <span class="rate-val">0.00580</span>
+</div>
+<div class="catbar-row" title="Carry: n=714233, xg_sum=4124.571, mean_xg=0.00577">
+  <div class="catbar-label"><span>Carry</span><span class="n">n=714233</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:39.26%"></div>
+    <div class="catbar-refline" style="left:40.73%"></div>
+  </div>
+  <span class="rate-val">0.00577</span>
+</div>
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=95,048) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on target_future_shot_10s==1 -- mean xG by category on the
+shot-only subset, dashed marker = shot-only mean xG (0.10042). Much smaller n; small-sample
+categories flagged, not hidden.</p>
+
+<div class="catbar-row" title="Shot: n=1737, xg_sum=313.310, mean_xg=0.18037">
+  <div class="catbar-label"><span>Shot</span><span class="n">n=1737</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:48.41%"></div>
+  </div>
+  <span class="rate-val">0.18037</span>
+</div>
+<div class="catbar-row" title="Dribble: n=2384, xg_sum=273.981, mean_xg=0.11492">
+  <div class="catbar-label"><span>Dribble</span><span class="n">n=2384</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:55.40%"></div>
+    <div class="catbar-refline" style="left:48.41%"></div>
+  </div>
+  <span class="rate-val">0.11492</span>
+</div>
+<div class="catbar-row" title="Pass: n=47112, xg_sum=4833.294, mean_xg=0.10259">
+  <div class="catbar-label"><span>Pass</span><span class="n">n=47112</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:49.46%"></div>
+    <div class="catbar-refline" style="left:48.41%"></div>
+  </div>
+  <span class="rate-val">0.10259</span>
+</div>
+<div class="catbar-row" title="Carry: n=43815, xg_sum=4124.571, mean_xg=0.09414">
+  <div class="catbar-label"><span>Carry</span><span class="n">n=43815</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:45.38%"></div>
+    <div class="catbar-refline" style="left:48.41%"></div>
+  </div>
+  <span class="rate-val">0.09414</span>
+</div>
+</details>
+</div>
+<div class="card xg-card locked" style="margin-bottom:16px;">
+<h3>period <span class="xg-status-badge locked">LOCKED</span></h3>
+
+<p class="subnote">Unconditional -- mean xG by category, dashed marker = dataset mean xG (0.00599)</p>
+
+<div class="catbar-row" title="3: n=23655, xg_sum=205.644, mean_xg=0.00869">
+  <div class="catbar-label"><span>3</span><span class="n">n=23655</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:59.93%"></div>
+  </div>
+  <span class="rate-val">0.00869</span>
+</div>
+<div class="catbar-row" title="4: n=19686, xg_sum=160.793, mean_xg=0.00817">
+  <div class="catbar-label"><span>4</span><span class="n">n=19686</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:81.70%"></div>
+    <div class="catbar-refline" style="left:59.93%"></div>
+  </div>
+  <span class="rate-val">0.00817</span>
+</div>
+<div class="catbar-row" title="2: n=747977, xg_sum=5404.000, mean_xg=0.00722">
+  <div class="catbar-label"><span>2</span><span class="n">n=747977</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:72.27%"></div>
+    <div class="catbar-refline" style="left:59.93%"></div>
+  </div>
+  <span class="rate-val">0.00722</span>
+</div>
+<div class="catbar-row" title="1: n=801811, xg_sum=3774.718, mean_xg=0.00471">
+  <div class="catbar-label"><span>1</span><span class="n">n=801811</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:47.09%"></div>
+    <div class="catbar-refline" style="left:59.93%"></div>
+  </div>
+  <span class="rate-val">0.00471</span>
+</div>
+<div class="catbar-row" title="5: n=52, xg_sum=0.000, mean_xg=0.00000">
+  <div class="catbar-label"><span>5</span><span class="n">n=52</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:0.00%"></div>
+    <div class="catbar-refline" style="left:59.93%"></div>
+  </div>
+  <span class="rate-val">0.00000</span>
+</div>
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=95,048) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on target_future_shot_10s==1 -- mean xG by category on the
+shot-only subset, dashed marker = shot-only mean xG (0.10042). Much smaller n; small-sample
+categories flagged, not hidden.</p>
+
+<div class="catbar-row" title="3: n=1500, xg_sum=205.644, mean_xg=0.13710">
+  <div class="catbar-label"><span>3</span><span class="n">n=1500</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:63.70%"></div>
+  </div>
+  <span class="rate-val">0.13710</span>
+</div>
+<div class="catbar-row" title="2: n=50662, xg_sum=5404.000, mean_xg=0.10667">
+  <div class="catbar-label"><span>2</span><span class="n">n=50662</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:67.66%"></div>
+    <div class="catbar-refline" style="left:63.70%"></div>
+  </div>
+  <span class="rate-val">0.10667</span>
+</div>
+<div class="catbar-row" title="1: n=41022, xg_sum=3774.718, mean_xg=0.09202">
+  <div class="catbar-label"><span>1</span><span class="n">n=41022</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:58.36%"></div>
+    <div class="catbar-refline" style="left:63.70%"></div>
+  </div>
+  <span class="rate-val">0.09202</span>
+</div>
+<div class="catbar-row" title="4: n=1864, xg_sum=160.793, mean_xg=0.08626">
+  <div class="catbar-label"><span>4</span><span class="n">n=1864</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:54.71%"></div>
+    <div class="catbar-refline" style="left:63.70%"></div>
+  </div>
+  <span class="rate-val">0.08626</span>
+</div>
+</details>
+</div>
+<div class="card xg-card locked" style="margin-bottom:16px;">
+<h3>phase_label <span class="xg-status-badge locked">LOCKED</span></h3>
+
+<p class="subnote">Unconditional -- mean xG by category, dashed marker = dataset mean xG (0.00599)</p>
+
+<div class="catbar-row" title="box_defence: n=103445, xg_sum=1657.172, mean_xg=0.01602">
+  <div class="catbar-label"><span>box_defence</span><span class="n">n=103445</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:32.52%"></div>
+  </div>
+  <span class="rate-val">0.01602</span>
+</div>
+<div class="catbar-row" title="high_press_proxy: n=197765, xg_sum=2966.566, mean_xg=0.01500">
+  <div class="catbar-label"><span>high_press_proxy</span><span class="n">n=197765</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:81.42%"></div>
+    <div class="catbar-refline" style="left:32.52%"></div>
+  </div>
+  <span class="rate-val">0.01500</span>
+</div>
+<div class="catbar-row" title="transition_defence: n=139800, xg_sum=736.030, mean_xg=0.00526">
+  <div class="catbar-label"><span>transition_defence</span><span class="n">n=139800</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:28.58%"></div>
+    <div class="catbar-refline" style="left:32.52%"></div>
+  </div>
+  <span class="rate-val">0.00526</span>
+</div>
+<div class="catbar-row" title="settled_low_block_proxy: n=218035, xg_sum=1123.156, mean_xg=0.00515">
+  <div class="catbar-label"><span>settled_low_block_proxy</span><span class="n">n=218035</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:27.96%"></div>
+    <div class="catbar-refline" style="left:32.52%"></div>
+  </div>
+  <span class="rate-val">0.00515</span>
+</div>
+<div class="catbar-row" title="counterpress_after_loss: n=225851, xg_sum=893.072, mean_xg=0.00395">
+  <div class="catbar-label"><span>counterpress_after_loss</span><span class="n">n=225851</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:21.46%"></div>
+    <div class="catbar-refline" style="left:32.52%"></div>
+  </div>
+  <span class="rate-val">0.00395</span>
+</div>
+<div class="catbar-row" title="settled_mid_block_proxy: n=491458, xg_sum=1706.402, mean_xg=0.00347">
+  <div class="catbar-label"><span>settled_mid_block_proxy</span><span class="n">n=491458</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:18.85%"></div>
+    <div class="catbar-refline" style="left:32.52%"></div>
+  </div>
+  <span class="rate-val">0.00347</span>
+</div>
+<div class="catbar-row" title="wide_defending_proxy: n=216827, xg_sum=462.758, mean_xg=0.00213">
+  <div class="catbar-label"><span>wide_defending_proxy</span><span class="n">n=216827</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:11.58%"></div>
+    <div class="catbar-refline" style="left:32.52%"></div>
+  </div>
+  <span class="rate-val">0.00213</span>
+</div>
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=95,048) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on target_future_shot_10s==1 -- mean xG by category on the
+shot-only subset, dashed marker = shot-only mean xG (0.10042). Much smaller n; small-sample
+categories flagged, not hidden.</p>
+
+<div class="catbar-row" title="box_defence: n=14546, xg_sum=1657.172, mean_xg=0.11393">
+  <div class="catbar-label"><span>box_defence</span><span class="n">n=14546</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.11393</span>
+</div>
+<div class="catbar-row" title="counterpress_after_loss: n=8237, xg_sum=893.072, mean_xg=0.10842">
+  <div class="catbar-label"><span>counterpress_after_loss</span><span class="n">n=8237</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:82.76%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.10842</span>
+</div>
+<div class="catbar-row" title="transition_defence: n=6943, xg_sum=736.030, mean_xg=0.10601">
+  <div class="catbar-label"><span>transition_defence</span><span class="n">n=6943</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:80.91%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.10601</span>
+</div>
+<div class="catbar-row" title="high_press_proxy: n=29252, xg_sum=2966.566, mean_xg=0.10141">
+  <div class="catbar-label"><span>high_press_proxy</span><span class="n">n=29252</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:77.41%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.10141</span>
+</div>
+<div class="catbar-row" title="settled_low_block_proxy: n=12169, xg_sum=1123.156, mean_xg=0.09230">
+  <div class="catbar-label"><span>settled_low_block_proxy</span><span class="n">n=12169</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:70.45%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.09230</span>
+</div>
+<div class="catbar-row" title="wide_defending_proxy: n=5064, xg_sum=462.758, mean_xg=0.09138">
+  <div class="catbar-label"><span>wide_defending_proxy</span><span class="n">n=5064</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:69.75%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.09138</span>
+</div>
+<div class="catbar-row" title="settled_mid_block_proxy: n=18837, xg_sum=1706.402, mean_xg=0.09059">
+  <div class="catbar-label"><span>settled_mid_block_proxy</span><span class="n">n=18837</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:69.14%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.09059</span>
+</div>
+</details>
+</div>
+</div>
+</body>
+</html>

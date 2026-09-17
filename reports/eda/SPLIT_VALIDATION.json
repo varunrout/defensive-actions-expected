@@ -1,0 +1,266 @@
+{
+  "canonical_split_path": "outputs\\models\\splits\\match_assignment.json",
+  "n_matches_total": 115,
+  "n_test_matches": 23,
+  "n_train_val_matches": 92,
+  "n_folds": 5,
+  "method_note": "Per match, per leg, target_future_shot_10s rate; combined as the average of each leg's own percentile rank (not either leg's raw rate alone) into one combined_rank per match. train_test_split(matches, test_size=0.20, stratify=qcut(combined_rank, 4), random_state=42) -> TEST/TRAIN+VAL. StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42) on the TRAIN+VAL pool, grouped by match_id, stratified on the row-level target (active leg).",
+  "legs": {
+    "active": {
+      "parquet_path": "data/features/player_defensive_actions.parquet",
+      "n_rows_total": 56068,
+      "n_matches_total": 115,
+      "overall_shot_rate_pct": 7.791,
+      "by_split": [
+        {
+          "split": "test",
+          "n_matches": 23,
+          "n_rows": 10660,
+          "shot_rate_pct": 7.205
+        },
+        {
+          "split": "fold0",
+          "n_matches": 18,
+          "n_rows": 8450,
+          "shot_rate_pct": 8.97
+        },
+        {
+          "split": "fold1",
+          "n_matches": 20,
+          "n_rows": 10053,
+          "shot_rate_pct": 8.256
+        },
+        {
+          "split": "fold2",
+          "n_matches": 17,
+          "n_rows": 8753,
+          "shot_rate_pct": 7.209
+        },
+        {
+          "split": "fold3",
+          "n_matches": 19,
+          "n_rows": 9342,
+          "shot_rate_pct": 8.06
+        },
+        {
+          "split": "fold4",
+          "n_matches": 18,
+          "n_rows": 8810,
+          "shot_rate_pct": 7.128
+        }
+      ]
+    },
+    "passive": {
+      "parquet_path": "data/features/passive_defense.parquet",
+      "n_rows_total": 1593181,
+      "n_matches_total": 115,
+      "overall_shot_rate_pct": 5.966,
+      "by_split": [
+        {
+          "split": "test",
+          "n_matches": 23,
+          "n_rows": 315807,
+          "shot_rate_pct": 5.51
+        },
+        {
+          "split": "fold0",
+          "n_matches": 18,
+          "n_rows": 241162,
+          "shot_rate_pct": 6.565
+        },
+        {
+          "split": "fold1",
+          "n_matches": 20,
+          "n_rows": 279561,
+          "shot_rate_pct": 6.464
+        },
+        {
+          "split": "fold2",
+          "n_matches": 17,
+          "n_rows": 227329,
+          "shot_rate_pct": 5.816
+        },
+        {
+          "split": "fold3",
+          "n_matches": 19,
+          "n_rows": 258944,
+          "shot_rate_pct": 6.146
+        },
+        {
+          "split": "fold4",
+          "n_matches": 18,
+          "n_rows": 270378,
+          "shot_rate_pct": 5.402
+        }
+      ]
+    }
+  },
+  "integrity_checks": [
+    {
+      "name": "every_match_accounted_for_exactly_once",
+      "description": "All 115 matches present, no duplicate keys.",
+      "passed": true,
+      "detail": "115 matches, 115 unique keys"
+    },
+    {
+      "name": "labels_are_test_or_a_valid_fold",
+      "description": "Every label is \"test\" or \"fold0\"..\"fold4\".",
+      "passed": true,
+      "detail": "all labels valid"
+    },
+    {
+      "name": "test_match_count",
+      "description": "Exactly 23 matches held out as TEST.",
+      "passed": true,
+      "detail": "23 TEST matches"
+    },
+    {
+      "name": "no_test_match_in_any_cv_fold",
+      "description": "No TEST match also appears in a CV fold.",
+      "passed": true,
+      "detail": "no overlap"
+    },
+    {
+      "name": "all_five_folds_present",
+      "description": "TRAIN+VAL matches cover all 5 folds.",
+      "passed": true,
+      "detail": "folds present: ['fold0', 'fold1', 'fold2', 'fold3', 'fold4']"
+    },
+    {
+      "name": "train_val_match_count",
+      "description": "Exactly 92 matches in the TRAIN+VAL pool.",
+      "passed": true,
+      "detail": "92 TRAIN+VAL matches"
+    },
+    {
+      "name": "fold_sizes_reasonably_balanced",
+      "description": "Each fold has 10-30 matches (known result: 17-20).",
+      "passed": true,
+      "detail": "fold0=18, fold1=20, fold2=17, fold3=19, fold4=18"
+    },
+    {
+      "name": "no_match_in_two_cv_folds",
+      "description": "No match's fold membership is ambiguous or duplicated.",
+      "passed": true,
+      "detail": "dict keys are unique by construction; verified no key maps to multiple labels"
+    }
+  ],
+  "all_integrity_checks_passed": true,
+  "match_assignment": {
+    "3857254": "fold2",
+    "3857255": "fold4",
+    "3857256": "fold3",
+    "3857257": "test",
+    "3857258": "fold1",
+    "3857259": "fold1",
+    "3857260": "fold1",
+    "3857261": "fold3",
+    "3857262": "fold1",
+    "3857263": "fold2",
+    "3857264": "fold1",
+    "3857265": "fold1",
+    "3857266": "test",
+    "3857267": "test",
+    "3857268": "fold4",
+    "3857269": "fold4",
+    "3857270": "fold0",
+    "3857271": "fold0",
+    "3857272": "fold0",
+    "3857273": "fold3",
+    "3857274": "fold2",
+    "3857275": "fold3",
+    "3857276": "fold1",
+    "3857277": "test",
+    "3857278": "test",
+    "3857279": "fold4",
+    "3857280": "fold0",
+    "3857281": "fold4",
+    "3857282": "fold3",
+    "3857283": "fold3",
+    "3857284": "fold3",
+    "3857285": "fold4",
+    "3857286": "fold3",
+    "3857287": "fold1",
+    "3857288": "fold2",
+    "3857289": "test",
+    "3857290": "fold2",
+    "3857291": "fold2",
+    "3857292": "fold2",
+    "3857293": "fold2",
+    "3857294": "test",
+    "3857295": "fold1",
+    "3857296": "test",
+    "3857297": "fold0",
+    "3857298": "test",
+    "3857299": "fold0",
+    "3857300": "fold0",
+    "3857301": "test",
+    "3869117": "fold0",
+    "3869118": "fold2",
+    "3869151": "fold4",
+    "3869152": "fold1",
+    "3869219": "fold2",
+    "3869220": "fold4",
+    "3869253": "fold1",
+    "3869254": "test",
+    "3869321": "fold3",
+    "3869354": "fold3",
+    "3869420": "test",
+    "3869486": "fold4",
+    "3869519": "test",
+    "3869552": "fold1",
+    "3869684": "test",
+    "3869685": "fold3",
+    "3930158": "fold4",
+    "3930159": "fold4",
+    "3930160": "fold2",
+    "3930161": "fold0",
+    "3930162": "fold4",
+    "3930163": "test",
+    "3930164": "fold0",
+    "3930165": "fold3",
+    "3930166": "fold0",
+    "3930167": "fold1",
+    "3930168": "test",
+    "3930169": "fold1",
+    "3930170": "test",
+    "3930171": "test",
+    "3930172": "fold4",
+    "3930173": "fold0",
+    "3930174": "fold2",
+    "3930175": "fold0",
+    "3930176": "fold3",
+    "3930177": "fold1",
+    "3930178": "fold4",
+    "3930179": "fold0",
+    "3930180": "fold2",
+    "3930181": "fold4",
+    "3930182": "fold2",
+    "3930183": "fold0",
+    "3930184": "fold0",
+    "3938637": "fold1",
+    "3938638": "fold3",
+    "3938639": "fold3",
+    "3938640": "test",
+    "3938641": "fold3",
+    "3938642": "fold3",
+    "3938643": "test",
+    "3938644": "fold4",
+    "3938645": "test",
+    "3940878": "fold3",
+    "3940983": "fold2",
+    "3941017": "fold4",
+    "3941018": "fold0",
+    "3941019": "fold2",
+    "3941020": "fold0",
+    "3941021": "test",
+    "3941022": "fold2",
+    "3942226": "fold1",
+    "3942227": "fold1",
+    "3942349": "fold1",
+    "3942382": "fold3",
+    "3942752": "fold1",
+    "3942819": "test",
+    "3943043": "fold4"
+  }
+}

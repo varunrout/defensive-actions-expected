@@ -1,0 +1,121 @@
+{
+  "purpose": "Stress-test identity-leakage risk on `position` for the active leg by building a player-disjoint fold structure (no player appears in more than one fold) and comparing fold balance against the canonical match-grouped folds over the same TRAIN+VAL rows.",
+  "scope": "Active leg only (player_id / position are active-dataset concepts; the passive leg is not player-indexed the same way).",
+  "canonical_test_set_excluded": true,
+  "n_train_val_rows": 45408,
+  "n_train_val_matches": 92,
+  "n_train_val_players": 964,
+  "n_splits": 5,
+  "seed": 42,
+  "leakage_check": {
+    "players_appearing_in_more_than_one_fold": 0,
+    "verdict": "clean -- zero player overlap across folds"
+  },
+  "player_grouped_fold_summary": [
+    {
+      "fold": 0,
+      "rows": 9531,
+      "matches": 92,
+      "players": 193,
+      "target_mean": 0.0764872521246459,
+      "positive_shots": 729
+    },
+    {
+      "fold": 1,
+      "rows": 10064,
+      "matches": 92,
+      "players": 194,
+      "target_mean": 0.08018680445151033,
+      "positive_shots": 807
+    },
+    {
+      "fold": 2,
+      "rows": 9452,
+      "matches": 92,
+      "players": 194,
+      "target_mean": 0.07691493863732543,
+      "positive_shots": 727
+    },
+    {
+      "fold": 3,
+      "rows": 8142,
+      "matches": 92,
+      "players": 191,
+      "target_mean": 0.08425448292802751,
+      "positive_shots": 686
+    },
+    {
+      "fold": 4,
+      "rows": 8219,
+      "matches": 91,
+      "players": 192,
+      "target_mean": 0.07920671614551648,
+      "positive_shots": 651
+    }
+  ],
+  "match_grouped_fold_summary_same_rows": [
+    {
+      "fold": 0,
+      "rows": 8450,
+      "matches": 18,
+      "players": 405,
+      "target_mean": 0.08970414201183433,
+      "positive_shots": 758
+    },
+    {
+      "fold": 1,
+      "rows": 10053,
+      "matches": 20,
+      "players": 426,
+      "target_mean": 0.08256241917835472,
+      "positive_shots": 830
+    },
+    {
+      "fold": 2,
+      "rows": 8753,
+      "matches": 17,
+      "players": 391,
+      "target_mean": 0.07208956929052897,
+      "positive_shots": 631
+    },
+    {
+      "fold": 3,
+      "rows": 9342,
+      "matches": 19,
+      "players": 419,
+      "target_mean": 0.08060372511239564,
+      "positive_shots": 753
+    },
+    {
+      "fold": 4,
+      "rows": 8810,
+      "matches": 18,
+      "players": 410,
+      "target_mean": 0.07128263337116912,
+      "positive_shots": 628
+    }
+  ],
+  "position_balance_player_grouped": [
+    {
+      "fold": 0,
+      "max_abs_position_share_deviation": 0.0514
+    },
+    {
+      "fold": 1,
+      "max_abs_position_share_deviation": 0.0277
+    },
+    {
+      "fold": 2,
+      "max_abs_position_share_deviation": 0.049
+    },
+    {
+      "fold": 3,
+      "max_abs_position_share_deviation": 0.0399
+    },
+    {
+      "fold": 4,
+      "max_abs_position_share_deviation": 0.0314
+    }
+  ],
+  "interpretation": "If player-grouped and match-grouped fold summaries show similar target rates and row counts (no fold collapsing or wildly skewed target_mean), the two split structures are broadly interchangeable for this dataset -- meaning the canonical match-grouped split's per-fold estimates are not being propped up by within-fold player repetition. Position balance is checked separately since `position` is the specific leakage vector named in stage 06 planning: a large max_abs_position_share_deviation in any fold means that fold's position mix diverges from the dataset average, which is the condition under which position-as-identity-proxy leakage would actually bite."
+}

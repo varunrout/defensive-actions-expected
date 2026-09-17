@@ -1,0 +1,1313 @@
+{
+  "generated_at": "2026-09-16T17:08:02.410315+00:00",
+  "methodology": {
+    "numeric<->numeric": "Spearman rho (continuous+discrete pooled as 'numeric'; robust to the heavy right-skew present in several features, e.g. top_option_1_threat_score skew 7.91)",
+    "boolean<->boolean": "phi coefficient (Pearson r on 0/1)",
+    "boolean<->numeric": "point-biserial r",
+    "categorical<->categorical": "Cramer's V, bias-corrected (boolean treated as a 2-level categorical when paired with a categorical column)",
+    "categorical<->numeric": "correlation ratio eta",
+    "tiers": {
+      "drop": "|r| >= 0.98 (confirmed > 0.999) for numeric/boolean pairs, Cramer's V >= 0.9 (confirmed > 0.99), or eta >= 0.98 (confirmed > 0.995) -- exact/near-exact duplicates, delete one side without further analysis",
+      "collapse": "0.90 <= |r| < 0.98, or 0.4 <= Cramer's V < 0.9, or 0.6 <= eta < 0.98 (also includes DROP-candidates that failed the near-1.0 confirm check, flagged downgraded_from_drop)",
+      "review": "0.5 <= |r| < 0.90 for numeric/boolean pairs, or 0.3 <= Cramer's V < 0.4, or 0.5 <= eta < 0.6 for categorical pairs (V2, prompt 7/7) -- resolved by a separate review-analysis pass, not by this script",
+      "distinct": "below all thresholds above -- no action needed"
+    }
+  },
+  "datasets": {
+    "active": {
+      "dataset": "active",
+      "n_rows_full": 56068,
+      "n_rows_used": 56068,
+      "sampled": false,
+      "sample_seed": null,
+      "n_features": 36,
+      "n_pairs_evaluated": 621,
+      "n_pairs_skipped": 9,
+      "tier_counts": {
+        "drop": 0,
+        "collapse": 14,
+        "review": 25,
+        "distinct": 582,
+        "distinct_total": 582
+      },
+      "pairs": {
+        "drop": [],
+        "collapse": [
+          {
+            "feature_a": "period",
+            "feature_b": "match_time_seconds",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.8658,
+            "abs_value": 0.8658,
+            "n": 56068,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "distance_to_attacking_box",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.8531,
+            "abs_value": 0.8531,
+            "n": 56068,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "is_in_attacking_box",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.6646,
+            "abs_value": 0.6646,
+            "n": 56068,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "phase_label_prev_event",
+            "type_a": "categorical",
+            "type_b": "categorical",
+            "method": "cramers_v",
+            "value": 0.6503,
+            "abs_value": 0.6503,
+            "n": 51534,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "angle_to_attacking_goal",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.6265,
+            "abs_value": 0.6265,
+            "n": 56068,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "phase_changed_since_prev_event",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.6065,
+            "abs_value": 0.6065,
+            "n": 56068,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label_prev_event",
+            "feature_b": "phase_changed_since_prev_event",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.5961,
+            "abs_value": 0.5961,
+            "n": 51534,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "is_in_defending_box",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.581,
+            "abs_value": 0.581,
+            "n": 56068,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "counterpress",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.5714,
+            "abs_value": 0.5714,
+            "n": 56068,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "event_type",
+            "feature_b": "action_retained_defensive_team_control",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.5583,
+            "abs_value": 0.5583,
+            "n": 56068,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label_prev_event",
+            "feature_b": "counterpress",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.4984,
+            "abs_value": 0.4984,
+            "n": 51534,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label_prev_event",
+            "feature_b": "is_in_attacking_box",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.4378,
+            "abs_value": 0.4378,
+            "n": 51534,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "event_type",
+            "feature_b": "action_was_under_opponent_possession",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.4212,
+            "abs_value": 0.4212,
+            "n": 56068,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label_prev_event",
+            "feature_b": "is_in_defending_box",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.4195,
+            "abs_value": 0.4195,
+            "n": 51534,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          }
+        ],
+        "review": [
+          {
+            "feature_a": "action_was_under_opponent_possession",
+            "feature_b": "action_retained_defensive_team_control",
+            "type_a": "boolean",
+            "type_b": "boolean",
+            "method": "phi",
+            "value": 0.8472,
+            "abs_value": 0.8472,
+            "n": 56068,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "nearest_defender_distance",
+            "feature_b": "defenders_within_5m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.8458,
+            "abs_value": 0.8458,
+            "n": 52064,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "defenders_within_10m",
+            "feature_b": "local_numerical_balance_10m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.7321,
+            "abs_value": 0.7321,
+            "n": 43199,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "defenders_within_5m",
+            "feature_b": "local_numerical_balance_5m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.714,
+            "abs_value": 0.714,
+            "n": 52138,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "nearest_attacker_distance",
+            "feature_b": "attackers_within_5m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.7113,
+            "abs_value": 0.7113,
+            "n": 52107,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "nearest_defender_distance",
+            "feature_b": "defenders_within_10m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.7046,
+            "abs_value": 0.7046,
+            "n": 43146,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "angle_to_attacking_goal",
+            "feature_b": "attacking_goal_centrality",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.6589,
+            "abs_value": 0.6589,
+            "n": 56068,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "attackers_within_5m",
+            "feature_b": "local_numerical_balance_5m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.6202,
+            "abs_value": 0.6202,
+            "n": 52138,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "angle_to_attacking_goal",
+            "feature_b": "distance_to_attacking_box",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.6175,
+            "abs_value": 0.6175,
+            "n": 56068,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "attacker_defender_ratio",
+            "feature_b": "visible_attacker_count",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.6077,
+            "abs_value": 0.6077,
+            "n": 56068,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "defenders_within_5m",
+            "feature_b": "defenders_within_10m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.6046,
+            "abs_value": 0.6046,
+            "n": 43199,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "attacker_spread",
+            "feature_b": "defender_spread",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.5813,
+            "abs_value": 0.5813,
+            "n": 55963,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "nearest_defender_distance",
+            "feature_b": "local_numerical_balance_5m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.5739,
+            "abs_value": 0.5739,
+            "n": 52064,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "action_was_under_opponent_possession",
+            "feature_b": "local_numerical_balance_5m",
+            "type_a": "boolean",
+            "type_b": "numeric",
+            "method": "point_biserial",
+            "value": 0.558,
+            "abs_value": 0.558,
+            "n": 52138,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "nearest_defender_distance",
+            "feature_b": "local_numerical_balance_10m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.5451,
+            "abs_value": 0.5451,
+            "n": 43146,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "event_type",
+            "feature_b": "nearest_attacker_distance",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.5443,
+            "abs_value": 0.5443,
+            "n": 56037,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "action_retained_defensive_team_control",
+            "feature_b": "local_numerical_balance_5m",
+            "type_a": "boolean",
+            "type_b": "numeric",
+            "method": "point_biserial",
+            "value": 0.5128,
+            "abs_value": 0.5128,
+            "n": 52138,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "is_in_defending_box",
+            "feature_b": "distance_to_attacking_box",
+            "type_a": "boolean",
+            "type_b": "numeric",
+            "method": "point_biserial",
+            "value": 0.5108,
+            "abs_value": 0.5108,
+            "n": 56068,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "local_numerical_balance_5m",
+            "feature_b": "local_numerical_balance_10m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.5086,
+            "abs_value": 0.5086,
+            "n": 43199,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "attackers_within_5m",
+            "feature_b": "attackers_within_10m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.505,
+            "abs_value": 0.505,
+            "n": 43199,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "attacker_defender_ratio",
+            "feature_b": "local_numerical_balance_10m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.5027,
+            "abs_value": 0.5027,
+            "n": 43199,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label_prev_event",
+            "feature_b": "distance_to_attacking_box",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.5008,
+            "abs_value": 0.5008,
+            "n": 51534,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "event_type",
+            "feature_b": "has_previous_event",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.354,
+            "abs_value": 0.354,
+            "n": 56068,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "event_type",
+            "feature_b": "is_in_attacking_box",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.319,
+            "abs_value": 0.319,
+            "n": 56068,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "play_pattern",
+            "feature_b": "counterpress",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.3083,
+            "abs_value": 0.3083,
+            "n": 56068,
+            "tier": "review",
+            "downgraded_from_drop": false
+          }
+        ],
+        "distinct_sample": [
+          {
+            "feature_a": "event_type",
+            "feature_b": "nearest_defender_distance",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.4985,
+            "abs_value": 0.4985,
+            "n": 55992,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "defenders_within_5m",
+            "feature_b": "local_numerical_balance_10m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.4955,
+            "abs_value": 0.4955,
+            "n": 43199,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "is_in_attacking_box",
+            "feature_b": "distance_to_attacking_box",
+            "type_a": "boolean",
+            "type_b": "numeric",
+            "method": "point_biserial",
+            "value": -0.4775,
+            "abs_value": 0.4775,
+            "n": 56068,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "attacking_goal_centrality",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.4724,
+            "abs_value": 0.4724,
+            "n": 56068,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "nearest_attacker_distance",
+            "feature_b": "local_numerical_balance_5m",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.4705,
+            "abs_value": 0.4705,
+            "n": 52107,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "defender_spread",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.4621,
+            "abs_value": 0.4621,
+            "n": 55992,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "attacker_defender_ratio",
+            "feature_b": "visible_defender_count",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.4604,
+            "abs_value": 0.4604,
+            "n": 56068,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label_prev_event",
+            "feature_b": "possession_elapsed_seconds",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.4528,
+            "abs_value": 0.4528,
+            "n": 51534,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label_prev_event",
+            "feature_b": "defender_spread",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.4468,
+            "abs_value": 0.4468,
+            "n": 51464,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "attacker_spread",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.4352,
+            "abs_value": 0.4352,
+            "n": 56037,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          }
+        ]
+      },
+      "skipped_pairs": [
+        {
+          "feature_a": "phase_label_prev_event",
+          "feature_b": "has_previous_event",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_visible_attacker",
+          "feature_b": "nearest_attacker_distance",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_visible_attacker",
+          "feature_b": "defender_attacker_gap_x",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_visible_attacker",
+          "feature_b": "defender_attacker_gap_y",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_visible_attacker",
+          "feature_b": "attacker_spread",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_visible_defender",
+          "feature_b": "nearest_defender_distance",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_visible_defender",
+          "feature_b": "defender_attacker_gap_x",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_visible_defender",
+          "feature_b": "defender_attacker_gap_y",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_visible_defender",
+          "feature_b": "defender_spread",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        }
+      ]
+    },
+    "passive": {
+      "dataset": "passive",
+      "n_rows_full": 1593181,
+      "n_rows_used": 300000,
+      "sampled": true,
+      "sample_seed": 42,
+      "n_features": 39,
+      "n_pairs_evaluated": 723,
+      "n_pairs_skipped": 18,
+      "tier_counts": {
+        "drop": 0,
+        "collapse": 4,
+        "review": 29,
+        "distinct": 690,
+        "distinct_total": 690
+      },
+      "pairs": {
+        "drop": [],
+        "collapse": [
+          {
+            "feature_a": "phase_label",
+            "feature_b": "ball_x",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.7989,
+            "abs_value": 0.7989,
+            "n": 300000,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "defender_x",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.6756,
+            "abs_value": 0.6756,
+            "n": 300000,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "is_in_attacking_box",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.4881,
+            "abs_value": 0.4881,
+            "n": 300000,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "is_in_defending_box",
+            "type_a": "categorical",
+            "type_b": "boolean",
+            "method": "cramers_v",
+            "value": 0.4865,
+            "abs_value": 0.4865,
+            "n": 300000,
+            "tier": "collapse",
+            "downgraded_from_drop": false
+          }
+        ],
+        "review": [
+          {
+            "feature_a": "top_option_2_threat_score",
+            "feature_b": "top_option_3_threat_score",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.8874,
+            "abs_value": 0.8874,
+            "n": 297837,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "top_option_1_threat_score",
+            "feature_b": "top_option_2_threat_score",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.8747,
+            "abs_value": 0.8747,
+            "n": 299619,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "top_option_1_dy",
+            "feature_b": "top_option_1_angle_from_ball",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.8311,
+            "abs_value": 0.8311,
+            "n": 299943,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "angle_to_attacking_goal",
+            "feature_b": "attacking_goal_centrality",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.8249,
+            "abs_value": 0.8249,
+            "n": 300000,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "defender_x",
+            "feature_b": "ball_x",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.8051,
+            "abs_value": 0.8051,
+            "n": 300000,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "top_option_1_threat_score",
+            "feature_b": "top_option_3_threat_score",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.8049,
+            "abs_value": 0.8049,
+            "n": 297837,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "ball_x",
+            "feature_b": "top_option_1_threat_score",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.7992,
+            "abs_value": 0.7992,
+            "n": 299943,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "top_option_2_dy",
+            "feature_b": "top_option_2_angle_from_ball",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.7889,
+            "abs_value": 0.7889,
+            "n": 299619,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "ball_y",
+            "feature_b": "top_option_1_dy",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.7828,
+            "abs_value": 0.7828,
+            "n": 299943,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "top_option_3_dy",
+            "feature_b": "top_option_3_angle_from_ball",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.7691,
+            "abs_value": 0.7691,
+            "n": 297837,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "ball_x",
+            "feature_b": "top_option_2_threat_score",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.7131,
+            "abs_value": 0.7131,
+            "n": 299619,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "defender_x",
+            "feature_b": "top_option_1_threat_score",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.7078,
+            "abs_value": 0.7078,
+            "n": 299943,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "ball_y",
+            "feature_b": "top_option_2_dy",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.6918,
+            "abs_value": 0.6918,
+            "n": 299619,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "engagement_distance_to_carrier",
+            "feature_b": "lane_screening_score_option_1",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.6897,
+            "abs_value": 0.6897,
+            "n": 299943,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "ball_x",
+            "feature_b": "top_option_3_threat_score",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.6852,
+            "abs_value": 0.6852,
+            "n": 297837,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "engagement_distance_to_carrier",
+            "feature_b": "lane_screening_score_option_2",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.6782,
+            "abs_value": 0.6782,
+            "n": 299619,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "defender_x",
+            "feature_b": "top_option_3_threat_score",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.6649,
+            "abs_value": 0.6649,
+            "n": 297837,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "is_wide_lane",
+            "feature_b": "attacking_goal_centrality",
+            "type_a": "boolean",
+            "type_b": "numeric",
+            "method": "point_biserial",
+            "value": -0.6527,
+            "abs_value": 0.6527,
+            "n": 300000,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "defender_x",
+            "feature_b": "top_option_2_threat_score",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.6493,
+            "abs_value": 0.6493,
+            "n": 299619,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "engagement_distance_to_carrier",
+            "feature_b": "lane_screening_score_option_3",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.6475,
+            "abs_value": 0.6475,
+            "n": 297837,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "ball_y",
+            "feature_b": "top_option_3_dy",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.6447,
+            "abs_value": 0.6447,
+            "n": 297837,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "ball_y",
+            "feature_b": "top_option_1_angle_from_ball",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.644,
+            "abs_value": 0.644,
+            "n": 299943,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "lane_screening_score_option_1",
+            "feature_b": "lane_screening_score_option_2",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.6065,
+            "abs_value": 0.6065,
+            "n": 299619,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "lane_screening_score_option_1",
+            "feature_b": "lane_screening_score_option_3",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.5641,
+            "abs_value": 0.5641,
+            "n": 297837,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "lane_screening_score_option_2",
+            "feature_b": "lane_screening_score_option_3",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.5408,
+            "abs_value": 0.5408,
+            "n": 297837,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "defender_y",
+            "feature_b": "ball_y",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.5365,
+            "abs_value": 0.5365,
+            "n": 300000,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "defender_x",
+            "feature_b": "angle_to_attacking_goal",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.5241,
+            "abs_value": 0.5241,
+            "n": 300000,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "top_option_1_dx",
+            "feature_b": "top_option_2_dx",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.505,
+            "abs_value": 0.505,
+            "n": 299619,
+            "tier": "review",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "top_option_1_dy",
+            "feature_b": "top_option_3_dy",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.5002,
+            "abs_value": 0.5002,
+            "n": 297837,
+            "tier": "review",
+            "downgraded_from_drop": false
+          }
+        ],
+        "distinct_sample": [
+          {
+            "feature_a": "phase_label",
+            "feature_b": "top_option_3_threat_score",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.4982,
+            "abs_value": 0.4982,
+            "n": 297837,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "ball_y",
+            "feature_b": "top_option_2_angle_from_ball",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.4973,
+            "abs_value": 0.4973,
+            "n": 299619,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "phase_label",
+            "feature_b": "top_option_2_threat_score",
+            "type_a": "categorical",
+            "type_b": "numeric",
+            "method": "correlation_ratio",
+            "value": 0.489,
+            "abs_value": 0.489,
+            "n": 299619,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "lane_screening_score_option_3",
+            "feature_b": "overload_score",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.4872,
+            "abs_value": 0.4872,
+            "n": 297837,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "lane_screening_score_option_2",
+            "feature_b": "overload_score",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.4838,
+            "abs_value": 0.4838,
+            "n": 299619,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "lane_screening_score_option_1",
+            "feature_b": "overload_score",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.4824,
+            "abs_value": 0.4824,
+            "n": 299943,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "top_option_1_dy",
+            "feature_b": "top_option_2_dy",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": 0.4512,
+            "abs_value": 0.4512,
+            "n": 299619,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "is_in_defending_box",
+            "feature_b": "defender_x",
+            "type_a": "boolean",
+            "type_b": "numeric",
+            "method": "point_biserial",
+            "value": -0.4494,
+            "abs_value": 0.4494,
+            "n": 300000,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "is_in_attacking_box",
+            "feature_b": "defender_x",
+            "type_a": "boolean",
+            "type_b": "numeric",
+            "method": "point_biserial",
+            "value": 0.432,
+            "abs_value": 0.432,
+            "n": 300000,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          },
+          {
+            "feature_a": "engagement_distance_to_carrier",
+            "feature_b": "overload_score",
+            "type_a": "numeric",
+            "type_b": "numeric",
+            "method": "spearman",
+            "value": -0.4307,
+            "abs_value": 0.4307,
+            "n": 300000,
+            "tier": "distinct",
+            "downgraded_from_drop": false
+          }
+        ]
+      },
+      "skipped_pairs": [
+        {
+          "feature_a": "has_option_2",
+          "feature_b": "top_option_2_threat_score",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_2",
+          "feature_b": "lane_screening_score_option_2",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_2",
+          "feature_b": "top_option_3_threat_score",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_2",
+          "feature_b": "lane_screening_score_option_3",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_2",
+          "feature_b": "top_option_2_dx",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_2",
+          "feature_b": "top_option_2_dy",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_2",
+          "feature_b": "top_option_2_distance_from_ball",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_2",
+          "feature_b": "top_option_2_angle_from_ball",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_2",
+          "feature_b": "top_option_3_dx",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_2",
+          "feature_b": "top_option_3_dy",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_2",
+          "feature_b": "top_option_3_distance_from_ball",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_2",
+          "feature_b": "top_option_3_angle_from_ball",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_3",
+          "feature_b": "top_option_3_threat_score",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_3",
+          "feature_b": "lane_screening_score_option_3",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_3",
+          "feature_b": "top_option_3_dx",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_3",
+          "feature_b": "top_option_3_dy",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_3",
+          "feature_b": "top_option_3_distance_from_ball",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        },
+        {
+          "feature_a": "has_option_3",
+          "feature_b": "top_option_3_angle_from_ball",
+          "reason": "n < 50 after dropping NaNs, or degenerate value"
+        }
+      ]
+    }
+  }
+}

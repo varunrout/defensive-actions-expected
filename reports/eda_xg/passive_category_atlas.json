@@ -1,0 +1,417 @@
+{
+  "dataset": "passive",
+  "target": "target_future_xg_10s",
+  "shot_col": "target_future_shot_10s",
+  "n_rows": 1593181,
+  "n_rows_given_shot": 95048,
+  "base_xg": 0.0059912564115096115,
+  "base_xg_given_shot": 0.10042458422002883,
+  "columns": {
+    "defender_functional_role": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "mid_block",
+          "n": 838270,
+          "xg_sum": 5331.8885369705,
+          "mean_xg": 0.0063605861321179335
+        },
+        {
+          "category": "central_screen",
+          "n": 213043,
+          "xg_sum": 1273.0537876635,
+          "mean_xg": 0.005975572009704614
+        },
+        {
+          "category": "last_line",
+          "n": 216551,
+          "xg_sum": 1282.077035276,
+          "mean_xg": 0.0059204392280617505
+        },
+        {
+          "category": "advanced_wide",
+          "n": 155367,
+          "xg_sum": 852.0072733759,
+          "mean_xg": 0.005483836808176125
+        },
+        {
+          "category": "wide_cover",
+          "n": 168924,
+          "xg_sum": 806.0159582924,
+          "mean_xg": 0.004771470947244915
+        },
+        {
+          "category": "unclassified",
+          "n": 1026,
+          "xg_sum": 0.113289367,
+          "mean_xg": 0.00011041848635477583
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "last_line",
+          "n": 12352,
+          "xg_sum": 1282.077035276,
+          "mean_xg": 0.10379509676781089
+        },
+        {
+          "category": "central_screen",
+          "n": 12278,
+          "xg_sum": 1273.0537876635,
+          "mean_xg": 0.10368576214884347
+        },
+        {
+          "category": "advanced_wide",
+          "n": 8381,
+          "xg_sum": 852.0072733759,
+          "mean_xg": 0.10165938114495884
+        },
+        {
+          "category": "wide_cover",
+          "n": 7988,
+          "xg_sum": 806.0159582924,
+          "mean_xg": 0.1009033498112669
+        },
+        {
+          "category": "mid_block",
+          "n": 54044,
+          "xg_sum": 5331.8885369705,
+          "mean_xg": 0.09865828837559212
+        },
+        {
+          "category": "unclassified",
+          "n": 5,
+          "xg_sum": 0.113289367,
+          "mean_xg": 0.0226578734
+        }
+      ]
+    },
+    "defender_zone": {
+      "status": "dropped",
+      "reason": "Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box",
+      "categories": [
+        {
+          "category": "attacking_third_center",
+          "n": 258246,
+          "xg_sum": 2724.6177977613,
+          "mean_xg": 0.010550474345241747
+        },
+        {
+          "category": "defensive_third_center",
+          "n": 403528,
+          "xg_sum": 3893.7410893485,
+          "mean_xg": 0.00964924637038446
+        },
+        {
+          "category": "attacking_third_right_flank",
+          "n": 44089,
+          "xg_sum": 254.8207463761,
+          "mean_xg": 0.005779689863142734
+        },
+        {
+          "category": "defensive_third_left_flank",
+          "n": 58792,
+          "xg_sum": 323.7910506764,
+          "mean_xg": 0.005507399827806504
+        },
+        {
+          "category": "attacking_third_left_flank",
+          "n": 41424,
+          "xg_sum": 222.3688606989,
+          "mean_xg": 0.005368116567663673
+        },
+        {
+          "category": "defensive_third_right_flank",
+          "n": 60950,
+          "xg_sum": 294.3511338966,
+          "mean_xg": 0.004829386938418376
+        },
+        {
+          "category": "middle_third_center",
+          "n": 510835,
+          "xg_sum": 1298.9868519614,
+          "mean_xg": 0.0025428697171521134
+        },
+        {
+          "category": "middle_third_left_flank",
+          "n": 105177,
+          "xg_sum": 262.8443795514,
+          "mean_xg": 0.002499067092153227
+        },
+        {
+          "category": "middle_third_right_flank",
+          "n": 110140,
+          "xg_sum": 269.6339706747,
+          "mean_xg": 0.0024481021488532775
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "attacking_third_center",
+          "n": 25498,
+          "xg_sum": 2724.6177977613,
+          "mean_xg": 0.10685613764849401
+        },
+        {
+          "category": "middle_third_left_flank",
+          "n": 2496,
+          "xg_sum": 262.8443795514,
+          "mean_xg": 0.10530624180745192
+        },
+        {
+          "category": "middle_third_right_flank",
+          "n": 2659,
+          "xg_sum": 269.6339706747,
+          "mean_xg": 0.10140427629736742
+        },
+        {
+          "category": "defensive_third_center",
+          "n": 39125,
+          "xg_sum": 3893.7410893485,
+          "mean_xg": 0.09952053902488178
+        },
+        {
+          "category": "middle_third_center",
+          "n": 13095,
+          "xg_sum": 1298.9868519614,
+          "mean_xg": 0.09919716318911034
+        },
+        {
+          "category": "attacking_third_right_flank",
+          "n": 2674,
+          "xg_sum": 254.8207463761,
+          "mean_xg": 0.09529571667019447
+        },
+        {
+          "category": "attacking_third_left_flank",
+          "n": 2373,
+          "xg_sum": 222.3688606989,
+          "mean_xg": 0.09370790589924147
+        },
+        {
+          "category": "defensive_third_left_flank",
+          "n": 3563,
+          "xg_sum": 323.7910506764,
+          "mean_xg": 0.09087596145843391
+        },
+        {
+          "category": "defensive_third_right_flank",
+          "n": 3565,
+          "xg_sum": 294.3511338966,
+          "mean_xg": 0.08256693797941093
+        }
+      ]
+    },
+    "on_ball_event_type": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "Shot",
+          "n": 24496,
+          "xg_sum": 313.310278255,
+          "mean_xg": 0.012790262828829196
+        },
+        {
+          "category": "Dribble",
+          "n": 21436,
+          "xg_sum": 273.98054634,
+          "mean_xg": 0.012781327968837469
+        },
+        {
+          "category": "Pass",
+          "n": 833016,
+          "xg_sum": 4833.2935983757,
+          "mean_xg": 0.0058021617812571424
+        },
+        {
+          "category": "Carry",
+          "n": 714233,
+          "xg_sum": 4124.5714579746,
+          "mean_xg": 0.005774826223339723
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "Shot",
+          "n": 1737,
+          "xg_sum": 313.310278255,
+          "mean_xg": 0.18037436859815775
+        },
+        {
+          "category": "Dribble",
+          "n": 2384,
+          "xg_sum": 273.98054634,
+          "mean_xg": 0.11492472581375839
+        },
+        {
+          "category": "Pass",
+          "n": 47112,
+          "xg_sum": 4833.2935983757,
+          "mean_xg": 0.10259156050211622
+        },
+        {
+          "category": "Carry",
+          "n": 43815,
+          "xg_sum": 4124.5714579746,
+          "mean_xg": 0.09413605975064704
+        }
+      ]
+    },
+    "period": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "3",
+          "n": 23655,
+          "xg_sum": 205.6444898963,
+          "mean_xg": 0.008693489321340097
+        },
+        {
+          "category": "4",
+          "n": 19686,
+          "xg_sum": 160.793068796,
+          "mean_xg": 0.008167889301838871
+        },
+        {
+          "category": "2",
+          "n": 747977,
+          "xg_sum": 5403.9998584063,
+          "mean_xg": 0.007224820894768555
+        },
+        {
+          "category": "1",
+          "n": 801811,
+          "xg_sum": 3774.7184638467,
+          "mean_xg": 0.004707740931275201
+        },
+        {
+          "category": "5",
+          "n": 52,
+          "xg_sum": 0.0,
+          "mean_xg": 0.0
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "3",
+          "n": 1500,
+          "xg_sum": 205.6444898963,
+          "mean_xg": 0.13709632659753335
+        },
+        {
+          "category": "2",
+          "n": 50662,
+          "xg_sum": 5403.9998584063,
+          "mean_xg": 0.10666771660033753
+        },
+        {
+          "category": "1",
+          "n": 41022,
+          "xg_sum": 3774.7184638467,
+          "mean_xg": 0.09201692905871728
+        },
+        {
+          "category": "4",
+          "n": 1864,
+          "xg_sum": 160.793068796,
+          "mean_xg": 0.08626237596351931
+        }
+      ]
+    },
+    "phase_label": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "box_defence",
+          "n": 103445,
+          "xg_sum": 1657.1716685766,
+          "mean_xg": 0.016019833424298902
+        },
+        {
+          "category": "high_press_proxy",
+          "n": 197765,
+          "xg_sum": 2966.5657197839,
+          "mean_xg": 0.015000458725173312
+        },
+        {
+          "category": "transition_defence",
+          "n": 139800,
+          "xg_sum": 736.0296419777,
+          "mean_xg": 0.005264875836750357
+        },
+        {
+          "category": "settled_low_block_proxy",
+          "n": 218035,
+          "xg_sum": 1123.1564985435,
+          "mean_xg": 0.005151266991737565
+        },
+        {
+          "category": "counterpress_after_loss",
+          "n": 225851,
+          "xg_sum": 893.0716926509,
+          "mean_xg": 0.003954251664375628
+        },
+        {
+          "category": "settled_mid_block_proxy",
+          "n": 491458,
+          "xg_sum": 1706.4021947074,
+          "mean_xg": 0.0034721221237774135
+        },
+        {
+          "category": "wide_defending_proxy",
+          "n": 216827,
+          "xg_sum": 462.7584647053,
+          "mean_xg": 0.0021342289692026363
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "box_defence",
+          "n": 14546,
+          "xg_sum": 1657.1716685766,
+          "mean_xg": 0.11392627997914204
+        },
+        {
+          "category": "counterpress_after_loss",
+          "n": 8237,
+          "xg_sum": 893.0716926509,
+          "mean_xg": 0.10842196098711909
+        },
+        {
+          "category": "transition_defence",
+          "n": 6943,
+          "xg_sum": 736.0296419777,
+          "mean_xg": 0.10601031859105574
+        },
+        {
+          "category": "high_press_proxy",
+          "n": 29252,
+          "xg_sum": 2966.5657197839,
+          "mean_xg": 0.1014141159504957
+        },
+        {
+          "category": "settled_low_block_proxy",
+          "n": 12169,
+          "xg_sum": 1123.1564985435,
+          "mean_xg": 0.09229653205222287
+        },
+        {
+          "category": "wide_defending_proxy",
+          "n": 5064,
+          "xg_sum": 462.7584647053,
+          "mean_xg": 0.09138200329883492
+        },
+        {
+          "category": "settled_mid_block_proxy",
+          "n": 18837,
+          "xg_sum": 1706.4021947074,
+          "mean_xg": 0.09058778970682169
+        }
+      ]
+    }
+  }
+}

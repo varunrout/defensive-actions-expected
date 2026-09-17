@@ -35,7 +35,7 @@ from .mlflow_tracking import (
 )
 from .regression import build_regressor
 from .schemas import dataset_fingerprint, normalise_model_schema, validate_model_dataset
-from .splits import fold_summary, make_grouped_folds
+from .splits import canonical_grouped_folds, canonical_test_mask, fold_summary, make_grouped_folds
 
 IDENTITY_COLUMNS = ["event_id", "match_id", "player_id", "player_name", "team", "action_family", "phase_label", "position_group"]
 CLASSIFICATION_CALIBRATION_METHODS = ["uncalibrated", "platt", "isotonic"]
@@ -190,11 +190,43 @@ def make_valid_variant_folds(
     requested_folds: int,
     seed: int,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
-    """Create grouped folds, retrying with fewer folds when support is insufficient."""
+    """Create grouped folds. Prefers the frozen canonical match split
+    (prompt 13, outputs/models/splits/match_assignment.json) when this
+    dataframe's matches are fully covered by it -- both the active and
+    passive legs then share identical fold membership, instead of each
+    training run drawing its own random grouped split. Falls back to
+    make_grouped_folds' retry-fewer-folds logic for anything the canonical
+    split doesn't cover (a test fixture, a dataset built after the split
+    was frozen, or a different match population)."""
+
+    try:
+        folds = canonical_grouped_folds(df, group_col=group_col)
+        if len(folds) != len(df):
+            # df still contains rows from canonical TEST matches (this
+            # function was called directly rather than through
+            # train_variant, which excludes them first) -- the fold/oof
+            # row-alignment invariant this pipeline depends on requires
+            # folds to cover every row of df, so fall back rather than
+            # silently return a partial split.
+            raise ValueError(
+                f"canonical split covers {len(folds)} of {len(df)} rows -- df still contains "
+                "canonical-TEST-match rows; exclude them (canonical_test_mask) before calling this."
+            )
+        validate_fold_support(df.loc[folds["row_index"]], folds, contract)
+        n_folds = int(folds["fold"].nunique())
+        metadata = {
+            "requested_fold_count": requested_folds,
+            "effective_fold_count": n_folds,
+            "fallback_sequence": [{"source": "canonical_split", "status": "selected", "reason": "loaded frozen match_assignment.json"}],
+            "rule": "canonical frozen match-grouped split (prompt 13), shared across the active and passive legs",
+        }
+        return folds, metadata
+    except (ValueError, FileNotFoundError) as exc:
+        canonical_failure_reason = str(exc)
 
     unique_groups = int(df[group_col].nunique())
     max_folds = min(requested_folds, unique_groups)
-    attempts: list[dict[str, Any]] = []
+    attempts: list[dict[str, Any]] = [{"source": "canonical_split", "status": "skipped", "reason": canonical_failure_reason}]
     for candidate_folds in range(max_folds, 1, -1):
         try:
             folds = make_grouped_folds(df, contract.target, group_col=group_col, n_splits=candidate_folds, seed=seed)
@@ -376,6 +408,26 @@ def train_variant(
 
     variant_data = select_variant_rows(df, contract)
     variant_df = variant_data.frame.reset_index(drop=True)
+
+    # Exclude the frozen canonical TEST-match rows before any fold-making or
+    # fitting happens, so they are never seen during CV/model selection --
+    # this keeps the existing fold/oof row-alignment invariants intact
+    # (folds must cover exactly variant_df's rows) with no changes needed
+    # elsewhere. Held-out TEST evaluation is a separate, later step, out of
+    # this function's scope. Silently a no-op (0 rows excluded) when the
+    # canonical split hasn't been computed yet or doesn't cover this
+    # variant's matches (e.g. a unit-test fixture) -- make_valid_variant_folds
+    # falls back to make_grouped_folds for that case regardless.
+    group_col = config.get("group_column", "match_id")
+    n_test_excluded = 0
+    try:
+        test_mask = canonical_test_mask(variant_df, group_col=group_col)
+        n_test_excluded = int(test_mask.sum())
+        if n_test_excluded:
+            variant_df = variant_df.loc[~test_mask].reset_index(drop=True)
+    except FileNotFoundError:
+        pass
+
     audit = validate_model_dataset(variant_df)
     resolved = resolve_contract(variant_df, contract)
     leakage_audit = scan_features(resolved["final_features"], selected_target=contract.target, feature_scope=contract.feature_scope)

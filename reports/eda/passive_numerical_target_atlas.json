@@ -1,0 +1,5358 @@
+{
+  "dataset": "passive",
+  "generated_at": "2026-09-16T19:15:39.394702+00:00",
+  "target": "target_future_shot_10s",
+  "pool_construction": {
+    "n_locked": 28,
+    "n_dropped": 6,
+    "n_total": 34,
+    "excluded_as_coordinate_duplicate": [
+      "top_option_1_target_x",
+      "top_option_1_target_y",
+      "top_option_2_target_x",
+      "top_option_2_target_y",
+      "top_option_3_target_x",
+      "top_option_3_target_y"
+    ]
+  },
+  "n_features_analyzed": 34,
+  "n_features_checked_for_consistency": 28,
+  "n_features_flagged_inconsistent": 4,
+  "rho_threshold": 0.05,
+  "range_threshold_pp": 3.0,
+  "features": [
+    {
+      "feature": "top_option_3_threat_score",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1581783,
+      "n_unique_values": 192467,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0713,
+      "spearman_rho": -0.0853,
+      "bin_range_pp": 10.861,
+      "bins": [
+        {
+          "bin": "(-0.00022500000000000005, 0.00458]",
+          "n": 158184,
+          "shot_rate_pct": 14.415
+        },
+        {
+          "bin": "(0.00458, 0.0058]",
+          "n": 158188,
+          "shot_rate_pct": 8.584
+        },
+        {
+          "bin": "(0.0058, 0.00705]",
+          "n": 158167,
+          "shot_rate_pct": 4.565
+        },
+        {
+          "bin": "(0.00705, 0.00859]",
+          "n": 158178,
+          "shot_rate_pct": 3.554
+        },
+        {
+          "bin": "(0.00859, 0.0101]",
+          "n": 158181,
+          "shot_rate_pct": 5.032
+        },
+        {
+          "bin": "(0.0101, 0.0114]",
+          "n": 158175,
+          "shot_rate_pct": 4.488
+        },
+        {
+          "bin": "(0.0114, 0.0128]",
+          "n": 158176,
+          "shot_rate_pct": 4.218
+        },
+        {
+          "bin": "(0.0128, 0.0146]",
+          "n": 158186,
+          "shot_rate_pct": 4.387
+        },
+        {
+          "bin": "(0.0146, 0.0176]",
+          "n": 158173,
+          "shot_rate_pct": 4.641
+        },
+        {
+          "bin": "(0.0176, 0.111]",
+          "n": 158175,
+          "shot_rate_pct": 4.972
+        }
+      ],
+      "shape": "U-shaped",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "U-shaped",
+        "test_shape": "U-shaped",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-0.00022500000000000005, 0.00458]",
+            "n": 127901,
+            "shot_rate_pct": 14.573
+          },
+          {
+            "bin": "(0.00458, 0.0058]",
+            "n": 127172,
+            "shot_rate_pct": 9.08
+          },
+          {
+            "bin": "(0.0058, 0.00705]",
+            "n": 126323,
+            "shot_rate_pct": 4.769
+          },
+          {
+            "bin": "(0.00705, 0.00859]",
+            "n": 126324,
+            "shot_rate_pct": 3.531
+          },
+          {
+            "bin": "(0.00859, 0.0101]",
+            "n": 126347,
+            "shot_rate_pct": 5.169
+          },
+          {
+            "bin": "(0.0101, 0.0114]",
+            "n": 126869,
+            "shot_rate_pct": 4.537
+          },
+          {
+            "bin": "(0.0114, 0.0128]",
+            "n": 127209,
+            "shot_rate_pct": 4.29
+          },
+          {
+            "bin": "(0.0128, 0.0146]",
+            "n": 127728,
+            "shot_rate_pct": 4.481
+          },
+          {
+            "bin": "(0.0146, 0.0176]",
+            "n": 126683,
+            "shot_rate_pct": 4.584
+          },
+          {
+            "bin": "(0.0176, 0.111]",
+            "n": 126015,
+            "shot_rate_pct": 4.884
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-0.00022500000000000005, 0.00458]",
+            "n": 30283,
+            "shot_rate_pct": 13.75
+          },
+          {
+            "bin": "(0.00458, 0.0058]",
+            "n": 31016,
+            "shot_rate_pct": 6.551
+          },
+          {
+            "bin": "(0.0058, 0.00705]",
+            "n": 31844,
+            "shot_rate_pct": 3.759
+          },
+          {
+            "bin": "(0.00705, 0.00859]",
+            "n": 31854,
+            "shot_rate_pct": 3.645
+          },
+          {
+            "bin": "(0.00859, 0.0101]",
+            "n": 31834,
+            "shot_rate_pct": 4.486
+          },
+          {
+            "bin": "(0.0101, 0.0114]",
+            "n": 31306,
+            "shot_rate_pct": 4.29
+          },
+          {
+            "bin": "(0.0114, 0.0128]",
+            "n": 30967,
+            "shot_rate_pct": 3.924
+          },
+          {
+            "bin": "(0.0128, 0.0146]",
+            "n": 30458,
+            "shot_rate_pct": 3.992
+          },
+          {
+            "bin": "(0.0146, 0.0176]",
+            "n": 31490,
+            "shot_rate_pct": 4.871
+          },
+          {
+            "bin": "(0.0176, 0.111]",
+            "n": 32160,
+            "shot_rate_pct": 5.32
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_2_threat_score",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1591000,
+      "n_unique_values": 194434,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0617,
+      "spearman_rho": -0.0766,
+      "bin_range_pp": 10.891,
+      "bins": [
+        {
+          "bin": "(-0.00021700000000000007, 0.0057]",
+          "n": 159108,
+          "shot_rate_pct": 14.502
+        },
+        {
+          "bin": "(0.0057, 0.00809]",
+          "n": 159096,
+          "shot_rate_pct": 5.8
+        },
+        {
+          "bin": "(0.00809, 0.0102]",
+          "n": 159099,
+          "shot_rate_pct": 6.41
+        },
+        {
+          "bin": "(0.0102, 0.0116]",
+          "n": 159101,
+          "shot_rate_pct": 5.74
+        },
+        {
+          "bin": "(0.0116, 0.0129]",
+          "n": 159097,
+          "shot_rate_pct": 4.529
+        },
+        {
+          "bin": "(0.0129, 0.0143]",
+          "n": 159103,
+          "shot_rate_pct": 3.611
+        },
+        {
+          "bin": "(0.0143, 0.016]",
+          "n": 159098,
+          "shot_rate_pct": 3.936
+        },
+        {
+          "bin": "(0.016, 0.0183]",
+          "n": 159103,
+          "shot_rate_pct": 4.117
+        },
+        {
+          "bin": "(0.0183, 0.0223]",
+          "n": 159095,
+          "shot_rate_pct": 5.254
+        },
+        {
+          "bin": "(0.0223, 0.211]",
+          "n": 159100,
+          "shot_rate_pct": 5.634
+        }
+      ],
+      "shape": "U-shaped",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "U-shaped",
+        "test_shape": "U-shaped",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-0.00021700000000000007, 0.0057]",
+            "n": 128984,
+            "shot_rate_pct": 14.826
+          },
+          {
+            "bin": "(0.0057, 0.00809]",
+            "n": 126670,
+            "shot_rate_pct": 6.078
+          },
+          {
+            "bin": "(0.00809, 0.0102]",
+            "n": 128089,
+            "shot_rate_pct": 6.584
+          },
+          {
+            "bin": "(0.0102, 0.0116]",
+            "n": 126391,
+            "shot_rate_pct": 5.751
+          },
+          {
+            "bin": "(0.0116, 0.0129]",
+            "n": 127395,
+            "shot_rate_pct": 4.605
+          },
+          {
+            "bin": "(0.0129, 0.0143]",
+            "n": 128544,
+            "shot_rate_pct": 3.788
+          },
+          {
+            "bin": "(0.0143, 0.016]",
+            "n": 127820,
+            "shot_rate_pct": 4.003
+          },
+          {
+            "bin": "(0.016, 0.0183]",
+            "n": 126812,
+            "shot_rate_pct": 4.068
+          },
+          {
+            "bin": "(0.0183, 0.0223]",
+            "n": 128050,
+            "shot_rate_pct": 5.203
+          },
+          {
+            "bin": "(0.0223, 0.211]",
+            "n": 126866,
+            "shot_rate_pct": 5.67
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-0.00021700000000000007, 0.0057]",
+            "n": 30124,
+            "shot_rate_pct": 13.116
+          },
+          {
+            "bin": "(0.0057, 0.00809]",
+            "n": 32426,
+            "shot_rate_pct": 4.715
+          },
+          {
+            "bin": "(0.00809, 0.0102]",
+            "n": 31010,
+            "shot_rate_pct": 5.692
+          },
+          {
+            "bin": "(0.0102, 0.0116]",
+            "n": 32710,
+            "shot_rate_pct": 5.696
+          },
+          {
+            "bin": "(0.0116, 0.0129]",
+            "n": 31702,
+            "shot_rate_pct": 4.221
+          },
+          {
+            "bin": "(0.0129, 0.0143]",
+            "n": 30559,
+            "shot_rate_pct": 2.87
+          },
+          {
+            "bin": "(0.0143, 0.016]",
+            "n": 31278,
+            "shot_rate_pct": 3.661
+          },
+          {
+            "bin": "(0.016, 0.0183]",
+            "n": 32291,
+            "shot_rate_pct": 4.311
+          },
+          {
+            "bin": "(0.0183, 0.0223]",
+            "n": 31045,
+            "shot_rate_pct": 5.463
+          },
+          {
+            "bin": "(0.0223, 0.211]",
+            "n": 32234,
+            "shot_rate_pct": 5.491
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_1_threat_score",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1592902,
+      "n_unique_values": 194889,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.036,
+      "spearman_rho": -0.0671,
+      "bin_range_pp": 8.057,
+      "bins": [
+        {
+          "bin": "(-0.00011200000000000001, 0.00981]",
+          "n": 159295,
+          "shot_rate_pct": 11.169
+        },
+        {
+          "bin": "(0.00981, 0.0117]",
+          "n": 159288,
+          "shot_rate_pct": 10.506
+        },
+        {
+          "bin": "(0.0117, 0.0131]",
+          "n": 159289,
+          "shot_rate_pct": 6.79
+        },
+        {
+          "bin": "(0.0131, 0.0146]",
+          "n": 159297,
+          "shot_rate_pct": 4.116
+        },
+        {
+          "bin": "(0.0146, 0.0161]",
+          "n": 159287,
+          "shot_rate_pct": 3.285
+        },
+        {
+          "bin": "(0.0161, 0.0179]",
+          "n": 159290,
+          "shot_rate_pct": 3.112
+        },
+        {
+          "bin": "(0.0179, 0.0203]",
+          "n": 159285,
+          "shot_rate_pct": 3.656
+        },
+        {
+          "bin": "(0.0203, 0.0237]",
+          "n": 159295,
+          "shot_rate_pct": 4.556
+        },
+        {
+          "bin": "(0.0237, 0.0303]",
+          "n": 159291,
+          "shot_rate_pct": 6.667
+        },
+        {
+          "bin": "(0.0303, 0.909]",
+          "n": 159285,
+          "shot_rate_pct": 5.788
+        }
+      ],
+      "shape": "U-shaped",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "U-shaped",
+        "test_shape": "U-shaped",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-0.00011200000000000001, 0.00981]",
+            "n": 128431,
+            "shot_rate_pct": 11.593
+          },
+          {
+            "bin": "(0.00981, 0.0117]",
+            "n": 127518,
+            "shot_rate_pct": 10.908
+          },
+          {
+            "bin": "(0.0117, 0.0131]",
+            "n": 128227,
+            "shot_rate_pct": 6.899
+          },
+          {
+            "bin": "(0.0131, 0.0146]",
+            "n": 128005,
+            "shot_rate_pct": 4.11
+          },
+          {
+            "bin": "(0.0146, 0.0161]",
+            "n": 128000,
+            "shot_rate_pct": 3.263
+          },
+          {
+            "bin": "(0.0161, 0.0179]",
+            "n": 127072,
+            "shot_rate_pct": 3.109
+          },
+          {
+            "bin": "(0.0179, 0.0203]",
+            "n": 127881,
+            "shot_rate_pct": 3.666
+          },
+          {
+            "bin": "(0.0203, 0.0237]",
+            "n": 127074,
+            "shot_rate_pct": 4.549
+          },
+          {
+            "bin": "(0.0237, 0.0303]",
+            "n": 127570,
+            "shot_rate_pct": 6.725
+          },
+          {
+            "bin": "(0.0303, 0.909]",
+            "n": 127367,
+            "shot_rate_pct": 5.915
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-0.00011200000000000001, 0.00981]",
+            "n": 30864,
+            "shot_rate_pct": 9.403
+          },
+          {
+            "bin": "(0.00981, 0.0117]",
+            "n": 31770,
+            "shot_rate_pct": 8.892
+          },
+          {
+            "bin": "(0.0117, 0.0131]",
+            "n": 31062,
+            "shot_rate_pct": 6.339
+          },
+          {
+            "bin": "(0.0131, 0.0146]",
+            "n": 31292,
+            "shot_rate_pct": 4.142
+          },
+          {
+            "bin": "(0.0146, 0.0161]",
+            "n": 31287,
+            "shot_rate_pct": 3.375
+          },
+          {
+            "bin": "(0.0161, 0.0179]",
+            "n": 32218,
+            "shot_rate_pct": 3.122
+          },
+          {
+            "bin": "(0.0179, 0.0203]",
+            "n": 31404,
+            "shot_rate_pct": 3.614
+          },
+          {
+            "bin": "(0.0203, 0.0237]",
+            "n": 32221,
+            "shot_rate_pct": 4.587
+          },
+          {
+            "bin": "(0.0237, 0.0303]",
+            "n": 31721,
+            "shot_rate_pct": 6.434
+          },
+          {
+            "bin": "(0.0303, 0.909]",
+            "n": 31918,
+            "shot_rate_pct": 5.279
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "lane_screening_score_option_3",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1581783,
+      "n_unique_values": 1551519,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.046,
+      "spearman_rho": 0.0656,
+      "bin_range_pp": 4.895,
+      "bins": [
+        {
+          "bin": "(0.00791, 0.0329]",
+          "n": 158179,
+          "shot_rate_pct": 3.16
+        },
+        {
+          "bin": "(0.0329, 0.0412]",
+          "n": 158178,
+          "shot_rate_pct": 4.075
+        },
+        {
+          "bin": "(0.0412, 0.0498]",
+          "n": 158178,
+          "shot_rate_pct": 4.474
+        },
+        {
+          "bin": "(0.0498, 0.0601]",
+          "n": 158178,
+          "shot_rate_pct": 5.326
+        },
+        {
+          "bin": "(0.0601, 0.0734]",
+          "n": 158179,
+          "shot_rate_pct": 5.737
+        },
+        {
+          "bin": "(0.0734, 0.0913]",
+          "n": 158178,
+          "shot_rate_pct": 6.242
+        },
+        {
+          "bin": "(0.0913, 0.122]",
+          "n": 158178,
+          "shot_rate_pct": 6.842
+        },
+        {
+          "bin": "(0.122, 0.176]",
+          "n": 158178,
+          "shot_rate_pct": 7.256
+        },
+        {
+          "bin": "(0.176, 0.298]",
+          "n": 158178,
+          "shot_rate_pct": 7.692
+        },
+        {
+          "bin": "(0.298, 1.0]",
+          "n": 158179,
+          "shot_rate_pct": 8.055
+        }
+      ],
+      "shape": "monotonic increasing",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "monotonic increasing",
+        "test_shape": "monotonic increasing",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(0.00791, 0.0329]",
+            "n": 127898,
+            "shot_rate_pct": 3.148
+          },
+          {
+            "bin": "(0.0329, 0.0412]",
+            "n": 126941,
+            "shot_rate_pct": 4.165
+          },
+          {
+            "bin": "(0.0412, 0.0498]",
+            "n": 126842,
+            "shot_rate_pct": 4.53
+          },
+          {
+            "bin": "(0.0498, 0.0601]",
+            "n": 126833,
+            "shot_rate_pct": 5.44
+          },
+          {
+            "bin": "(0.0601, 0.0734]",
+            "n": 126525,
+            "shot_rate_pct": 5.892
+          },
+          {
+            "bin": "(0.0734, 0.0913]",
+            "n": 126745,
+            "shot_rate_pct": 6.392
+          },
+          {
+            "bin": "(0.0913, 0.122]",
+            "n": 126897,
+            "shot_rate_pct": 7.012
+          },
+          {
+            "bin": "(0.122, 0.176]",
+            "n": 126487,
+            "shot_rate_pct": 7.412
+          },
+          {
+            "bin": "(0.176, 0.298]",
+            "n": 126568,
+            "shot_rate_pct": 7.791
+          },
+          {
+            "bin": "(0.298, 1.0]",
+            "n": 126835,
+            "shot_rate_pct": 8.239
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(0.00791, 0.0329]",
+            "n": 30281,
+            "shot_rate_pct": 3.21
+          },
+          {
+            "bin": "(0.0329, 0.0412]",
+            "n": 31237,
+            "shot_rate_pct": 3.707
+          },
+          {
+            "bin": "(0.0412, 0.0498]",
+            "n": 31336,
+            "shot_rate_pct": 4.248
+          },
+          {
+            "bin": "(0.0498, 0.0601]",
+            "n": 31345,
+            "shot_rate_pct": 4.862
+          },
+          {
+            "bin": "(0.0601, 0.0734]",
+            "n": 31654,
+            "shot_rate_pct": 5.115
+          },
+          {
+            "bin": "(0.0734, 0.0913]",
+            "n": 31433,
+            "shot_rate_pct": 5.637
+          },
+          {
+            "bin": "(0.0913, 0.122]",
+            "n": 31281,
+            "shot_rate_pct": 6.154
+          },
+          {
+            "bin": "(0.122, 0.176]",
+            "n": 31691,
+            "shot_rate_pct": 6.633
+          },
+          {
+            "bin": "(0.176, 0.298]",
+            "n": 31610,
+            "shot_rate_pct": 7.295
+          },
+          {
+            "bin": "(0.298, 1.0]",
+            "n": 31344,
+            "shot_rate_pct": 7.312
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "attacking_goal_centrality",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1593181,
+      "n_unique_values": 1558814,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.0635,
+      "spearman_rho": 0.0648,
+      "bin_range_pp": 4.873,
+      "bins": [
+        {
+          "bin": "(-0.001, 0.294]",
+          "n": 159319,
+          "shot_rate_pct": 3.469
+        },
+        {
+          "bin": "(0.294, 0.432]",
+          "n": 159318,
+          "shot_rate_pct": 4.335
+        },
+        {
+          "bin": "(0.432, 0.534]",
+          "n": 159318,
+          "shot_rate_pct": 4.867
+        },
+        {
+          "bin": "(0.534, 0.62]",
+          "n": 159318,
+          "shot_rate_pct": 5.111
+        },
+        {
+          "bin": "(0.62, 0.698]",
+          "n": 159318,
+          "shot_rate_pct": 5.467
+        },
+        {
+          "bin": "(0.698, 0.769]",
+          "n": 159318,
+          "shot_rate_pct": 6.007
+        },
+        {
+          "bin": "(0.769, 0.834]",
+          "n": 159318,
+          "shot_rate_pct": 6.667
+        },
+        {
+          "bin": "(0.834, 0.893]",
+          "n": 159318,
+          "shot_rate_pct": 7.338
+        },
+        {
+          "bin": "(0.893, 0.948]",
+          "n": 159318,
+          "shot_rate_pct": 8.057
+        },
+        {
+          "bin": "(0.948, 1.0]",
+          "n": 159318,
+          "shot_rate_pct": 8.342
+        }
+      ],
+      "shape": "monotonic increasing",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "monotonic increasing",
+        "test_shape": "monotonic increasing",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-0.001, 0.294]",
+            "n": 128034,
+            "shot_rate_pct": 3.585
+          },
+          {
+            "bin": "(0.294, 0.432]",
+            "n": 127390,
+            "shot_rate_pct": 4.383
+          },
+          {
+            "bin": "(0.432, 0.534]",
+            "n": 127341,
+            "shot_rate_pct": 4.911
+          },
+          {
+            "bin": "(0.534, 0.62]",
+            "n": 127857,
+            "shot_rate_pct": 5.227
+          },
+          {
+            "bin": "(0.62, 0.698]",
+            "n": 127312,
+            "shot_rate_pct": 5.546
+          },
+          {
+            "bin": "(0.698, 0.769]",
+            "n": 127322,
+            "shot_rate_pct": 6.13
+          },
+          {
+            "bin": "(0.769, 0.834]",
+            "n": 128166,
+            "shot_rate_pct": 6.808
+          },
+          {
+            "bin": "(0.834, 0.893]",
+            "n": 127706,
+            "shot_rate_pct": 7.467
+          },
+          {
+            "bin": "(0.893, 0.948]",
+            "n": 127958,
+            "shot_rate_pct": 8.188
+          },
+          {
+            "bin": "(0.948, 1.0]",
+            "n": 128288,
+            "shot_rate_pct": 8.521
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-0.001, 0.294]",
+            "n": 31285,
+            "shot_rate_pct": 2.992
+          },
+          {
+            "bin": "(0.294, 0.432]",
+            "n": 31928,
+            "shot_rate_pct": 4.144
+          },
+          {
+            "bin": "(0.432, 0.534]",
+            "n": 31977,
+            "shot_rate_pct": 4.691
+          },
+          {
+            "bin": "(0.534, 0.62]",
+            "n": 31461,
+            "shot_rate_pct": 4.641
+          },
+          {
+            "bin": "(0.62, 0.698]",
+            "n": 32006,
+            "shot_rate_pct": 5.152
+          },
+          {
+            "bin": "(0.698, 0.769]",
+            "n": 31996,
+            "shot_rate_pct": 5.516
+          },
+          {
+            "bin": "(0.769, 0.834]",
+            "n": 31152,
+            "shot_rate_pct": 6.086
+          },
+          {
+            "bin": "(0.834, 0.893]",
+            "n": 31612,
+            "shot_rate_pct": 6.817
+          },
+          {
+            "bin": "(0.893, 0.948]",
+            "n": 31360,
+            "shot_rate_pct": 7.526
+          },
+          {
+            "bin": "(0.948, 1.0]",
+            "n": 31030,
+            "shot_rate_pct": 7.599
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "distance_to_center_line",
+      "status": "dropped",
+      "reason": "CORRELATION_ANALYSIS DROP tier: Spearman r=-1.0 vs attacking_goal_centrality (kept)",
+      "type": "continuous",
+      "n_rows_used": 1593181,
+      "n_unique_values": 1561729,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0634,
+      "spearman_rho": -0.0648,
+      "bin_range_pp": 4.873,
+      "bins": [
+        {
+          "bin": "(-0.0009741, 2.067]",
+          "n": 159319,
+          "shot_rate_pct": 8.342
+        },
+        {
+          "bin": "(2.067, 4.267]",
+          "n": 159318,
+          "shot_rate_pct": 8.057
+        },
+        {
+          "bin": "(4.267, 6.651]",
+          "n": 159318,
+          "shot_rate_pct": 7.338
+        },
+        {
+          "bin": "(6.651, 9.25]",
+          "n": 159319,
+          "shot_rate_pct": 6.666
+        },
+        {
+          "bin": "(9.25, 12.083]",
+          "n": 159317,
+          "shot_rate_pct": 6.007
+        },
+        {
+          "bin": "(12.083, 15.182]",
+          "n": 159318,
+          "shot_rate_pct": 5.467
+        },
+        {
+          "bin": "(15.182, 18.625]",
+          "n": 159318,
+          "shot_rate_pct": 5.111
+        },
+        {
+          "bin": "(18.625, 22.73]",
+          "n": 159318,
+          "shot_rate_pct": 4.867
+        },
+        {
+          "bin": "(22.73, 28.234]",
+          "n": 159318,
+          "shot_rate_pct": 4.335
+        },
+        {
+          "bin": "(28.234, 49.508]",
+          "n": 159318,
+          "shot_rate_pct": 3.469
+        }
+      ],
+      "shape": "monotonic decreasing",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "monotonic decreasing",
+        "test_shape": "monotonic decreasing",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-0.0009741, 2.067]",
+            "n": 128289,
+            "shot_rate_pct": 8.521
+          },
+          {
+            "bin": "(2.067, 4.267]",
+            "n": 127958,
+            "shot_rate_pct": 8.188
+          },
+          {
+            "bin": "(4.267, 6.651]",
+            "n": 127706,
+            "shot_rate_pct": 7.467
+          },
+          {
+            "bin": "(6.651, 9.25]",
+            "n": 128167,
+            "shot_rate_pct": 6.808
+          },
+          {
+            "bin": "(9.25, 12.083]",
+            "n": 127321,
+            "shot_rate_pct": 6.13
+          },
+          {
+            "bin": "(12.083, 15.182]",
+            "n": 127312,
+            "shot_rate_pct": 5.546
+          },
+          {
+            "bin": "(15.182, 18.625]",
+            "n": 127857,
+            "shot_rate_pct": 5.227
+          },
+          {
+            "bin": "(18.625, 22.73]",
+            "n": 127341,
+            "shot_rate_pct": 4.911
+          },
+          {
+            "bin": "(22.73, 28.234]",
+            "n": 127390,
+            "shot_rate_pct": 4.383
+          },
+          {
+            "bin": "(28.234, 49.508]",
+            "n": 128033,
+            "shot_rate_pct": 3.585
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-0.0009741, 2.067]",
+            "n": 31030,
+            "shot_rate_pct": 7.599
+          },
+          {
+            "bin": "(2.067, 4.267]",
+            "n": 31360,
+            "shot_rate_pct": 7.526
+          },
+          {
+            "bin": "(4.267, 6.651]",
+            "n": 31612,
+            "shot_rate_pct": 6.817
+          },
+          {
+            "bin": "(6.651, 9.25]",
+            "n": 31152,
+            "shot_rate_pct": 6.086
+          },
+          {
+            "bin": "(9.25, 12.083]",
+            "n": 31996,
+            "shot_rate_pct": 5.516
+          },
+          {
+            "bin": "(12.083, 15.182]",
+            "n": 32006,
+            "shot_rate_pct": 5.152
+          },
+          {
+            "bin": "(15.182, 18.625]",
+            "n": 31461,
+            "shot_rate_pct": 4.641
+          },
+          {
+            "bin": "(18.625, 22.73]",
+            "n": 31977,
+            "shot_rate_pct": 4.691
+          },
+          {
+            "bin": "(22.73, 28.234]",
+            "n": 31928,
+            "shot_rate_pct": 4.144
+          },
+          {
+            "bin": "(28.234, 49.508]",
+            "n": 31285,
+            "shot_rate_pct": 2.992
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_3_distance_from_ball",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1581783,
+      "n_unique_values": 192355,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0637,
+      "spearman_rho": -0.0634,
+      "bin_range_pp": 6.236,
+      "bins": [
+        {
+          "bin": "(0.102, 11.352]",
+          "n": 158183,
+          "shot_rate_pct": 9.009
+        },
+        {
+          "bin": "(11.352, 14.749]",
+          "n": 158179,
+          "shot_rate_pct": 7.373
+        },
+        {
+          "bin": "(14.749, 17.803]",
+          "n": 158176,
+          "shot_rate_pct": 6.517
+        },
+        {
+          "bin": "(17.803, 20.892]",
+          "n": 158175,
+          "shot_rate_pct": 6.22
+        },
+        {
+          "bin": "(20.892, 24.317]",
+          "n": 158187,
+          "shot_rate_pct": 5.772
+        },
+        {
+          "bin": "(24.317, 28.248]",
+          "n": 158173,
+          "shot_rate_pct": 6.067
+        },
+        {
+          "bin": "(28.248, 32.958]",
+          "n": 158177,
+          "shot_rate_pct": 5.485
+        },
+        {
+          "bin": "(32.958, 38.716]",
+          "n": 158178,
+          "shot_rate_pct": 5.218
+        },
+        {
+          "bin": "(38.716, 46.937]",
+          "n": 158178,
+          "shot_rate_pct": 4.423
+        },
+        {
+          "bin": "(46.937, 127.083]",
+          "n": 158177,
+          "shot_rate_pct": 2.773
+        }
+      ],
+      "shape": "monotonic decreasing",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "monotonic decreasing",
+        "test_shape": "monotonic decreasing",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(0.102, 11.352]",
+            "n": 126078,
+            "shot_rate_pct": 9.131
+          },
+          {
+            "bin": "(11.352, 14.749]",
+            "n": 126278,
+            "shot_rate_pct": 7.733
+          },
+          {
+            "bin": "(14.749, 17.803]",
+            "n": 126152,
+            "shot_rate_pct": 6.612
+          },
+          {
+            "bin": "(17.803, 20.892]",
+            "n": 126921,
+            "shot_rate_pct": 6.335
+          },
+          {
+            "bin": "(20.892, 24.317]",
+            "n": 125340,
+            "shot_rate_pct": 5.801
+          },
+          {
+            "bin": "(24.317, 28.248]",
+            "n": 127303,
+            "shot_rate_pct": 6.24
+          },
+          {
+            "bin": "(28.248, 32.958]",
+            "n": 126421,
+            "shot_rate_pct": 5.624
+          },
+          {
+            "bin": "(32.958, 38.716]",
+            "n": 127411,
+            "shot_rate_pct": 5.268
+          },
+          {
+            "bin": "(38.716, 46.937]",
+            "n": 128204,
+            "shot_rate_pct": 4.377
+          },
+          {
+            "bin": "(46.937, 127.083]",
+            "n": 128463,
+            "shot_rate_pct": 2.952
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(0.102, 11.352]",
+            "n": 32105,
+            "shot_rate_pct": 8.531
+          },
+          {
+            "bin": "(11.352, 14.749]",
+            "n": 31901,
+            "shot_rate_pct": 5.947
+          },
+          {
+            "bin": "(14.749, 17.803]",
+            "n": 32024,
+            "shot_rate_pct": 6.145
+          },
+          {
+            "bin": "(17.803, 20.892]",
+            "n": 31254,
+            "shot_rate_pct": 5.753
+          },
+          {
+            "bin": "(20.892, 24.317]",
+            "n": 32847,
+            "shot_rate_pct": 5.663
+          },
+          {
+            "bin": "(24.317, 28.248]",
+            "n": 30870,
+            "shot_rate_pct": 5.351
+          },
+          {
+            "bin": "(28.248, 32.958]",
+            "n": 31756,
+            "shot_rate_pct": 4.931
+          },
+          {
+            "bin": "(32.958, 38.716]",
+            "n": 30767,
+            "shot_rate_pct": 5.009
+          },
+          {
+            "bin": "(38.716, 46.937]",
+            "n": 29974,
+            "shot_rate_pct": 4.624
+          },
+          {
+            "bin": "(46.937, 127.083]",
+            "n": 29714,
+            "shot_rate_pct": 1.999
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "lane_screening_score_option_2",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1591000,
+      "n_unique_values": 1560865,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.0429,
+      "spearman_rho": 0.0631,
+      "bin_range_pp": 4.719,
+      "bins": [
+        {
+          "bin": "(0.008730000000000002, 0.0324]",
+          "n": 159100,
+          "shot_rate_pct": 3.299
+        },
+        {
+          "bin": "(0.0324, 0.04]",
+          "n": 159100,
+          "shot_rate_pct": 4.101
+        },
+        {
+          "bin": "(0.04, 0.0478]",
+          "n": 159100,
+          "shot_rate_pct": 4.708
+        },
+        {
+          "bin": "(0.0478, 0.0572]",
+          "n": 159100,
+          "shot_rate_pct": 5.453
+        },
+        {
+          "bin": "(0.0572, 0.0691]",
+          "n": 159100,
+          "shot_rate_pct": 5.884
+        },
+        {
+          "bin": "(0.0691, 0.0848]",
+          "n": 159100,
+          "shot_rate_pct": 6.278
+        },
+        {
+          "bin": "(0.0848, 0.111]",
+          "n": 159100,
+          "shot_rate_pct": 6.799
+        },
+        {
+          "bin": "(0.111, 0.161]",
+          "n": 159100,
+          "shot_rate_pct": 7.329
+        },
+        {
+          "bin": "(0.161, 0.276]",
+          "n": 159100,
+          "shot_rate_pct": 7.664
+        },
+        {
+          "bin": "(0.276, 1.0]",
+          "n": 159100,
+          "shot_rate_pct": 8.018
+        }
+      ],
+      "shape": "monotonic increasing",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "monotonic increasing",
+        "test_shape": "monotonic increasing",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(0.008730000000000002, 0.0324]",
+            "n": 129229,
+            "shot_rate_pct": 3.282
+          },
+          {
+            "bin": "(0.0324, 0.04]",
+            "n": 127874,
+            "shot_rate_pct": 4.174
+          },
+          {
+            "bin": "(0.04, 0.0478]",
+            "n": 127457,
+            "shot_rate_pct": 4.798
+          },
+          {
+            "bin": "(0.0478, 0.0572]",
+            "n": 127187,
+            "shot_rate_pct": 5.542
+          },
+          {
+            "bin": "(0.0572, 0.0691]",
+            "n": 127406,
+            "shot_rate_pct": 5.993
+          },
+          {
+            "bin": "(0.0691, 0.0848]",
+            "n": 127271,
+            "shot_rate_pct": 6.419
+          },
+          {
+            "bin": "(0.0848, 0.111]",
+            "n": 127281,
+            "shot_rate_pct": 6.982
+          },
+          {
+            "bin": "(0.111, 0.161]",
+            "n": 127276,
+            "shot_rate_pct": 7.469
+          },
+          {
+            "bin": "(0.161, 0.276]",
+            "n": 127353,
+            "shot_rate_pct": 7.838
+          },
+          {
+            "bin": "(0.276, 1.0]",
+            "n": 127287,
+            "shot_rate_pct": 8.226
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(0.008730000000000002, 0.0324]",
+            "n": 29871,
+            "shot_rate_pct": 3.371
+          },
+          {
+            "bin": "(0.0324, 0.04]",
+            "n": 31226,
+            "shot_rate_pct": 3.801
+          },
+          {
+            "bin": "(0.04, 0.0478]",
+            "n": 31643,
+            "shot_rate_pct": 4.349
+          },
+          {
+            "bin": "(0.0478, 0.0572]",
+            "n": 31913,
+            "shot_rate_pct": 5.098
+          },
+          {
+            "bin": "(0.0572, 0.0691]",
+            "n": 31694,
+            "shot_rate_pct": 5.449
+          },
+          {
+            "bin": "(0.0691, 0.0848]",
+            "n": 31829,
+            "shot_rate_pct": 5.712
+          },
+          {
+            "bin": "(0.0848, 0.111]",
+            "n": 31819,
+            "shot_rate_pct": 6.069
+          },
+          {
+            "bin": "(0.111, 0.161]",
+            "n": 31824,
+            "shot_rate_pct": 6.772
+          },
+          {
+            "bin": "(0.161, 0.276]",
+            "n": 31747,
+            "shot_rate_pct": 6.964
+          },
+          {
+            "bin": "(0.276, 1.0]",
+            "n": 31813,
+            "shot_rate_pct": 7.189
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "lane_screening_score_option_1",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1592902,
+      "n_unique_values": 1563186,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.0368,
+      "spearman_rho": 0.059,
+      "bin_range_pp": 4.637,
+      "bins": [
+        {
+          "bin": "(0.00878, 0.0322]",
+          "n": 159291,
+          "shot_rate_pct": 3.104
+        },
+        {
+          "bin": "(0.0322, 0.0396]",
+          "n": 159290,
+          "shot_rate_pct": 4.14
+        },
+        {
+          "bin": "(0.0396, 0.0471]",
+          "n": 159290,
+          "shot_rate_pct": 4.932
+        },
+        {
+          "bin": "(0.0471, 0.0559]",
+          "n": 159290,
+          "shot_rate_pct": 5.577
+        },
+        {
+          "bin": "(0.0559, 0.067]",
+          "n": 159290,
+          "shot_rate_pct": 6.186
+        },
+        {
+          "bin": "(0.067, 0.0819]",
+          "n": 159290,
+          "shot_rate_pct": 6.589
+        },
+        {
+          "bin": "(0.0819, 0.105]",
+          "n": 159290,
+          "shot_rate_pct": 6.811
+        },
+        {
+          "bin": "(0.105, 0.151]",
+          "n": 159290,
+          "shot_rate_pct": 7.164
+        },
+        {
+          "bin": "(0.151, 0.262]",
+          "n": 159290,
+          "shot_rate_pct": 7.4
+        },
+        {
+          "bin": "(0.262, 1.0]",
+          "n": 159291,
+          "shot_rate_pct": 7.741
+        }
+      ],
+      "shape": "monotonic increasing",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "monotonic increasing",
+        "test_shape": "monotonic increasing",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(0.00878, 0.0322]",
+            "n": 129699,
+            "shot_rate_pct": 3.212
+          },
+          {
+            "bin": "(0.0322, 0.0396]",
+            "n": 128745,
+            "shot_rate_pct": 4.24
+          },
+          {
+            "bin": "(0.0396, 0.0471]",
+            "n": 127980,
+            "shot_rate_pct": 5.051
+          },
+          {
+            "bin": "(0.0471, 0.0559]",
+            "n": 127660,
+            "shot_rate_pct": 5.651
+          },
+          {
+            "bin": "(0.0559, 0.067]",
+            "n": 127321,
+            "shot_rate_pct": 6.274
+          },
+          {
+            "bin": "(0.067, 0.0819]",
+            "n": 127182,
+            "shot_rate_pct": 6.721
+          },
+          {
+            "bin": "(0.0819, 0.105]",
+            "n": 127248,
+            "shot_rate_pct": 6.941
+          },
+          {
+            "bin": "(0.105, 0.151]",
+            "n": 127342,
+            "shot_rate_pct": 7.295
+          },
+          {
+            "bin": "(0.151, 0.262]",
+            "n": 127023,
+            "shot_rate_pct": 7.545
+          },
+          {
+            "bin": "(0.262, 1.0]",
+            "n": 126945,
+            "shot_rate_pct": 7.932
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(0.00878, 0.0322]",
+            "n": 29592,
+            "shot_rate_pct": 2.632
+          },
+          {
+            "bin": "(0.0322, 0.0396]",
+            "n": 30545,
+            "shot_rate_pct": 3.719
+          },
+          {
+            "bin": "(0.0396, 0.0471]",
+            "n": 31310,
+            "shot_rate_pct": 4.446
+          },
+          {
+            "bin": "(0.0471, 0.0559]",
+            "n": 31630,
+            "shot_rate_pct": 5.277
+          },
+          {
+            "bin": "(0.0559, 0.067]",
+            "n": 31969,
+            "shot_rate_pct": 5.837
+          },
+          {
+            "bin": "(0.067, 0.0819]",
+            "n": 32108,
+            "shot_rate_pct": 6.064
+          },
+          {
+            "bin": "(0.0819, 0.105]",
+            "n": 32042,
+            "shot_rate_pct": 6.298
+          },
+          {
+            "bin": "(0.105, 0.151]",
+            "n": 31948,
+            "shot_rate_pct": 6.639
+          },
+          {
+            "bin": "(0.151, 0.262]",
+            "n": 32267,
+            "shot_rate_pct": 6.831
+          },
+          {
+            "bin": "(0.262, 1.0]",
+            "n": 32346,
+            "shot_rate_pct": 6.99
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_2_distance_from_ball",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1591000,
+      "n_unique_values": 194319,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0576,
+      "spearman_rho": -0.0571,
+      "bin_range_pp": 4.786,
+      "bins": [
+        {
+          "bin": "(0.264, 12.466]",
+          "n": 159106,
+          "shot_rate_pct": 8.078
+        },
+        {
+          "bin": "(12.466, 15.966]",
+          "n": 159096,
+          "shot_rate_pct": 7.033
+        },
+        {
+          "bin": "(15.966, 19.172]",
+          "n": 159101,
+          "shot_rate_pct": 7.199
+        },
+        {
+          "bin": "(19.172, 22.516]",
+          "n": 159097,
+          "shot_rate_pct": 6.783
+        },
+        {
+          "bin": "(22.516, 26.157]",
+          "n": 159101,
+          "shot_rate_pct": 6.272
+        },
+        {
+          "bin": "(26.157, 30.258]",
+          "n": 159103,
+          "shot_rate_pct": 6.217
+        },
+        {
+          "bin": "(30.258, 34.985]",
+          "n": 159098,
+          "shot_rate_pct": 5.259
+        },
+        {
+          "bin": "(34.985, 40.647]",
+          "n": 159102,
+          "shot_rate_pct": 4.833
+        },
+        {
+          "bin": "(40.647, 48.692]",
+          "n": 159096,
+          "shot_rate_pct": 4.567
+        },
+        {
+          "bin": "(48.692, 122.954]",
+          "n": 159100,
+          "shot_rate_pct": 3.292
+        }
+      ],
+      "shape": "monotonic decreasing",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "monotonic decreasing",
+        "test_shape": "monotonic decreasing",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(0.264, 12.466]",
+            "n": 126594,
+            "shot_rate_pct": 8.241
+          },
+          {
+            "bin": "(12.466, 15.966]",
+            "n": 126668,
+            "shot_rate_pct": 7.284
+          },
+          {
+            "bin": "(15.966, 19.172]",
+            "n": 127194,
+            "shot_rate_pct": 7.249
+          },
+          {
+            "bin": "(19.172, 22.516]",
+            "n": 127172,
+            "shot_rate_pct": 6.829
+          },
+          {
+            "bin": "(22.516, 26.157]",
+            "n": 128683,
+            "shot_rate_pct": 6.464
+          },
+          {
+            "bin": "(26.157, 30.258]",
+            "n": 126572,
+            "shot_rate_pct": 6.298
+          },
+          {
+            "bin": "(30.258, 34.985]",
+            "n": 127644,
+            "shot_rate_pct": 5.518
+          },
+          {
+            "bin": "(34.985, 40.647]",
+            "n": 128945,
+            "shot_rate_pct": 4.959
+          },
+          {
+            "bin": "(40.647, 48.692]",
+            "n": 128655,
+            "shot_rate_pct": 4.625
+          },
+          {
+            "bin": "(48.692, 122.954]",
+            "n": 127494,
+            "shot_rate_pct": 3.255
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(0.264, 12.466]",
+            "n": 32512,
+            "shot_rate_pct": 7.446
+          },
+          {
+            "bin": "(12.466, 15.966]",
+            "n": 32428,
+            "shot_rate_pct": 6.05
+          },
+          {
+            "bin": "(15.966, 19.172]",
+            "n": 31907,
+            "shot_rate_pct": 6.998
+          },
+          {
+            "bin": "(19.172, 22.516]",
+            "n": 31925,
+            "shot_rate_pct": 6.597
+          },
+          {
+            "bin": "(22.516, 26.157]",
+            "n": 30418,
+            "shot_rate_pct": 5.461
+          },
+          {
+            "bin": "(26.157, 30.258]",
+            "n": 32531,
+            "shot_rate_pct": 5.902
+          },
+          {
+            "bin": "(30.258, 34.985]",
+            "n": 31454,
+            "shot_rate_pct": 4.206
+          },
+          {
+            "bin": "(34.985, 40.647]",
+            "n": 30157,
+            "shot_rate_pct": 4.298
+          },
+          {
+            "bin": "(40.647, 48.692]",
+            "n": 30441,
+            "shot_rate_pct": 4.323
+          },
+          {
+            "bin": "(48.692, 122.954]",
+            "n": 31606,
+            "shot_rate_pct": 3.442
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "engagement_distance_to_carrier",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1593181,
+      "n_unique_values": 1564723,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0538,
+      "spearman_rho": -0.0555,
+      "bin_range_pp": 4.155,
+      "bins": [
+        {
+          "bin": "(-0.00099847, 6.448]",
+          "n": 159319,
+          "shot_rate_pct": 7.842
+        },
+        {
+          "bin": "(6.448, 10.696]",
+          "n": 159318,
+          "shot_rate_pct": 7.7
+        },
+        {
+          "bin": "(10.696, 14.334]",
+          "n": 159318,
+          "shot_rate_pct": 7.235
+        },
+        {
+          "bin": "(14.334, 17.738]",
+          "n": 159318,
+          "shot_rate_pct": 6.649
+        },
+        {
+          "bin": "(17.738, 21.109]",
+          "n": 159318,
+          "shot_rate_pct": 6.068
+        },
+        {
+          "bin": "(21.109, 24.666]",
+          "n": 159318,
+          "shot_rate_pct": 5.639
+        },
+        {
+          "bin": "(24.666, 28.662]",
+          "n": 159318,
+          "shot_rate_pct": 5.24
+        },
+        {
+          "bin": "(28.662, 33.398]",
+          "n": 159318,
+          "shot_rate_pct": 4.903
+        },
+        {
+          "bin": "(33.398, 39.865]",
+          "n": 159318,
+          "shot_rate_pct": 4.696
+        },
+        {
+          "bin": "(39.865, 138.98]",
+          "n": 159318,
+          "shot_rate_pct": 3.687
+        }
+      ],
+      "shape": "monotonic decreasing",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "monotonic decreasing",
+        "test_shape": "monotonic decreasing",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-0.00099847, 6.448]",
+            "n": 127388,
+            "shot_rate_pct": 8.026
+          },
+          {
+            "bin": "(6.448, 10.696]",
+            "n": 127666,
+            "shot_rate_pct": 7.9
+          },
+          {
+            "bin": "(10.696, 14.334]",
+            "n": 127547,
+            "shot_rate_pct": 7.386
+          },
+          {
+            "bin": "(14.334, 17.738]",
+            "n": 127515,
+            "shot_rate_pct": 6.815
+          },
+          {
+            "bin": "(17.738, 21.109]",
+            "n": 127501,
+            "shot_rate_pct": 6.169
+          },
+          {
+            "bin": "(21.109, 24.666]",
+            "n": 127196,
+            "shot_rate_pct": 5.735
+          },
+          {
+            "bin": "(24.666, 28.662]",
+            "n": 127326,
+            "shot_rate_pct": 5.354
+          },
+          {
+            "bin": "(28.662, 33.398]",
+            "n": 128043,
+            "shot_rate_pct": 5.006
+          },
+          {
+            "bin": "(33.398, 39.865]",
+            "n": 128348,
+            "shot_rate_pct": 4.754
+          },
+          {
+            "bin": "(39.865, 138.98]",
+            "n": 128844,
+            "shot_rate_pct": 3.677
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-0.00099847, 6.448]",
+            "n": 31931,
+            "shot_rate_pct": 7.109
+          },
+          {
+            "bin": "(6.448, 10.696]",
+            "n": 31652,
+            "shot_rate_pct": 6.897
+          },
+          {
+            "bin": "(10.696, 14.334]",
+            "n": 31771,
+            "shot_rate_pct": 6.632
+          },
+          {
+            "bin": "(14.334, 17.738]",
+            "n": 31803,
+            "shot_rate_pct": 5.984
+          },
+          {
+            "bin": "(17.738, 21.109]",
+            "n": 31817,
+            "shot_rate_pct": 5.66
+          },
+          {
+            "bin": "(21.109, 24.666]",
+            "n": 32122,
+            "shot_rate_pct": 5.258
+          },
+          {
+            "bin": "(24.666, 28.662]",
+            "n": 31992,
+            "shot_rate_pct": 4.789
+          },
+          {
+            "bin": "(28.662, 33.398]",
+            "n": 31275,
+            "shot_rate_pct": 4.48
+          },
+          {
+            "bin": "(33.398, 39.865]",
+            "n": 30970,
+            "shot_rate_pct": 4.453
+          },
+          {
+            "bin": "(39.865, 138.98]",
+            "n": 30474,
+            "shot_rate_pct": 3.731
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "ball_x",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1593181,
+      "n_unique_values": 1543,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.036,
+      "spearman_rho": -0.0422,
+      "bin_range_pp": 11.424,
+      "bins": [
+        {
+          "bin": "(-0.001, 23.5]",
+          "n": 159457,
+          "shot_rate_pct": 13.857
+        },
+        {
+          "bin": "(23.5, 34.3]",
+          "n": 160545,
+          "shot_rate_pct": 9.572
+        },
+        {
+          "bin": "(34.3, 42.5]",
+          "n": 158741,
+          "shot_rate_pct": 5.008
+        },
+        {
+          "bin": "(42.5, 49.8]",
+          "n": 159862,
+          "shot_rate_pct": 3.012
+        },
+        {
+          "bin": "(49.8, 56.6]",
+          "n": 158424,
+          "shot_rate_pct": 2.433
+        },
+        {
+          "bin": "(56.6, 64.3]",
+          "n": 159874,
+          "shot_rate_pct": 2.501
+        },
+        {
+          "bin": "(64.3, 72.5]",
+          "n": 159519,
+          "shot_rate_pct": 2.486
+        },
+        {
+          "bin": "(72.5, 81.3]",
+          "n": 158229,
+          "shot_rate_pct": 3.54
+        },
+        {
+          "bin": "(81.3, 93.2]",
+          "n": 159601,
+          "shot_rate_pct": 6.03
+        },
+        {
+          "bin": "(93.2, 120.0]",
+          "n": 158929,
+          "shot_rate_pct": 11.185
+        }
+      ],
+      "shape": "U-shaped",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "U-shaped",
+        "test_shape": "U-shaped",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-0.001, 23.5]",
+            "n": 129632,
+            "shot_rate_pct": 14.135
+          },
+          {
+            "bin": "(23.5, 34.3]",
+            "n": 131515,
+            "shot_rate_pct": 9.867
+          },
+          {
+            "bin": "(34.3, 42.5]",
+            "n": 127742,
+            "shot_rate_pct": 5.012
+          },
+          {
+            "bin": "(42.5, 49.8]",
+            "n": 127251,
+            "shot_rate_pct": 3.125
+          },
+          {
+            "bin": "(49.8, 56.6]",
+            "n": 126234,
+            "shot_rate_pct": 2.632
+          },
+          {
+            "bin": "(56.6, 64.3]",
+            "n": 128568,
+            "shot_rate_pct": 2.564
+          },
+          {
+            "bin": "(64.3, 72.5]",
+            "n": 126691,
+            "shot_rate_pct": 2.502
+          },
+          {
+            "bin": "(72.5, 81.3]",
+            "n": 125959,
+            "shot_rate_pct": 3.36
+          },
+          {
+            "bin": "(81.3, 93.2]",
+            "n": 126728,
+            "shot_rate_pct": 5.996
+          },
+          {
+            "bin": "(93.2, 120.0]",
+            "n": 127054,
+            "shot_rate_pct": 11.291
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-0.001, 23.5]",
+            "n": 29825,
+            "shot_rate_pct": 12.647
+          },
+          {
+            "bin": "(23.5, 34.3]",
+            "n": 29030,
+            "shot_rate_pct": 8.236
+          },
+          {
+            "bin": "(34.3, 42.5]",
+            "n": 30999,
+            "shot_rate_pct": 4.99
+          },
+          {
+            "bin": "(42.5, 49.8]",
+            "n": 32611,
+            "shot_rate_pct": 2.57
+          },
+          {
+            "bin": "(49.8, 56.6]",
+            "n": 32190,
+            "shot_rate_pct": 1.653
+          },
+          {
+            "bin": "(56.6, 64.3]",
+            "n": 31306,
+            "shot_rate_pct": 2.242
+          },
+          {
+            "bin": "(64.3, 72.5]",
+            "n": 32828,
+            "shot_rate_pct": 2.422
+          },
+          {
+            "bin": "(72.5, 81.3]",
+            "n": 32270,
+            "shot_rate_pct": 4.245
+          },
+          {
+            "bin": "(81.3, 93.2]",
+            "n": 32873,
+            "shot_rate_pct": 6.16
+          },
+          {
+            "bin": "(93.2, 120.0]",
+            "n": 31875,
+            "shot_rate_pct": 10.761
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_1_distance_from_ball",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1592902,
+      "n_unique_values": 194774,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0408,
+      "spearman_rho": -0.0377,
+      "bin_range_pp": 3.751,
+      "bins": [
+        {
+          "bin": "(0.43, 13.648]",
+          "n": 159293,
+          "shot_rate_pct": 7.307
+        },
+        {
+          "bin": "(13.648, 17.231]",
+          "n": 159292,
+          "shot_rate_pct": 6.676
+        },
+        {
+          "bin": "(17.231, 20.412]",
+          "n": 159289,
+          "shot_rate_pct": 6.218
+        },
+        {
+          "bin": "(20.412, 23.733]",
+          "n": 159293,
+          "shot_rate_pct": 6.572
+        },
+        {
+          "bin": "(23.733, 27.58]",
+          "n": 159286,
+          "shot_rate_pct": 6.703
+        },
+        {
+          "bin": "(27.58, 32.072]",
+          "n": 159291,
+          "shot_rate_pct": 5.949
+        },
+        {
+          "bin": "(32.072, 37.254]",
+          "n": 159287,
+          "shot_rate_pct": 6.061
+        },
+        {
+          "bin": "(37.254, 43.295]",
+          "n": 159293,
+          "shot_rate_pct": 5.625
+        },
+        {
+          "bin": "(43.295, 51.698]",
+          "n": 159287,
+          "shot_rate_pct": 4.976
+        },
+        {
+          "bin": "(51.698, 121.35]",
+          "n": 159291,
+          "shot_rate_pct": 3.556
+        }
+      ],
+      "shape": "monotonic decreasing",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "monotonic decreasing",
+        "test_shape": "no-clear-pattern",
+        "consistent": false,
+        "train_val_bins": [
+          {
+            "bin": "(0.43, 13.648]",
+            "n": 128316,
+            "shot_rate_pct": 7.544
+          },
+          {
+            "bin": "(13.648, 17.231]",
+            "n": 129067,
+            "shot_rate_pct": 6.924
+          },
+          {
+            "bin": "(17.231, 20.412]",
+            "n": 129184,
+            "shot_rate_pct": 6.33
+          },
+          {
+            "bin": "(20.412, 23.733]",
+            "n": 127627,
+            "shot_rate_pct": 6.696
+          },
+          {
+            "bin": "(23.733, 27.58]",
+            "n": 127415,
+            "shot_rate_pct": 6.877
+          },
+          {
+            "bin": "(27.58, 32.072]",
+            "n": 127630,
+            "shot_rate_pct": 5.878
+          },
+          {
+            "bin": "(32.072, 37.254]",
+            "n": 127721,
+            "shot_rate_pct": 6.102
+          },
+          {
+            "bin": "(37.254, 43.295]",
+            "n": 127790,
+            "shot_rate_pct": 5.63
+          },
+          {
+            "bin": "(43.295, 51.698]",
+            "n": 126328,
+            "shot_rate_pct": 5.133
+          },
+          {
+            "bin": "(51.698, 121.35]",
+            "n": 126067,
+            "shot_rate_pct": 3.6
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(0.43, 13.648]",
+            "n": 30977,
+            "shot_rate_pct": 6.327
+          },
+          {
+            "bin": "(13.648, 17.231]",
+            "n": 30225,
+            "shot_rate_pct": 5.618
+          },
+          {
+            "bin": "(17.231, 20.412]",
+            "n": 30105,
+            "shot_rate_pct": 5.737
+          },
+          {
+            "bin": "(20.412, 23.733]",
+            "n": 31666,
+            "shot_rate_pct": 6.07
+          },
+          {
+            "bin": "(23.733, 27.58]",
+            "n": 31871,
+            "shot_rate_pct": 6.009
+          },
+          {
+            "bin": "(27.58, 32.072]",
+            "n": 31661,
+            "shot_rate_pct": 6.238
+          },
+          {
+            "bin": "(32.072, 37.254]",
+            "n": 31566,
+            "shot_rate_pct": 5.899
+          },
+          {
+            "bin": "(37.254, 43.295]",
+            "n": 31503,
+            "shot_rate_pct": 5.606
+          },
+          {
+            "bin": "(43.295, 51.698]",
+            "n": 32959,
+            "shot_rate_pct": 4.372
+          },
+          {
+            "bin": "(51.698, 121.35]",
+            "n": 33224,
+            "shot_rate_pct": 3.392
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "marking_tightness",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1592902,
+      "n_unique_values": 1545255,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0285,
+      "spearman_rho": -0.036,
+      "bin_range_pp": 3.299,
+      "bins": [
+        {
+          "bin": "(-0.001, 2.336]",
+          "n": 159291,
+          "shot_rate_pct": 8.304
+        },
+        {
+          "bin": "(2.336, 3.49]",
+          "n": 159290,
+          "shot_rate_pct": 6.916
+        },
+        {
+          "bin": "(3.49, 4.538]",
+          "n": 159290,
+          "shot_rate_pct": 6.381
+        },
+        {
+          "bin": "(4.538, 5.578]",
+          "n": 159290,
+          "shot_rate_pct": 6.009
+        },
+        {
+          "bin": "(5.578, 6.656]",
+          "n": 159290,
+          "shot_rate_pct": 5.747
+        },
+        {
+          "bin": "(6.656, 7.824]",
+          "n": 159290,
+          "shot_rate_pct": 5.482
+        },
+        {
+          "bin": "(7.824, 9.17]",
+          "n": 159290,
+          "shot_rate_pct": 5.341
+        },
+        {
+          "bin": "(9.17, 10.881]",
+          "n": 159290,
+          "shot_rate_pct": 5.105
+        },
+        {
+          "bin": "(10.881, 13.55]",
+          "n": 159290,
+          "shot_rate_pct": 5.005
+        },
+        {
+          "bin": "(13.55, 57.302]",
+          "n": 159291,
+          "shot_rate_pct": 5.354
+        }
+      ],
+      "shape": "monotonic decreasing",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "monotonic decreasing",
+        "test_shape": "monotonic decreasing",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-0.001, 2.336]",
+            "n": 128631,
+            "shot_rate_pct": 8.482
+          },
+          {
+            "bin": "(2.336, 3.49]",
+            "n": 128665,
+            "shot_rate_pct": 7.02
+          },
+          {
+            "bin": "(3.49, 4.538]",
+            "n": 128772,
+            "shot_rate_pct": 6.451
+          },
+          {
+            "bin": "(4.538, 5.578]",
+            "n": 128186,
+            "shot_rate_pct": 6.111
+          },
+          {
+            "bin": "(5.578, 6.656]",
+            "n": 127717,
+            "shot_rate_pct": 5.806
+          },
+          {
+            "bin": "(6.656, 7.824]",
+            "n": 127822,
+            "shot_rate_pct": 5.598
+          },
+          {
+            "bin": "(7.824, 9.17]",
+            "n": 127296,
+            "shot_rate_pct": 5.446
+          },
+          {
+            "bin": "(9.17, 10.881]",
+            "n": 127202,
+            "shot_rate_pct": 5.204
+          },
+          {
+            "bin": "(10.881, 13.55]",
+            "n": 126734,
+            "shot_rate_pct": 5.094
+          },
+          {
+            "bin": "(13.55, 57.302]",
+            "n": 126120,
+            "shot_rate_pct": 5.511
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-0.001, 2.336]",
+            "n": 30660,
+            "shot_rate_pct": 7.557
+          },
+          {
+            "bin": "(2.336, 3.49]",
+            "n": 30625,
+            "shot_rate_pct": 6.478
+          },
+          {
+            "bin": "(3.49, 4.538]",
+            "n": 30518,
+            "shot_rate_pct": 6.085
+          },
+          {
+            "bin": "(4.538, 5.578]",
+            "n": 31104,
+            "shot_rate_pct": 5.588
+          },
+          {
+            "bin": "(5.578, 6.656]",
+            "n": 31573,
+            "shot_rate_pct": 5.508
+          },
+          {
+            "bin": "(6.656, 7.824]",
+            "n": 31468,
+            "shot_rate_pct": 5.008
+          },
+          {
+            "bin": "(7.824, 9.17]",
+            "n": 31994,
+            "shot_rate_pct": 4.923
+          },
+          {
+            "bin": "(9.17, 10.881]",
+            "n": 32088,
+            "shot_rate_pct": 4.712
+          },
+          {
+            "bin": "(10.881, 13.55]",
+            "n": 32556,
+            "shot_rate_pct": 4.657
+          },
+          {
+            "bin": "(13.55, 57.302]",
+            "n": 33171,
+            "shot_rate_pct": 4.76
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "distance_to_defending_goal",
+      "status": "dropped",
+      "reason": "Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box",
+      "type": "continuous",
+      "n_rows_used": 1593181,
+      "n_unique_values": 1565698,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0255,
+      "spearman_rho": -0.0359,
+      "bin_range_pp": 13.32,
+      "bins": [
+        {
+          "bin": "(0.0789, 24.147]",
+          "n": 159319,
+          "shot_rate_pct": 15.504
+        },
+        {
+          "bin": "(24.147, 33.845]",
+          "n": 159318,
+          "shot_rate_pct": 7.901
+        },
+        {
+          "bin": "(33.845, 41.673]",
+          "n": 159318,
+          "shot_rate_pct": 4.672
+        },
+        {
+          "bin": "(41.673, 49.193]",
+          "n": 159318,
+          "shot_rate_pct": 3.071
+        },
+        {
+          "bin": "(49.193, 56.677]",
+          "n": 159318,
+          "shot_rate_pct": 2.262
+        },
+        {
+          "bin": "(56.677, 64.489]",
+          "n": 159319,
+          "shot_rate_pct": 2.184
+        },
+        {
+          "bin": "(64.489, 73.252]",
+          "n": 159317,
+          "shot_rate_pct": 2.353
+        },
+        {
+          "bin": "(73.252, 83.809]",
+          "n": 159318,
+          "shot_rate_pct": 3.221
+        },
+        {
+          "bin": "(83.809, 96.444]",
+          "n": 159318,
+          "shot_rate_pct": 5.497
+        },
+        {
+          "bin": "(96.444, 129.835]",
+          "n": 159318,
+          "shot_rate_pct": 12.995
+        }
+      ],
+      "shape": "U-shaped",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "U-shaped",
+        "test_shape": "U-shaped",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(0.0789, 24.147]",
+            "n": 131956,
+            "shot_rate_pct": 15.658
+          },
+          {
+            "bin": "(24.147, 33.845]",
+            "n": 129299,
+            "shot_rate_pct": 8.068
+          },
+          {
+            "bin": "(33.845, 41.673]",
+            "n": 128314,
+            "shot_rate_pct": 4.783
+          },
+          {
+            "bin": "(41.673, 49.193]",
+            "n": 127358,
+            "shot_rate_pct": 3.184
+          },
+          {
+            "bin": "(49.193, 56.677]",
+            "n": 127263,
+            "shot_rate_pct": 2.357
+          },
+          {
+            "bin": "(56.677, 64.489]",
+            "n": 127398,
+            "shot_rate_pct": 2.268
+          },
+          {
+            "bin": "(64.489, 73.252]",
+            "n": 126866,
+            "shot_rate_pct": 2.42
+          },
+          {
+            "bin": "(73.252, 83.809]",
+            "n": 126154,
+            "shot_rate_pct": 3.185
+          },
+          {
+            "bin": "(83.809, 96.444]",
+            "n": 126587,
+            "shot_rate_pct": 5.42
+          },
+          {
+            "bin": "(96.444, 129.835]",
+            "n": 126179,
+            "shot_rate_pct": 13.094
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(0.0789, 24.147]",
+            "n": 27363,
+            "shot_rate_pct": 14.761
+          },
+          {
+            "bin": "(24.147, 33.845]",
+            "n": 30019,
+            "shot_rate_pct": 7.179
+          },
+          {
+            "bin": "(33.845, 41.673]",
+            "n": 31004,
+            "shot_rate_pct": 4.216
+          },
+          {
+            "bin": "(41.673, 49.193]",
+            "n": 31960,
+            "shot_rate_pct": 2.619
+          },
+          {
+            "bin": "(49.193, 56.677]",
+            "n": 32055,
+            "shot_rate_pct": 1.881
+          },
+          {
+            "bin": "(56.677, 64.489]",
+            "n": 31921,
+            "shot_rate_pct": 1.848
+          },
+          {
+            "bin": "(64.489, 73.252]",
+            "n": 32451,
+            "shot_rate_pct": 2.089
+          },
+          {
+            "bin": "(73.252, 83.809]",
+            "n": 33164,
+            "shot_rate_pct": 3.359
+          },
+          {
+            "bin": "(83.809, 96.444]",
+            "n": 32731,
+            "shot_rate_pct": 5.796
+          },
+          {
+            "bin": "(96.444, 129.835]",
+            "n": 33139,
+            "shot_rate_pct": 12.62
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "zone_defensive_value",
+      "status": "dropped",
+      "reason": "CORRELATION_ANALYSIS DROP tier: Spearman r=-1.0 vs distance_to_defending_goal (kept)",
+      "type": "continuous",
+      "n_rows_used": 1593181,
+      "n_unique_values": 1565698,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.1003,
+      "spearman_rho": 0.0359,
+      "bin_range_pp": 13.32,
+      "bins": [
+        {
+          "bin": "(0.00664, 0.0103]",
+          "n": 159319,
+          "shot_rate_pct": 12.995
+        },
+        {
+          "bin": "(0.0103, 0.0118]",
+          "n": 159318,
+          "shot_rate_pct": 5.497
+        },
+        {
+          "bin": "(0.0118, 0.0135]",
+          "n": 159318,
+          "shot_rate_pct": 3.221
+        },
+        {
+          "bin": "(0.0135, 0.0153]",
+          "n": 159318,
+          "shot_rate_pct": 2.353
+        },
+        {
+          "bin": "(0.0153, 0.0173]",
+          "n": 159318,
+          "shot_rate_pct": 2.184
+        },
+        {
+          "bin": "(0.0173, 0.0199]",
+          "n": 159318,
+          "shot_rate_pct": 2.262
+        },
+        {
+          "bin": "(0.0199, 0.0234]",
+          "n": 159318,
+          "shot_rate_pct": 3.071
+        },
+        {
+          "bin": "(0.0234, 0.0287]",
+          "n": 159318,
+          "shot_rate_pct": 4.672
+        },
+        {
+          "bin": "(0.0287, 0.0398]",
+          "n": 159318,
+          "shot_rate_pct": 7.901
+        },
+        {
+          "bin": "(0.0398, 0.926]",
+          "n": 159318,
+          "shot_rate_pct": 15.504
+        }
+      ],
+      "shape": "U-shaped",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "U-shaped",
+        "test_shape": "U-shaped",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(0.00664, 0.0103]",
+            "n": 126179,
+            "shot_rate_pct": 13.094
+          },
+          {
+            "bin": "(0.0103, 0.0118]",
+            "n": 126588,
+            "shot_rate_pct": 5.42
+          },
+          {
+            "bin": "(0.0118, 0.0135]",
+            "n": 126154,
+            "shot_rate_pct": 3.185
+          },
+          {
+            "bin": "(0.0135, 0.0153]",
+            "n": 126865,
+            "shot_rate_pct": 2.42
+          },
+          {
+            "bin": "(0.0153, 0.0173]",
+            "n": 127399,
+            "shot_rate_pct": 2.268
+          },
+          {
+            "bin": "(0.0173, 0.0199]",
+            "n": 127263,
+            "shot_rate_pct": 2.357
+          },
+          {
+            "bin": "(0.0199, 0.0234]",
+            "n": 127358,
+            "shot_rate_pct": 3.184
+          },
+          {
+            "bin": "(0.0234, 0.0287]",
+            "n": 128314,
+            "shot_rate_pct": 4.783
+          },
+          {
+            "bin": "(0.0287, 0.0398]",
+            "n": 129299,
+            "shot_rate_pct": 8.068
+          },
+          {
+            "bin": "(0.0398, 0.926]",
+            "n": 131955,
+            "shot_rate_pct": 15.658
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(0.00664, 0.0103]",
+            "n": 33140,
+            "shot_rate_pct": 12.619
+          },
+          {
+            "bin": "(0.0103, 0.0118]",
+            "n": 32730,
+            "shot_rate_pct": 5.796
+          },
+          {
+            "bin": "(0.0118, 0.0135]",
+            "n": 33164,
+            "shot_rate_pct": 3.359
+          },
+          {
+            "bin": "(0.0135, 0.0153]",
+            "n": 32453,
+            "shot_rate_pct": 2.089
+          },
+          {
+            "bin": "(0.0153, 0.0173]",
+            "n": 31919,
+            "shot_rate_pct": 1.848
+          },
+          {
+            "bin": "(0.0173, 0.0199]",
+            "n": 32055,
+            "shot_rate_pct": 1.881
+          },
+          {
+            "bin": "(0.0199, 0.0234]",
+            "n": 31960,
+            "shot_rate_pct": 2.619
+          },
+          {
+            "bin": "(0.0234, 0.0287]",
+            "n": 31004,
+            "shot_rate_pct": 4.216
+          },
+          {
+            "bin": "(0.0287, 0.0398]",
+            "n": 30019,
+            "shot_rate_pct": 7.179
+          },
+          {
+            "bin": "(0.0398, 0.926]",
+            "n": 27363,
+            "shot_rate_pct": 14.761
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "distance_to_defending_box",
+      "status": "dropped",
+      "reason": "Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box",
+      "type": "continuous",
+      "n_rows_used": 1593181,
+      "n_unique_values": 1451418,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0132,
+      "spearman_rho": -0.0357,
+      "bin_range_pp": 13.715,
+      "bins": [
+        {
+          "bin": "(-0.001, 2.981]",
+          "n": 159319,
+          "shot_rate_pct": 15.884
+        },
+        {
+          "bin": "(2.981, 12.057]",
+          "n": 159318,
+          "shot_rate_pct": 7.704
+        },
+        {
+          "bin": "(12.057, 20.088]",
+          "n": 159318,
+          "shot_rate_pct": 4.478
+        },
+        {
+          "bin": "(20.088, 28.049]",
+          "n": 159318,
+          "shot_rate_pct": 3.052
+        },
+        {
+          "bin": "(28.049, 35.974]",
+          "n": 159318,
+          "shot_rate_pct": 2.295
+        },
+        {
+          "bin": "(35.974, 44.1]",
+          "n": 159318,
+          "shot_rate_pct": 2.169
+        },
+        {
+          "bin": "(44.1, 53.075]",
+          "n": 159318,
+          "shot_rate_pct": 2.371
+        },
+        {
+          "bin": "(53.075, 63.94]",
+          "n": 159318,
+          "shot_rate_pct": 3.138
+        },
+        {
+          "bin": "(63.94, 76.921]",
+          "n": 159318,
+          "shot_rate_pct": 5.408
+        },
+        {
+          "bin": "(76.921, 108.895]",
+          "n": 159318,
+          "shot_rate_pct": 13.16
+        }
+      ],
+      "shape": "U-shaped",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "U-shaped",
+        "test_shape": "U-shaped",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-0.001, 2.981]",
+            "n": 131868,
+            "shot_rate_pct": 16.062
+          },
+          {
+            "bin": "(2.981, 12.057]",
+            "n": 129474,
+            "shot_rate_pct": 7.814
+          },
+          {
+            "bin": "(12.057, 20.088]",
+            "n": 128363,
+            "shot_rate_pct": 4.61
+          },
+          {
+            "bin": "(20.088, 28.049]",
+            "n": 127300,
+            "shot_rate_pct": 3.162
+          },
+          {
+            "bin": "(28.049, 35.974]",
+            "n": 127295,
+            "shot_rate_pct": 2.395
+          },
+          {
+            "bin": "(35.974, 44.1]",
+            "n": 127618,
+            "shot_rate_pct": 2.266
+          },
+          {
+            "bin": "(44.1, 53.075]",
+            "n": 126560,
+            "shot_rate_pct": 2.435
+          },
+          {
+            "bin": "(53.075, 63.94]",
+            "n": 126274,
+            "shot_rate_pct": 3.126
+          },
+          {
+            "bin": "(63.94, 76.921]",
+            "n": 126494,
+            "shot_rate_pct": 5.295
+          },
+          {
+            "bin": "(76.921, 108.895]",
+            "n": 126128,
+            "shot_rate_pct": 13.271
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-0.001, 2.981]",
+            "n": 27451,
+            "shot_rate_pct": 15.03
+          },
+          {
+            "bin": "(2.981, 12.057]",
+            "n": 29844,
+            "shot_rate_pct": 7.228
+          },
+          {
+            "bin": "(12.057, 20.088]",
+            "n": 30955,
+            "shot_rate_pct": 3.932
+          },
+          {
+            "bin": "(20.088, 28.049]",
+            "n": 32018,
+            "shot_rate_pct": 2.617
+          },
+          {
+            "bin": "(28.049, 35.974]",
+            "n": 32023,
+            "shot_rate_pct": 1.896
+          },
+          {
+            "bin": "(35.974, 44.1]",
+            "n": 31700,
+            "shot_rate_pct": 1.776
+          },
+          {
+            "bin": "(44.1, 53.075]",
+            "n": 32758,
+            "shot_rate_pct": 2.122
+          },
+          {
+            "bin": "(53.075, 63.94]",
+            "n": 33044,
+            "shot_rate_pct": 3.184
+          },
+          {
+            "bin": "(63.94, 76.921]",
+            "n": 32824,
+            "shot_rate_pct": 5.843
+          },
+          {
+            "bin": "(76.921, 108.895]",
+            "n": 33190,
+            "shot_rate_pct": 12.742
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "defender_x",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1593181,
+      "n_unique_values": 1562049,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0221,
+      "spearman_rho": -0.0356,
+      "bin_range_pp": 13.646,
+      "bins": [
+        {
+          "bin": "(-6.416, 20.066]",
+          "n": 159319,
+          "shot_rate_pct": 15.825
+        },
+        {
+          "bin": "(20.066, 29.375]",
+          "n": 159318,
+          "shot_rate_pct": 7.638
+        },
+        {
+          "bin": "(29.375, 37.695]",
+          "n": 159318,
+          "shot_rate_pct": 4.569
+        },
+        {
+          "bin": "(37.695, 45.768]",
+          "n": 159318,
+          "shot_rate_pct": 3.089
+        },
+        {
+          "bin": "(45.768, 53.752]",
+          "n": 159318,
+          "shot_rate_pct": 2.293
+        },
+        {
+          "bin": "(53.752, 61.914]",
+          "n": 159318,
+          "shot_rate_pct": 2.179
+        },
+        {
+          "bin": "(61.914, 70.918]",
+          "n": 159318,
+          "shot_rate_pct": 2.349
+        },
+        {
+          "bin": "(70.918, 81.808]",
+          "n": 159318,
+          "shot_rate_pct": 3.141
+        },
+        {
+          "bin": "(81.808, 94.828]",
+          "n": 159318,
+          "shot_rate_pct": 5.395
+        },
+        {
+          "bin": "(94.828, 126.712]",
+          "n": 159318,
+          "shot_rate_pct": 13.182
+        }
+      ],
+      "shape": "U-shaped",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "U-shaped",
+        "test_shape": "U-shaped",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-6.416, 20.066]",
+            "n": 131909,
+            "shot_rate_pct": 15.996
+          },
+          {
+            "bin": "(20.066, 29.375]",
+            "n": 129457,
+            "shot_rate_pct": 7.76
+          },
+          {
+            "bin": "(29.375, 37.695]",
+            "n": 128340,
+            "shot_rate_pct": 4.699
+          },
+          {
+            "bin": "(37.695, 45.768]",
+            "n": 127415,
+            "shot_rate_pct": 3.197
+          },
+          {
+            "bin": "(45.768, 53.752]",
+            "n": 127207,
+            "shot_rate_pct": 2.391
+          },
+          {
+            "bin": "(53.752, 61.914]",
+            "n": 127618,
+            "shot_rate_pct": 2.274
+          },
+          {
+            "bin": "(61.914, 70.918]",
+            "n": 126540,
+            "shot_rate_pct": 2.421
+          },
+          {
+            "bin": "(70.918, 81.808]",
+            "n": 126306,
+            "shot_rate_pct": 3.127
+          },
+          {
+            "bin": "(81.808, 94.828]",
+            "n": 126450,
+            "shot_rate_pct": 5.276
+          },
+          {
+            "bin": "(94.828, 126.712]",
+            "n": 126132,
+            "shot_rate_pct": 13.296
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-6.416, 20.066]",
+            "n": 27410,
+            "shot_rate_pct": 15.002
+          },
+          {
+            "bin": "(20.066, 29.375]",
+            "n": 29861,
+            "shot_rate_pct": 7.106
+          },
+          {
+            "bin": "(29.375, 37.695]",
+            "n": 30978,
+            "shot_rate_pct": 4.029
+          },
+          {
+            "bin": "(37.695, 45.768]",
+            "n": 31903,
+            "shot_rate_pct": 2.658
+          },
+          {
+            "bin": "(45.768, 53.752]",
+            "n": 32111,
+            "shot_rate_pct": 1.906
+          },
+          {
+            "bin": "(53.752, 61.914]",
+            "n": 31700,
+            "shot_rate_pct": 1.798
+          },
+          {
+            "bin": "(61.914, 70.918]",
+            "n": 32778,
+            "shot_rate_pct": 2.075
+          },
+          {
+            "bin": "(70.918, 81.808]",
+            "n": 33012,
+            "shot_rate_pct": 3.196
+          },
+          {
+            "bin": "(81.808, 94.828]",
+            "n": 32868,
+            "shot_rate_pct": 5.854
+          },
+          {
+            "bin": "(94.828, 126.712]",
+            "n": 33186,
+            "shot_rate_pct": 12.749
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "distance_to_attacking_box",
+      "status": "dropped",
+      "reason": "Cluster 4 (defender-position, drop-to-one): mutually r/eta >= 0.92 with defender_x and the rest of this cluster -- kept defender_x (the most primitive measurement; it's upstream of every derived distance/zone column here, unlike the active side where the raw coordinate isn't itself a kept feature)",
+      "type": "continuous",
+      "n_rows_used": 1593181,
+      "n_unique_values": 1490073,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.0292,
+      "spearman_rho": 0.0354,
+      "bin_range_pp": 13.61,
+      "bins": [
+        {
+          "bin": "(-0.001, 8.267]",
+          "n": 159319,
+          "shot_rate_pct": 13.332
+        },
+        {
+          "bin": "(8.267, 20.623]",
+          "n": 159319,
+          "shot_rate_pct": 5.249
+        },
+        {
+          "bin": "(20.623, 31.345]",
+          "n": 159317,
+          "shot_rate_pct": 3.129
+        },
+        {
+          "bin": "(31.345, 40.289]",
+          "n": 159318,
+          "shot_rate_pct": 2.355
+        },
+        {
+          "bin": "(40.289, 48.41]",
+          "n": 159318,
+          "shot_rate_pct": 2.186
+        },
+        {
+          "bin": "(48.41, 56.364]",
+          "n": 159318,
+          "shot_rate_pct": 2.289
+        },
+        {
+          "bin": "(56.364, 64.417]",
+          "n": 159318,
+          "shot_rate_pct": 3.103
+        },
+        {
+          "bin": "(64.417, 72.717]",
+          "n": 159318,
+          "shot_rate_pct": 4.581
+        },
+        {
+          "bin": "(72.717, 81.992]",
+          "n": 159318,
+          "shot_rate_pct": 7.639
+        },
+        {
+          "bin": "(81.992, 108.415]",
+          "n": 159318,
+          "shot_rate_pct": 15.796
+        }
+      ],
+      "shape": "U-shaped",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "U-shaped",
+        "test_shape": "U-shaped",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-0.001, 8.267]",
+            "n": 126194,
+            "shot_rate_pct": 13.418
+          },
+          {
+            "bin": "(8.267, 20.623]",
+            "n": 126274,
+            "shot_rate_pct": 5.159
+          },
+          {
+            "bin": "(20.623, 31.345]",
+            "n": 126380,
+            "shot_rate_pct": 3.107
+          },
+          {
+            "bin": "(31.345, 40.289]",
+            "n": 126614,
+            "shot_rate_pct": 2.429
+          },
+          {
+            "bin": "(40.289, 48.41]",
+            "n": 127527,
+            "shot_rate_pct": 2.283
+          },
+          {
+            "bin": "(48.41, 56.364]",
+            "n": 127242,
+            "shot_rate_pct": 2.388
+          },
+          {
+            "bin": "(56.364, 64.417]",
+            "n": 127434,
+            "shot_rate_pct": 3.21
+          },
+          {
+            "bin": "(64.417, 72.717]",
+            "n": 128349,
+            "shot_rate_pct": 4.707
+          },
+          {
+            "bin": "(72.717, 81.992]",
+            "n": 129426,
+            "shot_rate_pct": 7.767
+          },
+          {
+            "bin": "(81.992, 108.415]",
+            "n": 131934,
+            "shot_rate_pct": 15.965
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-0.001, 8.267]",
+            "n": 33125,
+            "shot_rate_pct": 13.005
+          },
+          {
+            "bin": "(8.267, 20.623]",
+            "n": 33045,
+            "shot_rate_pct": 5.589
+          },
+          {
+            "bin": "(20.623, 31.345]",
+            "n": 32937,
+            "shot_rate_pct": 3.215
+          },
+          {
+            "bin": "(31.345, 40.289]",
+            "n": 32704,
+            "shot_rate_pct": 2.07
+          },
+          {
+            "bin": "(40.289, 48.41]",
+            "n": 31791,
+            "shot_rate_pct": 1.796
+          },
+          {
+            "bin": "(48.41, 56.364]",
+            "n": 32076,
+            "shot_rate_pct": 1.895
+          },
+          {
+            "bin": "(56.364, 64.417]",
+            "n": 31884,
+            "shot_rate_pct": 2.675
+          },
+          {
+            "bin": "(64.417, 72.717]",
+            "n": 30969,
+            "shot_rate_pct": 4.059
+          },
+          {
+            "bin": "(72.717, 81.992]",
+            "n": 29892,
+            "shot_rate_pct": 7.089
+          },
+          {
+            "bin": "(81.992, 108.415]",
+            "n": 27384,
+            "shot_rate_pct": 14.983
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "distance_to_attacking_goal",
+      "status": "dropped",
+      "reason": "Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box",
+      "type": "continuous",
+      "n_rows_used": 1593181,
+      "n_unique_values": 1565698,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.0191,
+      "spearman_rho": 0.0344,
+      "bin_range_pp": 13.321,
+      "bins": [
+        {
+          "bin": "(0.0703, 30.059]",
+          "n": 159319,
+          "shot_rate_pct": 13.218
+        },
+        {
+          "bin": "(30.059, 42.246]",
+          "n": 159318,
+          "shot_rate_pct": 5.372
+        },
+        {
+          "bin": "(42.246, 52.203]",
+          "n": 159318,
+          "shot_rate_pct": 3.082
+        },
+        {
+          "bin": "(52.203, 60.764]",
+          "n": 159318,
+          "shot_rate_pct": 2.371
+        },
+        {
+          "bin": "(60.764, 68.579]",
+          "n": 159318,
+          "shot_rate_pct": 2.23
+        },
+        {
+          "bin": "(68.579, 76.345]",
+          "n": 159318,
+          "shot_rate_pct": 2.348
+        },
+        {
+          "bin": "(76.345, 84.175]",
+          "n": 159318,
+          "shot_rate_pct": 3.116
+        },
+        {
+          "bin": "(84.175, 92.266]",
+          "n": 159318,
+          "shot_rate_pct": 4.659
+        },
+        {
+          "bin": "(92.266, 101.193]",
+          "n": 159318,
+          "shot_rate_pct": 7.712
+        },
+        {
+          "bin": "(101.193, 128.782]",
+          "n": 159318,
+          "shot_rate_pct": 15.551
+        }
+      ],
+      "shape": "U-shaped",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "U-shaped",
+        "test_shape": "U-shaped",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(0.0703, 30.059]",
+            "n": 126218,
+            "shot_rate_pct": 13.311
+          },
+          {
+            "bin": "(30.059, 42.246]",
+            "n": 126108,
+            "shot_rate_pct": 5.275
+          },
+          {
+            "bin": "(42.246, 52.203]",
+            "n": 126298,
+            "shot_rate_pct": 3.053
+          },
+          {
+            "bin": "(52.203, 60.764]",
+            "n": 126745,
+            "shot_rate_pct": 2.445
+          },
+          {
+            "bin": "(60.764, 68.579]",
+            "n": 127527,
+            "shot_rate_pct": 2.313
+          },
+          {
+            "bin": "(68.579, 76.345]",
+            "n": 127363,
+            "shot_rate_pct": 2.474
+          },
+          {
+            "bin": "(76.345, 84.175]",
+            "n": 127471,
+            "shot_rate_pct": 3.208
+          },
+          {
+            "bin": "(84.175, 92.266]",
+            "n": 128344,
+            "shot_rate_pct": 4.802
+          },
+          {
+            "bin": "(92.266, 101.193]",
+            "n": 129452,
+            "shot_rate_pct": 7.846
+          },
+          {
+            "bin": "(101.193, 128.782]",
+            "n": 131848,
+            "shot_rate_pct": 15.721
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(0.0703, 30.059]",
+            "n": 33101,
+            "shot_rate_pct": 12.861
+          },
+          {
+            "bin": "(30.059, 42.246]",
+            "n": 33210,
+            "shot_rate_pct": 5.742
+          },
+          {
+            "bin": "(42.246, 52.203]",
+            "n": 33020,
+            "shot_rate_pct": 3.192
+          },
+          {
+            "bin": "(52.203, 60.764]",
+            "n": 32573,
+            "shot_rate_pct": 2.085
+          },
+          {
+            "bin": "(60.764, 68.579]",
+            "n": 31791,
+            "shot_rate_pct": 1.897
+          },
+          {
+            "bin": "(68.579, 76.345]",
+            "n": 31955,
+            "shot_rate_pct": 1.846
+          },
+          {
+            "bin": "(76.345, 84.175]",
+            "n": 31847,
+            "shot_rate_pct": 2.748
+          },
+          {
+            "bin": "(84.175, 92.266]",
+            "n": 30974,
+            "shot_rate_pct": 4.065
+          },
+          {
+            "bin": "(92.266, 101.193]",
+            "n": 29866,
+            "shot_rate_pct": 7.132
+          },
+          {
+            "bin": "(101.193, 128.782]",
+            "n": 27470,
+            "shot_rate_pct": 14.736
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_3_dx",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1581783,
+      "n_unique_values": 191855,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.0265,
+      "spearman_rho": 0.0314,
+      "bin_range_pp": 4.592,
+      "bins": [
+        {
+          "bin": "(-111.54, -18.962]",
+          "n": 158186,
+          "shot_rate_pct": 2.859
+        },
+        {
+          "bin": "(-18.962, -13.291]",
+          "n": 158173,
+          "shot_rate_pct": 4.537
+        },
+        {
+          "bin": "(-13.291, -9.067]",
+          "n": 158188,
+          "shot_rate_pct": 5.31
+        },
+        {
+          "bin": "(-9.067, -5.217]",
+          "n": 158176,
+          "shot_rate_pct": 6.339
+        },
+        {
+          "bin": "(-5.217, -1.429]",
+          "n": 158178,
+          "shot_rate_pct": 6.768
+        },
+        {
+          "bin": "(-1.429, 2.458]",
+          "n": 158174,
+          "shot_rate_pct": 7.317
+        },
+        {
+          "bin": "(2.458, 6.5]",
+          "n": 158175,
+          "shot_rate_pct": 7.451
+        },
+        {
+          "bin": "(6.5, 10.719]",
+          "n": 158184,
+          "shot_rate_pct": 6.975
+        },
+        {
+          "bin": "(10.719, 16.652]",
+          "n": 158176,
+          "shot_rate_pct": 6.62
+        },
+        {
+          "bin": "(16.652, 111.815]",
+          "n": 158173,
+          "shot_rate_pct": 4.682
+        }
+      ],
+      "shape": "inverse-U",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "inverse-U",
+        "test_shape": "no-clear-pattern",
+        "consistent": false,
+        "train_val_bins": [
+          {
+            "bin": "(-111.54, -18.962]",
+            "n": 128483,
+            "shot_rate_pct": 2.905
+          },
+          {
+            "bin": "(-18.962, -13.291]",
+            "n": 126845,
+            "shot_rate_pct": 4.668
+          },
+          {
+            "bin": "(-13.291, -9.067]",
+            "n": 126159,
+            "shot_rate_pct": 5.553
+          },
+          {
+            "bin": "(-9.067, -5.217]",
+            "n": 125616,
+            "shot_rate_pct": 6.709
+          },
+          {
+            "bin": "(-5.217, -1.429]",
+            "n": 126635,
+            "shot_rate_pct": 7.022
+          },
+          {
+            "bin": "(-1.429, 2.458]",
+            "n": 126645,
+            "shot_rate_pct": 7.275
+          },
+          {
+            "bin": "(2.458, 6.5]",
+            "n": 127079,
+            "shot_rate_pct": 7.645
+          },
+          {
+            "bin": "(6.5, 10.719]",
+            "n": 127007,
+            "shot_rate_pct": 7.088
+          },
+          {
+            "bin": "(10.719, 16.652]",
+            "n": 126814,
+            "shot_rate_pct": 6.518
+          },
+          {
+            "bin": "(16.652, 111.815]",
+            "n": 127288,
+            "shot_rate_pct": 4.653
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-111.54, -18.962]",
+            "n": 29703,
+            "shot_rate_pct": 2.656
+          },
+          {
+            "bin": "(-18.962, -13.291]",
+            "n": 31328,
+            "shot_rate_pct": 4.009
+          },
+          {
+            "bin": "(-13.291, -9.067]",
+            "n": 32029,
+            "shot_rate_pct": 4.355
+          },
+          {
+            "bin": "(-9.067, -5.217]",
+            "n": 32560,
+            "shot_rate_pct": 4.908
+          },
+          {
+            "bin": "(-5.217, -1.429]",
+            "n": 31543,
+            "shot_rate_pct": 5.748
+          },
+          {
+            "bin": "(-1.429, 2.458]",
+            "n": 31529,
+            "shot_rate_pct": 7.485
+          },
+          {
+            "bin": "(2.458, 6.5]",
+            "n": 31096,
+            "shot_rate_pct": 6.657
+          },
+          {
+            "bin": "(6.5, 10.719]",
+            "n": 31177,
+            "shot_rate_pct": 6.518
+          },
+          {
+            "bin": "(10.719, 16.652]",
+            "n": 31362,
+            "shot_rate_pct": 7.034
+          },
+          {
+            "bin": "(16.652, 111.815]",
+            "n": 30885,
+            "shot_rate_pct": 4.798
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "angle_to_attacking_goal",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1593181,
+      "n_unique_values": 1565696,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.0032,
+      "spearman_rho": -0.0304,
+      "bin_range_pp": 4.702,
+      "bins": [
+        {
+          "bin": "(-0.000999511, 0.0318]",
+          "n": 159319,
+          "shot_rate_pct": 8.543
+        },
+        {
+          "bin": "(0.0318, 0.068]",
+          "n": 159318,
+          "shot_rate_pct": 7.516
+        },
+        {
+          "bin": "(0.068, 0.108]",
+          "n": 159318,
+          "shot_rate_pct": 6.69
+        },
+        {
+          "bin": "(0.108, 0.152]",
+          "n": 159318,
+          "shot_rate_pct": 5.765
+        },
+        {
+          "bin": "(0.152, 0.2]",
+          "n": 159318,
+          "shot_rate_pct": 5.254
+        },
+        {
+          "bin": "(0.2, 0.253]",
+          "n": 159318,
+          "shot_rate_pct": 4.858
+        },
+        {
+          "bin": "(0.253, 0.315]",
+          "n": 159318,
+          "shot_rate_pct": 4.354
+        },
+        {
+          "bin": "(0.315, 0.399]",
+          "n": 159318,
+          "shot_rate_pct": 3.841
+        },
+        {
+          "bin": "(0.399, 0.549]",
+          "n": 159318,
+          "shot_rate_pct": 4.632
+        },
+        {
+          "bin": "(0.549, 3.141]",
+          "n": 159318,
+          "shot_rate_pct": 8.206
+        }
+      ],
+      "shape": "U-shaped",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "U-shaped",
+        "test_shape": "no-clear-pattern",
+        "consistent": false,
+        "train_val_bins": [
+          {
+            "bin": "(-0.000999511, 0.0318]",
+            "n": 129045,
+            "shot_rate_pct": 8.758
+          },
+          {
+            "bin": "(0.0318, 0.068]",
+            "n": 128886,
+            "shot_rate_pct": 7.709
+          },
+          {
+            "bin": "(0.068, 0.108]",
+            "n": 128055,
+            "shot_rate_pct": 6.871
+          },
+          {
+            "bin": "(0.108, 0.152]",
+            "n": 128041,
+            "shot_rate_pct": 5.93
+          },
+          {
+            "bin": "(0.152, 0.2]",
+            "n": 127544,
+            "shot_rate_pct": 5.376
+          },
+          {
+            "bin": "(0.2, 0.253]",
+            "n": 127668,
+            "shot_rate_pct": 4.925
+          },
+          {
+            "bin": "(0.253, 0.315]",
+            "n": 127483,
+            "shot_rate_pct": 4.357
+          },
+          {
+            "bin": "(0.315, 0.399]",
+            "n": 127005,
+            "shot_rate_pct": 3.874
+          },
+          {
+            "bin": "(0.399, 0.549]",
+            "n": 127131,
+            "shot_rate_pct": 4.661
+          },
+          {
+            "bin": "(0.549, 3.141]",
+            "n": 126516,
+            "shot_rate_pct": 8.276
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-0.000999511, 0.0318]",
+            "n": 30274,
+            "shot_rate_pct": 7.627
+          },
+          {
+            "bin": "(0.0318, 0.068]",
+            "n": 30432,
+            "shot_rate_pct": 6.697
+          },
+          {
+            "bin": "(0.068, 0.108]",
+            "n": 31263,
+            "shot_rate_pct": 5.95
+          },
+          {
+            "bin": "(0.108, 0.152]",
+            "n": 31277,
+            "shot_rate_pct": 5.087
+          },
+          {
+            "bin": "(0.152, 0.2]",
+            "n": 31774,
+            "shot_rate_pct": 4.765
+          },
+          {
+            "bin": "(0.2, 0.253]",
+            "n": 31650,
+            "shot_rate_pct": 4.588
+          },
+          {
+            "bin": "(0.253, 0.315]",
+            "n": 31835,
+            "shot_rate_pct": 4.341
+          },
+          {
+            "bin": "(0.315, 0.399]",
+            "n": 32313,
+            "shot_rate_pct": 3.711
+          },
+          {
+            "bin": "(0.399, 0.549]",
+            "n": 32187,
+            "shot_rate_pct": 4.517
+          },
+          {
+            "bin": "(0.549, 3.141]",
+            "n": 32802,
+            "shot_rate_pct": 7.935
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_1_dx",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1592902,
+      "n_unique_values": 194261,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0318,
+      "spearman_rho": -0.0297,
+      "bin_range_pp": 3.552,
+      "bins": [
+        {
+          "bin": "(-112.599, -9.878]",
+          "n": 159300,
+          "shot_rate_pct": 7.556
+        },
+        {
+          "bin": "(-9.878, -3.447]",
+          "n": 159286,
+          "shot_rate_pct": 7.114
+        },
+        {
+          "bin": "(-3.447, 0.821]",
+          "n": 159286,
+          "shot_rate_pct": 5.999
+        },
+        {
+          "bin": "(0.821, 4.395]",
+          "n": 159292,
+          "shot_rate_pct": 5.891
+        },
+        {
+          "bin": "(4.395, 7.462]",
+          "n": 159287,
+          "shot_rate_pct": 5.834
+        },
+        {
+          "bin": "(7.462, 10.367]",
+          "n": 159298,
+          "shot_rate_pct": 5.41
+        },
+        {
+          "bin": "(10.367, 13.436]",
+          "n": 159283,
+          "shot_rate_pct": 5.765
+        },
+        {
+          "bin": "(13.436, 17.149]",
+          "n": 159291,
+          "shot_rate_pct": 5.87
+        },
+        {
+          "bin": "(17.149, 22.491]",
+          "n": 159290,
+          "shot_rate_pct": 6.199
+        },
+        {
+          "bin": "(22.491, 112.136]",
+          "n": 159289,
+          "shot_rate_pct": 4.004
+        }
+      ],
+      "shape": "no-clear-pattern",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "no-clear-pattern",
+        "test_shape": "no-clear-pattern",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-112.599, -9.878]",
+            "n": 127692,
+            "shot_rate_pct": 7.612
+          },
+          {
+            "bin": "(-9.878, -3.447]",
+            "n": 126752,
+            "shot_rate_pct": 7.269
+          },
+          {
+            "bin": "(-3.447, 0.821]",
+            "n": 127902,
+            "shot_rate_pct": 6.116
+          },
+          {
+            "bin": "(0.821, 4.395]",
+            "n": 127139,
+            "shot_rate_pct": 5.906
+          },
+          {
+            "bin": "(4.395, 7.462]",
+            "n": 127057,
+            "shot_rate_pct": 5.926
+          },
+          {
+            "bin": "(7.462, 10.367]",
+            "n": 126465,
+            "shot_rate_pct": 5.651
+          },
+          {
+            "bin": "(10.367, 13.436]",
+            "n": 127275,
+            "shot_rate_pct": 6.062
+          },
+          {
+            "bin": "(13.436, 17.149]",
+            "n": 128168,
+            "shot_rate_pct": 5.867
+          },
+          {
+            "bin": "(17.149, 22.491]",
+            "n": 128521,
+            "shot_rate_pct": 6.325
+          },
+          {
+            "bin": "(22.491, 112.136]",
+            "n": 130174,
+            "shot_rate_pct": 4.077
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-112.599, -9.878]",
+            "n": 31608,
+            "shot_rate_pct": 7.33
+          },
+          {
+            "bin": "(-9.878, -3.447]",
+            "n": 32534,
+            "shot_rate_pct": 6.51
+          },
+          {
+            "bin": "(-3.447, 0.821]",
+            "n": 31384,
+            "shot_rate_pct": 5.522
+          },
+          {
+            "bin": "(0.821, 4.395]",
+            "n": 32153,
+            "shot_rate_pct": 5.831
+          },
+          {
+            "bin": "(4.395, 7.462]",
+            "n": 32230,
+            "shot_rate_pct": 5.47
+          },
+          {
+            "bin": "(7.462, 10.367]",
+            "n": 32833,
+            "shot_rate_pct": 4.48
+          },
+          {
+            "bin": "(10.367, 13.436]",
+            "n": 32008,
+            "shot_rate_pct": 4.583
+          },
+          {
+            "bin": "(13.436, 17.149]",
+            "n": 31123,
+            "shot_rate_pct": 5.886
+          },
+          {
+            "bin": "(17.149, 22.491]",
+            "n": 30769,
+            "shot_rate_pct": 5.675
+          },
+          {
+            "bin": "(22.491, 112.136]",
+            "n": 29115,
+            "shot_rate_pct": 3.679
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "defender_slot_index",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1593181,
+      "n_unique_values": 11,
+      "binning_method": "exact-value (discrete)",
+      "pearson_r": 0.0266,
+      "spearman_rho": 0.025,
+      "bin_range_pp": 6.798,
+      "bins": [
+        {
+          "bin": "0",
+          "n": 198354,
+          "shot_rate_pct": 5.394
+        },
+        {
+          "bin": "1",
+          "n": 197328,
+          "shot_rate_pct": 5.42
+        },
+        {
+          "bin": "2",
+          "n": 194976,
+          "shot_rate_pct": 5.477
+        },
+        {
+          "bin": "3",
+          "n": 190074,
+          "shot_rate_pct": 5.596
+        },
+        {
+          "bin": "4",
+          "n": 182289,
+          "shot_rate_pct": 5.76
+        },
+        {
+          "bin": "5",
+          "n": 169453,
+          "shot_rate_pct": 6.026
+        },
+        {
+          "bin": "6",
+          "n": 150171,
+          "shot_rate_pct": 6.433
+        },
+        {
+          "bin": "7",
+          "n": 127593,
+          "shot_rate_pct": 6.75
+        },
+        {
+          "bin": "8",
+          "n": 102160,
+          "shot_rate_pct": 6.848
+        },
+        {
+          "bin": "9",
+          "n": 66831,
+          "shot_rate_pct": 6.97
+        },
+        {
+          "bin": "10",
+          "n": 13952,
+          "shot_rate_pct": 12.192
+        }
+      ],
+      "shape": "monotonic increasing",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "monotonic increasing",
+        "test_shape": "monotonic increasing",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "0",
+            "n": 158207,
+            "shot_rate_pct": 5.512
+          },
+          {
+            "bin": "1",
+            "n": 157440,
+            "shot_rate_pct": 5.538
+          },
+          {
+            "bin": "2",
+            "n": 155630,
+            "shot_rate_pct": 5.593
+          },
+          {
+            "bin": "3",
+            "n": 151829,
+            "shot_rate_pct": 5.708
+          },
+          {
+            "bin": "4",
+            "n": 145822,
+            "shot_rate_pct": 5.872
+          },
+          {
+            "bin": "5",
+            "n": 135759,
+            "shot_rate_pct": 6.143
+          },
+          {
+            "bin": "6",
+            "n": 120587,
+            "shot_rate_pct": 6.549
+          },
+          {
+            "bin": "7",
+            "n": 102689,
+            "shot_rate_pct": 6.854
+          },
+          {
+            "bin": "8",
+            "n": 82778,
+            "shot_rate_pct": 6.91
+          },
+          {
+            "bin": "9",
+            "n": 54825,
+            "shot_rate_pct": 7.052
+          },
+          {
+            "bin": "10",
+            "n": 11808,
+            "shot_rate_pct": 11.958
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "0",
+            "n": 40147,
+            "shot_rate_pct": 4.929
+          },
+          {
+            "bin": "1",
+            "n": 39888,
+            "shot_rate_pct": 4.954
+          },
+          {
+            "bin": "2",
+            "n": 39346,
+            "shot_rate_pct": 5.014
+          },
+          {
+            "bin": "3",
+            "n": 38245,
+            "shot_rate_pct": 5.151
+          },
+          {
+            "bin": "4",
+            "n": 36467,
+            "shot_rate_pct": 5.312
+          },
+          {
+            "bin": "5",
+            "n": 33694,
+            "shot_rate_pct": 5.556
+          },
+          {
+            "bin": "6",
+            "n": 29584,
+            "shot_rate_pct": 5.959
+          },
+          {
+            "bin": "7",
+            "n": 24904,
+            "shot_rate_pct": 6.324
+          },
+          {
+            "bin": "8",
+            "n": 19382,
+            "shot_rate_pct": 6.583
+          },
+          {
+            "bin": "9",
+            "n": 12006,
+            "shot_rate_pct": 6.597
+          },
+          {
+            "bin": "10",
+            "n": 2144,
+            "shot_rate_pct": 13.479
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_2_dx",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1591000,
+      "n_unique_values": 193816,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.008,
+      "spearman_rho": 0.0096,
+      "bin_range_pp": 1.989,
+      "bins": [
+        {
+          "bin": "(-114.512, -15.753]",
+          "n": 159106,
+          "shot_rate_pct": 4.599
+        },
+        {
+          "bin": "(-15.753, -10.18]",
+          "n": 159098,
+          "shot_rate_pct": 5.586
+        },
+        {
+          "bin": "(-10.18, -5.966]",
+          "n": 159100,
+          "shot_rate_pct": 6.096
+        },
+        {
+          "bin": "(-5.966, -2.242]",
+          "n": 159105,
+          "shot_rate_pct": 6.135
+        },
+        {
+          "bin": "(-2.242, 1.34]",
+          "n": 159098,
+          "shot_rate_pct": 6.314
+        },
+        {
+          "bin": "(1.34, 4.891]",
+          "n": 159096,
+          "shot_rate_pct": 6.588
+        },
+        {
+          "bin": "(4.891, 8.419]",
+          "n": 159103,
+          "shot_rate_pct": 6.116
+        },
+        {
+          "bin": "(8.419, 12.211]",
+          "n": 159095,
+          "shot_rate_pct": 6.548
+        },
+        {
+          "bin": "(12.211, 17.445]",
+          "n": 159099,
+          "shot_rate_pct": 6.471
+        },
+        {
+          "bin": "(17.445, 108.76]",
+          "n": 159100,
+          "shot_rate_pct": 5.08
+        }
+      ],
+      "shape": "no-clear-pattern",
+      "consistency_check": {
+        "checked": false,
+        "reason": "|rho|<0.05 and bin range 1.99pp <= 3.0pp"
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "overload_score",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1593181,
+      "n_unique_values": 4,
+      "binning_method": "exact-value (discrete)",
+      "pearson_r": -0.0128,
+      "spearman_rho": -0.0095,
+      "bin_range_pp": 1.565,
+      "bins": [
+        {
+          "bin": "0",
+          "n": 1204568,
+          "shot_rate_pct": 6.072
+        },
+        {
+          "bin": "1",
+          "n": 237513,
+          "shot_rate_pct": 6.089
+        },
+        {
+          "bin": "2",
+          "n": 99111,
+          "shot_rate_pct": 5.135
+        },
+        {
+          "bin": "3",
+          "n": 51989,
+          "shot_rate_pct": 4.524
+        }
+      ],
+      "shape": "monotonic decreasing",
+      "consistency_check": {
+        "checked": false,
+        "reason": "|rho|<0.05 and bin range 1.57pp <= 3.0pp"
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_3_dy",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1581783,
+      "n_unique_values": 191850,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.0049,
+      "spearman_rho": 0.0048,
+      "bin_range_pp": 3.5,
+      "bins": [
+        {
+          "bin": "(-77.453, -35.111]",
+          "n": 158179,
+          "shot_rate_pct": 3.871
+        },
+        {
+          "bin": "(-35.111, -24.02]",
+          "n": 158183,
+          "shot_rate_pct": 5.514
+        },
+        {
+          "bin": "(-24.02, -16.182]",
+          "n": 158176,
+          "shot_rate_pct": 6.043
+        },
+        {
+          "bin": "(-16.182, -9.288]",
+          "n": 158178,
+          "shot_rate_pct": 6.378
+        },
+        {
+          "bin": "(-9.288, -0.135]",
+          "n": 158179,
+          "shot_rate_pct": 7.204
+        },
+        {
+          "bin": "(-0.135, 9.052]",
+          "n": 158176,
+          "shot_rate_pct": 7.371
+        },
+        {
+          "bin": "(9.052, 15.978]",
+          "n": 158177,
+          "shot_rate_pct": 6.393
+        },
+        {
+          "bin": "(15.978, 23.649]",
+          "n": 158178,
+          "shot_rate_pct": 5.767
+        },
+        {
+          "bin": "(23.649, 34.741]",
+          "n": 158182,
+          "shot_rate_pct": 6.025
+        },
+        {
+          "bin": "(34.741, 78.174]",
+          "n": 158175,
+          "shot_rate_pct": 4.292
+        }
+      ],
+      "shape": "inverse-U",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "inverse-U",
+        "test_shape": "no-clear-pattern",
+        "consistent": false,
+        "train_val_bins": [
+          {
+            "bin": "(-77.453, -35.111]",
+            "n": 127813,
+            "shot_rate_pct": 4.01
+          },
+          {
+            "bin": "(-35.111, -24.02]",
+            "n": 126194,
+            "shot_rate_pct": 5.825
+          },
+          {
+            "bin": "(-24.02, -16.182]",
+            "n": 126913,
+            "shot_rate_pct": 6.1
+          },
+          {
+            "bin": "(-16.182, -9.288]",
+            "n": 126690,
+            "shot_rate_pct": 6.494
+          },
+          {
+            "bin": "(-9.288, -0.135]",
+            "n": 125866,
+            "shot_rate_pct": 7.226
+          },
+          {
+            "bin": "(-0.135, 9.052]",
+            "n": 126169,
+            "shot_rate_pct": 7.592
+          },
+          {
+            "bin": "(9.052, 15.978]",
+            "n": 126330,
+            "shot_rate_pct": 6.603
+          },
+          {
+            "bin": "(15.978, 23.649]",
+            "n": 126767,
+            "shot_rate_pct": 5.921
+          },
+          {
+            "bin": "(23.649, 34.741]",
+            "n": 128025,
+            "shot_rate_pct": 6.013
+          },
+          {
+            "bin": "(34.741, 78.174]",
+            "n": 127804,
+            "shot_rate_pct": 4.253
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-77.453, -35.111]",
+            "n": 30366,
+            "shot_rate_pct": 3.287
+          },
+          {
+            "bin": "(-35.111, -24.02]",
+            "n": 31989,
+            "shot_rate_pct": 4.289
+          },
+          {
+            "bin": "(-24.02, -16.182]",
+            "n": 31263,
+            "shot_rate_pct": 5.809
+          },
+          {
+            "bin": "(-16.182, -9.288]",
+            "n": 31488,
+            "shot_rate_pct": 5.91
+          },
+          {
+            "bin": "(-9.288, -0.135]",
+            "n": 32313,
+            "shot_rate_pct": 7.118
+          },
+          {
+            "bin": "(-0.135, 9.052]",
+            "n": 32007,
+            "shot_rate_pct": 6.499
+          },
+          {
+            "bin": "(9.052, 15.978]",
+            "n": 31847,
+            "shot_rate_pct": 5.561
+          },
+          {
+            "bin": "(15.978, 23.649]",
+            "n": 31411,
+            "shot_rate_pct": 5.145
+          },
+          {
+            "bin": "(23.649, 34.741]",
+            "n": 30157,
+            "shot_rate_pct": 6.078
+          },
+          {
+            "bin": "(34.741, 78.174]",
+            "n": 30371,
+            "shot_rate_pct": 4.458
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "ball_y",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1593181,
+      "n_unique_values": 993,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.003,
+      "spearman_rho": -0.0033,
+      "bin_range_pp": 2.724,
+      "bins": [
+        {
+          "bin": "(-0.001, 7.8]",
+          "n": 159813,
+          "shot_rate_pct": 4.545
+        },
+        {
+          "bin": "(7.8, 16.1]",
+          "n": 159677,
+          "shot_rate_pct": 5.45
+        },
+        {
+          "bin": "(16.1, 23.8]",
+          "n": 158898,
+          "shot_rate_pct": 7.064
+        },
+        {
+          "bin": "(23.8, 31.7]",
+          "n": 159178,
+          "shot_rate_pct": 6.819
+        },
+        {
+          "bin": "(31.7, 40.6]",
+          "n": 160622,
+          "shot_rate_pct": 6.36
+        },
+        {
+          "bin": "(40.6, 49.6]",
+          "n": 158960,
+          "shot_rate_pct": 6.476
+        },
+        {
+          "bin": "(49.6, 57.2]",
+          "n": 160227,
+          "shot_rate_pct": 6.689
+        },
+        {
+          "bin": "(57.2, 64.7]",
+          "n": 157643,
+          "shot_rate_pct": 6.558
+        },
+        {
+          "bin": "(64.7, 72.6]",
+          "n": 159765,
+          "shot_rate_pct": 5.36
+        },
+        {
+          "bin": "(72.6, 80.0]",
+          "n": 158398,
+          "shot_rate_pct": 4.34
+        }
+      ],
+      "shape": "no-clear-pattern",
+      "consistency_check": {
+        "checked": false,
+        "reason": "|rho|<0.05 and bin range 2.72pp <= 3.0pp"
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_2_dy",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1591000,
+      "n_unique_values": 193798,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.0035,
+      "spearman_rho": 0.0033,
+      "bin_range_pp": 3.811,
+      "bins": [
+        {
+          "bin": "(-81.762, -37.925]",
+          "n": 159106,
+          "shot_rate_pct": 3.698
+        },
+        {
+          "bin": "(-37.925, -26.94]",
+          "n": 159099,
+          "shot_rate_pct": 5.471
+        },
+        {
+          "bin": "(-26.94, -18.484]",
+          "n": 159102,
+          "shot_rate_pct": 6.339
+        },
+        {
+          "bin": "(-18.484, -11.06]",
+          "n": 159093,
+          "shot_rate_pct": 6.528
+        },
+        {
+          "bin": "(-11.06, -0.393]",
+          "n": 159100,
+          "shot_rate_pct": 7.383
+        },
+        {
+          "bin": "(-0.393, 10.745]",
+          "n": 159101,
+          "shot_rate_pct": 7.509
+        },
+        {
+          "bin": "(10.745, 18.216]",
+          "n": 159099,
+          "shot_rate_pct": 6.84
+        },
+        {
+          "bin": "(18.216, 26.665]",
+          "n": 159102,
+          "shot_rate_pct": 6.018
+        },
+        {
+          "bin": "(26.665, 37.734]",
+          "n": 159102,
+          "shot_rate_pct": 5.426
+        },
+        {
+          "bin": "(37.734, 78.148]",
+          "n": 159096,
+          "shot_rate_pct": 4.322
+        }
+      ],
+      "shape": "inverse-U",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "inverse-U",
+        "test_shape": "inverse-U",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-81.762, -37.925]",
+            "n": 127340,
+            "shot_rate_pct": 3.82
+          },
+          {
+            "bin": "(-37.925, -26.94]",
+            "n": 127983,
+            "shot_rate_pct": 5.618
+          },
+          {
+            "bin": "(-26.94, -18.484]",
+            "n": 127529,
+            "shot_rate_pct": 6.364
+          },
+          {
+            "bin": "(-18.484, -11.06]",
+            "n": 127198,
+            "shot_rate_pct": 6.642
+          },
+          {
+            "bin": "(-11.06, -0.393]",
+            "n": 126948,
+            "shot_rate_pct": 7.539
+          },
+          {
+            "bin": "(-0.393, 10.745]",
+            "n": 127275,
+            "shot_rate_pct": 7.701
+          },
+          {
+            "bin": "(10.745, 18.216]",
+            "n": 127583,
+            "shot_rate_pct": 6.969
+          },
+          {
+            "bin": "(18.216, 26.665]",
+            "n": 127539,
+            "shot_rate_pct": 6.236
+          },
+          {
+            "bin": "(26.665, 37.734]",
+            "n": 127730,
+            "shot_rate_pct": 5.555
+          },
+          {
+            "bin": "(37.734, 78.148]",
+            "n": 128496,
+            "shot_rate_pct": 4.25
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-81.762, -37.925]",
+            "n": 31766,
+            "shot_rate_pct": 3.208
+          },
+          {
+            "bin": "(-37.925, -26.94]",
+            "n": 31116,
+            "shot_rate_pct": 4.869
+          },
+          {
+            "bin": "(-26.94, -18.484]",
+            "n": 31573,
+            "shot_rate_pct": 6.236
+          },
+          {
+            "bin": "(-18.484, -11.06]",
+            "n": 31895,
+            "shot_rate_pct": 6.073
+          },
+          {
+            "bin": "(-11.06, -0.393]",
+            "n": 32152,
+            "shot_rate_pct": 6.765
+          },
+          {
+            "bin": "(-0.393, 10.745]",
+            "n": 31826,
+            "shot_rate_pct": 6.74
+          },
+          {
+            "bin": "(10.745, 18.216]",
+            "n": 31516,
+            "shot_rate_pct": 6.317
+          },
+          {
+            "bin": "(18.216, 26.665]",
+            "n": 31563,
+            "shot_rate_pct": 5.139
+          },
+          {
+            "bin": "(26.665, 37.734]",
+            "n": 31372,
+            "shot_rate_pct": 4.902
+          },
+          {
+            "bin": "(37.734, 78.148]",
+            "n": 30600,
+            "shot_rate_pct": 4.624
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_3_angle_from_ball",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1581783,
+      "n_unique_values": 192354,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.0033,
+      "spearman_rho": 0.0032,
+      "bin_range_pp": 2.023,
+      "bins": [
+        {
+          "bin": "(-3.142, -2.144]",
+          "n": 158187,
+          "shot_rate_pct": 4.966
+        },
+        {
+          "bin": "(-2.144, -1.781]",
+          "n": 158175,
+          "shot_rate_pct": 4.971
+        },
+        {
+          "bin": "(-1.781, -1.455]",
+          "n": 158178,
+          "shot_rate_pct": 6.082
+        },
+        {
+          "bin": "(-1.455, -1.001]",
+          "n": 158178,
+          "shot_rate_pct": 6.624
+        },
+        {
+          "bin": "(-1.001, -0.019]",
+          "n": 158178,
+          "shot_rate_pct": 6.404
+        },
+        {
+          "bin": "(-0.019, 1.003]",
+          "n": 158175,
+          "shot_rate_pct": 6.215
+        },
+        {
+          "bin": "(1.003, 1.472]",
+          "n": 158177,
+          "shot_rate_pct": 6.935
+        },
+        {
+          "bin": "(1.472, 1.797]",
+          "n": 158178,
+          "shot_rate_pct": 6.527
+        },
+        {
+          "bin": "(1.797, 2.16]",
+          "n": 158182,
+          "shot_rate_pct": 4.912
+        },
+        {
+          "bin": "(2.16, 3.141]",
+          "n": 158175,
+          "shot_rate_pct": 5.221
+        }
+      ],
+      "shape": "no-clear-pattern",
+      "consistency_check": {
+        "checked": false,
+        "reason": "|rho|<0.05 and bin range 2.02pp <= 3.0pp"
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_2_angle_from_ball",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1591000,
+      "n_unique_values": 194318,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": 0.0032,
+      "spearman_rho": 0.0029,
+      "bin_range_pp": 1.712,
+      "bins": [
+        {
+          "bin": "(-3.143, -1.97]",
+          "n": 159103,
+          "shot_rate_pct": 5.86
+        },
+        {
+          "bin": "(-1.97, -1.65]",
+          "n": 159103,
+          "shot_rate_pct": 5.455
+        },
+        {
+          "bin": "(-1.65, -1.377]",
+          "n": 159107,
+          "shot_rate_pct": 5.513
+        },
+        {
+          "bin": "(-1.377, -0.989]",
+          "n": 159091,
+          "shot_rate_pct": 6.093
+        },
+        {
+          "bin": "(-0.989, -0.044]",
+          "n": 159102,
+          "shot_rate_pct": 6.557
+        },
+        {
+          "bin": "(-0.044, 0.982]",
+          "n": 159100,
+          "shot_rate_pct": 6.115
+        },
+        {
+          "bin": "(0.982, 1.382]",
+          "n": 159098,
+          "shot_rate_pct": 6.853
+        },
+        {
+          "bin": "(1.382, 1.659]",
+          "n": 159102,
+          "shot_rate_pct": 5.733
+        },
+        {
+          "bin": "(1.659, 1.984]",
+          "n": 159100,
+          "shot_rate_pct": 5.141
+        },
+        {
+          "bin": "(1.984, 3.142]",
+          "n": 159094,
+          "shot_rate_pct": 6.214
+        }
+      ],
+      "shape": "no-clear-pattern",
+      "consistency_check": {
+        "checked": false,
+        "reason": "|rho|<0.05 and bin range 1.71pp <= 3.0pp"
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "defender_y",
+      "status": "locked",
+      "reason": null,
+      "type": "continuous",
+      "n_rows_used": 1593181,
+      "n_unique_values": 1561986,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0018,
+      "spearman_rho": -0.0023,
+      "bin_range_pp": 4.415,
+      "bins": [
+        {
+          "bin": "(-9.508999999999999, 17.503]",
+          "n": 159319,
+          "shot_rate_pct": 3.867
+        },
+        {
+          "bin": "(17.503, 25.109]",
+          "n": 159318,
+          "shot_rate_pct": 5.078
+        },
+        {
+          "bin": "(25.109, 31.031]",
+          "n": 159318,
+          "shot_rate_pct": 5.873
+        },
+        {
+          "bin": "(31.031, 35.994]",
+          "n": 159318,
+          "shot_rate_pct": 7.172
+        },
+        {
+          "bin": "(35.994, 40.239]",
+          "n": 159318,
+          "shot_rate_pct": 8.282
+        },
+        {
+          "bin": "(40.239, 44.526]",
+          "n": 159318,
+          "shot_rate_pct": 8.116
+        },
+        {
+          "bin": "(44.526, 49.528]",
+          "n": 159318,
+          "shot_rate_pct": 6.844
+        },
+        {
+          "bin": "(49.528, 55.453]",
+          "n": 159318,
+          "shot_rate_pct": 5.598
+        },
+        {
+          "bin": "(55.453, 62.965]",
+          "n": 159318,
+          "shot_rate_pct": 4.885
+        },
+        {
+          "bin": "(62.965, 87.515]",
+          "n": 159318,
+          "shot_rate_pct": 3.944
+        }
+      ],
+      "shape": "inverse-U",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "inverse-U",
+        "test_shape": "inverse-U",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-9.508999999999999, 17.503]",
+            "n": 127598,
+            "shot_rate_pct": 3.892
+          },
+          {
+            "bin": "(17.503, 25.109]",
+            "n": 127348,
+            "shot_rate_pct": 5.15
+          },
+          {
+            "bin": "(25.109, 31.031]",
+            "n": 127124,
+            "shot_rate_pct": 5.925
+          },
+          {
+            "bin": "(31.031, 35.994]",
+            "n": 127690,
+            "shot_rate_pct": 7.315
+          },
+          {
+            "bin": "(35.994, 40.239]",
+            "n": 128065,
+            "shot_rate_pct": 8.439
+          },
+          {
+            "bin": "(40.239, 44.526]",
+            "n": 128194,
+            "shot_rate_pct": 8.254
+          },
+          {
+            "bin": "(44.526, 49.528]",
+            "n": 128191,
+            "shot_rate_pct": 6.991
+          },
+          {
+            "bin": "(49.528, 55.453]",
+            "n": 127517,
+            "shot_rate_pct": 5.755
+          },
+          {
+            "bin": "(55.453, 62.965]",
+            "n": 127828,
+            "shot_rate_pct": 4.972
+          },
+          {
+            "bin": "(62.965, 87.515]",
+            "n": 127819,
+            "shot_rate_pct": 4.071
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-9.508999999999999, 17.503]",
+            "n": 31721,
+            "shot_rate_pct": 3.767
+          },
+          {
+            "bin": "(17.503, 25.109]",
+            "n": 31970,
+            "shot_rate_pct": 4.792
+          },
+          {
+            "bin": "(25.109, 31.031]",
+            "n": 32194,
+            "shot_rate_pct": 5.666
+          },
+          {
+            "bin": "(31.031, 35.994]",
+            "n": 31628,
+            "shot_rate_pct": 6.595
+          },
+          {
+            "bin": "(35.994, 40.239]",
+            "n": 31253,
+            "shot_rate_pct": 7.638
+          },
+          {
+            "bin": "(40.239, 44.526]",
+            "n": 31124,
+            "shot_rate_pct": 7.547
+          },
+          {
+            "bin": "(44.526, 49.528]",
+            "n": 31127,
+            "shot_rate_pct": 6.239
+          },
+          {
+            "bin": "(49.528, 55.453]",
+            "n": 31801,
+            "shot_rate_pct": 4.968
+          },
+          {
+            "bin": "(55.453, 62.965]",
+            "n": 31490,
+            "shot_rate_pct": 4.532
+          },
+          {
+            "bin": "(62.965, 87.515]",
+            "n": 31499,
+            "shot_rate_pct": 3.429
+          }
+        ]
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_1_angle_from_ball",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1592902,
+      "n_unique_values": 194774,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0004,
+      "spearman_rho": -0.0005,
+      "bin_range_pp": 2.435,
+      "bins": [
+        {
+          "bin": "(-3.142, -1.698]",
+          "n": 159295,
+          "shot_rate_pct": 7.519
+        },
+        {
+          "bin": "(-1.698, -1.414]",
+          "n": 159293,
+          "shot_rate_pct": 5.472
+        },
+        {
+          "bin": "(-1.414, -1.172]",
+          "n": 159284,
+          "shot_rate_pct": 5.09
+        },
+        {
+          "bin": "(-1.172, -0.853]",
+          "n": 159290,
+          "shot_rate_pct": 5.613
+        },
+        {
+          "bin": "(-0.853, -0.0804]",
+          "n": 159291,
+          "shot_rate_pct": 6.132
+        },
+        {
+          "bin": "(-0.0804, 0.812]",
+          "n": 159290,
+          "shot_rate_pct": 6.323
+        },
+        {
+          "bin": "(0.812, 1.158]",
+          "n": 159289,
+          "shot_rate_pct": 5.307
+        },
+        {
+          "bin": "(1.158, 1.409]",
+          "n": 159289,
+          "shot_rate_pct": 5.084
+        },
+        {
+          "bin": "(1.409, 1.695]",
+          "n": 159296,
+          "shot_rate_pct": 5.801
+        },
+        {
+          "bin": "(1.695, 3.141]",
+          "n": 159285,
+          "shot_rate_pct": 7.304
+        }
+      ],
+      "shape": "no-clear-pattern",
+      "consistency_check": {
+        "checked": false,
+        "reason": "|rho|<0.05 and bin range 2.44pp <= 3.0pp"
+      },
+      "unreliable_note": null
+    },
+    {
+      "feature": "top_option_1_dy",
+      "status": "locked",
+      "reason": null,
+      "type": "discrete",
+      "n_rows_used": 1592902,
+      "n_unique_values": 194248,
+      "binning_method": "quantile deciles (10 bins actually produced)",
+      "pearson_r": -0.0002,
+      "spearman_rho": 0.0004,
+      "bin_range_pp": 3.065,
+      "bins": [
+        {
+          "bin": "(-80.242, -39.762]",
+          "n": 159295,
+          "shot_rate_pct": 4.561
+        },
+        {
+          "bin": "(-39.762, -28.254]",
+          "n": 159288,
+          "shot_rate_pct": 5.938
+        },
+        {
+          "bin": "(-28.254, -19.757]",
+          "n": 159289,
+          "shot_rate_pct": 5.794
+        },
+        {
+          "bin": "(-19.757, -12.441]",
+          "n": 159289,
+          "shot_rate_pct": 6.157
+        },
+        {
+          "bin": "(-12.441, -1.025]",
+          "n": 159293,
+          "shot_rate_pct": 7.328
+        },
+        {
+          "bin": "(-1.025, 11.578]",
+          "n": 159287,
+          "shot_rate_pct": 7.49
+        },
+        {
+          "bin": "(11.578, 19.288]",
+          "n": 159297,
+          "shot_rate_pct": 5.875
+        },
+        {
+          "bin": "(19.288, 27.955]",
+          "n": 159286,
+          "shot_rate_pct": 5.832
+        },
+        {
+          "bin": "(27.955, 39.762]",
+          "n": 159291,
+          "shot_rate_pct": 6.245
+        },
+        {
+          "bin": "(39.762, 78.676]",
+          "n": 159287,
+          "shot_rate_pct": 4.425
+        }
+      ],
+      "shape": "no-clear-pattern",
+      "consistency_check": {
+        "checked": true,
+        "train_val_shape": "no-clear-pattern",
+        "test_shape": "no-clear-pattern",
+        "consistent": true,
+        "train_val_bins": [
+          {
+            "bin": "(-80.242, -39.762]",
+            "n": 124836,
+            "shot_rate_pct": 4.788
+          },
+          {
+            "bin": "(-39.762, -28.254]",
+            "n": 126289,
+            "shot_rate_pct": 6.05
+          },
+          {
+            "bin": "(-28.254, -19.757]",
+            "n": 127815,
+            "shot_rate_pct": 5.819
+          },
+          {
+            "bin": "(-19.757, -12.441]",
+            "n": 129203,
+            "shot_rate_pct": 6.392
+          },
+          {
+            "bin": "(-12.441, -1.025]",
+            "n": 128757,
+            "shot_rate_pct": 7.555
+          },
+          {
+            "bin": "(-1.025, 11.578]",
+            "n": 129612,
+            "shot_rate_pct": 7.752
+          },
+          {
+            "bin": "(11.578, 19.288]",
+            "n": 127981,
+            "shot_rate_pct": 5.899
+          },
+          {
+            "bin": "(19.288, 27.955]",
+            "n": 127846,
+            "shot_rate_pct": 5.773
+          },
+          {
+            "bin": "(27.955, 39.762]",
+            "n": 127893,
+            "shot_rate_pct": 6.157
+          },
+          {
+            "bin": "(39.762, 78.676]",
+            "n": 126913,
+            "shot_rate_pct": 4.508
+          }
+        ],
+        "test_bins": [
+          {
+            "bin": "(-80.242, -39.762]",
+            "n": 34459,
+            "shot_rate_pct": 3.738
+          },
+          {
+            "bin": "(-39.762, -28.254]",
+            "n": 32999,
+            "shot_rate_pct": 5.509
+          },
+          {
+            "bin": "(-28.254, -19.757]",
+            "n": 31474,
+            "shot_rate_pct": 5.694
+          },
+          {
+            "bin": "(-19.757, -12.441]",
+            "n": 30086,
+            "shot_rate_pct": 5.145
+          },
+          {
+            "bin": "(-12.441, -1.025]",
+            "n": 30536,
+            "shot_rate_pct": 6.373
+          },
+          {
+            "bin": "(-1.025, 11.578]",
+            "n": 29675,
+            "shot_rate_pct": 6.345
+          },
+          {
+            "bin": "(11.578, 19.288]",
+            "n": 31316,
+            "shot_rate_pct": 5.777
+          },
+          {
+            "bin": "(19.288, 27.955]",
+            "n": 31440,
+            "shot_rate_pct": 6.072
+          },
+          {
+            "bin": "(27.955, 39.762]",
+            "n": 31398,
+            "shot_rate_pct": 6.602
+          },
+          {
+            "bin": "(39.762, 78.676]",
+            "n": 32374,
+            "shot_rate_pct": 4.099
+          }
+        ]
+      },
+      "unreliable_note": null
+    }
+  ]
+}

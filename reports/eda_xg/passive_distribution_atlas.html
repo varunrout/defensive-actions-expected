@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Passive / Off-Ball Defensive Positioning: Distribution Atlas (reconstructed pool)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.dist-card-wrap { position: relative; border-radius: 12px; }
+.dist-card-wrap.locked { border-left: 4px solid var(--good); }
+.dist-card-wrap.dropped { border-left: 4px solid var(--amber); }
+.dist-status-badge { font-family: "JetBrains Mono", monospace; font-size: 9.5px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px; font-weight: 700; margin-left: 6px; vertical-align: middle; }
+.dist-status-badge.locked { background: var(--good-wash); color: var(--good); }
+.dist-status-badge.dropped { background: var(--amber-wash); color: var(--amber); }
+.dist-reason { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--text-muted); margin: 2px 0 8px; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">DISTRIBUTION ATLAS -- RECONSTRUCTED POOL &middot; PASSIVE / OFF-BALL DEFENSIVE POSITIONING</p>
+  <h1 class="title">Passive / Off-Ball Defensive Positioning: Distribution Atlas</h1>
+  <p class="dek">Every numerical column's own shape (mean/median/skew), reconstructed pre-drop 51/44-era pool,
+  one row per visible defender-slot per on-ball attacking event. Target-independent -- valid for both the binary and xG contexts.</p>
+  <div class="statbar"><div class="stat"><b>1,593,181</b><span>rows</span></div><div class="stat"><b>34</b><span>numerical columns</span></div><div class="stat"><b>28</b><span>locked</span></div><div class="stat"><b>6</b><span>dropped, still shown</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="findings"><div class="finding"><span class="tag">pool</span><p><b>34 numerical columns (28 locked + 6 dropped-but-included)</b> &mdash; reconstructed pre-drop 51/44-era pool -- the existing Distribution Atlas only ever covered the current locked list, so the dropped columns never had a shape card anywhere until now.</p></div></div>
+<h2 class="section-title">Continuous Distributions</h2><p class="section-note">Green border = locked (current candidate list), amber = dropped (still shown, reason inline). 24 equal-width bins from the column min to its 99th percentile.</p><div class="card-grid"><div class="dist-card-wrap locked">
+<div class="card">
+<h3>angle_to_attacking_goal<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:64px" title="211352"></div><div class="bin" style="height:54px" title="181018"></div><div class="bin" style="height:49px" title="163380"></div><div class="bin" style="height:45px" title="150755"></div><div class="bin" style="height:42px" title="139278"></div><div class="bin" style="height:38px" title="126108"></div><div class="bin" style="height:33px" title="111415"></div><div class="bin" style="height:28px" title="94961"></div><div class="bin" style="height:23px" title="78464"></div><div class="bin" style="height:18px" title="62427"></div><div class="bin" style="height:15px" title="50062"></div><div class="bin" style="height:12px" title="39839"></div><div class="bin" style="height:9px" title="32203"></div><div class="bin" style="height:7px" title="26282"></div><div class="bin" style="height:6px" title="21433"></div><div class="bin" style="height:5px" title="18130"></div><div class="bin" style="height:4px" title="15141"></div><div class="bin" style="height:3px" title="12630"></div><div class="bin" style="height:3px" title="10612"></div><div class="bin" style="height:2px" title="8895"></div><div class="bin" style="height:2px" title="7494"></div><div class="bin" style="height:2px" title="6292"></div><div class="bin" style="height:2px" title="4968"></div><div class="bin" style="height:2px" title="4110"></div></div>
+<div class="stat-row">
+  <div><b>0.25</b>mean</div>
+  <div><b>0.20</b>median</div>
+  <div><b>1.71</b>skew</div>
+</div>
+<div class="extreme-note">15932 rows above p99 (1.03); true max 3.14</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>attacking_goal_centrality<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:3px" title="7655"></div><div class="bin" style="height:4px" title="9842"></div><div class="bin" style="height:8px" title="16725"></div><div class="bin" style="height:11px" title="22924"></div><div class="bin" style="height:14px" title="28420"></div><div class="bin" style="height:16px" title="32874"></div><div class="bin" style="height:18px" title="37049"></div><div class="bin" style="height:20px" title="41556"></div><div class="bin" style="height:23px" title="46475"></div><div class="bin" style="height:26px" title="52048"></div><div class="bin" style="height:28px" title="57512"></div><div class="bin" style="height:31px" title="63406"></div><div class="bin" style="height:34px" title="69329"></div><div class="bin" style="height:37px" title="74309"></div><div class="bin" style="height:39px" title="79699"></div><div class="bin" style="height:41px" title="83516"></div><div class="bin" style="height:43px" title="87892"></div><div class="bin" style="height:46px" title="92119"></div><div class="bin" style="height:48px" title="97453"></div><div class="bin" style="height:51px" title="102628"></div><div class="bin" style="height:54px" title="108630"></div><div class="bin" style="height:57px" title="115101"></div><div class="bin" style="height:61px" title="122099"></div><div class="bin" style="height:64px" title="127988"></div></div>
+<div class="stat-row">
+  <div><b>0.66</b>mean</div>
+  <div><b>0.70</b>median</div>
+  <div><b>-0.56</b>skew</div>
+</div>
+<div class="extreme-note">15932 rows above p99 (0.99); true max 1.00</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>ball_x<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:8px" title="14662"></div><div class="bin" style="height:12px" title="23708"></div><div class="bin" style="height:16px" title="30463"></div><div class="bin" style="height:20px" title="37052"></div><div class="bin" style="height:30px" title="55478"></div><div class="bin" style="height:36px" title="66908"></div><div class="bin" style="height:37px" title="69161"></div><div class="bin" style="height:48px" title="88930"></div><div class="bin" style="height:51px" title="94500"></div><div class="bin" style="height:58px" title="106212"></div><div class="bin" style="height:58px" title="107542"></div><div class="bin" style="height:59px" title="109156"></div><div class="bin" style="height:41px" title="75550"></div><div class="bin" style="height:64px" title="116937"></div><div class="bin" style="height:52px" title="96236"></div><div class="bin" style="height:47px" title="86438"></div><div class="bin" style="height:45px" title="83367"></div><div class="bin" style="height:39px" title="72471"></div><div class="bin" style="height:32px" title="59401"></div><div class="bin" style="height:31px" title="56998"></div><div class="bin" style="height:23px" title="43127"></div><div class="bin" style="height:16px" title="30263"></div><div class="bin" style="height:16px" title="29401"></div><div class="bin" style="height:12px" title="23353"></div></div>
+<div class="stat-row">
+  <div><b>57.81</b>mean</div>
+  <div><b>56.60</b>median</div>
+  <div><b>0.10</b>skew</div>
+</div>
+<div class="extreme-note">15867 rows above p99 (113.80); true max 120.00</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>ball_y<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:42px" title="53115"></div><div class="bin" style="height:64px" title="79384"></div><div class="bin" style="height:53px" title="66891"></div><div class="bin" style="height:50px" title="62643"></div><div class="bin" style="height:49px" title="61594"></div><div class="bin" style="height:52px" title="64780"></div><div class="bin" style="height:57px" title="70724"></div><div class="bin" style="height:58px" title="72613"></div><div class="bin" style="height:54px" title="67309"></div><div class="bin" style="height:46px" title="57224"></div><div class="bin" style="height:45px" title="56978"></div><div class="bin" style="height:46px" title="58117"></div><div class="bin" style="height:51px" title="64469"></div><div class="bin" style="height:46px" title="57099"></div><div class="bin" style="height:44px" title="55521"></div><div class="bin" style="height:50px" title="62488"></div><div class="bin" style="height:57px" title="71800"></div><div class="bin" style="height:59px" title="74160"></div><div class="bin" style="height:56px" title="69913"></div><div class="bin" style="height:51px" title="64012"></div><div class="bin" style="height:53px" title="66090"></div><div class="bin" style="height:54px" title="67002"></div><div class="bin" style="height:63px" title="78185"></div><div class="bin" style="height:60px" title="75258"></div></div>
+<div class="stat-row">
+  <div><b>40.41</b>mean</div>
+  <div><b>40.60</b>median</div>
+  <div><b>-0.02</b>skew</div>
+</div>
+<div class="extreme-note">15812 rows above p99 (78.70); true max 80.00</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>defender_x<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:2px" title="225"></div><div class="bin" style="height:8px" title="13910"></div><div class="bin" style="height:14px" title="23438"></div><div class="bin" style="height:22px" title="36256"></div><div class="bin" style="height:40px" title="64043"></div><div class="bin" style="height:51px" title="81760"></div><div class="bin" style="height:55px" title="87604"></div><div class="bin" style="height:59px" title="94257"></div><div class="bin" style="height:61px" title="97931"></div><div class="bin" style="height:62px" title="99675"></div><div class="bin" style="height:61px" title="98157"></div><div class="bin" style="height:64px" title="101702"></div><div class="bin" style="height:62px" title="99484"></div><div class="bin" style="height:59px" title="94480"></div><div class="bin" style="height:56px" title="89611"></div><div class="bin" style="height:50px" title="79507"></div><div class="bin" style="height:45px" title="73016"></div><div class="bin" style="height:43px" title="69073"></div><div class="bin" style="height:39px" title="63322"></div><div class="bin" style="height:36px" title="58015"></div><div class="bin" style="height:33px" title="53274"></div><div class="bin" style="height:30px" title="48472"></div><div class="bin" style="height:19px" title="31266"></div><div class="bin" style="height:11px" title="18771"></div></div>
+<div class="stat-row">
+  <div><b>55.51</b>mean</div>
+  <div><b>53.75</b>median</div>
+  <div><b>0.20</b>skew</div>
+</div>
+<div class="extreme-note">15932 rows above p99 (114.15); true max 126.71</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>defender_y<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:2px" title="19"></div><div class="bin" style="height:2px" title="268"></div><div class="bin" style="height:2px" title="2515"></div><div class="bin" style="height:5px" title="11901"></div><div class="bin" style="height:12px" title="25536"></div><div class="bin" style="height:17px" title="36120"></div><div class="bin" style="height:22px" title="46579"></div><div class="bin" style="height:28px" title="58759"></div><div class="bin" style="height:34px" title="71143"></div><div class="bin" style="height:39px" title="83466"></div><div class="bin" style="height:44px" title="93671"></div><div class="bin" style="height:49px" title="104430"></div><div class="bin" style="height:56px" title="117986"></div><div class="bin" style="height:63px" title="133077"></div><div class="bin" style="height:64px" title="133801"></div><div class="bin" style="height:57px" title="119259"></div><div class="bin" style="height:50px" title="106535"></div><div class="bin" style="height:45px" title="94724"></div><div class="bin" style="height:41px" title="86278"></div><div class="bin" style="height:35px" title="74842"></div><div class="bin" style="height:29px" title="61253"></div><div class="bin" style="height:23px" title="48739"></div><div class="bin" style="height:18px" title="38598"></div><div class="bin" style="height:13px" title="27750"></div></div>
+<div class="stat-row">
+  <div><b>40.25</b>mean</div>
+  <div><b>40.24</b>median</div>
+  <div><b>-0.01</b>skew</div>
+</div>
+<div class="extreme-note">15932 rows above p99 (75.28); true max 87.52</div>
+</div></div><div class="dist-card-wrap dropped">
+<div class="card">
+<h3>distance_to_attacking_box<span class="dist-status-badge dropped">DROPPED</span></h3>
+<p class="dist-reason">Why dropped: Cluster 4 (defender-position, drop-to-one): mutually r/eta &gt;= 0.92 with defender_x and the rest of this cluster -- kept defender_x (the most primitive measurement; it&#x27;s upstream of every derived distance/zone column here, unlike the active side where the raw coordinate isn&#x27;t itself a kept feature)</p><p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:64px" title="114545"></div><div class="bin" style="height:24px" title="43658"></div><div class="bin" style="height:27px" title="49474"></div><div class="bin" style="height:29px" title="52576"></div><div class="bin" style="height:31px" title="55608"></div><div class="bin" style="height:32px" title="58456"></div><div class="bin" style="height:33px" title="60760"></div><div class="bin" style="height:36px" title="65021"></div><div class="bin" style="height:40px" title="71920"></div><div class="bin" style="height:42px" title="75751"></div><div class="bin" style="height:44px" title="78908"></div><div class="bin" style="height:45px" title="82152"></div><div class="bin" style="height:46px" title="82927"></div><div class="bin" style="height:44px" title="80173"></div><div class="bin" style="height:45px" title="80827"></div><div class="bin" style="height:45px" title="80666"></div><div class="bin" style="height:44px" title="79451"></div><div class="bin" style="height:42px" title="76024"></div><div class="bin" style="height:40px" title="71826"></div><div class="bin" style="height:37px" title="67978"></div><div class="bin" style="height:34px" title="62027"></div><div class="bin" style="height:23px" title="41736"></div><div class="bin" style="height:14px" title="25986"></div><div class="bin" style="height:10px" title="18799"></div></div>
+<div class="stat-row">
+  <div><b>47.10</b>mean</div>
+  <div><b>48.41</b>median</div>
+  <div><b>-0.10</b>skew</div>
+</div>
+<div class="extreme-note">15932 rows above p99 (98.02); true max 108.41</div>
+</div></div><div class="dist-card-wrap dropped">
+<div class="card">
+<h3>distance_to_attacking_goal<span class="dist-status-badge dropped">DROPPED</span></h3>
+<p class="dist-reason">Why dropped: Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box</p><p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:5px" title="8258"></div><div class="bin" style="height:7px" title="12388"></div><div class="bin" style="height:10px" title="17129"></div><div class="bin" style="height:17px" title="27803"></div><div class="bin" style="height:24px" title="38111"></div><div class="bin" style="height:29px" title="45723"></div><div class="bin" style="height:35px" title="55308"></div><div class="bin" style="height:40px" title="64228"></div><div class="bin" style="height:44px" title="70672"></div><div class="bin" style="height:48px" title="75970"></div><div class="bin" style="height:52px" title="82618"></div><div class="bin" style="height:56px" title="89299"></div><div class="bin" style="height:60px" title="95168"></div><div class="bin" style="height:63px" title="99348"></div><div class="bin" style="height:64px" title="100701"></div><div class="bin" style="height:62px" title="98264"></div><div class="bin" style="height:62px" title="98735"></div><div class="bin" style="height:62px" title="97577"></div><div class="bin" style="height:59px" title="94201"></div><div class="bin" style="height:56px" title="88465"></div><div class="bin" style="height:53px" title="83946"></div><div class="bin" style="height:43px" title="68693"></div><div class="bin" style="height:25px" title="39697"></div><div class="bin" style="height:15px" title="24947"></div></div>
+<div class="stat-row">
+  <div><b>67.05</b>mean</div>
+  <div><b>68.58</b>median</div>
+  <div><b>-0.22</b>skew</div>
+</div>
+<div class="extreme-note">15932 rows above p99 (116.32); true max 128.78</div>
+</div></div><div class="dist-card-wrap dropped">
+<div class="card">
+<h3>distance_to_center_line<span class="dist-status-badge dropped">DROPPED</span></h3>
+<p class="dist-reason">Why dropped: CORRELATION_ANALYSIS DROP tier: Spearman r=-1.0 vs attacking_goal_centrality (kept)</p><p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:64px" title="119125"></div><div class="bin" style="height:61px" title="114662"></div><div class="bin" style="height:58px" title="108726"></div><div class="bin" style="height:55px" title="103086"></div><div class="bin" style="height:52px" title="97085"></div><div class="bin" style="height:49px" title="92924"></div><div class="bin" style="height:47px" title="88368"></div><div class="bin" style="height:45px" title="84057"></div><div class="bin" style="height:43px" title="80369"></div><div class="bin" style="height:41px" title="76832"></div><div class="bin" style="height:39px" title="73425"></div><div class="bin" style="height:36px" title="68691"></div><div class="bin" style="height:34px" title="64464"></div><div class="bin" style="height:31px" title="59281"></div><div class="bin" style="height:29px" title="54438"></div><div class="bin" style="height:26px" title="49448"></div><div class="bin" style="height:24px" title="44726"></div><div class="bin" style="height:21px" title="40342"></div><div class="bin" style="height:19px" title="36414"></div><div class="bin" style="height:17px" title="32370"></div><div class="bin" style="height:15px" title="29160"></div><div class="bin" style="height:13px" title="24802"></div><div class="bin" style="height:10px" title="20032"></div><div class="bin" style="height:7px" title="14422"></div></div>
+<div class="stat-row">
+  <div><b>13.71</b>mean</div>
+  <div><b>12.08</b>median</div>
+  <div><b>0.57</b>skew</div>
+</div>
+<div class="extreme-note">15932 rows above p99 (36.89); true max 49.51</div>
+</div></div><div class="dist-card-wrap dropped">
+<div class="card">
+<h3>distance_to_defending_box<span class="dist-status-badge dropped">DROPPED</span></h3>
+<p class="dist-reason">Why dropped: Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box</p><p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:64px" title="175827"></div><div class="bin" style="height:24px" title="68194"></div><div class="bin" style="height:26px" title="73957"></div><div class="bin" style="height:28px" title="78840"></div><div class="bin" style="height:29px" title="80099"></div><div class="bin" style="height:29px" title="80429"></div><div class="bin" style="height:29px" title="79966"></div><div class="bin" style="height:28px" title="78985"></div><div class="bin" style="height:29px" title="82134"></div><div class="bin" style="height:29px" title="79991"></div><div class="bin" style="height:28px" title="77114"></div><div class="bin" style="height:26px" title="73828"></div><div class="bin" style="height:25px" title="69901"></div><div class="bin" style="height:22px" title="62780"></div><div class="bin" style="height:21px" title="58605"></div><div class="bin" style="height:20px" title="56323"></div><div class="bin" style="height:19px" title="53012"></div><div class="bin" style="height:17px" title="49146"></div><div class="bin" style="height:16px" title="46184"></div><div class="bin" style="height:15px" title="42839"></div><div class="bin" style="height:14px" title="40959"></div><div class="bin" style="height:11px" title="32476"></div><div class="bin" style="height:7px" title="21389"></div><div class="bin" style="height:5px" title="14271"></div></div>
+<div class="stat-row">
+  <div><b>38.33</b>mean</div>
+  <div><b>35.97</b>median</div>
+  <div><b>0.32</b>skew</div>
+</div>
+<div class="extreme-note">15932 rows above p99 (96.18); true max 108.89</div>
+</div></div><div class="dist-card-wrap dropped">
+<div class="card">
+<h3>distance_to_defending_goal<span class="dist-status-badge dropped">DROPPED</span></h3>
+<p class="dist-reason">Why dropped: Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box</p><p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:8px" title="12929"></div><div class="bin" style="height:11px" title="18701"></div><div class="bin" style="height:15px" title="24597"></div><div class="bin" style="height:26px" title="42154"></div><div class="bin" style="height:36px" title="58535"></div><div class="bin" style="height:44px" title="71362"></div><div class="bin" style="height:53px" title="84492"></div><div class="bin" style="height:59px" title="94788"></div><div class="bin" style="height:63px" title="100562"></div><div class="bin" style="height:63px" title="100829"></div><div class="bin" style="height:64px" title="101609"></div><div class="bin" style="height:63px" title="101503"></div><div class="bin" style="height:62px" title="98874"></div><div class="bin" style="height:58px" title="92213"></div><div class="bin" style="height:54px" title="86836"></div><div class="bin" style="height:48px" title="77675"></div><div class="bin" style="height:45px" title="71497"></div><div class="bin" style="height:42px" title="66872"></div><div class="bin" style="height:38px" title="61781"></div><div class="bin" style="height:36px" title="57193"></div><div class="bin" style="height:33px" title="53402"></div><div class="bin" style="height:30px" title="48095"></div><div class="bin" style="height:19px" title="31615"></div><div class="bin" style="height:12px" title="19135"></div></div>
+<div class="stat-row">
+  <div><b>58.39</b>mean</div>
+  <div><b>56.68</b>median</div>
+  <div><b>0.16</b>skew</div>
+</div>
+<div class="extreme-note">15932 rows above p99 (114.77); true max 129.84</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>engagement_distance_to_carrier<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:21px" title="37669"></div><div class="bin" style="height:37px" title="65574"></div><div class="bin" style="height:42px" title="74126"></div><div class="bin" style="height:49px" title="85225"></div><div class="bin" style="height:55px" title="96629"></div><div class="bin" style="height:59px" title="102606"></div><div class="bin" style="height:62px" title="107869"></div><div class="bin" style="height:64px" title="110628"></div><div class="bin" style="height:63px" title="109695"></div><div class="bin" style="height:61px" title="106713"></div><div class="bin" style="height:57px" title="99234"></div><div class="bin" style="height:53px" title="92681"></div><div class="bin" style="height:49px" title="85085"></div><div class="bin" style="height:44px" title="77180"></div><div class="bin" style="height:39px" title="68146"></div><div class="bin" style="height:34px" title="59400"></div><div class="bin" style="height:29px" title="50299"></div><div class="bin" style="height:23px" title="41449"></div><div class="bin" style="height:18px" title="32340"></div><div class="bin" style="height:14px" title="24872"></div><div class="bin" style="height:10px" title="18988"></div><div class="bin" style="height:8px" title="14174"></div><div class="bin" style="height:5px" title="9981"></div><div class="bin" style="height:3px" title="6686"></div></div>
+<div class="stat-row">
+  <div><b>22.52</b>mean</div>
+  <div><b>21.11</b>median</div>
+  <div><b>0.89</b>skew</div>
+</div>
+<div class="extreme-note">15932 rows above p99 (55.92); true max 138.98</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>lane_screening_score_option_1<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:42px" title="334912"></div><div class="bin" style="height:64px" title="506847"></div><div class="bin" style="height:32px" title="255204"></div><div class="bin" style="height:15px" title="125469"></div><div class="bin" style="height:9px" title="78533"></div><div class="bin" style="height:6px" title="54067"></div><div class="bin" style="height:5px" title="40308"></div><div class="bin" style="height:3px" title="30971"></div><div class="bin" style="height:3px" title="24798"></div><div class="bin" style="height:2px" title="19993"></div><div class="bin" style="height:2px" title="16771"></div><div class="bin" style="height:2px" title="13824"></div><div class="bin" style="height:2px" title="11718"></div><div class="bin" style="height:2px" title="10340"></div><div class="bin" style="height:2px" title="8882"></div><div class="bin" style="height:2px" title="7513"></div><div class="bin" style="height:2px" title="6842"></div><div class="bin" style="height:2px" title="5977"></div><div class="bin" style="height:2px" title="5236"></div><div class="bin" style="height:2px" title="4647"></div><div class="bin" style="height:2px" title="4080"></div><div class="bin" style="height:2px" title="3667"></div><div class="bin" style="height:2px" title="3317"></div><div class="bin" style="height:2px" title="3056"></div></div>
+<div class="stat-row">
+  <div><b>0.12</b>mean</div>
+  <div><b>0.07</b>median</div>
+  <div><b>3.05</b>skew</div>
+</div>
+<div class="extreme-note">15930 rows above p99 (0.74); true max 1.00</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>lane_screening_score_option_2<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:43px" title="336314"></div><div class="bin" style="height:64px" title="492411"></div><div class="bin" style="height:32px" title="247844"></div><div class="bin" style="height:16px" title="126179"></div><div class="bin" style="height:10px" title="80635"></div><div class="bin" style="height:7px" title="57276"></div><div class="bin" style="height:5px" title="42612"></div><div class="bin" style="height:4px" title="33010"></div><div class="bin" style="height:3px" title="26437"></div><div class="bin" style="height:2px" title="21503"></div><div class="bin" style="height:2px" title="17389"></div><div class="bin" style="height:2px" title="14625"></div><div class="bin" style="height:2px" title="12661"></div><div class="bin" style="height:2px" title="10858"></div><div class="bin" style="height:2px" title="9283"></div><div class="bin" style="height:2px" title="7986"></div><div class="bin" style="height:2px" title="6973"></div><div class="bin" style="height:2px" title="6291"></div><div class="bin" style="height:2px" title="5508"></div><div class="bin" style="height:2px" title="4741"></div><div class="bin" style="height:2px" title="4326"></div><div class="bin" style="height:2px" title="3755"></div><div class="bin" style="height:2px" title="3449"></div><div class="bin" style="height:2px" title="3024"></div></div>
+<div class="stat-row">
+  <div><b>0.12</b>mean</div>
+  <div><b>0.07</b>median</div>
+  <div><b>2.93</b>skew</div>
+</div>
+<div class="extreme-note">15910 rows above p99 (0.76); true max 1.00</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>lane_screening_score_option_3<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:41px" title="310058"></div><div class="bin" style="height:64px" title="474805"></div><div class="bin" style="height:32px" title="244104"></div><div class="bin" style="height:17px" title="132809"></div><div class="bin" style="height:11px" title="86654"></div><div class="bin" style="height:8px" title="62321"></div><div class="bin" style="height:6px" title="46720"></div><div class="bin" style="height:4px" title="35850"></div><div class="bin" style="height:3px" title="28916"></div><div class="bin" style="height:3px" title="23398"></div><div class="bin" style="height:2px" title="19077"></div><div class="bin" style="height:2px" title="16114"></div><div class="bin" style="height:2px" title="13524"></div><div class="bin" style="height:2px" title="11728"></div><div class="bin" style="height:2px" title="10249"></div><div class="bin" style="height:2px" title="8656"></div><div class="bin" style="height:2px" title="7686"></div><div class="bin" style="height:2px" title="6758"></div><div class="bin" style="height:2px" title="5953"></div><div class="bin" style="height:2px" title="5093"></div><div class="bin" style="height:2px" title="4587"></div><div class="bin" style="height:2px" title="4196"></div><div class="bin" style="height:2px" title="3614"></div><div class="bin" style="height:2px" title="3095"></div></div>
+<div class="stat-row">
+  <div><b>0.13</b>mean</div>
+  <div><b>0.07</b>median</div>
+  <div><b>2.76</b>skew</div>
+</div>
+<div class="extreme-note">15818 rows above p99 (0.78); true max 1.00</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>marking_tightness<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:9px" title="20975"></div><div class="bin" style="height:35px" title="76533"></div><div class="bin" style="height:51px" title="111311"></div><div class="bin" style="height:59px" title="129321"></div><div class="bin" style="height:63px" title="137941"></div><div class="bin" style="height:64px" title="138568"></div><div class="bin" style="height:62px" title="135758"></div><div class="bin" style="height:59px" title="128059"></div><div class="bin" style="height:54px" title="117923"></div><div class="bin" style="height:48px" title="106045"></div><div class="bin" style="height:42px" title="91898"></div><div class="bin" style="height:36px" title="78508"></div><div class="bin" style="height:30px" title="65615"></div><div class="bin" style="height:24px" title="53363"></div><div class="bin" style="height:19px" title="43009"></div><div class="bin" style="height:16px" title="34976"></div><div class="bin" style="height:12px" title="27736"></div><div class="bin" style="height:9px" title="21622"></div><div class="bin" style="height:7px" title="16775"></div><div class="bin" style="height:5px" title="12696"></div><div class="bin" style="height:4px" title="10018"></div><div class="bin" style="height:3px" title="7661"></div><div class="bin" style="height:2px" title="5966"></div><div class="bin" style="height:2px" title="4695"></div></div>
+<div class="stat-row">
+  <div><b>7.46</b>mean</div>
+  <div><b>6.66</b>median</div>
+  <div><b>1.17</b>skew</div>
+</div>
+<div class="extreme-note">15930 rows above p99 (21.73); true max 57.30</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_1_threat_score<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:10px" title="91765"></div><div class="bin" style="height:50px" title="444381"></div><div class="bin" style="height:64px" title="567055"></div><div class="bin" style="height:29px" title="257618"></div><div class="bin" style="height:11px" title="103183"></div><div class="bin" style="height:4px" title="41886"></div><div class="bin" style="height:2px" title="18569"></div><div class="bin" style="height:2px" title="9284"></div><div class="bin" style="height:2px" title="5936"></div><div class="bin" style="height:2px" title="4585"></div><div class="bin" style="height:2px" title="3556"></div><div class="bin" style="height:2px" title="3240"></div><div class="bin" style="height:2px" title="2759"></div><div class="bin" style="height:2px" title="2952"></div><div class="bin" style="height:2px" title="2669"></div><div class="bin" style="height:2px" title="2462"></div><div class="bin" style="height:2px" title="2368"></div><div class="bin" style="height:2px" title="2316"></div><div class="bin" style="height:2px" title="1902"></div><div class="bin" style="height:2px" title="1791"></div><div class="bin" style="height:2px" title="1881"></div><div class="bin" style="height:2px" title="1766"></div><div class="bin" style="height:2px" title="1570"></div><div class="bin" style="height:2px" title="1484"></div></div>
+<div class="stat-row">
+  <div><b>0.02</b>mean</div>
+  <div><b>0.02</b>median</div>
+  <div><b>8.32</b>skew</div>
+</div>
+<div class="extreme-note">15924 rows above p99 (0.15); true max 0.91</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_2_threat_score<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:4px" title="15631"></div><div class="bin" style="height:13px" title="44044"></div><div class="bin" style="height:41px" title="138668"></div><div class="bin" style="height:33px" title="112521"></div><div class="bin" style="height:34px" title="115738"></div><div class="bin" style="height:61px" title="203564"></div><div class="bin" style="height:64px" title="212439"></div><div class="bin" style="height:57px" title="190577"></div><div class="bin" style="height:45px" title="149832"></div><div class="bin" style="height:33px" title="110349"></div><div class="bin" style="height:23px" title="79616"></div><div class="bin" style="height:17px" title="56836"></div><div class="bin" style="height:11px" title="39617"></div><div class="bin" style="height:8px" title="26954"></div><div class="bin" style="height:5px" title="19173"></div><div class="bin" style="height:4px" title="13624"></div><div class="bin" style="height:3px" title="10656"></div><div class="bin" style="height:2px" title="7827"></div><div class="bin" style="height:2px" title="6541"></div><div class="bin" style="height:2px" title="5983"></div><div class="bin" style="height:2px" title="4612"></div><div class="bin" style="height:2px" title="4039"></div><div class="bin" style="height:2px" title="3499"></div><div class="bin" style="height:2px" title="2756"></div></div>
+<div class="stat-row">
+  <div><b>0.01</b>mean</div>
+  <div><b>0.01</b>median</div>
+  <div><b>2.47</b>skew</div>
+</div>
+<div class="extreme-note">15904 rows above p99 (0.04); true max 0.21</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_3_threat_score<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:8px" title="20910"></div><div class="bin" style="height:22px" title="55863"></div><div class="bin" style="height:29px" title="72670"></div><div class="bin" style="height:59px" title="148064"></div><div class="bin" style="height:64px" title="159726"></div><div class="bin" style="height:51px" title="129018"></div><div class="bin" style="height:47px" title="117855"></div><div class="bin" style="height:55px" title="138608"></div><div class="bin" style="height:59px" title="148496"></div><div class="bin" style="height:54px" title="136747"></div><div class="bin" style="height:43px" title="109283"></div><div class="bin" style="height:34px" title="85568"></div><div class="bin" style="height:25px" title="63703"></div><div class="bin" style="height:18px" title="46607"></div><div class="bin" style="height:14px" title="35747"></div><div class="bin" style="height:10px" title="26380"></div><div class="bin" style="height:7px" title="19647"></div><div class="bin" style="height:5px" title="13814"></div><div class="bin" style="height:4px" title="10674"></div><div class="bin" style="height:3px" title="8409"></div><div class="bin" style="height:2px" title="6496"></div><div class="bin" style="height:2px" title="4765"></div><div class="bin" style="height:2px" title="3657"></div><div class="bin" style="height:2px" title="3265"></div></div>
+<div class="stat-row">
+  <div><b>0.01</b>mean</div>
+  <div><b>0.01</b>median</div>
+  <div><b>1.66</b>skew</div>
+</div>
+<div class="extreme-note">15811 rows above p99 (0.03); true max 0.11</div>
+</div></div><div class="dist-card-wrap dropped">
+<div class="card">
+<h3>zone_defensive_value<span class="dist-status-badge dropped">DROPPED</span></h3>
+<p class="dist-reason">Why dropped: CORRELATION_ANALYSIS DROP tier: Spearman r=-1.0 vs distance_to_defending_goal (kept)</p><p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:64px" title="496462"></div><div class="bin" style="height:57px" title="447370"></div><div class="bin" style="height:32px" title="250826"></div><div class="bin" style="height:18px" title="140892"></div><div class="bin" style="height:10px" title="79903"></div><div class="bin" style="height:6px" title="48524"></div><div class="bin" style="height:4px" title="32263"></div><div class="bin" style="height:2px" title="21644"></div><div class="bin" style="height:2px" title="13981"></div><div class="bin" style="height:2px" title="9527"></div><div class="bin" style="height:2px" title="7074"></div><div class="bin" style="height:2px" title="5160"></div><div class="bin" style="height:2px" title="3931"></div><div class="bin" style="height:2px" title="3137"></div><div class="bin" style="height:2px" title="2589"></div><div class="bin" style="height:2px" title="2217"></div><div class="bin" style="height:2px" title="1923"></div><div class="bin" style="height:2px" title="1744"></div><div class="bin" style="height:2px" title="1537"></div><div class="bin" style="height:2px" title="1480"></div><div class="bin" style="height:2px" title="1379"></div><div class="bin" style="height:2px" title="1272"></div><div class="bin" style="height:2px" title="1254"></div><div class="bin" style="height:2px" title="1160"></div></div>
+<div class="stat-row">
+  <div><b>0.02</b>mean</div>
+  <div><b>0.02</b>median</div>
+  <div><b>8.18</b>skew</div>
+</div>
+<div class="extreme-note">15932 rows above p99 (0.15); true max 0.93</div>
+</div></div></div>
+<h2 class="section-title">Discrete Distributions</h2><p class="section-note">Raw value counts, capped at 20 distinct values.</p><div class="card-grid"><div class="dist-card-wrap locked">
+<div class="card">
+<h3>defender_slot_index<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts</p>
+<div class="hist"><div class="bin" style="height:64px" title="0: 198354"></div><div class="bin" style="height:63px" title="1: 197328"></div><div class="bin" style="height:62px" title="2: 194976"></div><div class="bin" style="height:61px" title="3: 190074"></div><div class="bin" style="height:58px" title="4: 182289"></div><div class="bin" style="height:54px" title="5: 169453"></div><div class="bin" style="height:48px" title="6: 150171"></div><div class="bin" style="height:41px" title="7: 127593"></div><div class="bin" style="height:32px" title="8: 102160"></div><div class="bin" style="height:21px" title="9: 66831"></div><div class="bin" style="height:4px" title="10: 13952"></div></div>
+<div class="stat-row">
+  <div><b>3.82</b>mean</div>
+  <div><b>4.00</b>median</div>
+  <div><b>1,593,181</b>n</div>
+</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>overload_score<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts</p>
+<div class="hist"><div class="bin" style="height:64px" title="0: 1204568"></div><div class="bin" style="height:12px" title="1: 237513"></div><div class="bin" style="height:5px" title="2: 99111"></div><div class="bin" style="height:2px" title="3: 51989"></div></div>
+<div class="stat-row">
+  <div><b>0.37</b>mean</div>
+  <div><b>0.00</b>median</div>
+  <div><b>1,593,181</b>n</div>
+</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_1_angle_from_ball<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts (tail bucketed, amber)</p>
+<div class="hist"><div class="bin" style="height:2px" title="-3.1413555587470054: 20"></div><div class="bin" style="height:2px" title="-3.1413469810318637: 6"></div><div class="bin" style="height:2px" title="-3.1409770788548355: 10"></div><div class="bin" style="height:2px" title="-3.1390192877608625: 6"></div><div class="bin" style="height:2px" title="-3.13890061141493: 7"></div><div class="bin" style="height:2px" title="-3.1382681120345146: 7"></div><div class="bin" style="height:2px" title="-3.137797644930903: 9"></div><div class="bin" style="height:2px" title="-3.1376543414146947: 7"></div><div class="bin" style="height:2px" title="-3.1376193031883117: 4"></div><div class="bin" style="height:2px" title="-3.1372888889583685: 11"></div><div class="bin" style="height:2px" title="-3.137054942933985: 1"></div><div class="bin" style="height:2px" title="-3.137048318263183: 8"></div><div class="bin" style="height:2px" title="-3.13692550128323: 4"></div><div class="bin" style="height:2px" title="-3.1367076033253656: 7"></div><div class="bin" style="height:2px" title="-3.1366760790986863: 1"></div><div class="bin" style="height:2px" title="-3.1365467381873318: 1"></div><div class="bin" style="height:2px" title="-3.13638167301963: 10"></div><div class="bin" style="height:2px" title="-3.135957408128289: 6"></div><div class="bin" style="height:2px" title="-3.1355579949137558: 8"></div><div class="bin tail" style="height:64px" title="-3.1355579949137558+: 1592769"></div></div>
+<div class="stat-row">
+  <div><b>-0.01</b>mean</div>
+  <div><b>-0.08</b>median</div>
+  <div><b>1,592,902</b>n</div>
+</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_1_distance_from_ball<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts (tail bucketed, amber)</p>
+<div class="hist"><div class="bin" style="height:2px" title="0.43117118401155724: 9"></div><div class="bin" style="height:2px" title="0.5766162073386158: 9"></div><div class="bin" style="height:2px" title="0.7041700561183242: 7"></div><div class="bin" style="height:2px" title="0.8563275843749801: 10"></div><div class="bin" style="height:2px" title="0.8668030516470815: 10"></div><div class="bin" style="height:2px" title="0.8775543074116154: 11"></div><div class="bin" style="height:2px" title="0.8834218353535287: 10"></div><div class="bin" style="height:2px" title="0.8888081455893488: 7"></div><div class="bin" style="height:2px" title="0.8924526018588199: 1"></div><div class="bin" style="height:2px" title="0.9505676033725768: 4"></div><div class="bin" style="height:2px" title="1.0574435152231496: 9"></div><div class="bin" style="height:2px" title="1.0685079369291333: 8"></div><div class="bin" style="height:2px" title="1.1078407833912478: 6"></div><div class="bin" style="height:2px" title="1.1217723776724284: 6"></div><div class="bin" style="height:2px" title="1.1244298638083439: 9"></div><div class="bin" style="height:2px" title="1.125301516774041: 8"></div><div class="bin" style="height:2px" title="1.1353646359663556: 7"></div><div class="bin" style="height:2px" title="1.2081184240651734: 4"></div><div class="bin" style="height:2px" title="1.2524612777143995: 9"></div><div class="bin tail" style="height:64px" title="1.2524612777143995+: 1592758"></div></div>
+<div class="stat-row">
+  <div><b>30.43</b>mean</div>
+  <div><b>27.58</b>median</div>
+  <div><b>1,592,902</b>n</div>
+</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_1_dx<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts (tail bucketed, amber)</p>
+<div class="hist"><div class="bin" style="height:2px" title="-112.59775303982839: 9"></div><div class="bin" style="height:2px" title="-105.49083339457215: 7"></div><div class="bin" style="height:2px" title="-103.35956042398135: 9"></div><div class="bin" style="height:2px" title="-101.66423612699113: 4"></div><div class="bin" style="height:2px" title="-101.44071422364553: 8"></div><div class="bin" style="height:2px" title="-100.39003021892857: 8"></div><div class="bin" style="height:2px" title="-99.40124900879538: 9"></div><div class="bin" style="height:2px" title="-99.26550819149043: 9"></div><div class="bin" style="height:2px" title="-99.15926031905285: 8"></div><div class="bin" style="height:2px" title="-98.0912420639038: 9"></div><div class="bin" style="height:2px" title="-97.40450372639022: 10"></div><div class="bin" style="height:2px" title="-97.23645020531839: 7"></div><div class="bin" style="height:2px" title="-96.9317399808297: 5"></div><div class="bin" style="height:2px" title="-96.8063712531187: 9"></div><div class="bin" style="height:2px" title="-96.76038513278056: 5"></div><div class="bin" style="height:2px" title="-96.5868663968036: 4"></div><div class="bin" style="height:2px" title="-96.52628892662098: 10"></div><div class="bin" style="height:2px" title="-96.37213722686715: 9"></div><div class="bin" style="height:2px" title="-95.26185489908241: 3"></div><div class="bin tail" style="height:64px" title="-95.26185489908241+: 1592760"></div></div>
+<div class="stat-row">
+  <div><b>6.96</b>mean</div>
+  <div><b>7.46</b>median</div>
+  <div><b>1,592,902</b>n</div>
+</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_1_dy<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts (tail bucketed, amber)</p>
+<div class="hist"><div class="bin" style="height:2px" title="-80.24053347311522: 8"></div><div class="bin" style="height:2px" title="-78.34394112103509: 7"></div><div class="bin" style="height:2px" title="-78.30850539513673: 10"></div><div class="bin" style="height:2px" title="-78.10919273857004: 8"></div><div class="bin" style="height:2px" title="-77.99655738698523: 11"></div><div class="bin" style="height:2px" title="-77.94106335507416: 8"></div><div class="bin" style="height:2px" title="-77.47656886196833: 10"></div><div class="bin" style="height:2px" title="-77.15239134453978: 10"></div><div class="bin" style="height:2px" title="-76.6246122765417: 10"></div><div class="bin" style="height:2px" title="-76.00510127954684: 9"></div><div class="bin" style="height:2px" title="-75.96912772017879: 10"></div><div class="bin" style="height:2px" title="-75.87560145056578: 11"></div><div class="bin" style="height:2px" title="-75.86432853430868: 7"></div><div class="bin" style="height:2px" title="-75.84339046121738: 10"></div><div class="bin" style="height:2px" title="-75.8016841129904: 6"></div><div class="bin" style="height:2px" title="-75.77879131754504: 10"></div><div class="bin" style="height:2px" title="-75.64643252079688: 10"></div><div class="bin" style="height:2px" title="-75.60087867589256: 10"></div><div class="bin" style="height:2px" title="-75.55439828096891: 9"></div><div class="bin tail" style="height:64px" title="-75.55439828096891+: 1592728"></div></div>
+<div class="stat-row">
+  <div><b>-0.22</b>mean</div>
+  <div><b>-1.02</b>median</div>
+  <div><b>1,592,902</b>n</div>
+</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_2_angle_from_ball<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts (tail bucketed, amber)</p>
+<div class="hist"><div class="bin" style="height:2px" title="-3.1415412923967163: 9"></div><div class="bin" style="height:2px" title="-3.141463912789967: 5"></div><div class="bin" style="height:2px" title="-3.141461391749175: 7"></div><div class="bin" style="height:2px" title="-3.1413358969894816: 9"></div><div class="bin" style="height:2px" title="-3.141242487407283: 7"></div><div class="bin" style="height:2px" title="-3.1411674804991314: 10"></div><div class="bin" style="height:2px" title="-3.141102989954896: 10"></div><div class="bin" style="height:2px" title="-3.1409547435580287: 5"></div><div class="bin" style="height:2px" title="-3.140393277894834: 3"></div><div class="bin" style="height:2px" title="-3.140334999997917: 9"></div><div class="bin" style="height:2px" title="-3.140190184137148: 6"></div><div class="bin" style="height:2px" title="-3.1400570120117464: 10"></div><div class="bin" style="height:2px" title="-3.1399358528225347: 5"></div><div class="bin" style="height:2px" title="-3.1398887477502737: 10"></div><div class="bin" style="height:2px" title="-3.1398448049235137: 11"></div><div class="bin" style="height:2px" title="-3.139811296350439: 6"></div><div class="bin" style="height:2px" title="-3.1396272815221966: 7"></div><div class="bin" style="height:2px" title="-3.139615302878447: 8"></div><div class="bin" style="height:2px" title="-3.139441461888805: 6"></div><div class="bin tail" style="height:64px" title="-3.139441461888805+: 1590857"></div></div>
+<div class="stat-row">
+  <div><b>-0.00</b>mean</div>
+  <div><b>-0.04</b>median</div>
+  <div><b>1,591,000</b>n</div>
+</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_2_distance_from_ball<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts (tail bucketed, amber)</p>
+<div class="hist"><div class="bin" style="height:2px" title="0.2646032691532064: 5"></div><div class="bin" style="height:2px" title="0.3545836449534086: 11"></div><div class="bin" style="height:2px" title="0.35673806927875845: 8"></div><div class="bin" style="height:2px" title="0.3728189774422052: 5"></div><div class="bin" style="height:2px" title="0.4765333916214255: 7"></div><div class="bin" style="height:2px" title="0.5826516856061988: 9"></div><div class="bin" style="height:2px" title="0.587431224158144: 9"></div><div class="bin" style="height:2px" title="0.6057285716771819: 8"></div><div class="bin" style="height:2px" title="0.6087590476287477: 8"></div><div class="bin" style="height:2px" title="0.6618084999288751: 3"></div><div class="bin" style="height:2px" title="0.7243965963569252: 5"></div><div class="bin" style="height:2px" title="0.7346601902926162: 9"></div><div class="bin" style="height:2px" title="0.7618942044272866: 8"></div><div class="bin" style="height:2px" title="0.7826243830260957: 7"></div><div class="bin" style="height:2px" title="0.8174930880700899: 11"></div><div class="bin" style="height:2px" title="0.8374244899966268: 11"></div><div class="bin" style="height:2px" title="0.8643721278335116: 11"></div><div class="bin" style="height:2px" title="0.9316626193696449: 11"></div><div class="bin" style="height:2px" title="1.009378590400735: 7"></div><div class="bin tail" style="height:64px" title="1.009378590400735+: 1590847"></div></div>
+<div class="stat-row">
+  <div><b>28.65</b>mean</div>
+  <div><b>26.16</b>median</div>
+  <div><b>1,591,000</b>n</div>
+</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_2_dx<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts (tail bucketed, amber)</p>
+<div class="hist"><div class="bin" style="height:2px" title="-114.51134386819257: 4"></div><div class="bin" style="height:2px" title="-109.53787367671565: 8"></div><div class="bin" style="height:2px" title="-107.97783911270628: 4"></div><div class="bin" style="height:2px" title="-106.42461855660335: 6"></div><div class="bin" style="height:2px" title="-105.49455195892963: 9"></div><div class="bin" style="height:2px" title="-105.24293240333209: 7"></div><div class="bin" style="height:2px" title="-104.55484934382491: 10"></div><div class="bin" style="height:2px" title="-103.22874951994848: 9"></div><div class="bin" style="height:2px" title="-103.22731127098203: 9"></div><div class="bin" style="height:2px" title="-103.151138745012: 11"></div><div class="bin" style="height:2px" title="-102.94417981122174: 5"></div><div class="bin" style="height:2px" title="-102.8044436172644: 10"></div><div class="bin" style="height:2px" title="-102.8014053760911: 10"></div><div class="bin" style="height:2px" title="-102.2428003830209: 10"></div><div class="bin" style="height:2px" title="-100.01284996907535: 9"></div><div class="bin" style="height:2px" title="-99.83311577716019: 9"></div><div class="bin" style="height:2px" title="-99.794671843353: 5"></div><div class="bin" style="height:2px" title="-99.64069011945494: 7"></div><div class="bin" style="height:2px" title="-99.47937923379382: 4"></div><div class="bin tail" style="height:64px" title="-99.47937923379382+: 1590854"></div></div>
+<div class="stat-row">
+  <div><b>1.16</b>mean</div>
+  <div><b>1.34</b>median</div>
+  <div><b>1,591,000</b>n</div>
+</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_2_dy<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts (tail bucketed, amber)</p>
+<div class="hist"><div class="bin" style="height:2px" title="-81.76101895927616: 9"></div><div class="bin" style="height:2px" title="-81.34467765611201: 10"></div><div class="bin" style="height:2px" title="-79.48745749276902: 10"></div><div class="bin" style="height:2px" title="-76.95453741352864: 10"></div><div class="bin" style="height:2px" title="-76.54239013064638: 8"></div><div class="bin" style="height:2px" title="-75.92281469267483: 8"></div><div class="bin" style="height:2px" title="-75.86406668125278: 10"></div><div class="bin" style="height:2px" title="-75.86340695385948: 10"></div><div class="bin" style="height:2px" title="-75.5326029778928: 8"></div><div class="bin" style="height:2px" title="-75.31137652763968: 10"></div><div class="bin" style="height:2px" title="-75.2771590914032: 10"></div><div class="bin" style="height:2px" title="-75.08592947792874: 10"></div><div class="bin" style="height:2px" title="-74.91420045665588: 10"></div><div class="bin" style="height:2px" title="-74.86558680176505: 11"></div><div class="bin" style="height:2px" title="-74.83940756391812: 11"></div><div class="bin" style="height:2px" title="-74.70338972969238: 11"></div><div class="bin" style="height:2px" title="-74.69750809333034: 10"></div><div class="bin" style="height:2px" title="-74.61332289656136: 10"></div><div class="bin" style="height:2px" title="-74.5856012933112: 10"></div><div class="bin tail" style="height:64px" title="-74.5856012933112+: 1590814"></div></div>
+<div class="stat-row">
+  <div><b>-0.13</b>mean</div>
+  <div><b>-0.39</b>median</div>
+  <div><b>1,591,000</b>n</div>
+</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_3_angle_from_ball<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts (tail bucketed, amber)</p>
+<div class="hist"><div class="bin" style="height:2px" title="-3.1414826072868354: 11"></div><div class="bin" style="height:2px" title="-3.1414588154024976: 10"></div><div class="bin" style="height:2px" title="-3.1413942309144973: 7"></div><div class="bin" style="height:2px" title="-3.1413637479975796: 6"></div><div class="bin" style="height:2px" title="-3.1413262581779833: 10"></div><div class="bin" style="height:2px" title="-3.141259967455937: 10"></div><div class="bin" style="height:2px" title="-3.141144943274224: 9"></div><div class="bin" style="height:2px" title="-3.1409562062743723: 8"></div><div class="bin" style="height:2px" title="-3.140826632886702: 6"></div><div class="bin" style="height:2px" title="-3.140820564399708: 10"></div><div class="bin" style="height:2px" title="-3.14079746477334: 7"></div><div class="bin" style="height:2px" title="-3.1406402666713817: 10"></div><div class="bin" style="height:2px" title="-3.1405994622579856: 4"></div><div class="bin" style="height:2px" title="-3.140567804113664: 10"></div><div class="bin" style="height:2px" title="-3.140545040700192: 10"></div><div class="bin" style="height:2px" title="-3.1401972951007964: 9"></div><div class="bin" style="height:2px" title="-3.1401117495441895: 6"></div><div class="bin" style="height:2px" title="-3.140087586494745: 5"></div><div class="bin" style="height:2px" title="-3.1399662059602567: 11"></div><div class="bin tail" style="height:64px" title="-3.1399662059602567+: 1581624"></div></div>
+<div class="stat-row">
+  <div><b>0.00</b>mean</div>
+  <div><b>-0.02</b>median</div>
+  <div><b>1,581,783</b>n</div>
+</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_3_distance_from_ball<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts (tail bucketed, amber)</p>
+<div class="hist"><div class="bin" style="height:2px" title="0.10334183776354927: 7"></div><div class="bin" style="height:2px" title="0.22609217917593666: 6"></div><div class="bin" style="height:2px" title="0.3208774044457333: 7"></div><div class="bin" style="height:2px" title="0.3352234821415594: 5"></div><div class="bin" style="height:2px" title="0.3549996226013561: 7"></div><div class="bin" style="height:2px" title="0.40192456657647135: 5"></div><div class="bin" style="height:2px" title="0.5452804678465755: 5"></div><div class="bin" style="height:2px" title="0.6097778065601889: 7"></div><div class="bin" style="height:2px" title="0.6367853287657362: 6"></div><div class="bin" style="height:2px" title="0.6694639419881357: 22"></div><div class="bin" style="height:2px" title="0.6802570302911516: 6"></div><div class="bin" style="height:2px" title="0.6890809930660472: 4"></div><div class="bin" style="height:2px" title="0.7049707758651741: 11"></div><div class="bin" style="height:2px" title="0.7205820223752823: 11"></div><div class="bin" style="height:2px" title="0.7334817574310996: 7"></div><div class="bin" style="height:2px" title="0.7408308317628638: 9"></div><div class="bin" style="height:2px" title="0.7423563699031503: 9"></div><div class="bin" style="height:2px" title="0.7520138881109082: 9"></div><div class="bin" style="height:2px" title="0.7613347577914049: 7"></div><div class="bin tail" style="height:64px" title="0.7613347577914049+: 1581633"></div></div>
+<div class="stat-row">
+  <div><b>27.08</b>mean</div>
+  <div><b>24.32</b>median</div>
+  <div><b>1,581,783</b>n</div>
+</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_3_dx<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts (tail bucketed, amber)</p>
+<div class="hist"><div class="bin" style="height:2px" title="-111.5389843495717: 7"></div><div class="bin" style="height:2px" title="-111.21359604891735: 4"></div><div class="bin" style="height:2px" title="-110.79534234734548: 5"></div><div class="bin" style="height:2px" title="-110.12481286378548: 9"></div><div class="bin" style="height:2px" title="-109.96030093880847: 3"></div><div class="bin" style="height:2px" title="-106.74936280637975: 10"></div><div class="bin" style="height:2px" title="-106.32983251404069: 8"></div><div class="bin" style="height:2px" title="-105.49576275796215: 8"></div><div class="bin" style="height:2px" title="-105.2506450992175: 10"></div><div class="bin" style="height:2px" title="-104.82509096953308: 9"></div><div class="bin" style="height:2px" title="-104.71656132407024: 4"></div><div class="bin" style="height:2px" title="-104.4620333016321: 3"></div><div class="bin" style="height:2px" title="-104.45601459571502: 9"></div><div class="bin" style="height:2px" title="-104.1477024187497: 9"></div><div class="bin" style="height:2px" title="-103.06248193924068: 9"></div><div class="bin" style="height:2px" title="-103.00382163572864: 10"></div><div class="bin" style="height:2px" title="-102.72153011440166: 10"></div><div class="bin" style="height:2px" title="-102.62923230825865: 9"></div><div class="bin" style="height:2px" title="-102.00771340926161: 9"></div><div class="bin tail" style="height:64px" title="-102.00771340926161+: 1581638"></div></div>
+<div class="stat-row">
+  <div><b>-1.16</b>mean</div>
+  <div><b>-1.43</b>median</div>
+  <div><b>1,581,783</b>n</div>
+</div>
+</div></div><div class="dist-card-wrap locked">
+<div class="card">
+<h3>top_option_3_dy<span class="dist-status-badge locked">LOCKED</span></h3>
+<p class="subnote">discrete &middot; value counts (tail bucketed, amber)</p>
+<div class="hist"><div class="bin" style="height:2px" title="-77.4524933413686: 7"></div><div class="bin" style="height:2px" title="-77.08101000860964: 8"></div><div class="bin" style="height:2px" title="-76.79214282871945: 7"></div><div class="bin" style="height:2px" title="-76.76012441927675: 11"></div><div class="bin" style="height:2px" title="-76.07645038818862: 10"></div><div class="bin" style="height:2px" title="-75.63492041429902: 10"></div><div class="bin" style="height:2px" title="-75.59045804501568: 3"></div><div class="bin" style="height:2px" title="-75.5639128724652: 10"></div><div class="bin" style="height:2px" title="-75.50192170285774: 9"></div><div class="bin" style="height:2px" title="-75.42819544352119: 11"></div><div class="bin" style="height:2px" title="-75.30043553110849: 5"></div><div class="bin" style="height:2px" title="-75.02661017111183: 10"></div><div class="bin" style="height:2px" title="-74.85289293490919: 10"></div><div class="bin" style="height:2px" title="-74.70038914215873: 11"></div><div class="bin" style="height:2px" title="-74.56534001708633: 9"></div><div class="bin" style="height:2px" title="-74.49402976920618: 11"></div><div class="bin" style="height:2px" title="-74.44675774480267: 9"></div><div class="bin" style="height:2px" title="-74.25098819455945: 10"></div><div class="bin" style="height:2px" title="-74.19749315965548: 9"></div><div class="bin tail" style="height:64px" title="-74.19749315965548+: 1581613"></div></div>
+<div class="stat-row">
+  <div><b>-0.14</b>mean</div>
+  <div><b>-0.14</b>median</div>
+  <div><b>1,581,783</b>n</div>
+</div>
+</div></div></div>
+</div>
+</body>
+</html>

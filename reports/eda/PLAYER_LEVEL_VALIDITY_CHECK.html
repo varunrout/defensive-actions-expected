@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Player-Level Repeated-Measures / Split-Validity Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.test-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.test-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.test-title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 24px; margin: 0 0 6px; }
+.test-subnote { color: var(--text-muted); font-size: 13px; margin: 0 0 24px; }
+.qchart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
+.qchart-card h4 { font-family: "Archivo", sans-serif; font-size: 14.5px; margin: 0 0 4px; }
+.qchart-card .qc-note { color: var(--text-muted); font-size: 12px; margin: 0 0 16px; }
+.qbar-row { display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 0 4px; }
+.qbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.qbar-val { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.qbar-fill { width: 100%; max-width: 56px; background: var(--neg); border-radius: 4px 4px 0 0; min-height: 2px; }
+.qbar-label { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; text-align: center; line-height: 1.3; }
+.qbar-n { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); }
+.stratum-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 700px) { .stratum-grid { grid-template-columns: 1fr; } }
+.stratum-card { background: var(--plane); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.stratum-card h5 { font-family: "JetBrains Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--accent); margin: 0 0 4px; }
+.stratum-delta { font-size: 11.5px; color: var(--text-muted); margin: 0 0 12px; }
+.stratum-delta b { color: var(--text-primary); }
+.qbar-row.small { height: 90px; gap: 8px; }
+.qbar-row.small .qbar-fill { max-width: 40px; }
+.verdict-banner { border-radius: 10px; padding: 16px 20px; margin: 8px 0 28px; font-size: 14px; }
+.verdict-banner.v-no { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); }
+.verdict-banner.v-yes { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); }
+.verdict-banner.v-partially { background: rgba(42,120,214,0.10); border: 1px solid rgba(42,120,214,0.3); }
+.verdict-banner b { color: var(--text-primary); }
+.caveat-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 20px 24px; margin-top: 32px; }
+.caveat-box h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.caveat-box ul { margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary); }
+.caveat-box li { margin-bottom: 4px; }
+
+.numfeat-list { display: flex; flex-direction: column; gap: 12px; }
+.numfeat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+.numfeat-card.is-dropped { border-left: 4px solid var(--amber); }
+.numfeat-card.is-locked { border-left: 4px solid var(--good); }
+.numfeat-card.is-unreliable { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.numfeat-card.is-inconsistent { box-shadow: inset 0 0 0 1px rgba(227,73,72,0.4); }
+.numfeat-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-bottom: 6px;
+}
+.numfeat-rank { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-muted); }
+.numfeat-name { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 15.5px; color: var(--text-primary); }
+.nf-badge {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.nf-badge.locked { background: var(--good-wash); color: var(--good); }
+.nf-badge.dropped { background: var(--amber-wash); color: var(--amber); }
+.nf-badge.type { background: var(--plane); color: var(--text-secondary); }
+.nf-badge.unreliable { background: rgba(227,73,72,0.14); color: var(--pos); }
+.nf-badge.inconsistent { background: rgba(227,73,72,0.14); color: var(--pos); }
+.numfeat-stats {
+  display: flex; flex-wrap: wrap; gap: 14px 22px;
+  font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.numfeat-stats b { color: var(--text-primary); }
+.numfeat-reason, .numfeat-note { font-size: 12.5px; color: var(--text-secondary); margin: 4px 0; }
+.numfeat-note { color: var(--amber); }
+.numfeat-card summary {
+  cursor: pointer;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--neg);
+  margin-top: 6px;
+  outline: none;
+}
+.numfeat-card summary::-webkit-details-marker { color: var(--neg); }
+.numbin-rows { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+.numbin-row {
+  display: grid; grid-template-columns: 1fr 3fr auto; align-items: center; gap: 10px;
+  font-size: 11.5px; color: var(--text-secondary);
+}
+.numbin-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.numbin-track { position: relative; height: 9px; background: var(--gridline); border-radius: 4px; }
+.numbin-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; background: var(--neg); }
+.numbin-refline { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber); }
+.numbin-val { font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 600; color: var(--text-primary); text-align: right; }
+.numfeat-consistency {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-size: 12.5px; color: var(--text-secondary);
+}
+.numfeat-consistency .cverdict { font-weight: 700; }
+.numfeat-consistency .cverdict.ok { color: var(--good); }
+.numfeat-consistency .cverdict.bad { color: var(--pos); }
+.numsplit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+@media (max-width: 700px) { .numsplit-grid { grid-template-columns: 1fr; } }
+.numsplit-card { background: var(--plane); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.numsplit-card h5 { font-family: "JetBrains Mono", monospace; font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); margin: 0 0 6px; }
+
+tr.hi-row { background: var(--amber-wash); }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">PLAYER-LEVEL VALIDITY CHECK</p>
+  <h1 class="title">Player-Level Repeated-Measures / Split-Validity Check</h1>
+  <p class="dek">StratifiedGroupKFold groups by match, not by player. This checks whether that matters: how concentrated is the active dataset in a small number of players, which locked features are more 'who is defending' than 'what is the defensive situation', and how much train/test player overlap exists. Diagnostic only -- no causal claims, no corrections applied here.</p>
+  <div class="statbar"><div class="stat"><b>1012</b><span>distinct players</span></div><div class="stat"><b>89.98%</b><span>test players also in train+val</span></div><div class="stat"><b>1</b><span>risk pair(s) flagged</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+
+<div class="finding"><span class="tag">scope limitation -- passive dataset excluded</span><p><b>not an oversight</b> &mdash; This check is active-dataset only. passive_defense.parquet has no player identity column -- it's one row per anonymous defender-slot per on-ball event, not per identified player -- so player-level ICC and train/test player overlap cannot be computed on the passive side. This is a real scope limitation of the data, not an oversight: there is no workaround that recovers player identity from an anonymous defender slot.</p></div>
+<div class="finding"><span class="tag">target-independent</span><p><b>same for binary and xG</b> &mdash; Row concentration, per-feature ICC/Cramer's V against player_id, and train/test player overlap never reference target_future_shot_10s or target_future_xg_10s -- these numbers are identical whichever target a downstream model uses. Mirrored unchanged into reports/eda_xg/, not recomputed.</p></div>
+
+<h2 class="test-title">Step 1 -- row concentration</h2>
+<p class="test-subnote">1012 distinct players across 56,068 rows. Top 10 players:
+<b>4.83%</b> of rows. Top 25: <b>10.42%</b>.
+Top 50: <b>18.20%</b>. Gini coefficient: <b>0.4638</b>
+(0 = perfectly even, 1 = fully concentrated in one player). Max rows for a single player: 344
+(median 43.0).</p>
+<div class="qchart-card">
+  <h4>Lorenz curve -- cumulative row share by player rank</h4>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">30.6%</span>
+  <div class="qbar-fill" style="height:30.6%"></div>
+  <span class="qbar-label">top 10%<br>(101 players)</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">56.0%</span>
+  <div class="qbar-fill" style="height:56.0%"></div>
+  <span class="qbar-label">top 25%<br>(253 players)</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">82.7%</span>
+  <div class="qbar-fill" style="height:82.7%"></div>
+  <span class="qbar-label">top 50%<br>(506 players)</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">95.7%</span>
+  <div class="qbar-fill" style="height:95.7%"></div>
+  <span class="qbar-label">top 75%<br>(759 players)</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">100.0%</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">top 100%<br>(1012 players)</span>
+</div></div>
+</div>
+
+<h2 class="test-title" style="margin-top:32px;">Step 2 -- per-feature ICC / player-identity association (all 34 locked active features)</h2>
+<p class="test-subnote">Variance-ratio (eta^2, src.eda.correlation.correlation_ratio squared) for continuous/discrete/boolean features (28 of 34) -- the standard one-way ICC proxy, between-player variance / total variance, treating player_id as the grouping factor. Cramer&#x27;s V (bias-corrected, src.eda.correlation.cramers_v) for the 6 genuinely categorical features, since variance-ratio has no natural definition for a non-numeric feature -- same 0-1 scale and the same 0.3 threshold, but a different statistic (chi-square association, not a variance decomposition); each row states which method produced its value. Threshold: <b>0.3</b> (same convention as
+prompt 27's Cramer's V thresholds).</p>
+
+<div class="qchart-card" style="overflow-x:auto;">
+<table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+<thead><tr style="text-align:left;color:var(--text-muted);">
+  <th style="padding:6px 10px;">rank</th><th style="padding:6px 10px;">feature</th><th style="padding:6px 10px;">type</th>
+  <th style="padding:6px 10px;">ICC / Cramer's V</th><th style="padding:6px 10px;">method</th><th style="padding:6px 10px;"></th>
+</tr></thead>
+<tbody><tr class="hi-row">
+  <td>1</td><td><code>position</code></td><td>categorical</td>
+  <td>0.7714</td><td style="font-size:11px;color:var(--text-muted);">cramers_v (player_id vs feature, bias-corrected)</td>
+  <td>FLAGGED &gt; 0.3</td>
+</tr><tr>
+  <td>2</td><td><code>period</code></td><td>categorical</td>
+  <td>0.2754</td><td style="font-size:11px;color:var(--text-muted);">cramers_v (player_id vs feature, bias-corrected)</td>
+  <td></td>
+</tr><tr>
+  <td>3</td><td><code>phase_label</code></td><td>categorical</td>
+  <td>0.1875</td><td style="font-size:11px;color:var(--text-muted);">cramers_v (player_id vs feature, bias-corrected)</td>
+  <td></td>
+</tr><tr>
+  <td>4</td><td><code>event_type</code></td><td>categorical</td>
+  <td>0.1668</td><td style="font-size:11px;color:var(--text-muted);">cramers_v (player_id vs feature, bias-corrected)</td>
+  <td></td>
+</tr><tr>
+  <td>5</td><td><code>match_time_seconds</code></td><td>continuous</td>
+  <td>0.1559</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>6</td><td><code>attacking_goal_centrality</code></td><td>continuous</td>
+  <td>0.1461</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>7</td><td><code>defender_attacker_gap_x</code></td><td>continuous</td>
+  <td>0.1423</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>8</td><td><code>phase_label_prev_event</code></td><td>categorical</td>
+  <td>0.1415</td><td style="font-size:11px;color:var(--text-muted);">cramers_v (player_id vs feature, bias-corrected)</td>
+  <td></td>
+</tr><tr>
+  <td>9</td><td><code>visible_attacker_count</code></td><td>discrete</td>
+  <td>0.1116</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>10</td><td><code>play_pattern</code></td><td>categorical</td>
+  <td>0.1105</td><td style="font-size:11px;color:var(--text-muted);">cramers_v (player_id vs feature, bias-corrected)</td>
+  <td></td>
+</tr><tr>
+  <td>11</td><td><code>is_in_attacking_box</code></td><td>boolean</td>
+  <td>0.1079</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>12</td><td><code>angle_to_attacking_goal</code></td><td>continuous</td>
+  <td>0.0996</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>13</td><td><code>visible_defender_count</code></td><td>discrete</td>
+  <td>0.0947</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>14</td><td><code>has_previous_event</code></td><td>boolean</td>
+  <td>0.0884</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>15</td><td><code>distance_to_attacking_box</code></td><td>continuous</td>
+  <td>0.0853</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>16</td><td><code>defenders_within_10m</code></td><td>discrete</td>
+  <td>0.0828</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>17</td><td><code>is_in_defending_box</code></td><td>boolean</td>
+  <td>0.0816</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>18</td><td><code>attacker_defender_ratio</code></td><td>continuous</td>
+  <td>0.0743</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>19</td><td><code>attacker_spread</code></td><td>continuous</td>
+  <td>0.0733</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>20</td><td><code>defenders_between_ball_and_attacking_goal</code></td><td>discrete</td>
+  <td>0.0693</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>21</td><td><code>action_retained_defensive_team_control</code></td><td>boolean</td>
+  <td>0.0606</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>22</td><td><code>attackers_within_10m</code></td><td>discrete</td>
+  <td>0.0602</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>23</td><td><code>attackers_within_5m</code></td><td>discrete</td>
+  <td>0.0535</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>24</td><td><code>defender_spread</code></td><td>continuous</td>
+  <td>0.0523</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>25</td><td><code>has_visible_attacker</code></td><td>boolean</td>
+  <td>0.0504</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>26</td><td><code>action_was_under_opponent_possession</code></td><td>boolean</td>
+  <td>0.0474</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>27</td><td><code>possession_elapsed_seconds</code></td><td>continuous</td>
+  <td>0.0445</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>28</td><td><code>defenders_within_5m</code></td><td>discrete</td>
+  <td>0.0418</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>29</td><td><code>nearest_defender_distance</code></td><td>continuous</td>
+  <td>0.0406</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>30</td><td><code>defender_attacker_gap_y</code></td><td>continuous</td>
+  <td>0.0398</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>31</td><td><code>phase_changed_since_prev_event</code></td><td>boolean</td>
+  <td>0.0392</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>32</td><td><code>nearest_attacker_distance</code></td><td>continuous</td>
+  <td>0.0388</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>33</td><td><code>has_visible_defender</code></td><td>boolean</td>
+  <td>0.0365</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr><tr>
+  <td>34</td><td><code>counterpress</code></td><td>boolean</td>
+  <td>0.036</td><td style="font-size:11px;color:var(--text-muted);">variance_ratio (eta^2 of feature vs player_id groups)</td>
+  <td></td>
+</tr></tbody>
+</table>
+</div>
+
+<h2 class="test-title" style="margin-top:32px;">Step 3 -- train/test player overlap</h2>
+<p class="test-subnote">23 test matches (479 distinct players) vs
+92 train+val matches (964 distinct players).
+<b>89.98%</b> of test-set players (431 of
+479) also appear in train+val. Some overlap is expected and not inherently a problem -- players play in multiple matches across this 115-match, 2-tournament dataset. The percentage itself, not an assumption about it, is what matters for Step 3&#x27;s risk-pair cross-reference.</p>
+
+
+<h2 class="test-title" style="margin-top:32px;">Risk pairs -- high ICC AND high train/test player overlap</h2>
+<p class="test-subnote">Diagnostic only -- no correction applied here. Consider a player-grouped CV fold in
+addition to the match-grouped one, or drop/de-weight the feature, at the modelling stage.</p>
+
+<div class="verdict-banner v-yes" style="margin-bottom:10px;">
+<b>position -- HIGH RISK</b><br>position is player-identity-flavoured (0.7714 &gt; 0.3) AND 89.98% of test-set players also appear in train+val -- the combination the prompt asks to name explicitly, not either fact alone.
+</div>
+
+</div>
+</div>
+</body>
+</html>

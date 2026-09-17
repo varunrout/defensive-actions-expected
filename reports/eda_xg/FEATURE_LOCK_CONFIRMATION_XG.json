@@ -1,0 +1,424 @@
+{
+  "confirmed_counts": {
+    "active": 34,
+    "active_expected": 34,
+    "active_matches_expected": true,
+    "passive": 38,
+    "passive_expected": 38,
+    "passive_matches_expected": true
+  },
+  "changes_since_last_full_run": [
+    {
+      "change": "defender_functional_role bucket fix",
+      "detail": "4 categories -> 5: added advanced_wide (the previously-missing deep x wide quadrant), renamed the residual n>=2 fallback from unclassified to mid_block. unclassified now reserved exclusively for n<2.",
+      "feature_count_impact": "none (category-count change on an existing categorical column, not a column add/drop)"
+    },
+    {
+      "change": "V2 methodology-gap fixes",
+      "detail": "Added a categorical REVIEW band to correlation.py's tiering and Type 5/Type 6 review resolution logic. V1 pipeline (correlation.py, generate_review_analysis.py) reverted to its pre-V2 state after a scoping correction; V2 lives in separate _v2-suffixed modules.",
+      "feature_count_impact": "none (V1 candidate lists untouched; V2 is a parallel analysis track)"
+    },
+    {
+      "change": "VIF drop",
+      "detail": "local_numerical_balance_5m/10m dropped from the active candidate list -- near-exact linear combination of attackers_within_Nm - defenders_within_Nm (already kept), invisible to pairwise correlation, caught by VIF (condition number ~1.36e15 pre-drop, unbounded VIF for 6 columns).",
+      "feature_count_impact": "active: 36 -> 34"
+    },
+    {
+      "change": "Leakage drop",
+      "detail": "has_screened_outcome dropped from the passive candidate list -- censoring-mechanism proxy for target_future_shot_10s's own 10s window being truncated at end-of-period/match (chi2=136.5, p=1.54e-31), not defensive signal.",
+      "feature_count_impact": "passive: 39 -> 38"
+    },
+    {
+      "change": "Football sanity check",
+      "detail": "Validation-only pass (recomputation checks against stored values). No feature-list or pipeline changes.",
+      "feature_count_impact": "none"
+    },
+    {
+      "change": "Passive archetype clustering",
+      "detail": "New analysis module (src/dax/analysis/passive_archetypes.py) clustering within each defender_functional_role bucket. Does not touch feature_config.py's candidate lists.",
+      "feature_count_impact": "none"
+    },
+    {
+      "change": "Canonical match-grouped split",
+      "detail": "Frozen TEST/CV match assignment for model training. Does not touch feature_config.py's candidate lists.",
+      "feature_count_impact": "none"
+    }
+  ],
+  "correlation_diff": {
+    "active": {
+      "n_pairs_before": 25,
+      "n_pairs_after": 25,
+      "n_added": 0,
+      "n_removed": 0,
+      "n_tier_changed": 0,
+      "added_pairs": [],
+      "removed_pairs": [],
+      "tier_changed_pairs": [],
+      "newly_risky_pairs": []
+    },
+    "passive": {
+      "n_pairs_before": 31,
+      "n_pairs_after": 31,
+      "n_added": 0,
+      "n_removed": 0,
+      "n_tier_changed": 0,
+      "added_pairs": [],
+      "removed_pairs": [],
+      "tier_changed_pairs": [],
+      "newly_risky_pairs": []
+    }
+  },
+  "correlation_diff_note": "IDENTICAL to reports/eda/FEATURE_LOCK_CONFIRMATION.json's correlation_diff, by construction, not independently re-derived -- correlation clustering (feature vs feature) never references a target column, so re-running it against a different target would produce the exact same pairs and tiers. Reused directly from the binary confirmation rather than silently recomputed, so this file's numbers are traceable to that source.",
+  "diff_is_empty": true,
+  "any_newly_risky_pairs_found": false,
+  "part_b_triggered": false,
+  "leakage_confirmation_xg": {
+    "source": "reports/eda_xg/LEAKAGE_AUDIT.json",
+    "part_c_has_screened_outcome": {
+      "ratio_true_to_false": 1.3,
+      "t_stat": 2.0222197458288735,
+      "p_value": 0.043246202630200625,
+      "verdict": "excluded -- censoring-mechanism proxy (structural exclusion holds; empirical strength differs from the binary-target audit)",
+      "comparison_to_binary": "1.3x weaker mean-xG ratio at p=0.043 (barely significant), vs the binary target's ~12x shot-rate ratio at p=1.5e-31. The exclusion still holds on structural grounds -- the censoring mechanism (forward window truncated by match/period end) doesn't depend on which target is measured within that window, it depends on whether the window itself could be observed. Weaker evidence on this target does not weaken the case for dropping it; if anything, the binary leg alone was already sufficient and this just adds a second, independent (if noisier) confirmation."
+    },
+    "part_d_has_option_2_3": {
+      "leakage_audit_verdicts": {
+        "has_option_2": "flagged-for-follow-up",
+        "has_option_3": "flagged-for-follow-up"
+      },
+      "leakage_audit_note": "Still reads 'flagged-for-follow-up' in LEAKAGE_AUDIT.json itself -- that file records the state at the time of the base audit and is not rewritten retroactively when a follow-up closes elsewhere.",
+      "followup_status": {
+        "closed_by": "prompt 29 (reports/eda_xg/CONFOUND_ANALYSIS.json)",
+        "n_tests": 3,
+        "verdicts": {
+          "has_option_2_vs_top_option_1_threat_score": "no",
+          "has_option_3_vs_top_option_1_threat_score": "no",
+          "has_option_2_vs_defender_x": "no"
+        }
+      }
+    },
+    "verdict": "Both leakage items are confirmed consistent for continuous-target modelling. has_screened_outcome's drop is reconfirmed (mechanism-based, weaker-but-still-present empirical support on xg). has_option_2/3 remain locked candidate features -- LEAKAGE_AUDIT.json's own 'flagged-for-follow-up' note is resolved by the confound tests prompt 29 already ran (cross-referenced above), not reopened here."
+  },
+  "verdict": "The locked feature set (34 active / 38 passive) is confirmed internally consistent for continuous-target (target_future_xg_10s) modelling -- same counts as the binary confirmation (reports/eda/FEATURE_LOCK_CONFIRMATION.json), since correlation/redundancy is target-agnostic. One target-specific caveat: has_screened_outcome's leakage effect is present but materially weaker on xg (1.3x vs ~12x, p=0.043 vs p=1.5e-31) -- the drop is still warranted on structural grounds, more strongly evidenced on the binary target than on xg.",
+  "pattern_analysis_findings": {
+    "source_note": "Every number below re-read live from its source JSON. reports/eda/PATTERN_ANALYSIS_CLOSEOUT.md does not exist in this session; not used as a source.",
+    "numerical_vs_target_rankings_xg": {
+      "active_top": [
+        {
+          "feature": "defender_spread",
+          "spearman_rho": -0.1883,
+          "shape": "U-shaped"
+        },
+        {
+          "feature": "attacking_goal_centrality",
+          "spearman_rho": 0.1712,
+          "shape": "monotonic increasing"
+        },
+        {
+          "feature": "distance_to_center_line",
+          "spearman_rho": -0.1712,
+          "shape": "monotonic decreasing"
+        },
+        {
+          "feature": "attacker_spread",
+          "spearman_rho": -0.1711,
+          "shape": "monotonic decreasing"
+        },
+        {
+          "feature": "attacker_defender_ratio",
+          "spearman_rho": -0.1568,
+          "shape": "monotonic decreasing"
+        }
+      ],
+      "passive_top": [
+        {
+          "feature": "top_option_3_threat_score",
+          "spearman_rho": -0.0852,
+          "shape": "no-clear-pattern"
+        },
+        {
+          "feature": "top_option_2_threat_score",
+          "spearman_rho": -0.0765,
+          "shape": "no-clear-pattern"
+        },
+        {
+          "feature": "top_option_1_threat_score",
+          "spearman_rho": -0.0669,
+          "shape": "U-shaped"
+        },
+        {
+          "feature": "lane_screening_score_option_3",
+          "spearman_rho": 0.0659,
+          "shape": "monotonic increasing"
+        },
+        {
+          "feature": "attacking_goal_centrality",
+          "spearman_rho": 0.0649,
+          "shape": "monotonic increasing"
+        }
+      ],
+      "note": "Top 5 of each dataset's locked pool by |Spearman rho|, read from the atlas's own sort order."
+    },
+    "structural_zero_check": {
+      "overall_verdict": "confirmed",
+      "method": "Directly compared (target_future_shot_10s == 0) against (target_future_xg_10s == 0) row-for-row on both parquets. Zero mismatches confirms xg is structurally zero exactly where no shot occurred, which is the premise the shot-conditional panels (Part B/C) depend on.",
+      "note": "target_future_xg_10s == 0 exactly wherever target_future_shot_10s == 0 -- this is why every shot-conditional panel in this pipeline exists: the unconditional xg curve mostly re-derives occurrence in different units."
+    },
+    "confound_tests_xg": {
+      "n_tests": 5,
+      "tests": [
+        {
+          "name": "marking_tightness_vs_zone_defensive_value",
+          "title": "Marking tightness reversal",
+          "verdict": "partially"
+        },
+        {
+          "name": "lane_screening_vs_top_option_1_threat_score",
+          "title": "Lane screening reversal",
+          "verdict": "no"
+        },
+        {
+          "name": "has_option_2_vs_top_option_1_threat_score",
+          "title": "has_option_2 shot-rate gap vs top_option_1_threat_score",
+          "verdict": "no"
+        },
+        {
+          "name": "has_option_3_vs_top_option_1_threat_score",
+          "title": "has_option_3 shot-rate gap vs top_option_1_threat_score",
+          "verdict": "no"
+        },
+        {
+          "name": "has_option_2_vs_defender_x",
+          "title": "has_option_2 shot-rate gap vs defender_x",
+          "verdict": "no"
+        }
+      ],
+      "note": "5 tests, not 2 -- prompt 29 already extended this file with 3 has_option_2/3 tests; all 5 reported here."
+    },
+    "slice_stratification_xg": {
+      "n_genuine_divergences_unconditional": 363,
+      "n_genuine_divergences_given_shot": 90,
+      "n_conditioning_disagreements": 130,
+      "occurrence_vs_quality_worked_example": {
+        "dataset": "active",
+        "feature": "defender_spread",
+        "slicer": "phase_label",
+        "category": "box_defence",
+        "diverges_unconditional": true,
+        "diverges_given_shot": false,
+        "agrees": false,
+        "note": "diverges unconditionally but that divergence is occurrence-only -- flat once conditioned on a shot",
+        "takeaway": "Diverges unconditionally but that divergence is occurrence-only -- flat once conditioned on target_future_shot_10s==1. The unconditional divergence was about whether a shot happens, not about its quality."
+      }
+    },
+    "tournament_stability_xg": {
+      "n_features": 10,
+      "features": [
+        {
+          "feature": "defenders_within_10m",
+          "dataset": "active",
+          "verdict": "genuine tournament-level difference"
+        },
+        {
+          "feature": "defenders_within_5m",
+          "dataset": "active",
+          "verdict": "arbitrary train/test noise"
+        },
+        {
+          "feature": "events_elapsed_in_possession",
+          "dataset": "active",
+          "verdict": "genuine tournament-level difference"
+        },
+        {
+          "feature": "local_numerical_balance_5m",
+          "dataset": "active",
+          "verdict": "genuine tournament-level difference"
+        },
+        {
+          "feature": "match_time_seconds",
+          "dataset": "active",
+          "verdict": "genuine tournament-level difference"
+        },
+        {
+          "feature": "attackers_within_5m",
+          "dataset": "active",
+          "verdict": "arbitrary train/test noise"
+        },
+        {
+          "feature": "top_option_1_distance_from_ball",
+          "dataset": "passive",
+          "verdict": "arbitrary train/test noise"
+        },
+        {
+          "feature": "top_option_3_dx",
+          "dataset": "passive",
+          "verdict": "arbitrary train/test noise"
+        },
+        {
+          "feature": "top_option_3_dy",
+          "dataset": "passive",
+          "verdict": "arbitrary train/test noise"
+        },
+        {
+          "feature": "angle_to_attacking_goal",
+          "dataset": "passive",
+          "verdict": "arbitrary train/test noise"
+        }
+      ],
+      "excluded": {
+        "nearest_defender_distance": "already-known self-reference bug (73.6% of rows ~0m) -- a separate issue, not investigated here."
+      },
+      "target_agnosticism_note": "NOT target-agnostic -- 3/10 features (defenders_within_5m, local_numerical_balance_5m, attackers_within_5m) get a different verdict than reports/eda/FEATURE_LOCK_CONFIRMATION.json's tournament_stability section. Reported here in full, xg-specific, not cross-referenced."
+    },
+    "numeric_interaction_xg": {
+      "unconditional": {
+        "classification_counts": {
+          "interactive": 6,
+          "additive": 1,
+          "inconclusive": 3
+        },
+        "pairs": [
+          {
+            "feature_a": "defenders_within_10m",
+            "feature_b": "distance_to_attacking_box",
+            "dataset": "active",
+            "classification": "interactive"
+          },
+          {
+            "feature_a": "visible_defender_count",
+            "feature_b": "attacker_spread",
+            "dataset": "active",
+            "classification": "interactive"
+          },
+          {
+            "feature_a": "defenders_within_5m",
+            "feature_b": "defenders_within_10m",
+            "dataset": "active",
+            "classification": "interactive"
+          },
+          {
+            "feature_a": "possession_elapsed_seconds",
+            "feature_b": "match_time_seconds",
+            "dataset": "active",
+            "classification": "additive"
+          },
+          {
+            "feature_a": "defenders_between_ball_and_attacking_goal",
+            "feature_b": "attacker_defender_ratio",
+            "dataset": "active",
+            "classification": "inconclusive"
+          },
+          {
+            "feature_a": "top_option_2_threat_score",
+            "feature_b": "top_option_2_distance_from_ball",
+            "dataset": "passive",
+            "classification": "interactive"
+          },
+          {
+            "feature_a": "lane_screening_score_option_2",
+            "feature_b": "engagement_distance_to_carrier",
+            "dataset": "passive",
+            "classification": "interactive"
+          },
+          {
+            "feature_a": "marking_tightness",
+            "feature_b": "engagement_distance_to_carrier",
+            "dataset": "passive",
+            "classification": "inconclusive"
+          },
+          {
+            "feature_a": "overload_score",
+            "feature_b": "attacking_goal_centrality",
+            "dataset": "passive",
+            "classification": "inconclusive"
+          },
+          {
+            "feature_a": "lane_screening_score_option_1",
+            "feature_b": "marking_tightness",
+            "dataset": "passive",
+            "classification": "interactive"
+          }
+        ]
+      },
+      "given_shot": {
+        "classification_counts": {
+          "inconclusive": 10
+        },
+        "pairs": [
+          {
+            "feature_a": "defenders_within_10m",
+            "feature_b": "distance_to_attacking_box",
+            "dataset": "active",
+            "classification": "inconclusive"
+          },
+          {
+            "feature_a": "visible_defender_count",
+            "feature_b": "attacker_spread",
+            "dataset": "active",
+            "classification": "inconclusive"
+          },
+          {
+            "feature_a": "defenders_within_5m",
+            "feature_b": "defenders_within_10m",
+            "dataset": "active",
+            "classification": "inconclusive"
+          },
+          {
+            "feature_a": "possession_elapsed_seconds",
+            "feature_b": "match_time_seconds",
+            "dataset": "active",
+            "classification": "inconclusive"
+          },
+          {
+            "feature_a": "defenders_between_ball_and_attacking_goal",
+            "feature_b": "attacker_defender_ratio",
+            "dataset": "active",
+            "classification": "inconclusive"
+          },
+          {
+            "feature_a": "top_option_2_threat_score",
+            "feature_b": "top_option_2_distance_from_ball",
+            "dataset": "passive",
+            "classification": "inconclusive"
+          },
+          {
+            "feature_a": "lane_screening_score_option_2",
+            "feature_b": "engagement_distance_to_carrier",
+            "dataset": "passive",
+            "classification": "inconclusive"
+          },
+          {
+            "feature_a": "marking_tightness",
+            "feature_b": "engagement_distance_to_carrier",
+            "dataset": "passive",
+            "classification": "inconclusive"
+          },
+          {
+            "feature_a": "overload_score",
+            "feature_b": "attacking_goal_centrality",
+            "dataset": "passive",
+            "classification": "inconclusive"
+          },
+          {
+            "feature_a": "lane_screening_score_option_1",
+            "feature_b": "marking_tightness",
+            "dataset": "passive",
+            "classification": "inconclusive"
+          }
+        ]
+      },
+      "n_pairs_where_unconditional_and_given_shot_agree": 3,
+      "target_agnosticism_note": "NOT target-agnostic -- 6/10 pairs' unconditional classification differs from reports/eda/FEATURE_LOCK_CONFIRMATION.json's numeric_interaction section. Reported here in full, xg-specific, not cross-referenced."
+    },
+    "cross_referenced_target_agnostic_sections": {
+      "slicer_redundancy": "See reports/eda/FEATURE_LOCK_CONFIRMATION.json's pattern_analysis_findings.slicer_redundancy -- genuinely target-agnostic (confirmed), this analysis doesn't depend on target type.",
+      "player_level_validity": "See reports/eda/FEATURE_LOCK_CONFIRMATION.json's pattern_analysis_findings.player_level_validity -- genuinely target-agnostic (confirmed), active dataset only."
+    },
+    "corrections_to_prompt_34s_premise": [
+      "reports/eda/PATTERN_ANALYSIS_CLOSEOUT.md (prompt 32) does not exist in this session -- prompt 32 was never run. Every figure below is read directly from its live source JSON instead, which the prompt's own Method section required anyway.",
+      "Tournament stability is NOT target-agnostic, despite the prompt's claim -- verified by diffing reports/eda/TOURNAMENT_STABILITY_CHECK.json against reports/eda_xg/TOURNAMENT_STABILITY_CHECK.json directly: 3 of 10 features (defenders_within_5m, local_numerical_balance_5m, attackers_within_5m) get a DIFFERENT verdict depending on target. Reported in full in both lock-confirmation files, not cross-referenced.",
+      "Numeric interaction analysis is NOT target-agnostic either -- verified by diffing reports/eda/FEATURE_INTERACTION_ANALYSIS.json against the xg version's unconditional classification: 6 of 10 pairs differ. Reported in full in both lock-confirmation files, not cross-referenced.",
+      "reports/eda_xg/CONFOUND_ANALYSIS.json has 5 tests, not the 2 the prompt assumed -- prompt 29 already extended it with 3 has_option_2/3 tests. All 5 are reported here."
+    ]
+  }
+}

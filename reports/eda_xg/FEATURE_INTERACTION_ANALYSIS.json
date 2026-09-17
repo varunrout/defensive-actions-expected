@@ -1,0 +1,2919 @@
+{
+  "target": "target_future_xg_10s",
+  "shot_col": "target_future_shot_10s",
+  "quartile_n": 4,
+  "thresholds": {
+    "substitutive_ratio_max": 0.3,
+    "additive_magnitude_ratio_max": 2.0,
+    "min_cell_n_for_delta": 20,
+    "flat_margin_ratio": 0.5,
+    "min_marginal_delta_by_dataset": {
+      "active": 0.004055,
+      "passive": 0.002996
+    },
+    "min_marginal_delta_given_shot_by_dataset": {
+      "active": 0.052053,
+      "passive": 0.050212
+    },
+    "note": "Same classification logic as the binary-target file (substitutive / additive / interactive ratio thresholds are scale-free and identical), but the minimum-marginal-delta-to-classify threshold is relative to each dataset's own overall mean xG (unconditional) or shot-conditional mean xG (given-shot) -- flat_margin_ratio x that mean, same convention as generate_numerical_xg_target_analysis.py -- rather than a fixed percentage-point value, since xG's scale (~0.008 unconditional, ~10x higher given-shot) isn't comparable to a shot-rate percentage."
+  },
+  "candidate_selection": "Same 10 pairs as reports/eda/FEATURE_INTERACTION_ANALYSIS.json (binary target) -- see that file's candidate_selection field and this repo's generate_feature_interaction_analysis.py module docstring for the full ranking derivation and football rationale per pair. Computed here against target_future_xg_10s for direct comparability, with a shot-conditional panel alongside the unconditional one from the start.",
+  "n_pairs_where_unconditional_and_given_shot_agree": 3,
+  "n_pairs_total": 10,
+  "summary_table": [
+    {
+      "dataset": "active",
+      "feature_a": "defenders_within_10m",
+      "feature_b": "distance_to_attacking_box",
+      "classification": "interactive",
+      "classification_given_shot": "inconclusive"
+    },
+    {
+      "dataset": "active",
+      "feature_a": "visible_defender_count",
+      "feature_b": "attacker_spread",
+      "classification": "interactive",
+      "classification_given_shot": "inconclusive"
+    },
+    {
+      "dataset": "active",
+      "feature_a": "defenders_within_5m",
+      "feature_b": "defenders_within_10m",
+      "classification": "interactive",
+      "classification_given_shot": "inconclusive"
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "top_option_2_threat_score",
+      "feature_b": "top_option_2_distance_from_ball",
+      "classification": "interactive",
+      "classification_given_shot": "inconclusive"
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "lane_screening_score_option_2",
+      "feature_b": "engagement_distance_to_carrier",
+      "classification": "interactive",
+      "classification_given_shot": "inconclusive"
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "lane_screening_score_option_1",
+      "feature_b": "marking_tightness",
+      "classification": "interactive",
+      "classification_given_shot": "inconclusive"
+    },
+    {
+      "dataset": "active",
+      "feature_a": "possession_elapsed_seconds",
+      "feature_b": "match_time_seconds",
+      "classification": "additive",
+      "classification_given_shot": "inconclusive"
+    },
+    {
+      "dataset": "active",
+      "feature_a": "defenders_between_ball_and_attacking_goal",
+      "feature_b": "attacker_defender_ratio",
+      "classification": "inconclusive",
+      "classification_given_shot": "inconclusive"
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "marking_tightness",
+      "feature_b": "engagement_distance_to_carrier",
+      "classification": "inconclusive",
+      "classification_given_shot": "inconclusive"
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "overload_score",
+      "feature_b": "attacking_goal_centrality",
+      "classification": "inconclusive",
+      "classification_given_shot": "inconclusive"
+    }
+  ],
+  "pairs": [
+    {
+      "dataset": "active",
+      "feature_a": "defenders_within_10m",
+      "feature_b": "distance_to_attacking_box",
+      "football_rationale": "Defenders converge near the ball more as play nears their own box -- pitch geometry compresses everyone into a smaller space close to goal. Is 'defenders within 10m' just tracking how deep in the defensive third the action is, rather than a deliberate compactness/pressing choice?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 43199,
+      "n_rows_used_given_shot": 3298,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 3743,
+          "mean_xg": 0.007279,
+          "n_given_shot": 283,
+          "mean_xg_given_shot": 0.09627
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 2294,
+          "mean_xg": 0.010086,
+          "n_given_shot": 244,
+          "mean_xg_given_shot": 0.094827
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 1847,
+          "mean_xg": 0.019125,
+          "n_given_shot": 289,
+          "mean_xg_given_shot": 0.122227
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 2922,
+          "mean_xg": 0.022387,
+          "n_given_shot": 575,
+          "mean_xg_given_shot": 0.113766
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 6005,
+          "mean_xg": 0.002534,
+          "n_given_shot": 169,
+          "mean_xg_given_shot": 0.090042
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 2975,
+          "mean_xg": 0.004274,
+          "n_given_shot": 113,
+          "mean_xg_given_shot": 0.112533
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 1380,
+          "mean_xg": 0.004631,
+          "n_given_shot": 69,
+          "mean_xg_given_shot": 0.092619
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 456,
+          "mean_xg": 0.001808,
+          "n_given_shot": 10,
+          "mean_xg_given_shot": 0.082463
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 6098,
+          "mean_xg": 0.002604,
+          "n_given_shot": 174,
+          "mean_xg_given_shot": 0.091253
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 2896,
+          "mean_xg": 0.00299,
+          "n_given_shot": 100,
+          "mean_xg_given_shot": 0.086593
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 1323,
+          "mean_xg": 0.001748,
+          "n_given_shot": 34,
+          "mean_xg_given_shot": 0.06803
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 460,
+          "mean_xg": 0.004049,
+          "n_given_shot": 22,
+          "mean_xg_given_shot": 0.084668
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 4357,
+          "mean_xg": 0.006113,
+          "n_given_shot": 276,
+          "mean_xg_given_shot": 0.096507
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 2361,
+          "mean_xg": 0.01023,
+          "n_given_shot": 242,
+          "mean_xg_given_shot": 0.099811
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 1748,
+          "mean_xg": 0.01446,
+          "n_given_shot": 240,
+          "mean_xg_given_shot": 0.10532
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 2334,
+          "mean_xg": 0.027699,
+          "n_given_shot": 458,
+          "mean_xg_given_shot": 0.141157
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": "Q1",
+          "n": 20203,
+          "mean_xg": 0.004206
+        },
+        {
+          "a_bin": "Q2",
+          "n": 10526,
+          "mean_xg": 0.006524
+        },
+        {
+          "a_bin": "Q3",
+          "n": 6298,
+          "mean_xg": 0.011004
+        },
+        {
+          "a_bin": "Q4",
+          "n": 6172,
+          "mean_xg": 0.021509
+        }
+      ],
+      "marginal_a_by_quartile_given_shot": [
+        {
+          "a_bin": "Q1",
+          "n": 902,
+          "mean_xg": 0.094208
+        },
+        {
+          "a_bin": "Q2",
+          "n": 699,
+          "mean_xg": 0.098237
+        },
+        {
+          "a_bin": "Q3",
+          "n": 632,
+          "mean_xg": 0.109658
+        },
+        {
+          "a_bin": "Q4",
+          "n": 1065,
+          "mean_xg": 0.12465
+        }
+      ],
+      "marginal_a_delta": 0.017303,
+      "marginal_a_delta_given_shot": 0.030442,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.015108,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 10806
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.000726,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 10816
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.001445,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 10777
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.021586,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 10800
+        }
+      ],
+      "a_gradient_by_b_stratum_given_shot": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.017496,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 1391
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.007579,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 361
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -0.006585,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 330
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.04465,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 1216
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Sign flips across B-strata -- A's effect meaningfully depends on B's level.",
+      "classification_given_shot": "inconclusive",
+      "classification_reason_given_shot": "Pooled marginal delta (+0.030442) is below the 0.052053 minimum to classify confidently."
+    },
+    {
+      "dataset": "active",
+      "feature_a": "visible_defender_count",
+      "feature_b": "attacker_spread",
+      "football_rationale": "A wider attacking shape pulls more defenders across the width of the pitch and into the tracked frame. Does the raw count of defenders on screen just mirror how spread out the attack already is, rather than reflecting a deliberate defensive commitment of numbers?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 56037,
+      "n_rows_used_given_shot": 4367,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 4120,
+          "mean_xg": 0.012956,
+          "n_given_shot": 384,
+          "mean_xg_given_shot": 0.139004
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 4896,
+          "mean_xg": 0.017389,
+          "n_given_shot": 702,
+          "mean_xg_given_shot": 0.121277
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 2633,
+          "mean_xg": 0.018133,
+          "n_given_shot": 431,
+          "mean_xg_given_shot": 0.110773
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 2361,
+          "mean_xg": 0.021919,
+          "n_given_shot": 520,
+          "mean_xg_given_shot": 0.099521
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 3398,
+          "mean_xg": 0.00584,
+          "n_given_shot": 171,
+          "mean_xg_given_shot": 0.116042
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 5280,
+          "mean_xg": 0.007534,
+          "n_given_shot": 422,
+          "mean_xg_given_shot": 0.094269
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 3246,
+          "mean_xg": 0.008461,
+          "n_given_shot": 319,
+          "mean_xg_given_shot": 0.086096
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 2085,
+          "mean_xg": 0.012576,
+          "n_given_shot": 276,
+          "mean_xg_given_shot": 0.095006
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 3554,
+          "mean_xg": 0.003135,
+          "n_given_shot": 114,
+          "mean_xg_given_shot": 0.097732
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 5103,
+          "mean_xg": 0.004858,
+          "n_given_shot": 276,
+          "mean_xg_given_shot": 0.089826
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 3578,
+          "mean_xg": 0.005328,
+          "n_given_shot": 210,
+          "mean_xg_given_shot": 0.090771
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 1774,
+          "mean_xg": 0.009238,
+          "n_given_shot": 185,
+          "mean_xg_given_shot": 0.088585
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 3678,
+          "mean_xg": 0.001399,
+          "n_given_shot": 49,
+          "mean_xg_given_shot": 0.105012
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 4481,
+          "mean_xg": 0.002956,
+          "n_given_shot": 128,
+          "mean_xg_given_shot": 0.103483
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 4572,
+          "mean_xg": 0.002046,
+          "n_given_shot": 126,
+          "mean_xg_given_shot": 0.074246
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 1278,
+          "mean_xg": 0.003036,
+          "n_given_shot": 54,
+          "mean_xg_given_shot": 0.07185
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": "Q1",
+          "n": 14750,
+          "mean_xg": 0.006068
+        },
+        {
+          "a_bin": "Q2",
+          "n": 19760,
+          "mean_xg": 0.008247
+        },
+        {
+          "a_bin": "Q3",
+          "n": 14029,
+          "mean_xg": 0.007386
+        },
+        {
+          "a_bin": "Q4",
+          "n": 7498,
+          "mean_xg": 0.013102
+        }
+      ],
+      "marginal_a_by_quartile_given_shot": [
+        {
+          "a_bin": "Q1",
+          "n": 718,
+          "mean_xg": 0.124663
+        },
+        {
+          "a_bin": "Q2",
+          "n": 1528,
+          "mean_xg": 0.106646
+        },
+        {
+          "a_bin": "Q3",
+          "n": 1086,
+          "mean_xg": 0.095418
+        },
+        {
+          "a_bin": "Q4",
+          "n": 1035,
+          "mean_xg": 0.094919
+        }
+      ],
+      "marginal_a_delta": 0.007034,
+      "marginal_a_delta_given_shot": -0.029744,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.008963,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 14010
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 0.006736,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 14009
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.006103,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 14009
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.001637,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 14009
+        }
+      ],
+      "a_gradient_by_b_stratum_given_shot": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -0.039483,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 2037
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.021036,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 1188
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -0.009147,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 785
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -0.033162,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 357
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (5.48) exceeds 2.0 -- A's effect meaningfully depends on B's level.",
+      "classification_given_shot": "inconclusive",
+      "classification_reason_given_shot": "Pooled marginal delta (-0.029744) is below the 0.052053 minimum to classify confidently."
+    },
+    {
+      "dataset": "active",
+      "feature_a": "defenders_within_5m",
+      "feature_b": "defenders_within_10m",
+      "football_rationale": "Nested by construction -- every defender within 5m is also within 10m, so the two counts are not independent measurements. Once the 10m count is known, does the tighter 5m ring add real extra information about pressing intensity, or is it substitutively redundant with the wider count?",
+      "a_labels": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 43199,
+      "n_rows_used_given_shot": 3298,
+      "grid": [
+        {
+          "a_bin": 0.0,
+          "b_bin": "Q1",
+          "n": 16444,
+          "mean_xg": 0.004003,
+          "n_given_shot": 707,
+          "mean_xg_given_shot": 0.093106
+        },
+        {
+          "a_bin": 1.0,
+          "b_bin": "Q1",
+          "n": 3759,
+          "mean_xg": 0.005094,
+          "n_given_shot": 195,
+          "mean_xg_given_shot": 0.098201
+        },
+        {
+          "a_bin": 2.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 3.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 4.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 5.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 6.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 7.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 8.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 0.0,
+          "b_bin": "Q2",
+          "n": 5054,
+          "mean_xg": 0.007006,
+          "n_given_shot": 351,
+          "mean_xg_given_shot": 0.100875
+        },
+        {
+          "a_bin": 1.0,
+          "b_bin": "Q2",
+          "n": 4580,
+          "mean_xg": 0.006281,
+          "n_given_shot": 296,
+          "mean_xg_given_shot": 0.097183
+        },
+        {
+          "a_bin": 2.0,
+          "b_bin": "Q2",
+          "n": 892,
+          "mean_xg": 0.005038,
+          "n_given_shot": 52,
+          "mean_xg_given_shot": 0.086426
+        },
+        {
+          "a_bin": 3.0,
+          "b_bin": "Q2",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 4.0,
+          "b_bin": "Q2",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 5.0,
+          "b_bin": "Q2",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 6.0,
+          "b_bin": "Q2",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 7.0,
+          "b_bin": "Q2",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 8.0,
+          "b_bin": "Q2",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 0.0,
+          "b_bin": "Q3",
+          "n": 2041,
+          "mean_xg": 0.011296,
+          "n_given_shot": 236,
+          "mean_xg_given_shot": 0.097689
+        },
+        {
+          "a_bin": 1.0,
+          "b_bin": "Q3",
+          "n": 2904,
+          "mean_xg": 0.011376,
+          "n_given_shot": 286,
+          "mean_xg_given_shot": 0.115512
+        },
+        {
+          "a_bin": 2.0,
+          "b_bin": "Q3",
+          "n": 1213,
+          "mean_xg": 0.008373,
+          "n_given_shot": 91,
+          "mean_xg_given_shot": 0.111613
+        },
+        {
+          "a_bin": 3.0,
+          "b_bin": "Q3",
+          "n": 140,
+          "mean_xg": 0.02183,
+          "n_given_shot": 19,
+          "mean_xg_given_shot": 0.160851
+        },
+        {
+          "a_bin": 4.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 5.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 6.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 7.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 8.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": 0.0,
+          "b_bin": "Q4",
+          "n": 858,
+          "mean_xg": 0.021035,
+          "n_given_shot": 150,
+          "mean_xg_given_shot": 0.120321
+        },
+        {
+          "a_bin": 1.0,
+          "b_bin": "Q4",
+          "n": 2030,
+          "mean_xg": 0.017533,
+          "n_given_shot": 326,
+          "mean_xg_given_shot": 0.10918
+        },
+        {
+          "a_bin": 2.0,
+          "b_bin": "Q4",
+          "n": 1814,
+          "mean_xg": 0.022775,
+          "n_given_shot": 297,
+          "mean_xg_given_shot": 0.139105
+        },
+        {
+          "a_bin": 3.0,
+          "b_bin": "Q4",
+          "n": 885,
+          "mean_xg": 0.024459,
+          "n_given_shot": 165,
+          "mean_xg_given_shot": 0.13119
+        },
+        {
+          "a_bin": 4.0,
+          "b_bin": "Q4",
+          "n": 380,
+          "mean_xg": 0.031291,
+          "n_given_shot": 79,
+          "mean_xg_given_shot": 0.150515
+        },
+        {
+          "a_bin": 5.0,
+          "b_bin": "Q4",
+          "n": 142,
+          "mean_xg": 0.022546,
+          "n_given_shot": 34,
+          "mean_xg_given_shot": 0.094163
+        },
+        {
+          "a_bin": 6.0,
+          "b_bin": "Q4",
+          "n": 55,
+          "mean_xg": 0.016769,
+          "n_given_shot": 12,
+          "mean_xg_given_shot": 0.076858
+        },
+        {
+          "a_bin": 7.0,
+          "b_bin": "Q4",
+          "n": 6,
+          "mean_xg": 0.005942,
+          "n_given_shot": 1,
+          "mean_xg_given_shot": 0.035652
+        },
+        {
+          "a_bin": 8.0,
+          "b_bin": "Q4",
+          "n": 2,
+          "mean_xg": 0.050536,
+          "n_given_shot": 1,
+          "mean_xg_given_shot": 0.101072
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": 0.0,
+          "n": 24397,
+          "mean_xg": 0.005834
+        },
+        {
+          "a_bin": 1.0,
+          "n": 13273,
+          "mean_xg": 0.008781
+        },
+        {
+          "a_bin": 2.0,
+          "n": 3919,
+          "mean_xg": 0.01428
+        },
+        {
+          "a_bin": 3.0,
+          "n": 1025,
+          "mean_xg": 0.0241
+        },
+        {
+          "a_bin": 4.0,
+          "n": 380,
+          "mean_xg": 0.031291
+        },
+        {
+          "a_bin": 5.0,
+          "n": 142,
+          "mean_xg": 0.022546
+        },
+        {
+          "a_bin": 6.0,
+          "n": 55,
+          "mean_xg": 0.016769
+        },
+        {
+          "a_bin": 7.0,
+          "n": 6,
+          "mean_xg": 0.005942
+        },
+        {
+          "a_bin": 8.0,
+          "n": 2,
+          "mean_xg": 0.050536
+        }
+      ],
+      "marginal_a_by_quartile_given_shot": [
+        {
+          "a_bin": 0.0,
+          "n": 1444,
+          "mean_xg": 0.098571
+        },
+        {
+          "a_bin": 1.0,
+          "n": 1103,
+          "mean_xg": 0.105662
+        },
+        {
+          "a_bin": 2.0,
+          "n": 440,
+          "mean_xg": 0.127194
+        },
+        {
+          "a_bin": 3.0,
+          "n": 184,
+          "mean_xg": 0.134253
+        },
+        {
+          "a_bin": 4.0,
+          "n": 79,
+          "mean_xg": 0.150515
+        },
+        {
+          "a_bin": 5.0,
+          "n": 34,
+          "mean_xg": 0.094163
+        },
+        {
+          "a_bin": 6.0,
+          "n": 12,
+          "mean_xg": 0.076858
+        },
+        {
+          "a_bin": 7.0,
+          "n": 1,
+          "mean_xg": 0.035652
+        },
+        {
+          "a_bin": 8.0,
+          "n": 1,
+          "mean_xg": 0.101072
+        }
+      ],
+      "marginal_a_delta": 0.010935,
+      "marginal_a_delta_given_shot": -0.004408,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.001091,
+          "a_bin_compared_low": 0.0,
+          "a_bin_compared_high": 1.0,
+          "n_rows": 20203
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.001968,
+          "a_bin_compared_low": 0.0,
+          "a_bin_compared_high": 2.0,
+          "n_rows": 10526
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.010534,
+          "a_bin_compared_low": 0.0,
+          "a_bin_compared_high": 3.0,
+          "n_rows": 6298
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -0.004266,
+          "a_bin_compared_low": 0.0,
+          "a_bin_compared_high": 6.0,
+          "n_rows": 6172
+        }
+      ],
+      "a_gradient_by_b_stratum_given_shot": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.005095,
+          "a_bin_compared_low": 0.0,
+          "a_bin_compared_high": 1.0,
+          "n_rows": 902
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.014449,
+          "a_bin_compared_low": 0.0,
+          "a_bin_compared_high": 2.0,
+          "n_rows": 699
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.063162,
+          "a_bin_compared_low": 0.0,
+          "a_bin_compared_high": 3.0,
+          "n_rows": 632
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -0.043463,
+          "a_bin_compared_low": 0.0,
+          "a_bin_compared_high": 6.0,
+          "n_rows": 1065
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Sign flips across B-strata -- A's effect meaningfully depends on B's level.",
+      "classification_given_shot": "inconclusive",
+      "classification_reason_given_shot": "Pooled marginal delta (-0.004408) is below the 0.052053 minimum to classify confidently."
+    },
+    {
+      "dataset": "active",
+      "feature_a": "possession_elapsed_seconds",
+      "feature_b": "match_time_seconds",
+      "football_rationale": "Long-running possessions cluster in certain match phases (e.g. a team camped in the attacking third late in a half). Does the possession-clock effect just track match-clock context, rather than reflecting fatigue or space actually created by a sustained spell of pressure?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 56068,
+      "n_rows_used_given_shot": 4368,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 3641,
+          "mean_xg": 0.004622,
+          "n_given_shot": 190,
+          "mean_xg_given_shot": 0.088576
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 3371,
+          "mean_xg": 0.005581,
+          "n_given_shot": 247,
+          "mean_xg_given_shot": 0.07617
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 3225,
+          "mean_xg": 0.004455,
+          "n_given_shot": 204,
+          "mean_xg_given_shot": 0.070432
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 3786,
+          "mean_xg": 0.008737,
+          "n_given_shot": 284,
+          "mean_xg_given_shot": 0.116469
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 3632,
+          "mean_xg": 0.005829,
+          "n_given_shot": 201,
+          "mean_xg_given_shot": 0.105335
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 3402,
+          "mean_xg": 0.0066,
+          "n_given_shot": 196,
+          "mean_xg_given_shot": 0.114558
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 3313,
+          "mean_xg": 0.008178,
+          "n_given_shot": 262,
+          "mean_xg_given_shot": 0.103406
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 3665,
+          "mean_xg": 0.009953,
+          "n_given_shot": 382,
+          "mean_xg_given_shot": 0.095487
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 3753,
+          "mean_xg": 0.008692,
+          "n_given_shot": 242,
+          "mean_xg_given_shot": 0.134792
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 3546,
+          "mean_xg": 0.009052,
+          "n_given_shot": 233,
+          "mean_xg_given_shot": 0.137754
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 3476,
+          "mean_xg": 0.008464,
+          "n_given_shot": 325,
+          "mean_xg_given_shot": 0.090531
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 3249,
+          "mean_xg": 0.014368,
+          "n_given_shot": 366,
+          "mean_xg_given_shot": 0.127545
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 3803,
+          "mean_xg": 0.005702,
+          "n_given_shot": 234,
+          "mean_xg_given_shot": 0.092669
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 3605,
+          "mean_xg": 0.006645,
+          "n_given_shot": 272,
+          "mean_xg_given_shot": 0.088067
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 3472,
+          "mean_xg": 0.010798,
+          "n_given_shot": 331,
+          "mean_xg_given_shot": 0.113265
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 3129,
+          "mean_xg": 0.012944,
+          "n_given_shot": 399,
+          "mean_xg_given_shot": 0.101504
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": "Q1",
+          "n": 14829,
+          "mean_xg": 0.006225
+        },
+        {
+          "a_bin": "Q2",
+          "n": 13924,
+          "mean_xg": 0.006989
+        },
+        {
+          "a_bin": "Q3",
+          "n": 13486,
+          "mean_xg": 0.008036
+        },
+        {
+          "a_bin": "Q4",
+          "n": 13829,
+          "mean_xg": 0.011334
+        }
+      ],
+      "marginal_a_by_quartile_given_shot": [
+        {
+          "a_bin": "Q1",
+          "n": 867,
+          "mean_xg": 0.106466
+        },
+        {
+          "a_bin": "Q2",
+          "n": 948,
+          "mean_xg": 0.102656
+        },
+        {
+          "a_bin": "Q3",
+          "n": 1122,
+          "mean_xg": 0.09659
+        },
+        {
+          "a_bin": "Q4",
+          "n": 1431,
+          "mean_xg": 0.109528
+        }
+      ],
+      "marginal_a_delta": 0.005109,
+      "marginal_a_delta_given_shot": 0.003062,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.004115,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 14023
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 0.004124,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 14012
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.005676,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 14024
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.007242,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 14009
+        }
+      ],
+      "a_gradient_by_b_stratum_given_shot": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.027893,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 925
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.009848,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 1041
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -0.007247,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 1166
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.008835,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 1236
+        }
+      ],
+      "classification": "additive",
+      "classification_reason": "Every B-stratum delta shares the marginal delta's sign and the max/min magnitude ratio (1.76) is within the 2.0 threshold -- A's effect holds at roughly constant strength regardless of B's level.",
+      "classification_given_shot": "inconclusive",
+      "classification_reason_given_shot": "Pooled marginal delta (+0.003062) is below the 0.052053 minimum to classify confidently."
+    },
+    {
+      "dataset": "active",
+      "feature_a": "defenders_between_ball_and_attacking_goal",
+      "feature_b": "attacker_defender_ratio",
+      "football_rationale": "'Defenders goal-side of the ball' is a positioning-specific count, but it could just be restating the team's overall numerical balance on the pitch. Once the attacker:defender ratio is known, does goal-side positioning add anything beyond raw defensive numbers?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 56068,
+      "n_rows_used_given_shot": 4368,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 5160,
+          "mean_xg": 0.015562,
+          "n_given_shot": 697,
+          "mean_xg_given_shot": 0.115207
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 4027,
+          "mean_xg": 0.015484,
+          "n_given_shot": 524,
+          "mean_xg_given_shot": 0.118999
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 3518,
+          "mean_xg": 0.014261,
+          "n_given_shot": 455,
+          "mean_xg_given_shot": 0.110263
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 2679,
+          "mean_xg": 0.017641,
+          "n_given_shot": 379,
+          "mean_xg_given_shot": 0.1247
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 3597,
+          "mean_xg": 0.010605,
+          "n_given_shot": 390,
+          "mean_xg_given_shot": 0.09781
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 3520,
+          "mean_xg": 0.008615,
+          "n_given_shot": 307,
+          "mean_xg_given_shot": 0.098779
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 3121,
+          "mean_xg": 0.007196,
+          "n_given_shot": 262,
+          "mean_xg_given_shot": 0.085717
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 2674,
+          "mean_xg": 0.008576,
+          "n_given_shot": 253,
+          "mean_xg_given_shot": 0.090643
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 3848,
+          "mean_xg": 0.005479,
+          "n_given_shot": 212,
+          "mean_xg_given_shot": 0.099449
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 3720,
+          "mean_xg": 0.004888,
+          "n_given_shot": 181,
+          "mean_xg_given_shot": 0.10046
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 3171,
+          "mean_xg": 0.003042,
+          "n_given_shot": 140,
+          "mean_xg_given_shot": 0.068891
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 3169,
+          "mean_xg": 0.003688,
+          "n_given_shot": 164,
+          "mean_xg_given_shot": 0.071255
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 6445,
+          "mean_xg": 0.002957,
+          "n_given_shot": 183,
+          "mean_xg_given_shot": 0.104152
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 4305,
+          "mean_xg": 0.00221,
+          "n_given_shot": 95,
+          "mean_xg_given_shot": 0.100146
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 2459,
+          "mean_xg": 0.003008,
+          "n_given_shot": 68,
+          "mean_xg_given_shot": 0.108772
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 655,
+          "mean_xg": 0.00644,
+          "n_given_shot": 58,
+          "mean_xg_given_shot": 0.072733
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": "Q1",
+          "n": 19050,
+          "mean_xg": 0.008325
+        },
+        {
+          "a_bin": "Q2",
+          "n": 15572,
+          "mean_xg": 0.00773
+        },
+        {
+          "a_bin": "Q3",
+          "n": 12269,
+          "mean_xg": 0.007309
+        },
+        {
+          "a_bin": "Q4",
+          "n": 9177,
+          "mean_xg": 0.009382
+        }
+      ],
+      "marginal_a_by_quartile_given_shot": [
+        {
+          "a_bin": "Q1",
+          "n": 1482,
+          "mean_xg": 0.10701
+        },
+        {
+          "a_bin": "Q2",
+          "n": 1107,
+          "mean_xg": 0.108742
+        },
+        {
+          "a_bin": "Q3",
+          "n": 925,
+          "mean_xg": 0.096939
+        },
+        {
+          "a_bin": "Q4",
+          "n": 854,
+          "mean_xg": 0.100818
+        }
+      ],
+      "marginal_a_delta": 0.001057,
+      "marginal_a_delta_given_shot": -0.006192,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.002079,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 15384
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.002029,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 12912
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -0.001791,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 13908
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.003483,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 13864
+        }
+      ],
+      "a_gradient_by_b_stratum_given_shot": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.009493,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 2055
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.007167,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 1212
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -0.028194,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 697
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -0.031419,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 404
+        }
+      ],
+      "classification": "inconclusive",
+      "classification_reason": "Pooled marginal delta (+0.001057) is below the 0.004055 minimum to classify confidently.",
+      "classification_given_shot": "inconclusive",
+      "classification_reason_given_shot": "Pooled marginal delta (-0.006192) is below the 0.052053 minimum to classify confidently."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "top_option_2_threat_score",
+      "feature_b": "top_option_2_distance_from_ball",
+      "football_rationale": "The threat-score model for a passing option plausibly weights proximity to the ball heavily -- a closer option is easier to find and more immediately dangerous. Does option 2's threat score add positional-danger information beyond what its raw distance from the ball already says?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1591000,
+      "n_rows_used_given_shot": 94718,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 139962,
+          "mean_xg": 0.010881,
+          "n_given_shot": 14229,
+          "mean_xg_given_shot": 0.107032
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 76820,
+          "mean_xg": 0.007927,
+          "n_given_shot": 5541,
+          "mean_xg_given_shot": 0.109894
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 83581,
+          "mean_xg": 0.005332,
+          "n_given_shot": 4111,
+          "mean_xg_given_shot": 0.10841
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 97387,
+          "mean_xg": 0.006423,
+          "n_given_shot": 5827,
+          "mean_xg_given_shot": 0.107345
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 111286,
+          "mean_xg": 0.009598,
+          "n_given_shot": 10673,
+          "mean_xg_given_shot": 0.100082
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 91705,
+          "mean_xg": 0.006116,
+          "n_given_shot": 5867,
+          "mean_xg_given_shot": 0.095591
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 93272,
+          "mean_xg": 0.004009,
+          "n_given_shot": 4090,
+          "mean_xg_given_shot": 0.09142
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 101488,
+          "mean_xg": 0.005732,
+          "n_given_shot": 5927,
+          "mean_xg_given_shot": 0.098157
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 88671,
+          "mean_xg": 0.007781,
+          "n_given_shot": 7402,
+          "mean_xg_given_shot": 0.09321
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 100225,
+          "mean_xg": 0.005069,
+          "n_given_shot": 5473,
+          "mean_xg_given_shot": 0.092829
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 104152,
+          "mean_xg": 0.003611,
+          "n_given_shot": 4076,
+          "mean_xg_given_shot": 0.092273
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 104704,
+          "mean_xg": 0.005331,
+          "n_given_shot": 5432,
+          "mean_xg_given_shot": 0.102755
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 57833,
+          "mean_xg": 0.008284,
+          "n_given_shot": 4328,
+          "mean_xg_given_shot": 0.110701
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 128999,
+          "mean_xg": 0.004029,
+          "n_given_shot": 5324,
+          "mean_xg_given_shot": 0.097623
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 116749,
+          "mean_xg": 0.002484,
+          "n_given_shot": 2938,
+          "mean_xg_given_shot": 0.098688
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 94166,
+          "mean_xg": 0.003182,
+          "n_given_shot": 3480,
+          "mean_xg_given_shot": 0.086092
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": "Q1",
+          "n": 397752,
+          "mean_xg": 0.009454
+        },
+        {
+          "a_bin": "Q2",
+          "n": 397749,
+          "mean_xg": 0.005525
+        },
+        {
+          "a_bin": "Q3",
+          "n": 397754,
+          "mean_xg": 0.003735
+        },
+        {
+          "a_bin": "Q4",
+          "n": 397745,
+          "mean_xg": 0.005192
+        }
+      ],
+      "marginal_a_by_quartile_given_shot": [
+        {
+          "a_bin": "Q1",
+          "n": 36632,
+          "mean_xg": 0.102648
+        },
+        {
+          "a_bin": "Q2",
+          "n": 22205,
+          "mean_xg": 0.098967
+        },
+        {
+          "a_bin": "Q3",
+          "n": 15215,
+          "mean_xg": 0.097643
+        },
+        {
+          "a_bin": "Q4",
+          "n": 20666,
+          "mean_xg": 0.099925
+        }
+      ],
+      "marginal_a_delta": -0.004262,
+      "marginal_a_delta_given_shot": -0.002723,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -0.004458,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397750
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.003866,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397751
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -0.00245,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397752
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -0.005102,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397747
+        }
+      ],
+      "a_gradient_by_b_stratum_given_shot": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.000313,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 29708
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.001925,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 26557
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.009545,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 22383
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -0.024609,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 16070
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (2.08) exceeds 2.0 -- A's effect meaningfully depends on B's level.",
+      "classification_given_shot": "inconclusive",
+      "classification_reason_given_shot": "Pooled marginal delta (-0.002723) is below the 0.050212 minimum to classify confidently."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "lane_screening_score_option_2",
+      "feature_b": "engagement_distance_to_carrier",
+      "football_rationale": "A defender tightly engaging the ball-carrier is, almost by geometry, closer to more passing lanes. Is screening credit for option 2 mostly a byproduct of how tightly the defender is already engaging the carrier, rather than a deliberate lane-blocking position?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1591000,
+      "n_rows_used_given_shot": 94718,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 156124,
+          "mean_xg": 0.007438,
+          "n_given_shot": 11453,
+          "mean_xg_given_shot": 0.101399
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 241626,
+          "mean_xg": 0.008851,
+          "n_given_shot": 19146,
+          "mean_xg_given_shot": 0.111707
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 0,
+          "mean_xg": null,
+          "n_given_shot": 0,
+          "mean_xg_given_shot": null
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 201511,
+          "mean_xg": 0.005756,
+          "n_given_shot": 11848,
+          "mean_xg_given_shot": 0.097893
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 122641,
+          "mean_xg": 0.006603,
+          "n_given_shot": 8124,
+          "mean_xg_given_shot": 0.099682
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 73598,
+          "mean_xg": 0.008448,
+          "n_given_shot": 5767,
+          "mean_xg_given_shot": 0.107814
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 165791,
+          "mean_xg": 0.004156,
+          "n_given_shot": 7461,
+          "mean_xg_given_shot": 0.092358
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 117875,
+          "mean_xg": 0.004753,
+          "n_given_shot": 6216,
+          "mean_xg_given_shot": 0.090128
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 66489,
+          "mean_xg": 0.006285,
+          "n_given_shot": 4094,
+          "mean_xg_given_shot": 0.102069
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 47595,
+          "mean_xg": 0.007743,
+          "n_given_shot": 3567,
+          "mean_xg_given_shot": 0.103317
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 231959,
+          "mean_xg": 0.003026,
+          "n_given_shot": 7968,
+          "mean_xg_given_shot": 0.088104
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 78364,
+          "mean_xg": 0.00434,
+          "n_given_shot": 3808,
+          "mean_xg_given_shot": 0.089315
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 52496,
+          "mean_xg": 0.005517,
+          "n_given_shot": 2875,
+          "mean_xg_given_shot": 0.100729
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 34931,
+          "mean_xg": 0.007143,
+          "n_given_shot": 2391,
+          "mean_xg_given_shot": 0.104349
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": "Q1",
+          "n": 397750,
+          "mean_xg": 0.003497
+        },
+        {
+          "a_bin": "Q2",
+          "n": 397750,
+          "mean_xg": 0.00518
+        },
+        {
+          "a_bin": "Q3",
+          "n": 397750,
+          "mean_xg": 0.006734
+        },
+        {
+          "a_bin": "Q4",
+          "n": 397750,
+          "mean_xg": 0.008494
+        }
+      ],
+      "marginal_a_by_quartile_given_shot": [
+        {
+          "a_bin": "Q1",
+          "n": 15429,
+          "mean_xg": 0.090161
+        },
+        {
+          "a_bin": "Q2",
+          "n": 21872,
+          "mean_xg": 0.094193
+        },
+        {
+          "a_bin": "Q3",
+          "n": 26546,
+          "mean_xg": 0.100904
+        },
+        {
+          "a_bin": "Q4",
+          "n": 30871,
+          "mean_xg": 0.10944
+        }
+      ],
+      "marginal_a_delta": 0.004997,
+      "marginal_a_delta_given_shot": 0.019279,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.001413,
+          "a_bin_compared_low": "Q3",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397750
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 0.002692,
+          "a_bin_compared_low": "Q2",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397750
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.003587,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397750
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.004117,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397750
+        }
+      ],
+      "a_gradient_by_b_stratum_given_shot": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.010308,
+          "a_bin_compared_low": "Q3",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 30599
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 0.009921,
+          "a_bin_compared_low": "Q2",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 25739
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.010959,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 21338
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.016245,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 17042
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (2.91) exceeds 2.0 -- A's effect meaningfully depends on B's level.",
+      "classification_given_shot": "inconclusive",
+      "classification_reason_given_shot": "Pooled marginal delta (+0.019279) is below the 0.050212 minimum to classify confidently."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "marking_tightness",
+      "feature_b": "engagement_distance_to_carrier",
+      "football_rationale": "Both are distance measurements from a defender to a football-relevant point (nearest attacker vs the ball-carrier specifically) -- plausibly the same underlying 'how close is this defender to the action' phenomenon described twice, not two independent defensive behaviours.",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1592902,
+      "n_rows_used_given_shot": 95007,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 97595,
+          "mean_xg": 0.009772,
+          "n_given_shot": 8628,
+          "mean_xg_given_shot": 0.110536
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 97878,
+          "mean_xg": 0.008668,
+          "n_given_shot": 8022,
+          "mean_xg_given_shot": 0.105754
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 102431,
+          "mean_xg": 0.00788,
+          "n_given_shot": 7693,
+          "mean_xg_given_shot": 0.104926
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 100322,
+          "mean_xg": 0.006979,
+          "n_given_shot": 6353,
+          "mean_xg_given_shot": 0.110207
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 111857,
+          "mean_xg": 0.007457,
+          "n_given_shot": 8252,
+          "mean_xg_given_shot": 0.101087
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 116098,
+          "mean_xg": 0.006211,
+          "n_given_shot": 7228,
+          "mean_xg_given_shot": 0.099765
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 99487,
+          "mean_xg": 0.005864,
+          "n_given_shot": 5771,
+          "mean_xg_given_shot": 0.101092
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 70783,
+          "mean_xg": 0.006533,
+          "n_given_shot": 4574,
+          "mean_xg_given_shot": 0.101101
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 101402,
+          "mean_xg": 0.0064,
+          "n_given_shot": 6812,
+          "mean_xg_given_shot": 0.095272
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 101629,
+          "mean_xg": 0.004687,
+          "n_given_shot": 5019,
+          "mean_xg_given_shot": 0.094915
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 102201,
+          "mean_xg": 0.00425,
+          "n_given_shot": 4680,
+          "mean_xg_given_shot": 0.092818
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 92993,
+          "mean_xg": 0.005159,
+          "n_given_shot": 4881,
+          "mean_xg_given_shot": 0.098294
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 87372,
+          "mean_xg": 0.006172,
+          "n_given_shot": 5824,
+          "mean_xg_given_shot": 0.092597
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 82620,
+          "mean_xg": 0.003835,
+          "n_given_shot": 3349,
+          "mean_xg_given_shot": 0.094614
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 94106,
+          "mean_xg": 0.003239,
+          "n_given_shot": 3210,
+          "mean_xg_given_shot": 0.094942
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 134128,
+          "mean_xg": 0.003163,
+          "n_given_shot": 4711,
+          "mean_xg_given_shot": 0.090053
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": "Q1",
+          "n": 398226,
+          "mean_xg": 0.007474
+        },
+        {
+          "a_bin": "Q2",
+          "n": 398225,
+          "mean_xg": 0.005933
+        },
+        {
+          "a_bin": "Q3",
+          "n": 398225,
+          "mean_xg": 0.005348
+        },
+        {
+          "a_bin": "Q4",
+          "n": 398226,
+          "mean_xg": 0.005189
+        }
+      ],
+      "marginal_a_by_quartile_given_shot": [
+        {
+          "a_bin": "Q1",
+          "n": 29516,
+          "mean_xg": 0.100832
+        },
+        {
+          "a_bin": "Q2",
+          "n": 23618,
+          "mean_xg": 0.100038
+        },
+        {
+          "a_bin": "Q3",
+          "n": 21354,
+          "mean_xg": 0.099735
+        },
+        {
+          "a_bin": "Q4",
+          "n": 20519,
+          "mean_xg": 0.100716
+        }
+      ],
+      "marginal_a_delta": -0.002285,
+      "marginal_a_delta_given_shot": -0.000116,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -0.002793,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 398226
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.000924,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 398225
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -0.001241,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 398225
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -0.003009,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 398226
+        }
+      ],
+      "a_gradient_by_b_stratum_given_shot": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -0.000329,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 30696
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 1.4e-05,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 25825
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.003022,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 21392
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -0.002544,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 17094
+        }
+      ],
+      "classification": "inconclusive",
+      "classification_reason": "Pooled marginal delta (-0.002285) is below the 0.002996 minimum to classify confidently.",
+      "classification_given_shot": "inconclusive",
+      "classification_reason_given_shot": "Pooled marginal delta (-0.000116) is below the 0.050212 minimum to classify confidently."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "overload_score",
+      "feature_b": "attacking_goal_centrality",
+      "football_rationale": "Central zones near goal draw more covering defenders by default (it's the most dangerous area to leave open). Does defensive overload just track how central the action is, rather than reflecting a genuine tactical over-commitment of numbers?",
+      "a_labels": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1593181,
+      "n_rows_used_given_shot": 95048,
+      "grid": [
+        {
+          "a_bin": 0,
+          "b_bin": "Q1",
+          "n": 281530,
+          "mean_xg": 0.003699,
+          "n_given_shot": 11034,
+          "mean_xg_given_shot": 0.094377
+        },
+        {
+          "a_bin": 1,
+          "b_bin": "Q1",
+          "n": 66126,
+          "mean_xg": 0.004216,
+          "n_given_shot": 2963,
+          "mean_xg_given_shot": 0.094098
+        },
+        {
+          "a_bin": 2,
+          "b_bin": "Q1",
+          "n": 31813,
+          "mean_xg": 0.004362,
+          "n_given_shot": 1454,
+          "mean_xg_given_shot": 0.095449
+        },
+        {
+          "a_bin": 3,
+          "b_bin": "Q1",
+          "n": 18827,
+          "mean_xg": 0.003628,
+          "n_given_shot": 733,
+          "mean_xg_given_shot": 0.093178
+        },
+        {
+          "a_bin": 0,
+          "b_bin": "Q2",
+          "n": 295926,
+          "mean_xg": 0.004947,
+          "n_given_shot": 14936,
+          "mean_xg_given_shot": 0.098012
+        },
+        {
+          "a_bin": 1,
+          "b_bin": "Q2",
+          "n": 62982,
+          "mean_xg": 0.006108,
+          "n_given_shot": 3732,
+          "mean_xg_given_shot": 0.103087
+        },
+        {
+          "a_bin": 2,
+          "b_bin": "Q2",
+          "n": 26035,
+          "mean_xg": 0.005701,
+          "n_given_shot": 1457,
+          "mean_xg_given_shot": 0.101871
+        },
+        {
+          "a_bin": 3,
+          "b_bin": "Q2",
+          "n": 13352,
+          "mean_xg": 0.004977,
+          "n_given_shot": 730,
+          "mean_xg_given_shot": 0.091025
+        },
+        {
+          "a_bin": 0,
+          "b_bin": "Q3",
+          "n": 307148,
+          "mean_xg": 0.006583,
+          "n_given_shot": 20148,
+          "mean_xg_given_shot": 0.100361
+        },
+        {
+          "a_bin": 1,
+          "b_bin": "Q3",
+          "n": 57839,
+          "mean_xg": 0.007563,
+          "n_given_shot": 4013,
+          "mean_xg_given_shot": 0.109008
+        },
+        {
+          "a_bin": 2,
+          "b_bin": "Q3",
+          "n": 22541,
+          "mean_xg": 0.005633,
+          "n_given_shot": 1243,
+          "mean_xg_given_shot": 0.10216
+        },
+        {
+          "a_bin": 3,
+          "b_bin": "Q3",
+          "n": 10767,
+          "mean_xg": 0.004888,
+          "n_given_shot": 508,
+          "mean_xg_given_shot": 0.103591
+        },
+        {
+          "a_bin": 0,
+          "b_bin": "Q4",
+          "n": 319964,
+          "mean_xg": 0.008623,
+          "n_given_shot": 27026,
+          "mean_xg_given_shot": 0.102088
+        },
+        {
+          "a_bin": 1,
+          "b_bin": "Q4",
+          "n": 50566,
+          "mean_xg": 0.00821,
+          "n_given_shot": 3755,
+          "mean_xg_given_shot": 0.110558
+        },
+        {
+          "a_bin": 2,
+          "b_bin": "Q4",
+          "n": 18722,
+          "mean_xg": 0.005446,
+          "n_given_shot": 935,
+          "mean_xg_given_shot": 0.109041
+        },
+        {
+          "a_bin": 3,
+          "b_bin": "Q4",
+          "n": 9043,
+          "mean_xg": 0.004328,
+          "n_given_shot": 381,
+          "mean_xg_given_shot": 0.102716
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": 0,
+          "n": 1204568,
+          "mean_xg": 0.006049
+        },
+        {
+          "a_bin": 1,
+          "n": 237513,
+          "mean_xg": 0.006383
+        },
+        {
+          "a_bin": 2,
+          "n": 99111,
+          "mean_xg": 0.005208
+        },
+        {
+          "a_bin": 3,
+          "n": 51989,
+          "mean_xg": 0.004357
+        }
+      ],
+      "marginal_a_by_quartile_given_shot": [
+        {
+          "a_bin": 0,
+          "n": 73144,
+          "mean_xg": 0.099617
+        },
+        {
+          "a_bin": 1,
+          "n": 14463,
+          "mean_xg": 0.104828
+        },
+        {
+          "a_bin": 2,
+          "n": 5089,
+          "mean_xg": 0.101424
+        },
+        {
+          "a_bin": 3,
+          "n": 2352,
+          "mean_xg": 0.096304
+        }
+      ],
+      "marginal_a_delta": -0.001692,
+      "marginal_a_delta_given_shot": -0.003313,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -7.1e-05,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 398296
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 3e-05,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 398295
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -0.001695,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 398295
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -0.004295,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 398295
+        }
+      ],
+      "a_gradient_by_b_stratum_given_shot": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -0.001199,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 16184
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.006987,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 20855
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.00323,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 25912
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.000628,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 32097
+        }
+      ],
+      "classification": "inconclusive",
+      "classification_reason": "Pooled marginal delta (-0.001692) is below the 0.002996 minimum to classify confidently.",
+      "classification_given_shot": "inconclusive",
+      "classification_reason_given_shot": "Pooled marginal delta (-0.003313) is below the 0.050212 minimum to classify confidently."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "lane_screening_score_option_1",
+      "feature_b": "marking_tightness",
+      "football_rationale": "Both come from the same defender-slot row and could both just be capturing 'this defender is positioned well' in general. Does lane-screening credit for the top option add independent blocking-position signal, or is it mostly redundant with how tightly the defender is already marking?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1592902,
+      "n_rows_used_given_shot": 95007,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 91231,
+          "mean_xg": 0.00478,
+          "n_given_shot": 4640,
+          "mean_xg_given_shot": 0.093979
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 107141,
+          "mean_xg": 0.006474,
+          "n_given_shot": 7687,
+          "mean_xg_given_shot": 0.090233
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 107554,
+          "mean_xg": 0.007966,
+          "n_given_shot": 8817,
+          "mean_xg_given_shot": 0.097169
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 92300,
+          "mean_xg": 0.010723,
+          "n_given_shot": 8372,
+          "mean_xg_given_shot": 0.11822
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 90009,
+          "mean_xg": 0.003165,
+          "n_given_shot": 3009,
+          "mean_xg_given_shot": 0.094663
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 106367,
+          "mean_xg": 0.005003,
+          "n_given_shot": 5593,
+          "mean_xg_given_shot": 0.095151
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 102229,
+          "mean_xg": 0.006735,
+          "n_given_shot": 7012,
+          "mean_xg_given_shot": 0.098192
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 99620,
+          "mean_xg": 0.008604,
+          "n_given_shot": 8004,
+          "mean_xg_given_shot": 0.107092
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 97124,
+          "mean_xg": 0.002803,
+          "n_given_shot": 3011,
+          "mean_xg_given_shot": 0.090425
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 98798,
+          "mean_xg": 0.004625,
+          "n_given_shot": 4773,
+          "mean_xg_given_shot": 0.095724
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 95756,
+          "mean_xg": 0.006338,
+          "n_given_shot": 5922,
+          "mean_xg_given_shot": 0.102486
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 106547,
+          "mean_xg": 0.007449,
+          "n_given_shot": 7648,
+          "mean_xg_given_shot": 0.103774
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 119862,
+          "mean_xg": 0.003617,
+          "n_given_shot": 4737,
+          "mean_xg_given_shot": 0.091531
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 85919,
+          "mean_xg": 0.005416,
+          "n_given_shot": 4683,
+          "mean_xg_given_shot": 0.09937
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 92686,
+          "mean_xg": 0.005775,
+          "n_given_shot": 5230,
+          "mean_xg_given_shot": 0.10234
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 99759,
+          "mean_xg": 0.00634,
+          "n_given_shot": 5869,
+          "mean_xg_given_shot": 0.107757
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": "Q1",
+          "n": 398226,
+          "mean_xg": 0.003583
+        },
+        {
+          "a_bin": "Q2",
+          "n": 398225,
+          "mean_xg": 0.005394
+        },
+        {
+          "a_bin": "Q3",
+          "n": 398225,
+          "mean_xg": 0.006749
+        },
+        {
+          "a_bin": "Q4",
+          "n": 398226,
+          "mean_xg": 0.008219
+        }
+      ],
+      "marginal_a_by_quartile_given_shot": [
+        {
+          "a_bin": "Q1",
+          "n": 15397,
+          "mean_xg": 0.092665
+        },
+        {
+          "a_bin": "Q2",
+          "n": 22736,
+          "mean_xg": 0.094478
+        },
+        {
+          "a_bin": "Q3",
+          "n": 26981,
+          "mean_xg": 0.099604
+        },
+        {
+          "a_bin": "Q4",
+          "n": 29893,
+          "mean_xg": 0.10949
+        }
+      ],
+      "marginal_a_delta": 0.004636,
+      "marginal_a_delta_given_shot": 0.016825,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.005943,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 398226
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 0.005439,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 398225
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.004646,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 398225
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.002723,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 398226
+        }
+      ],
+      "a_gradient_by_b_stratum_given_shot": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.024241,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 29516
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 0.012429,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 23618
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.013349,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 21354
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.016226,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 20519
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (2.18) exceeds 2.0 -- A's effect meaningfully depends on B's level.",
+      "classification_given_shot": "inconclusive",
+      "classification_reason_given_shot": "Pooled marginal delta (+0.016825) is below the 0.050212 minimum to classify confidently."
+    }
+  ],
+  "given_shot_threshold_decision": {
+    "date": "2026-09-17",
+    "status": "decided",
+    "question": "All 10 numeric x numeric pairs classify as 'inconclusive' on the shot-conditional (given-shot) xG panel -- every pair's marginal_a_delta_given_shot sits below its dataset's min_marginal_delta_given_shot_by_dataset threshold (active: 0.052053, passive: 0.050212), several by an order of magnitude (e.g. marking_tightness x engagement_distance_to_carrier: -0.000116). Should FLAT_MARGIN_RATIO / the given-shot threshold be loosened to force a classification on any of these?",
+    "decision": "No. 10/10 inconclusive is accepted as the final, genuine empirical answer at the current threshold. The threshold is not arbitrary -- it is FLAT_MARGIN_RATIO (0.5) x each dataset's own shot-conditional mean xG, the same relative convention already used and justified for the unconditional panel and for the binary-target leg. Loosening it specifically because these 10 pairs fail to clear it would be tuning the threshold to the result rather than the result following from a principled threshold -- exactly the kind of post-hoc adjustment this project's confound/threshold methodology has consistently avoided elsewhere (see CONFOUND_ANALYSIS.md, feature_interaction thresholds). The underlying finding is itself informative: once conditioned on a shot actually occurring, these numeric feature pairs do not show a detectable non-additive (interactive/substitutive) relationship in xG at a meaningfully-sized effect -- xG-given-shot is a much noisier, lower-signal target than shot occurrence itself, and 10/10 flat is consistent with that, not a methodology failure.",
+    "closes": "Numeric x numeric interaction analysis (prompt 30) -- both the unconditional and given-shot panels are now final; no further threshold tuning planned for this analysis."
+  }
+}
