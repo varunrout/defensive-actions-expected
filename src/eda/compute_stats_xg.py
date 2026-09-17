@@ -54,3 +54,16 @@ def boolean_xg_lift(df, col: str, target_col: str) -> dict:
         "n_false": n_false,
         "small_n": n_true < SMALL_N_THRESHOLD or n_false < SMALL_N_THRESHOLD,
     }
+
+
+def categorical_xg_table_given_shot(df, col: str, target_col: str, shot_col: str) -> list[dict]:
+    """Same as categorical_xg_table, filtered to rows where a shot actually
+    happened (shot_col == 1) first -- asks whether a feature relates to how
+    good the chance was, given a shot happened, not just whether one did."""
+    shot_df = df.loc[df[shot_col] == 1]
+    return categorical_xg_table(shot_df, col, target_col)
+
+
+def boolean_xg_lift_given_shot(df, col: str, target_col: str, shot_col: str) -> dict:
+    shot_df = df.loc[df[shot_col] == 1]
+    return boolean_xg_lift(shot_df, col, target_col)

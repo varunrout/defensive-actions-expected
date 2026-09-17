@@ -246,15 +246,15 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <p class="eyebrow">CATEGORY ATLAS -- XG &middot; PASSIVE / OFF-BALL DEFENSIVE POSITIONING</p>
   <h1 class="title">Passive / Off-Ball Defensive Positioning: Category Atlas (xG)</h1>
   <p class="dek">Mean target_future_xg_10s by category, reconstructed pre-drop pool, one row per visible defender-slot per on-ball attacking event.</p>
-  <div class="statbar"><div class="stat"><b>1,593,181</b><span>rows</span></div><div class="stat"><b>0.00599</b><span>mean xG</span></div><div class="stat"><b>5</b><span>categorical columns</span></div><div class="stat"><b>1</b><span>dropped, still shown</span></div></div>
+  <div class="statbar"><div class="stat"><b>1,593,181</b><span>rows</span></div><div class="stat"><b>0.00599</b><span>mean xG</span></div><div class="stat"><b>0.10042</b><span>mean xG given shot</span></div><div class="stat"><b>5</b><span>categorical columns</span></div><div class="stat"><b>1</b><span>dropped, still shown</span></div></div>
 </div></div>
 <div class="wrap">
-<div class="findings"><div class="finding"><span class="tag">pool</span><p><b>5 categorical columns (4 locked + 1 dropped-but-included)</b> &mdash; reconstructed pre-drop 51/44-era pool, not the current locked list -- same discipline as the numerical xG atlas.</p></div><div class="finding"><span class="tag">scale</span><p><b>mean target_future_xg_10s = 0.00599</b> &mdash; heavily zero-inflated continuous target -- values here are mean xG per category, not a percentage.</p></div></div>
-<h2 class="section-title">Category Atlas -- xG</h2><p class="section-note">One card per categorical column, reconstructed pre-drop pool. Green border = locked (current candidate list), amber = dropped (still shown, reason inline). Bars = groupby-mean xG against the full row population per category.</p>
+<div class="findings"><div class="finding"><span class="tag">pool</span><p><b>5 categorical columns (4 locked + 1 dropped-but-included)</b> &mdash; reconstructed pre-drop 51/44-era pool, not the current locked list -- same discipline as the numerical xG atlas.</p></div><div class="finding"><span class="tag">scale</span><p><b>mean target_future_xg_10s = 0.00599</b> &mdash; heavily zero-inflated continuous target -- values here are mean xG per category, not a percentage.</p></div><div class="finding"><span class="tag">conditional</span><p><b>mean target_future_xg_10s given a shot = 0.10042</b> &mdash; each card also expands to a shot-conditional breakdown (target_future_shot_10s==1 only) -- asks whether a category relates to how good the chance was, not just whether one occurred.</p></div></div>
+<h2 class="section-title">Category Atlas -- xG</h2><p class="section-note">One card per categorical column, reconstructed pre-drop pool. Green border = locked (current candidate list), amber = dropped (still shown, reason inline). Bars = groupby-mean xG against the full row population per category. Expand a card for the shot-conditional panel.</p>
 <div class="card xg-card locked" style="margin-bottom:16px;">
 <h3>defender_functional_role <span class="xg-status-badge locked">LOCKED</span></h3>
-<p class="subnote">mean xG by category &middot; dashed marker = dataset mean xG (0.00599)</p>
 
+<p class="subnote">Unconditional -- mean xG by category, dashed marker = dataset mean xG (0.00599)</p>
 
 <div class="catbar-row" title="mid_block: n=838270, xg_sum=5331.889, mean_xg=0.00636">
   <div class="catbar-label"><span>mid_block</span><span class="n">n=838270</span></div>
@@ -304,11 +304,68 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <span class="rate-val">0.00011</span>
 </div>
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=95,048) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on target_future_shot_10s==1 -- mean xG by category on the
+shot-only subset, dashed marker = shot-only mean xG (0.10042). Much smaller n; small-sample
+categories flagged, not hidden.</p>
+
+<div class="catbar-row" title="last_line: n=12352, xg_sum=1282.077, mean_xg=0.10380">
+  <div class="catbar-label"><span>last_line</span><span class="n">n=12352</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:84.13%"></div>
+  </div>
+  <span class="rate-val">0.10380</span>
+</div>
+<div class="catbar-row" title="central_screen: n=12278, xg_sum=1273.054, mean_xg=0.10369">
+  <div class="catbar-label"><span>central_screen</span><span class="n">n=12278</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.86%"></div>
+    <div class="catbar-refline" style="left:84.13%"></div>
+  </div>
+  <span class="rate-val">0.10369</span>
+</div>
+<div class="catbar-row" title="advanced_wide: n=8381, xg_sum=852.007, mean_xg=0.10166">
+  <div class="catbar-label"><span>advanced_wide</span><span class="n">n=8381</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:85.17%"></div>
+    <div class="catbar-refline" style="left:84.13%"></div>
+  </div>
+  <span class="rate-val">0.10166</span>
+</div>
+<div class="catbar-row" title="wide_cover: n=7988, xg_sum=806.016, mean_xg=0.10090">
+  <div class="catbar-label"><span>wide_cover</span><span class="n">n=7988</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:84.53%"></div>
+    <div class="catbar-refline" style="left:84.13%"></div>
+  </div>
+  <span class="rate-val">0.10090</span>
+</div>
+<div class="catbar-row" title="mid_block: n=54044, xg_sum=5331.889, mean_xg=0.09866">
+  <div class="catbar-label"><span>mid_block</span><span class="n">n=54044</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:82.65%"></div>
+    <div class="catbar-refline" style="left:84.13%"></div>
+  </div>
+  <span class="rate-val">0.09866</span>
+</div>
+<div class="catbar-row" title="unclassified: n=5, xg_sum=0.113, mean_xg=0.02266">
+  <div class="catbar-label"><span>unclassified</span><span class="n">n=5</span><span class="small-n-badge">small n</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:18.98%"></div>
+    <div class="catbar-refline" style="left:84.13%"></div>
+  </div>
+  <span class="rate-val">0.02266</span>
+</div>
+</details>
 </div>
 <div class="card xg-card dropped" style="margin-bottom:16px;">
 <h3>defender_zone <span class="xg-status-badge dropped">DROPPED</span></h3>
-<p class="subnote">mean xG by category &middot; dashed marker = dataset mean xG (0.00599)</p>
 <p class="xg-reason"><b>Why dropped:</b> Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box</p>
+<p class="subnote">Unconditional -- mean xG by category, dashed marker = dataset mean xG (0.00599)</p>
 
 <div class="catbar-row" title="attacking_third_center: n=258246, xg_sum=2724.618, mean_xg=0.01055">
   <div class="catbar-label"><span>attacking_third_center</span><span class="n">n=258246</span></div>
@@ -382,11 +439,92 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <span class="rate-val">0.00245</span>
 </div>
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=95,048) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on target_future_shot_10s==1 -- mean xG by category on the
+shot-only subset, dashed marker = shot-only mean xG (0.10042). Much smaller n; small-sample
+categories flagged, not hidden.</p>
+
+<div class="catbar-row" title="attacking_third_center: n=25498, xg_sum=2724.618, mean_xg=0.10686">
+  <div class="catbar-label"><span>attacking_third_center</span><span class="n">n=25498</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.10686</span>
+</div>
+<div class="catbar-row" title="middle_third_left_flank: n=2496, xg_sum=262.844, mean_xg=0.10531">
+  <div class="catbar-label"><span>middle_third_left_flank</span><span class="n">n=2496</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:85.70%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.10531</span>
+</div>
+<div class="catbar-row" title="middle_third_right_flank: n=2659, xg_sum=269.634, mean_xg=0.10140">
+  <div class="catbar-label"><span>middle_third_right_flank</span><span class="n">n=2659</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:82.52%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.10140</span>
+</div>
+<div class="catbar-row" title="defensive_third_center: n=39125, xg_sum=3893.741, mean_xg=0.09952">
+  <div class="catbar-label"><span>defensive_third_center</span><span class="n">n=39125</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:80.99%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.09952</span>
+</div>
+<div class="catbar-row" title="middle_third_center: n=13095, xg_sum=1298.987, mean_xg=0.09920">
+  <div class="catbar-label"><span>middle_third_center</span><span class="n">n=13095</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:80.72%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.09920</span>
+</div>
+<div class="catbar-row" title="attacking_third_right_flank: n=2674, xg_sum=254.821, mean_xg=0.09530">
+  <div class="catbar-label"><span>attacking_third_right_flank</span><span class="n">n=2674</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:77.55%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.09530</span>
+</div>
+<div class="catbar-row" title="attacking_third_left_flank: n=2373, xg_sum=222.369, mean_xg=0.09371">
+  <div class="catbar-label"><span>attacking_third_left_flank</span><span class="n">n=2373</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:76.26%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.09371</span>
+</div>
+<div class="catbar-row" title="defensive_third_left_flank: n=3563, xg_sum=323.791, mean_xg=0.09088">
+  <div class="catbar-label"><span>defensive_third_left_flank</span><span class="n">n=3563</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:73.95%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.09088</span>
+</div>
+<div class="catbar-row" title="defensive_third_right_flank: n=3565, xg_sum=294.351, mean_xg=0.08257">
+  <div class="catbar-label"><span>defensive_third_right_flank</span><span class="n">n=3565</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:67.19%"></div>
+    <div class="catbar-refline" style="left:81.72%"></div>
+  </div>
+  <span class="rate-val">0.08257</span>
+</div>
+</details>
 </div>
 <div class="card xg-card locked" style="margin-bottom:16px;">
 <h3>on_ball_event_type <span class="xg-status-badge locked">LOCKED</span></h3>
-<p class="subnote">mean xG by category &middot; dashed marker = dataset mean xG (0.00599)</p>
 
+<p class="subnote">Unconditional -- mean xG by category, dashed marker = dataset mean xG (0.00599)</p>
 
 <div class="catbar-row" title="Shot: n=24496, xg_sum=313.310, mean_xg=0.01279">
   <div class="catbar-label"><span>Shot</span><span class="n">n=24496</span></div>
@@ -420,11 +558,52 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <span class="rate-val">0.00577</span>
 </div>
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=95,048) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on target_future_shot_10s==1 -- mean xG by category on the
+shot-only subset, dashed marker = shot-only mean xG (0.10042). Much smaller n; small-sample
+categories flagged, not hidden.</p>
+
+<div class="catbar-row" title="Shot: n=1737, xg_sum=313.310, mean_xg=0.18037">
+  <div class="catbar-label"><span>Shot</span><span class="n">n=1737</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:48.41%"></div>
+  </div>
+  <span class="rate-val">0.18037</span>
+</div>
+<div class="catbar-row" title="Dribble: n=2384, xg_sum=273.981, mean_xg=0.11492">
+  <div class="catbar-label"><span>Dribble</span><span class="n">n=2384</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:55.40%"></div>
+    <div class="catbar-refline" style="left:48.41%"></div>
+  </div>
+  <span class="rate-val">0.11492</span>
+</div>
+<div class="catbar-row" title="Pass: n=47112, xg_sum=4833.294, mean_xg=0.10259">
+  <div class="catbar-label"><span>Pass</span><span class="n">n=47112</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:49.46%"></div>
+    <div class="catbar-refline" style="left:48.41%"></div>
+  </div>
+  <span class="rate-val">0.10259</span>
+</div>
+<div class="catbar-row" title="Carry: n=43815, xg_sum=4124.571, mean_xg=0.09414">
+  <div class="catbar-label"><span>Carry</span><span class="n">n=43815</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:45.38%"></div>
+    <div class="catbar-refline" style="left:48.41%"></div>
+  </div>
+  <span class="rate-val">0.09414</span>
+</div>
+</details>
 </div>
 <div class="card xg-card locked" style="margin-bottom:16px;">
 <h3>period <span class="xg-status-badge locked">LOCKED</span></h3>
-<p class="subnote">mean xG by category &middot; dashed marker = dataset mean xG (0.00599)</p>
 
+<p class="subnote">Unconditional -- mean xG by category, dashed marker = dataset mean xG (0.00599)</p>
 
 <div class="catbar-row" title="3: n=23655, xg_sum=205.644, mean_xg=0.00869">
   <div class="catbar-label"><span>3</span><span class="n">n=23655</span></div>
@@ -466,11 +645,52 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <span class="rate-val">0.00000</span>
 </div>
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=95,048) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on target_future_shot_10s==1 -- mean xG by category on the
+shot-only subset, dashed marker = shot-only mean xG (0.10042). Much smaller n; small-sample
+categories flagged, not hidden.</p>
+
+<div class="catbar-row" title="3: n=1500, xg_sum=205.644, mean_xg=0.13710">
+  <div class="catbar-label"><span>3</span><span class="n">n=1500</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:63.70%"></div>
+  </div>
+  <span class="rate-val">0.13710</span>
+</div>
+<div class="catbar-row" title="2: n=50662, xg_sum=5404.000, mean_xg=0.10667">
+  <div class="catbar-label"><span>2</span><span class="n">n=50662</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:67.66%"></div>
+    <div class="catbar-refline" style="left:63.70%"></div>
+  </div>
+  <span class="rate-val">0.10667</span>
+</div>
+<div class="catbar-row" title="1: n=41022, xg_sum=3774.718, mean_xg=0.09202">
+  <div class="catbar-label"><span>1</span><span class="n">n=41022</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:58.36%"></div>
+    <div class="catbar-refline" style="left:63.70%"></div>
+  </div>
+  <span class="rate-val">0.09202</span>
+</div>
+<div class="catbar-row" title="4: n=1864, xg_sum=160.793, mean_xg=0.08626">
+  <div class="catbar-label"><span>4</span><span class="n">n=1864</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:54.71%"></div>
+    <div class="catbar-refline" style="left:63.70%"></div>
+  </div>
+  <span class="rate-val">0.08626</span>
+</div>
+</details>
 </div>
 <div class="card xg-card locked" style="margin-bottom:16px;">
 <h3>phase_label <span class="xg-status-badge locked">LOCKED</span></h3>
-<p class="subnote">mean xG by category &middot; dashed marker = dataset mean xG (0.00599)</p>
 
+<p class="subnote">Unconditional -- mean xG by category, dashed marker = dataset mean xG (0.00599)</p>
 
 <div class="catbar-row" title="box_defence: n=103445, xg_sum=1657.172, mean_xg=0.01602">
   <div class="catbar-label"><span>box_defence</span><span class="n">n=103445</span></div>
@@ -528,6 +748,71 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <span class="rate-val">0.00213</span>
 </div>
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=95,048) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on target_future_shot_10s==1 -- mean xG by category on the
+shot-only subset, dashed marker = shot-only mean xG (0.10042). Much smaller n; small-sample
+categories flagged, not hidden.</p>
+
+<div class="catbar-row" title="box_defence: n=14546, xg_sum=1657.172, mean_xg=0.11393">
+  <div class="catbar-label"><span>box_defence</span><span class="n">n=14546</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:86.96%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.11393</span>
+</div>
+<div class="catbar-row" title="counterpress_after_loss: n=8237, xg_sum=893.072, mean_xg=0.10842">
+  <div class="catbar-label"><span>counterpress_after_loss</span><span class="n">n=8237</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:82.76%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.10842</span>
+</div>
+<div class="catbar-row" title="transition_defence: n=6943, xg_sum=736.030, mean_xg=0.10601">
+  <div class="catbar-label"><span>transition_defence</span><span class="n">n=6943</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:80.91%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.10601</span>
+</div>
+<div class="catbar-row" title="high_press_proxy: n=29252, xg_sum=2966.566, mean_xg=0.10141">
+  <div class="catbar-label"><span>high_press_proxy</span><span class="n">n=29252</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:77.41%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.10141</span>
+</div>
+<div class="catbar-row" title="settled_low_block_proxy: n=12169, xg_sum=1123.156, mean_xg=0.09230">
+  <div class="catbar-label"><span>settled_low_block_proxy</span><span class="n">n=12169</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:70.45%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.09230</span>
+</div>
+<div class="catbar-row" title="wide_defending_proxy: n=5064, xg_sum=462.758, mean_xg=0.09138">
+  <div class="catbar-label"><span>wide_defending_proxy</span><span class="n">n=5064</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:69.75%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.09138</span>
+</div>
+<div class="catbar-row" title="settled_mid_block_proxy: n=18837, xg_sum=1706.402, mean_xg=0.09059">
+  <div class="catbar-label"><span>settled_mid_block_proxy</span><span class="n">n=18837</span></div>
+  <div class="catbar-track">
+    <div class="catbar-fill" style="width:69.14%"></div>
+    <div class="catbar-refline" style="left:76.65%"></div>
+  </div>
+  <span class="rate-val">0.09059</span>
+</div>
+</details>
 </div>
 </div>
 </body>

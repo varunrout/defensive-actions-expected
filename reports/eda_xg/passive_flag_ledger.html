@@ -246,12 +246,13 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <p class="eyebrow">FLAG LEDGER -- XG &middot; PASSIVE / OFF-BALL DEFENSIVE POSITIONING</p>
   <h1 class="title">Passive / Off-Ball Defensive Positioning: Flag Ledger (xG)</h1>
   <p class="dek">Every boolean column ranked by mean-xG lift, reconstructed pre-drop pool, one row per visible defender-slot per on-ball attacking event.</p>
-  <div class="statbar"><div class="stat"><b>1,593,181</b><span>rows</span></div><div class="stat"><b>0.00599</b><span>mean xG</span></div><div class="stat"><b>11</b><span>boolean columns</span></div><div class="stat"><b>5</b><span>dropped, still shown</span></div></div>
+  <div class="statbar"><div class="stat"><b>1,593,181</b><span>rows</span></div><div class="stat"><b>0.00599</b><span>mean xG</span></div><div class="stat"><b>0.10042</b><span>mean xG given shot</span></div><div class="stat"><b>11</b><span>boolean columns</span></div><div class="stat"><b>5</b><span>dropped, still shown</span></div></div>
 </div></div>
 <div class="wrap">
 <div class="findings"><div class="finding"><span class="tag">lift</span><p><b>has_option_3</b> &mdash; is associated with a -0.01845 shift in mean xG (True 0.00586 vs False 0.02431).</p></div><div class="finding"><span class="tag">lift</span><p><b>is_in_attacking_box</b> &mdash; is associated with a +0.01360 shift in mean xG (True 0.01896 vs False 0.00535).</p></div><div class="finding"><span class="tag">pool</span><p><b>11 boolean columns (6 locked + 5 dropped-but-included)</b> &mdash; reconstructed pre-drop 51/44-era pool, not the current locked list.</p></div></div>
-<h2 class="section-title">Flag Ledger -- xG</h2><p class="section-note">Diverging bars ranked by absolute lift in mean xG, centered on zero. Green LOCKED / amber DROPPED badge per row, reconstructed pre-drop pool.</p><div class="ledger">
-<div class="ledger-row" title="True: 0.00586 (n=1581783)  False: 0.02431 (n=11398)">
+<h2 class="section-title">Flag Ledger -- xG</h2><p class="section-note">Diverging bars ranked by absolute lift in mean xG, centered on zero. Green LOCKED / amber DROPPED badge per row, reconstructed pre-drop pool. Expand a row for the shot-conditional lift.</p><div class="ledger">
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: 0.00586 (n=1581783)  False: 0.02431 (n=11398)">
   <div class="ledger-label">has_option_3<span class="xg-status-badge locked">LOCKED</span><span class="pct">99.3% True</span></div>
   <div class="divaxis"><span class="zero"></span>
     <div class="divbar neg" style="width:50.00%"></div>
@@ -259,7 +260,17 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <div class="ledger-figs"><span class="lift">-0.01845</span><br>T 0.00586 &middot; F 0.02431</div>
 </div>
-<div class="ledger-row" title="True: 0.01896 (n=74676)  False: 0.00535 (n=1518505)">
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a shot happened (n_true=93,100, n_false=1,948) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given shot <span class="lift">-0.04267</span> &middot; T 0.09955 &middot; F 0.14222
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: 0.01896 (n=74676)  False: 0.00535 (n=1518505)">
   <div class="ledger-label">is_in_attacking_box<span class="xg-status-badge locked">LOCKED</span><span class="pct">4.7% True</span></div>
   <div class="divaxis"><span class="zero"></span>
     <div class="divbar neg" style="width:0.00%"></div>
@@ -267,7 +278,17 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <div class="ledger-figs"><span class="lift">+0.01360</span><br>T 0.01896 &middot; F 0.00535</div>
 </div>
-<div class="ledger-row" title="True: 0.01825 (n=114367)  False: 0.00504 (n=1478814)">
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a shot happened (n_true=12,887, n_false=82,161) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given shot <span class="lift">+0.01091</span> &middot; T 0.10986 &middot; F 0.09894
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: 0.01825 (n=114367)  False: 0.00504 (n=1478814)">
   <div class="ledger-label">is_in_defending_box<span class="xg-status-badge locked">LOCKED</span><span class="pct">7.2% True</span></div>
   <div class="divaxis"><span class="zero"></span>
     <div class="divbar neg" style="width:0.00%"></div>
@@ -275,7 +296,17 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <div class="ledger-figs"><span class="lift">+0.01321</span><br>T 0.01825 &middot; F 0.00504</div>
 </div>
-<div class="ledger-row" title="True: 0.00598 (n=1591000)  False: 0.01684 (n=2181)">
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a shot happened (n_true=19,893, n_false=75,155) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given shot <span class="lift">+0.00570</span> &middot; T 0.10493 &middot; F 0.09923
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: 0.00598 (n=1591000)  False: 0.01684 (n=2181)">
   <div class="ledger-label">has_option_2<span class="xg-status-badge locked">LOCKED</span><span class="pct">99.9% True</span></div>
   <div class="divaxis"><span class="zero"></span>
     <div class="divbar neg" style="width:29.45%"></div>
@@ -283,7 +314,17 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <div class="ledger-figs"><span class="lift">-0.01087</span><br>T 0.00598 &middot; F 0.01684</div>
 </div>
-<div class="ledger-row" title="True: 0.01219 (n=214364)  False: 0.00503 (n=1378817)">
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a shot happened (n_true=94,718, n_false=330) (small n) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given shot <span class="lift">-0.01093</span> &middot; T 0.10039 &middot; F 0.11131
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: 0.01219 (n=214364)  False: 0.00503 (n=1378817)">
   <div class="ledger-label">is_high_zone<span class="xg-status-badge dropped">DROPPED</span><span class="pct">13.5% True &middot; <span class="xg-reason" style="display:inline;">Type 2 REVIEW resolution: near-total subset of is_in_attacking_box (kept, higher lift +11.85pp vs +6.41pp)</span></span></div>
   <div class="divaxis"><span class="zero"></span>
     <div class="divbar neg" style="width:0.00%"></div>
@@ -291,7 +332,17 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <div class="ledger-figs"><span class="lift">+0.00716</span><br>T 0.01219 &middot; F 0.00503</div>
 </div>
-<div class="ledger-row" title="True: 0.01136 (n=330258)  False: 0.00459 (n=1262923)">
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a shot happened (n_true=24,682, n_false=70,366) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given shot <span class="lift">+0.00736</span> &middot; T 0.10587 &middot; F 0.09851
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: 0.01136 (n=330258)  False: 0.00459 (n=1262923)">
   <div class="ledger-label">is_deep_zone<span class="xg-status-badge dropped">DROPPED</span><span class="pct">20.7% True &middot; <span class="xg-reason" style="display:inline;">Type 2 REVIEW resolution: near-total subset of is_in_defending_box (kept, higher lift +12.31pp vs +7.02pp)</span></span></div>
   <div class="divaxis"><span class="zero"></span>
     <div class="divbar neg" style="width:0.00%"></div>
@@ -299,7 +350,17 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <div class="ledger-figs"><span class="lift">+0.00677</span><br>T 0.01136 &middot; F 0.00459</div>
 </div>
-<div class="ledger-row" title="True: 0.00885 (n=111469)  False: 0.00577 (n=1481433)">
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a shot happened (n_true=38,073, n_false=56,975) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given shot <span class="lift">-0.00321</span> &middot; T 0.09850 &middot; F 0.10171
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: 0.00885 (n=111469)  False: 0.00577 (n=1481433)">
   <div class="ledger-label">screens_top_option<span class="xg-status-badge dropped">DROPPED</span><span class="pct">7.0% True &middot; <span class="xg-reason" style="display:inline;">Type 1 REVIEW resolution: point-biserial r=0.832 vs lane_screening_score_option_1 (kept)</span></span></div>
   <div class="divaxis"><span class="zero"></span>
     <div class="divbar neg" style="width:0.00%"></div>
@@ -307,7 +368,17 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <div class="ledger-figs"><span class="lift">+0.00308</span><br>T 0.00885 &middot; F 0.00577</div>
 </div>
-<div class="ledger-row" title="True: 0.00325 (n=165072)  False: 0.00631 (n=1428109)">
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a shot happened (n_true=8,726, n_false=86,281) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given shot <span class="lift">+0.01404</span> &middot; T 0.11311 &middot; F 0.09907
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: 0.00325 (n=165072)  False: 0.00631 (n=1428109)">
   <div class="ledger-label">is_wide_lane<span class="xg-status-badge locked">LOCKED</span><span class="pct">10.4% True</span></div>
   <div class="divaxis"><span class="zero"></span>
     <div class="divbar neg" style="width:8.29%"></div>
@@ -315,7 +386,17 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <div class="ledger-figs"><span class="lift">-0.00306</span><br>T 0.00325 &middot; F 0.00631</div>
 </div>
-<div class="ledger-row" title="True: 0.00707 (n=995724)  False: 0.00419 (n=597457)">
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a shot happened (n_true=5,762, n_false=89,286) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given shot <span class="lift">-0.00777</span> &middot; T 0.09313 &middot; F 0.10090
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: 0.00707 (n=995724)  False: 0.00419 (n=597457)">
   <div class="ledger-label">is_central_lane<span class="xg-status-badge dropped">DROPPED</span><span class="pct">62.5% True &middot; <span class="xg-reason" style="display:inline;">Type 1 REVIEW resolution: point-biserial r=0.849 vs attacking_goal_centrality (kept)</span></span></div>
   <div class="divaxis"><span class="zero"></span>
     <div class="divbar neg" style="width:0.00%"></div>
@@ -323,7 +404,17 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <div class="ledger-figs"><span class="lift">+0.00289</span><br>T 0.00707 &middot; F 0.00419</div>
 </div>
-<div class="ledger-row" title="True: 0.00599 (n=1590321)  False: 0.00461 (n=2860)">
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a shot happened (n_true=68,884, n_false=26,164) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given shot <span class="lift">+0.00665</span> &middot; T 0.10225 &middot; F 0.09561
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: 0.00599 (n=1590321)  False: 0.00461 (n=2860)">
   <div class="ledger-label">has_screened_outcome<span class="xg-status-badge dropped">DROPPED</span><span class="pct">99.8% True &middot; <span class="xg-reason" style="display:inline;">Leakage exclusion (not a correlation-tier verdict): censoring-mechanism proxy for target_future_shot_10s&#x27;s own 10s window being truncated at end-of-period/match, not defensive signal -- chi2=136.5, p=1.54e-31 vs target_future_shot_10s (0.50% shot rate when False [n=2,581] vs 5.97% when True); see reports/eda/LEAKAGE_AUDIT.json</span></span></div>
   <div class="divaxis"><span class="zero"></span>
     <div class="divbar neg" style="width:0.00%"></div>
@@ -331,13 +422,32 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   </div>
   <div class="ledger-figs"><span class="lift">+0.00139</span><br>T 0.00599 &middot; F 0.00461</div>
 </div>
-<div class="ledger-row" title="True: 0.00598 (n=831920)  False: 0.00599 (n=760982)">
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a shot happened (n_true=94,994, n_false=54) (small n) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given shot <span class="lift">-0.14358</span> &middot; T 0.10034 &middot; F 0.24392
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: 0.00598 (n=831920)  False: 0.00599 (n=760982)">
   <div class="ledger-label">is_goal_side_of_nearest_attacker<span class="xg-status-badge locked">LOCKED</span><span class="pct">52.2% True</span></div>
   <div class="divaxis"><span class="zero"></span>
     <div class="divbar neg" style="width:0.02%"></div>
     <div class="divbar pos" style="width:0.00%"></div>
   </div>
   <div class="ledger-figs"><span class="lift">-0.00001</span><br>T 0.00598 &middot; F 0.00599</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a shot happened (n_true=49,605, n_false=45,402) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given shot <span class="lift">-0.00005</span> &middot; T 0.10034 &middot; F 0.10039
+</div>
+</details>
 </div></div>
 </div>
 </body>

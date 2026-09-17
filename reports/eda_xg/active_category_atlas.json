@@ -1,0 +1,1043 @@
+{
+  "dataset": "active",
+  "target": "target_future_xg_10s",
+  "shot_col": "target_future_shot_10s",
+  "n_rows": 56068,
+  "n_rows_given_shot": 4368,
+  "base_xg": 0.008110388187891488,
+  "base_xg_given_shot": 0.10410559636417124,
+  "columns": {
+    "action_family": {
+      "status": "dropped",
+      "reason": "CORRELATION_ANALYSIS DROP tier: Cramer's V=1.0 vs event_type (kept, more granular)",
+      "categories": [
+        {
+          "category": "recovery",
+          "n": 8932,
+          "xg_sum": 107.4964914182,
+          "mean_xg": 0.012034985604366322
+        },
+        {
+          "category": "contest",
+          "n": 6910,
+          "xg_sum": 59.3555782244,
+          "mean_xg": 0.008589808715542692
+        },
+        {
+          "category": "intervention",
+          "n": 10105,
+          "xg_sum": 80.6064948092,
+          "mean_xg": 0.007976892113725879
+        },
+        {
+          "category": "pressure",
+          "n": 27478,
+          "xg_sum": 204.3785150099,
+          "mean_xg": 0.007437896317413931
+        },
+        {
+          "category": "discipline",
+          "n": 2643,
+          "xg_sum": 2.896165457,
+          "mean_xg": 0.0010957871573968974
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "recovery",
+          "n": 926,
+          "xg_sum": 107.4964914182,
+          "mean_xg": 0.11608692377775377
+        },
+        {
+          "category": "intervention",
+          "n": 766,
+          "xg_sum": 80.6064948092,
+          "mean_xg": 0.10523041097806789
+        },
+        {
+          "category": "pressure",
+          "n": 2015,
+          "xg_sum": 204.3785150099,
+          "mean_xg": 0.10142854342923077
+        },
+        {
+          "category": "contest",
+          "n": 625,
+          "xg_sum": 59.3555782244,
+          "mean_xg": 0.09496892515904
+        },
+        {
+          "category": "discipline",
+          "n": 36,
+          "xg_sum": 2.896165457,
+          "mean_xg": 0.08044904047222222
+        }
+      ]
+    },
+    "action_zone": {
+      "status": "dropped",
+      "reason": "Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal",
+      "categories": [
+        {
+          "category": "defensive_third_center",
+          "n": 9509,
+          "xg_sum": 163.6548067926,
+          "mean_xg": 0.017210517067262593
+        },
+        {
+          "category": "attacking_third_center",
+          "n": 11309,
+          "xg_sum": 180.2755818845,
+          "mean_xg": 0.015940895029136086
+        },
+        {
+          "category": "attacking_third_right_flank",
+          "n": 3777,
+          "xg_sum": 17.8838641296,
+          "mean_xg": 0.00473493887466243
+        },
+        {
+          "category": "defensive_third_left_flank",
+          "n": 3458,
+          "xg_sum": 14.8985583056,
+          "mean_xg": 0.004308432130017351
+        },
+        {
+          "category": "defensive_third_right_flank",
+          "n": 3193,
+          "xg_sum": 13.346806391,
+          "mean_xg": 0.004180020792671469
+        },
+        {
+          "category": "attacking_third_left_flank",
+          "n": 3653,
+          "xg_sum": 13.760533644,
+          "mean_xg": 0.0037669131245551602
+        },
+        {
+          "category": "middle_third_center",
+          "n": 9608,
+          "xg_sum": 29.5992384717,
+          "mean_xg": 0.003080686768495004
+        },
+        {
+          "category": "middle_third_right_flank",
+          "n": 5709,
+          "xg_sum": 10.7275997127,
+          "mean_xg": 0.0018790680877036258
+        },
+        {
+          "category": "middle_third_left_flank",
+          "n": 5852,
+          "xg_sum": 10.586255587,
+          "mean_xg": 0.0018089978788448395
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "defensive_third_center",
+          "n": 1436,
+          "xg_sum": 163.6548067926,
+          "mean_xg": 0.11396574289178273
+        },
+        {
+          "category": "attacking_third_center",
+          "n": 1718,
+          "xg_sum": 180.2755818845,
+          "mean_xg": 0.10493340039842841
+        },
+        {
+          "category": "attacking_third_right_flank",
+          "n": 172,
+          "xg_sum": 17.8838641296,
+          "mean_xg": 0.10397595424186046
+        },
+        {
+          "category": "middle_third_right_flank",
+          "n": 112,
+          "xg_sum": 10.7275997127,
+          "mean_xg": 0.09578214029196429
+        },
+        {
+          "category": "middle_third_center",
+          "n": 322,
+          "xg_sum": 29.5992384717,
+          "mean_xg": 0.09192310084378882
+        },
+        {
+          "category": "attacking_third_left_flank",
+          "n": 151,
+          "xg_sum": 13.760533644,
+          "mean_xg": 0.09112936188079471
+        },
+        {
+          "category": "defensive_third_left_flank",
+          "n": 174,
+          "xg_sum": 14.8985583056,
+          "mean_xg": 0.08562389830804598
+        },
+        {
+          "category": "middle_third_left_flank",
+          "n": 124,
+          "xg_sum": 10.586255587,
+          "mean_xg": 0.08537302892741935
+        },
+        {
+          "category": "defensive_third_right_flank",
+          "n": 159,
+          "xg_sum": 13.346806391,
+          "mean_xg": 0.08394217855974842
+        }
+      ]
+    },
+    "event_type": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "Ball Recovery",
+          "n": 8932,
+          "xg_sum": 107.4964914182,
+          "mean_xg": 0.012034985604366322
+        },
+        {
+          "category": "Clearance",
+          "n": 4187,
+          "xg_sum": 38.0064839992,
+          "mean_xg": 0.009077259135228086
+        },
+        {
+          "category": "Block",
+          "n": 3889,
+          "xg_sum": 34.967803636,
+          "mean_xg": 0.00899146403599897
+        },
+        {
+          "category": "Duel",
+          "n": 6432,
+          "xg_sum": 57.7764436964,
+          "mean_xg": 0.008982656047325871
+        },
+        {
+          "category": "Pressure",
+          "n": 27478,
+          "xg_sum": 204.3785150099,
+          "mean_xg": 0.007437896317413931
+        },
+        {
+          "category": "Interception",
+          "n": 2029,
+          "xg_sum": 7.632207174,
+          "mean_xg": 0.003761560953178906
+        },
+        {
+          "category": "50/50",
+          "n": 478,
+          "xg_sum": 1.579134528,
+          "mean_xg": 0.003303628719665272
+        },
+        {
+          "category": "Foul Committed",
+          "n": 2643,
+          "xg_sum": 2.896165457,
+          "mean_xg": 0.0010957871573968974
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "Block",
+          "n": 266,
+          "xg_sum": 34.967803636,
+          "mean_xg": 0.13145790840601504
+        },
+        {
+          "category": "Ball Recovery",
+          "n": 926,
+          "xg_sum": 107.4964914182,
+          "mean_xg": 0.11608692377775377
+        },
+        {
+          "category": "Pressure",
+          "n": 2015,
+          "xg_sum": 204.3785150099,
+          "mean_xg": 0.10142854342923077
+        },
+        {
+          "category": "Interception",
+          "n": 76,
+          "xg_sum": 7.632207174,
+          "mean_xg": 0.10042377860526316
+        },
+        {
+          "category": "Duel",
+          "n": 597,
+          "xg_sum": 57.7764436964,
+          "mean_xg": 0.09677796264053602
+        },
+        {
+          "category": "Clearance",
+          "n": 424,
+          "xg_sum": 38.0064839992,
+          "mean_xg": 0.08963793396037736
+        },
+        {
+          "category": "Foul Committed",
+          "n": 36,
+          "xg_sum": 2.896165457,
+          "mean_xg": 0.08044904047222222
+        },
+        {
+          "category": "50/50",
+          "n": 28,
+          "xg_sum": 1.579134528,
+          "mean_xg": 0.056397661714285716
+        }
+      ]
+    },
+    "period": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "2",
+          "n": 27915,
+          "xg_sum": 260.9759825613,
+          "mean_xg": 0.009348951551542181
+        },
+        {
+          "category": "3",
+          "n": 703,
+          "xg_sum": 5.2833905917,
+          "mean_xg": 0.007515491595590327
+        },
+        {
+          "category": "4",
+          "n": 783,
+          "xg_sum": 5.6517820279999995,
+          "mean_xg": 0.007218112424010216
+        },
+        {
+          "category": "1",
+          "n": 26667,
+          "xg_sum": 182.8220897377,
+          "mean_xg": 0.006855742668380395
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "2",
+          "n": 2362,
+          "xg_sum": 260.9759825613,
+          "mean_xg": 0.11048940836634208
+        },
+        {
+          "category": "1",
+          "n": 1875,
+          "xg_sum": 182.8220897377,
+          "mean_xg": 0.09750511452677334
+        },
+        {
+          "category": "4",
+          "n": 66,
+          "xg_sum": 5.6517820279999995,
+          "mean_xg": 0.08563306103030302
+        },
+        {
+          "category": "3",
+          "n": 65,
+          "xg_sum": 5.2833905917,
+          "mean_xg": 0.08128293218
+        }
+      ]
+    },
+    "phase_label": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "box_defence",
+          "n": 9144,
+          "xg_sum": 156.0184542984,
+          "mean_xg": 0.017062385640682416
+        },
+        {
+          "category": "high_press_proxy",
+          "n": 9094,
+          "xg_sum": 153.1440059983,
+          "mean_xg": 0.01684011502070596
+        },
+        {
+          "category": "transition_defence",
+          "n": 5699,
+          "xg_sum": 38.9444998064,
+          "mean_xg": 0.006833567258536586
+        },
+        {
+          "category": "settled_low_block_proxy",
+          "n": 7348,
+          "xg_sum": 37.0370428803,
+          "mean_xg": 0.005040424997318998
+        },
+        {
+          "category": "counterpress_after_loss",
+          "n": 9822,
+          "xg_sum": 38.1843604794,
+          "mean_xg": 0.003887635968173488
+        },
+        {
+          "category": "settled_mid_block_proxy",
+          "n": 9868,
+          "xg_sum": 22.8285294199,
+          "mean_xg": 0.0023133896858431296
+        },
+        {
+          "category": "wide_defending_proxy",
+          "n": 5093,
+          "xg_sum": 8.576352036,
+          "mean_xg": 0.0016839489566071078
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "transition_defence",
+          "n": 341,
+          "xg_sum": 38.9444998064,
+          "mean_xg": 0.11420674430029326
+        },
+        {
+          "category": "high_press_proxy",
+          "n": 1386,
+          "xg_sum": 153.1440059983,
+          "mean_xg": 0.11049351082128428
+        },
+        {
+          "category": "box_defence",
+          "n": 1451,
+          "xg_sum": 156.0184542984,
+          "mean_xg": 0.10752477897891109
+        },
+        {
+          "category": "counterpress_after_loss",
+          "n": 360,
+          "xg_sum": 38.1843604794,
+          "mean_xg": 0.10606766799833332
+        },
+        {
+          "category": "wide_defending_proxy",
+          "n": 99,
+          "xg_sum": 8.576352036,
+          "mean_xg": 0.08662981854545454
+        },
+        {
+          "category": "settled_low_block_proxy",
+          "n": 428,
+          "xg_sum": 37.0370428803,
+          "mean_xg": 0.08653514691658878
+        },
+        {
+          "category": "settled_mid_block_proxy",
+          "n": 303,
+          "xg_sum": 22.8285294199,
+          "mean_xg": 0.07534168125379538
+        }
+      ]
+    },
+    "phase_label_prev_event": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "box_defence",
+          "n": 6887,
+          "xg_sum": 127.8154717604,
+          "mean_xg": 0.01855894754761144
+        },
+        {
+          "category": "high_press_proxy",
+          "n": 9701,
+          "xg_sum": 157.225318342,
+          "mean_xg": 0.016207124867745594
+        },
+        {
+          "category": "transition_defence",
+          "n": 5201,
+          "xg_sum": 34.1807116442,
+          "mean_xg": 0.006571949941203615
+        },
+        {
+          "category": "settled_low_block_proxy",
+          "n": 5762,
+          "xg_sum": 37.2011557193,
+          "mean_xg": 0.006456292210916348
+        },
+        {
+          "category": "counterpress_after_loss",
+          "n": 9923,
+          "xg_sum": 43.232005005,
+          "mean_xg": 0.004356747455910511
+        },
+        {
+          "category": "settled_mid_block_proxy",
+          "n": 8880,
+          "xg_sum": 33.369128292,
+          "mean_xg": 0.0037577847175675676
+        },
+        {
+          "category": "(missing)",
+          "n": 4534,
+          "xg_sum": 10.8239476548,
+          "mean_xg": 0.002387284440846934
+        },
+        {
+          "category": "wide_defending_proxy",
+          "n": 5180,
+          "xg_sum": 10.885506501,
+          "mean_xg": 0.0021014491314671814
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "(missing)",
+          "n": 87,
+          "xg_sum": 10.8239476548,
+          "mean_xg": 0.12441319143448275
+        },
+        {
+          "category": "box_defence",
+          "n": 1185,
+          "xg_sum": 127.8154717604,
+          "mean_xg": 0.10786115760371308
+        },
+        {
+          "category": "transition_defence",
+          "n": 318,
+          "xg_sum": 34.1807116442,
+          "mean_xg": 0.10748651460440252
+        },
+        {
+          "category": "high_press_proxy",
+          "n": 1482,
+          "xg_sum": 157.225318342,
+          "mean_xg": 0.10608995839541162
+        },
+        {
+          "category": "counterpress_after_loss",
+          "n": 409,
+          "xg_sum": 43.232005005,
+          "mean_xg": 0.10570172372860635
+        },
+        {
+          "category": "settled_low_block_proxy",
+          "n": 368,
+          "xg_sum": 37.2011557193,
+          "mean_xg": 0.1010900970633152
+        },
+        {
+          "category": "wide_defending_proxy",
+          "n": 123,
+          "xg_sum": 10.885506501,
+          "mean_xg": 0.08850005285365854
+        },
+        {
+          "category": "settled_mid_block_proxy",
+          "n": 396,
+          "xg_sum": 33.369128292,
+          "mean_xg": 0.08426547548484849
+        }
+      ]
+    },
+    "play_pattern": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "From Counter",
+          "n": 752,
+          "xg_sum": 25.5727853337,
+          "mean_xg": 0.034006363475664894
+        },
+        {
+          "category": "From Corner",
+          "n": 3090,
+          "xg_sum": 69.8805334662,
+          "mean_xg": 0.02261505937417476
+        },
+        {
+          "category": "Other",
+          "n": 251,
+          "xg_sum": 2.523751144,
+          "mean_xg": 0.010054785434262947
+        },
+        {
+          "category": "From Free Kick",
+          "n": 8093,
+          "xg_sum": 78.3405660329,
+          "mean_xg": 0.00968004028579019
+        },
+        {
+          "category": "From Goal Kick",
+          "n": 4417,
+          "xg_sum": 35.0215714355,
+          "mean_xg": 0.007928813999434006
+        },
+        {
+          "category": "From Throw In",
+          "n": 12349,
+          "xg_sum": 85.447482151,
+          "mean_xg": 0.006919384739736011
+        },
+        {
+          "category": "From Kick Off",
+          "n": 1435,
+          "xg_sum": 9.482389402999999,
+          "mean_xg": 0.00660793686620209
+        },
+        {
+          "category": "From Keeper",
+          "n": 1428,
+          "xg_sum": 8.965700722,
+          "mean_xg": 0.006278501906162464
+        },
+        {
+          "category": "Regular Play",
+          "n": 24253,
+          "xg_sum": 139.4984652304,
+          "mean_xg": 0.005751802466927803
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "Other",
+          "n": 12,
+          "xg_sum": 2.523751144,
+          "mean_xg": 0.21031259533333332
+        },
+        {
+          "category": "From Counter",
+          "n": 158,
+          "xg_sum": 25.5727853337,
+          "mean_xg": 0.16185307173227848
+        },
+        {
+          "category": "From Kick Off",
+          "n": 65,
+          "xg_sum": 9.482389402999999,
+          "mean_xg": 0.14588291389230768
+        },
+        {
+          "category": "From Goal Kick",
+          "n": 269,
+          "xg_sum": 35.0215714355,
+          "mean_xg": 0.13019171537360594
+        },
+        {
+          "category": "From Corner",
+          "n": 617,
+          "xg_sum": 69.8805334662,
+          "mean_xg": 0.11325856315429499
+        },
+        {
+          "category": "From Free Kick",
+          "n": 737,
+          "xg_sum": 78.3405660329,
+          "mean_xg": 0.10629656178141113
+        },
+        {
+          "category": "From Keeper",
+          "n": 88,
+          "xg_sum": 8.965700722,
+          "mean_xg": 0.10188296274999999
+        },
+        {
+          "category": "Regular Play",
+          "n": 1473,
+          "xg_sum": 139.4984652304,
+          "mean_xg": 0.09470364238316362
+        },
+        {
+          "category": "From Throw In",
+          "n": 949,
+          "xg_sum": 85.447482151,
+          "mean_xg": 0.09003949647102213
+        }
+      ]
+    },
+    "position": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "Center Back",
+          "n": 1424,
+          "xg_sum": 21.8270909183,
+          "mean_xg": 0.015328013285323034
+        },
+        {
+          "category": "Left Center Back",
+          "n": 4619,
+          "xg_sum": 58.924764747699996,
+          "mean_xg": 0.012757039347845852
+        },
+        {
+          "category": "Right Center Back",
+          "n": 4545,
+          "xg_sum": 53.1093469279,
+          "mean_xg": 0.011685224846622662
+        },
+        {
+          "category": "Right Back",
+          "n": 3465,
+          "xg_sum": 39.3228091391,
+          "mean_xg": 0.011348574066118326
+        },
+        {
+          "category": "Left Attacking Midfield",
+          "n": 586,
+          "xg_sum": 5.4138914134,
+          "mean_xg": 0.009238722548464164
+        },
+        {
+          "category": "Left Defensive Midfield",
+          "n": 4131,
+          "xg_sum": 35.754632259,
+          "mean_xg": 0.008655200256354393
+        },
+        {
+          "category": "Center Defensive Midfield",
+          "n": 2309,
+          "xg_sum": 17.9988456056,
+          "mean_xg": 0.007795082548982243
+        },
+        {
+          "category": "Left Wing Back",
+          "n": 1650,
+          "xg_sum": 11.9934749924,
+          "mean_xg": 0.007268772722666667
+        },
+        {
+          "category": "Left Center Forward",
+          "n": 1350,
+          "xg_sum": 9.4334437003,
+          "mean_xg": 0.006987736074296296
+        },
+        {
+          "category": "Left Back",
+          "n": 3574,
+          "xg_sum": 24.5098393551,
+          "mean_xg": 0.006857817390906547
+        },
+        {
+          "category": "Center Forward",
+          "n": 4427,
+          "xg_sum": 30.0774722277,
+          "mean_xg": 0.006794098086220917
+        },
+        {
+          "category": "Right Center Midfield",
+          "n": 2227,
+          "xg_sum": 15.1188417476,
+          "mean_xg": 0.0067888826886394246
+        },
+        {
+          "category": "Right Center Forward",
+          "n": 1296,
+          "xg_sum": 8.7945092667,
+          "mean_xg": 0.006785886779861111
+        },
+        {
+          "category": "Right Wing Back",
+          "n": 1679,
+          "xg_sum": 11.078306337999999,
+          "mean_xg": 0.006598157437760571
+        },
+        {
+          "category": "Center Attacking Midfield",
+          "n": 2352,
+          "xg_sum": 15.3171969143,
+          "mean_xg": 0.006512413654039116
+        },
+        {
+          "category": "Right Defensive Midfield",
+          "n": 4397,
+          "xg_sum": 28.5419407533,
+          "mean_xg": 0.006491230555674323
+        },
+        {
+          "category": "Right Wing",
+          "n": 3190,
+          "xg_sum": 20.5455203813,
+          "mean_xg": 0.006440602000407524
+        },
+        {
+          "category": "Right Attacking Midfield",
+          "n": 609,
+          "xg_sum": 3.8006759199999998,
+          "mean_xg": 0.006240847159277503
+        },
+        {
+          "category": "Left Wing",
+          "n": 2920,
+          "xg_sum": 17.6750823856,
+          "mean_xg": 0.006053110406027397
+        },
+        {
+          "category": "Left Midfield",
+          "n": 1073,
+          "xg_sum": 6.4429238866,
+          "mean_xg": 0.006004588897110904
+        },
+        {
+          "category": "Left Center Midfield",
+          "n": 2251,
+          "xg_sum": 12.5043789888,
+          "mean_xg": 0.0055550328693025315
+        },
+        {
+          "category": "Right Midfield",
+          "n": 1120,
+          "xg_sum": 4.8743993880000005,
+          "mean_xg": 0.004352142310714287
+        },
+        {
+          "category": "Goalkeeper",
+          "n": 874,
+          "xg_sum": 1.673857662,
+          "mean_xg": 0.0019151689496567507
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "Goalkeeper",
+          "n": 7,
+          "xg_sum": 1.673857662,
+          "mean_xg": 0.23912252314285715
+        },
+        {
+          "category": "Center Back",
+          "n": 163,
+          "xg_sum": 21.8270909183,
+          "mean_xg": 0.1339085332411043
+        },
+        {
+          "category": "Right Back",
+          "n": 301,
+          "xg_sum": 39.3228091391,
+          "mean_xg": 0.13064056192392026
+        },
+        {
+          "category": "Center Forward",
+          "n": 244,
+          "xg_sum": 30.0774722277,
+          "mean_xg": 0.12326832880204917
+        },
+        {
+          "category": "Left Center Forward",
+          "n": 82,
+          "xg_sum": 9.4334437003,
+          "mean_xg": 0.11504199634512195
+        },
+        {
+          "category": "Right Center Back",
+          "n": 463,
+          "xg_sum": 53.1093469279,
+          "mean_xg": 0.11470701280323974
+        },
+        {
+          "category": "Left Attacking Midfield",
+          "n": 48,
+          "xg_sum": 5.4138914134,
+          "mean_xg": 0.11278940444583334
+        },
+        {
+          "category": "Left Center Back",
+          "n": 531,
+          "xg_sum": 58.924764747699996,
+          "mean_xg": 0.11096942513691148
+        },
+        {
+          "category": "Right Center Forward",
+          "n": 80,
+          "xg_sum": 8.7945092667,
+          "mean_xg": 0.10993136583375
+        },
+        {
+          "category": "Right Attacking Midfield",
+          "n": 35,
+          "xg_sum": 3.8006759199999998,
+          "mean_xg": 0.10859074057142856
+        },
+        {
+          "category": "Left Defensive Midfield",
+          "n": 352,
+          "xg_sum": 35.754632259,
+          "mean_xg": 0.10157565982670454
+        },
+        {
+          "category": "Left Wing Back",
+          "n": 120,
+          "xg_sum": 11.9934749924,
+          "mean_xg": 0.09994562493666666
+        },
+        {
+          "category": "Right Wing",
+          "n": 207,
+          "xg_sum": 20.5455203813,
+          "mean_xg": 0.09925372164879227
+        },
+        {
+          "category": "Left Midfield",
+          "n": 65,
+          "xg_sum": 6.4429238866,
+          "mean_xg": 0.09912190594769231
+        },
+        {
+          "category": "Left Wing",
+          "n": 180,
+          "xg_sum": 17.6750823856,
+          "mean_xg": 0.09819490214222222
+        },
+        {
+          "category": "Center Attacking Midfield",
+          "n": 162,
+          "xg_sum": 15.3171969143,
+          "mean_xg": 0.09455059823641976
+        },
+        {
+          "category": "Center Defensive Midfield",
+          "n": 192,
+          "xg_sum": 17.9988456056,
+          "mean_xg": 0.09374398752916667
+        },
+        {
+          "category": "Right Center Midfield",
+          "n": 162,
+          "xg_sum": 15.1188417476,
+          "mean_xg": 0.0933261836271605
+        },
+        {
+          "category": "Left Center Midfield",
+          "n": 136,
+          "xg_sum": 12.5043789888,
+          "mean_xg": 0.09194396315294118
+        },
+        {
+          "category": "Left Back",
+          "n": 285,
+          "xg_sum": 24.5098393551,
+          "mean_xg": 0.0859994363336842
+        },
+        {
+          "category": "Right Wing Back",
+          "n": 133,
+          "xg_sum": 11.078306337999999,
+          "mean_xg": 0.08329553637593984
+        },
+        {
+          "category": "Right Defensive Midfield",
+          "n": 346,
+          "xg_sum": 28.5419407533,
+          "mean_xg": 0.08249115824653179
+        },
+        {
+          "category": "Right Midfield",
+          "n": 74,
+          "xg_sum": 4.8743993880000005,
+          "mean_xg": 0.06587026200000001
+        }
+      ]
+    },
+    "position_group": {
+      "status": "dropped",
+      "reason": "CORRELATION_ANALYSIS DROP tier: Cramer's V=1.0 vs position (kept, more granular)",
+      "categories": [
+        {
+          "category": "centre_back",
+          "n": 10588,
+          "xg_sum": 133.8612025939,
+          "mean_xg": 0.012642727861154137
+        },
+        {
+          "category": "fullback_wingback",
+          "n": 10368,
+          "xg_sum": 86.9044298246,
+          "mean_xg": 0.008381985901292438
+        },
+        {
+          "category": "defensive_midfielder",
+          "n": 10837,
+          "xg_sum": 82.2954186179,
+          "mean_xg": 0.007593929926907815
+        },
+        {
+          "category": "forward",
+          "n": 7073,
+          "xg_sum": 48.3054251947,
+          "mean_xg": 0.0068295525512088225
+        },
+        {
+          "category": "other",
+          "n": 6110,
+          "xg_sum": 38.2206027669,
+          "mean_xg": 0.006255417801456629
+        },
+        {
+          "category": "midfielder",
+          "n": 10218,
+          "xg_sum": 63.472308258700004,
+          "mean_xg": 0.0062118132960168335
+        },
+        {
+          "category": "goalkeeper",
+          "n": 874,
+          "xg_sum": 1.673857662,
+          "mean_xg": 0.0019151689496567507
+        }
+      ],
+      "categories_given_shot": [
+        {
+          "category": "goalkeeper",
+          "n": 7,
+          "xg_sum": 1.673857662,
+          "mean_xg": 0.23912252314285715
+        },
+        {
+          "category": "forward",
+          "n": 406,
+          "xg_sum": 48.3054251947,
+          "mean_xg": 0.11897887978990147
+        },
+        {
+          "category": "centre_back",
+          "n": 1157,
+          "xg_sum": 133.8612025939,
+          "mean_xg": 0.11569680431624892
+        },
+        {
+          "category": "fullback_wingback",
+          "n": 839,
+          "xg_sum": 86.9044298246,
+          "mean_xg": 0.10358096522598331
+        },
+        {
+          "category": "other",
+          "n": 387,
+          "xg_sum": 38.2206027669,
+          "mean_xg": 0.09876124745968992
+        },
+        {
+          "category": "midfielder",
+          "n": 682,
+          "xg_sum": 63.472308258700004,
+          "mean_xg": 0.09306790067258065
+        },
+        {
+          "category": "defensive_midfielder",
+          "n": 890,
+          "xg_sum": 82.2954186179,
+          "mean_xg": 0.09246676249202247
+        }
+      ]
+    }
+  }
+}

@@ -27,6 +27,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "CONFOUND_ANALYSIS.json"
 
 TARGET_XG = "target_future_xg_10s"
+SHOT_COL = "target_future_shot_10s"
 
 
 def _marginal_table_xg(df: pd.DataFrame, col: str, labels: list[str]) -> tuple[pd.Series, list[dict]]:
@@ -68,22 +69,30 @@ def _stratified_table_xg(df: pd.DataFrame, marginal_bins: pd.Series, confound_bi
     return strata
 
 
-def run_test_xg(df: pd.DataFrame, spec: dict) -> dict:
+def run_test_xg(df: pd.DataFrame, spec: dict, given_shot: bool = False) -> dict:
     marginal_bins, marginal_table = _marginal_table_xg(df, spec["marginal_col"], spec["marginal_labels"])
     confound_bins = pd.qcut(df[spec["confound_col"]], QCUT_N, labels=spec["confound_labels"])
     strata = _stratified_table_xg(df, marginal_bins, confound_bins, spec["marginal_labels"], spec["confound_labels"])
     verdict = _verdict(marginal_table, strata)
 
-    return {
+    result = {
         "name": spec["name"],
         "title": spec["title"],
         "marginal_column": spec["marginal_col"],
         "confound_column": spec["confound_col"],
         "proposed_confound_reason": spec["proposed_confound_reason"],
+        "n_rows_used": len(df),
         "marginal_table": marginal_table,
         "stratified_table": strata,
         "verdict": verdict,
     }
+    if not given_shot:
+        # Real test of whether the reversal is about chance QUALITY, not just
+        # chance OCCURRENCE -- same marginal-quartile + stratified-by-confound
+        # structure, computed only on rows where a shot actually happened.
+        shot_df = df.loc[df[SHOT_COL] == 1]
+        result["given_shot"] = run_test_xg(shot_df, spec, given_shot=True)
+    return result
 
 
 def main() -> None:
@@ -98,10 +107,14 @@ def main() -> None:
         "parquet_path": PASSIVE["parquet_path"],
         "n_rows": len(df),
         "target_col": TARGET_XG,
+        "shot_col": SHOT_COL,
         "methodology": (
             "xG counterpart of CONFOUND_ANALYSIS.json -- same quartile-stratification method, against mean xG "
             "instead of shot-rate percentage. _verdict()'s sign-only comparison is target-scale-agnostic, reused "
-            "unchanged; only the table builders (mean_xg, not *100 rate) differ."
+            "unchanged; only the table builders (mean_xg, not *100 rate) differ. Each test also carries a "
+            "'given_shot' sub-object: the same marginal+stratified+verdict structure, computed only on rows "
+            "where target_future_shot_10s==1 -- the real test of whether the reversal is about chance quality, "
+            "not just chance occurrence, reported whichever way it comes out."
         ),
         "tests": [result_1, result_2],
     }
@@ -112,6 +125,9 @@ def main() -> None:
         print(f"\n=== {result['title']} (xG) ===")
         print("Marginal:", [(b["bin"], b["rate"]) for b in result["marginal_table"]])
         print(f"Verdict: {result['verdict']['verdict']} -- {result['verdict']['verdict_meaning']}")
+        gs = result["given_shot"]
+        print(f"Given-shot marginal (n={gs['n_rows_used']:,}):", [(b["bin"], b["rate"]) for b in gs["marginal_table"]])
+        print(f"Given-shot verdict: {gs['verdict']['verdict']} -- {gs['verdict']['verdict_meaning']}")
 
     print(f"\nWrote {OUTPUT_PATH}")
 

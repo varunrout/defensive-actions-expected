@@ -49,9 +49,11 @@ from src.eda.generate_numerical_target_analysis import (
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = REPO_ROOT / "reports" / "eda_xg"
 TARGET = "target_future_xg_10s"
+SHOT_COL = "target_future_shot_10s"
 
 FLAT_MARGIN_RATIO = 0.5   # shape classification: flat_margin = ratio * overall mean target
 RANGE_TRIGGER_RATIO = 1.0  # consistency-check trigger: bin range >= ratio * overall mean target
+SMALL_N_GIVEN_SHOT_THRESHOLD = 30  # per-bin n below this is flagged, not dropped, on the shot-only subset
 
 
 def _bin_table(df: pd.DataFrame, feature: str, is_discrete_cardinality: bool, quantile_edges: np.ndarray | None) -> tuple[list[dict], np.ndarray | None]:
@@ -98,6 +100,58 @@ def _consistency_check(df: pd.DataFrame, feature: str, is_discrete_cardinality: 
     }
 
 
+def _bin_table_given_shot(shot_df: pd.DataFrame, feature: str, is_discrete_cardinality: bool) -> list[dict]:
+    """Same binning approach as _bin_table (deciles for continuous, exact
+    value for low-cardinality discrete), but fresh edges computed on the
+    shot-only subset's OWN feature distribution -- not the full-population
+    edges reused. Bins with n below SMALL_N_GIVEN_SHOT_THRESHOLD are flagged,
+    never dropped."""
+    sub = shot_df[[feature, TARGET]].dropna()
+    if is_discrete_cardinality:
+        grouped = sub.groupby(feature, observed=True)[TARGET].agg(["mean", "count"]).sort_index()
+    else:
+        _, edges = pd.qcut(sub[feature], q=N_QUANTILE_BINS, duplicates="drop", retbins=True)
+        cats = pd.cut(sub[feature], bins=edges, include_lowest=True, duplicates="drop")
+        grouped = sub.groupby(cats, observed=True)[TARGET].agg(["mean", "count"])
+
+    return [
+        {
+            "bin": str(idx),
+            "n": int(row["count"]),
+            "mean_xg": round(float(row["mean"]), 6),
+            "small_n": bool(row["count"] < SMALL_N_GIVEN_SHOT_THRESHOLD),
+        }
+        for idx, row in grouped.iterrows()
+        if row["count"] > 0
+    ]
+
+
+def _given_shot_stats(df: pd.DataFrame, feature: str, is_discrete_cardinality: bool) -> dict:
+    shot_df = df.loc[df[SHOT_COL] == 1]
+    sub = shot_df[[feature, TARGET]].dropna()
+    n_used = len(sub)
+
+    if n_used < 10 or sub[feature].nunique() < 2:
+        return {
+            "n_rows_used": n_used,
+            "pearson_r": None,
+            "spearman_rho": None,
+            "bins": [],
+            "note": "insufficient shot-only data (n<10 or degenerate column)",
+        }
+
+    pearson_r, _ = pearsonr(sub[feature], sub[TARGET])
+    spearman_rho, _ = spearmanr(sub[feature], sub[TARGET])
+    bins = _bin_table_given_shot(shot_df, feature, is_discrete_cardinality)
+
+    return {
+        "n_rows_used": n_used,
+        "pearson_r": round(float(pearson_r), 4),
+        "spearman_rho": round(float(spearman_rho), 4),
+        "bins": bins,
+    }
+
+
 def analyze_feature(df: pd.DataFrame, entry: dict, split_assignment: dict, overall_mean_target: float) -> dict:
     feature = entry["feature"]
     sub = df[[feature, TARGET]].dropna()
@@ -105,7 +159,13 @@ def analyze_feature(df: pd.DataFrame, entry: dict, split_assignment: dict, overa
     flat_margin = FLAT_MARGIN_RATIO * overall_mean_target
     range_trigger = RANGE_TRIGGER_RATIO * overall_mean_target
 
-    if n_used < 50 or sub[feature].nunique() < 2:
+    # is_discrete_cardinality is needed for the given-shot panel even when
+    # the unconditional analysis bails early, so compute it before the guard.
+    n_unique_all = sub[feature].nunique()
+    is_discrete_cardinality = n_unique_all <= DISCRETE_CARDINALITY_THRESHOLD
+    given_shot = _given_shot_stats(df, feature, is_discrete_cardinality)
+
+    if n_used < 50 or n_unique_all < 2:
         return {
             **entry,
             "n_rows_used": n_used,
@@ -115,13 +175,16 @@ def analyze_feature(df: pd.DataFrame, entry: dict, split_assignment: dict, overa
             "shape": "insufficient data",
             "consistency_check": {"checked": False, "reason": "n<50 or degenerate column"},
             "unreliable_note": UNRELIABLE_FEATURES.get(entry.get("_dataset", ""), {}).get(feature),
+            "n_given_shot": given_shot["n_rows_used"],
+            "pearson_r_given_shot": given_shot["pearson_r"],
+            "spearman_rho_given_shot": given_shot["spearman_rho"],
+            "bins_given_shot": given_shot["bins"],
         }
 
     pearson_r, _ = pearsonr(sub[feature], sub[TARGET])
     spearman_rho, _ = spearmanr(sub[feature], sub[TARGET])
 
-    n_unique = sub[feature].nunique()
-    is_discrete_cardinality = n_unique <= DISCRETE_CARDINALITY_THRESHOLD
+    n_unique = n_unique_all
     bins, edges = _bin_table(df, feature, is_discrete_cardinality, None)
     values = [b["mean_xg"] for b in bins]
     shape = classify_shape([b["bin"] for b in bins], values, flat_margin=flat_margin)
@@ -146,6 +209,12 @@ def analyze_feature(df: pd.DataFrame, entry: dict, split_assignment: dict, overa
         "shape": shape,
         "consistency_check": consistency,
         "unreliable_note": UNRELIABLE_FEATURES.get(entry.get("_dataset", ""), {}).get(feature),
+        # Shot-conditional (target_future_shot_10s == 1 only) -- added
+        # alongside the unconditional numbers above, not replacing them.
+        "n_given_shot": given_shot["n_rows_used"],
+        "pearson_r_given_shot": given_shot["pearson_r"],
+        "spearman_rho_given_shot": given_shot["spearman_rho"],
+        "bins_given_shot": given_shot["bins"],
     }
 
 
@@ -155,7 +224,7 @@ def analyze_dataset(dataset_key: str, split_assignment: dict) -> dict:
     print(f"\n=== {dataset_key} (xG) ===")
     print(f"  reconstructed pool = {pool_meta['n_locked']} + {pool_meta['n_dropped']} = {pool_meta['n_total']} (same pool as the binary-target pass)")
 
-    df = pd.read_parquet(REPO_ROOT / dataset_cfg["parquet_path"], columns=list({p["feature"] for p in pool}) + [TARGET, "match_id"])
+    df = pd.read_parquet(REPO_ROOT / dataset_cfg["parquet_path"], columns=list({p["feature"] for p in pool}) + [TARGET, SHOT_COL, "match_id"])
     overall_mean_target = float(df[TARGET].mean())
     print(f"  overall mean {TARGET}: {overall_mean_target:.6f}  (flat_margin={FLAT_MARGIN_RATIO * overall_mean_target:.6f}, range_trigger={RANGE_TRIGGER_RATIO * overall_mean_target:.6f})")
 
