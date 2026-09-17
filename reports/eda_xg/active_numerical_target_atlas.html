@@ -280,7 +280,7 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <div class="statbar"><div class="stat"><b>31</b><span>features analyzed</span></div><div class="stat"><b>19</b><span>locked</span></div><div class="stat"><b>12</b><span>dropped, still shown</span></div><div class="stat"><b>5</b><span>train/test mismatch</span></div></div>
 </div></div>
 <div class="wrap">
-<div class="findings"><div class="finding"><span class="tag">pool</span><p><b>31 features analyzed</b> &mdash; 19 locked + 12 dropped-but-included -- same reconstructed pre-drop numerical candidate pool as the binary-target atlas, run against the continuous target instead.</p></div><div class="finding"><span class="tag">scale</span><p><b>overall mean target_future_xg_10s = 0.00811</b> &mdash; heavily zero-inflated, nothing like a 0-100% rate -- shape-classification flat margin is 0.5x this mean (0.004055), and the consistency-check range trigger is 1.0x this mean (0.00811), not a fixed percentage-point margin.</p></div><div class="finding flag"><span class="tag">caution</span><p><b>5 feature(s) flagged train/test-inconsistent</b> &mdash; the shape classification differs between train+val and test matches -- treat as noise, not a confirmed pattern, until re-examined.</p></div><div class="finding flag"><span class="tag">data issue</span><p><b>nearest_defender_distance</b> &mdash; flagged unreliable pending a known self-reference bug -- see the Distribution Atlas.</p></div></div>
+<div class="findings"><div class="finding"><span class="tag">pool</span><p><b>31 features analyzed</b> &mdash; 19 locked + 12 dropped-but-included -- same reconstructed pre-drop numerical candidate pool as the binary-target atlas, run against the continuous target instead.</p></div><div class="finding"><span class="tag">scale</span><p><b>overall mean target_future_xg_10s = 0.00811</b> &mdash; heavily zero-inflated, nothing like a 0-100% rate -- shape-classification flat margin is 0.5x this mean (0.004055), and the consistency-check range trigger is 1.0x this mean (0.00811), not a fixed percentage-point margin.</p></div><div class="finding"><span class="tag">conditional</span><p><b>given a shot happened</b> &mdash; each card also expands to a shot-conditional panel (target_future_shot_10s==1 only, fresh binning on that subset) -- asks whether a feature relates to chance quality, not just chance occurrence.</p></div><div class="finding flag"><span class="tag">caution</span><p><b>5 feature(s) flagged train/test-inconsistent</b> &mdash; the shape classification differs between train+val and test matches -- treat as noise, not a confirmed pattern, until re-examined.</p></div><div class="finding flag"><span class="tag">data issue</span><p><b>nearest_defender_distance</b> &mdash; flagged unreliable pending a known self-reference bug -- see the Distribution Atlas.</p></div></div>
 <h2 class="section-title">Ranked by |Spearman &rho;| vs target_future_xg_10s</h2>
 <p class="section-note">Click a row to expand its binned mean-xG curve. Green left border = locked (current
 34/38), amber = dropped (still included -- see reason inside), red = flagged unreliable. Amber "TRAIN/TEST
@@ -495,6 +495,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=55,992</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,365) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0670 &middot; Spearman &rho;=-0.0460 &middot; n=4,365</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(-0.001, 6.626]: n=437, mean xG=0.123049">
+  <span class="nt-bin-label">(-0.001, 6.626]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:90.5%"></div></div>
+  <span class="nt-bin-rate">0.1230</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(6.626, 7.925]: n=436, mean xG=0.135977">
+  <span class="nt-bin-label">(6.626, 7.925]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1360</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(7.925, 8.967]: n=437, mean xG=0.104215">
+  <span class="nt-bin-label">(7.925, 8.967]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:76.6%"></div></div>
+  <span class="nt-bin-rate">0.1042</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(8.967, 9.815]: n=436, mean xG=0.09974">
+  <span class="nt-bin-label">(8.967, 9.815]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:73.4%"></div></div>
+  <span class="nt-bin-rate">0.0997</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(9.815, 10.656]: n=437, mean xG=0.103436">
+  <span class="nt-bin-label">(9.815, 10.656]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:76.1%"></div></div>
+  <span class="nt-bin-rate">0.1034</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(10.656, 11.555]: n=436, mean xG=0.091674">
+  <span class="nt-bin-label">(10.656, 11.555]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:67.4%"></div></div>
+  <span class="nt-bin-rate">0.0917</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(11.555, 12.553]: n=436, mean xG=0.091934">
+  <span class="nt-bin-label">(11.555, 12.553]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:67.6%"></div></div>
+  <span class="nt-bin-rate">0.0919</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(12.553, 13.761]: n=437, mean xG=0.095392">
+  <span class="nt-bin-label">(12.553, 13.761]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:70.2%"></div></div>
+  <span class="nt-bin-rate">0.0954</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(13.761, 15.441]: n=436, mean xG=0.098279">
+  <span class="nt-bin-label">(13.761, 15.441]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:72.3%"></div></div>
+  <span class="nt-bin-rate">0.0983</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(15.441, 23.984]: n=437, mean xG=0.09788">
+  <span class="nt-bin-label">(15.441, 23.984]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:72.0%"></div></div>
+  <span class="nt-bin-rate">0.0979</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -706,6 +780,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=+0.0926 &middot; Spearman &rho;=+0.1405 &middot; n=4,368</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(0.019, 0.323]: n=438, mean xG=0.089193">
+  <span class="nt-bin-label">(0.019, 0.323]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:65.8%"></div></div>
+  <span class="nt-bin-rate">0.0892</span>
+  <span class="nt-bin-n">n=438</span>
+</div>
+<div class="nt-bin-row" title="(0.323, 0.495]: n=443, mean xG=0.091974">
+  <span class="nt-bin-label">(0.323, 0.495]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:67.8%"></div></div>
+  <span class="nt-bin-rate">0.0920</span>
+  <span class="nt-bin-n">n=443</span>
+</div>
+<div class="nt-bin-row" title="(0.495, 0.59]: n=436, mean xG=0.076656">
+  <span class="nt-bin-label">(0.495, 0.59]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:56.5%"></div></div>
+  <span class="nt-bin-rate">0.0767</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(0.59, 0.675]: n=442, mean xG=0.091276">
+  <span class="nt-bin-label">(0.59, 0.675]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:67.3%"></div></div>
+  <span class="nt-bin-rate">0.0913</span>
+  <span class="nt-bin-n">n=442</span>
+</div>
+<div class="nt-bin-row" title="(0.675, 0.742]: n=426, mean xG=0.095397">
+  <span class="nt-bin-label">(0.675, 0.742]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:70.3%"></div></div>
+  <span class="nt-bin-rate">0.0954</span>
+  <span class="nt-bin-n">n=426</span>
+</div>
+<div class="nt-bin-row" title="(0.742, 0.81]: n=455, mean xG=0.108003">
+  <span class="nt-bin-label">(0.742, 0.81]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:79.6%"></div></div>
+  <span class="nt-bin-rate">0.1080</span>
+  <span class="nt-bin-n">n=455</span>
+</div>
+<div class="nt-bin-row" title="(0.81, 0.86]: n=424, mean xG=0.110823">
+  <span class="nt-bin-label">(0.81, 0.86]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:81.7%"></div></div>
+  <span class="nt-bin-rate">0.1108</span>
+  <span class="nt-bin-n">n=424</span>
+</div>
+<div class="nt-bin-row" title="(0.86, 0.91]: n=434, mean xG=0.135629">
+  <span class="nt-bin-label">(0.86, 0.91]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1356</span>
+  <span class="nt-bin-n">n=434</span>
+</div>
+<div class="nt-bin-row" title="(0.91, 0.957]: n=445, mean xG=0.131425">
+  <span class="nt-bin-label">(0.91, 0.957]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:96.9%"></div></div>
+  <span class="nt-bin-rate">0.1314</span>
+  <span class="nt-bin-n">n=445</span>
+</div>
+<div class="nt-bin-row" title="(0.957, 1.0]: n=425, mean xG=0.110683">
+  <span class="nt-bin-label">(0.957, 1.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:81.6%"></div></div>
+  <span class="nt-bin-rate">0.1107</span>
+  <span class="nt-bin-n">n=425</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card dropped">
@@ -917,6 +1065,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0926 &middot; Spearman &rho;=-0.1405 &middot; n=4,368</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(-0.001, 1.7]: n=446, mean xG=0.111546">
+  <span class="nt-bin-label">(-0.001, 1.7]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:83.2%"></div></div>
+  <span class="nt-bin-rate">0.1115</span>
+  <span class="nt-bin-n">n=446</span>
+</div>
+<div class="nt-bin-row" title="(1.7, 3.6]: n=450, mean xG=0.133032">
+  <span class="nt-bin-label">(1.7, 3.6]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:99.2%"></div></div>
+  <span class="nt-bin-rate">0.1330</span>
+  <span class="nt-bin-n">n=450</span>
+</div>
+<div class="nt-bin-row" title="(3.6, 5.6]: n=431, mean xG=0.134041">
+  <span class="nt-bin-label">(3.6, 5.6]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1340</span>
+  <span class="nt-bin-n">n=431</span>
+</div>
+<div class="nt-bin-row" title="(5.6, 7.6]: n=422, mean xG=0.109433">
+  <span class="nt-bin-label">(5.6, 7.6]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:81.6%"></div></div>
+  <span class="nt-bin-rate">0.1094</span>
+  <span class="nt-bin-n">n=422</span>
+</div>
+<div class="nt-bin-row" title="(7.6, 10.3]: n=440, mean xG=0.107719">
+  <span class="nt-bin-label">(7.6, 10.3]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:80.4%"></div></div>
+  <span class="nt-bin-rate">0.1077</span>
+  <span class="nt-bin-n">n=440</span>
+</div>
+<div class="nt-bin-row" title="(10.3, 13.0]: n=435, mean xG=0.094341">
+  <span class="nt-bin-label">(10.3, 13.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:70.4%"></div></div>
+  <span class="nt-bin-rate">0.0943</span>
+  <span class="nt-bin-n">n=435</span>
+</div>
+<div class="nt-bin-row" title="(13.0, 16.4]: n=437, mean xG=0.091449">
+  <span class="nt-bin-label">(13.0, 16.4]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:68.2%"></div></div>
+  <span class="nt-bin-rate">0.0914</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(16.4, 20.2]: n=435, mean xG=0.078596">
+  <span class="nt-bin-label">(16.4, 20.2]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:58.6%"></div></div>
+  <span class="nt-bin-rate">0.0786</span>
+  <span class="nt-bin-n">n=435</span>
+</div>
+<div class="nt-bin-row" title="(20.2, 27.1]: n=438, mean xG=0.090716">
+  <span class="nt-bin-label">(20.2, 27.1]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:67.7%"></div></div>
+  <span class="nt-bin-rate">0.0907</span>
+  <span class="nt-bin-n">n=438</span>
+</div>
+<div class="nt-bin-row" title="(27.1, 39.2]: n=434, mean xG=0.089507">
+  <span class="nt-bin-label">(27.1, 39.2]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:66.8%"></div></div>
+  <span class="nt-bin-rate">0.0895</span>
+  <span class="nt-bin-n">n=434</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -1128,6 +1350,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=56,037</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,367) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.1106 &middot; Spearman &rho;=-0.0941 &middot; n=4,367</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(-0.001, 7.912]: n=437, mean xG=0.141528">
+  <span class="nt-bin-label">(-0.001, 7.912]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1415</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(7.912, 9.616]: n=437, mean xG=0.12226">
+  <span class="nt-bin-label">(7.912, 9.616]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:86.4%"></div></div>
+  <span class="nt-bin-rate">0.1223</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(9.616, 10.847]: n=436, mean xG=0.117086">
+  <span class="nt-bin-label">(9.616, 10.847]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:82.7%"></div></div>
+  <span class="nt-bin-rate">0.1171</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(10.847, 11.749]: n=437, mean xG=0.102565">
+  <span class="nt-bin-label">(10.847, 11.749]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:72.5%"></div></div>
+  <span class="nt-bin-rate">0.1026</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(11.749, 12.599]: n=437, mean xG=0.099955">
+  <span class="nt-bin-label">(11.749, 12.599]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:70.6%"></div></div>
+  <span class="nt-bin-rate">0.1000</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(12.599, 13.519]: n=436, mean xG=0.092243">
+  <span class="nt-bin-label">(12.599, 13.519]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:65.2%"></div></div>
+  <span class="nt-bin-rate">0.0922</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(13.519, 14.58]: n=437, mean xG=0.093272">
+  <span class="nt-bin-label">(13.519, 14.58]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:65.9%"></div></div>
+  <span class="nt-bin-rate">0.0933</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(14.58, 15.764]: n=436, mean xG=0.100356">
+  <span class="nt-bin-label">(14.58, 15.764]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:70.9%"></div></div>
+  <span class="nt-bin-rate">0.1004</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(15.764, 17.47]: n=437, mean xG=0.083479">
+  <span class="nt-bin-label">(15.764, 17.47]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:59.0%"></div></div>
+  <span class="nt-bin-rate">0.0835</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(17.47, 25.729]: n=437, mean xG=0.087619">
+  <span class="nt-bin-label">(17.47, 25.729]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:61.9%"></div></div>
+  <span class="nt-bin-rate">0.0876</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -1339,6 +1635,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0621 &middot; Spearman &rho;=-0.0784 &middot; n=4,368</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(-0.001, 0.545]: n=439, mean xG=0.135933">
+  <span class="nt-bin-label">(-0.001, 0.545]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1359</span>
+  <span class="nt-bin-n">n=439</span>
+</div>
+<div class="nt-bin-row" title="(0.545, 0.625]: n=553, mean xG=0.117585">
+  <span class="nt-bin-label">(0.545, 0.625]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:86.5%"></div></div>
+  <span class="nt-bin-rate">0.1176</span>
+  <span class="nt-bin-n">n=553</span>
+</div>
+<div class="nt-bin-row" title="(0.625, 0.667]: n=382, mean xG=0.102886">
+  <span class="nt-bin-label">(0.625, 0.667]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:75.7%"></div></div>
+  <span class="nt-bin-rate">0.1029</span>
+  <span class="nt-bin-n">n=382</span>
+</div>
+<div class="nt-bin-row" title="(0.667, 0.714]: n=374, mean xG=0.116593">
+  <span class="nt-bin-label">(0.667, 0.714]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:85.8%"></div></div>
+  <span class="nt-bin-rate">0.1166</span>
+  <span class="nt-bin-n">n=374</span>
+</div>
+<div class="nt-bin-row" title="(0.714, 0.778]: n=593, mean xG=0.097892">
+  <span class="nt-bin-label">(0.714, 0.778]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:72.0%"></div></div>
+  <span class="nt-bin-rate">0.0979</span>
+  <span class="nt-bin-n">n=593</span>
+</div>
+<div class="nt-bin-row" title="(0.778, 0.8]: n=281, mean xG=0.096143">
+  <span class="nt-bin-label">(0.778, 0.8]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:70.7%"></div></div>
+  <span class="nt-bin-rate">0.0961</span>
+  <span class="nt-bin-n">n=281</span>
+</div>
+<div class="nt-bin-row" title="(0.8, 0.889]: n=645, mean xG=0.094998">
+  <span class="nt-bin-label">(0.8, 0.889]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:69.9%"></div></div>
+  <span class="nt-bin-rate">0.0950</span>
+  <span class="nt-bin-n">n=645</span>
+</div>
+<div class="nt-bin-row" title="(0.889, 1.0]: n=561, mean xG=0.089677">
+  <span class="nt-bin-label">(0.889, 1.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:66.0%"></div></div>
+  <span class="nt-bin-rate">0.0897</span>
+  <span class="nt-bin-n">n=561</span>
+</div>
+<div class="nt-bin-row" title="(1.0, 1.125]: n=136, mean xG=0.075651">
+  <span class="nt-bin-label">(1.0, 1.125]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:55.7%"></div></div>
+  <span class="nt-bin-rate">0.0757</span>
+  <span class="nt-bin-n">n=136</span>
+</div>
+<div class="nt-bin-row" title="(1.125, 7.0]: n=404, mean xG=0.099477">
+  <span class="nt-bin-label">(1.125, 7.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:73.2%"></div></div>
+  <span class="nt-bin-rate">0.0995</span>
+  <span class="nt-bin-n">n=404</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -1586,6 +1956,92 @@ binning: exact-value (discrete) &middot; n=43,199</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=3,298) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=+0.0931 &middot; Spearman &rho;=+0.0780 &middot; n=3,298 &middot; 3 bin(s) flagged small-n (&lt;30)</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="0.0: n=263, mean xG=0.093786">
+  <span class="nt-bin-label">0.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:39.8%"></div></div>
+  <span class="nt-bin-rate">0.0938</span>
+  <span class="nt-bin-n">n=263</span>
+</div>
+<div class="nt-bin-row" title="1.0: n=639, mean xG=0.094381">
+  <span class="nt-bin-label">1.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:40.1%"></div></div>
+  <span class="nt-bin-rate">0.0944</span>
+  <span class="nt-bin-n">n=639</span>
+</div>
+<div class="nt-bin-row" title="2.0: n=699, mean xG=0.098237">
+  <span class="nt-bin-label">2.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:41.7%"></div></div>
+  <span class="nt-bin-rate">0.0982</span>
+  <span class="nt-bin-n">n=699</span>
+</div>
+<div class="nt-bin-row" title="3.0: n=632, mean xG=0.109658">
+  <span class="nt-bin-label">3.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:46.5%"></div></div>
+  <span class="nt-bin-rate">0.1097</span>
+  <span class="nt-bin-n">n=632</span>
+</div>
+<div class="nt-bin-row" title="4.0: n=433, mean xG=0.112056">
+  <span class="nt-bin-label">4.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:47.6%"></div></div>
+  <span class="nt-bin-rate">0.1121</span>
+  <span class="nt-bin-n">n=433</span>
+</div>
+<div class="nt-bin-row" title="5.0: n=274, mean xG=0.123751">
+  <span class="nt-bin-label">5.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:52.5%"></div></div>
+  <span class="nt-bin-rate">0.1238</span>
+  <span class="nt-bin-n">n=274</span>
+</div>
+<div class="nt-bin-row" title="6.0: n=171, mean xG=0.146835">
+  <span class="nt-bin-label">6.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:62.3%"></div></div>
+  <span class="nt-bin-rate">0.1468</span>
+  <span class="nt-bin-n">n=171</span>
+</div>
+<div class="nt-bin-row" title="7.0: n=108, mean xG=0.148955">
+  <span class="nt-bin-label">7.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:63.2%"></div></div>
+  <span class="nt-bin-rate">0.1490</span>
+  <span class="nt-bin-n">n=108</span>
+</div>
+<div class="nt-bin-row" title="8.0: n=50, mean xG=0.124137">
+  <span class="nt-bin-label">8.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:52.7%"></div></div>
+  <span class="nt-bin-rate">0.1241</span>
+  <span class="nt-bin-n">n=50</span>
+</div>
+<div class="nt-bin-row" title="9.0: n=21, mean xG=0.0558">
+  <span class="nt-bin-label">9.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:23.7%"></div></div>
+  <span class="nt-bin-rate">0.0558</span>
+  <span class="nt-bin-n">n=21</span>
+</div>
+<div class="nt-bin-row" title="10.0: n=7, mean xG=0.235586">
+  <span class="nt-bin-label">10.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.2356</span>
+  <span class="nt-bin-n">n=7</span>
+</div>
+<div class="nt-bin-row" title="11.0: n=1, mean xG=0.101072">
+  <span class="nt-bin-label">11.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:42.9%"></div></div>
+  <span class="nt-bin-rate">0.1011</span>
+  <span class="nt-bin-n">n=1</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card dropped">
@@ -1725,6 +2181,56 @@ binning: quantile deciles (6 bins actually produced) &middot; n=43,199</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=3,298) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.1038 &middot; Spearman &rho;=-0.0848 &middot; n=3,298</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(-8.001, -3.0]: n=505, mean xG=0.137644">
+  <span class="nt-bin-label">(-8.001, -3.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1376</span>
+  <span class="nt-bin-n">n=505</span>
+</div>
+<div class="nt-bin-row" title="(-3.0, -2.0]: n=535, mean xG=0.107293">
+  <span class="nt-bin-label">(-3.0, -2.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:77.9%"></div></div>
+  <span class="nt-bin-rate">0.1073</span>
+  <span class="nt-bin-n">n=535</span>
+</div>
+<div class="nt-bin-row" title="(-2.0, -1.0]: n=783, mean xG=0.110941">
+  <span class="nt-bin-label">(-2.0, -1.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:80.6%"></div></div>
+  <span class="nt-bin-rate">0.1109</span>
+  <span class="nt-bin-n">n=783</span>
+</div>
+<div class="nt-bin-row" title="(-1.0, 0.0]: n=803, mean xG=0.097749">
+  <span class="nt-bin-label">(-1.0, 0.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:71.0%"></div></div>
+  <span class="nt-bin-rate">0.0977</span>
+  <span class="nt-bin-n">n=803</span>
+</div>
+<div class="nt-bin-row" title="(0.0, 1.0]: n=491, mean xG=0.097954">
+  <span class="nt-bin-label">(0.0, 1.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:71.2%"></div></div>
+  <span class="nt-bin-rate">0.0980</span>
+  <span class="nt-bin-n">n=491</span>
+</div>
+<div class="nt-bin-row" title="(1.0, 6.0]: n=181, mean xG=0.084716">
+  <span class="nt-bin-label">(1.0, 6.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:61.5%"></div></div>
+  <span class="nt-bin-rate">0.0847</span>
+  <span class="nt-bin-n">n=181</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card dropped">
@@ -1900,6 +2406,74 @@ binning: quantile deciles (8 bins actually produced) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=+0.0069 &middot; Spearman &rho;=-0.0063 &middot; n=4,368</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(-0.001, 1.0]: n=1080, mean xG=0.104042">
+  <span class="nt-bin-label">(-0.001, 1.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:81.0%"></div></div>
+  <span class="nt-bin-rate">0.1040</span>
+  <span class="nt-bin-n">n=1,080</span>
+</div>
+<div class="nt-bin-row" title="(1.0, 2.0]: n=391, mean xG=0.114768">
+  <span class="nt-bin-label">(1.0, 2.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:89.4%"></div></div>
+  <span class="nt-bin-rate">0.1148</span>
+  <span class="nt-bin-n">n=391</span>
+</div>
+<div class="nt-bin-row" title="(2.0, 3.0]: n=286, mean xG=0.089302">
+  <span class="nt-bin-label">(2.0, 3.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:69.5%"></div></div>
+  <span class="nt-bin-rate">0.0893</span>
+  <span class="nt-bin-n">n=286</span>
+</div>
+<div class="nt-bin-row" title="(3.0, 5.0]: n=588, mean xG=0.094082">
+  <span class="nt-bin-label">(3.0, 5.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:73.3%"></div></div>
+  <span class="nt-bin-rate">0.0941</span>
+  <span class="nt-bin-n">n=588</span>
+</div>
+<div class="nt-bin-row" title="(5.0, 7.0]: n=461, mean xG=0.099804">
+  <span class="nt-bin-label">(5.0, 7.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:77.7%"></div></div>
+  <span class="nt-bin-rate">0.0998</span>
+  <span class="nt-bin-n">n=461</span>
+</div>
+<div class="nt-bin-row" title="(7.0, 9.0]: n=408, mean xG=0.095496">
+  <span class="nt-bin-label">(7.0, 9.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:74.4%"></div></div>
+  <span class="nt-bin-rate">0.0955</span>
+  <span class="nt-bin-n">n=408</span>
+</div>
+<div class="nt-bin-row" title="(9.0, 11.0]: n=306, mean xG=0.111552">
+  <span class="nt-bin-label">(9.0, 11.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:86.9%"></div></div>
+  <span class="nt-bin-rate">0.1116</span>
+  <span class="nt-bin-n">n=306</span>
+</div>
+<div class="nt-bin-row" title="(11.0, 15.0]: n=434, mean xG=0.128425">
+  <span class="nt-bin-label">(11.0, 15.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1284</span>
+  <span class="nt-bin-n">n=434</span>
+</div>
+<div class="nt-bin-row" title="(15.0, 49.0]: n=414, mean xG=0.10094">
+  <span class="nt-bin-label">(15.0, 49.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:78.6%"></div></div>
+  <span class="nt-bin-rate">0.1009</span>
+  <span class="nt-bin-n">n=414</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -2147,6 +2721,92 @@ binning: exact-value (discrete) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.1293 &middot; Spearman &rho;=-0.1564 &middot; n=4,368 &middot; 2 bin(s) flagged small-n (&lt;30)</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="0: n=1, mean xG=0.404267">
+  <span class="nt-bin-label">0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.4043</span>
+  <span class="nt-bin-n">n=1</span>
+</div>
+<div class="nt-bin-row" title="1: n=20, mean xG=0.161857">
+  <span class="nt-bin-label">1<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:40.0%"></div></div>
+  <span class="nt-bin-rate">0.1619</span>
+  <span class="nt-bin-n">n=20</span>
+</div>
+<div class="nt-bin-row" title="2: n=66, mean xG=0.161949">
+  <span class="nt-bin-label">2</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:40.1%"></div></div>
+  <span class="nt-bin-rate">0.1619</span>
+  <span class="nt-bin-n">n=66</span>
+</div>
+<div class="nt-bin-row" title="3: n=170, mean xG=0.140149">
+  <span class="nt-bin-label">3</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:34.7%"></div></div>
+  <span class="nt-bin-rate">0.1401</span>
+  <span class="nt-bin-n">n=170</span>
+</div>
+<div class="nt-bin-row" title="4: n=412, mean xG=0.13263">
+  <span class="nt-bin-label">4</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:32.8%"></div></div>
+  <span class="nt-bin-rate">0.1326</span>
+  <span class="nt-bin-n">n=412</span>
+</div>
+<div class="nt-bin-row" title="5: n=655, mean xG=0.121481">
+  <span class="nt-bin-label">5</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:30.0%"></div></div>
+  <span class="nt-bin-rate">0.1215</span>
+  <span class="nt-bin-n">n=655</span>
+</div>
+<div class="nt-bin-row" title="6: n=828, mean xG=0.102543">
+  <span class="nt-bin-label">6</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:25.4%"></div></div>
+  <span class="nt-bin-rate">0.1025</span>
+  <span class="nt-bin-n">n=828</span>
+</div>
+<div class="nt-bin-row" title="7: n=890, mean xG=0.096">
+  <span class="nt-bin-label">7</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:23.7%"></div></div>
+  <span class="nt-bin-rate">0.0960</span>
+  <span class="nt-bin-n">n=890</span>
+</div>
+<div class="nt-bin-row" title="8: n=664, mean xG=0.086826">
+  <span class="nt-bin-label">8</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:21.5%"></div></div>
+  <span class="nt-bin-rate">0.0868</span>
+  <span class="nt-bin-n">n=664</span>
+</div>
+<div class="nt-bin-row" title="9: n=404, mean xG=0.073474">
+  <span class="nt-bin-label">9</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:18.2%"></div></div>
+  <span class="nt-bin-rate">0.0735</span>
+  <span class="nt-bin-n">n=404</span>
+</div>
+<div class="nt-bin-row" title="10: n=206, mean xG=0.093299">
+  <span class="nt-bin-label">10</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:23.1%"></div></div>
+  <span class="nt-bin-rate">0.0933</span>
+  <span class="nt-bin-n">n=206</span>
+</div>
+<div class="nt-bin-row" title="11: n=52, mean xG=0.105048">
+  <span class="nt-bin-label">11</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:26.0%"></div></div>
+  <span class="nt-bin-rate">0.1050</span>
+  <span class="nt-bin-n">n=52</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -2394,6 +3054,92 @@ binning: exact-value (discrete) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0762 &middot; Spearman &rho;=-0.1349 &middot; n=4,368 &middot; 3 bin(s) flagged small-n (&lt;30)</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="0: n=3, mean xG=0.027288">
+  <span class="nt-bin-label">0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:16.5%"></div></div>
+  <span class="nt-bin-rate">0.0273</span>
+  <span class="nt-bin-n">n=3</span>
+</div>
+<div class="nt-bin-row" title="1: n=1, mean xG=0.07569">
+  <span class="nt-bin-label">1<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:45.7%"></div></div>
+  <span class="nt-bin-rate">0.0757</span>
+  <span class="nt-bin-n">n=1</span>
+</div>
+<div class="nt-bin-row" title="2: n=16, mean xG=0.129461">
+  <span class="nt-bin-label">2<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:78.1%"></div></div>
+  <span class="nt-bin-rate">0.1295</span>
+  <span class="nt-bin-n">n=16</span>
+</div>
+<div class="nt-bin-row" title="3: n=40, mean xG=0.165684">
+  <span class="nt-bin-label">3</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1657</span>
+  <span class="nt-bin-n">n=40</span>
+</div>
+<div class="nt-bin-row" title="4: n=95, mean xG=0.141911">
+  <span class="nt-bin-label">4</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:85.7%"></div></div>
+  <span class="nt-bin-rate">0.1419</span>
+  <span class="nt-bin-n">n=95</span>
+</div>
+<div class="nt-bin-row" title="5: n=198, mean xG=0.132077">
+  <span class="nt-bin-label">5</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:79.7%"></div></div>
+  <span class="nt-bin-rate">0.1321</span>
+  <span class="nt-bin-n">n=198</span>
+</div>
+<div class="nt-bin-row" title="6: n=366, mean xG=0.113177">
+  <span class="nt-bin-label">6</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:68.3%"></div></div>
+  <span class="nt-bin-rate">0.1132</span>
+  <span class="nt-bin-n">n=366</span>
+</div>
+<div class="nt-bin-row" title="7: n=632, mean xG=0.107678">
+  <span class="nt-bin-label">7</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:65.0%"></div></div>
+  <span class="nt-bin-rate">0.1077</span>
+  <span class="nt-bin-n">n=632</span>
+</div>
+<div class="nt-bin-row" title="8: n=896, mean xG=0.105919">
+  <span class="nt-bin-label">8</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:63.9%"></div></div>
+  <span class="nt-bin-rate">0.1059</span>
+  <span class="nt-bin-n">n=896</span>
+</div>
+<div class="nt-bin-row" title="9: n=1086, mean xG=0.095418">
+  <span class="nt-bin-label">9</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:57.6%"></div></div>
+  <span class="nt-bin-rate">0.0954</span>
+  <span class="nt-bin-n">n=1,086</span>
+</div>
+<div class="nt-bin-row" title="10: n=836, mean xG=0.093163">
+  <span class="nt-bin-label">10</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:56.2%"></div></div>
+  <span class="nt-bin-rate">0.0932</span>
+  <span class="nt-bin-n">n=836</span>
+</div>
+<div class="nt-bin-row" title="11: n=199, mean xG=0.102294">
+  <span class="nt-bin-label">11</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:61.7%"></div></div>
+  <span class="nt-bin-rate">0.1023</span>
+  <span class="nt-bin-n">n=199</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -2581,6 +3327,74 @@ binning: exact-value (discrete) &middot; n=52,138</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=3,868) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=+0.0650 &middot; Spearman &rho;=+0.0670 &middot; n=3,868 &middot; 3 bin(s) flagged small-n (&lt;30)</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="0.0: n=1796, mean xG=0.098014">
+  <span class="nt-bin-label">0.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:67.3%"></div></div>
+  <span class="nt-bin-rate">0.0980</span>
+  <span class="nt-bin-n">n=1,796</span>
+</div>
+<div class="nt-bin-row" title="1.0: n=1267, mean xG=0.104042">
+  <span class="nt-bin-label">1.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:71.4%"></div></div>
+  <span class="nt-bin-rate">0.1040</span>
+  <span class="nt-bin-n">n=1,267</span>
+</div>
+<div class="nt-bin-row" title="2.0: n=480, mean xG=0.122371">
+  <span class="nt-bin-label">2.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:84.0%"></div></div>
+  <span class="nt-bin-rate">0.1224</span>
+  <span class="nt-bin-n">n=480</span>
+</div>
+<div class="nt-bin-row" title="3.0: n=192, mean xG=0.134131">
+  <span class="nt-bin-label">3.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:92.1%"></div></div>
+  <span class="nt-bin-rate">0.1341</span>
+  <span class="nt-bin-n">n=192</span>
+</div>
+<div class="nt-bin-row" title="4.0: n=84, mean xG=0.145616">
+  <span class="nt-bin-label">4.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1456</span>
+  <span class="nt-bin-n">n=84</span>
+</div>
+<div class="nt-bin-row" title="5.0: n=34, mean xG=0.094163">
+  <span class="nt-bin-label">5.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:64.7%"></div></div>
+  <span class="nt-bin-rate">0.0942</span>
+  <span class="nt-bin-n">n=34</span>
+</div>
+<div class="nt-bin-row" title="6.0: n=13, mean xG=0.088094">
+  <span class="nt-bin-label">6.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:60.5%"></div></div>
+  <span class="nt-bin-rate">0.0881</span>
+  <span class="nt-bin-n">n=13</span>
+</div>
+<div class="nt-bin-row" title="7.0: n=1, mean xG=0.035652">
+  <span class="nt-bin-label">7.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:24.5%"></div></div>
+  <span class="nt-bin-rate">0.0357</span>
+  <span class="nt-bin-n">n=1</span>
+</div>
+<div class="nt-bin-row" title="8.0: n=1, mean xG=0.101072">
+  <span class="nt-bin-label">8.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:69.4%"></div></div>
+  <span class="nt-bin-rate">0.1011</span>
+  <span class="nt-bin-n">n=1</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -2792,6 +3606,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0126 &middot; Spearman &rho;=-0.0403 &middot; n=4,368</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(-0.001, 0.032]: n=437, mean xG=0.117121">
+  <span class="nt-bin-label">(-0.001, 0.032]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:94.4%"></div></div>
+  <span class="nt-bin-rate">0.1171</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(0.032, 0.0663]: n=437, mean xG=0.124092">
+  <span class="nt-bin-label">(0.032, 0.0663]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1241</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(0.0663, 0.113]: n=437, mean xG=0.11285">
+  <span class="nt-bin-label">(0.0663, 0.113]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:90.9%"></div></div>
+  <span class="nt-bin-rate">0.1129</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(0.113, 0.167]: n=436, mean xG=0.096324">
+  <span class="nt-bin-label">(0.113, 0.167]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:77.6%"></div></div>
+  <span class="nt-bin-rate">0.0963</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(0.167, 0.235]: n=437, mean xG=0.078063">
+  <span class="nt-bin-label">(0.167, 0.235]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:62.9%"></div></div>
+  <span class="nt-bin-rate">0.0781</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(0.235, 0.329]: n=437, mean xG=0.098964">
+  <span class="nt-bin-label">(0.235, 0.329]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:79.8%"></div></div>
+  <span class="nt-bin-rate">0.0990</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(0.329, 0.451]: n=436, mean xG=0.096958">
+  <span class="nt-bin-label">(0.329, 0.451]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:78.1%"></div></div>
+  <span class="nt-bin-rate">0.0970</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(0.451, 0.618]: n=437, mean xG=0.107847">
+  <span class="nt-bin-label">(0.451, 0.618]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:86.9%"></div></div>
+  <span class="nt-bin-rate">0.1078</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(0.618, 0.856]: n=437, mean xG=0.102334">
+  <span class="nt-bin-label">(0.618, 0.856]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:82.5%"></div></div>
+  <span class="nt-bin-rate">0.1023</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(0.856, 1.502]: n=437, mean xG=0.10647">
+  <span class="nt-bin-label">(0.856, 1.502]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:85.8%"></div></div>
+  <span class="nt-bin-rate">0.1065</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -2985,6 +3873,80 @@ binning: quantile deciles (9 bins actually produced) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=+0.0092 &middot; Spearman &rho;=+0.0079 &middot; n=4,368</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(-0.001, 2.0]: n=685, mean xG=0.111567">
+  <span class="nt-bin-label">(-0.001, 2.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:93.5%"></div></div>
+  <span class="nt-bin-rate">0.1116</span>
+  <span class="nt-bin-n">n=685</span>
+</div>
+<div class="nt-bin-row" title="(2.0, 4.0]: n=341, mean xG=0.090098">
+  <span class="nt-bin-label">(2.0, 4.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:75.5%"></div></div>
+  <span class="nt-bin-rate">0.0901</span>
+  <span class="nt-bin-n">n=341</span>
+</div>
+<div class="nt-bin-row" title="(4.0, 6.0]: n=287, mean xG=0.100735">
+  <span class="nt-bin-label">(4.0, 6.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:84.5%"></div></div>
+  <span class="nt-bin-rate">0.1007</span>
+  <span class="nt-bin-n">n=287</span>
+</div>
+<div class="nt-bin-row" title="(6.0, 11.0]: n=502, mean xG=0.106706">
+  <span class="nt-bin-label">(6.0, 11.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:89.5%"></div></div>
+  <span class="nt-bin-rate">0.1067</span>
+  <span class="nt-bin-n">n=502</span>
+</div>
+<div class="nt-bin-row" title="(11.0, 16.0]: n=431, mean xG=0.08669">
+  <span class="nt-bin-label">(11.0, 16.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:72.7%"></div></div>
+  <span class="nt-bin-rate">0.0867</span>
+  <span class="nt-bin-n">n=431</span>
+</div>
+<div class="nt-bin-row" title="(16.0, 21.0]: n=378, mean xG=0.094372">
+  <span class="nt-bin-label">(16.0, 21.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:79.1%"></div></div>
+  <span class="nt-bin-rate">0.0944</span>
+  <span class="nt-bin-n">n=378</span>
+</div>
+<div class="nt-bin-row" title="(21.0, 29.0]: n=489, mean xG=0.106066">
+  <span class="nt-bin-label">(21.0, 29.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:88.9%"></div></div>
+  <span class="nt-bin-rate">0.1061</span>
+  <span class="nt-bin-n">n=489</span>
+</div>
+<div class="nt-bin-row" title="(29.0, 37.0]: n=404, mean xG=0.119279">
+  <span class="nt-bin-label">(29.0, 37.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1193</span>
+  <span class="nt-bin-n">n=404</span>
+</div>
+<div class="nt-bin-row" title="(37.0, 53.0]: n=422, mean xG=0.103257">
+  <span class="nt-bin-label">(37.0, 53.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:86.6%"></div></div>
+  <span class="nt-bin-rate">0.1033</span>
+  <span class="nt-bin-n">n=422</span>
+</div>
+<div class="nt-bin-row" title="(53.0, 196.0]: n=429, mean xG=0.112923">
+  <span class="nt-bin-label">(53.0, 196.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:94.7%"></div></div>
+  <span class="nt-bin-rate">0.1129</span>
+  <span class="nt-bin-n">n=429</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card dropped">
@@ -3196,6 +4158,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0022 &middot; Spearman &rho;=+0.0071 &middot; n=4,368</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(0.999, 3.0]: n=588, mean xG=0.101878">
+  <span class="nt-bin-label">(0.999, 3.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:82.4%"></div></div>
+  <span class="nt-bin-rate">0.1019</span>
+  <span class="nt-bin-n">n=588</span>
+</div>
+<div class="nt-bin-row" title="(3.0, 5.0]: n=365, mean xG=0.108592">
+  <span class="nt-bin-label">(3.0, 5.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:87.9%"></div></div>
+  <span class="nt-bin-rate">0.1086</span>
+  <span class="nt-bin-n">n=365</span>
+</div>
+<div class="nt-bin-row" title="(5.0, 8.0]: n=401, mean xG=0.113286">
+  <span class="nt-bin-label">(5.0, 8.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:91.7%"></div></div>
+  <span class="nt-bin-rate">0.1133</span>
+  <span class="nt-bin-n">n=401</span>
+</div>
+<div class="nt-bin-row" title="(8.0, 12.0]: n=426, mean xG=0.092593">
+  <span class="nt-bin-label">(8.0, 12.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:74.9%"></div></div>
+  <span class="nt-bin-rate">0.0926</span>
+  <span class="nt-bin-n">n=426</span>
+</div>
+<div class="nt-bin-row" title="(12.0, 16.0]: n=411, mean xG=0.102404">
+  <span class="nt-bin-label">(12.0, 16.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:82.9%"></div></div>
+  <span class="nt-bin-rate">0.1024</span>
+  <span class="nt-bin-n">n=411</span>
+</div>
+<div class="nt-bin-row" title="(16.0, 22.0]: n=486, mean xG=0.094229">
+  <span class="nt-bin-label">(16.0, 22.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:76.2%"></div></div>
+  <span class="nt-bin-rate">0.0942</span>
+  <span class="nt-bin-n">n=486</span>
+</div>
+<div class="nt-bin-row" title="(22.0, 28.0]: n=410, mean xG=0.102827">
+  <span class="nt-bin-label">(22.0, 28.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:83.2%"></div></div>
+  <span class="nt-bin-rate">0.1028</span>
+  <span class="nt-bin-n">n=410</span>
+</div>
+<div class="nt-bin-row" title="(28.0, 36.0]: n=445, mean xG=0.110763">
+  <span class="nt-bin-label">(28.0, 36.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:89.6%"></div></div>
+  <span class="nt-bin-rate">0.1108</span>
+  <span class="nt-bin-n">n=445</span>
+</div>
+<div class="nt-bin-row" title="(36.0, 50.0]: n=408, mean xG=0.123593">
+  <span class="nt-bin-label">(36.0, 50.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1236</span>
+  <span class="nt-bin-n">n=408</span>
+</div>
+<div class="nt-bin-row" title="(50.0, 216.0]: n=428, mean xG=0.094772">
+  <span class="nt-bin-label">(50.0, 216.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:76.7%"></div></div>
+  <span class="nt-bin-rate">0.0948</span>
+  <span class="nt-bin-n">n=428</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card dropped">
@@ -3431,6 +4467,74 @@ binning: exact-value (discrete) &middot; n=52,138</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=3,868) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0563 &middot; Spearman &rho;=-0.0277 &middot; n=3,868 &middot; 3 bin(s) flagged small-n (&lt;30)</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="-5.0: n=2, mean xG=0.060329">
+  <span class="nt-bin-label">-5.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:37.1%"></div></div>
+  <span class="nt-bin-rate">0.0603</span>
+  <span class="nt-bin-n">n=2</span>
+</div>
+<div class="nt-bin-row" title="-4.0: n=28, mean xG=0.140448">
+  <span class="nt-bin-label">-4.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:86.5%"></div></div>
+  <span class="nt-bin-rate">0.1404</span>
+  <span class="nt-bin-n">n=28</span>
+</div>
+<div class="nt-bin-row" title="-3.0: n=69, mean xG=0.162457">
+  <span class="nt-bin-label">-3.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1625</span>
+  <span class="nt-bin-n">n=69</span>
+</div>
+<div class="nt-bin-row" title="-2.0: n=254, mean xG=0.118288">
+  <span class="nt-bin-label">-2.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:72.8%"></div></div>
+  <span class="nt-bin-rate">0.1183</span>
+  <span class="nt-bin-n">n=254</span>
+</div>
+<div class="nt-bin-row" title="-1.0: n=668, mean xG=0.114378">
+  <span class="nt-bin-label">-1.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:70.4%"></div></div>
+  <span class="nt-bin-rate">0.1144</span>
+  <span class="nt-bin-n">n=668</span>
+</div>
+<div class="nt-bin-row" title="0.0: n=1268, mean xG=0.102561">
+  <span class="nt-bin-label">0.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:63.1%"></div></div>
+  <span class="nt-bin-rate">0.1026</span>
+  <span class="nt-bin-n">n=1,268</span>
+</div>
+<div class="nt-bin-row" title="1.0: n=1410, mean xG=0.09779">
+  <span class="nt-bin-label">1.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:60.2%"></div></div>
+  <span class="nt-bin-rate">0.0978</span>
+  <span class="nt-bin-n">n=1,410</span>
+</div>
+<div class="nt-bin-row" title="2.0: n=162, mean xG=0.113129">
+  <span class="nt-bin-label">2.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:69.6%"></div></div>
+  <span class="nt-bin-rate">0.1131</span>
+  <span class="nt-bin-n">n=162</span>
+</div>
+<div class="nt-bin-row" title="3.0: n=7, mean xG=0.155455">
+  <span class="nt-bin-label">3.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:95.7%"></div></div>
+  <span class="nt-bin-rate">0.1555</span>
+  <span class="nt-bin-n">n=7</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card unreliable">
@@ -3642,6 +4746,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=55,992</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,365) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0307 &middot; Spearman &rho;=-0.0420 &middot; n=4,365</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(0.216, 1.613]: n=437, mean xG=0.11983">
+  <span class="nt-bin-label">(0.216, 1.613]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:99.0%"></div></div>
+  <span class="nt-bin-rate">0.1198</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(1.613, 2.503]: n=436, mean xG=0.121084">
+  <span class="nt-bin-label">(1.613, 2.503]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1211</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(2.503, 3.37]: n=437, mean xG=0.115606">
+  <span class="nt-bin-label">(2.503, 3.37]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:95.5%"></div></div>
+  <span class="nt-bin-rate">0.1156</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(3.37, 4.248]: n=436, mean xG=0.104615">
+  <span class="nt-bin-label">(3.37, 4.248]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:86.4%"></div></div>
+  <span class="nt-bin-rate">0.1046</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(4.248, 5.2]: n=437, mean xG=0.10053">
+  <span class="nt-bin-label">(4.248, 5.2]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:83.0%"></div></div>
+  <span class="nt-bin-rate">0.1005</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(5.2, 6.208]: n=436, mean xG=0.103752">
+  <span class="nt-bin-label">(5.2, 6.208]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:85.7%"></div></div>
+  <span class="nt-bin-rate">0.1038</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(6.208, 7.652]: n=436, mean xG=0.098434">
+  <span class="nt-bin-label">(6.208, 7.652]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:81.3%"></div></div>
+  <span class="nt-bin-rate">0.0984</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(7.652, 9.734]: n=437, mean xG=0.097817">
+  <span class="nt-bin-label">(7.652, 9.734]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:80.8%"></div></div>
+  <span class="nt-bin-rate">0.0978</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(9.734, 35.718]: n=436, mean xG=0.087206">
+  <span class="nt-bin-label">(9.734, 35.718]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:72.0%"></div></div>
+  <span class="nt-bin-rate">0.0872</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(35.718, 108.39]: n=437, mean xG=0.092695">
+  <span class="nt-bin-label">(35.718, 108.39]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:76.6%"></div></div>
+  <span class="nt-bin-rate">0.0927</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -3847,6 +5025,74 @@ binning: exact-value (discrete) &middot; n=43,199</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=3,298) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=+0.0119 &middot; Spearman &rho;=+0.0049 &middot; n=3,298 &middot; 3 bin(s) flagged small-n (&lt;30)</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="0.0: n=217, mean xG=0.105556">
+  <span class="nt-bin-label">0.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:90.3%"></div></div>
+  <span class="nt-bin-rate">0.1056</span>
+  <span class="nt-bin-n">n=217</span>
+</div>
+<div class="nt-bin-row" title="1.0: n=964, mean xG=0.104276">
+  <span class="nt-bin-label">1.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:89.2%"></div></div>
+  <span class="nt-bin-rate">0.1043</span>
+  <span class="nt-bin-n">n=964</span>
+</div>
+<div class="nt-bin-row" title="2.0: n=1134, mean xG=0.106072">
+  <span class="nt-bin-label">2.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:90.8%"></div></div>
+  <span class="nt-bin-rate">0.1061</span>
+  <span class="nt-bin-n">n=1,134</span>
+</div>
+<div class="nt-bin-row" title="3.0: n=628, mean xG=0.116842">
+  <span class="nt-bin-label">3.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1168</span>
+  <span class="nt-bin-n">n=628</span>
+</div>
+<div class="nt-bin-row" title="4.0: n=229, mean xG=0.116637">
+  <span class="nt-bin-label">4.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:99.8%"></div></div>
+  <span class="nt-bin-rate">0.1166</span>
+  <span class="nt-bin-n">n=229</span>
+</div>
+<div class="nt-bin-row" title="5.0: n=93, mean xG=0.108048">
+  <span class="nt-bin-label">5.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:92.5%"></div></div>
+  <span class="nt-bin-rate">0.1080</span>
+  <span class="nt-bin-n">n=93</span>
+</div>
+<div class="nt-bin-row" title="6.0: n=28, mean xG=0.058303">
+  <span class="nt-bin-label">6.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:49.9%"></div></div>
+  <span class="nt-bin-rate">0.0583</span>
+  <span class="nt-bin-n">n=28</span>
+</div>
+<div class="nt-bin-row" title="7.0: n=2, mean xG=0.045739">
+  <span class="nt-bin-label">7.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:39.1%"></div></div>
+  <span class="nt-bin-rate">0.0457</span>
+  <span class="nt-bin-n">n=2</span>
+</div>
+<div class="nt-bin-row" title="8.0: n=3, mean xG=0.042295">
+  <span class="nt-bin-label">8.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:36.2%"></div></div>
+  <span class="nt-bin-rate">0.0423</span>
+  <span class="nt-bin-n">n=3</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -3933,6 +5179,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=56,068</p>
 <p><b>Train/test consistency check:</b></p>
 <p style="font-size:11.5px; color:var(--text-muted);">Not checked -- |rho|&lt;0.05 and bin range 0.00578 &lt; 0.00811 (=1.0x overall mean)</p>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=+0.0161 &middot; Spearman &rho;=+0.0320 &middot; n=4,368</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(4.999, 696.4]: n=437, mean xG=0.101252">
+  <span class="nt-bin-label">(4.999, 696.4]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:80.3%"></div></div>
+  <span class="nt-bin-rate">0.1013</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(696.4, 1391.8]: n=437, mean xG=0.079119">
+  <span class="nt-bin-label">(696.4, 1391.8]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:62.7%"></div></div>
+  <span class="nt-bin-rate">0.0791</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(1391.8, 2046.1]: n=437, mean xG=0.109788">
+  <span class="nt-bin-label">(1391.8, 2046.1]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:87.0%"></div></div>
+  <span class="nt-bin-rate">0.1098</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(2046.1, 2711.0]: n=437, mean xG=0.104749">
+  <span class="nt-bin-label">(2046.1, 2711.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:83.0%"></div></div>
+  <span class="nt-bin-rate">0.1047</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(2711.0, 3079.5]: n=436, mean xG=0.098714">
+  <span class="nt-bin-label">(2711.0, 3079.5]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:78.3%"></div></div>
+  <span class="nt-bin-rate">0.0987</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(3079.5, 3608.0]: n=438, mean xG=0.126146">
+  <span class="nt-bin-label">(3079.5, 3608.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1261</span>
+  <span class="nt-bin-n">n=438</span>
+</div>
+<div class="nt-bin-row" title="(3608.0, 4261.9]: n=435, mean xG=0.118776">
+  <span class="nt-bin-label">(3608.0, 4261.9]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:94.2%"></div></div>
+  <span class="nt-bin-rate">0.1188</span>
+  <span class="nt-bin-n">n=435</span>
+</div>
+<div class="nt-bin-row" title="(4261.9, 4882.6]: n=437, mean xG=0.102667">
+  <span class="nt-bin-label">(4261.9, 4882.6]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:81.4%"></div></div>
+  <span class="nt-bin-rate">0.1027</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(4882.6, 5474.3]: n=437, mean xG=0.098587">
+  <span class="nt-bin-label">(4882.6, 5474.3]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:78.2%"></div></div>
+  <span class="nt-bin-rate">0.0986</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(5474.3, 7377.0]: n=437, mean xG=0.101262">
+  <span class="nt-bin-label">(5474.3, 7377.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:80.3%"></div></div>
+  <span class="nt-bin-rate">0.1013</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card dropped">
@@ -4144,6 +5464,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=+0.0067 &middot; Spearman &rho;=-0.0352 &middot; n=4,368</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(1.6480000000000001, 11.723]: n=437, mean xG=0.150662">
+  <span class="nt-bin-label">(1.6480000000000001, 11.723]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1507</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(11.723, 18.028]: n=437, mean xG=0.104024">
+  <span class="nt-bin-label">(11.723, 18.028]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:69.0%"></div></div>
+  <span class="nt-bin-rate">0.1040</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(18.028, 25.666]: n=437, mean xG=0.086671">
+  <span class="nt-bin-label">(18.028, 25.666]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:57.5%"></div></div>
+  <span class="nt-bin-rate">0.0867</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(25.666, 34.219]: n=436, mean xG=0.079685">
+  <span class="nt-bin-label">(25.666, 34.219]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:52.9%"></div></div>
+  <span class="nt-bin-rate">0.0797</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(34.219, 53.062]: n=437, mean xG=0.094454">
+  <span class="nt-bin-label">(34.219, 53.062]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:62.7%"></div></div>
+  <span class="nt-bin-rate">0.0945</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(53.062, 84.233]: n=437, mean xG=0.091397">
+  <span class="nt-bin-label">(53.062, 84.233]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:60.7%"></div></div>
+  <span class="nt-bin-rate">0.0914</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(84.233, 97.305]: n=436, mean xG=0.087274">
+  <span class="nt-bin-label">(84.233, 97.305]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:57.9%"></div></div>
+  <span class="nt-bin-rate">0.0873</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(97.305, 105.707]: n=437, mean xG=0.092072">
+  <span class="nt-bin-label">(97.305, 105.707]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:61.1%"></div></div>
+  <span class="nt-bin-rate">0.0921</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(105.707, 111.078]: n=437, mean xG=0.105967">
+  <span class="nt-bin-label">(105.707, 111.078]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:70.3%"></div></div>
+  <span class="nt-bin-rate">0.1060</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(111.078, 123.489]: n=437, mean xG=0.148757">
+  <span class="nt-bin-label">(111.078, 123.489]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:98.7%"></div></div>
+  <span class="nt-bin-rate">0.1488</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -4230,6 +5624,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=56,037</p>
 <p><b>Train/test consistency check:</b></p>
 <p style="font-size:11.5px; color:var(--text-muted);">Not checked -- |rho|&lt;0.05 and bin range 0.00375 &lt; 0.00811 (=1.0x overall mean)</p>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,367) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0236 &middot; Spearman &rho;=-0.0301 &middot; n=4,367</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(0.0922, 1.082]: n=437, mean xG=0.102202">
+  <span class="nt-bin-label">(0.0922, 1.082]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:91.3%"></div></div>
+  <span class="nt-bin-rate">0.1022</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(1.082, 1.606]: n=437, mean xG=0.109229">
+  <span class="nt-bin-label">(1.082, 1.606]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:97.6%"></div></div>
+  <span class="nt-bin-rate">0.1092</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(1.606, 2.133]: n=436, mean xG=0.104501">
+  <span class="nt-bin-label">(1.606, 2.133]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:93.3%"></div></div>
+  <span class="nt-bin-rate">0.1045</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(2.133, 2.645]: n=437, mean xG=0.111948">
+  <span class="nt-bin-label">(2.133, 2.645]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1119</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(2.645, 3.28]: n=437, mean xG=0.101329">
+  <span class="nt-bin-label">(2.645, 3.28]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:90.5%"></div></div>
+  <span class="nt-bin-rate">0.1013</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(3.28, 4.228]: n=436, mean xG=0.102355">
+  <span class="nt-bin-label">(3.28, 4.228]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:91.4%"></div></div>
+  <span class="nt-bin-rate">0.1024</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(4.228, 5.842]: n=437, mean xG=0.110749">
+  <span class="nt-bin-label">(4.228, 5.842]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:98.9%"></div></div>
+  <span class="nt-bin-rate">0.1107</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(5.842, 9.307]: n=436, mean xG=0.104437">
+  <span class="nt-bin-label">(5.842, 9.307]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:93.3%"></div></div>
+  <span class="nt-bin-rate">0.1044</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(9.307, 33.208]: n=437, mean xG=0.100702">
+  <span class="nt-bin-label">(9.307, 33.208]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:90.0%"></div></div>
+  <span class="nt-bin-rate">0.1007</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(33.208, 110.236]: n=437, mean xG=0.092913">
+  <span class="nt-bin-label">(33.208, 110.236]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:83.0%"></div></div>
+  <span class="nt-bin-rate">0.0929</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -4423,6 +5891,68 @@ binning: quantile deciles (9 bins actually produced) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=+0.0226 &middot; Spearman &rho;=-0.0205 &middot; n=4,368</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(-0.001, 3.3]: n=1312, mean xG=0.113857">
+  <span class="nt-bin-label">(-0.001, 3.3]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:74.9%"></div></div>
+  <span class="nt-bin-rate">0.1139</span>
+  <span class="nt-bin-n">n=1,312</span>
+</div>
+<div class="nt-bin-row" title="(3.3, 11.9]: n=438, mean xG=0.079932">
+  <span class="nt-bin-label">(3.3, 11.9]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:52.6%"></div></div>
+  <span class="nt-bin-rate">0.0799</span>
+  <span class="nt-bin-n">n=438</span>
+</div>
+<div class="nt-bin-row" title="(11.9, 31.952]: n=434, mean xG=0.095815">
+  <span class="nt-bin-label">(11.9, 31.952]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:63.1%"></div></div>
+  <span class="nt-bin-rate">0.0958</span>
+  <span class="nt-bin-n">n=434</span>
+</div>
+<div class="nt-bin-row" title="(31.952, 63.602]: n=437, mean xG=0.087676">
+  <span class="nt-bin-label">(31.952, 63.602]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:57.7%"></div></div>
+  <span class="nt-bin-rate">0.0877</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(63.602, 77.991]: n=436, mean xG=0.08748">
+  <span class="nt-bin-label">(63.602, 77.991]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:57.6%"></div></div>
+  <span class="nt-bin-rate">0.0875</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(77.991, 86.865]: n=437, mean xG=0.094484">
+  <span class="nt-bin-label">(77.991, 86.865]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:62.2%"></div></div>
+  <span class="nt-bin-rate">0.0945</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(86.865, 92.4]: n=442, mean xG=0.10269">
+  <span class="nt-bin-label">(86.865, 92.4]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:67.6%"></div></div>
+  <span class="nt-bin-rate">0.1027</span>
+  <span class="nt-bin-n">n=442</span>
+</div>
+<div class="nt-bin-row" title="(92.4, 101.4]: n=432, mean xG=0.151911">
+  <span class="nt-bin-label">(92.4, 101.4]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1519</span>
+  <span class="nt-bin-n">n=432</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -4574,6 +6104,56 @@ binning: exact-value (discrete) &middot; n=52,138</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=3,868) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=+0.0110 &middot; Spearman &rho;=+0.0370 &middot; n=3,868 &middot; 2 bin(s) flagged small-n (&lt;30)</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="0.0: n=1017, mean xG=0.107546">
+  <span class="nt-bin-label">0.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:82.1%"></div></div>
+  <span class="nt-bin-rate">0.1075</span>
+  <span class="nt-bin-n">n=1,017</span>
+</div>
+<div class="nt-bin-row" title="1.0: n=2200, mean xG=0.102272">
+  <span class="nt-bin-label">1.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:78.1%"></div></div>
+  <span class="nt-bin-rate">0.1023</span>
+  <span class="nt-bin-n">n=2,200</span>
+</div>
+<div class="nt-bin-row" title="2.0: n=533, mean xG=0.113581">
+  <span class="nt-bin-label">2.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:86.7%"></div></div>
+  <span class="nt-bin-rate">0.1136</span>
+  <span class="nt-bin-n">n=533</span>
+</div>
+<div class="nt-bin-row" title="3.0: n=92, mean xG=0.130967">
+  <span class="nt-bin-label">3.0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1310</span>
+  <span class="nt-bin-n">n=92</span>
+</div>
+<div class="nt-bin-row" title="4.0: n=20, mean xG=0.097515">
+  <span class="nt-bin-label">4.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:74.5%"></div></div>
+  <span class="nt-bin-rate">0.0975</span>
+  <span class="nt-bin-n">n=20</span>
+</div>
+<div class="nt-bin-row" title="5.0: n=6, mean xG=0.024744">
+  <span class="nt-bin-label">5.0<span class="small-n-badge">small n</span></span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:18.9%"></div></div>
+  <span class="nt-bin-rate">0.0247</span>
+  <span class="nt-bin-n">n=6</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -4821,6 +6401,92 @@ binning: exact-value (discrete) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0264 &middot; Spearman &rho;=-0.0444 &middot; n=4,368</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="0: n=461, mean xG=0.095649">
+  <span class="nt-bin-label">0</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:81.9%"></div></div>
+  <span class="nt-bin-rate">0.0956</span>
+  <span class="nt-bin-n">n=461</span>
+</div>
+<div class="nt-bin-row" title="1: n=517, mean xG=0.116762">
+  <span class="nt-bin-label">1</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1168</span>
+  <span class="nt-bin-n">n=517</span>
+</div>
+<div class="nt-bin-row" title="2: n=504, mean xG=0.107398">
+  <span class="nt-bin-label">2</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:92.0%"></div></div>
+  <span class="nt-bin-rate">0.1074</span>
+  <span class="nt-bin-n">n=504</span>
+</div>
+<div class="nt-bin-row" title="3: n=541, mean xG=0.109434">
+  <span class="nt-bin-label">3</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:93.7%"></div></div>
+  <span class="nt-bin-rate">0.1094</span>
+  <span class="nt-bin-n">n=541</span>
+</div>
+<div class="nt-bin-row" title="4: n=566, mean xG=0.108081">
+  <span class="nt-bin-label">4</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:92.6%"></div></div>
+  <span class="nt-bin-rate">0.1081</span>
+  <span class="nt-bin-n">n=566</span>
+</div>
+<div class="nt-bin-row" title="5: n=516, mean xG=0.102133">
+  <span class="nt-bin-label">5</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:87.5%"></div></div>
+  <span class="nt-bin-rate">0.1021</span>
+  <span class="nt-bin-n">n=516</span>
+</div>
+<div class="nt-bin-row" title="6: n=409, mean xG=0.090386">
+  <span class="nt-bin-label">6</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:77.4%"></div></div>
+  <span class="nt-bin-rate">0.0904</span>
+  <span class="nt-bin-n">n=409</span>
+</div>
+<div class="nt-bin-row" title="7: n=332, mean xG=0.110677">
+  <span class="nt-bin-label">7</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:94.8%"></div></div>
+  <span class="nt-bin-rate">0.1107</span>
+  <span class="nt-bin-n">n=332</span>
+</div>
+<div class="nt-bin-row" title="8: n=245, mean xG=0.098523">
+  <span class="nt-bin-label">8</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:84.4%"></div></div>
+  <span class="nt-bin-rate">0.0985</span>
+  <span class="nt-bin-n">n=245</span>
+</div>
+<div class="nt-bin-row" title="9: n=163, mean xG=0.098007">
+  <span class="nt-bin-label">9</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:83.9%"></div></div>
+  <span class="nt-bin-rate">0.0980</span>
+  <span class="nt-bin-n">n=163</span>
+</div>
+<div class="nt-bin-row" title="10: n=80, mean xG=0.09311">
+  <span class="nt-bin-label">10</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:79.7%"></div></div>
+  <span class="nt-bin-rate">0.0931</span>
+  <span class="nt-bin-n">n=80</span>
+</div>
+<div class="nt-bin-row" title="11: n=34, mean xG=0.05269">
+  <span class="nt-bin-label">11</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:45.1%"></div></div>
+  <span class="nt-bin-rate">0.0527</span>
+  <span class="nt-bin-n">n=34</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -5032,6 +6698,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=55,963</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,364) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0204 &middot; Spearman &rho;=-0.0081 &middot; n=4,364</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(-16.714000000000002, -5.756]: n=437, mean xG=0.087337">
+  <span class="nt-bin-label">(-16.714000000000002, -5.756]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:71.2%"></div></div>
+  <span class="nt-bin-rate">0.0873</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(-5.756, -3.989]: n=436, mean xG=0.095811">
+  <span class="nt-bin-label">(-5.756, -3.989]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:78.1%"></div></div>
+  <span class="nt-bin-rate">0.0958</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(-3.989, -2.665]: n=436, mean xG=0.112306">
+  <span class="nt-bin-label">(-3.989, -2.665]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:91.5%"></div></div>
+  <span class="nt-bin-rate">0.1123</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(-2.665, -1.303]: n=437, mean xG=0.122672">
+  <span class="nt-bin-label">(-2.665, -1.303]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1227</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(-1.303, 0.201]: n=436, mean xG=0.121295">
+  <span class="nt-bin-label">(-1.303, 0.201]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:98.9%"></div></div>
+  <span class="nt-bin-rate">0.1213</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(0.201, 1.778]: n=436, mean xG=0.120401">
+  <span class="nt-bin-label">(0.201, 1.778]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:98.1%"></div></div>
+  <span class="nt-bin-rate">0.1204</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(1.778, 3.035]: n=437, mean xG=0.10751">
+  <span class="nt-bin-label">(1.778, 3.035]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:87.6%"></div></div>
+  <span class="nt-bin-rate">0.1075</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(3.035, 4.365]: n=436, mean xG=0.098323">
+  <span class="nt-bin-label">(3.035, 4.365]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:80.2%"></div></div>
+  <span class="nt-bin-rate">0.0983</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(4.365, 6.046]: n=436, mean xG=0.095245">
+  <span class="nt-bin-label">(4.365, 6.046]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:77.6%"></div></div>
+  <span class="nt-bin-rate">0.0952</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(6.046, 14.423]: n=437, mean xG=0.08004">
+  <span class="nt-bin-label">(6.046, 14.423]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:65.2%"></div></div>
+  <span class="nt-bin-rate">0.0800</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card dropped">
@@ -5243,6 +6983,68 @@ binning: quantile deciles (10 bins actually produced) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0018 &middot; Spearman &rho;=+0.0309 &middot; n=4,368</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(-0.001, 7.7]: n=1312, mean xG=0.115797">
+  <span class="nt-bin-label">(-0.001, 7.7]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:75.8%"></div></div>
+  <span class="nt-bin-rate">0.1158</span>
+  <span class="nt-bin-n">n=1,312</span>
+</div>
+<div class="nt-bin-row" title="(7.7, 21.493]: n=435, mean xG=0.087429">
+  <span class="nt-bin-label">(7.7, 21.493]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:57.2%"></div></div>
+  <span class="nt-bin-rate">0.0874</span>
+  <span class="nt-bin-n">n=435</span>
+</div>
+<div class="nt-bin-row" title="(21.493, 52.8]: n=438, mean xG=0.087492">
+  <span class="nt-bin-label">(21.493, 52.8]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:57.3%"></div></div>
+  <span class="nt-bin-rate">0.0875</span>
+  <span class="nt-bin-n">n=438</span>
+</div>
+<div class="nt-bin-row" title="(52.8, 73.315]: n=436, mean xG=0.094186">
+  <span class="nt-bin-label">(52.8, 73.315]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:61.7%"></div></div>
+  <span class="nt-bin-rate">0.0942</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(73.315, 81.99]: n=436, mean xG=0.079381">
+  <span class="nt-bin-label">(73.315, 81.99]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:52.0%"></div></div>
+  <span class="nt-bin-rate">0.0794</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(81.99, 88.9]: n=439, mean xG=0.092081">
+  <span class="nt-bin-label">(81.99, 88.9]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:60.3%"></div></div>
+  <span class="nt-bin-rate">0.0921</span>
+  <span class="nt-bin-n">n=439</span>
+</div>
+<div class="nt-bin-row" title="(88.9, 93.4]: n=441, mean xG=0.100979">
+  <span class="nt-bin-label">(88.9, 93.4]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:66.1%"></div></div>
+  <span class="nt-bin-rate">0.1010</span>
+  <span class="nt-bin-n">n=441</span>
+</div>
+<div class="nt-bin-row" title="(93.4, 101.0]: n=431, mean xG=0.152724">
+  <span class="nt-bin-label">(93.4, 101.0]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1527</span>
+  <span class="nt-bin-n">n=431</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card dropped">
@@ -5454,6 +7256,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=56,037</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,367) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=+0.0075 &middot; Spearman &rho;=-0.0027 &middot; n=4,367</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(8.481, 28.395]: n=437, mean xG=0.087523">
+  <span class="nt-bin-label">(8.481, 28.395]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:68.3%"></div></div>
+  <span class="nt-bin-rate">0.0875</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(28.395, 32.759]: n=437, mean xG=0.095017">
+  <span class="nt-bin-label">(28.395, 32.759]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:74.1%"></div></div>
+  <span class="nt-bin-rate">0.0950</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(32.759, 35.434]: n=436, mean xG=0.107723">
+  <span class="nt-bin-label">(32.759, 35.434]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:84.0%"></div></div>
+  <span class="nt-bin-rate">0.1077</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(35.434, 37.816]: n=437, mean xG=0.111414">
+  <span class="nt-bin-label">(35.434, 37.816]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:86.9%"></div></div>
+  <span class="nt-bin-rate">0.1114</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(37.816, 40.135]: n=437, mean xG=0.103055">
+  <span class="nt-bin-label">(37.816, 40.135]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:80.4%"></div></div>
+  <span class="nt-bin-rate">0.1031</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(40.135, 42.428]: n=436, mean xG=0.128235">
+  <span class="nt-bin-label">(40.135, 42.428]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1282</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(42.428, 44.97]: n=437, mean xG=0.101753">
+  <span class="nt-bin-label">(42.428, 44.97]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:79.3%"></div></div>
+  <span class="nt-bin-rate">0.1018</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(44.97, 47.879]: n=436, mean xG=0.111016">
+  <span class="nt-bin-label">(44.97, 47.879]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:86.6%"></div></div>
+  <span class="nt-bin-rate">0.1110</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(47.879, 51.759]: n=437, mean xG=0.109485">
+  <span class="nt-bin-label">(47.879, 51.759]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:85.4%"></div></div>
+  <span class="nt-bin-rate">0.1095</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(51.759, 68.312]: n=437, mean xG=0.085227">
+  <span class="nt-bin-label">(51.759, 68.312]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:66.5%"></div></div>
+  <span class="nt-bin-rate">0.0852</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card locked">
@@ -5540,6 +7416,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=55,963</p>
 <p><b>Train/test consistency check:</b></p>
 <p style="font-size:11.5px; color:var(--text-muted);">Not checked -- |rho|&lt;0.05 and bin range 0.00314 &lt; 0.00811 (=1.0x overall mean)</p>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,364) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=+0.0171 &middot; Spearman &rho;=+0.0179 &middot; n=4,364</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(-18.986, -5.029]: n=437, mean xG=0.101197">
+  <span class="nt-bin-label">(-18.986, -5.029]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:91.7%"></div></div>
+  <span class="nt-bin-rate">0.1012</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(-5.029, -3.148]: n=436, mean xG=0.102108">
+  <span class="nt-bin-label">(-5.029, -3.148]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:92.6%"></div></div>
+  <span class="nt-bin-rate">0.1021</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(-3.148, -1.912]: n=436, mean xG=0.103911">
+  <span class="nt-bin-label">(-3.148, -1.912]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:94.2%"></div></div>
+  <span class="nt-bin-rate">0.1039</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(-1.912, -0.957]: n=437, mean xG=0.10293">
+  <span class="nt-bin-label">(-1.912, -0.957]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:93.3%"></div></div>
+  <span class="nt-bin-rate">0.1029</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(-0.957, -0.0317]: n=436, mean xG=0.103641">
+  <span class="nt-bin-label">(-0.957, -0.0317]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:94.0%"></div></div>
+  <span class="nt-bin-rate">0.1036</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(-0.0317, 0.853]: n=436, mean xG=0.100415">
+  <span class="nt-bin-label">(-0.0317, 0.853]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:91.0%"></div></div>
+  <span class="nt-bin-rate">0.1004</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(0.853, 1.858]: n=437, mean xG=0.101398">
+  <span class="nt-bin-label">(0.853, 1.858]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:91.9%"></div></div>
+  <span class="nt-bin-rate">0.1014</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(1.858, 3.046]: n=436, mean xG=0.110303">
+  <span class="nt-bin-label">(1.858, 3.046]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1103</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(3.046, 4.664]: n=436, mean xG=0.110215">
+  <span class="nt-bin-label">(3.046, 4.664]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:99.9%"></div></div>
+  <span class="nt-bin-rate">0.1102</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(4.664, 22.808]: n=437, mean xG=0.104791">
+  <span class="nt-bin-label">(4.664, 22.808]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:95.0%"></div></div>
+  <span class="nt-bin-rate">0.1048</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card dropped">
@@ -5751,6 +7701,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=55,992</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,365) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=+0.0168 &middot; Spearman &rho;=-0.0020 &middot; n=4,365</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(11.450000000000001, 29.516]: n=437, mean xG=0.091413">
+  <span class="nt-bin-label">(11.450000000000001, 29.516]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:79.9%"></div></div>
+  <span class="nt-bin-rate">0.0914</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(29.516, 33.275]: n=436, mean xG=0.091338">
+  <span class="nt-bin-label">(29.516, 33.275]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:79.8%"></div></div>
+  <span class="nt-bin-rate">0.0913</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(33.275, 35.712]: n=437, mean xG=0.114228">
+  <span class="nt-bin-label">(33.275, 35.712]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:99.8%"></div></div>
+  <span class="nt-bin-rate">0.1142</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(35.712, 37.96]: n=436, mean xG=0.104336">
+  <span class="nt-bin-label">(35.712, 37.96]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:91.2%"></div></div>
+  <span class="nt-bin-rate">0.1043</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(37.96, 40.3]: n=437, mean xG=0.108135">
+  <span class="nt-bin-label">(37.96, 40.3]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:94.5%"></div></div>
+  <span class="nt-bin-rate">0.1081</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(40.3, 42.477]: n=436, mean xG=0.114431">
+  <span class="nt-bin-label">(40.3, 42.477]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1144</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(42.477, 44.496]: n=436, mean xG=0.101326">
+  <span class="nt-bin-label">(42.477, 44.496]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:88.5%"></div></div>
+  <span class="nt-bin-rate">0.1013</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(44.496, 46.979]: n=437, mean xG=0.111814">
+  <span class="nt-bin-label">(44.496, 46.979]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:97.7%"></div></div>
+  <span class="nt-bin-rate">0.1118</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(46.979, 50.408]: n=436, mean xG=0.104022">
+  <span class="nt-bin-label">(46.979, 50.408]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:90.9%"></div></div>
+  <span class="nt-bin-rate">0.1040</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(50.408, 69.164]: n=437, mean xG=0.100529">
+  <span class="nt-bin-label">(50.408, 69.164]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:87.9%"></div></div>
+  <span class="nt-bin-rate">0.1005</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card dropped">
@@ -5962,6 +7986,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=55,992</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,365) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0194 &middot; Spearman &rho;=+0.0031 &middot; n=4,365</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(3.641, 10.761]: n=437, mean xG=0.137745">
+  <span class="nt-bin-label">(3.641, 10.761]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1377</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(10.761, 14.604]: n=436, mean xG=0.109449">
+  <span class="nt-bin-label">(10.761, 14.604]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:79.5%"></div></div>
+  <span class="nt-bin-rate">0.1094</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(14.604, 19.785]: n=437, mean xG=0.088908">
+  <span class="nt-bin-label">(14.604, 19.785]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:64.5%"></div></div>
+  <span class="nt-bin-rate">0.0889</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(19.785, 35.675]: n=436, mean xG=0.097538">
+  <span class="nt-bin-label">(19.785, 35.675]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:70.8%"></div></div>
+  <span class="nt-bin-rate">0.0975</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(35.675, 68.803]: n=437, mean xG=0.095773">
+  <span class="nt-bin-label">(35.675, 68.803]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:69.5%"></div></div>
+  <span class="nt-bin-rate">0.0958</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(68.803, 92.402]: n=436, mean xG=0.101244">
+  <span class="nt-bin-label">(68.803, 92.402]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:73.5%"></div></div>
+  <span class="nt-bin-rate">0.1012</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(92.402, 101.517]: n=436, mean xG=0.082423">
+  <span class="nt-bin-label">(92.402, 101.517]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:59.8%"></div></div>
+  <span class="nt-bin-rate">0.0824</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(101.517, 105.6]: n=437, mean xG=0.104502">
+  <span class="nt-bin-label">(101.517, 105.6]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:75.9%"></div></div>
+  <span class="nt-bin-rate">0.1045</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(105.6, 109.134]: n=436, mean xG=0.10007">
+  <span class="nt-bin-label">(105.6, 109.134]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:72.6%"></div></div>
+  <span class="nt-bin-rate">0.1001</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(109.134, 116.806]: n=437, mean xG=0.123864">
+  <span class="nt-bin-label">(109.134, 116.806]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:89.9%"></div></div>
+  <span class="nt-bin-rate">0.1239</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card dropped">
@@ -6173,6 +8271,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=56,037</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,367) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0179 &middot; Spearman &rho;=+0.0070 &middot; n=4,367</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(2.436, 13.164]: n=437, mean xG=0.142025">
+  <span class="nt-bin-label">(2.436, 13.164]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1420</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(13.164, 17.458]: n=437, mean xG=0.110308">
+  <span class="nt-bin-label">(13.164, 17.458]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:77.7%"></div></div>
+  <span class="nt-bin-rate">0.1103</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(17.458, 23.703]: n=436, mean xG=0.087277">
+  <span class="nt-bin-label">(17.458, 23.703]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:61.5%"></div></div>
+  <span class="nt-bin-rate">0.0873</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(23.703, 37.517]: n=437, mean xG=0.093138">
+  <span class="nt-bin-label">(23.703, 37.517]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:65.6%"></div></div>
+  <span class="nt-bin-rate">0.0931</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(37.517, 67.615]: n=437, mean xG=0.094944">
+  <span class="nt-bin-label">(37.517, 67.615]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:66.9%"></div></div>
+  <span class="nt-bin-rate">0.0949</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(67.615, 89.131]: n=436, mean xG=0.098125">
+  <span class="nt-bin-label">(67.615, 89.131]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:69.1%"></div></div>
+  <span class="nt-bin-rate">0.0981</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(89.131, 97.561]: n=437, mean xG=0.092195">
+  <span class="nt-bin-label">(89.131, 97.561]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:64.9%"></div></div>
+  <span class="nt-bin-rate">0.0922</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(97.561, 102.669]: n=436, mean xG=0.087402">
+  <span class="nt-bin-label">(97.561, 102.669]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:61.5%"></div></div>
+  <span class="nt-bin-rate">0.0874</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(102.669, 107.036]: n=437, mean xG=0.111782">
+  <span class="nt-bin-label">(102.669, 107.036]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:78.7%"></div></div>
+  <span class="nt-bin-rate">0.1118</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(107.036, 116.526]: n=437, mean xG=0.123083">
+  <span class="nt-bin-label">(107.036, 116.526]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:86.7%"></div></div>
+  <span class="nt-bin-rate">0.1231</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details>
 <details class="nt-card dropped">
@@ -6384,6 +8556,80 @@ binning: quantile deciles (10 bins actually produced) &middot; n=56,068</p>
 </div></div>
 </div>
 
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n=4,368) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+
+<p><b>Correlation given a shot:</b> Pearson r=-0.0191 &middot; Spearman &rho;=+0.0163 &middot; n=4,368</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+
+<div class="nt-bin-row" title="(2.1830000000000003, 13.235]: n=437, mean xG=0.161102">
+  <span class="nt-bin-label">(2.1830000000000003, 13.235]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:100.0%"></div></div>
+  <span class="nt-bin-rate">0.1611</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(13.235, 21.345]: n=437, mean xG=0.10269">
+  <span class="nt-bin-label">(13.235, 21.345]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:63.7%"></div></div>
+  <span class="nt-bin-rate">0.1027</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(21.345, 29.668]: n=437, mean xG=0.09066">
+  <span class="nt-bin-label">(21.345, 29.668]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:56.3%"></div></div>
+  <span class="nt-bin-rate">0.0907</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(29.668, 45.186]: n=436, mean xG=0.077007">
+  <span class="nt-bin-label">(29.668, 45.186]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:47.8%"></div></div>
+  <span class="nt-bin-rate">0.0770</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(45.186, 73.98]: n=437, mean xG=0.09043">
+  <span class="nt-bin-label">(45.186, 73.98]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:56.1%"></div></div>
+  <span class="nt-bin-rate">0.0904</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(73.98, 92.82]: n=437, mean xG=0.093304">
+  <span class="nt-bin-label">(73.98, 92.82]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:57.9%"></div></div>
+  <span class="nt-bin-rate">0.0933</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(92.82, 101.111]: n=436, mean xG=0.081502">
+  <span class="nt-bin-label">(92.82, 101.111]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:50.6%"></div></div>
+  <span class="nt-bin-rate">0.0815</span>
+  <span class="nt-bin-n">n=436</span>
+</div>
+<div class="nt-bin-row" title="(101.111, 107.729]: n=437, mean xG=0.091243">
+  <span class="nt-bin-label">(101.111, 107.729]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:56.6%"></div></div>
+  <span class="nt-bin-rate">0.0912</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(107.729, 111.843]: n=437, mean xG=0.10272">
+  <span class="nt-bin-label">(107.729, 111.843]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:63.8%"></div></div>
+  <span class="nt-bin-rate">0.1027</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+<div class="nt-bin-row" title="(111.843, 122.281]: n=437, mean xG=0.150285">
+  <span class="nt-bin-label">(111.843, 122.281]</span>
+  <div class="nt-bin-track"><div class="nt-bin-fill" style="width:93.3%"></div></div>
+  <span class="nt-bin-rate">0.1503</span>
+  <span class="nt-bin-n">n=437</span>
+</div>
+</div>
+</details>
   </div>
 </details></div>
 

@@ -29,14 +29,28 @@ def _bin_rows_html(bins: list[dict]) -> str:
     rows = []
     for b in bins:
         pct = min(100.0, (b["mean_xg"] / max_val) * 100) if max_val else 0.0
+        small_n_badge = '<span class="small-n-badge">small n</span>' if b.get("small_n") else ""
         rows.append(f"""
 <div class="nt-bin-row" title="{esc(b['bin'])}: n={b['n']}, mean xG={b['mean_xg']}">
-  <span class="nt-bin-label">{esc(b['bin'])}</span>
+  <span class="nt-bin-label">{esc(b['bin'])}{small_n_badge}</span>
   <div class="nt-bin-track"><div class="nt-bin-fill" style="width:{pct:.1f}%"></div></div>
   <span class="nt-bin-rate">{b['mean_xg']:.4f}</span>
   <span class="nt-bin-n">n={b['n']:,}</span>
 </div>""")
     return "".join(rows)
+
+
+def _given_shot_html(f: dict) -> str:
+    n = f.get("n_given_shot")
+    if not f.get("bins_given_shot"):
+        return f'<p style="font-size:11.5px; color:var(--text-muted);">Insufficient shot-only data (n={n}).</p>'
+    r, rho = f.get("pearson_r_given_shot"), f.get("spearman_rho_given_shot")
+    n_small = sum(1 for b in f["bins_given_shot"] if b.get("small_n"))
+    small_note = f' &middot; {n_small} bin(s) flagged small-n (&lt;{30})' if n_small else ""
+    return f"""
+<p><b>Correlation given a shot:</b> Pearson r={r:+.4f} &middot; Spearman &rho;={rho:+.4f} &middot; n={n:,}{small_note}</p>
+<p><b>Binned mean xG, shot-only subset</b> (fresh deciles on this subset's own distribution):</p>
+{_bin_rows_html(f['bins_given_shot'])}"""
 
 
 def _consistency_html(cc: dict) -> str:
@@ -98,6 +112,20 @@ binning: {esc(f['binning_method'])} &middot; n={f['n_rows_used']:,}</p>
     else:
         body = f'<p style="color:var(--text-muted);">Insufficient data to analyze ({f["consistency_check"].get("reason", "")}).</p>'
 
+    given_shot_n = f.get("n_given_shot", 0)
+    body += f"""
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a shot happened (n={given_shot_n:,}) -- click to expand
+</summary>
+<div style="margin-top:8px;">
+<p style="font-size:11.5px; color:var(--text-secondary);">Conditional on target_future_shot_10s==1 -- asks
+whether this feature relates to how good the chance was, not just whether one occurred. Much smaller n; the
+binning is recomputed fresh on this subset, not the full-population bin edges.</p>
+{_given_shot_html(f)}
+</div>
+</details>"""
+
     return f"""
 <details class="nt-card {card_cls}">
   <summary class="nt-summary">
@@ -136,6 +164,12 @@ def build_report(data: dict) -> str:
             f"{data['flat_margin_ratio']}x this mean ({data['flat_margin']}), and the consistency-check range "
             f"trigger is {data['range_trigger_ratio']}x this mean ({data['range_trigger']}), not a fixed "
             "percentage-point margin.",
+        ),
+        finding_card(
+            "conditional",
+            "given a shot happened",
+            "each card also expands to a shot-conditional panel (target_future_shot_10s==1 only, fresh binning "
+            "on that subset) -- asks whether a feature relates to chance quality, not just chance occurrence.",
         ),
     ]
     if data["n_features_flagged_inconsistent"]:

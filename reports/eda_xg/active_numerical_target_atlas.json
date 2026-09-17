@@ -1,6 +1,6 @@
 {
   "dataset": "active",
-  "generated_at": "2026-09-16T20:11:18.957039+00:00",
+  "generated_at": "2026-09-16T22:49:14.022141+00:00",
   "target": "target_future_xg_10s",
   "overall_mean_target": 0.00811,
   "flat_margin": 0.004055,
@@ -192,7 +192,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4365,
+      "pearson_r_given_shot": -0.067,
+      "spearman_rho_given_shot": -0.046,
+      "bins_given_shot": [
+        {
+          "bin": "(-0.001, 6.626]",
+          "n": 437,
+          "mean_xg": 0.123049,
+          "small_n": false
+        },
+        {
+          "bin": "(6.626, 7.925]",
+          "n": 436,
+          "mean_xg": 0.135977,
+          "small_n": false
+        },
+        {
+          "bin": "(7.925, 8.967]",
+          "n": 437,
+          "mean_xg": 0.104215,
+          "small_n": false
+        },
+        {
+          "bin": "(8.967, 9.815]",
+          "n": 436,
+          "mean_xg": 0.09974,
+          "small_n": false
+        },
+        {
+          "bin": "(9.815, 10.656]",
+          "n": 437,
+          "mean_xg": 0.103436,
+          "small_n": false
+        },
+        {
+          "bin": "(10.656, 11.555]",
+          "n": 436,
+          "mean_xg": 0.091674,
+          "small_n": false
+        },
+        {
+          "bin": "(11.555, 12.553]",
+          "n": 436,
+          "mean_xg": 0.091934,
+          "small_n": false
+        },
+        {
+          "bin": "(12.553, 13.761]",
+          "n": 437,
+          "mean_xg": 0.095392,
+          "small_n": false
+        },
+        {
+          "bin": "(13.761, 15.441]",
+          "n": 436,
+          "mean_xg": 0.098279,
+          "small_n": false
+        },
+        {
+          "bin": "(15.441, 23.984]",
+          "n": 437,
+          "mean_xg": 0.09788,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "attacking_goal_centrality",
@@ -368,7 +433,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": 0.0926,
+      "spearman_rho_given_shot": 0.1405,
+      "bins_given_shot": [
+        {
+          "bin": "(0.019, 0.323]",
+          "n": 438,
+          "mean_xg": 0.089193,
+          "small_n": false
+        },
+        {
+          "bin": "(0.323, 0.495]",
+          "n": 443,
+          "mean_xg": 0.091974,
+          "small_n": false
+        },
+        {
+          "bin": "(0.495, 0.59]",
+          "n": 436,
+          "mean_xg": 0.076656,
+          "small_n": false
+        },
+        {
+          "bin": "(0.59, 0.675]",
+          "n": 442,
+          "mean_xg": 0.091276,
+          "small_n": false
+        },
+        {
+          "bin": "(0.675, 0.742]",
+          "n": 426,
+          "mean_xg": 0.095397,
+          "small_n": false
+        },
+        {
+          "bin": "(0.742, 0.81]",
+          "n": 455,
+          "mean_xg": 0.108003,
+          "small_n": false
+        },
+        {
+          "bin": "(0.81, 0.86]",
+          "n": 424,
+          "mean_xg": 0.110823,
+          "small_n": false
+        },
+        {
+          "bin": "(0.86, 0.91]",
+          "n": 434,
+          "mean_xg": 0.135629,
+          "small_n": false
+        },
+        {
+          "bin": "(0.91, 0.957]",
+          "n": 445,
+          "mean_xg": 0.131425,
+          "small_n": false
+        },
+        {
+          "bin": "(0.957, 1.0]",
+          "n": 425,
+          "mean_xg": 0.110683,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "distance_to_center_line",
@@ -544,7 +674,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": -0.0926,
+      "spearman_rho_given_shot": -0.1405,
+      "bins_given_shot": [
+        {
+          "bin": "(-0.001, 1.7]",
+          "n": 446,
+          "mean_xg": 0.111546,
+          "small_n": false
+        },
+        {
+          "bin": "(1.7, 3.6]",
+          "n": 450,
+          "mean_xg": 0.133032,
+          "small_n": false
+        },
+        {
+          "bin": "(3.6, 5.6]",
+          "n": 431,
+          "mean_xg": 0.134041,
+          "small_n": false
+        },
+        {
+          "bin": "(5.6, 7.6]",
+          "n": 422,
+          "mean_xg": 0.109433,
+          "small_n": false
+        },
+        {
+          "bin": "(7.6, 10.3]",
+          "n": 440,
+          "mean_xg": 0.107719,
+          "small_n": false
+        },
+        {
+          "bin": "(10.3, 13.0]",
+          "n": 435,
+          "mean_xg": 0.094341,
+          "small_n": false
+        },
+        {
+          "bin": "(13.0, 16.4]",
+          "n": 437,
+          "mean_xg": 0.091449,
+          "small_n": false
+        },
+        {
+          "bin": "(16.4, 20.2]",
+          "n": 435,
+          "mean_xg": 0.078596,
+          "small_n": false
+        },
+        {
+          "bin": "(20.2, 27.1]",
+          "n": 438,
+          "mean_xg": 0.090716,
+          "small_n": false
+        },
+        {
+          "bin": "(27.1, 39.2]",
+          "n": 434,
+          "mean_xg": 0.089507,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "attacker_spread",
@@ -720,7 +915,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4367,
+      "pearson_r_given_shot": -0.1106,
+      "spearman_rho_given_shot": -0.0941,
+      "bins_given_shot": [
+        {
+          "bin": "(-0.001, 7.912]",
+          "n": 437,
+          "mean_xg": 0.141528,
+          "small_n": false
+        },
+        {
+          "bin": "(7.912, 9.616]",
+          "n": 437,
+          "mean_xg": 0.12226,
+          "small_n": false
+        },
+        {
+          "bin": "(9.616, 10.847]",
+          "n": 436,
+          "mean_xg": 0.117086,
+          "small_n": false
+        },
+        {
+          "bin": "(10.847, 11.749]",
+          "n": 437,
+          "mean_xg": 0.102565,
+          "small_n": false
+        },
+        {
+          "bin": "(11.749, 12.599]",
+          "n": 437,
+          "mean_xg": 0.099955,
+          "small_n": false
+        },
+        {
+          "bin": "(12.599, 13.519]",
+          "n": 436,
+          "mean_xg": 0.092243,
+          "small_n": false
+        },
+        {
+          "bin": "(13.519, 14.58]",
+          "n": 437,
+          "mean_xg": 0.093272,
+          "small_n": false
+        },
+        {
+          "bin": "(14.58, 15.764]",
+          "n": 436,
+          "mean_xg": 0.100356,
+          "small_n": false
+        },
+        {
+          "bin": "(15.764, 17.47]",
+          "n": 437,
+          "mean_xg": 0.083479,
+          "small_n": false
+        },
+        {
+          "bin": "(17.47, 25.729]",
+          "n": 437,
+          "mean_xg": 0.087619,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "attacker_defender_ratio",
@@ -896,7 +1156,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": -0.0621,
+      "spearman_rho_given_shot": -0.0784,
+      "bins_given_shot": [
+        {
+          "bin": "(-0.001, 0.545]",
+          "n": 439,
+          "mean_xg": 0.135933,
+          "small_n": false
+        },
+        {
+          "bin": "(0.545, 0.625]",
+          "n": 553,
+          "mean_xg": 0.117585,
+          "small_n": false
+        },
+        {
+          "bin": "(0.625, 0.667]",
+          "n": 382,
+          "mean_xg": 0.102886,
+          "small_n": false
+        },
+        {
+          "bin": "(0.667, 0.714]",
+          "n": 374,
+          "mean_xg": 0.116593,
+          "small_n": false
+        },
+        {
+          "bin": "(0.714, 0.778]",
+          "n": 593,
+          "mean_xg": 0.097892,
+          "small_n": false
+        },
+        {
+          "bin": "(0.778, 0.8]",
+          "n": 281,
+          "mean_xg": 0.096143,
+          "small_n": false
+        },
+        {
+          "bin": "(0.8, 0.889]",
+          "n": 645,
+          "mean_xg": 0.094998,
+          "small_n": false
+        },
+        {
+          "bin": "(0.889, 1.0]",
+          "n": 561,
+          "mean_xg": 0.089677,
+          "small_n": false
+        },
+        {
+          "bin": "(1.0, 1.125]",
+          "n": 136,
+          "mean_xg": 0.075651,
+          "small_n": false
+        },
+        {
+          "bin": "(1.125, 7.0]",
+          "n": 404,
+          "mean_xg": 0.099477,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "defenders_within_10m",
@@ -1102,7 +1427,84 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 3298,
+      "pearson_r_given_shot": 0.0931,
+      "spearman_rho_given_shot": 0.078,
+      "bins_given_shot": [
+        {
+          "bin": "0.0",
+          "n": 263,
+          "mean_xg": 0.093786,
+          "small_n": false
+        },
+        {
+          "bin": "1.0",
+          "n": 639,
+          "mean_xg": 0.094381,
+          "small_n": false
+        },
+        {
+          "bin": "2.0",
+          "n": 699,
+          "mean_xg": 0.098237,
+          "small_n": false
+        },
+        {
+          "bin": "3.0",
+          "n": 632,
+          "mean_xg": 0.109658,
+          "small_n": false
+        },
+        {
+          "bin": "4.0",
+          "n": 433,
+          "mean_xg": 0.112056,
+          "small_n": false
+        },
+        {
+          "bin": "5.0",
+          "n": 274,
+          "mean_xg": 0.123751,
+          "small_n": false
+        },
+        {
+          "bin": "6.0",
+          "n": 171,
+          "mean_xg": 0.146835,
+          "small_n": false
+        },
+        {
+          "bin": "7.0",
+          "n": 108,
+          "mean_xg": 0.148955,
+          "small_n": false
+        },
+        {
+          "bin": "8.0",
+          "n": 50,
+          "mean_xg": 0.124137,
+          "small_n": false
+        },
+        {
+          "bin": "9.0",
+          "n": 21,
+          "mean_xg": 0.0558,
+          "small_n": true
+        },
+        {
+          "bin": "10.0",
+          "n": 7,
+          "mean_xg": 0.235586,
+          "small_n": true
+        },
+        {
+          "bin": "11.0",
+          "n": 1,
+          "mean_xg": 0.101072,
+          "small_n": true
+        }
+      ]
     },
     {
       "feature": "local_numerical_balance_10m",
@@ -1218,7 +1620,48 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 3298,
+      "pearson_r_given_shot": -0.1038,
+      "spearman_rho_given_shot": -0.0848,
+      "bins_given_shot": [
+        {
+          "bin": "(-8.001, -3.0]",
+          "n": 505,
+          "mean_xg": 0.137644,
+          "small_n": false
+        },
+        {
+          "bin": "(-3.0, -2.0]",
+          "n": 535,
+          "mean_xg": 0.107293,
+          "small_n": false
+        },
+        {
+          "bin": "(-2.0, -1.0]",
+          "n": 783,
+          "mean_xg": 0.110941,
+          "small_n": false
+        },
+        {
+          "bin": "(-1.0, 0.0]",
+          "n": 803,
+          "mean_xg": 0.097749,
+          "small_n": false
+        },
+        {
+          "bin": "(0.0, 1.0]",
+          "n": 491,
+          "mean_xg": 0.097954,
+          "small_n": false
+        },
+        {
+          "bin": "(1.0, 6.0]",
+          "n": 181,
+          "mean_xg": 0.084716,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "phase_transitions_observed_so_far",
@@ -1364,7 +1807,66 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": 0.0069,
+      "spearman_rho_given_shot": -0.0063,
+      "bins_given_shot": [
+        {
+          "bin": "(-0.001, 1.0]",
+          "n": 1080,
+          "mean_xg": 0.104042,
+          "small_n": false
+        },
+        {
+          "bin": "(1.0, 2.0]",
+          "n": 391,
+          "mean_xg": 0.114768,
+          "small_n": false
+        },
+        {
+          "bin": "(2.0, 3.0]",
+          "n": 286,
+          "mean_xg": 0.089302,
+          "small_n": false
+        },
+        {
+          "bin": "(3.0, 5.0]",
+          "n": 588,
+          "mean_xg": 0.094082,
+          "small_n": false
+        },
+        {
+          "bin": "(5.0, 7.0]",
+          "n": 461,
+          "mean_xg": 0.099804,
+          "small_n": false
+        },
+        {
+          "bin": "(7.0, 9.0]",
+          "n": 408,
+          "mean_xg": 0.095496,
+          "small_n": false
+        },
+        {
+          "bin": "(9.0, 11.0]",
+          "n": 306,
+          "mean_xg": 0.111552,
+          "small_n": false
+        },
+        {
+          "bin": "(11.0, 15.0]",
+          "n": 434,
+          "mean_xg": 0.128425,
+          "small_n": false
+        },
+        {
+          "bin": "(15.0, 49.0]",
+          "n": 414,
+          "mean_xg": 0.10094,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "visible_attacker_count",
@@ -1570,7 +2072,84 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": -0.1293,
+      "spearman_rho_given_shot": -0.1564,
+      "bins_given_shot": [
+        {
+          "bin": "0",
+          "n": 1,
+          "mean_xg": 0.404267,
+          "small_n": true
+        },
+        {
+          "bin": "1",
+          "n": 20,
+          "mean_xg": 0.161857,
+          "small_n": true
+        },
+        {
+          "bin": "2",
+          "n": 66,
+          "mean_xg": 0.161949,
+          "small_n": false
+        },
+        {
+          "bin": "3",
+          "n": 170,
+          "mean_xg": 0.140149,
+          "small_n": false
+        },
+        {
+          "bin": "4",
+          "n": 412,
+          "mean_xg": 0.13263,
+          "small_n": false
+        },
+        {
+          "bin": "5",
+          "n": 655,
+          "mean_xg": 0.121481,
+          "small_n": false
+        },
+        {
+          "bin": "6",
+          "n": 828,
+          "mean_xg": 0.102543,
+          "small_n": false
+        },
+        {
+          "bin": "7",
+          "n": 890,
+          "mean_xg": 0.096,
+          "small_n": false
+        },
+        {
+          "bin": "8",
+          "n": 664,
+          "mean_xg": 0.086826,
+          "small_n": false
+        },
+        {
+          "bin": "9",
+          "n": 404,
+          "mean_xg": 0.073474,
+          "small_n": false
+        },
+        {
+          "bin": "10",
+          "n": 206,
+          "mean_xg": 0.093299,
+          "small_n": false
+        },
+        {
+          "bin": "11",
+          "n": 52,
+          "mean_xg": 0.105048,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "visible_defender_count",
@@ -1776,7 +2355,84 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": -0.0762,
+      "spearman_rho_given_shot": -0.1349,
+      "bins_given_shot": [
+        {
+          "bin": "0",
+          "n": 3,
+          "mean_xg": 0.027288,
+          "small_n": true
+        },
+        {
+          "bin": "1",
+          "n": 1,
+          "mean_xg": 0.07569,
+          "small_n": true
+        },
+        {
+          "bin": "2",
+          "n": 16,
+          "mean_xg": 0.129461,
+          "small_n": true
+        },
+        {
+          "bin": "3",
+          "n": 40,
+          "mean_xg": 0.165684,
+          "small_n": false
+        },
+        {
+          "bin": "4",
+          "n": 95,
+          "mean_xg": 0.141911,
+          "small_n": false
+        },
+        {
+          "bin": "5",
+          "n": 198,
+          "mean_xg": 0.132077,
+          "small_n": false
+        },
+        {
+          "bin": "6",
+          "n": 366,
+          "mean_xg": 0.113177,
+          "small_n": false
+        },
+        {
+          "bin": "7",
+          "n": 632,
+          "mean_xg": 0.107678,
+          "small_n": false
+        },
+        {
+          "bin": "8",
+          "n": 896,
+          "mean_xg": 0.105919,
+          "small_n": false
+        },
+        {
+          "bin": "9",
+          "n": 1086,
+          "mean_xg": 0.095418,
+          "small_n": false
+        },
+        {
+          "bin": "10",
+          "n": 836,
+          "mean_xg": 0.093163,
+          "small_n": false
+        },
+        {
+          "bin": "11",
+          "n": 199,
+          "mean_xg": 0.102294,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "defenders_within_5m",
@@ -1932,7 +2588,66 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 3868,
+      "pearson_r_given_shot": 0.065,
+      "spearman_rho_given_shot": 0.067,
+      "bins_given_shot": [
+        {
+          "bin": "0.0",
+          "n": 1796,
+          "mean_xg": 0.098014,
+          "small_n": false
+        },
+        {
+          "bin": "1.0",
+          "n": 1267,
+          "mean_xg": 0.104042,
+          "small_n": false
+        },
+        {
+          "bin": "2.0",
+          "n": 480,
+          "mean_xg": 0.122371,
+          "small_n": false
+        },
+        {
+          "bin": "3.0",
+          "n": 192,
+          "mean_xg": 0.134131,
+          "small_n": false
+        },
+        {
+          "bin": "4.0",
+          "n": 84,
+          "mean_xg": 0.145616,
+          "small_n": false
+        },
+        {
+          "bin": "5.0",
+          "n": 34,
+          "mean_xg": 0.094163,
+          "small_n": false
+        },
+        {
+          "bin": "6.0",
+          "n": 13,
+          "mean_xg": 0.088094,
+          "small_n": true
+        },
+        {
+          "bin": "7.0",
+          "n": 1,
+          "mean_xg": 0.035652,
+          "small_n": true
+        },
+        {
+          "bin": "8.0",
+          "n": 1,
+          "mean_xg": 0.101072,
+          "small_n": true
+        }
+      ]
     },
     {
       "feature": "angle_to_attacking_goal",
@@ -2108,7 +2823,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": -0.0126,
+      "spearman_rho_given_shot": -0.0403,
+      "bins_given_shot": [
+        {
+          "bin": "(-0.001, 0.032]",
+          "n": 437,
+          "mean_xg": 0.117121,
+          "small_n": false
+        },
+        {
+          "bin": "(0.032, 0.0663]",
+          "n": 437,
+          "mean_xg": 0.124092,
+          "small_n": false
+        },
+        {
+          "bin": "(0.0663, 0.113]",
+          "n": 437,
+          "mean_xg": 0.11285,
+          "small_n": false
+        },
+        {
+          "bin": "(0.113, 0.167]",
+          "n": 436,
+          "mean_xg": 0.096324,
+          "small_n": false
+        },
+        {
+          "bin": "(0.167, 0.235]",
+          "n": 437,
+          "mean_xg": 0.078063,
+          "small_n": false
+        },
+        {
+          "bin": "(0.235, 0.329]",
+          "n": 437,
+          "mean_xg": 0.098964,
+          "small_n": false
+        },
+        {
+          "bin": "(0.329, 0.451]",
+          "n": 436,
+          "mean_xg": 0.096958,
+          "small_n": false
+        },
+        {
+          "bin": "(0.451, 0.618]",
+          "n": 437,
+          "mean_xg": 0.107847,
+          "small_n": false
+        },
+        {
+          "bin": "(0.618, 0.856]",
+          "n": 437,
+          "mean_xg": 0.102334,
+          "small_n": false
+        },
+        {
+          "bin": "(0.856, 1.502]",
+          "n": 437,
+          "mean_xg": 0.10647,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "possession_elapsed_seconds",
@@ -2269,7 +3049,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": 0.0092,
+      "spearman_rho_given_shot": 0.0079,
+      "bins_given_shot": [
+        {
+          "bin": "(-0.001, 2.0]",
+          "n": 685,
+          "mean_xg": 0.111567,
+          "small_n": false
+        },
+        {
+          "bin": "(2.0, 4.0]",
+          "n": 341,
+          "mean_xg": 0.090098,
+          "small_n": false
+        },
+        {
+          "bin": "(4.0, 6.0]",
+          "n": 287,
+          "mean_xg": 0.100735,
+          "small_n": false
+        },
+        {
+          "bin": "(6.0, 11.0]",
+          "n": 502,
+          "mean_xg": 0.106706,
+          "small_n": false
+        },
+        {
+          "bin": "(11.0, 16.0]",
+          "n": 431,
+          "mean_xg": 0.08669,
+          "small_n": false
+        },
+        {
+          "bin": "(16.0, 21.0]",
+          "n": 378,
+          "mean_xg": 0.094372,
+          "small_n": false
+        },
+        {
+          "bin": "(21.0, 29.0]",
+          "n": 489,
+          "mean_xg": 0.106066,
+          "small_n": false
+        },
+        {
+          "bin": "(29.0, 37.0]",
+          "n": 404,
+          "mean_xg": 0.119279,
+          "small_n": false
+        },
+        {
+          "bin": "(37.0, 53.0]",
+          "n": 422,
+          "mean_xg": 0.103257,
+          "small_n": false
+        },
+        {
+          "bin": "(53.0, 196.0]",
+          "n": 429,
+          "mean_xg": 0.112923,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "events_elapsed_in_possession",
@@ -2445,7 +3290,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": -0.0022,
+      "spearman_rho_given_shot": 0.0071,
+      "bins_given_shot": [
+        {
+          "bin": "(0.999, 3.0]",
+          "n": 588,
+          "mean_xg": 0.101878,
+          "small_n": false
+        },
+        {
+          "bin": "(3.0, 5.0]",
+          "n": 365,
+          "mean_xg": 0.108592,
+          "small_n": false
+        },
+        {
+          "bin": "(5.0, 8.0]",
+          "n": 401,
+          "mean_xg": 0.113286,
+          "small_n": false
+        },
+        {
+          "bin": "(8.0, 12.0]",
+          "n": 426,
+          "mean_xg": 0.092593,
+          "small_n": false
+        },
+        {
+          "bin": "(12.0, 16.0]",
+          "n": 411,
+          "mean_xg": 0.102404,
+          "small_n": false
+        },
+        {
+          "bin": "(16.0, 22.0]",
+          "n": 486,
+          "mean_xg": 0.094229,
+          "small_n": false
+        },
+        {
+          "bin": "(22.0, 28.0]",
+          "n": 410,
+          "mean_xg": 0.102827,
+          "small_n": false
+        },
+        {
+          "bin": "(28.0, 36.0]",
+          "n": 445,
+          "mean_xg": 0.110763,
+          "small_n": false
+        },
+        {
+          "bin": "(36.0, 50.0]",
+          "n": 408,
+          "mean_xg": 0.123593,
+          "small_n": false
+        },
+        {
+          "bin": "(50.0, 216.0]",
+          "n": 428,
+          "mean_xg": 0.094772,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "local_numerical_balance_5m",
@@ -2641,7 +3551,66 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 3868,
+      "pearson_r_given_shot": -0.0563,
+      "spearman_rho_given_shot": -0.0277,
+      "bins_given_shot": [
+        {
+          "bin": "-5.0",
+          "n": 2,
+          "mean_xg": 0.060329,
+          "small_n": true
+        },
+        {
+          "bin": "-4.0",
+          "n": 28,
+          "mean_xg": 0.140448,
+          "small_n": true
+        },
+        {
+          "bin": "-3.0",
+          "n": 69,
+          "mean_xg": 0.162457,
+          "small_n": false
+        },
+        {
+          "bin": "-2.0",
+          "n": 254,
+          "mean_xg": 0.118288,
+          "small_n": false
+        },
+        {
+          "bin": "-1.0",
+          "n": 668,
+          "mean_xg": 0.114378,
+          "small_n": false
+        },
+        {
+          "bin": "0.0",
+          "n": 1268,
+          "mean_xg": 0.102561,
+          "small_n": false
+        },
+        {
+          "bin": "1.0",
+          "n": 1410,
+          "mean_xg": 0.09779,
+          "small_n": false
+        },
+        {
+          "bin": "2.0",
+          "n": 162,
+          "mean_xg": 0.113129,
+          "small_n": false
+        },
+        {
+          "bin": "3.0",
+          "n": 7,
+          "mean_xg": 0.155455,
+          "small_n": true
+        }
+      ]
     },
     {
       "feature": "nearest_defender_distance",
@@ -2817,7 +3786,72 @@
           }
         ]
       },
-      "unreliable_note": "Flagged in the Distribution Atlas as a likely self-reference bug -- 73.6% of rows are \u2248 0m. Run and reported below like every other feature, but do not read the pattern as clean."
+      "unreliable_note": "Flagged in the Distribution Atlas as a likely self-reference bug -- 73.6% of rows are \u2248 0m. Run and reported below like every other feature, but do not read the pattern as clean.",
+      "n_given_shot": 4365,
+      "pearson_r_given_shot": -0.0307,
+      "spearman_rho_given_shot": -0.042,
+      "bins_given_shot": [
+        {
+          "bin": "(0.216, 1.613]",
+          "n": 437,
+          "mean_xg": 0.11983,
+          "small_n": false
+        },
+        {
+          "bin": "(1.613, 2.503]",
+          "n": 436,
+          "mean_xg": 0.121084,
+          "small_n": false
+        },
+        {
+          "bin": "(2.503, 3.37]",
+          "n": 437,
+          "mean_xg": 0.115606,
+          "small_n": false
+        },
+        {
+          "bin": "(3.37, 4.248]",
+          "n": 436,
+          "mean_xg": 0.104615,
+          "small_n": false
+        },
+        {
+          "bin": "(4.248, 5.2]",
+          "n": 437,
+          "mean_xg": 0.10053,
+          "small_n": false
+        },
+        {
+          "bin": "(5.2, 6.208]",
+          "n": 436,
+          "mean_xg": 0.103752,
+          "small_n": false
+        },
+        {
+          "bin": "(6.208, 7.652]",
+          "n": 436,
+          "mean_xg": 0.098434,
+          "small_n": false
+        },
+        {
+          "bin": "(7.652, 9.734]",
+          "n": 437,
+          "mean_xg": 0.097817,
+          "small_n": false
+        },
+        {
+          "bin": "(9.734, 35.718]",
+          "n": 436,
+          "mean_xg": 0.087206,
+          "small_n": false
+        },
+        {
+          "bin": "(35.718, 108.39]",
+          "n": 437,
+          "mean_xg": 0.092695,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "attackers_within_10m",
@@ -2988,7 +4022,66 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 3298,
+      "pearson_r_given_shot": 0.0119,
+      "spearman_rho_given_shot": 0.0049,
+      "bins_given_shot": [
+        {
+          "bin": "0.0",
+          "n": 217,
+          "mean_xg": 0.105556,
+          "small_n": false
+        },
+        {
+          "bin": "1.0",
+          "n": 964,
+          "mean_xg": 0.104276,
+          "small_n": false
+        },
+        {
+          "bin": "2.0",
+          "n": 1134,
+          "mean_xg": 0.106072,
+          "small_n": false
+        },
+        {
+          "bin": "3.0",
+          "n": 628,
+          "mean_xg": 0.116842,
+          "small_n": false
+        },
+        {
+          "bin": "4.0",
+          "n": 229,
+          "mean_xg": 0.116637,
+          "small_n": false
+        },
+        {
+          "bin": "5.0",
+          "n": 93,
+          "mean_xg": 0.108048,
+          "small_n": false
+        },
+        {
+          "bin": "6.0",
+          "n": 28,
+          "mean_xg": 0.058303,
+          "small_n": true
+        },
+        {
+          "bin": "7.0",
+          "n": 2,
+          "mean_xg": 0.045739,
+          "small_n": true
+        },
+        {
+          "bin": "8.0",
+          "n": 3,
+          "mean_xg": 0.042295,
+          "small_n": true
+        }
+      ]
     },
     {
       "feature": "match_time_seconds",
@@ -3058,7 +4151,72 @@
         "checked": false,
         "reason": "|rho|<0.05 and bin range 0.00578 < 0.00811 (=1.0x overall mean)"
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": 0.0161,
+      "spearman_rho_given_shot": 0.032,
+      "bins_given_shot": [
+        {
+          "bin": "(4.999, 696.4]",
+          "n": 437,
+          "mean_xg": 0.101252,
+          "small_n": false
+        },
+        {
+          "bin": "(696.4, 1391.8]",
+          "n": 437,
+          "mean_xg": 0.079119,
+          "small_n": false
+        },
+        {
+          "bin": "(1391.8, 2046.1]",
+          "n": 437,
+          "mean_xg": 0.109788,
+          "small_n": false
+        },
+        {
+          "bin": "(2046.1, 2711.0]",
+          "n": 437,
+          "mean_xg": 0.104749,
+          "small_n": false
+        },
+        {
+          "bin": "(2711.0, 3079.5]",
+          "n": 436,
+          "mean_xg": 0.098714,
+          "small_n": false
+        },
+        {
+          "bin": "(3079.5, 3608.0]",
+          "n": 438,
+          "mean_xg": 0.126146,
+          "small_n": false
+        },
+        {
+          "bin": "(3608.0, 4261.9]",
+          "n": 435,
+          "mean_xg": 0.118776,
+          "small_n": false
+        },
+        {
+          "bin": "(4261.9, 4882.6]",
+          "n": 437,
+          "mean_xg": 0.102667,
+          "small_n": false
+        },
+        {
+          "bin": "(4882.6, 5474.3]",
+          "n": 437,
+          "mean_xg": 0.098587,
+          "small_n": false
+        },
+        {
+          "bin": "(5474.3, 7377.0]",
+          "n": 437,
+          "mean_xg": 0.101262,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "distance_to_attacking_goal",
@@ -3234,7 +4392,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": 0.0067,
+      "spearman_rho_given_shot": -0.0352,
+      "bins_given_shot": [
+        {
+          "bin": "(1.6480000000000001, 11.723]",
+          "n": 437,
+          "mean_xg": 0.150662,
+          "small_n": false
+        },
+        {
+          "bin": "(11.723, 18.028]",
+          "n": 437,
+          "mean_xg": 0.104024,
+          "small_n": false
+        },
+        {
+          "bin": "(18.028, 25.666]",
+          "n": 437,
+          "mean_xg": 0.086671,
+          "small_n": false
+        },
+        {
+          "bin": "(25.666, 34.219]",
+          "n": 436,
+          "mean_xg": 0.079685,
+          "small_n": false
+        },
+        {
+          "bin": "(34.219, 53.062]",
+          "n": 437,
+          "mean_xg": 0.094454,
+          "small_n": false
+        },
+        {
+          "bin": "(53.062, 84.233]",
+          "n": 437,
+          "mean_xg": 0.091397,
+          "small_n": false
+        },
+        {
+          "bin": "(84.233, 97.305]",
+          "n": 436,
+          "mean_xg": 0.087274,
+          "small_n": false
+        },
+        {
+          "bin": "(97.305, 105.707]",
+          "n": 437,
+          "mean_xg": 0.092072,
+          "small_n": false
+        },
+        {
+          "bin": "(105.707, 111.078]",
+          "n": 437,
+          "mean_xg": 0.105967,
+          "small_n": false
+        },
+        {
+          "bin": "(111.078, 123.489]",
+          "n": 437,
+          "mean_xg": 0.148757,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "nearest_attacker_distance",
@@ -3304,7 +4527,72 @@
         "checked": false,
         "reason": "|rho|<0.05 and bin range 0.00375 < 0.00811 (=1.0x overall mean)"
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4367,
+      "pearson_r_given_shot": -0.0236,
+      "spearman_rho_given_shot": -0.0301,
+      "bins_given_shot": [
+        {
+          "bin": "(0.0922, 1.082]",
+          "n": 437,
+          "mean_xg": 0.102202,
+          "small_n": false
+        },
+        {
+          "bin": "(1.082, 1.606]",
+          "n": 437,
+          "mean_xg": 0.109229,
+          "small_n": false
+        },
+        {
+          "bin": "(1.606, 2.133]",
+          "n": 436,
+          "mean_xg": 0.104501,
+          "small_n": false
+        },
+        {
+          "bin": "(2.133, 2.645]",
+          "n": 437,
+          "mean_xg": 0.111948,
+          "small_n": false
+        },
+        {
+          "bin": "(2.645, 3.28]",
+          "n": 437,
+          "mean_xg": 0.101329,
+          "small_n": false
+        },
+        {
+          "bin": "(3.28, 4.228]",
+          "n": 436,
+          "mean_xg": 0.102355,
+          "small_n": false
+        },
+        {
+          "bin": "(4.228, 5.842]",
+          "n": 437,
+          "mean_xg": 0.110749,
+          "small_n": false
+        },
+        {
+          "bin": "(5.842, 9.307]",
+          "n": 436,
+          "mean_xg": 0.104437,
+          "small_n": false
+        },
+        {
+          "bin": "(9.307, 33.208]",
+          "n": 437,
+          "mean_xg": 0.100702,
+          "small_n": false
+        },
+        {
+          "bin": "(33.208, 110.236]",
+          "n": 437,
+          "mean_xg": 0.092913,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "distance_to_attacking_box",
@@ -3465,7 +4753,60 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": 0.0226,
+      "spearman_rho_given_shot": -0.0205,
+      "bins_given_shot": [
+        {
+          "bin": "(-0.001, 3.3]",
+          "n": 1312,
+          "mean_xg": 0.113857,
+          "small_n": false
+        },
+        {
+          "bin": "(3.3, 11.9]",
+          "n": 438,
+          "mean_xg": 0.079932,
+          "small_n": false
+        },
+        {
+          "bin": "(11.9, 31.952]",
+          "n": 434,
+          "mean_xg": 0.095815,
+          "small_n": false
+        },
+        {
+          "bin": "(31.952, 63.602]",
+          "n": 437,
+          "mean_xg": 0.087676,
+          "small_n": false
+        },
+        {
+          "bin": "(63.602, 77.991]",
+          "n": 436,
+          "mean_xg": 0.08748,
+          "small_n": false
+        },
+        {
+          "bin": "(77.991, 86.865]",
+          "n": 437,
+          "mean_xg": 0.094484,
+          "small_n": false
+        },
+        {
+          "bin": "(86.865, 92.4]",
+          "n": 442,
+          "mean_xg": 0.10269,
+          "small_n": false
+        },
+        {
+          "bin": "(92.4, 101.4]",
+          "n": 432,
+          "mean_xg": 0.151911,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "attackers_within_5m",
@@ -3591,7 +4932,48 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 3868,
+      "pearson_r_given_shot": 0.011,
+      "spearman_rho_given_shot": 0.037,
+      "bins_given_shot": [
+        {
+          "bin": "0.0",
+          "n": 1017,
+          "mean_xg": 0.107546,
+          "small_n": false
+        },
+        {
+          "bin": "1.0",
+          "n": 2200,
+          "mean_xg": 0.102272,
+          "small_n": false
+        },
+        {
+          "bin": "2.0",
+          "n": 533,
+          "mean_xg": 0.113581,
+          "small_n": false
+        },
+        {
+          "bin": "3.0",
+          "n": 92,
+          "mean_xg": 0.130967,
+          "small_n": false
+        },
+        {
+          "bin": "4.0",
+          "n": 20,
+          "mean_xg": 0.097515,
+          "small_n": true
+        },
+        {
+          "bin": "5.0",
+          "n": 6,
+          "mean_xg": 0.024744,
+          "small_n": true
+        }
+      ]
     },
     {
       "feature": "defenders_between_ball_and_attacking_goal",
@@ -3797,7 +5179,84 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": -0.0264,
+      "spearman_rho_given_shot": -0.0444,
+      "bins_given_shot": [
+        {
+          "bin": "0",
+          "n": 461,
+          "mean_xg": 0.095649,
+          "small_n": false
+        },
+        {
+          "bin": "1",
+          "n": 517,
+          "mean_xg": 0.116762,
+          "small_n": false
+        },
+        {
+          "bin": "2",
+          "n": 504,
+          "mean_xg": 0.107398,
+          "small_n": false
+        },
+        {
+          "bin": "3",
+          "n": 541,
+          "mean_xg": 0.109434,
+          "small_n": false
+        },
+        {
+          "bin": "4",
+          "n": 566,
+          "mean_xg": 0.108081,
+          "small_n": false
+        },
+        {
+          "bin": "5",
+          "n": 516,
+          "mean_xg": 0.102133,
+          "small_n": false
+        },
+        {
+          "bin": "6",
+          "n": 409,
+          "mean_xg": 0.090386,
+          "small_n": false
+        },
+        {
+          "bin": "7",
+          "n": 332,
+          "mean_xg": 0.110677,
+          "small_n": false
+        },
+        {
+          "bin": "8",
+          "n": 245,
+          "mean_xg": 0.098523,
+          "small_n": false
+        },
+        {
+          "bin": "9",
+          "n": 163,
+          "mean_xg": 0.098007,
+          "small_n": false
+        },
+        {
+          "bin": "10",
+          "n": 80,
+          "mean_xg": 0.09311,
+          "small_n": false
+        },
+        {
+          "bin": "11",
+          "n": 34,
+          "mean_xg": 0.05269,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "defender_attacker_gap_x",
@@ -3973,7 +5432,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4364,
+      "pearson_r_given_shot": -0.0204,
+      "spearman_rho_given_shot": -0.0081,
+      "bins_given_shot": [
+        {
+          "bin": "(-16.714000000000002, -5.756]",
+          "n": 437,
+          "mean_xg": 0.087337,
+          "small_n": false
+        },
+        {
+          "bin": "(-5.756, -3.989]",
+          "n": 436,
+          "mean_xg": 0.095811,
+          "small_n": false
+        },
+        {
+          "bin": "(-3.989, -2.665]",
+          "n": 436,
+          "mean_xg": 0.112306,
+          "small_n": false
+        },
+        {
+          "bin": "(-2.665, -1.303]",
+          "n": 437,
+          "mean_xg": 0.122672,
+          "small_n": false
+        },
+        {
+          "bin": "(-1.303, 0.201]",
+          "n": 436,
+          "mean_xg": 0.121295,
+          "small_n": false
+        },
+        {
+          "bin": "(0.201, 1.778]",
+          "n": 436,
+          "mean_xg": 0.120401,
+          "small_n": false
+        },
+        {
+          "bin": "(1.778, 3.035]",
+          "n": 437,
+          "mean_xg": 0.10751,
+          "small_n": false
+        },
+        {
+          "bin": "(3.035, 4.365]",
+          "n": 436,
+          "mean_xg": 0.098323,
+          "small_n": false
+        },
+        {
+          "bin": "(4.365, 6.046]",
+          "n": 436,
+          "mean_xg": 0.095245,
+          "small_n": false
+        },
+        {
+          "bin": "(6.046, 14.423]",
+          "n": 437,
+          "mean_xg": 0.08004,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "distance_to_defending_box",
@@ -4149,7 +5673,60 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": -0.0018,
+      "spearman_rho_given_shot": 0.0309,
+      "bins_given_shot": [
+        {
+          "bin": "(-0.001, 7.7]",
+          "n": 1312,
+          "mean_xg": 0.115797,
+          "small_n": false
+        },
+        {
+          "bin": "(7.7, 21.493]",
+          "n": 435,
+          "mean_xg": 0.087429,
+          "small_n": false
+        },
+        {
+          "bin": "(21.493, 52.8]",
+          "n": 438,
+          "mean_xg": 0.087492,
+          "small_n": false
+        },
+        {
+          "bin": "(52.8, 73.315]",
+          "n": 436,
+          "mean_xg": 0.094186,
+          "small_n": false
+        },
+        {
+          "bin": "(73.315, 81.99]",
+          "n": 436,
+          "mean_xg": 0.079381,
+          "small_n": false
+        },
+        {
+          "bin": "(81.99, 88.9]",
+          "n": 439,
+          "mean_xg": 0.092081,
+          "small_n": false
+        },
+        {
+          "bin": "(88.9, 93.4]",
+          "n": 441,
+          "mean_xg": 0.100979,
+          "small_n": false
+        },
+        {
+          "bin": "(93.4, 101.0]",
+          "n": 431,
+          "mean_xg": 0.152724,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "attacker_centroid_y",
@@ -4325,7 +5902,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4367,
+      "pearson_r_given_shot": 0.0075,
+      "spearman_rho_given_shot": -0.0027,
+      "bins_given_shot": [
+        {
+          "bin": "(8.481, 28.395]",
+          "n": 437,
+          "mean_xg": 0.087523,
+          "small_n": false
+        },
+        {
+          "bin": "(28.395, 32.759]",
+          "n": 437,
+          "mean_xg": 0.095017,
+          "small_n": false
+        },
+        {
+          "bin": "(32.759, 35.434]",
+          "n": 436,
+          "mean_xg": 0.107723,
+          "small_n": false
+        },
+        {
+          "bin": "(35.434, 37.816]",
+          "n": 437,
+          "mean_xg": 0.111414,
+          "small_n": false
+        },
+        {
+          "bin": "(37.816, 40.135]",
+          "n": 437,
+          "mean_xg": 0.103055,
+          "small_n": false
+        },
+        {
+          "bin": "(40.135, 42.428]",
+          "n": 436,
+          "mean_xg": 0.128235,
+          "small_n": false
+        },
+        {
+          "bin": "(42.428, 44.97]",
+          "n": 437,
+          "mean_xg": 0.101753,
+          "small_n": false
+        },
+        {
+          "bin": "(44.97, 47.879]",
+          "n": 436,
+          "mean_xg": 0.111016,
+          "small_n": false
+        },
+        {
+          "bin": "(47.879, 51.759]",
+          "n": 437,
+          "mean_xg": 0.109485,
+          "small_n": false
+        },
+        {
+          "bin": "(51.759, 68.312]",
+          "n": 437,
+          "mean_xg": 0.085227,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "defender_attacker_gap_y",
@@ -4395,7 +6037,72 @@
         "checked": false,
         "reason": "|rho|<0.05 and bin range 0.00314 < 0.00811 (=1.0x overall mean)"
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4364,
+      "pearson_r_given_shot": 0.0171,
+      "spearman_rho_given_shot": 0.0179,
+      "bins_given_shot": [
+        {
+          "bin": "(-18.986, -5.029]",
+          "n": 437,
+          "mean_xg": 0.101197,
+          "small_n": false
+        },
+        {
+          "bin": "(-5.029, -3.148]",
+          "n": 436,
+          "mean_xg": 0.102108,
+          "small_n": false
+        },
+        {
+          "bin": "(-3.148, -1.912]",
+          "n": 436,
+          "mean_xg": 0.103911,
+          "small_n": false
+        },
+        {
+          "bin": "(-1.912, -0.957]",
+          "n": 437,
+          "mean_xg": 0.10293,
+          "small_n": false
+        },
+        {
+          "bin": "(-0.957, -0.0317]",
+          "n": 436,
+          "mean_xg": 0.103641,
+          "small_n": false
+        },
+        {
+          "bin": "(-0.0317, 0.853]",
+          "n": 436,
+          "mean_xg": 0.100415,
+          "small_n": false
+        },
+        {
+          "bin": "(0.853, 1.858]",
+          "n": 437,
+          "mean_xg": 0.101398,
+          "small_n": false
+        },
+        {
+          "bin": "(1.858, 3.046]",
+          "n": 436,
+          "mean_xg": 0.110303,
+          "small_n": false
+        },
+        {
+          "bin": "(3.046, 4.664]",
+          "n": 436,
+          "mean_xg": 0.110215,
+          "small_n": false
+        },
+        {
+          "bin": "(4.664, 22.808]",
+          "n": 437,
+          "mean_xg": 0.104791,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "defender_centroid_y",
@@ -4571,7 +6278,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4365,
+      "pearson_r_given_shot": 0.0168,
+      "spearman_rho_given_shot": -0.002,
+      "bins_given_shot": [
+        {
+          "bin": "(11.450000000000001, 29.516]",
+          "n": 437,
+          "mean_xg": 0.091413,
+          "small_n": false
+        },
+        {
+          "bin": "(29.516, 33.275]",
+          "n": 436,
+          "mean_xg": 0.091338,
+          "small_n": false
+        },
+        {
+          "bin": "(33.275, 35.712]",
+          "n": 437,
+          "mean_xg": 0.114228,
+          "small_n": false
+        },
+        {
+          "bin": "(35.712, 37.96]",
+          "n": 436,
+          "mean_xg": 0.104336,
+          "small_n": false
+        },
+        {
+          "bin": "(37.96, 40.3]",
+          "n": 437,
+          "mean_xg": 0.108135,
+          "small_n": false
+        },
+        {
+          "bin": "(40.3, 42.477]",
+          "n": 436,
+          "mean_xg": 0.114431,
+          "small_n": false
+        },
+        {
+          "bin": "(42.477, 44.496]",
+          "n": 436,
+          "mean_xg": 0.101326,
+          "small_n": false
+        },
+        {
+          "bin": "(44.496, 46.979]",
+          "n": 437,
+          "mean_xg": 0.111814,
+          "small_n": false
+        },
+        {
+          "bin": "(46.979, 50.408]",
+          "n": 436,
+          "mean_xg": 0.104022,
+          "small_n": false
+        },
+        {
+          "bin": "(50.408, 69.164]",
+          "n": 437,
+          "mean_xg": 0.100529,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "defender_centroid_x",
@@ -4747,7 +6519,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4365,
+      "pearson_r_given_shot": -0.0194,
+      "spearman_rho_given_shot": 0.0031,
+      "bins_given_shot": [
+        {
+          "bin": "(3.641, 10.761]",
+          "n": 437,
+          "mean_xg": 0.137745,
+          "small_n": false
+        },
+        {
+          "bin": "(10.761, 14.604]",
+          "n": 436,
+          "mean_xg": 0.109449,
+          "small_n": false
+        },
+        {
+          "bin": "(14.604, 19.785]",
+          "n": 437,
+          "mean_xg": 0.088908,
+          "small_n": false
+        },
+        {
+          "bin": "(19.785, 35.675]",
+          "n": 436,
+          "mean_xg": 0.097538,
+          "small_n": false
+        },
+        {
+          "bin": "(35.675, 68.803]",
+          "n": 437,
+          "mean_xg": 0.095773,
+          "small_n": false
+        },
+        {
+          "bin": "(68.803, 92.402]",
+          "n": 436,
+          "mean_xg": 0.101244,
+          "small_n": false
+        },
+        {
+          "bin": "(92.402, 101.517]",
+          "n": 436,
+          "mean_xg": 0.082423,
+          "small_n": false
+        },
+        {
+          "bin": "(101.517, 105.6]",
+          "n": 437,
+          "mean_xg": 0.104502,
+          "small_n": false
+        },
+        {
+          "bin": "(105.6, 109.134]",
+          "n": 436,
+          "mean_xg": 0.10007,
+          "small_n": false
+        },
+        {
+          "bin": "(109.134, 116.806]",
+          "n": 437,
+          "mean_xg": 0.123864,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "attacker_centroid_x",
@@ -4923,7 +6760,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4367,
+      "pearson_r_given_shot": -0.0179,
+      "spearman_rho_given_shot": 0.007,
+      "bins_given_shot": [
+        {
+          "bin": "(2.436, 13.164]",
+          "n": 437,
+          "mean_xg": 0.142025,
+          "small_n": false
+        },
+        {
+          "bin": "(13.164, 17.458]",
+          "n": 437,
+          "mean_xg": 0.110308,
+          "small_n": false
+        },
+        {
+          "bin": "(17.458, 23.703]",
+          "n": 436,
+          "mean_xg": 0.087277,
+          "small_n": false
+        },
+        {
+          "bin": "(23.703, 37.517]",
+          "n": 437,
+          "mean_xg": 0.093138,
+          "small_n": false
+        },
+        {
+          "bin": "(37.517, 67.615]",
+          "n": 437,
+          "mean_xg": 0.094944,
+          "small_n": false
+        },
+        {
+          "bin": "(67.615, 89.131]",
+          "n": 436,
+          "mean_xg": 0.098125,
+          "small_n": false
+        },
+        {
+          "bin": "(89.131, 97.561]",
+          "n": 437,
+          "mean_xg": 0.092195,
+          "small_n": false
+        },
+        {
+          "bin": "(97.561, 102.669]",
+          "n": 436,
+          "mean_xg": 0.087402,
+          "small_n": false
+        },
+        {
+          "bin": "(102.669, 107.036]",
+          "n": 437,
+          "mean_xg": 0.111782,
+          "small_n": false
+        },
+        {
+          "bin": "(107.036, 116.526]",
+          "n": 437,
+          "mean_xg": 0.123083,
+          "small_n": false
+        }
+      ]
     },
     {
       "feature": "distance_to_defending_goal",
@@ -5099,7 +7001,72 @@
           }
         ]
       },
-      "unreliable_note": null
+      "unreliable_note": null,
+      "n_given_shot": 4368,
+      "pearson_r_given_shot": -0.0191,
+      "spearman_rho_given_shot": 0.0163,
+      "bins_given_shot": [
+        {
+          "bin": "(2.1830000000000003, 13.235]",
+          "n": 437,
+          "mean_xg": 0.161102,
+          "small_n": false
+        },
+        {
+          "bin": "(13.235, 21.345]",
+          "n": 437,
+          "mean_xg": 0.10269,
+          "small_n": false
+        },
+        {
+          "bin": "(21.345, 29.668]",
+          "n": 437,
+          "mean_xg": 0.09066,
+          "small_n": false
+        },
+        {
+          "bin": "(29.668, 45.186]",
+          "n": 436,
+          "mean_xg": 0.077007,
+          "small_n": false
+        },
+        {
+          "bin": "(45.186, 73.98]",
+          "n": 437,
+          "mean_xg": 0.09043,
+          "small_n": false
+        },
+        {
+          "bin": "(73.98, 92.82]",
+          "n": 437,
+          "mean_xg": 0.093304,
+          "small_n": false
+        },
+        {
+          "bin": "(92.82, 101.111]",
+          "n": 436,
+          "mean_xg": 0.081502,
+          "small_n": false
+        },
+        {
+          "bin": "(101.111, 107.729]",
+          "n": 437,
+          "mean_xg": 0.091243,
+          "small_n": false
+        },
+        {
+          "bin": "(107.729, 111.843]",
+          "n": 437,
+          "mean_xg": 0.10272,
+          "small_n": false
+        },
+        {
+          "bin": "(111.843, 122.281]",
+          "n": 437,
+          "mean_xg": 0.150285,
+          "small_n": false
+        }
+      ]
     }
   ]
 }
