@@ -95,16 +95,32 @@ direct stratified rate analysis, not via a linear model's coefficient) --
 it means a simple product term added to an already class-weighted linear
 model does not translate that finding into a better-ranking baseline here.
 
-## 5. Held-out test readout (v2/v3 only, single readout, NOT used for selection)
+## 5. Held-out test readout (v1/v2/v3, single readout, NOT used for selection)
 
-| Variant | PR-AUC | ROC-AUC | Log loss | Brier |
-|---|---|---|---|---|
-| v2_weighted | 0.3594 | 0.8210 | 0.5193 | 0.1761 |
-| v3_weighted_interactions | 0.3572 | 0.8206 | 0.5189 | 0.1759 |
+| Variant | PR-AUC | ROC-AUC | Log loss | Brier | Calib. slope | Calib. intercept | ECE |
+|---|---|---|---|---|---|---|---|
+| v1_unweighted | 0.3725 | 0.8193 | 0.2047 | 0.0555 | 1.002 | -0.122 | 0.0107 |
+| v2_weighted | 0.3594 | 0.8210 | 0.5193 | 0.1761 | 1.029 | -2.587 | 0.2940 |
+| v3_weighted_interactions | 0.3572 | 0.8206 | 0.5189 | 0.1759 | 1.023 | -2.583 | 0.2934 |
 
 10,660 rows / 23 matches, evaluated exactly once each, after all
 cross-validation and variant comparison above was finalised. Consistent with
-the CV ranking: v2 slightly ahead of v3 on the primary metric.
+the CV ranking: v1 leads on PR-AUC and by a wide margin on calibration; v2
+slightly ahead of v3.
+
+**v1 CV-to-test check (added after prompt 37 -- follow-up to the overfitting
+question raised in discussion):** v1's PR-AUC went from 0.3521 (CV mean) to
+0.3725 (held-out test) -- an *increase*, not a drop. This is the same
+direction v2 (0.3376 CV -> 0.3594 test) and v3 (0.3331 CV -> 0.3572 test)
+both showed. Calibration on the held-out set stays excellent (slope 1.002,
+intercept -0.122, ECE 0.0107 -- essentially unchanged from CV's ECE of
+0.0036, both far better than v2/v3's 0.29). No evidence of overfitting: the
+model was not memorising training-fold-specific patterns, it generalises to
+the 23 held-out matches at least as well as it performed in cross-validation.
+Combined with the earlier evidence (fold std of only +/-0.0176 on PR-AUC
+across 5 match-grouped folds, L2 regularization by default, ~825 training
+rows per effective parameter), this closes out the generalisation question
+for v1 -- the CV result was real, not a fold-specific fluke.
 
 ## 6. Coefficient-vs-shape sanity check (v2/v3 vs `active_numerical_target_atlas.json`)
 

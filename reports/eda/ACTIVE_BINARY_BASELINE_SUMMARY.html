@@ -358,14 +358,24 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   &mdash; it means a simple product term added to an already class-weighted linear model doesn't translate
   that finding into a better-ranking baseline here.</p>
 
-<h2>5. Held-out test readout (v2/v3 only, single readout, not used for selection)</h2>
+<h2>5. Held-out test readout (v1/v2/v3, single readout, not used for selection)</h2>
 <table>
-<tr><th>Variant</th><th>PR-AUC</th><th>ROC-AUC</th><th>Log loss</th><th>Brier</th></tr>
-<tr><td>v2_weighted</td><td>0.3594</td><td>0.8210</td><td>0.5193</td><td>0.1761</td></tr>
-<tr><td>v3_weighted_interactions</td><td>0.3572</td><td>0.8206</td><td>0.5189</td><td>0.1759</td></tr>
+<tr><th>Variant</th><th>PR-AUC</th><th>ROC-AUC</th><th>Log loss</th><th>Brier</th><th>Calib. slope</th><th>Calib. intercept</th><th>ECE</th></tr>
+<tr><td>v1_unweighted</td><td><strong>0.3725</strong></td><td>0.8193</td><td><strong>0.2047</strong></td><td><strong>0.0555</strong></td><td>1.002</td><td><strong>-0.122</strong></td><td><strong>0.0107</strong></td></tr>
+<tr><td>v2_weighted</td><td>0.3594</td><td>0.8210</td><td>0.5193</td><td>0.1761</td><td>1.029</td><td>-2.587</td><td>0.2940</td></tr>
+<tr><td>v3_weighted_interactions</td><td>0.3572</td><td>0.8206</td><td>0.5189</td><td>0.1759</td><td>1.023</td><td>-2.583</td><td>0.2934</td></tr>
 </table>
 <p>10,660 rows / 23 matches, evaluated exactly once each, after all cross-validation and variant
-  comparison above was finalised. Consistent with the CV ranking: v2 slightly ahead of v3 on the primary metric.</p>
+  comparison above was finalised. Consistent with the CV ranking: v1 leads on PR-AUC and by a wide
+  margin on calibration; v2 slightly ahead of v3.</p>
+<p><strong>v1 CV-to-test check</strong> (added as a follow-up to the overfitting question raised in
+  discussion): v1's PR-AUC went from 0.3521 (CV mean) to 0.3725 (held-out test) &mdash; an
+  <em>increase</em>, not a drop. Same direction as v2 (0.3376&nbsp;&rarr;&nbsp;0.3594) and v3
+  (0.3331&nbsp;&rarr;&nbsp;0.3572). Calibration stays excellent on the held-out set (ECE 0.0107,
+  essentially unchanged from CV's 0.0036, both far better than v2/v3's ~0.29). No evidence of
+  overfitting &mdash; combined with the fold-stability evidence (std &plusmn;0.0176 on PR-AUC
+  across 5 match-grouped folds) and the parameter-to-row ratio (~825 rows per effective
+  coefficient), this closes out the generalisation question for v1.</p>
 
 <h2>6. Coefficient-vs-shape sanity check</h2>
 <p>Checked every continuous/discrete feature with a documented shape in
