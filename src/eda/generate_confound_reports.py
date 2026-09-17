@@ -26,7 +26,7 @@ VERDICT_LABEL = {
 }
 
 
-def _marginal_chart(table: list[dict], col_name: str) -> str:
+def _marginal_chart(table: list[dict], col_name: str, is_boolean: bool = False) -> str:
     max_rate = max(b["rate"] for b in table) * 1.15 or 1.0
     bars = "".join(
         f"""
@@ -38,9 +38,10 @@ def _marginal_chart(table: list[dict], col_name: str) -> str:
 </div>"""
         for b in table
     )
+    grouping = "True/False value" if is_boolean else "quartile"
     return f"""
 <div class="qchart-card">
-  <h4>Marginal shot rate by {esc(col_name)} quartile</h4>
+  <h4>Marginal shot rate by {esc(col_name)} {grouping}</h4>
   <p class="qc-note">Unconditioned -- the raw reversal being tested.</p>
   <div class="qbar-row">{bars}</div>
 </div>"""
@@ -79,16 +80,45 @@ def _stratified_chart(strata: list[dict], confound_col: str) -> str:
 </div>"""
 
 
+def _extra_notes(test: dict) -> str:
+    notes = []
+    if "cluster_5_connection" in test:
+        notes.append(("Cluster 5 connection (not decided here)", test["cluster_5_connection"]))
+    if "confound_selection_note" in test:
+        notes.append(("Confound selection", test["confound_selection_note"]))
+    if "reliability_note" in test:
+        notes.append(("Reliability caveat", test["reliability_note"]))
+    if not notes:
+        return ""
+    cards = "".join(
+        f"""
+<div class="finding flag" style="margin:12px 0;">
+<span class="tag">{esc(title)}</span>
+<p>{esc(body)}</p>
+</div>"""
+        for title, body in notes
+    )
+    return cards
+
+
 def _test_section(test: dict) -> str:
     v = test["verdict"]
     verdict_class = VERDICT_CLASS.get(v["verdict"], "v-partially")
     verdict_label = VERDICT_LABEL.get(v["verdict"], v["verdict"])
+    confound_type_note = (
+        f" ({esc(test['confound_type'])})" if "confound_type" in test else ""
+    )
+    marginal_type_note = (
+        f" ({esc(test['marginal_type'])})" if "marginal_type" in test else ""
+    )
 
     return f"""
 <div class="test-block">
   <h2 class="test-title">{esc(test['title'])}</h2>
-  <p class="test-subnote"><code>{esc(test['marginal_column'])}</code> vs proposed confound <code>{esc(test['confound_column'])}</code>
+  <p class="test-subnote"><code>{esc(test['marginal_column'])}</code>{marginal_type_note} vs proposed confound <code>{esc(test['confound_column'])}</code>{confound_type_note}
   &mdash; proposed reasoning: &ldquo;{esc(test['proposed_confound_reason'])}&rdquo;</p>
+
+  {_extra_notes(test)}
 
   <div class="verdict-banner {verdict_class}">
     <b>Verdict: {esc(v['verdict'].upper())}</b> &mdash; {esc(verdict_label)}.
@@ -96,7 +126,7 @@ def _test_section(test: dict) -> str:
     ({v['n_strata_reversal_survives']}/{v['n_strata_total']} strata show the reversal surviving.)
   </div>
 
-  {_marginal_chart(test['marginal_table'], test['marginal_column'])}
+  {_marginal_chart(test['marginal_table'], test['marginal_column'], is_boolean="marginal_type" in test)}
   {_stratified_chart(test['stratified_table'], test['confound_column'])}
 </div>"""
 
@@ -125,9 +155,12 @@ marking or screening quality at the anchor frame</li>
         title="Reversal (Simpson's-Paradox-Style) Checks",
         dek=(
             "A marginal correlation can reverse direction once you condition on a third variable -- a classic "
-            "Simpson's-paradox pattern. Two marginal reversals in the passive dataset were previously asserted as "
-            "“probably a selection effect” without being tested. This report actually stratifies and checks "
-            "whether the reversal survives."
+            "Simpson's-paradox pattern. The first 2 tests below check marginal reversals in the passive dataset "
+            "previously asserted as “probably a selection effect” without being tested. The 5 tests added after "
+            "them (prompt 24 Part A) extend the same method to the threat-score U-shapes, both other lane-screening "
+            "options, and defenders_within_10m -- the last of those carries an explicit reliability caveat, see its "
+            "card below. The final 3 (prompt 29) close LEAKAGE_AUDIT.json's has_option_2/3 follow-up item, adapting "
+            "the method for a boolean marginal (split True/False directly, not quartiled)."
         ),
         stats=[
             (f"{data['n_rows']:,}", "rows (passive)"),

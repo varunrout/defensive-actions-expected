@@ -351,15 +351,16 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 <div class="masthead"><div class="masthead-inner">
   <p class="eyebrow">CONFOUND ANALYSIS -- XG</p>
   <h1 class="title">Passive Dataset Confound (Reversal) Testing (xG)</h1>
-  <p class="dek">The continuous-target counterpart to CONFOUND_ANALYSIS.html -- same two reversal tests, same quartile-stratification method, against mean xG instead of shot-rate percentage.</p>
-  <div class="statbar"><div class="stat"><b>1,593,181</b><span>rows (passive)</span></div><div class="stat"><b>2</b><span>reversals tested</span></div><div class="stat"><b>1</b><span>diverge from binary-target verdict</span></div></div>
+  <p class="dek">The continuous-target counterpart to CONFOUND_ANALYSIS.html -- same two reversal tests, same quartile-stratification method, against mean xG instead of shot-rate percentage. Each test now also carries a shot-conditional version (target_future_shot_10s==1 only) -- the real test of whether the reversal is about chance quality, not just chance occurrence.</p>
+  <div class="statbar"><div class="stat"><b>1,593,181</b><span>rows (passive)</span></div><div class="stat"><b>5</b><span>reversals tested</span></div><div class="stat"><b>1</b><span>diverge from binary-target verdict</span></div></div>
 </div></div>
 <div class="wrap">
 <div class="article">
 
 <div class="test-block">
   <h2 class="test-title">Marking tightness reversal (xG)</h2>
-  <p class="test-subnote">Proposed confound: <code>zone_defensive_value</code> -- tight marking only happens because the zone&#x27;s already dangerous</p>
+  <p class="test-subnote">Marginal: <code>marking_tightness</code>
+  vs proposed confound: <code>zone_defensive_value</code> -- tight marking only happens because the zone&#x27;s already dangerous</p>
   
 <div class="finding flag" style="margin:16px 0;">
 <span class="tag">diverges from the binary-target audit</span>
@@ -368,7 +369,7 @@ stratification, same features -- the two targets genuinely disagree here. Don't 
 conclusion carries over.</p>
 </div>
   <div class="verdict-banner v-partially">
-  <b>Verdict: PARTIALLY</b> &mdash; The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.
+  <b>Unconditional verdict: PARTIALLY</b> &mdash; The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.
   (2/4 strata)
   </div>
   <div class="qchart-card">
@@ -517,13 +518,176 @@ conclusion carries over.</p>
   <span class="qbar-n">n=82,061</span>
 </div></div>
 </div></div>
+  
+<h3 style="margin-top:24px;">Given a shot happened (n=95,048)</h3>
+<p class="test-subnote">Same marginal-quartile + stratified-by-confound structure, restricted to
+target_future_shot_10s==1 -- the real test of whether marking_tightness says anything about chance
+QUALITY, not just chance occurrence.</p>
+
+<div class="finding" style="margin:16px 0;">
+<span class="tag">occurrence, not quality</span>
+<p>The unconditional reversal (which reflects whether a shot happens) is essentially <b>flat</b> once conditioned
+on a shot happening (range 0.001119, ~1.1% of the mean) -- this feature relates to
+whether a chance occurs, not to how good the chance is once it does. A real, useful finding on its own:
+occurrence and quality are separate things here.</p>
+</div>
+<div class="verdict-banner v-partially">
+<b>Given-shot verdict: PARTIALLY</b> &mdash; The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.
+(1/4 strata)
+</div>
+<div class="qchart-card">
+  <h4>Marginal mean xG by marking_tightness quartile, shot-only subset</h4>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">0.10087</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q1 tightest</span>
+  <span class="qbar-n">n=23,752</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10040</span>
+  <div class="qbar-fill" style="height:99.53405373252701%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=23,752</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.09975</span>
+  <div class="qbar-fill" style="height:98.89065133339943%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=23,751</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10043</span>
+  <div class="qbar-fill" style="height:99.56577773371666%"></div>
+  <span class="qbar-label">Q4 loosest</span>
+  <span class="qbar-n">n=23,752</span>
+</div></div>
+</div>
+<div class="stratum-grid">
+<div class="stratum-card">
+  <h5>Z1 calmest</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.004688</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.10773</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q1 tightest</span>
+  <span class="qbar-n">n=7,338</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10705</span>
+  <div class="qbar-fill" style="height:99.37433859978093%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=6,038</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10517</span>
+  <div class="qbar-fill" style="height:97.63102686445241%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=5,312</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10304</span>
+  <div class="qbar-fill" style="height:95.6482186287433%"></div>
+  <span class="qbar-label">Q4 loosest</span>
+  <span class="qbar-n">n=5,059</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>Z2</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.004439</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.09718</span>
+  <div class="qbar-fill" style="height:95.63172241411547%"></div>
+  <span class="qbar-label">Q1 tightest</span>
+  <span class="qbar-n">n=3,508</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10007</span>
+  <div class="qbar-fill" style="height:98.47371062498155%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=5,482</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10047</span>
+  <div class="qbar-fill" style="height:98.86930593688189%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=6,875</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10162</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q4 loosest</span>
+  <span class="qbar-n">n=7,882</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>Z3</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.004646</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.08896</span>
+  <div class="qbar-fill" style="height:95.03669597359172%"></div>
+  <span class="qbar-label">Q1 tightest</span>
+  <span class="qbar-n">n=4,146</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.09138</span>
+  <div class="qbar-fill" style="height:97.62304101189014%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=6,220</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.09156</span>
+  <div class="qbar-fill" style="height:97.81853921181109%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=7,052</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.09361</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q4 loosest</span>
+  <span class="qbar-n">n=6,336</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>Z4 most dangerous</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.002816</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.10224</span>
+  <div class="qbar-fill" style="height:97.31401812228737%"></div>
+  <span class="qbar-label">Q1 tightest</span>
+  <span class="qbar-n">n=8,760</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10335</span>
+  <div class="qbar-fill" style="height:98.37146881900556%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=6,012</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10506</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=4,512</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10506</span>
+  <div class="qbar-fill" style="height:99.99428919515722%"></div>
+  <span class="qbar-label">Q4 loosest</span>
+  <span class="qbar-n">n=4,475</span>
+</div></div>
+</div></div>
 </div>
 <div class="test-block">
   <h2 class="test-title">Lane screening reversal (xG)</h2>
-  <p class="test-subnote">Proposed confound: <code>top_option_1_threat_score</code> -- a threatening top option only exists when danger is already high</p>
+  <p class="test-subnote">Marginal: <code>lane_screening_score_option_1</code>
+  vs proposed confound: <code>top_option_1_threat_score</code> -- a threatening top option only exists when danger is already high</p>
   
   <div class="verdict-banner v-no">
-  <b>Verdict: NO</b> &mdash; The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+  <b>Unconditional verdict: NO</b> &mdash; The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
   (4/4 strata)
   </div>
   <div class="qchart-card">
@@ -670,6 +834,754 @@ conclusion carries over.</p>
   <div class="qbar-fill" style="height:100.0%"></div>
   <span class="qbar-label">Q4 most screened</span>
   <span class="qbar-n">n=95,729</span>
+</div></div>
+</div></div>
+  
+<h3 style="margin-top:24px;">Given a shot happened (n=95,048)</h3>
+<p class="test-subnote">Same marginal-quartile + stratified-by-confound structure, restricted to
+target_future_shot_10s==1 -- the real test of whether lane_screening_score_option_1 says anything about chance
+QUALITY, not just chance occurrence.</p>
+
+<div class="finding" style="margin:16px 0;">
+<span class="tag">holds for quality too</span>
+<p>The marginal pattern survives conditioning on a shot happening (range 0.017851) -- this feature relates to
+chance quality, not just chance occurrence. Same verdict as unconditional: <b>no</b>.</p>
+</div>
+<div class="verdict-banner v-no">
+<b>Given-shot verdict: NO</b> &mdash; The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+(4/4 strata)
+</div>
+<div class="qchart-card">
+  <h4>Marginal mean xG by lane_screening_score_option_1 quartile, shot-only subset</h4>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">0.09264</span>
+  <div class="qbar-fill" style="height:83.84407920935452%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=23,752</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.09622</span>
+  <div class="qbar-fill" style="height:87.08413278789415%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=23,752</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10210</span>
+  <div class="qbar-fill" style="height:92.40306990551352%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=23,751</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.11049</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=23,752</span>
+</div></div>
+</div>
+<div class="stratum-grid">
+<div class="stratum-card">
+  <h5>T1 low</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.017089</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.10164</span>
+  <div class="qbar-fill" style="height:85.60611165392002%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=4,889</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10349</span>
+  <div class="qbar-fill" style="height:87.17192816953607%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=5,675</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.11041</span>
+  <div class="qbar-fill" style="height:93.00141504666286%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=6,271</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.11872</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=6,922</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T2</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.013815</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.08407</span>
+  <div class="qbar-fill" style="height:85.88693200392285%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=6,811</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.08728</span>
+  <div class="qbar-fill" style="height:89.15903890160183%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=6,385</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.08894</span>
+  <div class="qbar-fill" style="height:90.86098398169335%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=5,633</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.09789</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=4,926</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T3</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.016908</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.09440</span>
+  <div class="qbar-fill" style="height:84.81012658227849%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=6,939</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.09927</span>
+  <div class="qbar-fill" style="height:89.1789670382981%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=5,754</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10514</span>
+  <div class="qbar-fill" style="height:94.45876867515341%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=5,569</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.11131</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=5,487</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T4 high</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.017523</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.09306</span>
+  <div class="qbar-fill" style="height:84.15470032914962%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=5,113</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.09594</span>
+  <div class="qbar-fill" style="height:86.75263138857741%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=5,938</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10290</span>
+  <div class="qbar-fill" style="height:93.04354902882773%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=6,278</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.11059</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=6,417</span>
+</div></div>
+</div></div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">has_option_2 shot-rate gap vs top_option_1_threat_score (xG)</h2>
+  <p class="test-subnote">Marginal: <code>has_option_2</code> (boolean (split True/False directly, not quartiled))
+  vs proposed confound: <code>top_option_1_threat_score</code> -- a defender only &#x27;has&#x27; a second ranked option worth recording when the primary threat is itself significant (more players committed forward = more danger already) -- the option-count effect might just be a proxy for how threatening the possession already is, not a defensive-shape signal in its own right</p>
+  
+  <div class="verdict-banner v-no">
+  <b>Unconditional verdict: NO</b> &mdash; The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+  (4/4 strata)
+  </div>
+  <div class="qchart-card">
+    <h4>Marginal mean xG by has_option_2 True/False value</h4>
+    <p class="qc-note">Unconditioned.</p>
+    <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">0.01684</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=2,181</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00598</span>
+  <div class="qbar-fill" style="height:35.48061509232322%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=1,591,000</span>
+</div></div>
+  </div>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>T1 low</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.003717</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.01407</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=1,361</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.01035</span>
+  <div class="qbar-fill" style="height:73.57645553422904%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=396,869</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T2</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.005715</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.00967</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=224</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00396</span>
+  <div class="qbar-fill" style="height:40.92412652470539%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=398,002</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T3</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.000965</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.00456</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=129</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00360</span>
+  <div class="qbar-fill" style="height:78.86089813800658%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=398,091</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T4 high</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.019972</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.02598</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=188</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00601</span>
+  <div class="qbar-fill" style="height:23.128440013856277%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=398,038</span>
+</div></div>
+</div></div>
+  
+<h3 style="margin-top:24px;">Given a shot happened (n=95,048)</h3>
+<p class="test-subnote">Same marginal-quartile + stratified-by-confound structure, restricted to
+target_future_shot_10s==1 -- the real test of whether has_option_2 says anything about chance
+QUALITY, not just chance occurrence.</p>
+
+<div class="finding flag" style="margin:16px 0;">
+<span class="tag">unconditional vs shot-conditional verdict differs</span>
+<p>Unconditional verdict: <b>no</b>. Given-shot verdict: <b>yes</b>. The reversal's relationship to
+the confound changes once restricted to rows where a shot happened.</p>
+</div>
+<div class="verdict-banner v-yes">
+<b>Given-shot verdict: YES</b> &mdash; The reversal disappears within every stratum -- consistent with the proposed confound explaining it away.
+(0/4 strata)
+</div>
+<div class="qchart-card">
+  <h4>Marginal mean xG by has_option_2 True/False value, shot-only subset</h4>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">0.11131</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=330</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10039</span>
+  <div class="qbar-fill" style="height:90.18362470129544%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=94,718</span>
+</div></div>
+</div>
+<div class="stratum-grid">
+<div class="stratum-card">
+  <h5>T1 low</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.004665</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.10475</span>
+  <div class="qbar-fill" style="height:95.73626052225097%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=181</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10941</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=23,576</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T2</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.026612</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.06236</span>
+  <div class="qbar-fill" style="height:70.09081100521489%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=20</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.08898</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=23,735</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T3</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.056276</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.04582</span>
+  <div class="qbar-fill" style="height:44.87824945638333%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=37</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10209</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=23,712</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T4 high</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.005355</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.09577</span>
+  <div class="qbar-fill" style="height:94.70478299993079%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=51</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10113</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=23,695</span>
+</div></div>
+</div></div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">has_option_3 shot-rate gap vs top_option_1_threat_score (xG)</h2>
+  <p class="test-subnote">Marginal: <code>has_option_3</code> (boolean (split True/False directly, not quartiled))
+  vs proposed confound: <code>top_option_1_threat_score</code> -- same hypothesis as has_option_2, extended to the third option</p>
+  
+  <div class="verdict-banner v-no">
+  <b>Unconditional verdict: NO</b> &mdash; The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+  (4/4 strata)
+  </div>
+  <div class="qchart-card">
+    <h4>Marginal mean xG by has_option_3 True/False value</h4>
+    <p class="qc-note">Unconditioned.</p>
+    <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">0.02431</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=11,398</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00586</span>
+  <div class="qbar-fill" style="height:24.10515921994569%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=1,581,783</span>
+</div></div>
+  </div>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>T1 low</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.015285</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.02539</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=6,770</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.01010</span>
+  <div class="qbar-fill" style="height:39.794391050890184%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=391,460</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T2</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.016886</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.02079</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=1,430</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00390</span>
+  <div class="qbar-fill" style="height:18.766536777793814%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=396,796</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T3</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.012664</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.01623</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=1,125</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00357</span>
+  <div class="qbar-fill" style="height:21.966849467003513%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=397,095</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T4 high</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.020398</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.02633</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=1,794</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00593</span>
+  <div class="qbar-fill" style="height:22.51471984805318%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=396,432</span>
+</div></div>
+</div></div>
+  
+<h3 style="margin-top:24px;">Given a shot happened (n=95,048)</h3>
+<p class="test-subnote">Same marginal-quartile + stratified-by-confound structure, restricted to
+target_future_shot_10s==1 -- the real test of whether has_option_3 says anything about chance
+QUALITY, not just chance occurrence.</p>
+
+<div class="finding" style="margin:16px 0;">
+<span class="tag">holds for quality too</span>
+<p>The marginal pattern survives conditioning on a shot happening (range 0.042666) -- this feature relates to
+chance quality, not just chance occurrence. Same verdict as unconditional: <b>no</b>.</p>
+</div>
+<div class="verdict-banner v-no">
+<b>Given-shot verdict: NO</b> &mdash; The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+(4/4 strata)
+</div>
+<div class="qchart-card">
+  <h4>Marginal mean xG by has_option_3 True/False value, shot-only subset</h4>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">0.14222</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=1,948</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.09955</span>
+  <div class="qbar-fill" style="height:69.99915621308432%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=93,100</span>
+</div></div>
+</div>
+<div class="stratum-grid">
+<div class="stratum-card">
+  <h5>T1 low</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.038071</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.14569</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=1,094</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10762</span>
+  <div class="qbar-fill" style="height:73.86920532074073%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=22,663</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T2</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.004573</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.09349</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=196</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.08891</span>
+  <div class="qbar-fill" style="height:95.10846311826116%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=23,559</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T3</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.026471</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.12811</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=329</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10164</span>
+  <div class="qbar-fill" style="height:79.33728826789476%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=23,420</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T4 high</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.063639</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.16398</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=288</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10035</span>
+  <div class="qbar-fill" style="height:61.192182211787674%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=23,458</span>
+</div></div>
+</div></div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">has_option_2 shot-rate gap vs defender_x (xG)</h2>
+  <p class="test-subnote">Marginal: <code>has_option_2</code> (boolean (split True/False directly, not quartiled))
+  vs proposed confound: <code>defender_x</code> -- fewer options might just mean the attack is closer to goal, not that the defending team&#x27;s structure is doing anything. Confound feature is defender_x, not zone_defensive_value: zone_defensive_value is dropped in feature_config.py (REDUNDANCY_DROPPED_PASSIVE, r=-1.0 vs distance_to_defending_goal), and distance_to_defending_goal is ALSO dropped (Cluster 4, defender-position) -- defender_x is the actually-kept, model-facing sibling, same correction prompt 25 already made for this exact substitution.</p>
+  
+  <div class="verdict-banner v-no">
+  <b>Unconditional verdict: NO</b> &mdash; The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+  (4/4 strata)
+  </div>
+  <div class="qchart-card">
+    <h4>Marginal mean xG by has_option_2 True/False value</h4>
+    <p class="qc-note">Unconditioned.</p>
+    <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">0.01684</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=2,181</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00598</span>
+  <div class="qbar-fill" style="height:35.48061509232322%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=1,591,000</span>
+</div></div>
+  </div>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>D1</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.006043</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.01623</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=903</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.01019</span>
+  <div class="qbar-fill" style="height:62.77565603055317%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=397,393</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>D2</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.020249</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.02307</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=233</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00282</span>
+  <div class="qbar-fill" style="height:12.239414033719067%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=398,062</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>D3</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.015823</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.01826</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=166</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00243</span>
+  <div class="qbar-fill" style="height:13.331872706359205%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=398,129</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>D4</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.007082</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.01555</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=879</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.00847</span>
+  <div class="qbar-fill" style="height:54.453662614959164%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=397,416</span>
+</div></div>
+</div></div>
+  
+<h3 style="margin-top:24px;">Given a shot happened (n=95,048)</h3>
+<p class="test-subnote">Same marginal-quartile + stratified-by-confound structure, restricted to
+target_future_shot_10s==1 -- the real test of whether has_option_2 says anything about chance
+QUALITY, not just chance occurrence.</p>
+
+<div class="finding flag" style="margin:16px 0;">
+<span class="tag">unconditional vs shot-conditional verdict differs</span>
+<p>Unconditional verdict: <b>no</b>. Given-shot verdict: <b>partially</b>. The reversal's relationship to
+the confound changes once restricted to rows where a shot happened.</p>
+</div>
+<div class="verdict-banner v-partially">
+<b>Given-shot verdict: PARTIALLY</b> &mdash; The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.
+(3/4 strata)
+</div>
+<div class="qchart-card">
+  <h4>Marginal mean xG by has_option_2 True/False value, shot-only subset</h4>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">0.11131</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=330</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10039</span>
+  <div class="qbar-fill" style="height:90.18362470129544%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=94,718</span>
+</div></div>
+</div>
+<div class="stratum-grid">
+<div class="stratum-card">
+  <h5>D1</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.030580</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.13339</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=69</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10281</span>
+  <div class="qbar-fill" style="height:77.0752588216773%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=23,693</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>D2</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.044070</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.13629</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=65</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.09222</span>
+  <div class="qbar-fill" style="height:67.66406433435078%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=23,697</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>D3</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>-0.005513</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.10577</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=82</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10025</span>
+  <div class="qbar-fill" style="height:94.78759915663676%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=23,681</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>D4</h5>
+  <p class="stratum-delta">first&rarr;last mean-xG delta: <b>+0.018572</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">0.08770</span>
+  <div class="qbar-fill" style="height:82.52441801381336%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=114</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">0.10627</span>
+  <div class="qbar-fill" style="height:100.0%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=23,647</span>
 </div></div>
 </div></div>
 </div>

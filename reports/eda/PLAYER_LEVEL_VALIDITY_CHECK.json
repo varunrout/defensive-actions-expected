@@ -1,0 +1,337 @@
+{
+  "dataset": "active",
+  "scope_limitation": "This check is active-dataset only. passive_defense.parquet has no player identity column -- it's one row per anonymous defender-slot per on-ball event, not per identified player -- so player-level ICC and train/test player overlap cannot be computed on the passive side. This is a real scope limitation of the data, not an oversight: there is no workaround that recovers player identity from an anonymous defender slot.",
+  "target_independence_note": "Row concentration, per-feature ICC/Cramer's V against player_id, and train/test player overlap never reference target_future_shot_10s or target_future_xg_10s -- these numbers are identical whichever target a downstream model uses. Mirrored unchanged into reports/eda_xg/, not recomputed.",
+  "row_concentration": {
+    "n_rows": 56068,
+    "n_distinct_players": 1012,
+    "top_10_players_row_share": 0.0483,
+    "top_25_players_row_share": 0.1042,
+    "top_50_players_row_share": 0.182,
+    "gini_coefficient": 0.4638,
+    "max_rows_single_player": 344,
+    "median_rows_per_player": 43.0,
+    "lorenz_curve_by_player_rank": [
+      {
+        "pct_of_players": 10,
+        "n_players": 101,
+        "cumulative_row_share": 0.3058
+      },
+      {
+        "pct_of_players": 25,
+        "n_players": 253,
+        "cumulative_row_share": 0.5602
+      },
+      {
+        "pct_of_players": 50,
+        "n_players": 506,
+        "cumulative_row_share": 0.8265
+      },
+      {
+        "pct_of_players": 75,
+        "n_players": 759,
+        "cumulative_row_share": 0.9572
+      },
+      {
+        "pct_of_players": 100,
+        "n_players": 1012,
+        "cumulative_row_share": 1.0
+      }
+    ]
+  },
+  "icc_threshold": 0.3,
+  "icc_methodology": "Variance-ratio (eta^2, src.eda.correlation.correlation_ratio squared) for continuous/discrete/boolean features (28 of 34) -- the standard one-way ICC proxy, between-player variance / total variance, treating player_id as the grouping factor. Cramer's V (bias-corrected, src.eda.correlation.cramers_v) for the 6 genuinely categorical features, since variance-ratio has no natural definition for a non-numeric feature -- same 0-1 scale and the same 0.3 threshold, but a different statistic (chi-square association, not a variance decomposition); each row states which method produced its value.",
+  "feature_icc_ranking": [
+    {
+      "feature": "position",
+      "feature_type": "categorical",
+      "method": "cramers_v (player_id vs feature, bias-corrected)",
+      "value": 0.7714,
+      "rank": 1,
+      "player_identity_flavoured": true
+    },
+    {
+      "feature": "period",
+      "feature_type": "categorical",
+      "method": "cramers_v (player_id vs feature, bias-corrected)",
+      "value": 0.2754,
+      "rank": 2,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "phase_label",
+      "feature_type": "categorical",
+      "method": "cramers_v (player_id vs feature, bias-corrected)",
+      "value": 0.1875,
+      "rank": 3,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "event_type",
+      "feature_type": "categorical",
+      "method": "cramers_v (player_id vs feature, bias-corrected)",
+      "value": 0.1668,
+      "rank": 4,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "match_time_seconds",
+      "feature_type": "continuous",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.1559,
+      "rank": 5,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "attacking_goal_centrality",
+      "feature_type": "continuous",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.1461,
+      "rank": 6,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "defender_attacker_gap_x",
+      "feature_type": "continuous",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.1423,
+      "rank": 7,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "phase_label_prev_event",
+      "feature_type": "categorical",
+      "method": "cramers_v (player_id vs feature, bias-corrected)",
+      "value": 0.1415,
+      "rank": 8,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "visible_attacker_count",
+      "feature_type": "discrete",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.1116,
+      "rank": 9,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "play_pattern",
+      "feature_type": "categorical",
+      "method": "cramers_v (player_id vs feature, bias-corrected)",
+      "value": 0.1105,
+      "rank": 10,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "is_in_attacking_box",
+      "feature_type": "boolean",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.1079,
+      "rank": 11,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "angle_to_attacking_goal",
+      "feature_type": "continuous",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0996,
+      "rank": 12,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "visible_defender_count",
+      "feature_type": "discrete",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0947,
+      "rank": 13,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "has_previous_event",
+      "feature_type": "boolean",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0884,
+      "rank": 14,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "distance_to_attacking_box",
+      "feature_type": "continuous",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0853,
+      "rank": 15,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "defenders_within_10m",
+      "feature_type": "discrete",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0828,
+      "rank": 16,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "is_in_defending_box",
+      "feature_type": "boolean",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0816,
+      "rank": 17,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "attacker_defender_ratio",
+      "feature_type": "continuous",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0743,
+      "rank": 18,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "attacker_spread",
+      "feature_type": "continuous",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0733,
+      "rank": 19,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "defenders_between_ball_and_attacking_goal",
+      "feature_type": "discrete",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0693,
+      "rank": 20,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "action_retained_defensive_team_control",
+      "feature_type": "boolean",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0606,
+      "rank": 21,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "attackers_within_10m",
+      "feature_type": "discrete",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0602,
+      "rank": 22,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "attackers_within_5m",
+      "feature_type": "discrete",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0535,
+      "rank": 23,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "defender_spread",
+      "feature_type": "continuous",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0523,
+      "rank": 24,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "has_visible_attacker",
+      "feature_type": "boolean",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0504,
+      "rank": 25,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "action_was_under_opponent_possession",
+      "feature_type": "boolean",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0474,
+      "rank": 26,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "possession_elapsed_seconds",
+      "feature_type": "continuous",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0445,
+      "rank": 27,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "defenders_within_5m",
+      "feature_type": "discrete",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0418,
+      "rank": 28,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "nearest_defender_distance",
+      "feature_type": "continuous",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0406,
+      "rank": 29,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "defender_attacker_gap_y",
+      "feature_type": "continuous",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0398,
+      "rank": 30,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "phase_changed_since_prev_event",
+      "feature_type": "boolean",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0392,
+      "rank": 31,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "nearest_attacker_distance",
+      "feature_type": "continuous",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0388,
+      "rank": 32,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "has_visible_defender",
+      "feature_type": "boolean",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.0365,
+      "rank": 33,
+      "player_identity_flavoured": false
+    },
+    {
+      "feature": "counterpress",
+      "feature_type": "boolean",
+      "method": "variance_ratio (eta^2 of feature vs player_id groups)",
+      "value": 0.036,
+      "rank": 34,
+      "player_identity_flavoured": false
+    }
+  ],
+  "train_test_player_overlap": {
+    "n_test_matches": 23,
+    "n_trainval_matches": 92,
+    "n_test_players": 479,
+    "n_trainval_players": 964,
+    "n_overlap_players": 431,
+    "overlap_pct_of_test_players": 89.98,
+    "note": "Some overlap is expected and not inherently a problem -- players play in multiple matches across this 115-match, 2-tournament dataset. The percentage itself, not an assumption about it, is what matters for Step 3's risk-pair cross-reference."
+  },
+  "risk_pairs": [
+    {
+      "feature": "position",
+      "icc_or_cramers_v": 0.7714,
+      "method": "cramers_v (player_id vs feature, bias-corrected)",
+      "train_test_player_overlap_pct": 89.98,
+      "risk_level": "high",
+      "reason": "position is player-identity-flavoured (0.7714 > 0.3) AND 89.98% of test-set players also appear in train+val -- the combination the prompt asks to name explicitly, not either fact alone."
+    }
+  ]
+}

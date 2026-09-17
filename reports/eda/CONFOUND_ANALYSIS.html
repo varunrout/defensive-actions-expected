@@ -351,8 +351,8 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 <div class="masthead"><div class="masthead-inner">
   <p class="eyebrow">CONFOUND ANALYSIS</p>
   <h1 class="title">Reversal (Simpson&#x27;s-Paradox-Style) Checks</h1>
-  <p class="dek">A marginal correlation can reverse direction once you condition on a third variable -- a classic Simpson's-paradox pattern. Two marginal reversals in the passive dataset were previously asserted as “probably a selection effect” without being tested. This report actually stratifies and checks whether the reversal survives.</p>
-  <div class="statbar"><div class="stat"><b>1,593,181</b><span>rows (passive)</span></div><div class="stat"><b>2</b><span>tests run</span></div><div class="stat"><b>2</b><span>reversals surviving</span></div></div>
+  <p class="dek">A marginal correlation can reverse direction once you condition on a third variable -- a classic Simpson's-paradox pattern. The first 2 tests below check marginal reversals in the passive dataset previously asserted as “probably a selection effect” without being tested. The 5 tests added after them (prompt 24 Part A) extend the same method to the threat-score U-shapes, both other lane-screening options, and defenders_within_10m -- the last of those carries an explicit reliability caveat, see its card below. The final 3 (prompt 29) close LEAKAGE_AUDIT.json's has_option_2/3 follow-up item, adapting the method for a boolean marginal (split True/False directly, not quartiled).</p>
+  <div class="statbar"><div class="stat"><b>1,593,181</b><span>rows (passive)</span></div><div class="stat"><b>10</b><span>tests run</span></div><div class="stat"><b>9</b><span>reversals surviving</span></div></div>
 </div></div>
 <div class="wrap">
 <div class="article">
@@ -361,6 +361,8 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <h2 class="test-title">Marking tightness reversal</h2>
   <p class="test-subnote"><code>marking_tightness</code> vs proposed confound <code>zone_defensive_value</code>
   &mdash; proposed reasoning: &ldquo;tight marking only happens because the zone&#x27;s already dangerous&rdquo;</p>
+
+  
 
   <div class="verdict-banner v-no">
     <b>Verdict: NO</b> &mdash; Reversal survives -- confound does not explain it away.
@@ -526,6 +528,8 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <p class="test-subnote"><code>lane_screening_score_option_1</code> vs proposed confound <code>top_option_1_threat_score</code>
   &mdash; proposed reasoning: &ldquo;a threatening top option only exists when danger is already high&rdquo;</p>
 
+  
+
   <div class="verdict-banner v-no">
     <b>Verdict: NO</b> &mdash; Reversal survives -- confound does not explain it away.
     The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
@@ -681,6 +685,1112 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <div class="qbar-fill" style="height:68.9%"></div>
   <span class="qbar-label">Q4 most screened</span>
   <span class="qbar-n">n=94,477</span>
+</div></div>
+</div></div>
+</div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">top_option_2_threat_score U-shape vs zone_defensive_value</h2>
+  <p class="test-subnote"><code>top_option_2_threat_score</code> vs proposed confound <code>zone_defensive_value</code>
+  &mdash; proposed reasoning: &ldquo;the U-shape in top_option_2_threat_score is just zone_defensive_value&#x27;s own established U-shape in different clothing&rdquo;</p>
+
+  
+<div class="finding flag" style="margin:12px 0;">
+<span class="tag">Cluster 5 connection (not decided here)</span>
+<p>Feeds directly into the still-open Cluster 5 decision (whether top_option_1/2/3_threat_score carry independent signal or are redundant with each other -- see REVIEW_METHODOLOGY.html/_V2.html and feature_config.py&#x27;s PASSIVE_COLLAPSE_OPTION_RANKS). This test does not decide Cluster 5 -- it only checks whether THIS feature&#x27;s pattern is explained by zone_defensive_value specifically, a separate question from whether it&#x27;s redundant with top_option_1/3_threat_score.</p>
+</div>
+
+  <div class="verdict-banner v-partially">
+    <b>Verdict: PARTIALLY</b> &mdash; Mixed -- survives in some strata, flattens in others.
+    The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.
+    (3/4 strata show the reversal surviving.)
+  </div>
+
+  
+<div class="qchart-card">
+  <h4>Marginal shot rate by top_option_2_threat_score quartile</h4>
+  <p class="qc-note">Unconditioned -- the raw reversal being tested.</p>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">9.21%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">Q1 lowest</span>
+  <span class="qbar-n">n=397,752</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.58%</span>
+  <div class="qbar-fill" style="height:52.7%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=397,749</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">3.83%</span>
+  <div class="qbar-fill" style="height:36.1%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=397,754</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.20%</span>
+  <div class="qbar-fill" style="height:49.1%"></div>
+  <span class="qbar-label">Q4 highest</span>
+  <span class="qbar-n">n=397,745</span>
+</div></div>
+</div>
+  
+<div class="qchart-card">
+  <h4>Stratified by zone_defensive_value quartile</h4>
+  <p class="qc-note">Same marginal breakdown, repeated within each quartile of the proposed confound.</p>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>Z1 calmest</h5>
+  <p class="stratum-delta">delta: <b>+0.60pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">7.44%</span>
+  <div class="qbar-fill" style="height:48.8%"></div>
+  <span class="qbar-label">Q1 lowest</span>
+  <span class="qbar-n">n=16,653</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">9.13%</span>
+  <div class="qbar-fill" style="height:59.9%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=52,117</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">7.73%</span>
+  <div class="qbar-fill" style="height:50.7%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=105,653</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">8.04%</span>
+  <div class="qbar-fill" style="height:52.8%"></div>
+  <span class="qbar-label">Q4 highest</span>
+  <span class="qbar-n">n=222,986</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>Z2</h5>
+  <p class="stratum-delta">delta: <b>-1.93pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">3.66%</span>
+  <div class="qbar-fill" style="height:24.0%"></div>
+  <span class="qbar-label">Q1 lowest</span>
+  <span class="qbar-n">n=59,430</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">2.55%</span>
+  <div class="qbar-fill" style="height:16.7%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=88,183</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">2.32%</span>
+  <div class="qbar-fill" style="height:15.2%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=130,960</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">1.73%</span>
+  <div class="qbar-fill" style="height:11.3%"></div>
+  <span class="qbar-label">Q4 highest</span>
+  <span class="qbar-n">n=119,566</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>Z3</h5>
+  <p class="stratum-delta">delta: <b>-3.39pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">4.59%</span>
+  <div class="qbar-fill" style="height:30.1%"></div>
+  <span class="qbar-label">Q1 lowest</span>
+  <span class="qbar-n">n=108,803</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">2.90%</span>
+  <div class="qbar-fill" style="height:19.0%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=124,014</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">2.17%</span>
+  <div class="qbar-fill" style="height:14.2%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=113,886</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">1.19%</span>
+  <div class="qbar-fill" style="height:7.8%"></div>
+  <span class="qbar-label">Q4 highest</span>
+  <span class="qbar-n">n=51,361</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>Z4 most dangerous</h5>
+  <p class="stratum-delta">delta: <b>-12.06pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">13.26%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">Q1 lowest</span>
+  <span class="qbar-n">n=212,866</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">8.69%</span>
+  <div class="qbar-fill" style="height:57.0%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=133,435</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">3.23%</span>
+  <div class="qbar-fill" style="height:21.2%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=47,255</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">1.20%</span>
+  <div class="qbar-fill" style="height:7.9%"></div>
+  <span class="qbar-label">Q4 highest</span>
+  <span class="qbar-n">n=3,832</span>
+</div></div>
+</div></div>
+</div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">top_option_3_threat_score U-shape vs zone_defensive_value</h2>
+  <p class="test-subnote"><code>top_option_3_threat_score</code> vs proposed confound <code>zone_defensive_value</code>
+  &mdash; proposed reasoning: &ldquo;the U-shape in top_option_3_threat_score is just zone_defensive_value&#x27;s own established U-shape in different clothing&rdquo;</p>
+
+  
+<div class="finding flag" style="margin:12px 0;">
+<span class="tag">Cluster 5 connection (not decided here)</span>
+<p>Feeds directly into the still-open Cluster 5 decision (whether top_option_1/2/3_threat_score carry independent signal or are redundant with each other). This test does not decide Cluster 5 -- it only checks whether THIS feature&#x27;s pattern is explained by zone_defensive_value specifically.</p>
+</div>
+
+  <div class="verdict-banner v-no">
+    <b>Verdict: NO</b> &mdash; Reversal survives -- confound does not explain it away.
+    The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+    (4/4 strata show the reversal surviving.)
+  </div>
+
+  
+<div class="qchart-card">
+  <h4>Marginal shot rate by top_option_3_threat_score quartile</h4>
+  <p class="qc-note">Unconditioned -- the raw reversal being tested.</p>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">10.27%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">Q1 lowest</span>
+  <span class="qbar-n">n=395,450</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">4.19%</span>
+  <div class="qbar-fill" style="height:35.5%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=395,448</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">4.36%</span>
+  <div class="qbar-fill" style="height:36.9%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=395,441</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">4.73%</span>
+  <div class="qbar-fill" style="height:40.0%"></div>
+  <span class="qbar-label">Q4 highest</span>
+  <span class="qbar-n">n=395,444</span>
+</div></div>
+</div>
+  
+<div class="qchart-card">
+  <h4>Stratified by zone_defensive_value quartile</h4>
+  <p class="qc-note">Same marginal breakdown, repeated within each quartile of the proposed confound.</p>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>Z1 calmest</h5>
+  <p class="stratum-delta">delta: <b>-2.17pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">9.56%</span>
+  <div class="qbar-fill" style="height:62.8%"></div>
+  <span class="qbar-label">Q1 lowest</span>
+  <span class="qbar-n">n=4,614</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">7.94%</span>
+  <div class="qbar-fill" style="height:52.2%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=67,037</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">9.17%</span>
+  <div class="qbar-fill" style="height:60.3%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=107,568</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">7.39%</span>
+  <div class="qbar-fill" style="height:48.5%"></div>
+  <span class="qbar-label">Q4 highest</span>
+  <span class="qbar-n">n=214,572</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>Z2</h5>
+  <p class="stratum-delta">delta: <b>-2.26pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">3.95%</span>
+  <div class="qbar-fill" style="height:25.9%"></div>
+  <span class="qbar-label">Q1 lowest</span>
+  <span class="qbar-n">n=31,390</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">2.90%</span>
+  <div class="qbar-fill" style="height:19.0%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=126,053</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">2.12%</span>
+  <div class="qbar-fill" style="height:13.9%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=118,998</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">1.69%</span>
+  <div class="qbar-fill" style="height:11.1%"></div>
+  <span class="qbar-label">Q4 highest</span>
+  <span class="qbar-n">n=120,730</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>Z3</h5>
+  <p class="stratum-delta">delta: <b>-3.71pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">4.99%</span>
+  <div class="qbar-fill" style="height:32.8%"></div>
+  <span class="qbar-label">Q1 lowest</span>
+  <span class="qbar-n">n=104,696</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">2.61%</span>
+  <div class="qbar-fill" style="height:17.1%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=125,665</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">2.08%</span>
+  <div class="qbar-fill" style="height:13.6%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=114,240</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">1.28%</span>
+  <div class="qbar-fill" style="height:8.4%"></div>
+  <span class="qbar-label">Q4 highest</span>
+  <span class="qbar-n">n=52,343</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>Z4 most dangerous</h5>
+  <p class="stratum-delta">delta: <b>-11.62pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">13.23%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">Q1 lowest</span>
+  <span class="qbar-n">n=254,750</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.62%</span>
+  <div class="qbar-fill" style="height:36.9%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=76,693</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">4.53%</span>
+  <div class="qbar-fill" style="height:29.7%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=54,635</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">1.62%</span>
+  <div class="qbar-fill" style="height:10.6%"></div>
+  <span class="qbar-label">Q4 highest</span>
+  <span class="qbar-n">n=7,799</span>
+</div></div>
+</div></div>
+</div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">Lane screening (option 2) reversal</h2>
+  <p class="test-subnote"><code>lane_screening_score_option_2</code> vs proposed confound <code>top_option_2_threat_score</code>
+  &mdash; proposed reasoning: &ldquo;a threatening option-2 only exists when danger is already high -- direct extension of the option-1 lane-screening test&rdquo;</p>
+
+  
+
+  <div class="verdict-banner v-no">
+    <b>Verdict: NO</b> &mdash; Reversal survives -- confound does not explain it away.
+    The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+    (4/4 strata show the reversal surviving.)
+  </div>
+
+  
+<div class="qchart-card">
+  <h4>Marginal shot rate by lane_screening_score_option_2 quartile</h4>
+  <p class="qc-note">Unconditioned -- the raw reversal being tested.</p>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">3.88%</span>
+  <div class="qbar-fill" style="height:43.5%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=397,750</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.50%</span>
+  <div class="qbar-fill" style="height:61.6%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=397,750</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">6.67%</span>
+  <div class="qbar-fill" style="height:74.8%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=397,750</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">7.76%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=397,750</span>
+</div></div>
+</div>
+  
+<div class="qchart-card">
+  <h4>Stratified by top_option_2_threat_score quartile</h4>
+  <p class="qc-note">Same marginal breakdown, repeated within each quartile of the proposed confound.</p>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>T1 low</h5>
+  <p class="stratum-delta">delta: <b>+3.49pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">6.96%</span>
+  <div class="qbar-fill" style="height:57.9%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=75,688</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">8.65%</span>
+  <div class="qbar-fill" style="height:72.1%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=93,407</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">9.88%</span>
+  <div class="qbar-fill" style="height:82.3%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=104,602</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">10.44%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=124,055</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T2</h5>
+  <p class="stratum-delta">delta: <b>+2.71pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">3.92%</span>
+  <div class="qbar-fill" style="height:32.6%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=93,942</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.41%</span>
+  <div class="qbar-fill" style="height:45.0%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=100,265</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">6.26%</span>
+  <div class="qbar-fill" style="height:52.1%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=104,060</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">6.62%</span>
+  <div class="qbar-fill" style="height:55.2%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=99,482</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T3</h5>
+  <p class="stratum-delta">delta: <b>+3.01pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">2.44%</span>
+  <div class="qbar-fill" style="height:20.3%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=115,647</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">3.57%</span>
+  <div class="qbar-fill" style="height:29.7%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=102,609</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">4.35%</span>
+  <div class="qbar-fill" style="height:36.2%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=94,455</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.44%</span>
+  <div class="qbar-fill" style="height:45.3%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=85,043</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T4 high</h5>
+  <p class="stratum-delta">delta: <b>+4.25pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">3.26%</span>
+  <div class="qbar-fill" style="height:27.1%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=112,473</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">4.64%</span>
+  <div class="qbar-fill" style="height:38.7%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=101,469</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.91%</span>
+  <div class="qbar-fill" style="height:49.2%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=94,633</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">7.51%</span>
+  <div class="qbar-fill" style="height:62.6%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=89,170</span>
+</div></div>
+</div></div>
+</div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">Lane screening (option 3) reversal</h2>
+  <p class="test-subnote"><code>lane_screening_score_option_3</code> vs proposed confound <code>top_option_3_threat_score</code>
+  &mdash; proposed reasoning: &ldquo;a threatening option-3 only exists when danger is already high -- direct extension of the option-1 lane-screening test&rdquo;</p>
+
+  
+
+  <div class="verdict-banner v-no">
+    <b>Verdict: NO</b> &mdash; Reversal survives -- confound does not explain it away.
+    The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+    (4/4 strata show the reversal surviving.)
+  </div>
+
+  
+<div class="qchart-card">
+  <h4>Marginal shot rate by lane_screening_score_option_3 quartile</h4>
+  <p class="qc-note">Unconditioned -- the raw reversal being tested.</p>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">3.76%</span>
+  <div class="qbar-fill" style="height:42.1%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=395,446</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.35%</span>
+  <div class="qbar-fill" style="height:60.0%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=395,446</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">6.68%</span>
+  <div class="qbar-fill" style="height:74.9%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=395,445</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">7.75%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=395,446</span>
+</div></div>
+</div>
+  
+<div class="qchart-card">
+  <h4>Stratified by top_option_3_threat_score quartile</h4>
+  <p class="qc-note">Same marginal breakdown, repeated within each quartile of the proposed confound.</p>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>T1 low</h5>
+  <p class="stratum-delta">delta: <b>+4.07pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">7.68%</span>
+  <div class="qbar-fill" style="height:56.9%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=71,983</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">9.52%</span>
+  <div class="qbar-fill" style="height:70.5%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=92,567</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">10.96%</span>
+  <div class="qbar-fill" style="height:81.1%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=108,062</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">11.75%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=122,838</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T2</h5>
+  <p class="stratum-delta">delta: <b>+1.98pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">3.15%</span>
+  <div class="qbar-fill" style="height:23.3%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=101,725</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">3.94%</span>
+  <div class="qbar-fill" style="height:29.2%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=100,820</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">4.60%</span>
+  <div class="qbar-fill" style="height:34.1%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=97,191</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.13%</span>
+  <div class="qbar-fill" style="height:38.0%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=95,712</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T3</h5>
+  <p class="stratum-delta">delta: <b>+3.28pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">2.65%</span>
+  <div class="qbar-fill" style="height:19.6%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=107,955</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">4.04%</span>
+  <div class="qbar-fill" style="height:29.9%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=101,776</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.15%</span>
+  <div class="qbar-fill" style="height:38.1%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=96,546</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.93%</span>
+  <div class="qbar-fill" style="height:43.9%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=89,164</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T4 high</h5>
+  <p class="stratum-delta">delta: <b>+4.01pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">2.87%</span>
+  <div class="qbar-fill" style="height:21.2%"></div>
+  <span class="qbar-label">Q1 least</span>
+  <span class="qbar-n">n=113,783</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">4.25%</span>
+  <div class="qbar-fill" style="height:31.5%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=100,283</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.48%</span>
+  <div class="qbar-fill" style="height:40.5%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=93,646</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">6.88%</span>
+  <div class="qbar-fill" style="height:50.9%"></div>
+  <span class="qbar-label">Q4 most screened</span>
+  <span class="qbar-n">n=87,732</span>
+</div></div>
+</div></div>
+</div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">defenders_within_10m vs box proximity</h2>
+  <p class="test-subnote"><code>defenders_within_10m</code> vs proposed confound <code>is_in_attacking_box</code> (boolean (stratified True/False, not quartiled))
+  &mdash; proposed reasoning: &ldquo;more nearby defenders correlating with more danger (not less) is opposite naive intuition -- plausibly because defenders converge precisely when the situation is already dangerous (box proximity)&rdquo;</p>
+
+  
+<div class="finding flag" style="margin:12px 0;">
+<span class="tag">Confound selection</span>
+<p>Checked both candidates directly: corr(defenders_within_10m, is_in_defending_box)=0.2397, corr(defenders_within_10m, is_in_attacking_box)=0.2825 -- used is_in_attacking_box as the confound, the stronger correlation.</p>
+</div>
+<div class="finding flag" style="margin:12px 0;">
+<span class="tag">Reliability caveat</span>
+<p>UNRELIABLE, not a clean finding: Part B (TOURNAMENT_STABILITY_CHECK.json/.html) found defenders_within_10m is a GENUINE TOURNAMENT-LEVEL DIFFERENCE, not arbitrary train/test noise -- U-shaped in WC2022, inverse-U in Euro2024 (same bin edges, same shape-classification method). This confound test below runs on the pooled 115-match population, which mixes two populations with opposite-direction patterns. Read the marginal/stratified numbers below as a description of the pooled data, not as evidence about a single, stable phenomenon.</p>
+</div>
+
+  <div class="verdict-banner v-no">
+    <b>Verdict: NO</b> &mdash; Reversal survives -- confound does not explain it away.
+    The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+    (2/2 strata show the reversal surviving.)
+  </div>
+
+  
+<div class="qchart-card">
+  <h4>Marginal shot rate by defenders_within_10m quartile</h4>
+  <p class="qc-note">Unconditioned -- the raw reversal being tested.</p>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">4.46%</span>
+  <div class="qbar-fill" style="height:22.5%"></div>
+  <span class="qbar-label">Q1 fewest</span>
+  <span class="qbar-n">n=20,203</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">6.64%</span>
+  <div class="qbar-fill" style="height:33.5%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=10,526</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">10.04%</span>
+  <div class="qbar-fill" style="height:50.6%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=6,298</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">17.25%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">Q4 most</span>
+  <span class="qbar-n">n=6,172</span>
+</div></div>
+</div>
+  
+<div class="qchart-card">
+  <h4>Stratified by is_in_attacking_box quartile</h4>
+  <p class="qc-note">Same marginal breakdown, repeated within each quartile of the proposed confound.</p>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>False</h5>
+  <p class="stratum-delta">delta: <b>+10.57pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">4.31%</span>
+  <div class="qbar-fill" style="height:16.9%"></div>
+  <span class="qbar-label">Q1 fewest</span>
+  <span class="qbar-n">n=19,029</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">6.06%</span>
+  <div class="qbar-fill" style="height:23.8%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=9,788</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">8.74%</span>
+  <div class="qbar-fill" style="height:34.3%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=5,503</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">14.88%</span>
+  <div class="qbar-fill" style="height:58.4%"></div>
+  <span class="qbar-label">Q4 most</span>
+  <span class="qbar-n">n=4,148</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>True</h5>
+  <p class="stratum-delta">delta: <b>+15.15pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">6.99%</span>
+  <div class="qbar-fill" style="height:27.4%"></div>
+  <span class="qbar-label">Q1 fewest</span>
+  <span class="qbar-n">n=1,174</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">14.36%</span>
+  <div class="qbar-fill" style="height:56.4%"></div>
+  <span class="qbar-label">Q2</span>
+  <span class="qbar-n">n=738</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">18.99%</span>
+  <div class="qbar-fill" style="height:74.6%"></div>
+  <span class="qbar-label">Q3</span>
+  <span class="qbar-n">n=795</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">22.13%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">Q4 most</span>
+  <span class="qbar-n">n=2,024</span>
+</div></div>
+</div></div>
+</div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">has_option_2 shot-rate gap vs top_option_1_threat_score</h2>
+  <p class="test-subnote"><code>has_option_2</code> (boolean (split True/False directly, not quartiled)) vs proposed confound <code>top_option_1_threat_score</code>
+  &mdash; proposed reasoning: &ldquo;a defender only &#x27;has&#x27; a second ranked option worth recording when the primary threat is itself significant (more players committed forward = more danger already) -- the option-count effect might just be a proxy for how threatening the possession already is, not a defensive-shape signal in its own right&rdquo;</p>
+
+  
+
+  <div class="verdict-banner v-no">
+    <b>Verdict: NO</b> &mdash; Reversal survives -- confound does not explain it away.
+    The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+    (4/4 strata show the reversal surviving.)
+  </div>
+
+  
+<div class="qchart-card">
+  <h4>Marginal shot rate by has_option_2 True/False value</h4>
+  <p class="qc-note">Unconditioned -- the raw reversal being tested.</p>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">15.13%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=2,181</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.95%</span>
+  <div class="qbar-fill" style="height:34.2%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=1,591,000</span>
+</div></div>
+</div>
+  
+<div class="qchart-card">
+  <h4>Stratified by top_option_1_threat_score quartile</h4>
+  <p class="qc-note">Same marginal breakdown, repeated within each quartile of the proposed confound.</p>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>T1 low</h5>
+  <p class="stratum-delta">delta: <b>-3.46pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">13.59%</span>
+  <div class="qbar-fill" style="height:43.6%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=1,361</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">10.13%</span>
+  <div class="qbar-fill" style="height:32.5%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=396,869</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T2</h5>
+  <p class="stratum-delta">delta: <b>-14.11pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">18.30%</span>
+  <div class="qbar-fill" style="height:58.7%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=224</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">4.19%</span>
+  <div class="qbar-fill" style="height:13.4%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=398,002</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T3</h5>
+  <p class="stratum-delta">delta: <b>-5.74pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">9.30%</span>
+  <div class="qbar-fill" style="height:29.8%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=129</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">3.56%</span>
+  <div class="qbar-fill" style="height:11.4%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=398,091</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T4 high</h5>
+  <p class="stratum-delta">delta: <b>-21.19pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">27.13%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=188</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.94%</span>
+  <div class="qbar-fill" style="height:19.0%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=398,038</span>
+</div></div>
+</div></div>
+</div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">has_option_3 shot-rate gap vs top_option_1_threat_score</h2>
+  <p class="test-subnote"><code>has_option_3</code> (boolean (split True/False directly, not quartiled)) vs proposed confound <code>top_option_1_threat_score</code>
+  &mdash; proposed reasoning: &ldquo;same hypothesis as has_option_2, extended to the third option&rdquo;</p>
+
+  
+
+  <div class="verdict-banner v-no">
+    <b>Verdict: NO</b> &mdash; Reversal survives -- confound does not explain it away.
+    The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+    (4/4 strata show the reversal surviving.)
+  </div>
+
+  
+<div class="qchart-card">
+  <h4>Marginal shot rate by has_option_3 True/False value</h4>
+  <p class="qc-note">Unconditioned -- the raw reversal being tested.</p>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">17.09%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=11,398</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.89%</span>
+  <div class="qbar-fill" style="height:29.9%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=1,581,783</span>
+</div></div>
+</div>
+  
+<div class="qchart-card">
+  <h4>Stratified by top_option_1_threat_score quartile</h4>
+  <p class="qc-note">Same marginal breakdown, repeated within each quartile of the proposed confound.</p>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>T1 low</h5>
+  <p class="stratum-delta">delta: <b>-8.00pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">18.01%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=6,770</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">10.01%</span>
+  <div class="qbar-fill" style="height:48.3%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=391,460</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T2</h5>
+  <p class="stratum-delta">delta: <b>-13.26pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">17.41%</span>
+  <div class="qbar-fill" style="height:84.1%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=1,430</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">4.15%</span>
+  <div class="qbar-fill" style="height:20.1%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=396,796</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T3</h5>
+  <p class="stratum-delta">delta: <b>-9.88pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">13.42%</span>
+  <div class="qbar-fill" style="height:64.8%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=1,125</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">3.54%</span>
+  <div class="qbar-fill" style="height:17.1%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=397,095</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>T4 high</h5>
+  <p class="stratum-delta">delta: <b>-10.15pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">16.05%</span>
+  <div class="qbar-fill" style="height:77.5%"></div>
+  <span class="qbar-label">False (no 3rd option)</span>
+  <span class="qbar-n">n=1,794</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.90%</span>
+  <div class="qbar-fill" style="height:28.5%"></div>
+  <span class="qbar-label">True (has 3rd option)</span>
+  <span class="qbar-n">n=396,432</span>
+</div></div>
+</div></div>
+</div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">has_option_2 shot-rate gap vs defender_x</h2>
+  <p class="test-subnote"><code>has_option_2</code> (boolean (split True/False directly, not quartiled)) vs proposed confound <code>defender_x</code>
+  &mdash; proposed reasoning: &ldquo;fewer options might just mean the attack is closer to goal, not that the defending team&#x27;s structure is doing anything. Confound feature is defender_x, not zone_defensive_value: zone_defensive_value is dropped in feature_config.py (REDUNDANCY_DROPPED_PASSIVE, r=-1.0 vs distance_to_defending_goal), and distance_to_defending_goal is ALSO dropped (Cluster 4, defender-position) -- defender_x is the actually-kept, model-facing sibling, same correction prompt 25 already made for this exact substitution.&rdquo;</p>
+
+  
+
+  <div class="verdict-banner v-no">
+    <b>Verdict: NO</b> &mdash; Reversal survives -- confound does not explain it away.
+    The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+    (4/4 strata show the reversal surviving.)
+  </div>
+
+  
+<div class="qchart-card">
+  <h4>Marginal shot rate by has_option_2 True/False value</h4>
+  <p class="qc-note">Unconditioned -- the raw reversal being tested.</p>
+  <div class="qbar-row">
+<div class="qbar-col">
+  <span class="qbar-val">15.13%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=2,181</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">5.95%</span>
+  <div class="qbar-fill" style="height:34.2%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=1,591,000</span>
+</div></div>
+</div>
+  
+<div class="qchart-card">
+  <h4>Stratified by defender_x quartile</h4>
+  <p class="qc-note">Same marginal breakdown, repeated within each quartile of the proposed confound.</p>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>D1</h5>
+  <p class="stratum-delta">delta: <b>-2.45pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">12.85%</span>
+  <div class="qbar-fill" style="height:62.9%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=903</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">10.40%</span>
+  <div class="qbar-fill" style="height:51.0%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=397,393</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>D2</h5>
+  <p class="stratum-delta">delta: <b>-12.07pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">15.02%</span>
+  <div class="qbar-fill" style="height:73.6%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=233</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">2.95%</span>
+  <div class="qbar-fill" style="height:14.5%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=398,062</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>D3</h5>
+  <p class="stratum-delta">delta: <b>-11.48pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">13.86%</span>
+  <div class="qbar-fill" style="height:67.9%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=166</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">2.37%</span>
+  <div class="qbar-fill" style="height:11.6%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=398,129</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>D4</h5>
+  <p class="stratum-delta">delta: <b>-9.64pp (first quartile to last)</b></p>
+  <div class="qbar-row small">
+<div class="qbar-col">
+  <span class="qbar-val">17.75%</span>
+  <div class="qbar-fill" style="height:87.0%"></div>
+  <span class="qbar-label">False (no 2nd option)</span>
+  <span class="qbar-n">n=879</span>
+</div>
+<div class="qbar-col">
+  <span class="qbar-val">8.10%</span>
+  <div class="qbar-fill" style="height:39.7%"></div>
+  <span class="qbar-label">True (has 2nd option)</span>
+  <span class="qbar-n">n=397,416</span>
 </div></div>
 </div></div>
 </div>

@@ -19,9 +19,12 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 REPORTS_DIR = REPO_ROOT / "reports" / "eda_xg"
 OUTPUT_PATH = REPORTS_DIR / "INDEX.html"
 
-DEFAULT_REPORT = "active_numerical_target_atlas.html"
+DEFAULT_REPORT = "../eda/MASTER_FINDINGS.html"
 
 REPORT_GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
+    ("Overview", [
+        ("../eda/MASTER_FINDINGS.html", "Master Findings -- start here (covers both targets)"),
+    ]),
     ("Base EDA vs xG (reconstructed 51/44 pool)", [
         ("active_category_atlas.html", "Active -- Category Atlas (xG)"),
         ("active_flag_ledger.html", "Active -- Flag Ledger (xG)"),
@@ -37,11 +40,20 @@ REPORT_GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
         ("CORRELATION_ATLAS_V2.html", "Correlation Atlas -- V2 (36/39, stage 07)"),
         ("CORRELATION_ATLAS_V3.html", "Correlation Atlas -- V3 (34/38, train+val only)"),
         ("VIF_ANALYSIS.html", "Multicollinearity (VIF)"),
+        ("SLICER_REDUNDANCY.html", "Slicer Redundancy Check"),
+        ("PLAYER_LEVEL_VALIDITY_CHECK.html", "Player-Level Validity Check (active only)"),
     ]),
     ("Redundancy / leakage / confound vs xG", [
         ("REVIEW_METHODOLOGY.html", "Review Methodology (xG lift)"),
         ("LEAKAGE_AUDIT.html", "Leakage Audit (xG)"),
         ("CONFOUND_ANALYSIS.html", "Confound (Reversal) Testing (xG)"),
+        ("TOURNAMENT_STABILITY_CHECK.html", "Tournament Stability Check (xG)"),
+        ("SLICE_STRATIFICATION.html", "Slice Stratification (xG, V1 -- categorical slicers)"),
+        ("SLICE_STRATIFICATION_V2.html", "Slice Stratification V2 (xG) -- archetype + boolean slicers"),
+        ("FEATURE_INTERACTION_ANALYSIS.html", "Feature Interaction Analysis (numeric x numeric, xG)"),
+    ]),
+    ("Confirmation", [
+        ("FEATURE_LOCK_CONFIRMATION_XG.html", "Feature Lock Confirmation + Pattern Findings (xG)"),
     ]),
 ]
 

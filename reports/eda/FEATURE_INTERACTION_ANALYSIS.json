@@ -1,0 +1,2121 @@
+{
+  "target": "target_future_shot_10s",
+  "quartile_n": 4,
+  "thresholds": {
+    "substitutive_ratio_max": 0.3,
+    "additive_magnitude_ratio_max": 2.0,
+    "min_marginal_delta_pp": 1.0,
+    "note": "substitutive: mean |within-B-stratum A delta| < substitutive_ratio_max x |A's pooled marginal delta|. additive: not substitutive, every B-stratum delta shares the marginal delta's sign, and max/min |delta| ratio across strata <= additive_magnitude_ratio_max. interactive: neither of the above. inconclusive: |marginal delta| < min_marginal_delta_pp, or too few populated quartile combinations. Every delta (marginal and within-stratum) is computed between the lowest and highest A-bin that both have at least min_cell_n_for_delta rows -- a sparse tail bin (e.g. n=2 in a heavily skewed discrete feature) is excluded as an endpoint rather than producing a noise-driven delta.",
+    "min_cell_n_for_delta": 20
+  },
+  "candidate_selection": "Top 5 active + top 5 passive features ranked by count of DISTINCT slicers (from reports/eda/SLICE_STRATIFICATION.json's cross_dataset_summary.genuine_divergences) they diverge on, after collapsing prompt 27's consensus-redundant slicer clusters to one representative each (active: phase_label_prev_event folds into phase_label; position_group -- not itself a locked feature, only used as a slicer in prompt 24's original cells -- folds into position, Cramer's V=1.0 per feature_config.py; passive has no consensus-redundant clusters, all 4 slicers counted separately). Ties broken by total raw divergence-row count, then alphabetically. See module docstring for the exact ranked lists and the football rationale behind each pairing.",
+  "summary_table": [
+    {
+      "dataset": "active",
+      "feature_a": "defenders_within_10m",
+      "feature_b": "distance_to_attacking_box",
+      "classification": "interactive"
+    },
+    {
+      "dataset": "active",
+      "feature_a": "visible_defender_count",
+      "feature_b": "attacker_spread",
+      "classification": "interactive"
+    },
+    {
+      "dataset": "active",
+      "feature_a": "possession_elapsed_seconds",
+      "feature_b": "match_time_seconds",
+      "classification": "interactive"
+    },
+    {
+      "dataset": "active",
+      "feature_a": "defenders_between_ball_and_attacking_goal",
+      "feature_b": "attacker_defender_ratio",
+      "classification": "interactive"
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "lane_screening_score_option_2",
+      "feature_b": "engagement_distance_to_carrier",
+      "classification": "interactive"
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "marking_tightness",
+      "feature_b": "engagement_distance_to_carrier",
+      "classification": "interactive"
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "overload_score",
+      "feature_b": "attacking_goal_centrality",
+      "classification": "interactive"
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "lane_screening_score_option_1",
+      "feature_b": "marking_tightness",
+      "classification": "interactive"
+    },
+    {
+      "dataset": "active",
+      "feature_a": "defenders_within_5m",
+      "feature_b": "defenders_within_10m",
+      "classification": "substitutive"
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "top_option_2_threat_score",
+      "feature_b": "top_option_2_distance_from_ball",
+      "classification": "additive"
+    }
+  ],
+  "pairs": [
+    {
+      "dataset": "active",
+      "feature_a": "defenders_within_10m",
+      "feature_b": "distance_to_attacking_box",
+      "football_rationale": "Defenders converge near the ball more as play nears their own box -- pitch geometry compresses everyone into a smaller space close to goal. Is 'defenders within 10m' just tracking how deep in the defensive third the action is, rather than a deliberate compactness/pressing choice?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 43199,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 3743,
+          "shots": 283,
+          "rate": 7.561
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 2294,
+          "shots": 244,
+          "rate": 10.636
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 1847,
+          "shots": 289,
+          "rate": 15.647
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 2922,
+          "shots": 575,
+          "rate": 19.678
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 6005,
+          "shots": 169,
+          "rate": 2.814
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 2975,
+          "shots": 113,
+          "rate": 3.798
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 1380,
+          "shots": 69,
+          "rate": 5.0
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 456,
+          "shots": 10,
+          "rate": 2.193
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 6098,
+          "shots": 174,
+          "rate": 2.853
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 2896,
+          "shots": 100,
+          "rate": 3.453
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 1323,
+          "shots": 34,
+          "rate": 2.57
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 460,
+          "shots": 22,
+          "rate": 4.783
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 4357,
+          "shots": 276,
+          "rate": 6.335
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 2361,
+          "shots": 242,
+          "rate": 10.25
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 1748,
+          "shots": 240,
+          "rate": 13.73
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 2334,
+          "shots": 458,
+          "rate": 19.623
+        }
+      ],
+      "marginal_a_rates_by_quartile": [
+        [
+          "Q1",
+          4.465
+        ],
+        [
+          "Q2",
+          6.641
+        ],
+        [
+          "Q3",
+          10.035
+        ],
+        [
+          "Q4",
+          17.255
+        ]
+      ],
+      "marginal_a_delta_pp": 12.791,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 12.117,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 10806
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.621,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 10816
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 1.93,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 10777
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 13.288,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 10800
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Sign flips across B-strata -- A's effect meaningfully depends on B's level."
+    },
+    {
+      "dataset": "active",
+      "feature_a": "visible_defender_count",
+      "feature_b": "attacker_spread",
+      "football_rationale": "A wider attacking shape pulls more defenders across the width of the pitch and into the tracked frame. Does the raw count of defenders on screen just mirror how spread out the attack already is, rather than reflecting a deliberate defensive commitment of numbers?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 56037,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 4120,
+          "shots": 384,
+          "rate": 9.32
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 4896,
+          "shots": 702,
+          "rate": 14.338
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 2633,
+          "shots": 431,
+          "rate": 16.369
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 2361,
+          "shots": 520,
+          "rate": 22.025
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 3398,
+          "shots": 171,
+          "rate": 5.032
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 5280,
+          "shots": 422,
+          "rate": 7.992
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 3246,
+          "shots": 319,
+          "rate": 9.827
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 2085,
+          "shots": 276,
+          "rate": 13.237
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 3554,
+          "shots": 114,
+          "rate": 3.208
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 5103,
+          "shots": 276,
+          "rate": 5.409
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 3578,
+          "shots": 210,
+          "rate": 5.869
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 1774,
+          "shots": 185,
+          "rate": 10.428
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 3678,
+          "shots": 49,
+          "rate": 1.332
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 4481,
+          "shots": 128,
+          "rate": 2.857
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 4572,
+          "shots": 126,
+          "rate": 2.756
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 1278,
+          "shots": 54,
+          "rate": 4.225
+        }
+      ],
+      "marginal_a_rates_by_quartile": [
+        [
+          "Q1",
+          4.868
+        ],
+        [
+          "Q2",
+          7.733
+        ],
+        [
+          "Q3",
+          7.741
+        ],
+        [
+          "Q4",
+          13.804
+        ]
+      ],
+      "marginal_a_delta_pp": 8.936,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 12.705,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 14010
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 8.205,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 14009
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 7.22,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 14009
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 2.893,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 14009
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (4.39) exceeds 2.0 -- A's effect meaningfully depends on B's level."
+    },
+    {
+      "dataset": "active",
+      "feature_a": "defenders_within_5m",
+      "feature_b": "defenders_within_10m",
+      "football_rationale": "Nested by construction -- every defender within 5m is also within 10m, so the two counts are not independent measurements. Once the 10m count is known, does the tighter 5m ring add real extra information about pressing intensity, or is it substitutively redundant with the wider count?",
+      "a_labels": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 43199,
+      "grid": [
+        {
+          "a_bin": 0.0,
+          "b_bin": "Q1",
+          "n": 16444,
+          "shots": 707,
+          "rate": 4.299
+        },
+        {
+          "a_bin": 1.0,
+          "b_bin": "Q1",
+          "n": 3759,
+          "shots": 195,
+          "rate": 5.188
+        },
+        {
+          "a_bin": 2.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 3.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 4.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 5.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 6.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 7.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 8.0,
+          "b_bin": "Q1",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 0.0,
+          "b_bin": "Q2",
+          "n": 5054,
+          "shots": 351,
+          "rate": 6.945
+        },
+        {
+          "a_bin": 1.0,
+          "b_bin": "Q2",
+          "n": 4580,
+          "shots": 296,
+          "rate": 6.463
+        },
+        {
+          "a_bin": 2.0,
+          "b_bin": "Q2",
+          "n": 892,
+          "shots": 52,
+          "rate": 5.83
+        },
+        {
+          "a_bin": 3.0,
+          "b_bin": "Q2",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 4.0,
+          "b_bin": "Q2",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 5.0,
+          "b_bin": "Q2",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 6.0,
+          "b_bin": "Q2",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 7.0,
+          "b_bin": "Q2",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 8.0,
+          "b_bin": "Q2",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 0.0,
+          "b_bin": "Q3",
+          "n": 2041,
+          "shots": 236,
+          "rate": 11.563
+        },
+        {
+          "a_bin": 1.0,
+          "b_bin": "Q3",
+          "n": 2904,
+          "shots": 286,
+          "rate": 9.848
+        },
+        {
+          "a_bin": 2.0,
+          "b_bin": "Q3",
+          "n": 1213,
+          "shots": 91,
+          "rate": 7.502
+        },
+        {
+          "a_bin": 3.0,
+          "b_bin": "Q3",
+          "n": 140,
+          "shots": 19,
+          "rate": 13.571
+        },
+        {
+          "a_bin": 4.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 5.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 6.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 7.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 8.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": 0.0,
+          "b_bin": "Q4",
+          "n": 858,
+          "shots": 150,
+          "rate": 17.483
+        },
+        {
+          "a_bin": 1.0,
+          "b_bin": "Q4",
+          "n": 2030,
+          "shots": 326,
+          "rate": 16.059
+        },
+        {
+          "a_bin": 2.0,
+          "b_bin": "Q4",
+          "n": 1814,
+          "shots": 297,
+          "rate": 16.373
+        },
+        {
+          "a_bin": 3.0,
+          "b_bin": "Q4",
+          "n": 885,
+          "shots": 165,
+          "rate": 18.644
+        },
+        {
+          "a_bin": 4.0,
+          "b_bin": "Q4",
+          "n": 380,
+          "shots": 79,
+          "rate": 20.789
+        },
+        {
+          "a_bin": 5.0,
+          "b_bin": "Q4",
+          "n": 142,
+          "shots": 34,
+          "rate": 23.944
+        },
+        {
+          "a_bin": 6.0,
+          "b_bin": "Q4",
+          "n": 55,
+          "shots": 12,
+          "rate": 21.818
+        },
+        {
+          "a_bin": 7.0,
+          "b_bin": "Q4",
+          "n": 6,
+          "shots": 1,
+          "rate": 16.667
+        },
+        {
+          "a_bin": 8.0,
+          "b_bin": "Q4",
+          "n": 2,
+          "shots": 1,
+          "rate": 50.0
+        }
+      ],
+      "marginal_a_rates_by_quartile": [
+        [
+          0.0,
+          5.919
+        ],
+        [
+          1.0,
+          8.31
+        ],
+        [
+          2.0,
+          11.227
+        ],
+        [
+          3.0,
+          17.951
+        ],
+        [
+          4.0,
+          20.789
+        ],
+        [
+          5.0,
+          23.944
+        ],
+        [
+          6.0,
+          21.818
+        ],
+        [
+          7.0,
+          16.667
+        ],
+        [
+          8.0,
+          50.0
+        ]
+      ],
+      "marginal_a_delta_pp": 15.899,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.889,
+          "a_bin_compared_low": 0.0,
+          "a_bin_compared_high": 1.0,
+          "n_populated_a_bins": 2,
+          "n_rows": 20203
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -1.115,
+          "a_bin_compared_low": 0.0,
+          "a_bin_compared_high": 2.0,
+          "n_populated_a_bins": 3,
+          "n_rows": 10526
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 2.008,
+          "a_bin_compared_low": 0.0,
+          "a_bin_compared_high": 3.0,
+          "n_populated_a_bins": 4,
+          "n_rows": 6298
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 4.335,
+          "a_bin_compared_low": 0.0,
+          "a_bin_compared_high": 6.0,
+          "n_populated_a_bins": 7,
+          "n_rows": 6172
+        }
+      ],
+      "classification": "substitutive",
+      "classification_reason": "Mean |within-B-stratum delta| (2.087pp) is 0.13x the pooled marginal delta (+15.899pp), below the 0.3 threshold -- A's effect mostly disappears once B is known."
+    },
+    {
+      "dataset": "active",
+      "feature_a": "possession_elapsed_seconds",
+      "feature_b": "match_time_seconds",
+      "football_rationale": "Long-running possessions cluster in certain match phases (e.g. a team camped in the attacking third late in a half). Does the possession-clock effect just track match-clock context, rather than reflecting fatigue or space actually created by a sustained spell of pressure?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 56068,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 3641,
+          "shots": 190,
+          "rate": 5.218
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 3371,
+          "shots": 247,
+          "rate": 7.327
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 3225,
+          "shots": 204,
+          "rate": 6.326
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 3786,
+          "shots": 284,
+          "rate": 7.501
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 3632,
+          "shots": 201,
+          "rate": 5.534
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 3402,
+          "shots": 196,
+          "rate": 5.761
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 3313,
+          "shots": 262,
+          "rate": 7.908
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 3665,
+          "shots": 382,
+          "rate": 10.423
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 3753,
+          "shots": 242,
+          "rate": 6.448
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 3546,
+          "shots": 233,
+          "rate": 6.571
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 3476,
+          "shots": 325,
+          "rate": 9.35
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 3249,
+          "shots": 366,
+          "rate": 11.265
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 3803,
+          "shots": 234,
+          "rate": 6.153
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 3605,
+          "shots": 272,
+          "rate": 7.545
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 3472,
+          "shots": 331,
+          "rate": 9.533
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 3129,
+          "shots": 399,
+          "rate": 12.752
+        }
+      ],
+      "marginal_a_rates_by_quartile": [
+        [
+          "Q1",
+          5.847
+        ],
+        [
+          "Q2",
+          6.808
+        ],
+        [
+          "Q3",
+          8.32
+        ],
+        [
+          "Q4",
+          10.348
+        ]
+      ],
+      "marginal_a_delta_pp": 4.501,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 2.283,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 14023
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 4.889,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 14012
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 4.817,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 14024
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 6.599,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 14009
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (2.89) exceeds 2.0 -- A's effect meaningfully depends on B's level."
+    },
+    {
+      "dataset": "active",
+      "feature_a": "defenders_between_ball_and_attacking_goal",
+      "feature_b": "attacker_defender_ratio",
+      "football_rationale": "'Defenders goal-side of the ball' is a positioning-specific count, but it could just be restating the team's overall numerical balance on the pitch. Once the attacker:defender ratio is known, does goal-side positioning add anything beyond raw defensive numbers?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 56068,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 5160,
+          "shots": 697,
+          "rate": 13.508
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 4027,
+          "shots": 524,
+          "rate": 13.012
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 3518,
+          "shots": 455,
+          "rate": 12.933
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 2679,
+          "shots": 379,
+          "rate": 14.147
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 3597,
+          "shots": 390,
+          "rate": 10.842
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 3520,
+          "shots": 307,
+          "rate": 8.722
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 3121,
+          "shots": 262,
+          "rate": 8.395
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 2674,
+          "shots": 253,
+          "rate": 9.461
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 3848,
+          "shots": 212,
+          "rate": 5.509
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 3720,
+          "shots": 181,
+          "rate": 4.866
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 3171,
+          "shots": 140,
+          "rate": 4.415
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 3169,
+          "shots": 164,
+          "rate": 5.175
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 6445,
+          "shots": 183,
+          "rate": 2.839
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 4305,
+          "shots": 95,
+          "rate": 2.207
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 2459,
+          "shots": 68,
+          "rate": 2.765
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 655,
+          "shots": 58,
+          "rate": 8.855
+        }
+      ],
+      "marginal_a_rates_by_quartile": [
+        [
+          "Q1",
+          7.78
+        ],
+        [
+          "Q2",
+          7.109
+        ],
+        [
+          "Q3",
+          7.539
+        ],
+        [
+          "Q4",
+          9.306
+        ]
+      ],
+      "marginal_a_delta_pp": 1.526,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.639,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 15384
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -1.381,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 12912
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -0.334,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 13908
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 6.016,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 13864
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Sign flips across B-strata -- A's effect meaningfully depends on B's level."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "top_option_2_threat_score",
+      "feature_b": "top_option_2_distance_from_ball",
+      "football_rationale": "The threat-score model for a passing option plausibly weights proximity to the ball heavily -- a closer option is easier to find and more immediately dangerous. Does option 2's threat score add positional-danger information beyond what its raw distance from the ball already says?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1591000,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 139962,
+          "shots": 14229,
+          "rate": 10.166
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 76820,
+          "shots": 5541,
+          "rate": 7.213
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 83581,
+          "shots": 4111,
+          "rate": 4.919
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 97387,
+          "shots": 5827,
+          "rate": 5.983
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 111286,
+          "shots": 10673,
+          "rate": 9.591
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 91705,
+          "shots": 5867,
+          "rate": 6.398
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 93272,
+          "shots": 4090,
+          "rate": 4.385
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 101488,
+          "shots": 5927,
+          "rate": 5.84
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 88671,
+          "shots": 7402,
+          "rate": 8.348
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 100225,
+          "shots": 5473,
+          "rate": 5.461
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 104152,
+          "shots": 4076,
+          "rate": 3.914
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 104704,
+          "shots": 5432,
+          "rate": 5.188
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 57833,
+          "shots": 4328,
+          "rate": 7.484
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 128999,
+          "shots": 5324,
+          "rate": 4.127
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 116749,
+          "shots": 2938,
+          "rate": 2.517
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 94166,
+          "shots": 3480,
+          "rate": 3.696
+        }
+      ],
+      "marginal_a_rates_by_quartile": [
+        [
+          "Q1",
+          9.21
+        ],
+        [
+          "Q2",
+          5.583
+        ],
+        [
+          "Q3",
+          3.825
+        ],
+        [
+          "Q4",
+          5.196
+        ]
+      ],
+      "marginal_a_delta_pp": -4.014,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -4.183,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 397750
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -3.751,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 397751
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -3.16,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 397752
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -3.788,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 397747
+        }
+      ],
+      "classification": "additive",
+      "classification_reason": "Every B-stratum delta shares the marginal delta's sign and the max/min magnitude ratio (1.32) is within the 2.0 threshold -- A's effect holds at roughly constant strength regardless of B's level."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "lane_screening_score_option_2",
+      "feature_b": "engagement_distance_to_carrier",
+      "football_rationale": "A defender tightly engaging the ball-carrier is, almost by geometry, closer to more passing lanes. Is screening credit for option 2 mostly a byproduct of how tightly the defender is already engaging the carrier, rather than a deliberate lane-blocking position?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1591000,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 156124,
+          "shots": 11453,
+          "rate": 7.336
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 241626,
+          "shots": 19146,
+          "rate": 7.924
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 0,
+          "shots": 0,
+          "rate": null
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 201511,
+          "shots": 11848,
+          "rate": 5.88
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 122641,
+          "shots": 8124,
+          "rate": 6.624
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 73598,
+          "shots": 5767,
+          "rate": 7.836
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 165791,
+          "shots": 7461,
+          "rate": 4.5
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 117875,
+          "shots": 6216,
+          "rate": 5.273
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 66489,
+          "shots": 4094,
+          "rate": 6.157
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 47595,
+          "shots": 3567,
+          "rate": 7.494
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 231959,
+          "shots": 7968,
+          "rate": 3.435
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 78364,
+          "shots": 3808,
+          "rate": 4.859
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 52496,
+          "shots": 2875,
+          "rate": 5.477
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 34931,
+          "shots": 2391,
+          "rate": 6.845
+        }
+      ],
+      "marginal_a_rates_by_quartile": [
+        [
+          "Q1",
+          3.879
+        ],
+        [
+          "Q2",
+          5.499
+        ],
+        [
+          "Q3",
+          6.674
+        ],
+        [
+          "Q4",
+          7.761
+        ]
+      ],
+      "marginal_a_delta_pp": 3.882,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.588,
+          "a_bin_compared_low": "Q3",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 2,
+          "n_rows": 397750
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 1.956,
+          "a_bin_compared_low": "Q2",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 3,
+          "n_rows": 397750
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 2.994,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 397750
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 3.41,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 397750
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (5.80) exceeds 2.0 -- A's effect meaningfully depends on B's level."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "marking_tightness",
+      "feature_b": "engagement_distance_to_carrier",
+      "football_rationale": "Both are distance measurements from a defender to a football-relevant point (nearest attacker vs the ball-carrier specifically) -- plausibly the same underlying 'how close is this defender to the action' phenomenon described twice, not two independent defensive behaviours.",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1592902,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 97595,
+          "shots": 8628,
+          "rate": 8.841
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 97878,
+          "shots": 8022,
+          "rate": 8.196
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 102431,
+          "shots": 7693,
+          "rate": 7.51
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 100322,
+          "shots": 6353,
+          "rate": 6.333
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 111857,
+          "shots": 8252,
+          "rate": 7.377
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 116098,
+          "shots": 7228,
+          "rate": 6.226
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 99487,
+          "shots": 5771,
+          "rate": 5.801
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 70783,
+          "shots": 4574,
+          "rate": 6.462
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 101402,
+          "shots": 6812,
+          "rate": 6.718
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 101629,
+          "shots": 5019,
+          "rate": 4.939
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 102201,
+          "shots": 4680,
+          "rate": 4.579
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 92993,
+          "shots": 4881,
+          "rate": 5.249
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 87372,
+          "shots": 5824,
+          "rate": 6.666
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 82620,
+          "shots": 3349,
+          "rate": 4.053
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 94106,
+          "shots": 3210,
+          "rate": 3.411
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 134128,
+          "shots": 4711,
+          "rate": 3.512
+        }
+      ],
+      "marginal_a_rates_by_quartile": [
+        [
+          "Q1",
+          7.412
+        ],
+        [
+          "Q2",
+          5.931
+        ],
+        [
+          "Q3",
+          5.362
+        ],
+        [
+          "Q4",
+          5.153
+        ]
+      ],
+      "marginal_a_delta_pp": -2.259,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -2.508,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 398226
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.915,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 398225
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -1.469,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 398225
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -3.154,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 398226
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (3.45) exceeds 2.0 -- A's effect meaningfully depends on B's level."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "overload_score",
+      "feature_b": "attacking_goal_centrality",
+      "football_rationale": "Central zones near goal draw more covering defenders by default (it's the most dangerous area to leave open). Does defensive overload just track how central the action is, rather than reflecting a genuine tactical over-commitment of numbers?",
+      "a_labels": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1593181,
+      "grid": [
+        {
+          "a_bin": 0,
+          "b_bin": "Q1",
+          "n": 281530,
+          "shots": 11034,
+          "rate": 3.919
+        },
+        {
+          "a_bin": 1,
+          "b_bin": "Q1",
+          "n": 66126,
+          "shots": 2963,
+          "rate": 4.481
+        },
+        {
+          "a_bin": 2,
+          "b_bin": "Q1",
+          "n": 31813,
+          "shots": 1454,
+          "rate": 4.57
+        },
+        {
+          "a_bin": 3,
+          "b_bin": "Q1",
+          "n": 18827,
+          "shots": 733,
+          "rate": 3.893
+        },
+        {
+          "a_bin": 0,
+          "b_bin": "Q2",
+          "n": 295926,
+          "shots": 14936,
+          "rate": 5.047
+        },
+        {
+          "a_bin": 1,
+          "b_bin": "Q2",
+          "n": 62982,
+          "shots": 3732,
+          "rate": 5.926
+        },
+        {
+          "a_bin": 2,
+          "b_bin": "Q2",
+          "n": 26035,
+          "shots": 1457,
+          "rate": 5.596
+        },
+        {
+          "a_bin": 3,
+          "b_bin": "Q2",
+          "n": 13352,
+          "shots": 730,
+          "rate": 5.467
+        },
+        {
+          "a_bin": 0,
+          "b_bin": "Q3",
+          "n": 307148,
+          "shots": 20148,
+          "rate": 6.56
+        },
+        {
+          "a_bin": 1,
+          "b_bin": "Q3",
+          "n": 57839,
+          "shots": 4013,
+          "rate": 6.938
+        },
+        {
+          "a_bin": 2,
+          "b_bin": "Q3",
+          "n": 22541,
+          "shots": 1243,
+          "rate": 5.514
+        },
+        {
+          "a_bin": 3,
+          "b_bin": "Q3",
+          "n": 10767,
+          "shots": 508,
+          "rate": 4.718
+        },
+        {
+          "a_bin": 0,
+          "b_bin": "Q4",
+          "n": 319964,
+          "shots": 27026,
+          "rate": 8.447
+        },
+        {
+          "a_bin": 1,
+          "b_bin": "Q4",
+          "n": 50566,
+          "shots": 3755,
+          "rate": 7.426
+        },
+        {
+          "a_bin": 2,
+          "b_bin": "Q4",
+          "n": 18722,
+          "shots": 935,
+          "rate": 4.994
+        },
+        {
+          "a_bin": 3,
+          "b_bin": "Q4",
+          "n": 9043,
+          "shots": 381,
+          "rate": 4.213
+        }
+      ],
+      "marginal_a_rates_by_quartile": [
+        [
+          0,
+          6.072
+        ],
+        [
+          1,
+          6.089
+        ],
+        [
+          2,
+          5.135
+        ],
+        [
+          3,
+          4.524
+        ]
+      ],
+      "marginal_a_delta_pp": -1.548,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -0.026,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_populated_a_bins": 4,
+          "n_rows": 398296
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 0.42,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_populated_a_bins": 4,
+          "n_rows": 398295
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -1.842,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_populated_a_bins": 4,
+          "n_rows": 398295
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -4.234,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_populated_a_bins": 4,
+          "n_rows": 398295
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Sign flips across B-strata -- A's effect meaningfully depends on B's level."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "lane_screening_score_option_1",
+      "feature_b": "marking_tightness",
+      "football_rationale": "Both come from the same defender-slot row and could both just be capturing 'this defender is positioned well' in general. Does lane-screening credit for the top option add independent blocking-position signal, or is it mostly redundant with how tightly the defender is already marking?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1592902,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 91231,
+          "shots": 4640,
+          "rate": 5.086
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 107141,
+          "shots": 7687,
+          "rate": 7.175
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 107554,
+          "shots": 8817,
+          "rate": 8.198
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 92300,
+          "shots": 8372,
+          "rate": 9.07
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 90009,
+          "shots": 3009,
+          "rate": 3.343
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 106367,
+          "shots": 5593,
+          "rate": 5.258
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 102229,
+          "shots": 7012,
+          "rate": 6.859
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 99620,
+          "shots": 8004,
+          "rate": 8.035
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 97124,
+          "shots": 3011,
+          "rate": 3.1
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 98798,
+          "shots": 4773,
+          "rate": 4.831
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 95756,
+          "shots": 5922,
+          "rate": 6.184
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 106547,
+          "shots": 7648,
+          "rate": 7.178
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 119862,
+          "shots": 4737,
+          "rate": 3.952
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 85919,
+          "shots": 4683,
+          "rate": 5.45
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 92686,
+          "shots": 5230,
+          "rate": 5.643
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 99759,
+          "shots": 5869,
+          "rate": 5.883
+        }
+      ],
+      "marginal_a_rates_by_quartile": [
+        [
+          "Q1",
+          3.866
+        ],
+        [
+          "Q2",
+          5.709
+        ],
+        [
+          "Q3",
+          6.775
+        ],
+        [
+          "Q4",
+          7.507
+        ]
+      ],
+      "marginal_a_delta_pp": 3.64,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 3.984,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 398226
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 4.692,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 398225
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 4.078,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 398225
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 1.931,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_populated_a_bins": 4,
+          "n_rows": 398226
+        }
+      ],
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (2.43) exceeds 2.0 -- A's effect meaningfully depends on B's level."
+    }
+  ]
+}

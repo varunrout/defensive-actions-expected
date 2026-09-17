@@ -3,7 +3,8 @@
   "parquet_path": "data/features/passive_defense.parquet",
   "n_rows": 1593181,
   "target_col": "target_future_xg_10s",
-  "methodology": "xG counterpart of CONFOUND_ANALYSIS.json -- same quartile-stratification method, against mean xG instead of shot-rate percentage. _verdict()'s sign-only comparison is target-scale-agnostic, reused unchanged; only the table builders (mean_xg, not *100 rate) differ.",
+  "shot_col": "target_future_shot_10s",
+  "methodology": "xG counterpart of CONFOUND_ANALYSIS.json -- same quartile-stratification method, against mean xG instead of shot-rate percentage. _verdict()'s sign-only comparison is target-scale-agnostic, reused unchanged; only the table builders (mean_xg, not *100 rate) differ. Each test also carries a 'given_shot' sub-object: the same marginal+stratified+verdict structure, computed only on rows where target_future_shot_10s==1 -- the real test of whether the reversal is about chance quality, not just chance occurrence, reported whichever way it comes out.",
   "tests": [
     {
       "name": "marking_tightness_vs_zone_defensive_value",
@@ -11,6 +12,7 @@
       "marginal_column": "marking_tightness",
       "confound_column": "zone_defensive_value",
       "proposed_confound_reason": "tight marking only happens because the zone's already dangerous",
+      "n_rows_used": 1593181,
       "marginal_table": [
         {
           "bin": "Q1 tightest",
@@ -164,6 +166,168 @@
         "verdict_meaning": "The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.",
         "n_strata_reversal_survives": 2,
         "n_strata_total": 4
+      },
+      "given_shot": {
+        "name": "marking_tightness_vs_zone_defensive_value",
+        "title": "Marking tightness reversal",
+        "marginal_column": "marking_tightness",
+        "confound_column": "zone_defensive_value",
+        "proposed_confound_reason": "tight marking only happens because the zone's already dangerous",
+        "n_rows_used": 95048,
+        "marginal_table": [
+          {
+            "bin": "Q1 tightest",
+            "n": 23752,
+            "xg_sum": 2395.87,
+            "rate": 0.10087
+          },
+          {
+            "bin": "Q2",
+            "n": 23752,
+            "xg_sum": 2384.7,
+            "rate": 0.1004
+          },
+          {
+            "bin": "Q3",
+            "n": 23751,
+            "xg_sum": 2369.175,
+            "rate": 0.099751
+          },
+          {
+            "bin": "Q4 loosest",
+            "n": 23752,
+            "xg_sum": 2385.463,
+            "rate": 0.100432
+          }
+        ],
+        "stratified_table": [
+          {
+            "stratum": "Z1 calmest",
+            "bins": [
+              {
+                "bin": "Q1 tightest",
+                "n": 7338,
+                "xg_sum": 790.492,
+                "rate": 0.107726
+              },
+              {
+                "bin": "Q2",
+                "n": 6038,
+                "xg_sum": 646.38,
+                "rate": 0.107052
+              },
+              {
+                "bin": "Q3",
+                "n": 5312,
+                "xg_sum": 558.682,
+                "rate": 0.105174
+              },
+              {
+                "bin": "Q4 loosest",
+                "n": 5059,
+                "xg_sum": 521.27,
+                "rate": 0.103038
+              }
+            ],
+            "first_to_last_delta_pp": -0.004688
+          },
+          {
+            "stratum": "Z2",
+            "bins": [
+              {
+                "bin": "Q1 tightest",
+                "n": 3508,
+                "xg_sum": 340.907,
+                "rate": 0.09718
+              },
+              {
+                "bin": "Q2",
+                "n": 5482,
+                "xg_sum": 548.571,
+                "rate": 0.100068
+              },
+              {
+                "bin": "Q3",
+                "n": 6875,
+                "xg_sum": 690.73,
+                "rate": 0.10047
+              },
+              {
+                "bin": "Q4 loosest",
+                "n": 7882,
+                "xg_sum": 800.963,
+                "rate": 0.101619
+              }
+            ],
+            "first_to_last_delta_pp": 0.004439
+          },
+          {
+            "stratum": "Z3",
+            "bins": [
+              {
+                "bin": "Q1 tightest",
+                "n": 4146,
+                "xg_sum": 368.834,
+                "rate": 0.088961
+              },
+              {
+                "bin": "Q2",
+                "n": 6220,
+                "xg_sum": 568.394,
+                "rate": 0.091382
+              },
+              {
+                "bin": "Q3",
+                "n": 7052,
+                "xg_sum": 645.714,
+                "rate": 0.091565
+              },
+              {
+                "bin": "Q4 loosest",
+                "n": 6336,
+                "xg_sum": 593.094,
+                "rate": 0.093607
+              }
+            ],
+            "first_to_last_delta_pp": 0.004646
+          },
+          {
+            "stratum": "Z4 most dangerous",
+            "bins": [
+              {
+                "bin": "Q1 tightest",
+                "n": 8760,
+                "xg_sum": 895.638,
+                "rate": 0.102242
+              },
+              {
+                "bin": "Q2",
+                "n": 6012,
+                "xg_sum": 621.356,
+                "rate": 0.103353
+              },
+              {
+                "bin": "Q3",
+                "n": 4512,
+                "xg_sum": 474.049,
+                "rate": 0.105064
+              },
+              {
+                "bin": "Q4 loosest",
+                "n": 4475,
+                "xg_sum": 470.135,
+                "rate": 0.105058
+              }
+            ],
+            "first_to_last_delta_pp": 0.002816
+          }
+        ],
+        "verdict": {
+          "verdict": "partially",
+          "verdict_meaning": "The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.",
+          "n_strata_reversal_survives": 1,
+          "n_strata_total": 4
+        }
       }
     },
     {
@@ -172,6 +336,7 @@
       "marginal_column": "lane_screening_score_option_1",
       "confound_column": "top_option_1_threat_score",
       "proposed_confound_reason": "a threatening top option only exists when danger is already high",
+      "n_rows_used": 1593181,
       "marginal_table": [
         {
           "bin": "Q1 least",
@@ -325,7 +490,788 @@
         "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
         "n_strata_reversal_survives": 4,
         "n_strata_total": 4
+      },
+      "given_shot": {
+        "name": "lane_screening_vs_top_option_1_threat_score",
+        "title": "Lane screening reversal",
+        "marginal_column": "lane_screening_score_option_1",
+        "confound_column": "top_option_1_threat_score",
+        "proposed_confound_reason": "a threatening top option only exists when danger is already high",
+        "n_rows_used": 95048,
+        "marginal_table": [
+          {
+            "bin": "Q1 least",
+            "n": 23752,
+            "xg_sum": 2200.411,
+            "rate": 0.092641
+          },
+          {
+            "bin": "Q2",
+            "n": 23752,
+            "xg_sum": 2285.446,
+            "rate": 0.096221
+          },
+          {
+            "bin": "Q3",
+            "n": 23751,
+            "xg_sum": 2424.937,
+            "rate": 0.102098
+          },
+          {
+            "bin": "Q4 most screened",
+            "n": 23752,
+            "xg_sum": 2624.415,
+            "rate": 0.110492
+          }
+        ],
+        "stratified_table": [
+          {
+            "stratum": "T1 low",
+            "bins": [
+              {
+                "bin": "Q1 least",
+                "n": 4889,
+                "xg_sum": 496.893,
+                "rate": 0.101635
+              },
+              {
+                "bin": "Q2",
+                "n": 5675,
+                "xg_sum": 587.328,
+                "rate": 0.103494
+              },
+              {
+                "bin": "Q3",
+                "n": 6271,
+                "xg_sum": 692.41,
+                "rate": 0.110415
+              },
+              {
+                "bin": "Q4 most screened",
+                "n": 6922,
+                "xg_sum": 821.811,
+                "rate": 0.118724
+              }
+            ],
+            "first_to_last_delta_pp": 0.017089
+          },
+          {
+            "stratum": "T2",
+            "bins": [
+              {
+                "bin": "Q1 least",
+                "n": 6811,
+                "xg_sum": 572.618,
+                "rate": 0.084073
+              },
+              {
+                "bin": "Q2",
+                "n": 6385,
+                "xg_sum": 557.258,
+                "rate": 0.087276
+              },
+              {
+                "bin": "Q3",
+                "n": 5633,
+                "xg_sum": 501.012,
+                "rate": 0.088942
+              },
+              {
+                "bin": "Q4 most screened",
+                "n": 4926,
+                "xg_sum": 482.195,
+                "rate": 0.097888
+              }
+            ],
+            "first_to_last_delta_pp": 0.013815
+          },
+          {
+            "stratum": "T3",
+            "bins": [
+              {
+                "bin": "Q1 least",
+                "n": 6939,
+                "xg_sum": 655.059,
+                "rate": 0.094403
+              },
+              {
+                "bin": "Q2",
+                "n": 5754,
+                "xg_sum": 571.178,
+                "rate": 0.099266
+              },
+              {
+                "bin": "Q3",
+                "n": 5569,
+                "xg_sum": 585.543,
+                "rate": 0.105143
+              },
+              {
+                "bin": "Q4 most screened",
+                "n": 5487,
+                "xg_sum": 610.765,
+                "rate": 0.111311
+              }
+            ],
+            "first_to_last_delta_pp": 0.016908
+          },
+          {
+            "stratum": "T4 high",
+            "bins": [
+              {
+                "bin": "Q1 least",
+                "n": 5113,
+                "xg_sum": 475.841,
+                "rate": 0.093065
+              },
+              {
+                "bin": "Q2",
+                "n": 5938,
+                "xg_sum": 569.682,
+                "rate": 0.095938
+              },
+              {
+                "bin": "Q3",
+                "n": 6278,
+                "xg_sum": 645.972,
+                "rate": 0.102895
+              },
+              {
+                "bin": "Q4 most screened",
+                "n": 6417,
+                "xg_sum": 709.645,
+                "rate": 0.110588
+              }
+            ],
+            "first_to_last_delta_pp": 0.017523
+          }
+        ],
+        "verdict": {
+          "verdict": "no",
+          "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
+          "n_strata_reversal_survives": 4,
+          "n_strata_total": 4
+        }
+      }
+    },
+    {
+      "name": "has_option_2_vs_top_option_1_threat_score",
+      "title": "has_option_2 shot-rate gap vs top_option_1_threat_score",
+      "marginal_column": "has_option_2",
+      "confound_column": "top_option_1_threat_score",
+      "marginal_type": "boolean (split True/False directly, not quartiled)",
+      "proposed_confound_reason": "a defender only 'has' a second ranked option worth recording when the primary threat is itself significant (more players committed forward = more danger already) -- the option-count effect might just be a proxy for how threatening the possession already is, not a defensive-shape signal in its own right",
+      "n_rows_used": 1593181,
+      "marginal_table": [
+        {
+          "bin": "False (no 2nd option)",
+          "n": 2181,
+          "xg_sum": 36.734,
+          "rate": 0.016843
+        },
+        {
+          "bin": "True (has 2nd option)",
+          "n": 1591000,
+          "xg_sum": 9508.422,
+          "rate": 0.005976
+        }
+      ],
+      "stratified_table": [
+        {
+          "stratum": "T1 low",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 1361,
+              "xg_sum": 19.146,
+              "rate": 0.014067
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 396869,
+              "xg_sum": 4107.637,
+              "rate": 0.01035
+            }
+          ],
+          "first_to_last_delta_pp": -0.003717
+        },
+        {
+          "stratum": "T2",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 224,
+              "xg_sum": 2.167,
+              "rate": 0.009674
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 398002,
+              "xg_sum": 1575.516,
+              "rate": 0.003959
+            }
+          ],
+          "first_to_last_delta_pp": -0.005715
+        },
+        {
+          "stratum": "T3",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 129,
+              "xg_sum": 0.589,
+              "rate": 0.004565
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 398091,
+              "xg_sum": 1433.285,
+              "rate": 0.0036
+            }
+          ],
+          "first_to_last_delta_pp": -0.000965
+        },
+        {
+          "stratum": "T4 high",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 188,
+              "xg_sum": 4.884,
+              "rate": 0.025981
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 398038,
+              "xg_sum": 2391.984,
+              "rate": 0.006009
+            }
+          ],
+          "first_to_last_delta_pp": -0.019972
+        }
+      ],
+      "verdict": {
+        "verdict": "no",
+        "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
+        "n_strata_reversal_survives": 4,
+        "n_strata_total": 4
+      },
+      "given_shot": {
+        "name": "has_option_2_vs_top_option_1_threat_score",
+        "title": "has_option_2 shot-rate gap vs top_option_1_threat_score",
+        "marginal_column": "has_option_2",
+        "confound_column": "top_option_1_threat_score",
+        "marginal_type": "boolean (split True/False directly, not quartiled)",
+        "proposed_confound_reason": "a defender only 'has' a second ranked option worth recording when the primary threat is itself significant (more players committed forward = more danger already) -- the option-count effect might just be a proxy for how threatening the possession already is, not a defensive-shape signal in its own right",
+        "n_rows_used": 95048,
+        "marginal_table": [
+          {
+            "bin": "False (no 2nd option)",
+            "n": 330,
+            "xg_sum": 36.734,
+            "rate": 0.111314
+          },
+          {
+            "bin": "True (has 2nd option)",
+            "n": 94718,
+            "xg_sum": 9508.422,
+            "rate": 0.100387
+          }
+        ],
+        "stratified_table": [
+          {
+            "stratum": "T1 low",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 181,
+                "xg_sum": 18.959,
+                "rate": 0.104746
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 23576,
+                "xg_sum": 2579.482,
+                "rate": 0.109411
+              }
+            ],
+            "first_to_last_delta_pp": 0.004665
+          },
+          {
+            "stratum": "T2",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 20,
+                "xg_sum": 1.247,
+                "rate": 0.062364
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 23735,
+                "xg_sum": 2111.835,
+                "rate": 0.088976
+              }
+            ],
+            "first_to_last_delta_pp": 0.026612
+          },
+          {
+            "stratum": "T3",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 37,
+                "xg_sum": 1.695,
+                "rate": 0.045818
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 23712,
+                "xg_sum": 2420.849,
+                "rate": 0.102094
+              }
+            ],
+            "first_to_last_delta_pp": 0.056276
+          },
+          {
+            "stratum": "T4 high",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 51,
+                "xg_sum": 4.884,
+                "rate": 0.095774
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 23695,
+                "xg_sum": 2396.255,
+                "rate": 0.101129
+              }
+            ],
+            "first_to_last_delta_pp": 0.005355
+          }
+        ],
+        "verdict": {
+          "verdict": "yes",
+          "verdict_meaning": "The reversal disappears within every stratum -- consistent with the proposed confound explaining it away.",
+          "n_strata_reversal_survives": 0,
+          "n_strata_total": 4
+        }
+      }
+    },
+    {
+      "name": "has_option_3_vs_top_option_1_threat_score",
+      "title": "has_option_3 shot-rate gap vs top_option_1_threat_score",
+      "marginal_column": "has_option_3",
+      "confound_column": "top_option_1_threat_score",
+      "marginal_type": "boolean (split True/False directly, not quartiled)",
+      "proposed_confound_reason": "same hypothesis as has_option_2, extended to the third option",
+      "n_rows_used": 1593181,
+      "marginal_table": [
+        {
+          "bin": "False (no 3rd option)",
+          "n": 11398,
+          "xg_sum": 277.036,
+          "rate": 0.024306
+        },
+        {
+          "bin": "True (has 3rd option)",
+          "n": 1581783,
+          "xg_sum": 9268.12,
+          "rate": 0.005859
+        }
+      ],
+      "stratified_table": [
+        {
+          "stratum": "T1 low",
+          "bins": [
+            {
+              "bin": "False (no 3rd option)",
+              "n": 6770,
+              "xg_sum": 171.878,
+              "rate": 0.025388
+            },
+            {
+              "bin": "True (has 3rd option)",
+              "n": 391460,
+              "xg_sum": 3954.904,
+              "rate": 0.010103
+            }
+          ],
+          "first_to_last_delta_pp": -0.015285
+        },
+        {
+          "stratum": "T2",
+          "bins": [
+            {
+              "bin": "False (no 3rd option)",
+              "n": 1430,
+              "xg_sum": 29.725,
+              "rate": 0.020787
+            },
+            {
+              "bin": "True (has 3rd option)",
+              "n": 396796,
+              "xg_sum": 1547.958,
+              "rate": 0.003901
+            }
+          ],
+          "first_to_last_delta_pp": -0.016886
+        },
+        {
+          "stratum": "T3",
+          "bins": [
+            {
+              "bin": "False (no 3rd option)",
+              "n": 1125,
+              "xg_sum": 18.257,
+              "rate": 0.016229
+            },
+            {
+              "bin": "True (has 3rd option)",
+              "n": 397095,
+              "xg_sum": 1415.617,
+              "rate": 0.003565
+            }
+          ],
+          "first_to_last_delta_pp": -0.012664
+        },
+        {
+          "stratum": "T4 high",
+          "bins": [
+            {
+              "bin": "False (no 3rd option)",
+              "n": 1794,
+              "xg_sum": 47.228,
+              "rate": 0.026325
+            },
+            {
+              "bin": "True (has 3rd option)",
+              "n": 396432,
+              "xg_sum": 2349.641,
+              "rate": 0.005927
+            }
+          ],
+          "first_to_last_delta_pp": -0.020398
+        }
+      ],
+      "verdict": {
+        "verdict": "no",
+        "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
+        "n_strata_reversal_survives": 4,
+        "n_strata_total": 4
+      },
+      "given_shot": {
+        "name": "has_option_3_vs_top_option_1_threat_score",
+        "title": "has_option_3 shot-rate gap vs top_option_1_threat_score",
+        "marginal_column": "has_option_3",
+        "confound_column": "top_option_1_threat_score",
+        "marginal_type": "boolean (split True/False directly, not quartiled)",
+        "proposed_confound_reason": "same hypothesis as has_option_2, extended to the third option",
+        "n_rows_used": 95048,
+        "marginal_table": [
+          {
+            "bin": "False (no 3rd option)",
+            "n": 1948,
+            "xg_sum": 277.036,
+            "rate": 0.142216
+          },
+          {
+            "bin": "True (has 3rd option)",
+            "n": 93100,
+            "xg_sum": 9268.12,
+            "rate": 0.09955
+          }
+        ],
+        "stratified_table": [
+          {
+            "stratum": "T1 low",
+            "bins": [
+              {
+                "bin": "False (no 3rd option)",
+                "n": 1094,
+                "xg_sum": 159.389,
+                "rate": 0.145694
+              },
+              {
+                "bin": "True (has 3rd option)",
+                "n": 22663,
+                "xg_sum": 2439.052,
+                "rate": 0.107623
+              }
+            ],
+            "first_to_last_delta_pp": -0.038071
+          },
+          {
+            "stratum": "T2",
+            "bins": [
+              {
+                "bin": "False (no 3rd option)",
+                "n": 196,
+                "xg_sum": 18.324,
+                "rate": 0.093488
+              },
+              {
+                "bin": "True (has 3rd option)",
+                "n": 23559,
+                "xg_sum": 2094.759,
+                "rate": 0.088915
+              }
+            ],
+            "first_to_last_delta_pp": -0.004573
+          },
+          {
+            "stratum": "T3",
+            "bins": [
+              {
+                "bin": "False (no 3rd option)",
+                "n": 329,
+                "xg_sum": 42.148,
+                "rate": 0.12811
+              },
+              {
+                "bin": "True (has 3rd option)",
+                "n": 23420,
+                "xg_sum": 2380.396,
+                "rate": 0.101639
+              }
+            ],
+            "first_to_last_delta_pp": -0.026471
+          },
+          {
+            "stratum": "T4 high",
+            "bins": [
+              {
+                "bin": "False (no 3rd option)",
+                "n": 288,
+                "xg_sum": 47.228,
+                "rate": 0.163985
+              },
+              {
+                "bin": "True (has 3rd option)",
+                "n": 23458,
+                "xg_sum": 2353.912,
+                "rate": 0.100346
+              }
+            ],
+            "first_to_last_delta_pp": -0.063639
+          }
+        ],
+        "verdict": {
+          "verdict": "no",
+          "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
+          "n_strata_reversal_survives": 4,
+          "n_strata_total": 4
+        }
+      }
+    },
+    {
+      "name": "has_option_2_vs_defender_x",
+      "title": "has_option_2 shot-rate gap vs defender_x",
+      "marginal_column": "has_option_2",
+      "confound_column": "defender_x",
+      "marginal_type": "boolean (split True/False directly, not quartiled)",
+      "proposed_confound_reason": "fewer options might just mean the attack is closer to goal, not that the defending team's structure is doing anything. Confound feature is defender_x, not zone_defensive_value: zone_defensive_value is dropped in feature_config.py (REDUNDANCY_DROPPED_PASSIVE, r=-1.0 vs distance_to_defending_goal), and distance_to_defending_goal is ALSO dropped (Cluster 4, defender-position) -- defender_x is the actually-kept, model-facing sibling, same correction prompt 25 already made for this exact substitution.",
+      "n_rows_used": 1593181,
+      "marginal_table": [
+        {
+          "bin": "False (no 2nd option)",
+          "n": 2181,
+          "xg_sum": 36.734,
+          "rate": 0.016843
+        },
+        {
+          "bin": "True (has 2nd option)",
+          "n": 1591000,
+          "xg_sum": 9508.422,
+          "rate": 0.005976
+        }
+      ],
+      "stratified_table": [
+        {
+          "stratum": "D1",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 903,
+              "xg_sum": 14.659,
+              "rate": 0.016234
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 397393,
+              "xg_sum": 4049.964,
+              "rate": 0.010191
+            }
+          ],
+          "first_to_last_delta_pp": -0.006043
+        },
+        {
+          "stratum": "D2",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 233,
+              "xg_sum": 5.376,
+              "rate": 0.023073
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 398062,
+              "xg_sum": 1124.155,
+              "rate": 0.002824
+            }
+          ],
+          "first_to_last_delta_pp": -0.020249
+        },
+        {
+          "stratum": "D3",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 166,
+              "xg_sum": 3.031,
+              "rate": 0.018257
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 398129,
+              "xg_sum": 969.227,
+              "rate": 0.002434
+            }
+          ],
+          "first_to_last_delta_pp": -0.015823
+        },
+        {
+          "stratum": "D4",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 879,
+              "xg_sum": 13.668,
+              "rate": 0.015549
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 397416,
+              "xg_sum": 3365.077,
+              "rate": 0.008467
+            }
+          ],
+          "first_to_last_delta_pp": -0.007082
+        }
+      ],
+      "verdict": {
+        "verdict": "no",
+        "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
+        "n_strata_reversal_survives": 4,
+        "n_strata_total": 4
+      },
+      "given_shot": {
+        "name": "has_option_2_vs_defender_x",
+        "title": "has_option_2 shot-rate gap vs defender_x",
+        "marginal_column": "has_option_2",
+        "confound_column": "defender_x",
+        "marginal_type": "boolean (split True/False directly, not quartiled)",
+        "proposed_confound_reason": "fewer options might just mean the attack is closer to goal, not that the defending team's structure is doing anything. Confound feature is defender_x, not zone_defensive_value: zone_defensive_value is dropped in feature_config.py (REDUNDANCY_DROPPED_PASSIVE, r=-1.0 vs distance_to_defending_goal), and distance_to_defending_goal is ALSO dropped (Cluster 4, defender-position) -- defender_x is the actually-kept, model-facing sibling, same correction prompt 25 already made for this exact substitution.",
+        "n_rows_used": 95048,
+        "marginal_table": [
+          {
+            "bin": "False (no 2nd option)",
+            "n": 330,
+            "xg_sum": 36.734,
+            "rate": 0.111314
+          },
+          {
+            "bin": "True (has 2nd option)",
+            "n": 94718,
+            "xg_sum": 9508.422,
+            "rate": 0.100387
+          }
+        ],
+        "stratified_table": [
+          {
+            "stratum": "D1",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 69,
+                "xg_sum": 9.204,
+                "rate": 0.133393
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 23693,
+                "xg_sum": 2435.943,
+                "rate": 0.102813
+              }
+            ],
+            "first_to_last_delta_pp": -0.03058
+          },
+          {
+            "stratum": "D2",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 65,
+                "xg_sum": 8.859,
+                "rate": 0.136288
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 23697,
+                "xg_sum": 2185.289,
+                "rate": 0.092218
+              }
+            ],
+            "first_to_last_delta_pp": -0.04407
+          },
+          {
+            "stratum": "D3",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 82,
+                "xg_sum": 8.673,
+                "rate": 0.105767
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 23681,
+                "xg_sum": 2374.121,
+                "rate": 0.100254
+              }
+            ],
+            "first_to_last_delta_pp": -0.005513
+          },
+          {
+            "stratum": "D4",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 114,
+                "xg_sum": 9.998,
+                "rate": 0.087702
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 23647,
+                "xg_sum": 2513.069,
+                "rate": 0.106274
+              }
+            ],
+            "first_to_last_delta_pp": 0.018572
+          }
+        ],
+        "verdict": {
+          "verdict": "partially",
+          "verdict_meaning": "The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.",
+          "n_strata_reversal_survives": 3,
+          "n_strata_total": 4
+        }
       }
     }
-  ]
+  ],
+  "part_d_extension_note": "3 tests added by prompt 29 (xG mirror of the binary-target has_option_2/3 confound tests). reports/eda_xg/CONFOUND_ANALYSIS.json had never received prompt 24 Part A's 5-test extension -- this is the FIRST Part-A-style extension applied to this file, not a continuation of an established xg pattern. The 2 pre-existing entries above this note are byte-for-byte unchanged."
 }

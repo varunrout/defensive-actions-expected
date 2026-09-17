@@ -1,0 +1,1319 @@
+{
+  "target": "target_future_shot_10s",
+  "tournaments": [
+    "WC2022",
+    "Euro2024"
+  ],
+  "n_quantile_bins": 10,
+  "excluded_from_investigation": {
+    "nearest_defender_distance": "already-known self-reference bug (73.6% of rows ~0m) -- a separate issue, not investigated here per prompt 24's explicit instruction."
+  },
+  "methodology": "For each feature, bin edges are computed once on the full population (same edges the train/test consistency check used), then applied to each tournament subset -- apples-to-apples. Shape classification uses the same classify_shape() heuristic as prompts 21/22. Verdict: matching shapes across tournaments -> the earlier train/test instability looks like arbitrary noise; differing shapes -> consistent with a genuine tournament-level difference.",
+  "features": [
+    {
+      "feature": "defenders_within_10m",
+      "dataset": "active",
+      "train_test_finding": {
+        "overall_shape": "monotonic increasing",
+        "spearman_rho": 0.1516,
+        "train_val_shape": "U-shaped",
+        "test_shape": "inverse-U",
+        "train_test_consistent": false
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 31041,
+          "n_matches": 64,
+          "shape": "U-shaped",
+          "rate_range_pp": 46.974,
+          "bins": [
+            {
+              "bin": "0.0",
+              "n": 4594,
+              "shot_rate_pct": 3.026
+            },
+            {
+              "bin": "1.0",
+              "n": 6657,
+              "shot_rate_pct": 4.582
+            },
+            {
+              "bin": "2.0",
+              "n": 5874,
+              "shot_rate_pct": 6.18
+            },
+            {
+              "bin": "3.0",
+              "n": 3409,
+              "shot_rate_pct": 8.976
+            },
+            {
+              "bin": "4.0",
+              "n": 1514,
+              "shot_rate_pct": 14.465
+            },
+            {
+              "bin": "5.0",
+              "n": 742,
+              "shot_rate_pct": 16.442
+            },
+            {
+              "bin": "6.0",
+              "n": 367,
+              "shot_rate_pct": 22.343
+            },
+            {
+              "bin": "7.0",
+              "n": 247,
+              "shot_rate_pct": 21.862
+            },
+            {
+              "bin": "8.0",
+              "n": 105,
+              "shot_rate_pct": 20.0
+            },
+            {
+              "bin": "9.0",
+              "n": 48,
+              "shot_rate_pct": 25.0
+            },
+            {
+              "bin": "10.0",
+              "n": 11,
+              "shot_rate_pct": 45.455
+            },
+            {
+              "bin": "11.0",
+              "n": 2,
+              "shot_rate_pct": 50.0
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 25027,
+          "n_matches": 51,
+          "shape": "inverse-U",
+          "rate_range_pp": 21.001,
+          "bins": [
+            {
+              "bin": "0.0",
+              "n": 3612,
+              "shot_rate_pct": 3.433
+            },
+            {
+              "bin": "1.0",
+              "n": 5340,
+              "shot_rate_pct": 6.255
+            },
+            {
+              "bin": "2.0",
+              "n": 4652,
+              "shot_rate_pct": 7.223
+            },
+            {
+              "bin": "3.0",
+              "n": 2889,
+              "shot_rate_pct": 11.284
+            },
+            {
+              "bin": "4.0",
+              "n": 1503,
+              "shot_rate_pct": 14.238
+            },
+            {
+              "bin": "5.0",
+              "n": 821,
+              "shot_rate_pct": 18.514
+            },
+            {
+              "bin": "6.0",
+              "n": 403,
+              "shot_rate_pct": 22.084
+            },
+            {
+              "bin": "7.0",
+              "n": 221,
+              "shot_rate_pct": 24.434
+            },
+            {
+              "bin": "8.0",
+              "n": 130,
+              "shot_rate_pct": 22.308
+            },
+            {
+              "bin": "9.0",
+              "n": 42,
+              "shot_rate_pct": 21.429
+            },
+            {
+              "bin": "10.0",
+              "n": 16,
+              "shot_rate_pct": 12.5
+            }
+          ]
+        }
+      },
+      "verdict": "genuine tournament-level difference",
+      "verdict_reason": "Shape classification differs between tournaments (WC2022: U-shaped, Euro2024: inverse-U) -- consistent with a real difference between the two populations (rules, pitch dimensions, squad quality), not just arbitrary train/test noise."
+    },
+    {
+      "feature": "defenders_within_5m",
+      "dataset": "active",
+      "train_test_finding": {
+        "overall_shape": "inverse-U",
+        "spearman_rho": 0.0844,
+        "train_val_shape": "inverse-U",
+        "test_shape": "U-shaped",
+        "train_test_consistent": false
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 31041,
+          "n_matches": 64,
+          "shape": "U-shaped",
+          "rate_range_pp": 100.0,
+          "bins": [
+            {
+              "bin": "0.0",
+              "n": 16902,
+              "shot_rate_pct": 5.189
+            },
+            {
+              "bin": "1.0",
+              "n": 8689,
+              "shot_rate_pct": 7.389
+            },
+            {
+              "bin": "2.0",
+              "n": 2269,
+              "shot_rate_pct": 10.489
+            },
+            {
+              "bin": "3.0",
+              "n": 573,
+              "shot_rate_pct": 18.499
+            },
+            {
+              "bin": "4.0",
+              "n": 203,
+              "shot_rate_pct": 23.153
+            },
+            {
+              "bin": "5.0",
+              "n": 66,
+              "shot_rate_pct": 22.727
+            },
+            {
+              "bin": "6.0",
+              "n": 28,
+              "shot_rate_pct": 21.429
+            },
+            {
+              "bin": "7.0",
+              "n": 4,
+              "shot_rate_pct": 0.0
+            },
+            {
+              "bin": "8.0",
+              "n": 1,
+              "shot_rate_pct": 100.0
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 25027,
+          "n_matches": 51,
+          "shape": "inverse-U",
+          "rate_range_pp": 50.0,
+          "bins": [
+            {
+              "bin": "0.0",
+              "n": 13772,
+              "shot_rate_pct": 6.673
+            },
+            {
+              "bin": "1.0",
+              "n": 6767,
+              "shot_rate_pct": 9.236
+            },
+            {
+              "bin": "2.0",
+              "n": 2040,
+              "shot_rate_pct": 11.863
+            },
+            {
+              "bin": "3.0",
+              "n": 522,
+              "shot_rate_pct": 16.475
+            },
+            {
+              "bin": "4.0",
+              "n": 190,
+              "shot_rate_pct": 19.474
+            },
+            {
+              "bin": "5.0",
+              "n": 81,
+              "shot_rate_pct": 23.457
+            },
+            {
+              "bin": "6.0",
+              "n": 28,
+              "shot_rate_pct": 25.0
+            },
+            {
+              "bin": "7.0",
+              "n": 2,
+              "shot_rate_pct": 50.0
+            },
+            {
+              "bin": "8.0",
+              "n": 1,
+              "shot_rate_pct": 0.0
+            }
+          ]
+        }
+      },
+      "verdict": "genuine tournament-level difference",
+      "verdict_reason": "Shape classification differs between tournaments (WC2022: U-shaped, Euro2024: inverse-U) -- consistent with a real difference between the two populations (rules, pitch dimensions, squad quality), not just arbitrary train/test noise."
+    },
+    {
+      "feature": "events_elapsed_in_possession",
+      "dataset": "active",
+      "train_test_finding": {
+        "overall_shape": "monotonic increasing",
+        "spearman_rho": 0.0647,
+        "train_val_shape": "monotonic increasing",
+        "test_shape": "U-shaped",
+        "train_test_consistent": false
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 31041,
+          "n_matches": 64,
+          "shape": "no-clear-pattern",
+          "rate_range_pp": 6.458,
+          "bins": [
+            {
+              "bin": "(0.999, 2.0]",
+              "n": 4236,
+              "shot_rate_pct": 4.013
+            },
+            {
+              "bin": "(2.0, 4.0]",
+              "n": 3266,
+              "shot_rate_pct": 8.114
+            },
+            {
+              "bin": "(4.0, 6.0]",
+              "n": 2520,
+              "shot_rate_pct": 6.349
+            },
+            {
+              "bin": "(6.0, 9.0]",
+              "n": 3420,
+              "shot_rate_pct": 5.497
+            },
+            {
+              "bin": "(9.0, 12.0]",
+              "n": 2788,
+              "shot_rate_pct": 5.38
+            },
+            {
+              "bin": "(12.0, 17.0]",
+              "n": 3532,
+              "shot_rate_pct": 6.823
+            },
+            {
+              "bin": "(17.0, 22.0]",
+              "n": 2716,
+              "shot_rate_pct": 7.842
+            },
+            {
+              "bin": "(22.0, 30.0]",
+              "n": 2907,
+              "shot_rate_pct": 9.219
+            },
+            {
+              "bin": "(30.0, 45.0]",
+              "n": 2970,
+              "shot_rate_pct": 10.471
+            },
+            {
+              "bin": "(45.0, 243.0]",
+              "n": 2686,
+              "shot_rate_pct": 8.079
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 25027,
+          "n_matches": 51,
+          "shape": "monotonic increasing",
+          "rate_range_pp": 7.624,
+          "bins": [
+            {
+              "bin": "(0.999, 2.0]",
+              "n": 2958,
+              "shot_rate_pct": 4.26
+            },
+            {
+              "bin": "(2.0, 4.0]",
+              "n": 2497,
+              "shot_rate_pct": 9.051
+            },
+            {
+              "bin": "(4.0, 6.0]",
+              "n": 1989,
+              "shot_rate_pct": 7.441
+            },
+            {
+              "bin": "(6.0, 9.0]",
+              "n": 2580,
+              "shot_rate_pct": 6.434
+            },
+            {
+              "bin": "(9.0, 12.0]",
+              "n": 2130,
+              "shot_rate_pct": 8.498
+            },
+            {
+              "bin": "(12.0, 17.0]",
+              "n": 2751,
+              "shot_rate_pct": 8.688
+            },
+            {
+              "bin": "(17.0, 22.0]",
+              "n": 2133,
+              "shot_rate_pct": 9.564
+            },
+            {
+              "bin": "(22.0, 30.0]",
+              "n": 2448,
+              "shot_rate_pct": 10.417
+            },
+            {
+              "bin": "(30.0, 45.0]",
+              "n": 2823,
+              "shot_rate_pct": 11.229
+            },
+            {
+              "bin": "(45.0, 243.0]",
+              "n": 2718,
+              "shot_rate_pct": 11.884
+            }
+          ]
+        }
+      },
+      "verdict": "genuine tournament-level difference",
+      "verdict_reason": "Shape classification differs between tournaments (WC2022: no-clear-pattern, Euro2024: monotonic increasing) -- consistent with a real difference between the two populations (rules, pitch dimensions, squad quality), not just arbitrary train/test noise."
+    },
+    {
+      "feature": "local_numerical_balance_5m",
+      "dataset": "active",
+      "train_test_finding": {
+        "overall_shape": "no-clear-pattern",
+        "spearman_rho": -0.0607,
+        "train_val_shape": "no-clear-pattern",
+        "test_shape": "U-shaped",
+        "train_test_consistent": false
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 31041,
+          "n_matches": 64,
+          "shape": "inverse-U",
+          "rate_range_pp": 25.397,
+          "bins": [
+            {
+              "bin": "-6.0",
+              "n": 3,
+              "shot_rate_pct": 0.0
+            },
+            {
+              "bin": "-5.0",
+              "n": 11,
+              "shot_rate_pct": 18.182
+            },
+            {
+              "bin": "-4.0",
+              "n": 63,
+              "shot_rate_pct": 25.397
+            },
+            {
+              "bin": "-3.0",
+              "n": 192,
+              "shot_rate_pct": 20.833
+            },
+            {
+              "bin": "-2.0",
+              "n": 1148,
+              "shot_rate_pct": 12.544
+            },
+            {
+              "bin": "-1.0",
+              "n": 4033,
+              "shot_rate_pct": 8.629
+            },
+            {
+              "bin": "0.0",
+              "n": 9099,
+              "shot_rate_pct": 7.1
+            },
+            {
+              "bin": "1.0",
+              "n": 12656,
+              "shot_rate_pct": 5.207
+            },
+            {
+              "bin": "2.0",
+              "n": 1403,
+              "shot_rate_pct": 5.203
+            },
+            {
+              "bin": "3.0",
+              "n": 120,
+              "shot_rate_pct": 3.333
+            },
+            {
+              "bin": "4.0",
+              "n": 7,
+              "shot_rate_pct": 0.0
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 25027,
+          "n_matches": 51,
+          "shape": "inverse-U",
+          "rate_range_pp": 23.077,
+          "bins": [
+            {
+              "bin": "-5.0",
+              "n": 8,
+              "shot_rate_pct": 0.0
+            },
+            {
+              "bin": "-4.0",
+              "n": 52,
+              "shot_rate_pct": 23.077
+            },
+            {
+              "bin": "-3.0",
+              "n": 203,
+              "shot_rate_pct": 14.286
+            },
+            {
+              "bin": "-2.0",
+              "n": 955,
+              "shot_rate_pct": 11.518
+            },
+            {
+              "bin": "-1.0",
+              "n": 3138,
+              "shot_rate_pct": 10.198
+            },
+            {
+              "bin": "0.0",
+              "n": 7234,
+              "shot_rate_pct": 8.598
+            },
+            {
+              "bin": "1.0",
+              "n": 10511,
+              "shot_rate_pct": 7.145
+            },
+            {
+              "bin": "2.0",
+              "n": 1202,
+              "shot_rate_pct": 7.404
+            },
+            {
+              "bin": "3.0",
+              "n": 89,
+              "shot_rate_pct": 3.371
+            },
+            {
+              "bin": "4.0",
+              "n": 9,
+              "shot_rate_pct": 0.0
+            },
+            {
+              "bin": "5.0",
+              "n": 2,
+              "shot_rate_pct": 0.0
+            }
+          ]
+        }
+      },
+      "verdict": "arbitrary train/test noise",
+      "verdict_reason": "Same shape classification (inverse-U) in both WC2022 and Euro2024 -- a genuine tournament-level population difference would be expected to show up here, and it doesn't. The train/test instability prompt 21 found looks like noise from an arbitrary match split, not a real population-mixing artefact."
+    },
+    {
+      "feature": "match_time_seconds",
+      "dataset": "active",
+      "train_test_finding": {
+        "overall_shape": "monotonic increasing",
+        "spearman_rho": 0.0353,
+        "train_val_shape": "monotonic increasing",
+        "test_shape": "no-clear-pattern",
+        "train_test_consistent": false
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 31041,
+          "n_matches": 64,
+          "shape": "monotonic increasing",
+          "rate_range_pp": 4.511,
+          "bins": [
+            {
+              "bin": "(1.999, 517.0]",
+              "n": 3018,
+              "shot_rate_pct": 5.368
+            },
+            {
+              "bin": "(517.0, 1138.0]",
+              "n": 3058,
+              "shot_rate_pct": 5.069
+            },
+            {
+              "bin": "(1138.0, 1750.0]",
+              "n": 3003,
+              "shot_rate_pct": 6.227
+            },
+            {
+              "bin": "(1750.0, 2391.0]",
+              "n": 3045,
+              "shot_rate_pct": 5.649
+            },
+            {
+              "bin": "(2391.0, 2877.0]",
+              "n": 3175,
+              "shot_rate_pct": 7.496
+            },
+            {
+              "bin": "(2877.0, 3417.0]",
+              "n": 3302,
+              "shot_rate_pct": 8.873
+            },
+            {
+              "bin": "(3417.0, 4037.0]",
+              "n": 3112,
+              "shot_rate_pct": 6.555
+            },
+            {
+              "bin": "(4037.0, 4689.0]",
+              "n": 3045,
+              "shot_rate_pct": 8.177
+            },
+            {
+              "bin": "(4689.0, 5338.0]",
+              "n": 3068,
+              "shot_rate_pct": 7.008
+            },
+            {
+              "bin": "(5338.0, 7495.0]",
+              "n": 3215,
+              "shot_rate_pct": 9.58
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 25027,
+          "n_matches": 51,
+          "shape": "no-clear-pattern",
+          "rate_range_pp": 4.366,
+          "bins": [
+            {
+              "bin": "(1.999, 517.0]",
+              "n": 2596,
+              "shot_rate_pct": 6.048
+            },
+            {
+              "bin": "(517.0, 1138.0]",
+              "n": 2547,
+              "shot_rate_pct": 7.97
+            },
+            {
+              "bin": "(1138.0, 1750.0]",
+              "n": 2604,
+              "shot_rate_pct": 10.1
+            },
+            {
+              "bin": "(1750.0, 2391.0]",
+              "n": 2564,
+              "shot_rate_pct": 7.683
+            },
+            {
+              "bin": "(2391.0, 2877.0]",
+              "n": 2425,
+              "shot_rate_pct": 9.567
+            },
+            {
+              "bin": "(2877.0, 3417.0]",
+              "n": 2307,
+              "shot_rate_pct": 8.496
+            },
+            {
+              "bin": "(3417.0, 4037.0]",
+              "n": 2492,
+              "shot_rate_pct": 9.591
+            },
+            {
+              "bin": "(4037.0, 4689.0]",
+              "n": 2565,
+              "shot_rate_pct": 7.953
+            },
+            {
+              "bin": "(4689.0, 5338.0]",
+              "n": 2536,
+              "shot_rate_pct": 9.661
+            },
+            {
+              "bin": "(5338.0, 7495.0]",
+              "n": 2391,
+              "shot_rate_pct": 10.414
+            }
+          ]
+        }
+      },
+      "verdict": "genuine tournament-level difference",
+      "verdict_reason": "Shape classification differs between tournaments (WC2022: monotonic increasing, Euro2024: no-clear-pattern) -- consistent with a real difference between the two populations (rules, pitch dimensions, squad quality), not just arbitrary train/test noise."
+    },
+    {
+      "feature": "attackers_within_5m",
+      "dataset": "active",
+      "train_test_finding": {
+        "overall_shape": "no-clear-pattern",
+        "spearman_rho": 0.0189,
+        "train_val_shape": "no-clear-pattern",
+        "test_shape": "U-shaped",
+        "train_test_consistent": false
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 31041,
+          "n_matches": 64,
+          "shape": "U-shaped",
+          "rate_range_pp": 40.0,
+          "bins": [
+            {
+              "bin": "0.0",
+              "n": 7963,
+              "shot_rate_pct": 7.108
+            },
+            {
+              "bin": "1.0",
+              "n": 17168,
+              "shot_rate_pct": 6.227
+            },
+            {
+              "bin": "2.0",
+              "n": 3143,
+              "shot_rate_pct": 7.795
+            },
+            {
+              "bin": "3.0",
+              "n": 393,
+              "shot_rate_pct": 9.924
+            },
+            {
+              "bin": "4.0",
+              "n": 62,
+              "shot_rate_pct": 17.742
+            },
+            {
+              "bin": "5.0",
+              "n": 5,
+              "shot_rate_pct": 40.0
+            },
+            {
+              "bin": "6.0",
+              "n": 1,
+              "shot_rate_pct": 0.0
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 25027,
+          "n_matches": 51,
+          "shape": "no-clear-pattern",
+          "rate_range_pp": 33.333,
+          "bins": [
+            {
+              "bin": "0.0",
+              "n": 6099,
+              "shot_rate_pct": 7.395
+            },
+            {
+              "bin": "1.0",
+              "n": 14033,
+              "shot_rate_pct": 8.06
+            },
+            {
+              "bin": "2.0",
+              "n": 2849,
+              "shot_rate_pct": 10.109
+            },
+            {
+              "bin": "3.0",
+              "n": 344,
+              "shot_rate_pct": 15.407
+            },
+            {
+              "bin": "4.0",
+              "n": 64,
+              "shot_rate_pct": 14.062
+            },
+            {
+              "bin": "5.0",
+              "n": 12,
+              "shot_rate_pct": 33.333
+            },
+            {
+              "bin": "6.0",
+              "n": 2,
+              "shot_rate_pct": 0.0
+            }
+          ]
+        }
+      },
+      "verdict": "genuine tournament-level difference",
+      "verdict_reason": "Shape classification differs between tournaments (WC2022: U-shaped, Euro2024: no-clear-pattern) -- consistent with a real difference between the two populations (rules, pitch dimensions, squad quality), not just arbitrary train/test noise."
+    },
+    {
+      "feature": "top_option_1_distance_from_ball",
+      "dataset": "passive",
+      "train_test_finding": {
+        "overall_shape": "monotonic decreasing",
+        "spearman_rho": -0.0377,
+        "train_val_shape": "monotonic decreasing",
+        "test_shape": "no-clear-pattern",
+        "train_test_consistent": false
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 840649,
+          "n_matches": 64,
+          "shape": "monotonic decreasing",
+          "rate_range_pp": 3.648,
+          "bins": [
+            {
+              "bin": "(0.43, 13.648]",
+              "n": 81618,
+              "shot_rate_pct": 6.996
+            },
+            {
+              "bin": "(13.648, 17.231]",
+              "n": 84215,
+              "shot_rate_pct": 6.57
+            },
+            {
+              "bin": "(17.231, 20.412]",
+              "n": 86573,
+              "shot_rate_pct": 5.815
+            },
+            {
+              "bin": "(20.412, 23.733]",
+              "n": 87112,
+              "shot_rate_pct": 6.243
+            },
+            {
+              "bin": "(23.733, 27.58]",
+              "n": 84868,
+              "shot_rate_pct": 6.042
+            },
+            {
+              "bin": "(27.58, 32.072]",
+              "n": 85036,
+              "shot_rate_pct": 5.653
+            },
+            {
+              "bin": "(32.072, 37.254]",
+              "n": 84409,
+              "shot_rate_pct": 5.574
+            },
+            {
+              "bin": "(37.254, 43.295]",
+              "n": 83756,
+              "shot_rate_pct": 5.564
+            },
+            {
+              "bin": "(43.295, 51.698]",
+              "n": 80421,
+              "shot_rate_pct": 4.99
+            },
+            {
+              "bin": "(51.698, 121.35]",
+              "n": 82472,
+              "shot_rate_pct": 3.348
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 752532,
+          "n_matches": 51,
+          "shape": "monotonic decreasing",
+          "rate_range_pp": 3.854,
+          "bins": [
+            {
+              "bin": "(0.43, 13.648]",
+              "n": 77675,
+              "shot_rate_pct": 7.634
+            },
+            {
+              "bin": "(13.648, 17.231]",
+              "n": 75077,
+              "shot_rate_pct": 6.796
+            },
+            {
+              "bin": "(17.231, 20.412]",
+              "n": 72716,
+              "shot_rate_pct": 6.697
+            },
+            {
+              "bin": "(20.412, 23.733]",
+              "n": 72181,
+              "shot_rate_pct": 6.969
+            },
+            {
+              "bin": "(23.733, 27.58]",
+              "n": 74418,
+              "shot_rate_pct": 7.457
+            },
+            {
+              "bin": "(27.58, 32.072]",
+              "n": 74255,
+              "shot_rate_pct": 6.289
+            },
+            {
+              "bin": "(32.072, 37.254]",
+              "n": 74878,
+              "shot_rate_pct": 6.611
+            },
+            {
+              "bin": "(37.254, 43.295]",
+              "n": 75537,
+              "shot_rate_pct": 5.693
+            },
+            {
+              "bin": "(43.295, 51.698]",
+              "n": 78866,
+              "shot_rate_pct": 4.962
+            },
+            {
+              "bin": "(51.698, 121.35]",
+              "n": 76819,
+              "shot_rate_pct": 3.78
+            }
+          ]
+        }
+      },
+      "verdict": "arbitrary train/test noise",
+      "verdict_reason": "Same shape classification (monotonic decreasing) in both WC2022 and Euro2024 -- a genuine tournament-level population difference would be expected to show up here, and it doesn't. The train/test instability prompt 21 found looks like noise from an arbitrary match split, not a real population-mixing artefact."
+    },
+    {
+      "feature": "top_option_3_dx",
+      "dataset": "passive",
+      "train_test_finding": {
+        "overall_shape": "inverse-U",
+        "spearman_rho": 0.0314,
+        "train_val_shape": "inverse-U",
+        "test_shape": "no-clear-pattern",
+        "train_test_consistent": false
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 840649,
+          "n_matches": 64,
+          "shape": "inverse-U",
+          "rate_range_pp": 4.523,
+          "bins": [
+            {
+              "bin": "(-111.54, -18.962]",
+              "n": 83184,
+              "shot_rate_pct": 2.576
+            },
+            {
+              "bin": "(-18.962, -13.291]",
+              "n": 83387,
+              "shot_rate_pct": 4.275
+            },
+            {
+              "bin": "(-13.291, -9.067]",
+              "n": 84670,
+              "shot_rate_pct": 5.132
+            },
+            {
+              "bin": "(-9.067, -5.217]",
+              "n": 85055,
+              "shot_rate_pct": 5.983
+            },
+            {
+              "bin": "(-5.217, -1.429]",
+              "n": 84095,
+              "shot_rate_pct": 6.45
+            },
+            {
+              "bin": "(-1.429, 2.458]",
+              "n": 83336,
+              "shot_rate_pct": 6.776
+            },
+            {
+              "bin": "(2.458, 6.5]",
+              "n": 84152,
+              "shot_rate_pct": 7.099
+            },
+            {
+              "bin": "(6.5, 10.719]",
+              "n": 84417,
+              "shot_rate_pct": 6.62
+            },
+            {
+              "bin": "(10.719, 16.652]",
+              "n": 83984,
+              "shot_rate_pct": 6.321
+            },
+            {
+              "bin": "(16.652, 111.815]",
+              "n": 76972,
+              "shot_rate_pct": 4.786
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 752532,
+          "n_matches": 51,
+          "shape": "inverse-U",
+          "rate_range_pp": 4.748,
+          "bins": [
+            {
+              "bin": "(-111.54, -18.962]",
+              "n": 75002,
+              "shot_rate_pct": 3.172
+            },
+            {
+              "bin": "(-18.962, -13.291]",
+              "n": 74786,
+              "shot_rate_pct": 4.83
+            },
+            {
+              "bin": "(-13.291, -9.067]",
+              "n": 73518,
+              "shot_rate_pct": 5.516
+            },
+            {
+              "bin": "(-9.067, -5.217]",
+              "n": 73121,
+              "shot_rate_pct": 6.752
+            },
+            {
+              "bin": "(-5.217, -1.429]",
+              "n": 74083,
+              "shot_rate_pct": 7.128
+            },
+            {
+              "bin": "(-1.429, 2.458]",
+              "n": 74838,
+              "shot_rate_pct": 7.92
+            },
+            {
+              "bin": "(2.458, 6.5]",
+              "n": 74023,
+              "shot_rate_pct": 7.85
+            },
+            {
+              "bin": "(6.5, 10.719]",
+              "n": 73767,
+              "shot_rate_pct": 7.383
+            },
+            {
+              "bin": "(10.719, 16.652]",
+              "n": 74192,
+              "shot_rate_pct": 6.959
+            },
+            {
+              "bin": "(16.652, 111.815]",
+              "n": 81201,
+              "shot_rate_pct": 4.582
+            }
+          ]
+        }
+      },
+      "verdict": "arbitrary train/test noise",
+      "verdict_reason": "Same shape classification (inverse-U) in both WC2022 and Euro2024 -- a genuine tournament-level population difference would be expected to show up here, and it doesn't. The train/test instability prompt 21 found looks like noise from an arbitrary match split, not a real population-mixing artefact."
+    },
+    {
+      "feature": "top_option_3_dy",
+      "dataset": "passive",
+      "train_test_finding": {
+        "overall_shape": "inverse-U",
+        "spearman_rho": 0.0048,
+        "train_val_shape": "inverse-U",
+        "test_shape": "no-clear-pattern",
+        "train_test_consistent": false
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 840649,
+          "n_matches": 64,
+          "shape": "inverse-U",
+          "rate_range_pp": 3.634,
+          "bins": [
+            {
+              "bin": "(-77.453, -35.111]",
+              "n": 86040,
+              "shot_rate_pct": 3.468
+            },
+            {
+              "bin": "(-35.111, -24.02]",
+              "n": 83139,
+              "shot_rate_pct": 5.326
+            },
+            {
+              "bin": "(-24.02, -16.182]",
+              "n": 82518,
+              "shot_rate_pct": 5.65
+            },
+            {
+              "bin": "(-16.182, -9.288]",
+              "n": 82430,
+              "shot_rate_pct": 6.216
+            },
+            {
+              "bin": "(-9.288, -0.135]",
+              "n": 83043,
+              "shot_rate_pct": 7.102
+            },
+            {
+              "bin": "(-0.135, 9.052]",
+              "n": 83944,
+              "shot_rate_pct": 7.094
+            },
+            {
+              "bin": "(9.052, 15.978]",
+              "n": 83303,
+              "shot_rate_pct": 5.885
+            },
+            {
+              "bin": "(15.978, 23.649]",
+              "n": 82568,
+              "shot_rate_pct": 5.386
+            },
+            {
+              "bin": "(23.649, 34.741]",
+              "n": 82406,
+              "shot_rate_pct": 5.887
+            },
+            {
+              "bin": "(34.741, 78.174]",
+              "n": 83861,
+              "shot_rate_pct": 4.194
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 752532,
+          "n_matches": 51,
+          "shape": "inverse-U",
+          "rate_range_pp": 3.333,
+          "bins": [
+            {
+              "bin": "(-77.453, -35.111]",
+              "n": 72139,
+              "shot_rate_pct": 4.351
+            },
+            {
+              "bin": "(-35.111, -24.02]",
+              "n": 75044,
+              "shot_rate_pct": 5.723
+            },
+            {
+              "bin": "(-24.02, -16.182]",
+              "n": 75658,
+              "shot_rate_pct": 6.471
+            },
+            {
+              "bin": "(-16.182, -9.288]",
+              "n": 75748,
+              "shot_rate_pct": 6.553
+            },
+            {
+              "bin": "(-9.288, -0.135]",
+              "n": 75136,
+              "shot_rate_pct": 7.316
+            },
+            {
+              "bin": "(-0.135, 9.052]",
+              "n": 74232,
+              "shot_rate_pct": 7.684
+            },
+            {
+              "bin": "(9.052, 15.978]",
+              "n": 74874,
+              "shot_rate_pct": 6.958
+            },
+            {
+              "bin": "(15.978, 23.649]",
+              "n": 75610,
+              "shot_rate_pct": 6.183
+            },
+            {
+              "bin": "(23.649, 34.741]",
+              "n": 75776,
+              "shot_rate_pct": 6.176
+            },
+            {
+              "bin": "(34.741, 78.174]",
+              "n": 74314,
+              "shot_rate_pct": 4.403
+            }
+          ]
+        }
+      },
+      "verdict": "arbitrary train/test noise",
+      "verdict_reason": "Same shape classification (inverse-U) in both WC2022 and Euro2024 -- a genuine tournament-level population difference would be expected to show up here, and it doesn't. The train/test instability prompt 21 found looks like noise from an arbitrary match split, not a real population-mixing artefact."
+    },
+    {
+      "feature": "angle_to_attacking_goal",
+      "dataset": "passive",
+      "train_test_finding": {
+        "overall_shape": "U-shaped",
+        "spearman_rho": -0.0304,
+        "train_val_shape": "U-shaped",
+        "test_shape": "no-clear-pattern",
+        "train_test_consistent": false
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 840649,
+          "n_matches": 64,
+          "shape": "U-shaped",
+          "rate_range_pp": 4.333,
+          "bins": [
+            {
+              "bin": "(-0.000999511, 0.0318]",
+              "n": 81849,
+              "shot_rate_pct": 8.116
+            },
+            {
+              "bin": "(0.0318, 0.068]",
+              "n": 82212,
+              "shot_rate_pct": 7.183
+            },
+            {
+              "bin": "(0.068, 0.108]",
+              "n": 83285,
+              "shot_rate_pct": 6.319
+            },
+            {
+              "bin": "(0.108, 0.152]",
+              "n": 83626,
+              "shot_rate_pct": 5.374
+            },
+            {
+              "bin": "(0.152, 0.2]",
+              "n": 84420,
+              "shot_rate_pct": 5.017
+            },
+            {
+              "bin": "(0.2, 0.253]",
+              "n": 84541,
+              "shot_rate_pct": 4.601
+            },
+            {
+              "bin": "(0.253, 0.315]",
+              "n": 85864,
+              "shot_rate_pct": 4.229
+            },
+            {
+              "bin": "(0.315, 0.399]",
+              "n": 85719,
+              "shot_rate_pct": 3.783
+            },
+            {
+              "bin": "(0.399, 0.549]",
+              "n": 84821,
+              "shot_rate_pct": 4.388
+            },
+            {
+              "bin": "(0.549, 3.141]",
+              "n": 84312,
+              "shot_rate_pct": 8.047
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 752532,
+          "n_matches": 51,
+          "shape": "U-shaped",
+          "rate_range_pp": 5.086,
+          "bins": [
+            {
+              "bin": "(-0.000999511, 0.0318]",
+              "n": 77470,
+              "shot_rate_pct": 8.994
+            },
+            {
+              "bin": "(0.0318, 0.068]",
+              "n": 77106,
+              "shot_rate_pct": 7.871
+            },
+            {
+              "bin": "(0.068, 0.108]",
+              "n": 76033,
+              "shot_rate_pct": 7.097
+            },
+            {
+              "bin": "(0.108, 0.152]",
+              "n": 75692,
+              "shot_rate_pct": 6.196
+            },
+            {
+              "bin": "(0.152, 0.2]",
+              "n": 74898,
+              "shot_rate_pct": 5.522
+            },
+            {
+              "bin": "(0.2, 0.253]",
+              "n": 74777,
+              "shot_rate_pct": 5.149
+            },
+            {
+              "bin": "(0.253, 0.315]",
+              "n": 73454,
+              "shot_rate_pct": 4.501
+            },
+            {
+              "bin": "(0.315, 0.399]",
+              "n": 73599,
+              "shot_rate_pct": 3.908
+            },
+            {
+              "bin": "(0.399, 0.549]",
+              "n": 74497,
+              "shot_rate_pct": 4.909
+            },
+            {
+              "bin": "(0.549, 3.141]",
+              "n": 75006,
+              "shot_rate_pct": 8.385
+            }
+          ]
+        }
+      },
+      "verdict": "arbitrary train/test noise",
+      "verdict_reason": "Same shape classification (U-shaped) in both WC2022 and Euro2024 -- a genuine tournament-level population difference would be expected to show up here, and it doesn't. The train/test instability prompt 21 found looks like noise from an arbitrary match split, not a real population-mixing artefact."
+    }
+  ]
+}

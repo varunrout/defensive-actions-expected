@@ -24,13 +24,14 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 REPORTS_DIR = REPO_ROOT / "reports" / "eda"
 OUTPUT_PATH = REPORTS_DIR / "INDEX.html"
 
-DEFAULT_REPORT = "EDA_PIPELINE_LOG.html"
+DEFAULT_REPORT = "MASTER_FINDINGS.html"
 
 # (group title, [(filename, label), ...]) -- order here is the order shown
 # in the sidebar. A file present on disk but not listed here still appears,
 # under "Other reports", so nothing is silently hidden.
 REPORT_GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
     ("Overview", [
+        ("MASTER_FINDINGS.html", "Master Findings -- start here"),
         ("EDA_PIPELINE_LOG.html", "Pipeline Audit Trail"),
     ]),
     ("Base EDA (stage 00)", [
@@ -57,6 +58,11 @@ REPORT_GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
         ("VIF_ANALYSIS.html", "Multicollinearity (VIF)"),
         ("CONFOUND_ANALYSIS.html", "Confound (Reversal) Testing"),
         ("LEAKAGE_AUDIT.html", "Leakage Audit"),
+        ("TOURNAMENT_STABILITY_CHECK.html", "Tournament Stability Check"),
+        ("SLICE_STRATIFICATION.html", "Slice Stratification (V1 -- categorical slicers)"),
+        ("SLICE_STRATIFICATION_V2.html", "Slice Stratification V2 -- archetype + boolean slicers"),
+        ("SLICER_REDUNDANCY.html", "Slicer Redundancy Check"),
+        ("FEATURE_INTERACTION_ANALYSIS.html", "Feature Interaction Analysis (numeric x numeric)"),
     ]),
     ("Validation", [
         ("FOOTBALL_SANITY_CHECK.html", "Football Sanity Check"),
@@ -64,9 +70,10 @@ REPORT_GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
     ("Modelling infrastructure", [
         ("PASSIVE_ARCHETYPES.html", "Passive Archetype Clustering"),
         ("SPLIT_VALIDATION.html", "Canonical Match-Grouped Split"),
+        ("PLAYER_LEVEL_VALIDITY_CHECK.html", "Player-Level Validity Check (active only)"),
     ]),
     ("Confirmation", [
-        ("FEATURE_LOCK_CONFIRMATION.html", "Post-Lock Correlation Confirmation"),
+        ("FEATURE_LOCK_CONFIRMATION.html", "Feature Lock Confirmation + Pattern Findings"),
     ]),
 ]
 

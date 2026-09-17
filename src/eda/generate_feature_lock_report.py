@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 
 from src.eda import render
-from src.eda.render import esc
+from src.eda.render import esc, finding_card
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 INPUT_PATH = REPO_ROOT / "reports" / "eda" / "FEATURE_LOCK_CONFIRMATION.json"
@@ -81,6 +81,70 @@ def _manifest(changes: list[dict]) -> str:
     return f'<div class="stratum-grid" style="grid-template-columns:1fr;">{rows}</div>'
 
 
+def _kv_table(rows: list[dict], cols: list[tuple[str, str]]) -> str:
+    header = "".join(f"<th style='padding:5px 8px;'>{esc(label)}</th>" for _, label in cols)
+    body = "".join(
+        "<tr>" + "".join(f"<td style='padding:5px 8px;border-top:1px solid var(--border);'>{esc(str(r.get(key, '')))}</td>" for key, _ in cols) + "</tr>"
+        for r in rows
+    )
+    return f'<table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead><tr style="text-align:left;color:var(--text-muted);">{header}</tr></thead><tbody>{body}</tbody></table>'
+
+
+def _pattern_findings_section(pf: dict) -> str:
+    corrections_html = "".join(f"<li>{esc(c)}</li>" for c in pf["corrections_to_prompt_34s_premise"])
+    nr = pf["numerical_vs_target_rankings"]
+    ct = pf["confound_tests"]
+    ts = pf["tournament_stability"]
+    ss = pf["slice_stratification"]
+    sr = pf["slicer_redundancy"]
+    ni = pf["numeric_interaction"]
+    pv = pf["player_level_validity"]
+
+    return f"""
+<h2 style="margin-top:48px;padding-top:24px;border-top:2px solid var(--border);">Pattern-analysis findings (binary target)</h2>
+<p class="section-note">{esc(pf['source_note'])}</p>
+
+{finding_card("premise corrections", "verified before writing anything", "<ul>" + corrections_html + "</ul>")}
+
+<h3 style="margin-top:28px;">Numerical-vs-target rankings</h3>
+<p class="section-note">{esc(nr['note'])}</p>
+<div class="before-after">
+<div class="ba-card"><h4>Active (top 5)</h4>{_kv_table(nr['active_top'], [('feature','feature'),('spearman_rho','rho'),('shape','shape')])}</div>
+<div class="ba-card"><h4>Passive (top 5)</h4>{_kv_table(nr['passive_top'], [('feature','feature'),('spearman_rho','rho'),('shape','shape')])}</div>
+</div>
+
+<h3 style="margin-top:28px;">Confound tests ({ct['n_tests']})</h3>
+{_kv_table(ct['tests'], [('name','test'),('verdict','verdict')])}
+
+<h3 style="margin-top:28px;">Tournament stability</h3>
+<p class="section-note">{esc(ts['target_agnosticism_note'])}</p>
+{_kv_table(ts['features'], [('feature','feature'),('dataset','dataset'),('verdict','verdict')])}
+
+<h3 style="margin-top:28px;">Slice stratification</h3>
+<p class="section-note">V1 (categorical slicers): {ss['v1_categorical_slicers']['n_cells']} cells,
+{ss['v1_categorical_slicers']['n_genuine_divergences']} genuine divergences,
+{ss['v1_categorical_slicers']['n_features_with_at_least_one_diverging_slicer']} features flagged. V2 (archetype +
+boolean slicers): {ss['v2_archetype_and_boolean_slicers']['n_cells']} cells,
+{ss['v2_archetype_and_boolean_slicers']['n_genuine_divergences']} genuine divergences.</p>
+{"".join(finding_card(f"worked example -- {ex['feature']} x {ex['slicer']}", f"overall {ex['overall_shape']}, {ex['diverging']} diverge", esc(ex['takeaway'])) for ex in ss['worked_examples'])}
+
+<h3 style="margin-top:28px;">Slicer redundancy</h3>
+<p class="section-note">{esc(sr['target_agnosticism_note'])}</p>
+<p class="section-note">Active redundant clusters: {esc(str(sr['active']['redundant_clusters']))}, independent: {esc(str(sr['active']['independent_slicers']))}.
+Passive redundant clusters: {esc(str(sr['passive']['redundant_clusters']))}, independent: {esc(str(sr['passive']['independent_slicers']))}.</p>
+
+<h3 style="margin-top:28px;">Numeric x numeric interaction</h3>
+<p class="section-note">{esc(ni['target_agnosticism_note'])} Classification counts: {esc(str(ni['classification_counts']))}.</p>
+{_kv_table(ni['pairs'], [('feature_a','feature A'),('feature_b','feature B'),('dataset','dataset'),('classification','classification')])}
+
+<h3 style="margin-top:28px;">Player-level validity</h3>
+<p class="section-note">{esc(pv['target_agnosticism_note'])} {esc(pv['scope_limitation'])}</p>
+<p class="section-note">{pv['n_distinct_players']} distinct players, Gini={pv['gini_coefficient']}, train/test player
+overlap={pv['train_test_player_overlap_pct']}%.</p>
+{"".join(finding_card(rp['feature'], f"{rp['risk_level']} risk", esc(rp['reason'])) for rp in pv['risk_pairs']) or '<p class="section-note">No risk pairs.</p>'}
+"""
+
+
 def build_report(data: dict) -> str:
     counts = data["confirmed_counts"]
     verdict_class = "v-no" if not data["any_newly_risky_pairs_found"] else "v-yes"
@@ -109,6 +173,7 @@ sample is excluded from this diff since sampling noise there isn't a real tier c
 <p class="section-note">So this report is legible on its own -- proof the locked feature set is still internally
 consistent, without needing the full session history.</p>
 {_manifest(data['changes_since_last_full_run'])}
+{_pattern_findings_section(data['pattern_analysis_findings']) if 'pattern_analysis_findings' in data else ''}
 """
 
     return render.render_article(
@@ -117,7 +182,9 @@ consistent, without needing the full session history.</p>
         dek=(
             "Not another COLLAPSE/REVIEW redundancy round -- that work is closed. A confirmation pass: after "
             "every landed feature-list change this session, does the locked candidate set still hold up under "
-            "a fresh correlation re-run?"
+            "a fresh correlation re-run? Extended (prompt 34) with a pattern-analysis-findings section -- this "
+            "is now the single confirmation-plus-findings reference for the binary target, not just a "
+            "feature-count sign-off."
         ),
         stats=[
             (str(counts["active"]), "active features"),

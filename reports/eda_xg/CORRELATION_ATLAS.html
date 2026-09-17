@@ -537,8 +537,10 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 <div class="wrap">
 <div class="finding" style="margin-bottom:24px;">
 <span class="tag">target-independent -- mirrored, not recomputed</span>
-<p>Correlation (feature vs feature) and VIF (a feature's own multicollinearity against every other feature)
-never reference a target column at all -- this page's numbers are <b>identical</b> to
+<p>Correlation (feature vs feature), VIF (a feature's own multicollinearity against every other feature), slicer
+redundancy (association between two categorical slicer columns), and the player-level validity check (row
+concentration, per-feature ICC/Cramer's V against player_id, train/test player overlap) never reference a target
+column at all -- this page's numbers are <b>identical</b> to
 <a href="../eda/CORRELATION_ATLAS.html" style="color:var(--neg);">the binary-target version</a> by construction, not
 independently re-derived. Mirrored here so the xG portal is a complete, self-contained arm.</p>
 </div>
