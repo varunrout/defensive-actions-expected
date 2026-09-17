@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- Active-Binary Baseline Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 900px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+
+/* Additions for this report only, reusing the existing token set above --
+   a chart gallery and small verdict badges, since no prior EDA report needed
+   an image grid of PNGs. */
+.verdict-chip {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verdict-chip.confirms { background: var(--good-wash); color: var(--good); }
+.verdict-chip.mismatch { background: rgba(227,73,72,0.14); color: var(--pos); }
+.verdict-chip.flag { background: var(--amber-wash); color: var(--amber); }
+.variant-block { margin: 28px 0 44px; }
+.variant-title { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 16px; margin: 0 0 10px; }
+.chart-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 900px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+.chart-card img { width: 100%; height: auto; border-radius: 6px; display: block; background: var(--plane); }
+.chart-card .cc-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 6px 2px 0; text-align: center; }
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p { margin: 0 0 10px; }
+.deviation-box p:last-child { margin-bottom: 0; }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; Active leg</p>
+    <h1 class="title">Active-Binary Baseline Summary (v0-v3)</h1>
+    <p class="dek">Four locked baseline variants for <code>target_future_shot_10s</code> on the real
+      active-defensive-action dataset, using the canonical match-grouped split and the 32-feature
+      post-lock active feature set. Replaces the retired, fixture-scale pre-lock <code>b0</code>-<code>b8</code>
+      classification outputs.</p>
+    <div class="statbar">
+      <div class="stat"><b>56,068 / 115</b><span>rows / matches (real data)</span></div>
+      <div class="stat"><b>32</b><span>locked active features</span></div>
+      <div class="stat"><b>5-fold</b><span>canonical grouped CV, seed 42</span></div>
+      <div class="stat"><b>v1 &gt; v2 &gt; v3</b><span>PR-AUC ranking (CV)</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+
+<h2>1. Feature set</h2>
+<p>32 of the 34 locked <code>ACTIVE</code> features from <code>src/eda/feature_config.py</code>
+  (6 categorical + 9 boolean + 12 continuous + 7 discrete = 34), excluding:</p>
+<ul>
+  <li><code>nearest_defender_distance</code> &mdash; known self-reference bug (&#8776;73.6% of rows
+    &#8776;0m per the distribution atlas), not a genuine defensive-distance signal.</li>
+  <li><code>defenders_within_5m</code> &mdash; confirmed substitutive/nested with
+    <code>defenders_within_10m</code> for this target
+    (<code>reports/eda/FEATURE_INTERACTION_ANALYSIS.json</code>: "defenders_within_5m x
+    defenders_within_10m &rarr; substitutive").</li>
+</ul>
+<p>Verified programmatically at training time (an assertion in
+  <code>scripts/train_active_binary_baseline.py</code> fails the run if the count drifts from 32):
+  6 categorical (one-hot), 9 boolean (passthrough), 11 continuous + 6 discrete = 17 numeric
+  (median-impute + standard-scale). None of the 5 pre-lock-dropped columns
+  (<code>action_x</code>, <code>action_y</code>, <code>action_zone</code>, <code>action_family</code>,
+  <code>position_group</code>, <code>distance_to_center_line</code>) appear anywhere in this feature set.</p>
+
+<h2>2. Split</h2>
+<p>The canonical, frozen match-grouped split in
+  <code>outputs/models/splits/match_assignment.json</code> (5-fold, seed 42, computed once by
+  <code>scripts/compute_canonical_split.py</code>). No fresh random split was created anywhere in this
+  run. Train+val: 45,408 rows / 92 matches. Held-out test: 10,660 rows / 23 matches.</p>
+
+<h2>3. Variants</h2>
+<table>
+<tr><th>Variant</th><th>Model</th><th>Notes</th></tr>
+<tr><td><code>v0_dummy</code></td><td><code>ConstantClassifier</code></td><td>training-fold positive rate for every row</td></tr>
+<tr><td><code>v1_unweighted</code></td><td><code>LogisticRegression</code></td><td>no <code>class_weight</code></td></tr>
+<tr><td><code>v2_weighted</code></td><td><code>LogisticRegression(class_weight="balanced")</code></td><td>same features as v1</td></tr>
+<tr><td><code>v3_weighted_interactions</code></td><td>v2 + 11 interaction terms</td><td>4 numeric&times;numeric pairs + 7 <code>phase_label</code> dummy terms</td></tr>
+</table>
+<p>The 4 numeric&times;numeric pairs are each independently confirmed <code>"interactive"</code> for
+  <code>target_future_shot_10s</code> in <code>FEATURE_INTERACTION_ANALYSIS.json</code>'s
+  <code>summary_table</code>. The 5th pair (<code>defenders_within_10m &times; phase_label</code>) is not
+  in that JSON (numeric&times;numeric only) &mdash; it comes from <code>MASTER_FINDINGS.md</code> section 6,
+  which states it "diverges in 7/7 phase categories &mdash; the single strongest slice-level interaction
+  signal in the whole corpus," matching the brief exactly.</p>
+
+<h2>4. Cross-validation results (5-fold, out-of-fold metrics)</h2>
+<table>
+<tr><th>Variant</th><th>PR-AUC (AP)</th><th>ROC-AUC</th><th>Log loss</th><th>Brier</th><th>Calib. slope</th><th>Calib. intercept</th><th>ECE</th></tr>
+<tr><td>v0_dummy</td><td>0.0751</td><td>0.4747</td><td>0.2772</td><td>0.0730</td><td>0.857</td><td>-0.350</td><td>0.0000</td></tr>
+<tr><td><strong>v1_unweighted</strong></td><td><strong>0.3521</strong></td><td>0.8177</td><td><strong>0.2209</strong></td><td><strong>0.0614</strong></td><td>0.972</td><td><strong>-0.052</strong></td><td><strong>0.0036</strong></td></tr>
+<tr><td>v2_weighted</td><td>0.3376</td><td><strong>0.8188</strong></td><td>0.5151</td><td>0.1739</td><td>0.990</td><td>-2.432</td><td>0.2855</td></tr>
+<tr><td>v3_weighted_interactions</td><td>0.3331</td><td>0.8186</td><td>0.5153</td><td>0.1739</td><td>0.980</td><td>-2.430</td><td>0.2850</td></tr>
+</table>
+<p>Per-fold average precision mean &plusmn; std: v0 0.0792 &plusmn; 0.0069; v1 0.3531 &plusmn; 0.0176;
+  v2 0.3389 &plusmn; 0.0163; v3 0.3349 &plusmn; 0.0148. Full per-metric fold mean/std for every variant is
+  in <code>outputs/models/comparisons/active_binary_baseline_comparison.csv</code>.</p>
+
+<p><strong>PR-AUC ranking: v1 &gt; v2 &gt; v3 &gt; v0.</strong> The plain unweighted logistic regression
+  (v1) has the best PR-AUC of the three fitted variants in cross-validation. <code>class_weight="balanced"</code>
+  (v2/v3) buys a very small ROC-AUC gain (+0.001) at a large calibration cost: calibration intercept
+  collapses from -0.05 (v1) to -2.43 (v2/v3) and expected calibration error jumps from 0.004 to 0.285
+  &mdash; balanced weighting inflates predicted probabilities well past the true positive rate, roughly
+  tripling log loss and Brier score. This is the expected mechanical effect of balanced class weighting
+  on a linear classifier's raw probabilities, not a broken model &mdash; but v2/v3's <code>predict_proba</code>
+  output should not be read as a calibrated probability without a separate calibration step (out of scope here).</p>
+
+<p><strong>Does v3's interaction terms beat v2 by enough to matter? No.</strong> v3's PR-AUC (0.3331 CV /
+  0.3572 held-out) is slightly below v2's (0.3376 CV / 0.3594 held-out) both in cross-validation and in the
+  held-out readout. ROC-AUC is statistically indistinguishable (0.8186 vs 0.8188 CV). The two largest
+  interaction coefficients are <code>defenders_within_10m &times; phase_label_settled_mid_block_proxy</code>
+  (+0.191) and <code>&times; phase_label_wide_defending_proxy</code> (-0.171), consistent in direction with
+  the documented "strongest slice-level interaction" finding &mdash; but the net effect on this linear
+  model's ranking is a wash to a small regression, not an improvement. This doesn't contradict the underlying
+  interaction finding (established via direct stratified rate analysis, not a linear model's coefficient)
+  &mdash; it means a simple product term added to an already class-weighted linear model doesn't translate
+  that finding into a better-ranking baseline here.</p>
+
+<h2>5. Held-out test readout (v2/v3 only, single readout, not used for selection)</h2>
+<table>
+<tr><th>Variant</th><th>PR-AUC</th><th>ROC-AUC</th><th>Log loss</th><th>Brier</th></tr>
+<tr><td>v2_weighted</td><td>0.3594</td><td>0.8210</td><td>0.5193</td><td>0.1761</td></tr>
+<tr><td>v3_weighted_interactions</td><td>0.3572</td><td>0.8206</td><td>0.5189</td><td>0.1759</td></tr>
+</table>
+<p>10,660 rows / 23 matches, evaluated exactly once each, after all cross-validation and variant
+  comparison above was finalised. Consistent with the CV ranking: v2 slightly ahead of v3 on the primary metric.</p>
+
+<h2>6. Coefficient-vs-shape sanity check</h2>
+<p>Checked every continuous/discrete feature with a documented shape in
+  <code>reports/eda/active_numerical_target_atlas.json</code> against its sign in
+  <code>outputs/models/classification/v2_weighted.json</code> (v3's coefficients agree in sign
+  throughout, so only v2 is quoted below).</p>
+
+<h3>Confirms (sign matches documented monotonic direction) &mdash; 6 of 11</h3>
+<table>
+<tr><th>Feature</th><th>Documented shape (rho)</th><th>v2 coefficient</th><th>Verdict</th></tr>
+<tr><td><code>attacking_goal_centrality</code></td><td>monotonic increasing (+0.170)</td><td>+0.550</td><td><span class="verdict-chip confirms">confirms</span></td></tr>
+<tr><td><code>attacker_spread</code></td><td>monotonic decreasing (-0.170)</td><td>-0.121</td><td><span class="verdict-chip confirms">confirms</span></td></tr>
+<tr><td><code>attacker_defender_ratio</code></td><td>monotonic decreasing (-0.156)</td><td>-0.269</td><td><span class="verdict-chip confirms">confirms</span></td></tr>
+<tr><td><code>defenders_within_10m</code></td><td>monotonic increasing (+0.152)</td><td>+0.077</td><td><span class="verdict-chip confirms">confirms</span></td></tr>
+<tr><td><code>match_time_seconds</code></td><td>monotonic increasing (+0.035)</td><td>+0.104</td><td><span class="verdict-chip confirms">confirms</span></td></tr>
+<tr><td><code>possession_elapsed_seconds</code></td><td>monotonic increasing (+0.067)</td><td>+0.055</td><td><span class="verdict-chip confirms">confirms</span></td></tr>
+</table>
+
+<h3>Mismatch &mdash; linear model can't represent a documented U-shape &mdash; 4 of 11</h3>
+<table>
+<tr><th>Feature</th><th>Documented shape (rho)</th><th>v2 coefficient</th><th>Issue</th></tr>
+<tr><td><code>defender_spread</code></td><td>U-shaped (-0.188, strongest active correlate)</td><td>-0.143</td>
+  <td><span class="verdict-chip mismatch">mismatch</span> A single linear coefficient can only report a net
+  monotonic direction; the documented U-shape means risk is elevated at both very low and very high defender
+  spread, which this coefficient can't represent.</td></tr>
+<tr><td><code>distance_to_attacking_box</code></td><td>U-shaped (-0.019, weak)</td><td>+0.112</td>
+  <td><span class="verdict-chip mismatch">mismatch</span> Sign doesn't even match the (weak) overall Spearman
+  direction; likely dominated by the non-monotonic part of the true relationship.</td></tr>
+<tr><td><code>visible_defender_count</code></td><td>U-shaped (+0.087)</td><td>+0.253</td>
+  <td><span class="verdict-chip mismatch">mismatch</span> Same blind spot as <code>defender_spread</code>: net
+  positive linear coefficient, but the documented shape says risk rises at both extremes.</td></tr>
+<tr><td><code>defenders_between_ball_and_attacking_goal</code></td><td>U-shaped (+0.013, near-zero)</td><td>-0.032</td>
+  <td><span class="verdict-chip mismatch">mismatch</span> Sign disagreement on an already very weak univariate
+  signal &mdash; likely noise on both sides.</td></tr>
+</table>
+
+<h3>Flagged &mdash; no clear univariate support</h3>
+<p><code>nearest_attacker_distance</code> carries a moderately large v2 coefficient (+0.226) despite
+  <code>active_numerical_target_atlas.json</code> documenting "no-clear-pattern" (rho=0.023) for it
+  univariately. <span class="verdict-chip flag">flag</span> Most plausibly picking up a
+  multivariate/correlated-feature effect rather than a real univariate relationship &mdash; worth a
+  VIF/partial-dependence follow-up before trusting it in isolation.</p>
+
+<p><strong>Overall</strong>: 6/11 checked features have linear-model coefficients that agree in sign with
+  their documented monotonic pattern; the other 5 either have a genuinely non-monotonic (U-shaped)
+  documented pattern that a linear logistic term structurally cannot capture, or (for
+  <code>nearest_attacker_distance</code>) show a coefficient not well-supported by the univariate atlas
+  evidence. This is an honest limitation of a linear baseline, not a bug &mdash; a non-linear baseline
+  (e.g. the existing <code>hist_gradient_boosting_classifier</code> variants in <code>configs/models.yaml</code>)
+  would be needed to capture the U-shaped relationships directly.</p>
+
+<h2>7. Charts</h2>
+<p>4 PNGs per variant (calibration curve, precision-recall curve, ROC curve, prediction distribution),
+  generated by <code>scripts/train_active_binary_baseline.py</code> and saved under
+  <code>outputs/models/classification/charts/&lt;variant&gt;/</code>. That directory is gitignored (same
+  convention as the retired pre-lock outputs) &mdash; regenerate by running the script if the images below
+  don't resolve.</p>
+
+<div class="variant-block">
+  <p class="variant-title">v0_dummy</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v0_dummy/calibration_curve.png" alt="v0_dummy calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v0_dummy/precision_recall_curve.png" alt="v0_dummy precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v0_dummy/roc_curve.png" alt="v0_dummy ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v0_dummy/prediction_distribution.png" alt="v0_dummy prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">v1_unweighted</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1_unweighted/calibration_curve.png" alt="v1_unweighted calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1_unweighted/precision_recall_curve.png" alt="v1_unweighted precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1_unweighted/roc_curve.png" alt="v1_unweighted ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1_unweighted/prediction_distribution.png" alt="v1_unweighted prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">v2_weighted</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v2_weighted/calibration_curve.png" alt="v2_weighted calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v2_weighted/precision_recall_curve.png" alt="v2_weighted precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v2_weighted/roc_curve.png" alt="v2_weighted ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v2_weighted/prediction_distribution.png" alt="v2_weighted prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">v3_weighted_interactions</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v3_weighted_interactions/calibration_curve.png" alt="v3_weighted_interactions calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v3_weighted_interactions/precision_recall_curve.png" alt="v3_weighted_interactions precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v3_weighted_interactions/roc_curve.png" alt="v3_weighted_interactions ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v3_weighted_interactions/prediction_distribution.png" alt="v3_weighted_interactions prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+
+<h2>8. Deviations from instructions</h2>
+<div class="deviation-box">
+<p><strong>configs/models.yaml left untouched.</strong> Its <code>classification.variants</code>
+  (<code>b0_constant</code> ... <code>b8_interpretable_reduced</code>) are the actual source of the
+  retired <code>outputs/models/classification/b*</code> artifacts &mdash; not
+  <code>src/dax/models/baseline_logistic.py</code>'s <code>default_variant_specs()</code>, which the task
+  background attributed them to. Investigation found <code>default_variant_specs()</code> was dead code
+  exercised only by two test files and an already-archived <code>src/dax/models/archive/specs.py</code>
+  &mdash; it never fed the real training entrypoint (<code>scripts/train_models.py</code> &rarr;
+  <code>dax.models.training.train_logistic_models</code>, which reads <code>configs/models.yaml</code> via
+  <code>feature_contracts.py</code>). Editing <code>configs/models.yaml</code> would have been destructive
+  to unrelated, working functionality: <code>b5_360_geometry</code>/<code>b7_full_with_360</code> (real-scale,
+  56,024 rows/115 matches, not toy-scale) and <code>r4_full_with_360</code> feed the two-part xG hurdle-model
+  sensitivity analysis, and <code>tests/test_model_workflow_production_fixture.py</code> asserts against
+  <code>b5_360_geometry</code>/<code>b0_constant</code> directly.</p>
+<p><strong>Part B outputs are not git-tracked.</strong> Comparison CSVs, per-variant JSON/joblib and charts
+  under <code>outputs/models/**</code> follow this repository's existing <code>.gitignore</code> convention
+  (that whole tree is ignored except <code>outputs/models/splits/match_assignment.json</code>, and the
+  retired <code>b0</code>-<code>b8</code> artifacts were likewise never tracked). They're reproducible with a
+  single command: <code>python scripts/train_active_binary_baseline.py</code>.</p>
+</div>
+
+</div>
+</div>
+<footer>
+  <p>Generated by <code>scripts/train_active_binary_baseline.py</code>. Markdown source:
+    <code>reports/eda/ACTIVE_BINARY_BASELINE_SUMMARY.md</code>.</p>
+</footer>
+</body>
+</html>
