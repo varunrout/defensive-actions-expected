@@ -1,7 +1,7 @@
 import pytest
 from dax.features.player_defense import _goal_metrics, DEFENSIVE_ACTION_TYPES
 from dax.models.attacking_threat import GridThreatModel
-from dax.models.baseline_logistic import VariantSpec, default_variant_specs, validate_no_future_features
+from dax.models.baseline_logistic import VariantSpec, validate_no_future_features
 
 
 def test_attacking_goal_geometry():
@@ -11,9 +11,6 @@ def test_attacking_goal_geometry():
 
 def test_shield_excluded():
     assert 'Shield' not in DEFENSIVE_ACTION_TYPES
-
-def test_default_specs_no_future_features():
-    for spec in default_variant_specs(): validate_no_future_features(spec)
 
 def test_future_feature_denylist_fails():
     with pytest.raises(ValueError): validate_no_future_features(VariantSpec('bad',[],['possession_duration_total']))

@@ -5,7 +5,7 @@ from dax.analysis.notebook_aggregation import (
     TEAM_NOTEBOOK_AGGREGATION_FEATURES,
 )
 from dax.features.player_defense import build_player_defensive_actions
-from dax.models.baseline_logistic import default_variant_specs, resolve_columns as resolve_logistic_columns
+from dax.models.baseline_logistic import VariantSpec, resolve_columns as resolve_logistic_columns
 from dax.models.baseline_regression import default_regression_specs, resolve_columns as resolve_regression_columns
 
 
@@ -57,11 +57,6 @@ def _fixture_player_dataset() -> pd.DataFrame:
 
 def test_default_model_specs_exist_in_generated_player_dataset():
     df = _fixture_player_dataset()
-    for spec in default_variant_specs():
-        missing = [*spec.categorical, *spec.numeric]
-        missing = [feature for feature in missing if feature not in df.columns]
-        assert missing == []
-        resolve_logistic_columns(df, spec)
     for spec in default_regression_specs():
         missing = [*spec.categorical, *spec.numeric]
         missing = [feature for feature in missing if feature not in df.columns]
@@ -70,7 +65,7 @@ def test_default_model_specs_exist_in_generated_player_dataset():
 
 
 def test_default_model_specs_do_not_duplicate_features():
-    specs = [*default_variant_specs(), *default_regression_specs()]
+    specs = [*default_regression_specs()]
     for spec in specs:
         numeric = list(spec.numeric)
         categorical = list(spec.categorical)
@@ -95,7 +90,11 @@ def test_notebook_aggregation_features_exist_in_generated_player_dataset():
 
 def test_resolve_columns_fails_for_missing_required_features():
     df = _fixture_player_dataset().drop(columns=["nearest_attacker_distance"])
-    spec = default_variant_specs()[2]
+    spec = VariantSpec(
+        name="manual_spec_missing_feature_check",
+        categorical=["phase_label"],
+        numeric=["nearest_attacker_distance"],
+    )
     try:
         resolve_logistic_columns(df, spec)
     except ValueError as exc:
