@@ -1,0 +1,275 @@
+{
+  "dataset": "passive",
+  "target": "target_future_xg_10s",
+  "shot_col": "target_future_shot_10s",
+  "n_rows": 1593181,
+  "n_rows_given_shot": 95048,
+  "base_xg": 0.0059912564115096115,
+  "base_xg_given_shot": 0.10042458422002883,
+  "columns": {
+    "has_option_2": {
+      "status": "locked",
+      "reason": null,
+      "lift_stats": {
+        "column": "has_option_2",
+        "mean_xg_true": 0.005976380976303771,
+        "mean_xg_false": 0.016842616985786336,
+        "lift": -0.010866236009482565,
+        "pct_true": 99.86310406664403,
+        "n_true": 1591000,
+        "n_false": 2181,
+        "small_n": false
+      },
+      "lift_stats_given_shot": {
+        "column": "has_option_2",
+        "mean_xg_true": 0.10038664386177176,
+        "mean_xg_false": 0.11131438680606062,
+        "lift": -0.01092774294428886,
+        "pct_true": 99.65280700277755,
+        "n_true": 94718,
+        "n_false": 330,
+        "small_n": true
+      }
+    },
+    "has_option_3": {
+      "status": "locked",
+      "reason": null,
+      "lift_stats": {
+        "column": "has_option_3",
+        "mean_xg_true": 0.005859286432176408,
+        "mean_xg_false": 0.024305686120196523,
+        "lift": -0.018446399688020115,
+        "pct_true": 99.28457595213601,
+        "n_true": 1581783,
+        "n_false": 11398,
+        "small_n": false
+      },
+      "lift_stats_given_shot": {
+        "column": "has_option_3",
+        "mean_xg_true": 0.0995501575783813,
+        "mean_xg_false": 0.1422157137566735,
+        "lift": -0.042665556178292194,
+        "pct_true": 97.95050921639593,
+        "n_true": 93100,
+        "n_false": 1948,
+        "small_n": false
+      }
+    },
+    "has_screened_outcome": {
+      "status": "dropped",
+      "reason": "Leakage exclusion (not a correlation-tier verdict): censoring-mechanism proxy for target_future_shot_10s's own 10s window being truncated at end-of-period/match, not defensive signal -- chi2=136.5, p=1.54e-31 vs target_future_shot_10s (0.50% shot rate when False [n=2,581] vs 5.97% when True); see reports/eda/LEAKAGE_AUDIT.json",
+      "lift_stats": {
+        "column": "has_screened_outcome",
+        "mean_xg_true": 0.005993748545315885,
+        "mean_xg_false": 0.004605489723776224,
+        "lift": 0.0013882588215396608,
+        "pct_true": 99.82048492920767,
+        "n_true": 1590321,
+        "n_false": 2860,
+        "small_n": false
+      },
+      "lift_stats_given_shot": {
+        "column": "has_screened_outcome",
+        "mean_xg_true": 0.10034301303593175,
+        "mean_xg_false": 0.24392038166666674,
+        "lift": -0.143577368630735,
+        "pct_true": 99.94318660045451,
+        "n_true": 94994,
+        "n_false": 54,
+        "small_n": true
+      }
+    },
+    "is_central_lane": {
+      "status": "dropped",
+      "reason": "Type 1 REVIEW resolution: point-biserial r=0.849 vs attacking_goal_centrality (kept)",
+      "lift_stats": {
+        "column": "is_central_lane",
+        "mean_xg_true": 0.007073910184379809,
+        "mean_xg_false": 0.004186901712615134,
+        "lift": 0.002887008471764675,
+        "pct_true": 62.49911340895981,
+        "n_true": 995724,
+        "n_false": 597457,
+        "small_n": false
+      },
+      "lift_stats_given_shot": {
+        "column": "is_central_lane",
+        "mean_xg_true": 0.1022539652812177,
+        "mean_xg_false": 0.09560823025966594,
+        "lift": 0.00664573502155176,
+        "pct_true": 72.47285582021715,
+        "n_true": 68884,
+        "n_false": 26164,
+        "small_n": false
+      }
+    },
+    "is_deep_zone": {
+      "status": "dropped",
+      "reason": "Type 2 REVIEW resolution: near-total subset of is_in_defending_box (kept, higher lift +12.31pp vs +7.02pp)",
+      "lift_stats": {
+        "column": "is_deep_zone",
+        "mean_xg_true": 0.011355200884202955,
+        "mean_xg_false": 0.004588569491038013,
+        "lift": 0.006766631393164942,
+        "pct_true": 20.72947141599103,
+        "n_true": 330258,
+        "n_false": 1262923,
+        "small_n": false
+      },
+      "lift_stats_given_shot": {
+        "column": "is_deep_zone",
+        "mean_xg_true": 0.09849882944908728,
+        "mean_xg_false": 0.1017114514669627,
+        "lift": -0.0032126220178754217,
+        "pct_true": 40.05660297954717,
+        "n_true": 38073,
+        "n_false": 56975,
+        "small_n": false
+      }
+    },
+    "is_goal_side_of_nearest_attacker": {
+      "status": "locked",
+      "reason": null,
+      "lift_stats": {
+        "column": "is_goal_side_of_nearest_attacker",
+        "mean_xg_true": 0.005982809484864173,
+        "mean_xg_false": 0.005989615265442679,
+        "lift": -6.805780578506698e-06,
+        "pct_true": 52.226690656424566,
+        "n_true": 831920,
+        "n_false": 760982,
+        "small_n": false
+      },
+      "lift_stats_given_shot": {
+        "column": "is_goal_side_of_nearest_attacker",
+        "mean_xg_true": 0.1003370399485576,
+        "mean_xg_false": 0.10039181983011983,
+        "lift": -5.477988156223079e-05,
+        "pct_true": 52.21194227793742,
+        "n_true": 49605,
+        "n_false": 45402,
+        "small_n": false
+      }
+    },
+    "is_high_zone": {
+      "status": "dropped",
+      "reason": "Type 2 REVIEW resolution: near-total subset of is_in_attacking_box (kept, higher lift +11.85pp vs +6.41pp)",
+      "lift_stats": {
+        "column": "is_high_zone",
+        "mean_xg_true": 0.01219024962712349,
+        "mean_xg_false": 0.005027501988934429,
+        "lift": 0.007162747638189061,
+        "pct_true": 13.455093928436254,
+        "n_true": 214364,
+        "n_false": 1378817,
+        "small_n": false
+      },
+      "lift_stats_given_shot": {
+        "column": "is_high_zone",
+        "mean_xg_true": 0.10587272794217244,
+        "mean_xg_false": 0.098513560666751,
+        "lift": 0.0073591672754214355,
+        "pct_true": 25.967931992256542,
+        "n_true": 24682,
+        "n_false": 70366,
+        "small_n": false
+      }
+    },
+    "is_in_attacking_box": {
+      "status": "locked",
+      "reason": null,
+      "lift_stats": {
+        "column": "is_in_attacking_box",
+        "mean_xg_true": 0.01895842990492394,
+        "mean_xg_false": 0.005353565624983255,
+        "lift": 0.013604864279940686,
+        "pct_true": 4.687226372897994,
+        "n_true": 74676,
+        "n_false": 1518505,
+        "small_n": false
+      },
+      "lift_stats_given_shot": {
+        "column": "is_in_attacking_box",
+        "mean_xg_true": 0.1098579740498254,
+        "mean_xg_false": 0.09894495161165515,
+        "lift": 0.010913022438170258,
+        "pct_true": 13.558412591532697,
+        "n_true": 12887,
+        "n_false": 82161,
+        "small_n": false
+      }
+    },
+    "is_in_defending_box": {
+      "status": "locked",
+      "reason": null,
+      "lift_stats": {
+        "column": "is_in_defending_box",
+        "mean_xg_true": 0.018251984278948474,
+        "mean_xg_false": 0.005043048818116948,
+        "lift": 0.013208935460831527,
+        "pct_true": 7.178531503953412,
+        "n_true": 114367,
+        "n_false": 1478814,
+        "small_n": false
+      },
+      "lift_stats_given_shot": {
+        "column": "is_in_defending_box",
+        "mean_xg_true": 0.10493262383906397,
+        "mean_xg_false": 0.09923133783400705,
+        "lift": 0.005701286005056927,
+        "pct_true": 20.9294251325646,
+        "n_true": 19893,
+        "n_false": 75155,
+        "small_n": false
+      }
+    },
+    "is_wide_lane": {
+      "status": "locked",
+      "reason": null,
+      "lift_stats": {
+        "column": "is_wide_lane",
+        "mean_xg_true": 0.0032506815830322523,
+        "mean_xg_false": 0.0063080334699039085,
+        "lift": -0.0030573518868716562,
+        "pct_true": 10.36115796008112,
+        "n_true": 165072,
+        "n_false": 1428109,
+        "small_n": false
+      },
+      "lift_stats_given_shot": {
+        "column": "is_wide_lane",
+        "mean_xg_true": 0.0931267806793301,
+        "mean_xg_false": 0.10089554208578051,
+        "lift": -0.007768761406450414,
+        "pct_true": 6.062200151502399,
+        "n_true": 5762,
+        "n_false": 89286,
+        "small_n": false
+      }
+    },
+    "screens_top_option": {
+      "status": "dropped",
+      "reason": "Type 1 REVIEW resolution: point-biserial r=0.832 vs lane_screening_score_option_1 (kept)",
+      "lift_stats": {
+        "column": "screens_top_option",
+        "mean_xg_true": 0.008854505947562999,
+        "mean_xg_false": 0.0057702274399897896,
+        "lift": 0.0030842785075732094,
+        "pct_true": 6.997856741971571,
+        "n_true": 111469,
+        "n_false": 1481433,
+        "small_n": false
+      },
+      "lift_stats_given_shot": {
+        "column": "screens_top_option",
+        "mean_xg_true": 0.11311058027376805,
+        "mean_xg_false": 0.09907401800056095,
+        "lift": 0.014036562273207098,
+        "pct_true": 9.184586398896924,
+        "n_true": 8726,
+        "n_false": 86281,
+        "small_n": false
+      }
+    }
+  }
+}

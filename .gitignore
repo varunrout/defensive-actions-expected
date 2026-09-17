@@ -44,6 +44,14 @@ Thumbs.db
 # Generated outputs (preserve archive warnings and directory placeholders)
 /outputs/models/**
 !/outputs/models/.gitkeep
+# The canonical, frozen match-grouped split (prompt 13) is a versioned
+# artifact, not a throwaway model output -- it must be checked in so every
+# clone/environment shares the exact same match assignment across the
+# active and passive legs, rather than each falling back to its own random
+# split. Everything else under outputs/models/splits/ stays ignored.
+!/outputs/models/splits/
+/outputs/models/splits/*
+!/outputs/models/splits/match_assignment.json
 /outputs/metrics/**
 !/outputs/metrics/.gitkeep
 /outputs/figures/**

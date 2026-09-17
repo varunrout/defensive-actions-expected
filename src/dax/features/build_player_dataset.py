@@ -85,6 +85,18 @@ def build_player_dataset(
     if not rows:
         raise ValueError("No player defensive actions were built.")
 
+    # 80 columns built here (as of the actor-self-reference fix --
+    # nearest_defender_distance & co. no longer treat the acting player as
+    # their own defender -- and the action_inside_visible_area drop, always
+    # identical to ball_inside_visible_area in this table; see
+    # build_player_defensive_actions' row assembly). action_x/action_y are
+    # ALSO always identical to ball_x/ball_y but are deliberately kept:
+    # they're required/canonical column names across the modeling and
+    # analysis pipeline (dax.models.schemas/specs/leakage, baseline_regression.py,
+    # baseline_logistic.py, dax.analysis.*, dax.coach_analysis.zones,
+    # analysis.player_features.*) -- dropping them is a separate, dedicated
+    # task. 83 columns total once scripts/add_missingness_flags.py adds its
+    # 3 missingness flags afterwards.
     out = pd.DataFrame(rows)
     if require_corrected_targets:
         require_targets(out)

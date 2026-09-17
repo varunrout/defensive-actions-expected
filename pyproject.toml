@@ -20,6 +20,7 @@ dependencies = [
   "tqdm>=4.66",
   "scipy>=1.11",
   "shapely>=2.0",
+  "Markdown>=3.4",
   "PyYAML>=6.0",
   "mplsoccer>=1.2"
 ]

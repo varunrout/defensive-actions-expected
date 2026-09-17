@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Active Defensive Actions: Distribution Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">DISTRIBUTION ATLAS · ACTIVE DEFENSIVE ACTIONS</p>
+  <h1 class="title">Active Defensive Actions: Distribution Atlas</h1>
+  <p class="dek">One card per numerical column, one row per actual defensive action.</p>
+  <div class="statbar"><div class="stat"><b>56,068</b><span>rows</span></div><div class="stat"><b>7.79%</b><span>base rate</span></div><div class="stat"><b>12</b><span>continuous</span></div><div class="stat"><b>7</b><span>discrete</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="findings"><div class="finding"><span class="tag">shape</span><p><b>nearest_attacker_distance</b> &mdash; is the most skewed continuous feature (skew=4.63); its p99-clipped view keeps the readable range legible.</p></div><div class="finding flag"><span class="tag">extremes</span><p><b>possession_elapsed_seconds</b> &mdash; has 561 rows above its p99 (103.33) up to a true max of 219.00 -- these are counted, not dropped.</p></div></div>
+<h2 class="section-title">Continuous Distributions</h2><p class="section-note">24 equal-width bins from the column min to its 99th percentile. Rows above p99 are counted as extreme, never dropped.</p><div class="card-grid">
+<div class="card">
+<h3>match_time_seconds</h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:52px" title="3153"></div><div class="bin" style="height:46px" title="2787"></div><div class="bin" style="height:42px" title="2508"></div><div class="bin" style="height:40px" title="2419"></div><div class="bin" style="height:43px" title="2580"></div><div class="bin" style="height:41px" title="2490"></div><div class="bin" style="height:42px" title="2527"></div><div class="bin" style="height:39px" title="2345"></div><div class="bin" style="height:38px" title="2311"></div><div class="bin" style="height:48px" title="2906"></div><div class="bin" style="height:64px" title="3820"></div><div class="bin" style="height:44px" title="2671"></div><div class="bin" style="height:43px" title="2594"></div><div class="bin" style="height:42px" title="2508"></div><div class="bin" style="height:39px" title="2331"></div><div class="bin" style="height:40px" title="2413"></div><div class="bin" style="height:39px" title="2357"></div><div class="bin" style="height:38px" title="2275"></div><div class="bin" style="height:40px" title="2424"></div><div class="bin" style="height:42px" title="2531"></div><div class="bin" style="height:39px" title="2343"></div><div class="bin" style="height:12px" title="762"></div><div class="bin" style="height:3px" title="221"></div><div class="bin" style="height:3px" title="234"></div></div>
+<div class="stat-row">
+  <div><b>2928.32</b>mean</div>
+  <div><b>2877.00</b>median</div>
+  <div><b>0.11</b>skew</div>
+</div>
+<div class="extreme-note">558 rows above p99 (6597.00); true max 7495.00</div>
+</div>
+<div class="card">
+<h3>possession_elapsed_seconds</h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:64px" title="17332"></div><div class="bin" style="height:26px" title="7300"></div><div class="bin" style="height:19px" title="5324"></div><div class="bin" style="height:19px" title="5269"></div><div class="bin" style="height:12px" title="3495"></div><div class="bin" style="height:10px" title="2871"></div><div class="bin" style="height:10px" title="2889"></div><div class="bin" style="height:6px" title="1833"></div><div class="bin" style="height:5px" title="1619"></div><div class="bin" style="height:6px" title="1684"></div><div class="bin" style="height:3px" title="1010"></div><div class="bin" style="height:3px" title="859"></div><div class="bin" style="height:2px" title="703"></div><div class="bin" style="height:2px" title="727"></div><div class="bin" style="height:2px" title="522"></div><div class="bin" style="height:2px" title="437"></div><div class="bin" style="height:2px" title="365"></div><div class="bin" style="height:2px" title="277"></div><div class="bin" style="height:2px" title="246"></div><div class="bin" style="height:2px" title="231"></div><div class="bin" style="height:2px" title="180"></div><div class="bin" style="height:2px" title="139"></div><div class="bin" style="height:2px" title="115"></div><div class="bin" style="height:2px" title="80"></div></div>
+<div class="stat-row">
+  <div><b>18.65</b>mean</div>
+  <div><b>11.00</b>median</div>
+  <div><b>2.26</b>skew</div>
+</div>
+<div class="extreme-note">561 rows above p99 (103.33); true max 219.00</div>
+</div>
+<div class="card">
+<h3>angle_to_attacking_goal</h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:64px" title="5064"></div><div class="bin" style="height:57px" title="4534"></div><div class="bin" style="height:56px" title="4456"></div><div class="bin" style="height:57px" title="4535"></div><div class="bin" style="height:57px" title="4549"></div><div class="bin" style="height:58px" title="4648"></div><div class="bin" style="height:55px" title="4407"></div><div class="bin" style="height:50px" title="3988"></div><div class="bin" style="height:38px" title="3077"></div><div class="bin" style="height:33px" title="2614"></div><div class="bin" style="height:29px" title="2311"></div><div class="bin" style="height:24px" title="1929"></div><div class="bin" style="height:22px" title="1743"></div><div class="bin" style="height:17px" title="1390"></div><div class="bin" style="height:15px" title="1200"></div><div class="bin" style="height:12px" title="979"></div><div class="bin" style="height:9px" title="790"></div><div class="bin" style="height:8px" title="654"></div><div class="bin" style="height:7px" title="611"></div><div class="bin" style="height:7px" title="557"></div><div class="bin" style="height:5px" title="460"></div><div class="bin" style="height:5px" title="404"></div><div class="bin" style="height:3px" title="303"></div><div class="bin" style="height:3px" title="304"></div></div>
+<div class="stat-row">
+  <div><b>0.40</b>mean</div>
+  <div><b>0.34</b>median</div>
+  <div><b>1.07</b>skew</div>
+</div>
+<div class="extreme-note">561 rows above p99 (1.33); true max 1.57</div>
+</div>
+<div class="card">
+<h3>distance_to_attacking_box</h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:64px" title="7729"></div><div class="bin" style="height:17px" title="2054"></div><div class="bin" style="height:20px" title="2510"></div><div class="bin" style="height:20px" title="2509"></div><div class="bin" style="height:19px" title="2334"></div><div class="bin" style="height:19px" title="2328"></div><div class="bin" style="height:20px" title="2427"></div><div class="bin" style="height:18px" title="2269"></div><div class="bin" style="height:18px" title="2273"></div><div class="bin" style="height:21px" title="2576"></div><div class="bin" style="height:14px" title="1691"></div><div class="bin" style="height:19px" title="2385"></div><div class="bin" style="height:17px" title="2097"></div><div class="bin" style="height:16px" title="2033"></div><div class="bin" style="height:17px" title="2158"></div><div class="bin" style="height:16px" title="2018"></div><div class="bin" style="height:17px" title="2063"></div><div class="bin" style="height:14px" title="1741"></div><div class="bin" style="height:15px" title="1835"></div><div class="bin" style="height:14px" title="1765"></div><div class="bin" style="height:11px" title="1438"></div><div class="bin" style="height:16px" title="1942"></div><div class="bin" style="height:16px" title="2016"></div><div class="bin" style="height:10px" title="1320"></div></div>
+<div class="stat-row">
+  <div><b>41.91</b>mean</div>
+  <div><b>39.25</b>median</div>
+  <div><b>0.21</b>skew</div>
+</div>
+<div class="extreme-note">557 rows above p99 (98.20); true max 101.88</div>
+</div>
+<div class="card">
+<h3>attacking_goal_centrality</h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:8px" title="364"></div><div class="bin" style="height:44px" title="1941"></div><div class="bin" style="height:59px" title="2572"></div><div class="bin" style="height:63px" title="2763"></div><div class="bin" style="height:58px" title="2521"></div><div class="bin" style="height:53px" title="2334"></div><div class="bin" style="height:51px" title="2216"></div><div class="bin" style="height:47px" title="2073"></div><div class="bin" style="height:49px" title="2147"></div><div class="bin" style="height:49px" title="2164"></div><div class="bin" style="height:48px" title="2103"></div><div class="bin" style="height:52px" title="2283"></div><div class="bin" style="height:53px" title="2330"></div><div class="bin" style="height:56px" title="2464"></div><div class="bin" style="height:62px" title="2702"></div><div class="bin" style="height:61px" title="2655"></div><div class="bin" style="height:53px" title="2328"></div><div class="bin" style="height:53px" title="2328"></div><div class="bin" style="height:55px" title="2402"></div><div class="bin" style="height:57px" title="2478"></div><div class="bin" style="height:55px" title="2415"></div><div class="bin" style="height:60px" title="2627"></div><div class="bin" style="height:58px" title="2549"></div><div class="bin" style="height:64px" title="2772"></div></div>
+<div class="stat-row">
+  <div><b>0.53</b>mean</div>
+  <div><b>0.54</b>median</div>
+  <div><b>-0.05</b>skew</div>
+</div>
+<div class="extreme-note">537 rows above p99 (0.99); true max 1.00</div>
+</div>
+<div class="card">
+<h3>nearest_attacker_distance</h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:64px" title="31887"></div><div class="bin" style="height:25px" title="12667"></div><div class="bin" style="height:9px" title="4750"></div><div class="bin" style="height:4px" title="2142"></div><div class="bin" style="height:2px" title="1002"></div><div class="bin" style="height:2px" title="544"></div><div class="bin" style="height:2px" title="339"></div><div class="bin" style="height:2px" title="243"></div><div class="bin" style="height:2px" title="205"></div><div class="bin" style="height:2px" title="164"></div><div class="bin" style="height:2px" title="167"></div><div class="bin" style="height:2px" title="122"></div><div class="bin" style="height:2px" title="127"></div><div class="bin" style="height:2px" title="124"></div><div class="bin" style="height:2px" title="107"></div><div class="bin" style="height:2px" title="112"></div><div class="bin" style="height:2px" title="95"></div><div class="bin" style="height:2px" title="82"></div><div class="bin" style="height:2px" title="79"></div><div class="bin" style="height:2px" title="86"></div><div class="bin" style="height:2px" title="82"></div><div class="bin" style="height:2px" title="110"></div><div class="bin" style="height:2px" title="113"></div><div class="bin" style="height:2px" title="127"></div></div>
+<div class="stat-row">
+  <div><b>7.08</b>mean</div>
+  <div><b>3.20</b>median</div>
+  <div><b>4.63</b>skew</div>
+</div>
+<div class="extreme-note">561 rows above p99 (87.30); true max 110.24</div>
+</div>
+<div class="card">
+<h3>nearest_defender_distance</h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:56px" title="14895"></div><div class="bin" style="height:64px" title="16918"></div><div class="bin" style="height:45px" title="11933"></div><div class="bin" style="height:21px" title="5721"></div><div class="bin" style="height:8px" title="2336"></div><div class="bin" style="height:3px" title="943"></div><div class="bin" style="height:2px" title="464"></div><div class="bin" style="height:2px" title="261"></div><div class="bin" style="height:2px" title="212"></div><div class="bin" style="height:2px" title="168"></div><div class="bin" style="height:2px" title="163"></div><div class="bin" style="height:2px" title="129"></div><div class="bin" style="height:2px" title="133"></div><div class="bin" style="height:2px" title="98"></div><div class="bin" style="height:2px" title="109"></div><div class="bin" style="height:2px" title="103"></div><div class="bin" style="height:2px" title="109"></div><div class="bin" style="height:2px" title="85"></div><div class="bin" style="height:2px" title="81"></div><div class="bin" style="height:2px" title="86"></div><div class="bin" style="height:2px" title="112"></div><div class="bin" style="height:2px" title="115"></div><div class="bin" style="height:2px" title="107"></div><div class="bin" style="height:2px" title="151"></div></div>
+<div class="stat-row">
+  <div><b>9.49</b>mean</div>
+  <div><b>6.35</b>median</div>
+  <div><b>4.38</b>skew</div>
+</div>
+<div class="extreme-note">560 rows above p99 (86.15); true max 110.36</div>
+</div>
+<div class="card">
+<h3>defender_attacker_gap_x</h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:2px" title="2"></div><div class="bin" style="height:2px" title="3"></div><div class="bin" style="height:2px" title="4"></div><div class="bin" style="height:2px" title="6"></div><div class="bin" style="height:2px" title="6"></div><div class="bin" style="height:2px" title="38"></div><div class="bin" style="height:2px" title="60"></div><div class="bin" style="height:2px" title="137"></div><div class="bin" style="height:3px" title="340"></div><div class="bin" style="height:9px" title="845"></div><div class="bin" style="height:18px" title="1696"></div><div class="bin" style="height:32px" title="2985"></div><div class="bin" style="height:48px" title="4471"></div><div class="bin" style="height:55px" title="5052"></div><div class="bin" style="height:54px" title="4985"></div><div class="bin" style="height:46px" title="4239"></div><div class="bin" style="height:42px" title="3921"></div><div class="bin" style="height:51px" title="4690"></div><div class="bin" style="height:60px" title="5580"></div><div class="bin" style="height:64px" title="5865"></div><div class="bin" style="height:52px" title="4807"></div><div class="bin" style="height:35px" title="3245"></div><div class="bin" style="height:18px" title="1664"></div><div class="bin" style="height:8px" title="762"></div></div>
+<div class="stat-row">
+  <div><b>0.33</b>mean</div>
+  <div><b>0.63</b>median</div>
+  <div><b>-0.08</b>skew</div>
+</div>
+<div class="extreme-note">560 rows above p99 (11.74); true max 24.08</div>
+</div>
+<div class="card">
+<h3>defender_attacker_gap_y</h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:2px" title="3"></div><div class="bin" style="height:2px" title="1"></div><div class="bin" style="height:2px" title="1"></div><div class="bin" style="height:2px" title="10"></div><div class="bin" style="height:2px" title="4"></div><div class="bin" style="height:2px" title="10"></div><div class="bin" style="height:2px" title="21"></div><div class="bin" style="height:2px" title="35"></div><div class="bin" style="height:2px" title="56"></div><div class="bin" style="height:2px" title="122"></div><div class="bin" style="height:2px" title="259"></div><div class="bin" style="height:3px" title="555"></div><div class="bin" style="height:6px" title="994"></div><div class="bin" style="height:12px" title="1908"></div><div class="bin" style="height:22px" title="3535"></div><div class="bin" style="height:38px" title="6097"></div><div class="bin" style="height:56px" title="8836"></div><div class="bin" style="height:64px" title="10087"></div><div class="bin" style="height:56px" title="8864"></div><div class="bin" style="height:41px" title="6504"></div><div class="bin" style="height:23px" title="3762"></div><div class="bin" style="height:13px" title="2101"></div><div class="bin" style="height:6px" title="1097"></div><div class="bin" style="height:3px" title="541"></div></div>
+<div class="stat-row">
+  <div><b>0.04</b>mean</div>
+  <div><b>0.02</b>median</div>
+  <div><b>0.00</b>skew</div>
+</div>
+<div class="extreme-note">560 rows above p99 (11.51); true max 32.01</div>
+</div>
+<div class="card">
+<h3>attacker_spread</h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:2px" title="199"></div><div class="bin" style="height:2px" title="8"></div><div class="bin" style="height:2px" title="5"></div><div class="bin" style="height:2px" title="47"></div><div class="bin" style="height:2px" title="139"></div><div class="bin" style="height:3px" title="303"></div><div class="bin" style="height:6px" title="556"></div><div class="bin" style="height:11px" title="973"></div><div class="bin" style="height:17px" title="1443"></div><div class="bin" style="height:25px" title="2127"></div><div class="bin" style="height:35px" title="3010"></div><div class="bin" style="height:47px" title="3997"></div><div class="bin" style="height:57px" title="4858"></div><div class="bin" style="height:60px" title="5093"></div><div class="bin" style="height:64px" title="5383"></div><div class="bin" style="height:61px" title="5149"></div><div class="bin" style="height:58px" title="4956"></div><div class="bin" style="height:52px" title="4407"></div><div class="bin" style="height:43px" title="3683"></div><div class="bin" style="height:37px" title="3163"></div><div class="bin" style="height:28px" title="2373"></div><div class="bin" style="height:21px" title="1789"></div><div class="bin" style="height:14px" title="1182"></div><div class="bin" style="height:7px" title="633"></div></div>
+<div class="stat-row">
+  <div><b>15.07</b>mean</div>
+  <div><b>15.02</b>median</div>
+  <div><b>-0.10</b>skew</div>
+</div>
+<div class="extreme-note">561 rows above p99 (24.07); true max 29.30</div>
+</div>
+<div class="card">
+<h3>defender_spread</h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:2px" title="246"></div><div class="bin" style="height:2px" title="2"></div><div class="bin" style="height:2px" title="7"></div><div class="bin" style="height:2px" title="19"></div><div class="bin" style="height:2px" title="59"></div><div class="bin" style="height:3px" title="296"></div><div class="bin" style="height:7px" title="687"></div><div class="bin" style="height:12px" title="1102"></div><div class="bin" style="height:18px" title="1639"></div><div class="bin" style="height:23px" title="2108"></div><div class="bin" style="height:31px" title="2824"></div><div class="bin" style="height:36px" title="3298"></div><div class="bin" style="height:43px" title="3928"></div><div class="bin" style="height:52px" title="4728"></div><div class="bin" style="height:59px" title="5362"></div><div class="bin" style="height:64px" title="5767"></div><div class="bin" style="height:62px" title="5643"></div><div class="bin" style="height:57px" title="5208"></div><div class="bin" style="height:48px" title="4356"></div><div class="bin" style="height:35px" title="3202"></div><div class="bin" style="height:25px" title="2263"></div><div class="bin" style="height:15px" title="1384"></div><div class="bin" style="height:9px" title="842"></div><div class="bin" style="height:5px" title="462"></div></div>
+<div class="stat-row">
+  <div><b>13.14</b>mean</div>
+  <div><b>13.34</b>median</div>
+  <div><b>-0.25</b>skew</div>
+</div>
+<div class="extreme-note">560 rows above p99 (20.93); true max 26.38</div>
+</div>
+<div class="card">
+<h3>attacker_defender_ratio</h3>
+<p class="subnote">continuous &middot; p99-clipped histogram</p>
+<div class="hist"><div class="bin" style="height:2px" title="31"></div><div class="bin" style="height:2px" title="72"></div><div class="bin" style="height:2px" title="164"></div><div class="bin" style="height:3px" title="577"></div><div class="bin" style="height:13px" title="1936"></div><div class="bin" style="height:19px" title="2815"></div><div class="bin" style="height:50px" title="7415"></div><div class="bin" style="height:51px" title="7583"></div><div class="bin" style="height:64px" title="9390"></div><div class="bin" style="height:55px" title="8086"></div><div class="bin" style="height:36px" title="5427"></div><div class="bin" style="height:12px" title="1845"></div><div class="bin" style="height:23px" title="3405"></div><div class="bin" style="height:10px" title="1541"></div><div class="bin" style="height:9px" title="1323"></div><div class="bin" style="height:6px" title="942"></div><div class="bin" style="height:7px" title="1129"></div><div class="bin" style="height:3px" title="473"></div><div class="bin" style="height:2px" title="0"></div><div class="bin" style="height:6px" title="890"></div><div class="bin" style="height:2px" title="0"></div><div class="bin" style="height:2px" title="131"></div><div class="bin" style="height:2px" title="190"></div><div class="bin" style="height:2px" title="153"></div></div>
+<div class="stat-row">
+  <div><b>1.00</b>mean</div>
+  <div><b>0.89</b>median</div>
+  <div><b>3.27</b>skew</div>
+</div>
+<div class="extreme-note">550 rows above p99 (2.50); true max 7.00</div>
+</div></div>
+<h2 class="section-title">Discrete Distributions</h2><p class="section-note">Raw value counts, capped at 20 distinct values; any remaining tail is bucketed and marked.</p><div class="card-grid">
+<div class="card">
+<h3>visible_attacker_count</h3>
+<p class="subnote">discrete &middot; value counts</p>
+<div class="hist"><div class="bin" style="height:2px" title="0: 31"></div><div class="bin" style="height:2px" title="1: 198"></div><div class="bin" style="height:3px" title="2: 641"></div><div class="bin" style="height:8px" title="3: 1535"></div><div class="bin" style="height:18px" title="4: 3283"></div><div class="bin" style="height:34px" title="5: 5928"></div><div class="bin" style="height:51px" title="6: 8918"></div><div class="bin" style="height:64px" title="7: 11099"></div><div class="bin" style="height:62px" title="8: 10765"></div><div class="bin" style="height:47px" title="9: 8192"></div><div class="bin" style="height:28px" title="10: 4951"></div><div class="bin" style="height:3px" title="11: 527"></div></div>
+<div class="stat-row">
+  <div><b>7.05</b>mean</div>
+  <div><b>7.00</b>median</div>
+  <div><b>56,068</b>n</div>
+</div>
+</div>
+<div class="card">
+<h3>visible_defender_count</h3>
+<p class="subnote">discrete &middot; value counts</p>
+<div class="hist"><div class="bin" style="height:2px" title="0: 76"></div><div class="bin" style="height:2px" title="1: 244"></div><div class="bin" style="height:2px" title="2: 557"></div><div class="bin" style="height:5px" title="3: 1164"></div><div class="bin" style="height:10px" title="4: 2279"></div><div class="bin" style="height:18px" title="5: 4132"></div><div class="bin" style="height:28px" title="6: 6329"></div><div class="bin" style="height:38px" title="7: 8513"></div><div class="bin" style="height:51px" title="8: 11247"></div><div class="bin" style="height:64px" title="9: 14029"></div><div class="bin" style="height:29px" title="10: 6557"></div><div class="bin" style="height:4px" title="11: 941"></div></div>
+<div class="stat-row">
+  <div><b>7.57</b>mean</div>
+  <div><b>8.00</b>median</div>
+  <div><b>56,068</b>n</div>
+</div>
+</div>
+<div class="card">
+<h3>attackers_within_5m</h3>
+<p class="subnote">discrete &middot; value counts</p>
+<div class="hist"><div class="bin" style="height:28px" title="0.0: 14062"></div><div class="bin" style="height:64px" title="1.0: 31201"></div><div class="bin" style="height:12px" title="2.0: 5992"></div><div class="bin" style="height:2px" title="3.0: 737"></div><div class="bin" style="height:2px" title="4.0: 126"></div><div class="bin" style="height:2px" title="5.0: 17"></div><div class="bin" style="height:2px" title="6.0: 3"></div></div>
+<div class="stat-row">
+  <div><b>0.88</b>mean</div>
+  <div><b>1.00</b>median</div>
+  <div><b>52,138</b>n</div>
+</div>
+</div>
+<div class="card">
+<h3>defenders_within_5m</h3>
+<p class="subnote">discrete &middot; value counts</p>
+<div class="hist"><div class="bin" style="height:64px" title="0.0: 30674"></div><div class="bin" style="height:32px" title="1.0: 15456"></div><div class="bin" style="height:8px" title="2.0: 4309"></div><div class="bin" style="height:2px" title="3.0: 1095"></div><div class="bin" style="height:2px" title="4.0: 393"></div><div class="bin" style="height:2px" title="5.0: 147"></div><div class="bin" style="height:2px" title="6.0: 56"></div><div class="bin" style="height:2px" title="7.0: 6"></div><div class="bin" style="height:2px" title="8.0: 2"></div></div>
+<div class="stat-row">
+  <div><b>0.58</b>mean</div>
+  <div><b>0.00</b>median</div>
+  <div><b>52,138</b>n</div>
+</div>
+</div>
+<div class="card">
+<h3>attackers_within_10m</h3>
+<p class="subnote">discrete &middot; value counts</p>
+<div class="hist"><div class="bin" style="height:13px" title="0.0: 3130"></div><div class="bin" style="height:64px" title="1.0: 15375"></div><div class="bin" style="height:60px" title="2.0: 14589"></div><div class="bin" style="height:28px" title="3.0: 6902"></div><div class="bin" style="height:9px" title="4.0: 2202"></div><div class="bin" style="height:3px" title="5.0: 758"></div><div class="bin" style="height:2px" title="6.0: 195"></div><div class="bin" style="height:2px" title="7.0: 36"></div><div class="bin" style="height:2px" title="8.0: 11"></div><div class="bin" style="height:2px" title="9.0: 1"></div></div>
+<div class="stat-row">
+  <div><b>1.84</b>mean</div>
+  <div><b>2.00</b>median</div>
+  <div><b>43,199</b>n</div>
+</div>
+</div>
+<div class="card">
+<h3>defenders_within_10m</h3>
+<p class="subnote">discrete &middot; value counts</p>
+<div class="hist"><div class="bin" style="height:43px" title="0.0: 8206"></div><div class="bin" style="height:64px" title="1.0: 11997"></div><div class="bin" style="height:56px" title="2.0: 10526"></div><div class="bin" style="height:33px" title="3.0: 6298"></div><div class="bin" style="height:16px" title="4.0: 3017"></div><div class="bin" style="height:8px" title="5.0: 1563"></div><div class="bin" style="height:4px" title="6.0: 770"></div><div class="bin" style="height:2px" title="7.0: 468"></div><div class="bin" style="height:2px" title="8.0: 235"></div><div class="bin" style="height:2px" title="9.0: 90"></div><div class="bin" style="height:2px" title="10.0: 27"></div><div class="bin" style="height:2px" title="11.0: 2"></div></div>
+<div class="stat-row">
+  <div><b>1.91</b>mean</div>
+  <div><b>2.00</b>median</div>
+  <div><b>43,199</b>n</div>
+</div>
+</div>
+<div class="card">
+<h3>defenders_between_ball_and_attacking_goal</h3>
+<p class="subnote">discrete &middot; value counts</p>
+<div class="hist"><div class="bin" style="height:47px" title="0: 5859"></div><div class="bin" style="height:51px" title="1: 6286"></div><div class="bin" style="height:56px" title="2: 6905"></div><div class="bin" style="height:64px" title="3: 7827"></div><div class="bin" style="height:63px" title="4: 7745"></div><div class="bin" style="height:55px" title="5: 6823"></div><div class="bin" style="height:44px" title="6: 5446"></div><div class="bin" style="height:32px" title="7: 3935"></div><div class="bin" style="height:23px" title="8: 2863"></div><div class="bin" style="height:14px" title="9: 1713"></div><div class="bin" style="height:4px" title="10: 549"></div><div class="bin" style="height:2px" title="11: 117"></div></div>
+<div class="stat-row">
+  <div><b>3.82</b>mean</div>
+  <div><b>4.00</b>median</div>
+  <div><b>56,068</b>n</div>
+</div>
+</div></div>
+</div>
+<footer>
+
+<p><b>Lift</b> = shot rate when a flag is True minus shot rate when it is False, in percentage points,
+against the dataset base rate of 7.79%. <b>Skew</b> is the sample skewness
+(scipy.stats.skew) of the full (unclipped) column. Continuous histograms use 24 equal-width bins from the
+column minimum to its 99th percentile; rows above p99 are counted as "extreme" but never dropped from the
+reported mean/median/skew. Boolean groups (True or False) with n &lt; 500 are flagged as small-n rather than
+excluded. All findings describe correlation/association, never causation.</p>
+<p><b>Excluded from this report:</b></p>
+<ul><li><b>visibility_quality_band</b> &mdash; camera/360-tracking-coverage metadata, not a football signal (confound: crowded/dangerous zones are both harder to fully capture on camera and where shots cluster)</li><li><b>ball_inside_visible_area</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>action_inside_visible_area</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>local_5m_region_fully_visible</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>local_10m_region_fully_visible</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>visibility_limited</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>visible_area_polygon_area</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>visible_area_fraction_of_pitch</b> &mdash; camera/360-tracking-coverage metadata, not a football signal</li><li><b>freeze_frame_count</b> &mdash; data-collection artifact, not a defensive feature</li><li><b>carrier_x</b> &mdash; verified 100%-duplicate of ball_x (already dropped from the passive parquet)</li><li><b>carrier_y</b> &mdash; verified 100%-duplicate of ball_y (already dropped from the passive parquet)</li><li><b>action_x</b> &mdash; verified 100%-duplicate of ball_x as of this pass -- known unresolved data issue</li><li><b>action_y</b> &mdash; verified 100%-duplicate of ball_y as of this pass -- known unresolved data issue</li><li><b>action_changed_possession</b> &mdash; structural zero (0.00% shot rate by target-window definition), not a genuine finding</li><li><b>action_ended_possession</b> &mdash; structural zero (0.00% shot rate by target-window definition), not a genuine finding</li><li><b>action_won_possession</b> &mdash; structural zero (0.00% shot rate by target-window definition), not a genuine finding</li><li><b>is_central_lane</b> &mdash; Type 1 REVIEW resolution: point-biserial r=0.854 vs attacking_goal_centrality (kept)</li><li><b>is_wide_lane</b> &mdash; Type 1 REVIEW resolution: point-biserial r=-0.785 vs attacking_goal_centrality (kept)</li><li><b>is_high_zone</b> &mdash; Type 2 REVIEW resolution: near-total subset of is_in_attacking_box (kept, higher lift +11.99pp vs +7.22pp)</li><li><b>is_deep_zone</b> &mdash; Type 2 REVIEW resolution: near-total subset of is_in_defending_box (kept, higher lift +12.04pp vs +7.22pp)</li><li><b>position_group</b> &mdash; CORRELATION_ANALYSIS DROP tier: Cramer&#x27;s V=1.0 vs position (kept, more granular)</li><li><b>action_family</b> &mdash; CORRELATION_ANALYSIS DROP tier: Cramer&#x27;s V=1.0 vs event_type (kept, more granular)</li><li><b>distance_to_center_line</b> &mdash; CORRELATION_ANALYSIS DROP tier: Spearman r=-1.0 vs attacking_goal_centrality (kept)</li><li><b>distance_to_attacking_goal</b> &mdash; Cluster 1 (goal-proximity, drop-to-one): mutually r/eta &gt;= 0.94 with distance_to_attacking_box, distance_to_defending_goal/box, action_zone -- kept distance_to_attacking_box (is_in_attacking_box lift +11.99pp is the most predictive single cut)</li><li><b>distance_to_defending_goal</b> &mdash; Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal</li><li><b>distance_to_defending_box</b> &mdash; Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal</li><li><b>action_zone</b> &mdash; Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal</li><li><b>attacker_centroid_x</b> &mdash; Cluster 2 (attacker/defender centroid, MERGE not drop): r=0.984 with defender_centroid_x -- replaced by defender_attacker_gap_x/y (defensive compactness relative to attacking shape), not simply dropped, since the two centroids describe different teams&#x27; shapes</li><li><b>attacker_centroid_y</b> &mdash; Cluster 2 (attacker/defender centroid, MERGE not drop): see attacker_centroid_x</li><li><b>defender_centroid_x</b> &mdash; Cluster 2 (attacker/defender centroid, MERGE not drop): see attacker_centroid_x</li><li><b>defender_centroid_y</b> &mdash; Cluster 2 (attacker/defender centroid, MERGE not drop): see attacker_centroid_x</li><li><b>events_elapsed_in_possession</b> &mdash; Cluster 3 (possession clock, drop-to-one): mutually r=0.90-0.95 with possession_elapsed_seconds/phase_transitions_observed_so_far -- kept possession_elapsed_seconds (most granular, continuous)</li><li><b>phase_transitions_observed_so_far</b> &mdash; Cluster 3 (possession clock, drop-to-one): see events_elapsed_in_possession</li><li><b>local_numerical_balance_5m</b> &mdash; VIF analysis: near-exact linear combination of attackers_within_5m - defenders_within_5m (both kept); joint multicollinearity invisible to pairwise correlation, caught by VIF, not a COLLAPSE/REVIEW tier verdict -- see reports/eda/VIF_ANALYSIS.json</li><li><b>local_numerical_balance_10m</b> &mdash; VIF analysis: near-exact linear combination of attackers_within_10m - defenders_within_10m (both kept); joint multicollinearity invisible to pairwise correlation, caught by VIF, not a COLLAPSE/REVIEW tier verdict -- see reports/eda/VIF_ANALYSIS.json</li></ul>
+
+</footer>
+</body>
+</html>

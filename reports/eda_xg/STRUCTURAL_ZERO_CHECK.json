@@ -1,0 +1,26 @@
+{
+  "method": "Directly compared (target_future_shot_10s == 0) against (target_future_xg_10s == 0) row-for-row on both parquets. Zero mismatches confirms xg is structurally zero exactly where no shot occurred, which is the premise the shot-conditional panels (Part B/C) depend on.",
+  "shot_col": "target_future_shot_10s",
+  "xg_col": "target_future_xg_10s",
+  "datasets": {
+    "active": {
+      "dataset": "active",
+      "parquet_path": "data/features/player_defensive_actions.parquet",
+      "n_rows": 56068,
+      "n_mismatches": 0,
+      "n_shot_zero_xg_nonzero": 0,
+      "n_shot_nonzero_xg_zero": 0,
+      "verdict": "confirmed -- xg is structurally zero exactly where shot is zero"
+    },
+    "passive": {
+      "dataset": "passive",
+      "parquet_path": "data/features/passive_defense.parquet",
+      "n_rows": 1593181,
+      "n_mismatches": 0,
+      "n_shot_zero_xg_nonzero": 0,
+      "n_shot_nonzero_xg_zero": 0,
+      "verdict": "confirmed -- xg is structurally zero exactly where shot is zero"
+    }
+  },
+  "overall_verdict": "confirmed"
+}

@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Are the Slice-Stratification Slicers Independent?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.vif-dataset-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.vif-dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.vif-chart { display: flex; flex-direction: column; gap: 6px; position: relative; padding: 8px 0; }
+.vif-row { display: grid; grid-template-columns: 180px 1fr 70px; align-items: center; gap: 10px; font-size: 12px; }
+.vif-label { color: var(--text-primary); font-weight: 600; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vif-track { position: relative; height: 14px; background: var(--gridline); border-radius: 3px; }
+.vif-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 3px; background: var(--neg); }
+.vif-fill.warn { background: var(--amber); }
+.vif-fill.severe { background: var(--pos); }
+.vif-value { font-family: "JetBrains Mono", monospace; font-weight: 700; }
+.vif-threshold { position: absolute; top: -4px; bottom: -4px; width: 1px; background: var(--text-muted); opacity: 0.5; }
+.vif-threshold-label { position: absolute; top: -18px; font-size: 9px; color: var(--text-muted); font-family: "JetBrains Mono", monospace; transform: translateX(-50%); }
+.vif-legend { display: flex; gap: 20px; font-size: 11.5px; color: var(--text-muted); margin: 8px 0 20px; }
+.vif-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.vif-legend .dot { width: 9px; height: 9px; border-radius: 50%; }
+.cond-badge { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 12px; background: var(--plane); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; margin-bottom: 16px; }
+.before-after { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+@media (max-width: 700px) { .before-after { grid-template-columns: 1fr; } }
+.ba-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.ba-card h4 { font-family: "Archivo", sans-serif; font-size: 14px; margin: 0 0 12px; }
+.ba-card.before h4 { color: var(--pos); }
+.ba-card.after h4 { color: var(--good); }
+
+.numfeat-list { display: flex; flex-direction: column; gap: 12px; }
+.numfeat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+.numfeat-card.is-dropped { border-left: 4px solid var(--amber); }
+.numfeat-card.is-locked { border-left: 4px solid var(--good); }
+.numfeat-card.is-unreliable { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.numfeat-card.is-inconsistent { box-shadow: inset 0 0 0 1px rgba(227,73,72,0.4); }
+.numfeat-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-bottom: 6px;
+}
+.numfeat-rank { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-muted); }
+.numfeat-name { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 15.5px; color: var(--text-primary); }
+.nf-badge {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.nf-badge.locked { background: var(--good-wash); color: var(--good); }
+.nf-badge.dropped { background: var(--amber-wash); color: var(--amber); }
+.nf-badge.type { background: var(--plane); color: var(--text-secondary); }
+.nf-badge.unreliable { background: rgba(227,73,72,0.14); color: var(--pos); }
+.nf-badge.inconsistent { background: rgba(227,73,72,0.14); color: var(--pos); }
+.numfeat-stats {
+  display: flex; flex-wrap: wrap; gap: 14px 22px;
+  font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.numfeat-stats b { color: var(--text-primary); }
+.numfeat-reason, .numfeat-note { font-size: 12.5px; color: var(--text-secondary); margin: 4px 0; }
+.numfeat-note { color: var(--amber); }
+.numfeat-card summary {
+  cursor: pointer;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--neg);
+  margin-top: 6px;
+  outline: none;
+}
+.numfeat-card summary::-webkit-details-marker { color: var(--neg); }
+.numbin-rows { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+.numbin-row {
+  display: grid; grid-template-columns: 1fr 3fr auto; align-items: center; gap: 10px;
+  font-size: 11.5px; color: var(--text-secondary);
+}
+.numbin-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.numbin-track { position: relative; height: 9px; background: var(--gridline); border-radius: 4px; }
+.numbin-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; background: var(--neg); }
+.numbin-refline { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber); }
+.numbin-val { font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 600; color: var(--text-primary); text-align: right; }
+.numfeat-consistency {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-size: 12.5px; color: var(--text-secondary);
+}
+.numfeat-consistency .cverdict { font-weight: 700; }
+.numfeat-consistency .cverdict.ok { color: var(--good); }
+.numfeat-consistency .cverdict.bad { color: var(--pos); }
+.numsplit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+@media (max-width: 700px) { .numsplit-grid { grid-template-columns: 1fr; } }
+.numsplit-card { background: var(--plane); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.numsplit-card h5 { font-family: "JetBrains Mono", monospace; font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); margin: 0 0 6px; }
+
+.vif-fill.good { background: var(--good); }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">SLICER REDUNDANCY</p>
+  <h1 class="title">Are the Slice-Stratification Slicers Independent?</h1>
+  <p class="dek">Prompt 25/26's slice-stratification grid tested every locked numerical feature against every locked categorical slicer. Before that becomes an interaction-term shortlist for modelling: are the slicers themselves independent, or does testing two redundant slicers just double-count one finding?</p>
+  <div class="statbar"><div class="stat"><b>21</b><span>slicer pairs tested</span></div><div class="stat"><b>1</b><span>highly redundant by Cramer&#x27;s V</span></div><div class="stat"><b>8</b><span>pairs where V and NMI disagree</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+
+<p class="test-subnote" style="margin-bottom:16px;">Every pair of slicers within each dataset (active: 6 slicers from feature_config.py&#x27;s ACTIVE[&#x27;categorical&#x27;] -&gt; 15 pairs; passive: 4 from PASSIVE[&#x27;categorical&#x27;] -&gt; 6 pairs) scored with Cramer&#x27;s V (bias-corrected, src.eda.correlation.cramers_v -- same function CORRELATION_ANALYSIS uses for categorical&lt;-&gt;categorical pairs) as the primary measure, and normalised mutual information (sklearn, arithmetic averaging) as a secondary check since Cramer&#x27;s V can be inflated by small cell counts in a large contingency table. Rows with a null in either column of the pair are dropped for that pair only (n_rows_dropped_na records how many).</p>
+<div class="finding"><span class="tag">verdict thresholds</span><p><b>stated explicitly, not implicit</b> &mdash; Cramer&#x27;s V &lt; 0.1 &nbsp;|&nbsp; 0.1 &lt;= Cramer&#x27;s V &lt;= 0.3 &nbsp;|&nbsp; Cramer&#x27;s V &gt; 0.3. The same thresholds are applied to normalised mutual information for a second, independent verdict (verdict_from_nmi); metrics_disagree flags where the two disagree.</p></div>
+<div class="finding"><span class="tag">downstream connection</span><p><b>interaction-term shortlist (not acted on here)</b> &mdash; 1 pair(s) reach &#x27;highly redundant&#x27; by raw Cramer&#x27;s V, but only 1 of those are confirmed by NMI too (not metrics_disagree) -- the confirmed one is phase_label vs phase_label_prev_event (active), the constructed lag pair. For that confirmed pair, the divergence counts in reports/eda/SLICE_STRATIFICATION.json (320 genuine) and reports/eda_xg/SLICE_STRATIFICATION.json (363 unconditional / 90 given-shot) likely double-count findings that show up under both phase_label and phase_label_prev_event -- a future interaction-term shortlist for modelling should prefer one of the two, not both. The remaining &#x27;partially redundant&#x27; pairs flagged by Cramer&#x27;s V alone (see metrics_disagree in each pair) look like small-cell-count inflation rather than genuine overlap -- NMI for those pairs is close to 0. Diagnostic only: neither SLICE_STRATIFICATION.json file is edited by this prompt.</p></div>
+
+<div class="vif-dataset-block">
+  <h2 class="test-title">active (15 pairs)</h2>
+  <div class="vif-legend">
+    <span><span class="dot" style="background:var(--good);"></span>independent (V &lt; 0.1)</span>
+    <span><span class="dot" style="background:var(--amber);"></span>partially redundant (0.1 &ndash; 0.3)</span>
+    <span><span class="dot" style="background:var(--pos);"></span>highly redundant (V &gt; 0.3)</span>
+  </div>
+  
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">phase_label &times; position <span class="nf-badge unreliable">METRICS DISAGREE</span></div>
+  <div class="vif-track">
+    <div class="vif-fill warn" style="width:12.5%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.1251</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0197 (verdict from NMI: independent)
+&mdash; contingency table 7&times;23 &mdash; n=56,068 (dropped 0 with a null)
+&mdash; verdict: <b>partially redundant</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">phase_label &times; event_type <span class="nf-badge unreliable">METRICS DISAGREE</span></div>
+  <div class="vif-track">
+    <div class="vif-fill warn" style="width:15.3%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.1528</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0386 (verdict from NMI: independent)
+&mdash; contingency table 7&times;8 &mdash; n=56,068 (dropped 0 with a null)
+&mdash; verdict: <b>partially redundant</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">phase_label &times; play_pattern <span class="nf-badge unreliable">METRICS DISAGREE</span></div>
+  <div class="vif-track">
+    <div class="vif-fill warn" style="width:16.5%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.1649</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0478 (verdict from NMI: independent)
+&mdash; contingency table 7&times;9 &mdash; n=56,068 (dropped 0 with a null)
+&mdash; verdict: <b>partially redundant</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">phase_label &times; phase_label_prev_event <span class="nf-badge type">NAMED CANDIDATE</span></div>
+  <div class="vif-track">
+    <div class="vif-fill severe" style="width:65.0%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.6503</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.5149 (verdict from NMI: highly redundant)
+&mdash; contingency table 7&times;7 &mdash; n=51,534 (dropped 4534 with a null)
+&mdash; verdict: <b>highly redundant</b></p>
+<p class="numfeat-note">phase_label_prev_event is a 1-event lag of phase_label -- likely high association by construction.</p>
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">phase_label &times; period</div>
+  <div class="vif-track">
+    <div class="vif-fill good" style="width:3.1%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.0309</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0012 (verdict from NMI: independent)
+&mdash; contingency table 7&times;4 &mdash; n=56,068 (dropped 0 with a null)
+&mdash; verdict: <b>independent</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">position &times; event_type <span class="nf-badge unreliable">METRICS DISAGREE</span></div>
+  <div class="vif-track">
+    <div class="vif-fill warn" style="width:15.2%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.1522</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0294 (verdict from NMI: independent)
+&mdash; contingency table 23&times;8 &mdash; n=56,068 (dropped 0 with a null)
+&mdash; verdict: <b>partially redundant</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">position &times; play_pattern</div>
+  <div class="vif-track">
+    <div class="vif-fill good" style="width:3.8%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.038</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0032 (verdict from NMI: independent)
+&mdash; contingency table 23&times;9 &mdash; n=56,068 (dropped 0 with a null)
+&mdash; verdict: <b>independent</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">position &times; phase_label_prev_event</div>
+  <div class="vif-track">
+    <div class="vif-fill good" style="width:9.0%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.0902</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0105 (verdict from NMI: independent)
+&mdash; contingency table 23&times;7 &mdash; n=51,534 (dropped 4534 with a null)
+&mdash; verdict: <b>independent</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">position &times; period</div>
+  <div class="vif-track">
+    <div class="vif-fill good" style="width:3.7%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.0372</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0013 (verdict from NMI: independent)
+&mdash; contingency table 23&times;4 &mdash; n=56,068 (dropped 0 with a null)
+&mdash; verdict: <b>independent</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">event_type &times; play_pattern <span class="nf-badge type">NAMED CANDIDATE</span></div>
+  <div class="vif-track">
+    <div class="vif-fill good" style="width:8.9%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.0894</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0156 (verdict from NMI: independent)
+&mdash; contingency table 8&times;9 &mdash; n=56,068 (dropped 0 with a null)
+&mdash; verdict: <b>independent</b></p>
+<p class="numfeat-note">Both describe the nature of the on-ball action.</p>
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">event_type &times; phase_label_prev_event <span class="nf-badge unreliable">METRICS DISAGREE</span></div>
+  <div class="vif-track">
+    <div class="vif-fill warn" style="width:13.8%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.1379</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0325 (verdict from NMI: independent)
+&mdash; contingency table 8&times;7 &mdash; n=51,534 (dropped 4534 with a null)
+&mdash; verdict: <b>partially redundant</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">event_type &times; period</div>
+  <div class="vif-track">
+    <div class="vif-fill good" style="width:2.1%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.0213</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0007 (verdict from NMI: independent)
+&mdash; contingency table 8&times;4 &mdash; n=56,068 (dropped 0 with a null)
+&mdash; verdict: <b>independent</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">play_pattern &times; phase_label_prev_event <span class="nf-badge unreliable">METRICS DISAGREE</span></div>
+  <div class="vif-track">
+    <div class="vif-fill warn" style="width:18.5%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.1848</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0585 (verdict from NMI: independent)
+&mdash; contingency table 9&times;7 &mdash; n=51,534 (dropped 4534 with a null)
+&mdash; verdict: <b>partially redundant</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">play_pattern &times; period</div>
+  <div class="vif-track">
+    <div class="vif-fill good" style="width:3.3%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.0332</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0015 (verdict from NMI: independent)
+&mdash; contingency table 9&times;4 &mdash; n=56,068 (dropped 0 with a null)
+&mdash; verdict: <b>independent</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">phase_label_prev_event &times; period</div>
+  <div class="vif-track">
+    <div class="vif-fill good" style="width:2.9%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.0287</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.001 (verdict from NMI: independent)
+&mdash; contingency table 7&times;4 &mdash; n=51,534 (dropped 4534 with a null)
+&mdash; verdict: <b>independent</b></p>
+
+  <h3 style="margin-top:28px;">Cluster views</h3>
+  <p class="test-subnote">Three cluster views: from_cramers_v (over-clusters -- V is inflated by sparse cells in this dataset&#x27;s larger contingency tables), from_nmi (more conservative), and consensus_both_metrics_agree (only pairs where V and NMI both agree it&#x27;s not independent -- the one to actually trust).</p>
+  
+<div class="before-after" style="grid-template-columns: repeat(3, 1fr);">
+  
+<div class="ba-card before">
+  <h4>From raw Cramer&#x27;s V (over-clusters)</h4>
+  <p style="font-size:11.5px;color:var(--text-secondary);margin:0 0 10px;">Edges where the Cramer&#x27;s-V verdict != independent -- inflated by sparse contingency-table cells in this data.</p>
+  <p style="font-size:12px;margin:0 0 6px;"><b>Redundant clusters:</b><br><span class="nf-badge unreliable" style="margin:2px 6px 2px 0;">event_type + phase_label + phase_label_prev_event + play_pattern + position</span></p>
+  <p style="font-size:12px;margin:0;"><b>Independent of everything else:</b><br><span class="nf-badge locked" style="margin:2px 6px 2px 0;">period</span></p>
+</div>
+  
+<div class="ba-card before">
+  <h4>From NMI (conservative)</h4>
+  <p style="font-size:11.5px;color:var(--text-secondary);margin:0 0 10px;">Edges where the NMI verdict != independent.</p>
+  <p style="font-size:12px;margin:0 0 6px;"><b>Redundant clusters:</b><br><span class="nf-badge unreliable" style="margin:2px 6px 2px 0;">phase_label + phase_label_prev_event</span></p>
+  <p style="font-size:12px;margin:0;"><b>Independent of everything else:</b><br><span class="nf-badge locked" style="margin:2px 6px 2px 0;">event_type</span><span class="nf-badge locked" style="margin:2px 6px 2px 0;">period</span><span class="nf-badge locked" style="margin:2px 6px 2px 0;">play_pattern</span><span class="nf-badge locked" style="margin:2px 6px 2px 0;">position</span></p>
+</div>
+  
+<div class="ba-card after">
+  <h4>Consensus -- trust this</h4>
+  <p style="font-size:11.5px;color:var(--text-secondary);margin:0 0 10px;">Edges where BOTH metrics agree it&#x27;s not independent (not metrics_disagree). This is the view to act on.</p>
+  <p style="font-size:12px;margin:0 0 6px;"><b>Redundant clusters:</b><br><span class="nf-badge unreliable" style="margin:2px 6px 2px 0;">phase_label + phase_label_prev_event</span></p>
+  <p style="font-size:12px;margin:0;"><b>Independent of everything else:</b><br><span class="nf-badge locked" style="margin:2px 6px 2px 0;">event_type</span><span class="nf-badge locked" style="margin:2px 6px 2px 0;">period</span><span class="nf-badge locked" style="margin:2px 6px 2px 0;">play_pattern</span><span class="nf-badge locked" style="margin:2px 6px 2px 0;">position</span></p>
+</div>
+</div>
+</div>
+<div class="vif-dataset-block">
+  <h2 class="test-title">passive (6 pairs)</h2>
+  <div class="vif-legend">
+    <span><span class="dot" style="background:var(--good);"></span>independent (V &lt; 0.1)</span>
+    <span><span class="dot" style="background:var(--amber);"></span>partially redundant (0.1 &ndash; 0.3)</span>
+    <span><span class="dot" style="background:var(--pos);"></span>highly redundant (V &gt; 0.3)</span>
+  </div>
+  
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">on_ball_event_type &times; phase_label <span class="nf-badge unreliable">METRICS DISAGREE</span></div>
+  <div class="vif-track">
+    <div class="vif-fill warn" style="width:12.4%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.1241</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0137 (verdict from NMI: independent)
+&mdash; contingency table 4&times;7 &mdash; n=1,593,181 (dropped 0 with a null)
+&mdash; verdict: <b>partially redundant</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">on_ball_event_type &times; defender_functional_role</div>
+  <div class="vif-track">
+    <div class="vif-fill good" style="width:1.2%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.0123</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0002 (verdict from NMI: independent)
+&mdash; contingency table 4&times;6 &mdash; n=1,593,181 (dropped 0 with a null)
+&mdash; verdict: <b>independent</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">on_ball_event_type &times; period</div>
+  <div class="vif-track">
+    <div class="vif-fill good" style="width:3.0%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.0298</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0005 (verdict from NMI: independent)
+&mdash; contingency table 4&times;5 &mdash; n=1,593,181 (dropped 0 with a null)
+&mdash; verdict: <b>independent</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">phase_label &times; defender_functional_role <span class="nf-badge type">NAMED CANDIDATE</span></div>
+  <div class="vif-track">
+    <div class="vif-fill good" style="width:3.4%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.0343</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0019 (verdict from NMI: independent)
+&mdash; contingency table 7&times;6 &mdash; n=1,593,181 (dropped 0 with a null)
+&mdash; verdict: <b>independent</b></p>
+<p class="numfeat-note">defender_functional_role is partly determined by pitch position, which correlates with match phase.</p>
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">phase_label &times; period</div>
+  <div class="vif-track">
+    <div class="vif-fill good" style="width:2.8%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.0282</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0012 (verdict from NMI: independent)
+&mdash; contingency table 7&times;5 &mdash; n=1,593,181 (dropped 0 with a null)
+&mdash; verdict: <b>independent</b></p>
+
+<div class="vif-row" style="grid-template-columns: 260px 1fr 90px;">
+  <div class="vif-label">defender_functional_role &times; period <span class="nf-badge unreliable">METRICS DISAGREE</span></div>
+  <div class="vif-track">
+    <div class="vif-fill warn" style="width:11.3%;"></div>
+    <div class="vif-threshold" style="left:10%;"></div>
+    <div class="vif-threshold" style="left:30%;"></div>
+  </div>
+  <div class="vif-value">V=0.1126</div>
+</div>
+<p style="font-size:11px;color:var(--text-muted);margin:2px 0 10px 0;">NMI=0.0003 (verdict from NMI: independent)
+&mdash; contingency table 6&times;5 &mdash; n=1,593,181 (dropped 0 with a null)
+&mdash; verdict: <b>partially redundant</b></p>
+
+  <h3 style="margin-top:28px;">Cluster views</h3>
+  <p class="test-subnote">Three cluster views: from_cramers_v (over-clusters -- V is inflated by sparse cells in this dataset&#x27;s larger contingency tables), from_nmi (more conservative), and consensus_both_metrics_agree (only pairs where V and NMI both agree it&#x27;s not independent -- the one to actually trust).</p>
+  
+<div class="before-after" style="grid-template-columns: repeat(3, 1fr);">
+  
+<div class="ba-card before">
+  <h4>From raw Cramer&#x27;s V (over-clusters)</h4>
+  <p style="font-size:11.5px;color:var(--text-secondary);margin:0 0 10px;">Edges where the Cramer&#x27;s-V verdict != independent -- inflated by sparse contingency-table cells in this data.</p>
+  <p style="font-size:12px;margin:0 0 6px;"><b>Redundant clusters:</b><br><span class="nf-badge unreliable" style="margin:2px 6px 2px 0;">on_ball_event_type + phase_label</span><span class="nf-badge unreliable" style="margin:2px 6px 2px 0;">defender_functional_role + period</span></p>
+  <p style="font-size:12px;margin:0;"><b>Independent of everything else:</b><br><span style="color:var(--text-muted);">none</span></p>
+</div>
+  
+<div class="ba-card before">
+  <h4>From NMI (conservative)</h4>
+  <p style="font-size:11.5px;color:var(--text-secondary);margin:0 0 10px;">Edges where the NMI verdict != independent.</p>
+  <p style="font-size:12px;margin:0 0 6px;"><b>Redundant clusters:</b><br><span style="color:var(--text-muted);">none</span></p>
+  <p style="font-size:12px;margin:0;"><b>Independent of everything else:</b><br><span class="nf-badge locked" style="margin:2px 6px 2px 0;">defender_functional_role</span><span class="nf-badge locked" style="margin:2px 6px 2px 0;">on_ball_event_type</span><span class="nf-badge locked" style="margin:2px 6px 2px 0;">period</span><span class="nf-badge locked" style="margin:2px 6px 2px 0;">phase_label</span></p>
+</div>
+  
+<div class="ba-card after">
+  <h4>Consensus -- trust this</h4>
+  <p style="font-size:11.5px;color:var(--text-secondary);margin:0 0 10px;">Edges where BOTH metrics agree it&#x27;s not independent (not metrics_disagree). This is the view to act on.</p>
+  <p style="font-size:12px;margin:0 0 6px;"><b>Redundant clusters:</b><br><span style="color:var(--text-muted);">none</span></p>
+  <p style="font-size:12px;margin:0;"><b>Independent of everything else:</b><br><span class="nf-badge locked" style="margin:2px 6px 2px 0;">defender_functional_role</span><span class="nf-badge locked" style="margin:2px 6px 2px 0;">on_ball_event_type</span><span class="nf-badge locked" style="margin:2px 6px 2px 0;">period</span><span class="nf-badge locked" style="margin:2px 6px 2px 0;">phase_label</span></p>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</body>
+</html>

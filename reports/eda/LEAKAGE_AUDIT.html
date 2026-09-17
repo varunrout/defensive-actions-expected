@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Passive Dataset Leakage Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.test-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.test-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.test-title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 24px; margin: 0 0 6px; }
+.test-subnote { color: var(--text-muted); font-size: 13px; margin: 0 0 24px; }
+.qchart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
+.qchart-card h4 { font-family: "Archivo", sans-serif; font-size: 14.5px; margin: 0 0 4px; }
+.qchart-card .qc-note { color: var(--text-muted); font-size: 12px; margin: 0 0 16px; }
+.qbar-row { display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 0 4px; }
+.qbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.qbar-val { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.qbar-fill { width: 100%; max-width: 56px; background: var(--neg); border-radius: 4px 4px 0 0; min-height: 2px; }
+.qbar-label { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; text-align: center; line-height: 1.3; }
+.qbar-n { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); }
+.stratum-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 700px) { .stratum-grid { grid-template-columns: 1fr; } }
+.stratum-card { background: var(--plane); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.stratum-card h5 { font-family: "JetBrains Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--accent); margin: 0 0 4px; }
+.stratum-delta { font-size: 11.5px; color: var(--text-muted); margin: 0 0 12px; }
+.stratum-delta b { color: var(--text-primary); }
+.qbar-row.small { height: 90px; gap: 8px; }
+.qbar-row.small .qbar-fill { max-width: 40px; }
+.verdict-banner { border-radius: 10px; padding: 16px 20px; margin: 8px 0 28px; font-size: 14px; }
+.verdict-banner.v-no { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); }
+.verdict-banner.v-yes { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); }
+.verdict-banner.v-partially { background: rgba(42,120,214,0.10); border: 1px solid rgba(42,120,214,0.3); }
+.verdict-banner b { color: var(--text-primary); }
+.caveat-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 20px 24px; margin-top: 32px; }
+.caveat-box h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.caveat-box ul { margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary); }
+.caveat-box li { margin-bottom: 4px; }
+
+.vif-dataset-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.vif-dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.vif-chart { display: flex; flex-direction: column; gap: 6px; position: relative; padding: 8px 0; }
+.vif-row { display: grid; grid-template-columns: 180px 1fr 70px; align-items: center; gap: 10px; font-size: 12px; }
+.vif-label { color: var(--text-primary); font-weight: 600; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vif-track { position: relative; height: 14px; background: var(--gridline); border-radius: 3px; }
+.vif-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 3px; background: var(--neg); }
+.vif-fill.warn { background: var(--amber); }
+.vif-fill.severe { background: var(--pos); }
+.vif-value { font-family: "JetBrains Mono", monospace; font-weight: 700; }
+.vif-threshold { position: absolute; top: -4px; bottom: -4px; width: 1px; background: var(--text-muted); opacity: 0.5; }
+.vif-threshold-label { position: absolute; top: -18px; font-size: 9px; color: var(--text-muted); font-family: "JetBrains Mono", monospace; transform: translateX(-50%); }
+.vif-legend { display: flex; gap: 20px; font-size: 11.5px; color: var(--text-muted); margin: 8px 0 20px; }
+.vif-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.vif-legend .dot { width: 9px; height: 9px; border-radius: 50%; }
+.cond-badge { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 12px; background: var(--plane); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; margin-bottom: 16px; }
+.before-after { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+@media (max-width: 700px) { .before-after { grid-template-columns: 1fr; } }
+.ba-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.ba-card h4 { font-family: "Archivo", sans-serif; font-size: 14px; margin: 0 0 12px; }
+.ba-card.before h4 { color: var(--pos); }
+.ba-card.after h4 { color: var(--good); }
+
+.dataset-block { margin-top: 56px; padding-top: 36px; border-top: 2px solid var(--border); }
+.dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.dataset-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  margin: 0 0 4px;
+}
+.dataset-substat { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 12.5px; margin: 0 0 18px; }
+.method-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 16px 0 40px;
+}
+@media (max-width: 980px) { .method-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .method-strip { grid-template-columns: 1fr; } }
+.method-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.method-card .m-name {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: block;
+}
+.method-card p { margin: 0; font-size: 12.5px; color: var(--text-secondary); }
+.tier-section { margin: 12px 0 44px; }
+.tier-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+.tier-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.tier-dot.drop { background: var(--pos); }
+.tier-dot.collapse { background: var(--amber); }
+.tier-dot.review { background: var(--neg); }
+.tier-dot.distinct { background: var(--good); }
+.tier-note { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; }
+.corr-ledger { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.corr-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 160px 76px 96px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.corr-row:last-child { border-bottom: none; }
+.corr-row:hover { background: var(--plane); }
+@media (max-width: 760px) {
+  .corr-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 14px; }
+}
+.corr-pair { color: var(--text-primary); font-weight: 600; }
+.corr-pair .arrow { color: var(--text-muted); font-weight: 400; margin: 0 4px; }
+.corr-method {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.corr-mag-track { position: relative; height: 8px; background: var(--gridline); border-radius: 4px; }
+.corr-mag-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; }
+.corr-mag-fill.drop { background: var(--pos); }
+.corr-mag-fill.collapse { background: var(--amber); }
+.corr-mag-fill.review { background: var(--neg); }
+.corr-mag-fill.distinct { background: var(--good); }
+.corr-value { font-family: "JetBrains Mono", monospace; font-weight: 600; text-align: right; }
+.verdict-chip {
+  justify-self: end;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verdict-chip.drop { background: rgba(227,73,72,0.14); color: var(--pos); }
+.verdict-chip.collapse { background: var(--amber-wash); color: var(--amber); }
+.verdict-chip.review { background: rgba(42,120,214,0.12); color: var(--neg); }
+.verdict-chip.distinct { background: var(--good-wash); color: var(--good); }
+.closing-note {
+  margin-top: 24px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.closing-note b { color: var(--text-primary); }
+
+.rule-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+.rule-banner b { color: var(--text-primary); }
+.framework-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 40px; }
+@media (max-width: 760px) { .framework-grid { grid-template-columns: 1fr; } }
+.framework-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.framework-card .f-type {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: block;
+}
+.framework-card h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.framework-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0 0 10px; }
+.framework-card .example {
+  font-size: 12.5px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+}
+.framework-card .example b { color: var(--text-primary); }
+
+.hcall-panel {
+  background: var(--amber-wash);
+  border: 1px solid rgba(237,161,0,0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 20px 0 40px;
+}
+.hcall-panel > .hp-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.hcall-panel > .hp-note { font-size: 13px; color: var(--text-secondary); margin: 0 0 16px; }
+.hcall-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.hcall-item:last-child { margin-bottom: 0; }
+.hcall-item .hp-pair { font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.hcall-item .hp-reason { color: var(--text-secondary); }
+
+.table-scroll { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+.evidence-ledger { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 12.5px; border: none; border-radius: 0; }
+.evidence-ledger th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.evidence-ledger td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); background: var(--surface); }
+.evidence-ledger tr:last-child td { border-bottom: none; }
+.evidence-ledger td:first-child { color: var(--text-primary); font-weight: 600; }
+
+.path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+@media (max-width: 760px) { .path-grid { grid-template-columns: 1fr; } }
+.path-card { border-radius: 10px; padding: 16px 18px; border: 1px solid var(--border); }
+.path-card.do-now { background: var(--good-wash); border-color: rgba(47,158,91,0.35); }
+.path-card.defer { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.path-card .p-label {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+.path-card.do-now .p-label { color: var(--good); }
+.path-card.defer .p-label { color: var(--amber); }
+.path-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
+.recommendation {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--good);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+.recommendation b { color: var(--text-primary); }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">LEAKAGE AUDIT</p>
+  <h1 class="title">Passive Dataset Leakage Audit</h1>
+  <p class="dek">target_future_shot_10s and target_future_xg_10s are forward-looking by construction. One leakage bug (screened_option_was_avoided) was already caught during design. This is the systematic follow-up: every candidate feature asked — could this only be knowable because of what happens in the 10-second forward window?</p>
+  <div class="statbar"><div class="stat"><b>1,593,181</b><span>rows (passive)</span></div><div class="stat"><b>73</b><span>columns scanned</span></div><div class="stat"><b>1</b><span>feature excluded (has_screened_outcome)</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+
+<div class="test-block">
+  <h2 class="test-title">Part A &mdash; known-leaky columns &amp; full name-pattern scan</h2>
+  <p class="test-subnote">Verified directly against feature_config.py's PASSIVE candidate lists, not assumed from docstrings.</p>
+  <div class="corr-ledger" style="margin-bottom:16px;">
+<div class="corr-row">
+  <span class="corr-pair"><code>target_future_shot_10s</code></span>
+  <span class="corr-method">presence check</span>
+  <span></span>
+  <span class="corr-value">not in candidate list</span>
+  <span class="verdict-chip distinct">EXCLUDED</span>
+</div>
+<div class="corr-row">
+  <span class="corr-pair"><code>target_future_xg_10s</code></span>
+  <span class="corr-method">presence check</span>
+  <span></span>
+  <span class="corr-value">not in candidate list</span>
+  <span class="verdict-chip distinct">EXCLUDED</span>
+</div>
+<div class="corr-row">
+  <span class="corr-pair"><code>screened_option_was_avoided</code></span>
+  <span class="corr-method">presence check</span>
+  <span></span>
+  <span class="corr-value">not in candidate list</span>
+  <span class="verdict-chip distinct">EXCLUDED</span>
+</div>
+<div class="corr-row">
+  <span class="corr-pair">73 columns scanned for future/next/avoided/outcome/after</span>
+  <span class="corr-method">name-pattern scan</span>
+  <span></span>
+  <span class="corr-value">4 flagged by name</span>
+  <span class="verdict-chip distinct">CLEAN</span>
+</div></div>
+  <div class="qchart-card">
+    <h4>Every column matching future / next / avoided / outcome / after</h4>
+    <p class="qc-note">Full list, so "nothing else found" is checkable, not just asserted.</p>
+    <ul style="margin:0; padding-left:20px; font-size:13px; color:var(--text-secondary);"><li><code>has_screened_outcome</code></li><li><code>screened_option_was_avoided</code></li><li><code>target_future_shot_10s</code></li><li><code>target_future_xg_10s</code></li></ul>
+  </div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">Part B &mdash; <code>screened_option_was_avoided</code> guard, quantified</h2>
+  <p class="test-subnote">Informational: the exclusion is correct on conceptual/structural grounds regardless of this result.</p>
+  <div class="qchart-card">
+    <h4>target_future_shot_10s rate by screened_option_was_avoided</h4>
+    <p class="qc-note">Essentially flat &mdash; delta +0.10pp. Confirms low empirical leakage risk for this specific pair.</p>
+    <div style="margin:16px 0;">
+<div class="stratum-delta" style="display:grid; grid-template-columns: 60px 1fr 140px; align-items:center; gap:10px; margin-bottom:8px;">
+  <span class="mono" style="font-family:'JetBrains Mono',monospace; font-weight:700;">True</span>
+  <div class="vif-track"><div class="vif-fill severe" style="width:87.0%"></div></div>
+  <span>5.98% (n=1,542,932)</span>
+</div>
+<div class="stratum-delta" style="display:grid; grid-template-columns: 60px 1fr 140px; align-items:center; gap:10px; margin-bottom:8px;">
+  <span class="mono" style="font-family:'JetBrains Mono',monospace; font-weight:700;">False</span>
+  <div class="vif-track"><div class="vif-fill severe" style="width:85.6%"></div></div>
+  <span>5.88% (n=47,668)</span>
+</div></div>
+  </div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">Part C &mdash; <code>has_screened_outcome</code>: censoring-mechanism proxy (EXCLUDED)</h2>
+  <p class="test-subnote">The real finding of this audit &mdash; a candidate feature removed as a result.</p>
+  <div class="verdict-banner v-yes">
+    <b>Verdict: EXCLUDED</b> &mdash; chi2=136.5, p=1.538e-31, dof=1. Ratio True:False rate
+    = 11.86x.
+  </div>
+  <div class="qchart-card">
+    <h4>target_future_shot_10s rate by has_screened_outcome</h4>
+    <p class="qc-note">has_screened_outcome=False means the target's own 10s window was truncated (end of period/match) -- not that nothing defensively interesting happened.</p>
+    <div style="margin:16px 0;">
+<div class="stratum-delta" style="display:grid; grid-template-columns: 60px 1fr 140px; align-items:center; gap:10px; margin-bottom:8px;">
+  <span class="mono" style="font-family:'JetBrains Mono',monospace; font-weight:700;">True</span>
+  <div class="vif-track"><div class="vif-fill severe" style="width:87.0%"></div></div>
+  <span>5.97% (n=1,590,600)</span>
+</div>
+<div class="stratum-delta" style="display:grid; grid-template-columns: 60px 1fr 140px; align-items:center; gap:10px; margin-bottom:8px;">
+  <span class="mono" style="font-family:'JetBrains Mono',monospace; font-weight:700;">False</span>
+  <div class="vif-track"><div class="vif-fill severe" style="width:7.3%"></div></div>
+  <span>0.50% (n=2,581)</span>
+</div></div>
+  </div>
+  <div class="closing-note">has_screened_outcome is False only when screened_option_was_avoided could not be computed (end of period/match, no next event in the data to compare against). Those rows show a 11.86x lower shot rate (0.504% vs 5.975%, chi2 p=1.538e-31) -- not because nothing defensively interesting happened, but because target_future_shot_10s&#x27;s own 10-second measurement window was truncated by the match/period ending, making a false negative (no time left for a shot) far more likely than a genuine successful defensive outcome. A model fed this feature would learn to predict near-zero shot probability whenever the target&#x27;s own measurement window was cut short -- circular with the target&#x27;s construction, not causal, not useful, and it would look like a strong feature in offline evaluation while encoding nothing about defending.</div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">Part D &mdash; <code>has_option_2</code> / <code>has_option_3</code> (FLAGGED FOR FOLLOW-UP, not excluded)</h2>
+  <div class="verdict-banner v-partially">
+    <b>Verdict: FLAGGED FOR FOLLOW-UP</b> &mdash; different shape of finding from Part C. About the current freeze
+    frame, not future-window computability. Kept as candidate features; worth a confound test later, not resolved here.
+  </div>
+  
+<div class="qchart-card">
+  <h4><code>has_option_2</code></h4>
+  <div style="margin:16px 0;">
+<div class="stratum-delta" style="display:grid; grid-template-columns: 60px 1fr 140px; align-items:center; gap:10px; margin-bottom:8px;">
+  <span class="mono" style="font-family:'JetBrains Mono',monospace; font-weight:700;">True</span>
+  <div class="vif-track"><div class="vif-fill severe" style="width:35.3%"></div></div>
+  <span>5.96% (n=1,592,902)</span>
+</div>
+<div class="stratum-delta" style="display:grid; grid-template-columns: 60px 1fr 140px; align-items:center; gap:10px; margin-bottom:8px;">
+  <span class="mono" style="font-family:'JetBrains Mono',monospace; font-weight:700;">False</span>
+  <div class="vif-track"><div class="vif-fill severe" style="width:87.0%"></div></div>
+  <span>14.70% (n=279)</span>
+</div></div>
+  <p class="qc-note">has_option_2=False shows a 2.46x HIGHER shot rate than True -- the opposite shape from has_screened_outcome. This is about the CURRENT freeze frame (whether a 2nd/3rd ranked passing option was visible right now), not about whether the 10s forward window was computable, so it is not the same censoring-mechanism artefact. Plausible as real signal (fewer passing options can mean a more direct, more urgent attack) rather than a target-construction artefact -- kept as a candidate feature. Worth testing the same way as the marking-tightness/lane-screening reversals (does conditioning on some third variable explain it away), but that is separate follow-up work, not part of this audit.</p>
+</div>
+<div class="qchart-card">
+  <h4><code>has_option_3</code></h4>
+  <div style="margin:16px 0;">
+<div class="stratum-delta" style="display:grid; grid-template-columns: 60px 1fr 140px; align-items:center; gap:10px; margin-bottom:8px;">
+  <span class="mono" style="font-family:'JetBrains Mono',monospace; font-weight:700;">True</span>
+  <div class="vif-track"><div class="vif-fill severe" style="width:34.2%"></div></div>
+  <span>5.95% (n=1,591,000)</span>
+</div>
+<div class="stratum-delta" style="display:grid; grid-template-columns: 60px 1fr 140px; align-items:center; gap:10px; margin-bottom:8px;">
+  <span class="mono" style="font-family:'JetBrains Mono',monospace; font-weight:700;">False</span>
+  <div class="vif-track"><div class="vif-fill severe" style="width:87.0%"></div></div>
+  <span>15.13% (n=2,181)</span>
+</div></div>
+  <p class="qc-note">has_option_3=False shows a 2.54x HIGHER shot rate than True -- the opposite shape from has_screened_outcome. This is about the CURRENT freeze frame (whether a 2nd/3rd ranked passing option was visible right now), not about whether the 10s forward window was computable, so it is not the same censoring-mechanism artefact. Plausible as real signal (fewer passing options can mean a more direct, more urgent attack) rather than a target-construction artefact -- kept as a candidate feature. Worth testing the same way as the marking-tightness/lane-screening reversals (does conditioning on some third variable explain it away), but that is separate follow-up work, not part of this audit.</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

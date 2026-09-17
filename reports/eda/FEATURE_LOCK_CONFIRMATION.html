@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Post-Lock Correlation Confirmation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.dataset-block { margin-top: 56px; padding-top: 36px; border-top: 2px solid var(--border); }
+.dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.dataset-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  margin: 0 0 4px;
+}
+.dataset-substat { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 12.5px; margin: 0 0 18px; }
+.method-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 16px 0 40px;
+}
+@media (max-width: 980px) { .method-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .method-strip { grid-template-columns: 1fr; } }
+.method-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.method-card .m-name {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: block;
+}
+.method-card p { margin: 0; font-size: 12.5px; color: var(--text-secondary); }
+.tier-section { margin: 12px 0 44px; }
+.tier-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+.tier-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.tier-dot.drop { background: var(--pos); }
+.tier-dot.collapse { background: var(--amber); }
+.tier-dot.review { background: var(--neg); }
+.tier-dot.distinct { background: var(--good); }
+.tier-note { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; }
+.corr-ledger { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.corr-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 160px 76px 96px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.corr-row:last-child { border-bottom: none; }
+.corr-row:hover { background: var(--plane); }
+@media (max-width: 760px) {
+  .corr-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 14px; }
+}
+.corr-pair { color: var(--text-primary); font-weight: 600; }
+.corr-pair .arrow { color: var(--text-muted); font-weight: 400; margin: 0 4px; }
+.corr-method {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.corr-mag-track { position: relative; height: 8px; background: var(--gridline); border-radius: 4px; }
+.corr-mag-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; }
+.corr-mag-fill.drop { background: var(--pos); }
+.corr-mag-fill.collapse { background: var(--amber); }
+.corr-mag-fill.review { background: var(--neg); }
+.corr-mag-fill.distinct { background: var(--good); }
+.corr-value { font-family: "JetBrains Mono", monospace; font-weight: 600; text-align: right; }
+.verdict-chip {
+  justify-self: end;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verdict-chip.drop { background: rgba(227,73,72,0.14); color: var(--pos); }
+.verdict-chip.collapse { background: var(--amber-wash); color: var(--amber); }
+.verdict-chip.review { background: rgba(42,120,214,0.12); color: var(--neg); }
+.verdict-chip.distinct { background: var(--good-wash); color: var(--good); }
+.closing-note {
+  margin-top: 24px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.closing-note b { color: var(--text-primary); }
+
+.rule-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+.rule-banner b { color: var(--text-primary); }
+.framework-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 40px; }
+@media (max-width: 760px) { .framework-grid { grid-template-columns: 1fr; } }
+.framework-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.framework-card .f-type {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: block;
+}
+.framework-card h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.framework-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0 0 10px; }
+.framework-card .example {
+  font-size: 12.5px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+}
+.framework-card .example b { color: var(--text-primary); }
+
+.hcall-panel {
+  background: var(--amber-wash);
+  border: 1px solid rgba(237,161,0,0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 20px 0 40px;
+}
+.hcall-panel > .hp-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.hcall-panel > .hp-note { font-size: 13px; color: var(--text-secondary); margin: 0 0 16px; }
+.hcall-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.hcall-item:last-child { margin-bottom: 0; }
+.hcall-item .hp-pair { font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.hcall-item .hp-reason { color: var(--text-secondary); }
+
+.table-scroll { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+.evidence-ledger { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 12.5px; border: none; border-radius: 0; }
+.evidence-ledger th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.evidence-ledger td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); background: var(--surface); }
+.evidence-ledger tr:last-child td { border-bottom: none; }
+.evidence-ledger td:first-child { color: var(--text-primary); font-weight: 600; }
+
+.path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+@media (max-width: 760px) { .path-grid { grid-template-columns: 1fr; } }
+.path-card { border-radius: 10px; padding: 16px 18px; border: 1px solid var(--border); }
+.path-card.do-now { background: var(--good-wash); border-color: rgba(47,158,91,0.35); }
+.path-card.defer { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.path-card .p-label {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+.path-card.do-now .p-label { color: var(--good); }
+.path-card.defer .p-label { color: var(--amber); }
+.path-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
+.recommendation {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--good);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+.recommendation b { color: var(--text-primary); }
+
+.vif-dataset-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.vif-dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.vif-chart { display: flex; flex-direction: column; gap: 6px; position: relative; padding: 8px 0; }
+.vif-row { display: grid; grid-template-columns: 180px 1fr 70px; align-items: center; gap: 10px; font-size: 12px; }
+.vif-label { color: var(--text-primary); font-weight: 600; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vif-track { position: relative; height: 14px; background: var(--gridline); border-radius: 3px; }
+.vif-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 3px; background: var(--neg); }
+.vif-fill.warn { background: var(--amber); }
+.vif-fill.severe { background: var(--pos); }
+.vif-value { font-family: "JetBrains Mono", monospace; font-weight: 700; }
+.vif-threshold { position: absolute; top: -4px; bottom: -4px; width: 1px; background: var(--text-muted); opacity: 0.5; }
+.vif-threshold-label { position: absolute; top: -18px; font-size: 9px; color: var(--text-muted); font-family: "JetBrains Mono", monospace; transform: translateX(-50%); }
+.vif-legend { display: flex; gap: 20px; font-size: 11.5px; color: var(--text-muted); margin: 8px 0 20px; }
+.vif-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.vif-legend .dot { width: 9px; height: 9px; border-radius: 50%; }
+.cond-badge { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 12px; background: var(--plane); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; margin-bottom: 16px; }
+.before-after { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+@media (max-width: 700px) { .before-after { grid-template-columns: 1fr; } }
+.ba-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.ba-card h4 { font-family: "Archivo", sans-serif; font-size: 14px; margin: 0 0 12px; }
+.ba-card.before h4 { color: var(--pos); }
+.ba-card.after h4 { color: var(--good); }
+
+.test-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.test-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.test-title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 24px; margin: 0 0 6px; }
+.test-subnote { color: var(--text-muted); font-size: 13px; margin: 0 0 24px; }
+.qchart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
+.qchart-card h4 { font-family: "Archivo", sans-serif; font-size: 14.5px; margin: 0 0 4px; }
+.qchart-card .qc-note { color: var(--text-muted); font-size: 12px; margin: 0 0 16px; }
+.qbar-row { display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 0 4px; }
+.qbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.qbar-val { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.qbar-fill { width: 100%; max-width: 56px; background: var(--neg); border-radius: 4px 4px 0 0; min-height: 2px; }
+.qbar-label { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; text-align: center; line-height: 1.3; }
+.qbar-n { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); }
+.stratum-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 700px) { .stratum-grid { grid-template-columns: 1fr; } }
+.stratum-card { background: var(--plane); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.stratum-card h5 { font-family: "JetBrains Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--accent); margin: 0 0 4px; }
+.stratum-delta { font-size: 11.5px; color: var(--text-muted); margin: 0 0 12px; }
+.stratum-delta b { color: var(--text-primary); }
+.qbar-row.small { height: 90px; gap: 8px; }
+.qbar-row.small .qbar-fill { max-width: 40px; }
+.verdict-banner { border-radius: 10px; padding: 16px 20px; margin: 8px 0 28px; font-size: 14px; }
+.verdict-banner.v-no { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); }
+.verdict-banner.v-yes { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); }
+.verdict-banner.v-partially { background: rgba(42,120,214,0.10); border: 1px solid rgba(42,120,214,0.3); }
+.verdict-banner b { color: var(--text-primary); }
+.caveat-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 20px 24px; margin-top: 32px; }
+.caveat-box h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.caveat-box ul { margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary); }
+.caveat-box li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">FEATURE LOCK CONFIRMATION</p>
+  <h1 class="title">Post-Lock Correlation Confirmation</h1>
+  <p class="dek">Not another COLLAPSE/REVIEW redundancy round -- that work is closed. A confirmation pass: after every landed feature-list change this session, does the locked candidate set still hold up under a fresh correlation re-run? Extended (prompt 34) with a pattern-analysis-findings section -- this is now the single confirmation-plus-findings reference for the binary target, not just a feature-count sign-off.</p>
+  <div class="statbar"><div class="stat"><b>34</b><span>active features</span></div><div class="stat"><b>38</b><span>passive features</span></div><div class="stat"><b>0</b><span>tier changes found</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+
+<div class="verdict-banner v-no" style="margin-bottom:28px;">
+<b>LOCKED -- no new tier crossings</b>
+&mdash; No new DROP/COLLAPSE crossings found -- the locked feature set is internally consistent after all landed changes.
+</div>
+
+<h2>Confirmed candidate feature counts</h2>
+<p class="section-note">Read directly from feature_config.py's ACTIVE/PASSIVE dicts, not assumed.</p>
+<div class="before-after">
+
+<div class="ba-card after">
+  <h4>Active</h4>
+  <p style="font-size:28px; font-family:'Archivo',sans-serif; font-weight:800; margin:4px 0;">34</p>
+  <p style="font-size:12px; color:var(--text-muted); margin:0 0 8px;">expected 34</p>
+  <span class="verdict-chip distinct">CONFIRMED</span>
+</div>
+
+<div class="ba-card after">
+  <h4>Passive</h4>
+  <p style="font-size:28px; font-family:'Archivo',sans-serif; font-weight:800; margin:4px 0;">38</p>
+  <p style="font-size:12px; color:var(--text-muted); margin:0 0 8px;">expected 38</p>
+  <span class="verdict-chip distinct">CONFIRMED</span>
+</div>
+</div>
+
+<h2 style="margin-top:40px;">Correlation diff vs. the last confirmed run</h2>
+<p class="section-note">DROP/COLLAPSE/REVIEW tiers only (exhaustive lists) -- the DISTINCT tier's top-10-by-magnitude
+sample is excluded from this diff since sampling noise there isn't a real tier change.
+Diff is empty, as expected.</p>
+
+<div class="vif-dataset-block">
+  <h2 class="dataset-title">Active</h2>
+  <p class="dataset-substat">25 DROP/COLLAPSE/REVIEW pairs before &rarr; 25 after &middot;
+  0 added &middot; 0 removed &middot; 0 tier changes</p>
+  <div class="corr-ledger"><div class="corr-row"><span class="corr-pair">No changes -- diff is empty for this dataset.</span></div></div>
+</div>
+
+<div class="vif-dataset-block">
+  <h2 class="dataset-title">Passive</h2>
+  <p class="dataset-substat">31 DROP/COLLAPSE/REVIEW pairs before &rarr; 31 after &middot;
+  0 added &middot; 0 removed &middot; 0 tier changes</p>
+  <div class="corr-ledger"><div class="corr-row"><span class="corr-pair">No changes -- diff is empty for this dataset.</span></div></div>
+</div>
+
+<h2 style="margin-top:40px;">Manifest: every change since the last full correlation run</h2>
+<p class="section-note">So this report is legible on its own -- proof the locked feature set is still internally
+consistent, without needing the full session history.</p>
+<div class="stratum-grid" style="grid-template-columns:1fr;">
+<div class="stratum-card" style="margin-bottom:10px;">
+  <h5>defender_functional_role bucket fix</h5>
+  <p class="stratum-delta" style="margin-bottom:4px;">4 categories -&gt; 5: added advanced_wide (the previously-missing deep x wide quadrant), renamed the residual n&gt;=2 fallback from unclassified to mid_block. unclassified now reserved exclusively for n&lt;2.</p>
+  <p class="stratum-delta"><b>Feature-count impact:</b> none (category-count change on an existing categorical column, not a column add/drop)</p>
+</div>
+<div class="stratum-card" style="margin-bottom:10px;">
+  <h5>V2 methodology-gap fixes</h5>
+  <p class="stratum-delta" style="margin-bottom:4px;">Added a categorical REVIEW band to correlation.py&#x27;s tiering and Type 5/Type 6 review resolution logic. V1 pipeline (correlation.py, generate_review_analysis.py) reverted to its pre-V2 state after a scoping correction; V2 lives in separate _v2-suffixed modules.</p>
+  <p class="stratum-delta"><b>Feature-count impact:</b> none (V1 candidate lists untouched; V2 is a parallel analysis track)</p>
+</div>
+<div class="stratum-card" style="margin-bottom:10px;">
+  <h5>VIF drop</h5>
+  <p class="stratum-delta" style="margin-bottom:4px;">local_numerical_balance_5m/10m dropped from the active candidate list -- near-exact linear combination of attackers_within_Nm - defenders_within_Nm (already kept), invisible to pairwise correlation, caught by VIF (condition number ~1.36e15 pre-drop, unbounded VIF for 6 columns).</p>
+  <p class="stratum-delta"><b>Feature-count impact:</b> active: 36 -&gt; 34</p>
+</div>
+<div class="stratum-card" style="margin-bottom:10px;">
+  <h5>Leakage drop</h5>
+  <p class="stratum-delta" style="margin-bottom:4px;">has_screened_outcome dropped from the passive candidate list -- censoring-mechanism proxy for target_future_shot_10s&#x27;s own 10s window being truncated at end-of-period/match (chi2=136.5, p=1.54e-31), not defensive signal.</p>
+  <p class="stratum-delta"><b>Feature-count impact:</b> passive: 39 -&gt; 38</p>
+</div>
+<div class="stratum-card" style="margin-bottom:10px;">
+  <h5>Football sanity check</h5>
+  <p class="stratum-delta" style="margin-bottom:4px;">Validation-only pass (recomputation checks against stored values). No feature-list or pipeline changes.</p>
+  <p class="stratum-delta"><b>Feature-count impact:</b> none</p>
+</div>
+<div class="stratum-card" style="margin-bottom:10px;">
+  <h5>Passive archetype clustering</h5>
+  <p class="stratum-delta" style="margin-bottom:4px;">New analysis module (src/dax/analysis/passive_archetypes.py) clustering within each defender_functional_role bucket. Does not touch feature_config.py&#x27;s candidate lists.</p>
+  <p class="stratum-delta"><b>Feature-count impact:</b> none</p>
+</div>
+<div class="stratum-card" style="margin-bottom:10px;">
+  <h5>Canonical match-grouped split</h5>
+  <p class="stratum-delta" style="margin-bottom:4px;">Frozen TEST/CV match assignment for model training. Does not touch feature_config.py&#x27;s candidate lists.</p>
+  <p class="stratum-delta"><b>Feature-count impact:</b> none</p>
+</div></div>
+
+<h2 style="margin-top:48px;padding-top:24px;border-top:2px solid var(--border);">Pattern-analysis findings (binary target)</h2>
+<p class="section-note">Every number below re-read live from its source JSON at the time this section was generated -- see generate_feature_lock_pattern_findings.py for the exact reads. reports/eda/PATTERN_ANALYSIS_CLOSEOUT.md does not exist in this session; not used as a source.</p>
+
+<div class="finding"><span class="tag">premise corrections</span><p><b>verified before writing anything</b> &mdash; <ul><li>reports/eda/PATTERN_ANALYSIS_CLOSEOUT.md (prompt 32) does not exist in this session -- prompt 32 was never run. Every figure below is read directly from its live source JSON instead, which the prompt&#x27;s own Method section required anyway.</li><li>Tournament stability is NOT target-agnostic, despite the prompt&#x27;s claim -- verified by diffing reports/eda/TOURNAMENT_STABILITY_CHECK.json against reports/eda_xg/TOURNAMENT_STABILITY_CHECK.json directly: 3 of 10 features (defenders_within_5m, local_numerical_balance_5m, attackers_within_5m) get a DIFFERENT verdict depending on target. Reported in full in both lock-confirmation files, not cross-referenced.</li><li>Numeric interaction analysis is NOT target-agnostic either -- verified by diffing reports/eda/FEATURE_INTERACTION_ANALYSIS.json against the xg version&#x27;s unconditional classification: 6 of 10 pairs differ. Reported in full in both lock-confirmation files, not cross-referenced.</li><li>reports/eda_xg/CONFOUND_ANALYSIS.json has 5 tests, not the 2 the prompt assumed -- prompt 29 already extended it with 3 has_option_2/3 tests. All 5 are reported here.</li></ul></p></div>
+
+<h3 style="margin-top:28px;">Numerical-vs-target rankings</h3>
+<p class="section-note">Top 5 of each dataset&#x27;s locked pool by |Spearman rho|, read from the atlas&#x27;s own sort order.</p>
+<div class="before-after">
+<div class="ba-card"><h4>Active (top 5)</h4><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead><tr style="text-align:left;color:var(--text-muted);"><th style='padding:5px 8px;'>feature</th><th style='padding:5px 8px;'>rho</th><th style='padding:5px 8px;'>shape</th></tr></thead><tbody><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>defender_spread</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.1881</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>U-shaped</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>attacker_spread</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.1703</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>monotonic decreasing</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>attacking_goal_centrality</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>0.1701</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>monotonic increasing</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>distance_to_center_line</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.1701</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>monotonic decreasing</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>attacker_defender_ratio</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.1562</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>monotonic decreasing</td></tr></tbody></table></div>
+<div class="ba-card"><h4>Passive (top 5)</h4><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead><tr style="text-align:left;color:var(--text-muted);"><th style='padding:5px 8px;'>feature</th><th style='padding:5px 8px;'>rho</th><th style='padding:5px 8px;'>shape</th></tr></thead><tbody><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>top_option_3_threat_score</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.0853</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>U-shaped</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>top_option_2_threat_score</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.0766</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>U-shaped</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>top_option_1_threat_score</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.0671</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>U-shaped</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>lane_screening_score_option_3</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>0.0656</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>monotonic increasing</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>attacking_goal_centrality</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>0.0648</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>monotonic increasing</td></tr></tbody></table></div>
+</div>
+
+<h3 style="margin-top:28px;">Confound tests (10)</h3>
+<table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead><tr style="text-align:left;color:var(--text-muted);"><th style='padding:5px 8px;'>test</th><th style='padding:5px 8px;'>verdict</th></tr></thead><tbody><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>marking_tightness_vs_zone_defensive_value</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>no</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>lane_screening_vs_top_option_1_threat_score</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>no</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>top_option_2_threat_score_vs_zone_defensive_value</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>partially</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>top_option_3_threat_score_vs_zone_defensive_value</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>no</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>lane_screening_2_vs_top_option_2_threat_score</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>no</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>lane_screening_3_vs_top_option_3_threat_score</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>no</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_within_10m_vs_box_proximity</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>no</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>has_option_2_vs_top_option_1_threat_score</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>no</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>has_option_3_vs_top_option_1_threat_score</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>no</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>has_option_2_vs_defender_x</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>no</td></tr></tbody></table>
+
+<h3 style="margin-top:28px;">Tournament stability</h3>
+<p class="section-note">NOT target-agnostic despite how it might look (it&#x27;s about tournament, not target) -- verified against the xg version directly: 3/10 features get a different verdict. This section reports the binary-target numbers specifically; see leakage_confirmation_xg&#x27;s sibling section in FEATURE_LOCK_CONFIRMATION_XG.json for the xg numbers, not assumed identical.</p>
+<table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead><tr style="text-align:left;color:var(--text-muted);"><th style='padding:5px 8px;'>feature</th><th style='padding:5px 8px;'>dataset</th><th style='padding:5px 8px;'>verdict</th></tr></thead><tbody><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_within_10m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>active</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>genuine tournament-level difference</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_within_5m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>active</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>genuine tournament-level difference</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>events_elapsed_in_possession</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>active</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>genuine tournament-level difference</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>local_numerical_balance_5m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>active</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>arbitrary train/test noise</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>match_time_seconds</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>active</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>genuine tournament-level difference</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>attackers_within_5m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>active</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>genuine tournament-level difference</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>top_option_1_distance_from_ball</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>passive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>arbitrary train/test noise</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>top_option_3_dx</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>passive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>arbitrary train/test noise</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>top_option_3_dy</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>passive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>arbitrary train/test noise</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>angle_to_attacking_goal</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>passive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>arbitrary train/test noise</td></tr></tbody></table>
+
+<h3 style="margin-top:28px;">Slice stratification</h3>
+<p class="section-note">V1 (categorical slicers): 118 cells,
+320 genuine divergences,
+26 features flagged. V2 (archetype +
+boolean slicers): 199 cells,
+245 genuine divergences.</p>
+<div class="finding"><span class="tag">worked example -- defenders_within_10m x phase_label</span><p><b>overall monotonic increasing, 7/7 diverge</b> &mdash; Every phase category diverges from the overall shape -- the strongest interaction-term candidate found in the whole slice-stratification corpus.</p></div><div class="finding"><span class="tag">worked example -- marking_tightness x phase_label</span><p><b>overall monotonic decreasing, 4/7 diverge</b> &mdash; Only 3 of 7 phases reproduce the overall monotonic-decreasing pattern -- real category-dependence, but not concentrated in a single outlier category.</p></div>
+
+<h3 style="margin-top:28px;">Slicer redundancy</h3>
+<p class="section-note">Genuinely target-agnostic (confirmed: never references a target column, computed once, mirrored unchanged into reports/eda_xg/).</p>
+<p class="section-note">Active redundant clusters: [[&#x27;phase_label&#x27;, &#x27;phase_label_prev_event&#x27;]], independent: [&#x27;event_type&#x27;, &#x27;period&#x27;, &#x27;play_pattern&#x27;, &#x27;position&#x27;].
+Passive redundant clusters: [], independent: [&#x27;defender_functional_role&#x27;, &#x27;on_ball_event_type&#x27;, &#x27;period&#x27;, &#x27;phase_label&#x27;].</p>
+
+<h3 style="margin-top:28px;">Numeric x numeric interaction</h3>
+<p class="section-note">NOT target-agnostic despite the prompt&#x27;s claim -- verified against the xg version&#x27;s unconditional classification directly: 6/10 pairs differ. This section reports the binary-target numbers specifically; see FEATURE_LOCK_CONFIRMATION_XG.json&#x27;s sibling section for the xg numbers. Classification counts: {&#x27;interactive&#x27;: 8, &#x27;substitutive&#x27;: 1, &#x27;additive&#x27;: 1}.</p>
+<table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead><tr style="text-align:left;color:var(--text-muted);"><th style='padding:5px 8px;'>feature A</th><th style='padding:5px 8px;'>feature B</th><th style='padding:5px 8px;'>dataset</th><th style='padding:5px 8px;'>classification</th></tr></thead><tbody><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_within_10m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>distance_to_attacking_box</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>active</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>interactive</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>visible_defender_count</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>attacker_spread</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>active</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>interactive</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_within_5m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_within_10m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>active</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>substitutive</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>possession_elapsed_seconds</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>match_time_seconds</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>active</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>interactive</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_between_ball_and_attacking_goal</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>attacker_defender_ratio</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>active</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>interactive</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>top_option_2_threat_score</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>top_option_2_distance_from_ball</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>passive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>additive</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>lane_screening_score_option_2</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>engagement_distance_to_carrier</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>passive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>interactive</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>marking_tightness</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>engagement_distance_to_carrier</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>passive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>interactive</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>overload_score</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>attacking_goal_centrality</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>passive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>interactive</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>lane_screening_score_option_1</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>marking_tightness</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>passive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>interactive</td></tr></tbody></table>
+
+<h3 style="margin-top:28px;">Player-level validity</h3>
+<p class="section-note">Genuinely target-agnostic (confirmed: never references a target column, computed once, mirrored unchanged into reports/eda_xg/). Active dataset only -- passive has no player_id column.</p>
+<p class="section-note">1012 distinct players, Gini=0.4638, train/test player
+overlap=89.98%.</p>
+<div class="finding"><span class="tag">position</span><p><b>high risk</b> &mdash; position is player-identity-flavoured (0.7714 &gt; 0.3) AND 89.98% of test-set players also appear in train+val -- the combination the prompt asks to name explicitly, not either fact alone.</p></div>
+
+
+</div>
+</div>
+</body>
+</html>

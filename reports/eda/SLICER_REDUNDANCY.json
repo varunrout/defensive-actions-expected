@@ -1,0 +1,456 @@
+{
+  "verdict_thresholds": {
+    "independent": "Cramer's V < 0.1",
+    "partially redundant": "0.1 <= Cramer's V <= 0.3",
+    "highly redundant": "Cramer's V > 0.3",
+    "note": "The same thresholds are applied to normalised mutual information for a second, independent verdict (verdict_from_nmi); metrics_disagree flags where the two disagree."
+  },
+  "methodology": "Every pair of slicers within each dataset (active: 6 slicers from feature_config.py's ACTIVE['categorical'] -> 15 pairs; passive: 4 from PASSIVE['categorical'] -> 6 pairs) scored with Cramer's V (bias-corrected, src.eda.correlation.cramers_v -- same function CORRELATION_ANALYSIS uses for categorical<->categorical pairs) as the primary measure, and normalised mutual information (sklearn, arithmetic averaging) as a secondary check since Cramer's V can be inflated by small cell counts in a large contingency table. Rows with a null in either column of the pair are dropped for that pair only (n_rows_dropped_na records how many).",
+  "downstream_connection": "1 pair(s) reach 'highly redundant' by raw Cramer's V, but only 1 of those are confirmed by NMI too (not metrics_disagree) -- the confirmed one is phase_label vs phase_label_prev_event (active), the constructed lag pair. For that confirmed pair, the divergence counts in reports/eda/SLICE_STRATIFICATION.json (320 genuine) and reports/eda_xg/SLICE_STRATIFICATION.json (363 unconditional / 90 given-shot) likely double-count findings that show up under both phase_label and phase_label_prev_event -- a future interaction-term shortlist for modelling should prefer one of the two, not both. The remaining 'partially redundant' pairs flagged by Cramer's V alone (see metrics_disagree in each pair) look like small-cell-count inflation rather than genuine overlap -- NMI for those pairs is close to 0. Diagnostic only: neither SLICE_STRATIFICATION.json file is edited by this prompt.",
+  "datasets": {
+    "active": {
+      "dataset": "active",
+      "slicers": [
+        "phase_label",
+        "position",
+        "event_type",
+        "play_pattern",
+        "phase_label_prev_event",
+        "period"
+      ],
+      "n_pairs": 15,
+      "pairs": [
+        {
+          "slicer_a": "phase_label",
+          "slicer_b": "position",
+          "n_rows_used": 56068,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            7,
+            23
+          ],
+          "cramers_v": 0.1251,
+          "normalized_mutual_info": 0.0197,
+          "verdict": "partially redundant",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": true,
+          "dataset": "active"
+        },
+        {
+          "slicer_a": "phase_label",
+          "slicer_b": "event_type",
+          "n_rows_used": 56068,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            7,
+            8
+          ],
+          "cramers_v": 0.1528,
+          "normalized_mutual_info": 0.0386,
+          "verdict": "partially redundant",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": true,
+          "dataset": "active"
+        },
+        {
+          "slicer_a": "phase_label",
+          "slicer_b": "play_pattern",
+          "n_rows_used": 56068,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            7,
+            9
+          ],
+          "cramers_v": 0.1649,
+          "normalized_mutual_info": 0.0478,
+          "verdict": "partially redundant",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": true,
+          "dataset": "active"
+        },
+        {
+          "slicer_a": "phase_label",
+          "slicer_b": "phase_label_prev_event",
+          "n_rows_used": 51534,
+          "n_rows_dropped_na": 4534,
+          "contingency_table_shape": [
+            7,
+            7
+          ],
+          "cramers_v": 0.6503,
+          "normalized_mutual_info": 0.5149,
+          "verdict": "highly redundant",
+          "verdict_from_nmi": "highly redundant",
+          "metrics_disagree": false,
+          "dataset": "active",
+          "named_candidate_reason": "phase_label_prev_event is a 1-event lag of phase_label -- likely high association by construction."
+        },
+        {
+          "slicer_a": "phase_label",
+          "slicer_b": "period",
+          "n_rows_used": 56068,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            7,
+            4
+          ],
+          "cramers_v": 0.0309,
+          "normalized_mutual_info": 0.0012,
+          "verdict": "independent",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": false,
+          "dataset": "active"
+        },
+        {
+          "slicer_a": "position",
+          "slicer_b": "event_type",
+          "n_rows_used": 56068,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            23,
+            8
+          ],
+          "cramers_v": 0.1522,
+          "normalized_mutual_info": 0.0294,
+          "verdict": "partially redundant",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": true,
+          "dataset": "active"
+        },
+        {
+          "slicer_a": "position",
+          "slicer_b": "play_pattern",
+          "n_rows_used": 56068,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            23,
+            9
+          ],
+          "cramers_v": 0.038,
+          "normalized_mutual_info": 0.0032,
+          "verdict": "independent",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": false,
+          "dataset": "active"
+        },
+        {
+          "slicer_a": "position",
+          "slicer_b": "phase_label_prev_event",
+          "n_rows_used": 51534,
+          "n_rows_dropped_na": 4534,
+          "contingency_table_shape": [
+            23,
+            7
+          ],
+          "cramers_v": 0.0902,
+          "normalized_mutual_info": 0.0105,
+          "verdict": "independent",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": false,
+          "dataset": "active"
+        },
+        {
+          "slicer_a": "position",
+          "slicer_b": "period",
+          "n_rows_used": 56068,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            23,
+            4
+          ],
+          "cramers_v": 0.0372,
+          "normalized_mutual_info": 0.0013,
+          "verdict": "independent",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": false,
+          "dataset": "active"
+        },
+        {
+          "slicer_a": "event_type",
+          "slicer_b": "play_pattern",
+          "n_rows_used": 56068,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            8,
+            9
+          ],
+          "cramers_v": 0.0894,
+          "normalized_mutual_info": 0.0156,
+          "verdict": "independent",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": false,
+          "dataset": "active",
+          "named_candidate_reason": "Both describe the nature of the on-ball action."
+        },
+        {
+          "slicer_a": "event_type",
+          "slicer_b": "phase_label_prev_event",
+          "n_rows_used": 51534,
+          "n_rows_dropped_na": 4534,
+          "contingency_table_shape": [
+            8,
+            7
+          ],
+          "cramers_v": 0.1379,
+          "normalized_mutual_info": 0.0325,
+          "verdict": "partially redundant",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": true,
+          "dataset": "active"
+        },
+        {
+          "slicer_a": "event_type",
+          "slicer_b": "period",
+          "n_rows_used": 56068,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            8,
+            4
+          ],
+          "cramers_v": 0.0213,
+          "normalized_mutual_info": 0.0007,
+          "verdict": "independent",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": false,
+          "dataset": "active"
+        },
+        {
+          "slicer_a": "play_pattern",
+          "slicer_b": "phase_label_prev_event",
+          "n_rows_used": 51534,
+          "n_rows_dropped_na": 4534,
+          "contingency_table_shape": [
+            9,
+            7
+          ],
+          "cramers_v": 0.1848,
+          "normalized_mutual_info": 0.0585,
+          "verdict": "partially redundant",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": true,
+          "dataset": "active"
+        },
+        {
+          "slicer_a": "play_pattern",
+          "slicer_b": "period",
+          "n_rows_used": 56068,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            9,
+            4
+          ],
+          "cramers_v": 0.0332,
+          "normalized_mutual_info": 0.0015,
+          "verdict": "independent",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": false,
+          "dataset": "active"
+        },
+        {
+          "slicer_a": "phase_label_prev_event",
+          "slicer_b": "period",
+          "n_rows_used": 51534,
+          "n_rows_dropped_na": 4534,
+          "contingency_table_shape": [
+            7,
+            4
+          ],
+          "cramers_v": 0.0287,
+          "normalized_mutual_info": 0.001,
+          "verdict": "independent",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": false,
+          "dataset": "active"
+        }
+      ],
+      "clusters": {
+        "from_cramers_v": {
+          "clusters": [
+            [
+              "event_type",
+              "phase_label",
+              "phase_label_prev_event",
+              "play_pattern",
+              "position"
+            ]
+          ],
+          "independent_slicers": [
+            "period"
+          ]
+        },
+        "from_nmi": {
+          "clusters": [
+            [
+              "phase_label",
+              "phase_label_prev_event"
+            ]
+          ],
+          "independent_slicers": [
+            "event_type",
+            "period",
+            "play_pattern",
+            "position"
+          ]
+        },
+        "consensus_both_metrics_agree": {
+          "clusters": [
+            [
+              "phase_label",
+              "phase_label_prev_event"
+            ]
+          ],
+          "independent_slicers": [
+            "event_type",
+            "period",
+            "play_pattern",
+            "position"
+          ]
+        }
+      },
+      "cluster_note": "Three cluster views: from_cramers_v (over-clusters -- V is inflated by sparse cells in this dataset's larger contingency tables), from_nmi (more conservative), and consensus_both_metrics_agree (only pairs where V and NMI both agree it's not independent -- the one to actually trust)."
+    },
+    "passive": {
+      "dataset": "passive",
+      "slicers": [
+        "on_ball_event_type",
+        "phase_label",
+        "defender_functional_role",
+        "period"
+      ],
+      "n_pairs": 6,
+      "pairs": [
+        {
+          "slicer_a": "on_ball_event_type",
+          "slicer_b": "phase_label",
+          "n_rows_used": 1593181,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            4,
+            7
+          ],
+          "cramers_v": 0.1241,
+          "normalized_mutual_info": 0.0137,
+          "verdict": "partially redundant",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": true,
+          "dataset": "passive"
+        },
+        {
+          "slicer_a": "on_ball_event_type",
+          "slicer_b": "defender_functional_role",
+          "n_rows_used": 1593181,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            4,
+            6
+          ],
+          "cramers_v": 0.0123,
+          "normalized_mutual_info": 0.0002,
+          "verdict": "independent",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": false,
+          "dataset": "passive"
+        },
+        {
+          "slicer_a": "on_ball_event_type",
+          "slicer_b": "period",
+          "n_rows_used": 1593181,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            4,
+            5
+          ],
+          "cramers_v": 0.0298,
+          "normalized_mutual_info": 0.0005,
+          "verdict": "independent",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": false,
+          "dataset": "passive"
+        },
+        {
+          "slicer_a": "phase_label",
+          "slicer_b": "defender_functional_role",
+          "n_rows_used": 1593181,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            7,
+            6
+          ],
+          "cramers_v": 0.0343,
+          "normalized_mutual_info": 0.0019,
+          "verdict": "independent",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": false,
+          "dataset": "passive",
+          "named_candidate_reason": "defender_functional_role is partly determined by pitch position, which correlates with match phase."
+        },
+        {
+          "slicer_a": "phase_label",
+          "slicer_b": "period",
+          "n_rows_used": 1593181,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            7,
+            5
+          ],
+          "cramers_v": 0.0282,
+          "normalized_mutual_info": 0.0012,
+          "verdict": "independent",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": false,
+          "dataset": "passive"
+        },
+        {
+          "slicer_a": "defender_functional_role",
+          "slicer_b": "period",
+          "n_rows_used": 1593181,
+          "n_rows_dropped_na": 0,
+          "contingency_table_shape": [
+            6,
+            5
+          ],
+          "cramers_v": 0.1126,
+          "normalized_mutual_info": 0.0003,
+          "verdict": "partially redundant",
+          "verdict_from_nmi": "independent",
+          "metrics_disagree": true,
+          "dataset": "passive"
+        }
+      ],
+      "clusters": {
+        "from_cramers_v": {
+          "clusters": [
+            [
+              "on_ball_event_type",
+              "phase_label"
+            ],
+            [
+              "defender_functional_role",
+              "period"
+            ]
+          ],
+          "independent_slicers": []
+        },
+        "from_nmi": {
+          "clusters": [],
+          "independent_slicers": [
+            "defender_functional_role",
+            "on_ball_event_type",
+            "period",
+            "phase_label"
+          ]
+        },
+        "consensus_both_metrics_agree": {
+          "clusters": [],
+          "independent_slicers": [
+            "defender_functional_role",
+            "on_ball_event_type",
+            "period",
+            "phase_label"
+          ]
+        }
+      },
+      "cluster_note": "Three cluster views: from_cramers_v (over-clusters -- V is inflated by sparse cells in this dataset's larger contingency tables), from_nmi (more conservative), and consensus_both_metrics_agree (only pairs where V and NMI both agree it's not independent -- the one to actually trust)."
+    }
+  }
+}

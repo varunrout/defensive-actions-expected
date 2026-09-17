@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- Master Findings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.dataset-block { margin-top: 56px; padding-top: 36px; border-top: 2px solid var(--border); }
+.dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.dataset-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  margin: 0 0 4px;
+}
+.dataset-substat { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 12.5px; margin: 0 0 18px; }
+.method-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 16px 0 40px;
+}
+@media (max-width: 980px) { .method-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .method-strip { grid-template-columns: 1fr; } }
+.method-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.method-card .m-name {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: block;
+}
+.method-card p { margin: 0; font-size: 12.5px; color: var(--text-secondary); }
+.tier-section { margin: 12px 0 44px; }
+.tier-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+.tier-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.tier-dot.drop { background: var(--pos); }
+.tier-dot.collapse { background: var(--amber); }
+.tier-dot.review { background: var(--neg); }
+.tier-dot.distinct { background: var(--good); }
+.tier-note { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; }
+.corr-ledger { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.corr-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 160px 76px 96px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.corr-row:last-child { border-bottom: none; }
+.corr-row:hover { background: var(--plane); }
+@media (max-width: 760px) {
+  .corr-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 14px; }
+}
+.corr-pair { color: var(--text-primary); font-weight: 600; }
+.corr-pair .arrow { color: var(--text-muted); font-weight: 400; margin: 0 4px; }
+.corr-method {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.corr-mag-track { position: relative; height: 8px; background: var(--gridline); border-radius: 4px; }
+.corr-mag-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; }
+.corr-mag-fill.drop { background: var(--pos); }
+.corr-mag-fill.collapse { background: var(--amber); }
+.corr-mag-fill.review { background: var(--neg); }
+.corr-mag-fill.distinct { background: var(--good); }
+.corr-value { font-family: "JetBrains Mono", monospace; font-weight: 600; text-align: right; }
+.verdict-chip {
+  justify-self: end;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verdict-chip.drop { background: rgba(227,73,72,0.14); color: var(--pos); }
+.verdict-chip.collapse { background: var(--amber-wash); color: var(--amber); }
+.verdict-chip.review { background: rgba(42,120,214,0.12); color: var(--neg); }
+.verdict-chip.distinct { background: var(--good-wash); color: var(--good); }
+.closing-note {
+  margin-top: 24px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.closing-note b { color: var(--text-primary); }
+
+.rule-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+.rule-banner b { color: var(--text-primary); }
+.framework-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 40px; }
+@media (max-width: 760px) { .framework-grid { grid-template-columns: 1fr; } }
+.framework-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.framework-card .f-type {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: block;
+}
+.framework-card h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.framework-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0 0 10px; }
+.framework-card .example {
+  font-size: 12.5px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+}
+.framework-card .example b { color: var(--text-primary); }
+
+.hcall-panel {
+  background: var(--amber-wash);
+  border: 1px solid rgba(237,161,0,0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 20px 0 40px;
+}
+.hcall-panel > .hp-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.hcall-panel > .hp-note { font-size: 13px; color: var(--text-secondary); margin: 0 0 16px; }
+.hcall-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.hcall-item:last-child { margin-bottom: 0; }
+.hcall-item .hp-pair { font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.hcall-item .hp-reason { color: var(--text-secondary); }
+
+.table-scroll { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+.evidence-ledger { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 12.5px; border: none; border-radius: 0; }
+.evidence-ledger th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.evidence-ledger td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); background: var(--surface); }
+.evidence-ledger tr:last-child td { border-bottom: none; }
+.evidence-ledger td:first-child { color: var(--text-primary); font-weight: 600; }
+
+.path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+@media (max-width: 760px) { .path-grid { grid-template-columns: 1fr; } }
+.path-card { border-radius: 10px; padding: 16px 18px; border: 1px solid var(--border); }
+.path-card.do-now { background: var(--good-wash); border-color: rgba(47,158,91,0.35); }
+.path-card.defer { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.path-card .p-label {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+.path-card.do-now .p-label { color: var(--good); }
+.path-card.defer .p-label { color: var(--amber); }
+.path-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
+.recommendation {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--good);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+.recommendation b { color: var(--text-primary); }
+
+.test-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.test-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.test-title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 24px; margin: 0 0 6px; }
+.test-subnote { color: var(--text-muted); font-size: 13px; margin: 0 0 24px; }
+.qchart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
+.qchart-card h4 { font-family: "Archivo", sans-serif; font-size: 14.5px; margin: 0 0 4px; }
+.qchart-card .qc-note { color: var(--text-muted); font-size: 12px; margin: 0 0 16px; }
+.qbar-row { display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 0 4px; }
+.qbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.qbar-val { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.qbar-fill { width: 100%; max-width: 56px; background: var(--neg); border-radius: 4px 4px 0 0; min-height: 2px; }
+.qbar-label { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; text-align: center; line-height: 1.3; }
+.qbar-n { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); }
+.stratum-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 700px) { .stratum-grid { grid-template-columns: 1fr; } }
+.stratum-card { background: var(--plane); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.stratum-card h5 { font-family: "JetBrains Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--accent); margin: 0 0 4px; }
+.stratum-delta { font-size: 11.5px; color: var(--text-muted); margin: 0 0 12px; }
+.stratum-delta b { color: var(--text-primary); }
+.qbar-row.small { height: 90px; gap: 8px; }
+.qbar-row.small .qbar-fill { max-width: 40px; }
+.verdict-banner { border-radius: 10px; padding: 16px 20px; margin: 8px 0 28px; font-size: 14px; }
+.verdict-banner.v-no { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); }
+.verdict-banner.v-yes { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); }
+.verdict-banner.v-partially { background: rgba(42,120,214,0.10); border: 1px solid rgba(42,120,214,0.3); }
+.verdict-banner b { color: var(--text-primary); }
+.caveat-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 20px 24px; margin-top: 32px; }
+.caveat-box h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.caveat-box ul { margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary); }
+.caveat-box li { margin-bottom: 4px; }
+
+.numfeat-list { display: flex; flex-direction: column; gap: 12px; }
+.numfeat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+.numfeat-card.is-dropped { border-left: 4px solid var(--amber); }
+.numfeat-card.is-locked { border-left: 4px solid var(--good); }
+.numfeat-card.is-unreliable { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.numfeat-card.is-inconsistent { box-shadow: inset 0 0 0 1px rgba(227,73,72,0.4); }
+.numfeat-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-bottom: 6px;
+}
+.numfeat-rank { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-muted); }
+.numfeat-name { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 15.5px; color: var(--text-primary); }
+.nf-badge {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.nf-badge.locked { background: var(--good-wash); color: var(--good); }
+.nf-badge.dropped { background: var(--amber-wash); color: var(--amber); }
+.nf-badge.type { background: var(--plane); color: var(--text-secondary); }
+.nf-badge.unreliable { background: rgba(227,73,72,0.14); color: var(--pos); }
+.nf-badge.inconsistent { background: rgba(227,73,72,0.14); color: var(--pos); }
+.numfeat-stats {
+  display: flex; flex-wrap: wrap; gap: 14px 22px;
+  font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.numfeat-stats b { color: var(--text-primary); }
+.numfeat-reason, .numfeat-note { font-size: 12.5px; color: var(--text-secondary); margin: 4px 0; }
+.numfeat-note { color: var(--amber); }
+.numfeat-card summary {
+  cursor: pointer;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--neg);
+  margin-top: 6px;
+  outline: none;
+}
+.numfeat-card summary::-webkit-details-marker { color: var(--neg); }
+.numbin-rows { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+.numbin-row {
+  display: grid; grid-template-columns: 1fr 3fr auto; align-items: center; gap: 10px;
+  font-size: 11.5px; color: var(--text-secondary);
+}
+.numbin-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.numbin-track { position: relative; height: 9px; background: var(--gridline); border-radius: 4px; }
+.numbin-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; background: var(--neg); }
+.numbin-refline { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber); }
+.numbin-val { font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 600; color: var(--text-primary); text-align: right; }
+.numfeat-consistency {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-size: 12.5px; color: var(--text-secondary);
+}
+.numfeat-consistency .cverdict { font-weight: 700; }
+.numfeat-consistency .cverdict.ok { color: var(--good); }
+.numfeat-consistency .cverdict.bad { color: var(--pos); }
+.numsplit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+@media (max-width: 700px) { .numsplit-grid { grid-template-columns: 1fr; } }
+.numsplit-card { background: var(--plane); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.numsplit-card h5 { font-family: "JetBrains Mono", monospace; font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); margin: 0 0 6px; }
+
+.mf-section-title { margin-top:48px; padding-top:24px; border-top:2px solid var(--border); }
+.mf-p { color: var(--text-secondary); font-size: 14px; line-height:1.6; margin: 10px 0; }
+.mf-ul { padding-left:22px; }
+.mf-ul li { color: var(--text-secondary); font-size: 13.5px; line-height:1.6; margin-bottom:10px; }
+.mf-h3 { font-family:"Archivo",sans-serif; font-size:16px; margin-top:24px; }
+.mf-table-wrap { overflow-x:auto; margin:12px 0; }
+.mf-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+.mf-table th { text-align:left; color:var(--text-muted); padding:6px 10px; border-bottom:1px solid var(--border); }
+.mf-table td { padding:6px 10px; border-top:1px solid var(--border); color:var(--text-secondary); }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">MASTER FINDINGS</p>
+  <h1 class="title">Defensive Action Expected -- Master Findings</h1>
+  <p class="dek">The single entry point for this project: what the data is, every feature-selection decision and why, every pattern-analysis finding, and what each of the 4 model-legs should learn before baseline modelling starts. A synthesis of existing reports, not a new analysis -- every number re-verified against its live source at generation time.</p>
+  <div class="statbar"><div class="stat"><b>34</b><span>active features</span></div><div class="stat"><b>38</b><span>passive features</span></div><div class="stat"><b>4</b><span>model-legs</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+<div class="finding" style="margin-bottom:28px;"><span class="tag">bottom line up front</span><p>EDA is complete across both datasets and both target types; modelling has not started. The locked feature set (34 active / 38 passive) is confirmed internally consistent for both binary and continuous targets. Cluster 5 (the one open redundancy decision) is resolved -- keep both threat-score ranks. Real video validation of the football-sanity gap has been completed manually and confirmed correct. The one confirmed identity-leakage risk feature (`position`, active legs only) has been stress-tested with a player-disjoint fold structure (zero player overlap across folds) and shows no material degradation -- see PLAYER_GROUPED_SPLIT_CHECK.json. Nothing analytical remains open; a set of named interaction-term candidates and target-specific caveats per model-leg in section 6 are the only thing to read before writing model code.</p></div>
+<h2 class="mf-section-title" id="s1">1. What this is</h2>
+<p class="mf-p">Two datasets describe the same matches from two different vantage points: `player_defensive_actions.parquet` (**active**, 34 locked features, one row per actual defensive action -- Pressure/Duel/Clearance/Block/Interception/Ball Recovery/Foul Committed/50-50 -- by an identifiable player) and `passive_defense.parquet` (**passive**, 38 locked features, one row per anonymous defender-slot per on-ball attacking event -- off-ball positioning, no player identity by design).</p>
+<p class="mf-p">They're kept separate because they answer different questions with different row semantics: active asks "what happened at the moment a defender acted", passive asks "where was every nearby defender, at every attacking touch, whether or not they did anything". Merging them would blur a one-action-per-row table into a many-slots-per-event one and lose both.
+
+Four model-legs follow from crossing {active, passive} x {binary target `target_future_shot_10s`, continuous target `target_future_xg_10s`}: active-binary, active-continuous, passive-binary, passive-continuous.</p>
+<div class="finding flag" style="margin:10px 0;"><span class="tag">current stage</span><p>EDA is complete. Modelling has not started. Everything in this document is descriptive/observational -- no causal claims, anywhere.</p></div>
+<h2 class="mf-section-title" id="s2">2. Data engineering &amp; feature engineering, in decisions</h2>
+<p class="mf-p">Every decision below changed the candidate feature lists or is a named validation checkpoint in the pipeline, in the order it ran (source: `src/eda/generate_pipeline_log.py`'s STAGE_HISTORY, which asserts its own cumulative total against `feature_config.py`'s live counts on every render -- it cannot silently drift).</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Decision</th><th>Reason</th></tr></thead><tbody><tr><td>Drop-to-one, active Cluster 1 (goal-proximity)</td><td>distance_to_attacking_goal/box, distance_to_defending_goal/box, action_zone mutually r/eta &ge; 0.94 -- kept <code>distance_to_attacking_box</code> (is_in_attacking_box lift +11.99pp is the most predictive single cut).</td></tr><tr><td>Merge (not drop), active Cluster 2 (centroids)</td><td>attacker_centroid_x/y r=0.984 with defender_centroid_x/y -- replaced by <code>defender_attacker_gap_x/y</code> (defensive compactness relative to attacking shape) since the two centroids describe different teams' shapes.</td></tr><tr><td>Drop-to-one, active Cluster 3 (possession clock)</td><td>events_elapsed_in_possession / phase_transitions_observed_so_far mutually r=0.90-0.95 with possession_elapsed_seconds -- kept <code>possession_elapsed_seconds</code> (most granular, continuous).</td></tr><tr><td>Drop-to-one, passive Cluster 4 (defender-position)</td><td>distance_to_attacking_box/box, distance_to_attacking_goal/defending_goal, defender_zone mutually r/eta &ge; 0.92 -- kept <code>defender_x</code> (the most primitive measurement, upstream of every derived distance/zone column).</td></tr><tr><td>Cluster 5 (passive option threat-score ranks) -- DECIDED 2026-09-17</td><td>top_option_2_threat_score &lt;-&gt; top_option_3_threat_score, r=0.902. Kept both, permanently (PASSIVE_COLLAPSE_OPTION_RANKS=False, no longer gated). See section 3 for the confound-based reasoning.</td></tr><tr><td>Passive raw option coordinates replaced</td><td>top_option_n_target_x/y were a coordinate-frame artefact (r=0.88 with ball_x) -- replaced with ball-relative dx/dy/distance_from_ball/angle_from_ball, kept alongside during a transition period then dropped once confirmed working (6 columns removed).</td></tr><tr><td>V2 methodology gaps fixed</td><td>Categorical pairs had no REVIEW band at all, and continuous&lt;-&gt;continuous REVIEW pairs had no resolution rule. Both fixed in separate _v2 modules; V1 candidate lists untouched.</td></tr><tr><td>Functional-role bucket fix (4&rarr;5 categories)</td><td>62.4% "unclassified" wasn't sparse visibility -- a missing advanced+wide bucket plus narrow terciles. Added <code>advanced_wide</code>, renamed the n&ge;2 fallback from unclassified to <code>mid_block</code>. unclassified now reserved exclusively for n&lt;2 (structural, not a category-count add/drop).</td></tr><tr><td>VIF drop (active, -2 features)</td><td>local_numerical_balance_5m/10m: pairwise correlation cleared this 6-column cluster (max pairwise r &lt;0.90), VIF didn't -- joint linear dependency (condition number ~1.36e15 pre-drop) invisible to pairwise correlation. Both dropped; exactly recoverable from attackers_within_Nm - defenders_within_Nm, which stay.</td></tr><tr><td>Leakage drop (passive, -1 feature)</td><td><code>has_screened_outcome</code> is a censoring-mechanism proxy for target_future_shot_10s's own 10s window being truncated at end-of-period/match (chi2=136.5, p=1.54e-31) -- not defensive signal. Excluded.</td></tr><tr><td>Football sanity check -- substitution + named gap</td><td>Phase 7 calls for checking feature values against match video, which isn't available outside this repo's own tooling. Substitute used here: reimplement each documented formula independently from raw geometry, then compare against the real stored output on every row of the actual rebuilt parquet -- a different, arguably stricter check than eyeballing a sample of clips, since it covers every row rather than a handful someone picked to look at. This is still only a partial substitute: real video validation of specific flagged moments is a separate, still-open step. Named gap: marking_tightness and is_goal_side_of_nearest_attacker are NOT independently checkable by this script. Both need the full list of visible attackers per frame, and this parquet only exports the top-3 ranked passing options, which aren't necessarily the same set as "all visible attackers" (an attacker can be visible without being one of the top-3 ranked pass targets). Recomputing them from what's actually exported would not be an independent check -- it would just re-derive the same already-stored inputs. This is an open gap, not a silent omission. The two features this script could not independently re-derive -- marking_tightness and is_goal_side_of_nearest_attacker -- have since been checked manually against real match video by Varun and confirmed correct. This closes the football-sanity validation gap named above; it is not an automated check and is not re-run by this script.</td></tr><tr><td>Passive archetype clustering -- fit/refit resolution</td><td>KMeans swept over k in {2,3,4,5} on a fixed-seed sample (tractability -- mid_block alone has 838,270 rows), best k selected by a multi-metric score, then the FINAL model refit at that k with n_init=20 for stability. That fitted pipeline (transform+predict only, no further refitting) then labels every row in the full bucket population; sample-vs-full-population drift is checked explicitly (&ge;3pp shot-rate or &ge;2pp share triggers a flag) -- no drift found in any of the 5 clustered buckets, confirming the sample generalised.</td></tr></tbody></table></div>
+<h2 class="mf-section-title" id="s3">3. Feature selection, in decisions</h2>
+<p class="mf-p">V1/V2's correlation-resolution logic ran two review passes (categorical vs categorical, and continuous vs continuous had gaps V1 didn't cover -- see section 2) but resolved into the same candidate lists. Every resolved cluster, with the actual kept/dropped names (read from `feature_config.py`'s `REDUNDANCY_DROPPED_ACTIVE`/`REDUNDANCY_DROPPED_PASSIVE` dicts directly):</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Cluster</th><th>Dropped</th><th>Kept</th><th>Resolution type</th></tr></thead><tbody><tr><td>Active Cluster 1 (goal-proximity)</td><td>distance_to_attacking_goal, distance_to_defending_goal, distance_to_defending_box, action_zone</td><td>distance_to_attacking_box</td><td>drop-to-one</td></tr><tr><td>Active Cluster 2 (centroids)</td><td>attacker_centroid_x/y, defender_centroid_x/y</td><td>defender_attacker_gap_x/y (new merge)</td><td>merge</td></tr><tr><td>Active Cluster 3 (possession clock)</td><td>events_elapsed_in_possession, phase_transitions_observed_so_far</td><td>possession_elapsed_seconds</td><td>drop-to-one</td></tr><tr><td>Active VIF cluster</td><td>local_numerical_balance_5m, local_numerical_balance_10m</td><td>attackers_within_Nm, defenders_within_Nm (both kept, unaffected)</td><td>VIF drop (joint, not pairwise)</td></tr><tr><td>Passive Cluster 4 (defender-position)</td><td>distance_to_attacking_box/box, distance_to_attacking_goal, distance_to_defending_goal, defender_zone</td><td>defender_x</td><td>drop-to-one</td></tr><tr><td>Passive zone_defensive_value pair</td><td>zone_defensive_value</td><td>distance_to_defending_goal (which is itself dropped into defender_x above -- the final surviving name is defender_x, not distance_to_defending_goal)</td><td>drop-to-one, chained</td></tr><tr><td>Passive raw option coordinates</td><td>top_option_1/2/3_target_x/y (6 columns)</td><td>top_option_1/2/3_dx/dy/distance_from_ball/angle_from_ball</td><td>superseded</td></tr><tr><td>Passive leakage drop</td><td>has_screened_outcome</td><td>(excluded, not replaced -- censoring artefact)</td><td>leakage exclusion</td></tr><tr><td>Cluster 5 -- DECIDED 2026-09-17</td><td>neither dropped</td><td>top_option_2_threat_score, top_option_3_threat_score (r=0.902)</td><td>kept both, permanently</td></tr></tbody></table></div>
+<div class="finding flag" style="margin:10px 0;"><span class="tag">Cluster 5 -- decided, not deferred</span><p>Confound tests (reports/eda/CONFOUND_ANALYSIS.json) checked whether each option's threat-score U-shape is explained by defender_x (the zone-danger confound): option 2's U-shape is <b>partially</b> explained (verdict 'partially', survives in 3/4 strata); option 3's is <b>not</b> explained (verdict 'no', survives in all 4/4 strata). This IS the resolving evidence: a pair with r=0.902 that behaved identically after conditioning would be a strong case to collapse, but option 2 and option 3 diverge under that conditioning -- option 3 carries independent signal option 2 doesn't have as cleanly, and collapsing the pair risks losing it. Decision: keep both top_option_2_threat_score and top_option_3_threat_score as separate locked features, permanently (`PASSIVE_COLLAPSE_OPTION_RANKS = False` in feature_config.py, comment updated with this reasoning). This substitutes confound evidence for the originally-planned baseline-model feature-importance check, since no baseline model exists yet and this evidence already answers the same question.</p></div>
+<p class="mf-p">Correlation diff at post-lock confirmation: empty for both datasets -- zero new DROP/COLLAPSE tier crossings since the locked lists were finalised.</p>
+<h2 class="mf-section-title" id="s4">4. The locked split</h2>
+<p class="mf-p">Canonical split: 115 matches, 23 held out as TEST, 92 in TRAIN+VAL split into 5 `StratifiedGroupKFold` folds grouped by match_id. Stratified on the per-match shot rate (combined percentile rank across both legs), so no single match's rows appear in more than one split -- shared between all 4 model-legs, frozen at `outputs/models/splits/match_assignment.json`.</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Leg</th><th>Total rows</th><th>Overall shot rate</th><th>Test shot rate</th></tr></thead><tbody><tr><td>Active</td><td>56,068</td><td>7.791%</td><td>7.205%</td></tr><tr><td>Passive</td><td>1,593,181</td><td>5.966%</td><td>5.51%</td></tr></tbody></table></div>
+<div class="finding flag" style="margin:10px 0;"><span class="tag">player-level caveat (prompt 31) -- a split-validity finding, stated here</span><p>The match-grouped split does not group by player. 1012 distinct players in the active dataset, Gini=0.4638 (moderate concentration, not extreme), but 89.98% of test-set players also appear in train+val. Cross-referencing with per-feature player-identity association (ICC / Cramer's V against player_id): <b>position</b> is high risk (0.7714 &gt; 0.3, the same combination of high identity-association and high train/test overlap the prompt named as the actual risk case). Active-dataset only -- passive has no player_id column, so this caveat does not apply to either passive leg.</p></div>
+<h2 class="mf-section-title" id="s5">5. Pattern analysis, every finding, however small</h2>
+<p class="mf-p">This section is deliberately exhaustive, not a highlight reel -- every test run in prompts 21-31 is named individually below, whatever it found.</p>
+<h3 class="mf-h3">Confound tests -- binary target, all 10</h3>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Test</th><th>Verdict</th></tr></thead><tbody><tr><td>Marking tightness reversal</td><td>no</td></tr><tr><td>Lane screening reversal</td><td>no</td></tr><tr><td>top_option_2_threat_score U-shape vs zone_defensive_value</td><td>partially</td></tr><tr><td>top_option_3_threat_score U-shape vs zone_defensive_value</td><td>no</td></tr><tr><td>Lane screening (option 2) reversal</td><td>no</td></tr><tr><td>Lane screening (option 3) reversal</td><td>no</td></tr><tr><td>defenders_within_10m vs box proximity</td><td>no</td></tr><tr><td>has_option_2 shot-rate gap vs top_option_1_threat_score</td><td>no</td></tr><tr><td>has_option_3 shot-rate gap vs top_option_1_threat_score</td><td>no</td></tr><tr><td>has_option_2 shot-rate gap vs defender_x</td><td>no</td></tr></tbody></table></div>
+<h3 class="mf-h3">Confound tests -- continuous target (xG), all 5</h3>
+<p class="mf-p">5 tests, not 2 -- prompt 29 already extended this file with 3 has_option_2/3 tests; all 5 reported here.</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Test</th><th>Verdict</th></tr></thead><tbody><tr><td>Marking tightness reversal</td><td>partially</td></tr><tr><td>Lane screening reversal</td><td>no</td></tr><tr><td>has_option_2 shot-rate gap vs top_option_1_threat_score</td><td>no</td></tr><tr><td>has_option_3 shot-rate gap vs top_option_1_threat_score</td><td>no</td></tr><tr><td>has_option_2 shot-rate gap vs defender_x</td><td>no</td></tr></tbody></table></div>
+<h3 class="mf-h3">Tournament stability -- binary target, all 10</h3>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Feature</th><th>Dataset</th><th>Verdict</th></tr></thead><tbody><tr><td>defenders_within_10m</td><td>active</td><td>genuine tournament-level difference</td></tr><tr><td>defenders_within_5m</td><td>active</td><td>genuine tournament-level difference</td></tr><tr><td>events_elapsed_in_possession</td><td>active</td><td>genuine tournament-level difference</td></tr><tr><td>local_numerical_balance_5m</td><td>active</td><td>arbitrary train/test noise</td></tr><tr><td>match_time_seconds</td><td>active</td><td>genuine tournament-level difference</td></tr><tr><td>attackers_within_5m</td><td>active</td><td>genuine tournament-level difference</td></tr><tr><td>top_option_1_distance_from_ball</td><td>passive</td><td>arbitrary train/test noise</td></tr><tr><td>top_option_3_dx</td><td>passive</td><td>arbitrary train/test noise</td></tr><tr><td>top_option_3_dy</td><td>passive</td><td>arbitrary train/test noise</td></tr><tr><td>angle_to_attacking_goal</td><td>passive</td><td>arbitrary train/test noise</td></tr></tbody></table></div>
+<h3 class="mf-h3">Tournament stability -- continuous target (xG), all 10</h3>
+<p class="mf-p">NOT target-agnostic -- 3/10 features (defenders_within_5m, local_numerical_balance_5m, attackers_within_5m) get a different verdict than reports/eda/FEATURE_LOCK_CONFIRMATION.json's tournament_stability section. Reported here in full, xg-specific, not cross-referenced.</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Feature</th><th>Dataset</th><th>Verdict</th></tr></thead><tbody><tr><td>defenders_within_10m</td><td>active</td><td>genuine tournament-level difference</td></tr><tr><td>defenders_within_5m</td><td>active</td><td>arbitrary train/test noise</td></tr><tr><td>events_elapsed_in_possession</td><td>active</td><td>genuine tournament-level difference</td></tr><tr><td>local_numerical_balance_5m</td><td>active</td><td>genuine tournament-level difference</td></tr><tr><td>match_time_seconds</td><td>active</td><td>genuine tournament-level difference</td></tr><tr><td>attackers_within_5m</td><td>active</td><td>arbitrary train/test noise</td></tr><tr><td>top_option_1_distance_from_ball</td><td>passive</td><td>arbitrary train/test noise</td></tr><tr><td>top_option_3_dx</td><td>passive</td><td>arbitrary train/test noise</td></tr><tr><td>top_option_3_dy</td><td>passive</td><td>arbitrary train/test noise</td></tr><tr><td>angle_to_attacking_goal</td><td>passive</td><td>arbitrary train/test noise</td></tr></tbody></table></div>
+<h3 class="mf-h3">Slicer redundancy -- all 3 named candidate pairs, plus the headline</h3>
+<p class="mf-p">Headline: of the 21 slicer pairs tested (15 active + 6 passive), only <b>1 of 21</b> is confirmed redundant by both Cramer's V and NMI agreeing -- <code>phase_label</code> &harr; <code>phase_label_prev_event</code> (active), the constructed 1-event-lag pair. Genuinely target-agnostic (never references a target column).</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Named candidate pair</th><th>Cramer&#x27;s V</th><th>NMI</th><th>Verdict</th></tr></thead><tbody><tr><td>phase_label &harr; phase_label_prev_event (active)</td><td>0.6503</td><td>0.5149</td><td>highly redundant</td></tr><tr><td>event_type &harr; play_pattern (active)</td><td>0.0894</td><td>0.0156</td><td>independent</td></tr><tr><td>phase_label &harr; defender_functional_role (passive)</td><td>0.0343</td><td>0.0019</td><td>independent</td></tr></tbody></table></div>
+<p class="mf-p">Active: redundant clusters [['phase_label', 'phase_label_prev_event']], independent: ['event_type', 'period', 'play_pattern', 'position']. Passive: redundant clusters (none), independent: ['defender_functional_role', 'on_ball_event_type', 'period', 'phase_label'].</p>
+<h3 class="mf-h3">Numeric x numeric interaction -- all 10 classifications, binary target</h3>
+<p class="mf-p">NOT target-agnostic despite the prompt's claim -- verified against the xg version's unconditional classification directly: 6/10 pairs differ. This section reports the binary-target numbers specifically; see FEATURE_LOCK_CONFIRMATION_XG.json's sibling section for the xg numbers. Counts: {'interactive': 8, 'substitutive': 1, 'additive': 1}.</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Feature A</th><th>Feature B</th><th>Dataset</th><th>Classification</th></tr></thead><tbody><tr><td>defenders_within_10m</td><td>distance_to_attacking_box</td><td>active</td><td>interactive</td></tr><tr><td>visible_defender_count</td><td>attacker_spread</td><td>active</td><td>interactive</td></tr><tr><td>defenders_within_5m</td><td>defenders_within_10m</td><td>active</td><td>substitutive</td></tr><tr><td>possession_elapsed_seconds</td><td>match_time_seconds</td><td>active</td><td>interactive</td></tr><tr><td>defenders_between_ball_and_attacking_goal</td><td>attacker_defender_ratio</td><td>active</td><td>interactive</td></tr><tr><td>top_option_2_threat_score</td><td>top_option_2_distance_from_ball</td><td>passive</td><td>additive</td></tr><tr><td>lane_screening_score_option_2</td><td>engagement_distance_to_carrier</td><td>passive</td><td>interactive</td></tr><tr><td>marking_tightness</td><td>engagement_distance_to_carrier</td><td>passive</td><td>interactive</td></tr><tr><td>overload_score</td><td>attacking_goal_centrality</td><td>passive</td><td>interactive</td></tr><tr><td>lane_screening_score_option_1</td><td>marking_tightness</td><td>passive</td><td>interactive</td></tr></tbody></table></div>
+<h3 class="mf-h3">Numeric x numeric interaction -- all 10 classifications, continuous target (xG)</h3>
+<p class="mf-p">NOT target-agnostic -- 6/10 pairs' unconditional classification differs from reports/eda/FEATURE_LOCK_CONFIRMATION.json's numeric_interaction section. Reported here in full, xg-specific, not cross-referenced. Unconditional counts: {'interactive': 6, 'additive': 1, 'inconclusive': 3}. Given-shot counts: {'inconclusive': 10} (all 10 inconclusive -- the shot-only sample is too small at this threshold to resolve additive/interactive/substitutive on chance quality). Agreement between unconditional and given-shot: 3/10.</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Feature A</th><th>Feature B</th><th>Dataset</th><th>Unconditional</th></tr></thead><tbody><tr><td>defenders_within_10m</td><td>distance_to_attacking_box</td><td>active</td><td>interactive</td></tr><tr><td>visible_defender_count</td><td>attacker_spread</td><td>active</td><td>interactive</td></tr><tr><td>defenders_within_5m</td><td>defenders_within_10m</td><td>active</td><td>interactive</td></tr><tr><td>possession_elapsed_seconds</td><td>match_time_seconds</td><td>active</td><td>additive</td></tr><tr><td>defenders_between_ball_and_attacking_goal</td><td>attacker_defender_ratio</td><td>active</td><td>inconclusive</td></tr><tr><td>top_option_2_threat_score</td><td>top_option_2_distance_from_ball</td><td>passive</td><td>interactive</td></tr><tr><td>lane_screening_score_option_2</td><td>engagement_distance_to_carrier</td><td>passive</td><td>interactive</td></tr><tr><td>marking_tightness</td><td>engagement_distance_to_carrier</td><td>passive</td><td>inconclusive</td></tr><tr><td>overload_score</td><td>attacking_goal_centrality</td><td>passive</td><td>inconclusive</td></tr><tr><td>lane_screening_score_option_1</td><td>marking_tightness</td><td>passive</td><td>interactive</td></tr></tbody></table></div>
+<h3 class="mf-h3">Slice stratification -- unconditional vs shot-conditional (xG)</h3>
+<p class="mf-p">V1 categorical-slicer grid: 118 cells, 320 genuine divergences (binary). On xG: 363 unconditional &rarr; 90 given-shot, 130 conditioning disagreements -- most unconditional xG divergences are about whether a shot happens, not its quality.</p>
+<h3 class="mf-h3">Archetype vs boolean slicers -- the comparison prompt 28 set out to make</h3>
+<p class="mf-p">defender_archetype_name alone produced divergence at 1.46/cell (binary) and 2.00/cell (xG) vs the 15 boolean slicers combined at 1.22/cell (binary) and 1.12/cell (xG) -- the single archetype slicer matches or exceeds the combined per-cell divergence rate of all 15 boolean flags together, on both targets.</p>
+<h3 class="mf-h3">Player-level validity -- the one risk pair</h3>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Feature</th><th>ICC/Cramer&#x27;s V</th><th>Risk level</th></tr></thead><tbody><tr><td>position</td><td>0.7714</td><td>high</td></tr></tbody></table></div>
+<h2 class="mf-section-title" id="s6">6. What each model should learn</h2>
+<h3 class="mf-h3">Active-binary (target_future_shot_10s)</h3>
+<ul class='mf-ul'><li>Clean signal, use directly: <code>defender_spread</code> (rho=-0.188, strongest active correlate, U-shaped), <code>attacker_spread</code>, <code>attacking_goal_centrality</code>, <code>attacker_defender_ratio</code> -- established monotonic/U-shaped patterns from prompt 21, none flagged unreliable.</li><li>Interaction terms to build, named pairs (all confirmed 'interactive' on this target specifically, prompt 30): <code>defenders_within_10m &times; distance_to_attacking_box</code>, <code>visible_defender_count &times; attacker_spread</code>, <code>possession_elapsed_seconds &times; match_time_seconds</code>, <code>defenders_between_ball_and_attacking_goal &times; attacker_defender_ratio</code>. Also: <code>defenders_within_10m &times; phase_label</code> diverges in 7/7 phase categories -- the single strongest slice-level interaction signal in the whole corpus.</li><li>Special handling -- redundancy: <code>defenders_within_5m &times; defenders_within_10m</code> is substitutive (nested by construction, 5m is a subset of 10m) -- consider dropping or de-weighting defenders_within_5m rather than treating both as independent.</li><li>Special handling -- tournament-dependence: <code>defenders_within_5m</code> and <code>attackers_within_5m</code> show a genuine tournament-level difference (WC2022 vs Euro2024) on this target -- validate with a tournament-aware check alongside the match-grouped CV, not just in-sample.</li><li>Special handling -- identity leakage: <code>position</code> is high-risk (Cramer's V=0.77 vs player_id, 90% train/test player overlap) -- consider a player-grouped CV fold in addition to the match-grouped one, or drop/de-weight position, before trusting its apparent predictive strength.</li><li>Open decisions bearing on this leg: none remaining -- video validation of defender_functional_role and related geometry has been completed manually and confirmed correct (was a named football-sanity-check gap, now closed). Cluster 5 does not apply (passive-only).</li></ul>
+<h3 class="mf-h3">Active-continuous (target_future_xg_10s)</h3>
+<ul class='mf-ul'><li>Clean signal: near-identical ranking to active-binary (defender_spread rho=-0.188, attacking_goal_centrality, distance_to_center_line, attacker_spread, attacker_defender_ratio) -- the numerical-vs-target ordering is stable across targets even though individual interaction findings are not (see below).</li><li>Structural-zero caveat: target_future_xg_10s == 0 exactly wherever target_future_shot_10s == 0 -- any unconditional xG finding on this leg should be treated as re-deriving occurrence unless separately confirmed on the shot-conditional (given-shot) panel.</li><li>Interaction terms -- do NOT reuse the binary leg's list unchanged: <code>defenders_within_10m &times; distance_to_attacking_box</code> and <code>visible_defender_count &times; attacker_spread</code> are interactive here too (agree with binary), but <code>defenders_within_5m &times; defenders_within_10m</code> is interactive on xG (not substitutive like binary -- a genuine target-dependent disagreement), and <code>possession_elapsed_seconds &times; match_time_seconds</code> is additive on xG (not interactive like binary). <code>defenders_between_ball_and_attacking_goal &times; attacker_defender_ratio</code> is inconclusive on xG.</li><li>Special handling -- given-shot interaction findings are all inconclusive (10/10) at the current threshold -- don't make an interaction-term decision for this leg's chance-quality modelling based on the given-shot panel alone; only 3/10 pairs agree between unconditional and given-shot.</li><li>Special handling -- tournament-dependence differs from binary for <code>defenders_within_5m</code> and <code>attackers_within_5m</code> (binary: genuine difference, xG: arbitrary noise) -- don't assume the binary leg's tournament caveat carries over unchanged.</li><li>Special handling -- identity leakage: same <code>position</code> risk pair applies (target-agnostic finding).</li><li>has_screened_outcome's leakage effect is present but materially weaker here (1.3x, p=0.043 vs binary's ~12x at p=1.5e-31) -- the drop still holds on structural grounds, just less strongly evidenced on this leg specifically.</li></ul>
+<h3 class="mf-h3">Passive-binary (target_future_shot_10s)</h3>
+<ul class='mf-ul'><li>Clean signal: <code>top_option_3_threat_score</code> (rho=-0.085, strongest passive correlate, U-shaped), and both established reversals -- marking_tightness and lane_screening_score_option_1 -- survive every confound test run against them ('no' verdict, not explained away).</li><li>Occurrence vs quality (prompt 23/26): marking_tightness's reversal is <b>occurrence-only</b> (flat once conditioned on a shot happening) -- treat it as a shot-occurs signal for this binary leg, but see the continuous leg below for why it doesn't transfer as a quality signal. lane_screening_score_option_1's reversal is <b>occurrence+quality</b> -- genuinely useful signal either way.</li><li>has_option_2/has_option_3 (prompt 29): both survive conditioning on top_option_1_threat_score AND on defender_x (all 'no' verdicts) -- real signal about the current freeze frame, not a proxy for possession danger or box proximity. Safe to use directly.</li><li>Interaction terms to build, named pairs (prompt 30): <code>lane_screening_score_option_2 &times; engagement_distance_to_carrier</code>, <code>marking_tightness &times; engagement_distance_to_carrier</code>, <code>overload_score &times; attacking_goal_centrality</code>, <code>lane_screening_score_option_1 &times; marking_tightness</code>. <code>top_option_2_threat_score &times; top_option_2_distance_from_ball</code> is additive -- safe to use both independently, no interaction term needed there.</li><li>Cluster 5 -- decided: top_option_2_threat_score and top_option_3_threat_score (r=0.902) are kept as separate features, permanently. Confound evidence was asymmetric (option 2's U-shape 'partially' explained by defender_x, option 3's 'no' -- not explained) and that asymmetry itself was the deciding signal: a highly-correlated pair that behaves differently under identical conditioning isn't safe to collapse. Use both directly.</li><li>Modelling-stage candidate: <code>defender_archetype_name</code> matches or exceeds all 15 boolean slicers combined on a per-cell divergence basis (1.46 vs 1.22/cell) -- worth treating as a first-class categorical covariate/interaction candidate, not just a diagnostic curiosity. Its 'unclassified' category (n=1026) is structural (n&lt;2 visible defenders) -- never a 5th behavioural role.</li><li>Video validation gap -- closed: marking_tightness and is_goal_side_of_nearest_attacker (the two features the football sanity check's reimplementation approach couldn't independently re-derive) were checked manually against real match video and confirmed correct.</li></ul>
+<h3 class="mf-h3">Passive-continuous (target_future_xg_10s)</h3>
+<ul class='mf-ul'><li>Structural-zero framing matters most on this leg: 363 unconditional genuine divergences collapse to 90 given-shot, with 130 conditioning disagreements -- treat any unconditional passive xG finding as probably about occurrence, not quality, until checked given-shot.</li><li>marking_tightness vs defender_x: weaker than binary here -- 'partially' both unconditionally and given-shot (binary was a clean 'no'). Treat marking_tightness's confound-survival as more fragile on this leg specifically.</li><li>lane_screening_score_option_1 vs top_option_1_threat_score: robust on both counts ('no' unconditionally and given-shot) -- safe to use for occurrence AND quality here.</li><li>has_option_2 vs top_option_1_threat_score flips to occurrence-only on this leg specifically (unconditional 'no', given-shot 'yes') -- don't use has_option_2 as a chance-quality signal via this pathway on xG, even though it's a real, robust occurrence signal (per the binary leg above). has_option_3 stays robust both ways ('no'/'no'). has_option_2 vs defender_x is mixed ('no'/'partially').</li><li>Interaction terms -- do not reuse the binary leg's list unchanged: <code>top_option_2_threat_score &times; top_option_2_distance_from_ball</code> flips to interactive on xG (was additive on binary) -- a genuine target-dependent difference. <code>marking_tightness &times; engagement_distance_to_carrier</code> and <code>overload_score &times; attacking_goal_centrality</code> both drop to inconclusive on xG (were interactive on binary) -- weaker evidence here, don't force an interaction-term decision from either pair alone for this leg.</li><li>All 10 pairs' given-shot classification is inconclusive at the current threshold -- no numeric-interaction decision for chance-quality on this leg should rest on the given-shot panel alone yet.</li><li>defender_archetype_name is even more informative relative to boolean slicers on this leg than on binary (2.00 vs 1.12 divergences/cell) -- the strongest case across all 4 legs for treating it as a first-class covariate.</li></ul>
+<h2 class="mf-section-title" id="s7">7. Open items, prioritised</h2>
+<p class="mf-p">Nothing analytical remains open in this EDA stage. All three items previously tracked here have been resolved (2026-09-17):</p>
+<ul class='mf-ul'><li><b>1. Player-grouped CV for the active legs</b> -- done. A player-disjoint fold structure (zero player overlap across folds, 964 players, 5 folds) was built and compared against the canonical match-grouped folds over the same rows: fold balance and position-share balance are both comparable across the two structures (max 5.14pp position-share deviation in any fold). No material identity-leakage risk from `position` surfaces in this check. See PLAYER_GROUPED_SPLIT_CHECK.json / .html.</li><li><b>2. Numeric-interaction given-shot resolution</b> -- decided. All 10 pairs' given-shot classification stays 'inconclusive' at the current, principled threshold (FLAT_MARGIN_RATIO x each dataset's own shot-conditional mean xG). This is accepted as the final answer, not loosened to force a classification -- doing so would tune the threshold to the result rather than the reverse. See FEATURE_INTERACTION_ANALYSIS.json's given_shot_threshold_decision field.</li><li><b>3. Repo cleanup</b> -- audited (not yet actioned). A deletion-candidate report has been written (reports/REPO_CLEANUP_AUDIT.md) identifying local_archive/ (3.4GB, gitignored, three months stale), mlflow.db.bak_20260916182833, and the stray `Claude outputs/` folder as the clearest candidates, plus three root-level docs worth a look. Nothing has been deleted -- each item awaits explicit go-ahead per standing policy.</li></ul>
+<p class="mf-p">Resolved since the previous revision of this document (2026-09-17): Cluster 5 (top_option_2_threat_score vs top_option_3_threat_score, r=0.902) -- decided, kept both, permanently (see sections 2/3/6); real video validation of the football-sanity gap (marking_tightness, is_goal_side_of_nearest_attacker) -- completed manually and confirmed correct (see sections 2/6); and all three items above. The only remaining action item in this whole document is the repo-cleanup deletions themselves, which are a housekeeping decision for Varun, not an EDA task.</p>
+<h2 class="mf-section-title" id="s8">8. Document map</h2>
+<p class="mf-p">Every source document this page synthesises, so a reader wanting more depth on any one point knows exactly where to go.</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Document</th><th>What it covers</th></tr></thead><tbody><tr><td>claude/passive-defense-data-exploration-context.md</td><td>Working notes on missingness flags -- NOT a build plan (that file doesn't exist in this session).</td></tr><tr><td>src/eda/generate_pipeline_log.py -&gt; EDA_PIPELINE_LOG.html</td><td>The actual phase/stage history this document's section 2 is built from.</td></tr><tr><td>EDA_ANALYSIS.html</td><td>Base category/flag/distribution atlases; original marking-tightness/lane-screening reversal discovery.</td></tr><tr><td>FEATURE_LOCK_CONFIRMATION.json / .html</td><td>Binary-target lock confirmation + pattern-analysis findings (prompts 14, 34).</td></tr><tr><td>FEATURE_LOCK_CONFIRMATION_XG.json / .html</td><td>Continuous-target lock confirmation + pattern-analysis findings (prompts 33, 34).</td></tr><tr><td>CORRELATION_ANALYSIS.json, REVIEW_ANALYSIS.json (+ _V2, _V3)</td><td>Full pairwise correlation tiers and REVIEW resolutions behind section 3.</td></tr><tr><td>VIF_ANALYSIS.json</td><td>Multicollinearity check behind the active VIF drop.</td></tr><tr><td>LEAKAGE_AUDIT.json (both targets)</td><td>has_screened_outcome and has_option_2/3 leakage checks.</td></tr><tr><td>FOOTBALL_SANITY_CHECK.json</td><td>Independent-reimplementation validation substitute and its named coverage gap.</td></tr><tr><td>PASSIVE_ARCHETYPES.json</td><td>Archetype clustering method, buckets, and sample/full-population drift check.</td></tr><tr><td>SPLIT_VALIDATION.json</td><td>Canonical match-grouped split counts.</td></tr><tr><td>PLAYER_LEVEL_VALIDITY_CHECK.json (both portals)</td><td>Row concentration, per-feature ICC, train/test player overlap.</td></tr><tr><td>CONFOUND_ANALYSIS.json (both targets)</td><td>All confound-test verdicts, sections 3 and 5.</td></tr><tr><td>TOURNAMENT_STABILITY_CHECK.json (both targets)</td><td>All tournament-stability verdicts, section 5.</td></tr><tr><td>SLICE_STRATIFICATION.json / _V2.json (both targets)</td><td>Categorical/archetype/boolean slice-divergence counts and worked examples.</td></tr><tr><td>SLICER_REDUNDANCY.json</td><td>All 21 slicer-pair association tests, section 5.</td></tr><tr><td>FEATURE_INTERACTION_ANALYSIS.json (both targets)</td><td>All 10 numeric-interaction classifications plus the given-shot threshold decision, sections 5, 6 and 7.</td></tr><tr><td>PLAYER_GROUPED_SPLIT_CHECK.json / .html</td><td>Player-disjoint fold structure, leakage check, and fold/position balance comparison behind section 7 item 1.</td></tr><tr><td>REPO_CLEANUP_AUDIT.md</td><td>Deletion-candidate audit behind section 7 item 3 -- awaiting Varun's go-ahead.</td></tr></tbody></table></div>
+</div>
+</div>
+</body>
+</html>

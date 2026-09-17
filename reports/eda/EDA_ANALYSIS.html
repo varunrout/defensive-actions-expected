@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EDA Analysis: Defensive Positioning Features</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">EDA ANALYSIS</p>
+  <h1 class="title">EDA Analysis: Defensive Positioning Features</h1>
+  <p class="dek">A written synthesis of the 6 generated EDA reports: what the data shows, what's usable as a model feature, what isn't, and why.</p>
+  <div class="statbar"><div class="stat"><b>56,068 / 1,593,181</b><span>rows (active / passive)</span></div><div class="stat"><b>7.79% / 5.97%</b><span>base rate (active / passive)</span></div><div class="stat"><b>51 / 44</b><span>candidate features (active / passive)</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+<p>Source: <code>reports/eda/*.html</code> (generated by <code>python -m src.eda.generate_reports --dataset all</code>, reading <code>data/features/player_defensive_actions.parquet</code> and <code>data/features/passive_defense.parquet</code>). Every number below traces to those generated outputs or to a direct re-run of <code>src/eda/compute_stats.py</code> against the same parquet files.</p>
+<h2>Bottom line up front</h2>
+<p>Both datasets show the same dominant signal: <strong>proximity to either box</strong> (<code>is_in_defending_box</code>, <code>is_in_attacking_box</code>) and <strong>phase</strong> (<code>box_defence</code>, <code>high_press_proxy</code>) are associated with roughly double the base shot rate, consistently across active and passive tables. The active dataset's distance/count features are usable again after a real bug fix -- <code>nearest_defender_distance</code> and its correlated siblings were previously self-referencing the acting player (fixed; verified 0.0% residual). Camera-coverage metadata is excluded outright because it correlates with shots for a reason that has nothing to do with defending. After every exclusion, 51 active and 44 passive candidate features remain, unpruned for redundancy -- that's the next pass.</p>
+<h2>1. Overview</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>player_defensive_actions.parquet</code> (active)</th>
+<th><code>passive_defense.parquet</code> (passive)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grain</td>
+<td>one row per actual defensive action</td>
+<td>one row per visible defender-slot per on-ball attacking event</td>
+</tr>
+<tr>
+<td>Rows</td>
+<td>56,068</td>
+<td>1,593,181</td>
+</tr>
+<tr>
+<td>Base rate (<code>target_future_shot_10s</code> mean)</td>
+<td>7.79%</td>
+<td>5.97%</td>
+</tr>
+</tbody>
+</table>
+<p>The two tables are modelled separately because their grains are disjoint and not nestable: the active table has one row per thing a defender actually did, while the passive table has one row per defender who was merely <em>present</em> (possibly doing nothing) for every visible on-ball attacking event -- a single active action can correspond to zero, one, or several passive rows for teammates who weren't the actor. Pooling them would double-count positioning context and conflate "did something" with "was positioned somewhere."</p>
+<h2>2. Methodology</h2>
+<ul>
+<li><strong>Categorical shot rate</strong>: <code>df.groupby(col)['target_future_shot_10s'].agg(n='count', shots='sum', rate=lambda s: s.mean()*100)</code> -- always a groupby-mean against the full row population per category, never filter-to-shots-then-distribute.</li>
+<li><strong>Boolean lift</strong>: <code>rate_true - rate_false</code> in percentage points, where each rate is <code>df.loc[df[col]==True/False, target].mean()*100</code>. <code>pct_true = df[col].mean()*100</code>. Any True or False group with n &lt; 500 is flagged small-n, not excluded.</li>
+<li><strong>Continuous distributions</strong>: 24 equal-width bins from the column min to its 99th percentile (<code>np.percentile(x, 99)</code>); rows above p99 are counted as <code>n_extreme</code> and reported with the true max, never dropped from the histogram population or from <code>mean</code>/<code>median</code>/<code>skew</code> (<code>scipy.stats.skew</code>), which are computed on the full unclipped column.</li>
+<li><strong>Discrete distributions</strong>: raw value counts capped at 20 distinct values, tail bucketed beyond that.</li>
+</ul>
+<p>Every relationship in this report is a correlation or association, never a cause -- that includes every header, table caption and finding below, with no exceptions.</p>
+<h2>3. Findings by dataset</h2>
+<h3>3.1 Active (<code>player_defensive_actions.parquet</code>, n=56,068, base rate 7.79%)</h3>
+<h4>Strongest categorical correlates</h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Top categories (rate, n)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>play_pattern</code></td>
+<td>From Counter 21.01% (n=752); From Corner 19.97% (n=3,090); From Free Kick 9.11% (n=8,093)</td>
+</tr>
+<tr>
+<td><code>phase_label_prev_event</code></td>
+<td>box_defence 17.21% (n=6,887); high_press_proxy 15.28% (n=9,701); settled_low_block_proxy 6.39% (n=5,762)</td>
+</tr>
+<tr>
+<td><code>phase_label</code></td>
+<td>box_defence 15.87% (n=9,144); high_press_proxy 15.24% (n=9,094); transition_defence 5.98% (n=5,699)</td>
+</tr>
+<tr>
+<td><code>action_zone</code></td>
+<td>attacking_third_center 15.19% (n=11,309); defensive_third_center 15.10% (n=9,509); defensive_third_left_flank 5.03% (n=3,458)</td>
+</tr>
+<tr>
+<td><code>position</code></td>
+<td>Left Center Back 11.50% (n=4,619); Center Back 11.45% (n=1,424); Right Center Back 10.19% (n=4,545)</td>
+</tr>
+</tbody>
+</table>
+<p><code>play_pattern = From Counter</code> is the single largest divergence from base rate anywhere in the categorical set (+13.22pp on n=752).</p>
+<h4>Strongest boolean correlates</h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Lift</th>
+<th>True rate (n)</th>
+<th>False rate (n)</th>
+<th>% True</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>is_in_defending_box</code></td>
+<td><strong>+12.04pp</strong></td>
+<td>18.79% (4,842)</td>
+<td>6.75% (51,226)</td>
+<td>8.6%</td>
+</tr>
+<tr>
+<td><code>is_in_attacking_box</code></td>
+<td><strong>+11.99pp</strong></td>
+<td>18.52% (5,886)</td>
+<td>6.53% (50,182)</td>
+<td>10.5%</td>
+</tr>
+<tr>
+<td><code>is_central_lane</code></td>
+<td>+8.07pp</td>
+<td>12.35% (24,356)</td>
+<td>4.29% (31,712)</td>
+<td>43.4%</td>
+</tr>
+<tr>
+<td><code>is_high_zone</code></td>
+<td>+7.22pp</td>
+<td>13.27% (13,516)</td>
+<td>6.05% (42,552)</td>
+<td>24.1%</td>
+</tr>
+<tr>
+<td><code>is_deep_zone</code></td>
+<td>+7.22pp</td>
+<td>13.54% (11,441)</td>
+<td>6.32% (44,627)</td>
+<td>20.4%</td>
+</tr>
+<tr>
+<td><code>is_wide_lane</code></td>
+<td><strong>-7.24pp</strong></td>
+<td>2.54% (15,406)</td>
+<td>9.78% (40,662)</td>
+<td>27.5%</td>
+</tr>
+<tr>
+<td><code>counterpress</code></td>
+<td>-4.40pp</td>
+<td>4.07% (8,690)</td>
+<td>8.47% (47,378)</td>
+<td>15.5%</td>
+</tr>
+</tbody>
+</table>
+<p>Small-n caution (False-group n &lt; 500, lift unstable):</p>
+<ul>
+<li><code>has_visible_attacker</code>: False n=<strong>31</strong> -- below the n&lt;500 threshold, flagged small-n; the +4.57pp lift is not trustworthy.</li>
+<li><code>has_visible_defender</code>: False n=<strong>76</strong> -- below the threshold, flagged small-n; the +3.85pp lift is not trustworthy.</li>
+<li><code>has_previous_event</code>: False n=<strong>4,534</strong> -- above the threshold, not flagged small-n; its +6.39pp lift is trustworthy at that sample size, listed here only because it shares the same "structural absence" cause as the two above (first event of a possession has no prior event to look back at).</li>
+</ul>
+<h4>Numerical shape</h4>
+<p>Heavily skewed (need a log/rank transform before linear methods):</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>skew</th>
+<th>mean</th>
+<th>median</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nearest_attacker_distance</code></td>
+<td>4.63</td>
+<td>7.08</td>
+<td>3.20</td>
+</tr>
+<tr>
+<td><code>nearest_defender_distance</code></td>
+<td>4.38</td>
+<td>9.49</td>
+<td>6.35</td>
+</tr>
+<tr>
+<td><code>attacker_defender_ratio</code></td>
+<td>3.27</td>
+<td>1.00</td>
+<td>0.89</td>
+</tr>
+<tr>
+<td><code>possession_elapsed_seconds</code></td>
+<td>2.26</td>
+<td>18.65</td>
+<td>11.00</td>
+</tr>
+</tbody>
+</table>
+<p>Well-behaved (skew within ~±0.25 of zero): <code>attacker_spread</code>, <code>defender_spread</code>, <code>attacker_centroid_x/y</code>, <code>defender_centroid_x/y</code>, <code>distance_to_defending_box</code>, <code>distance_to_attacking_box</code>, <code>distance_to_defending_goal</code>, <code>distance_to_attacking_goal</code>, <code>distance_to_center_line</code>, <code>attacking_goal_centrality</code>, <code>match_time_seconds</code>.</p>
+<h4>The <code>nearest_defender_distance</code> self-reference bug</h4>
+<p>StatsBomb 360 freeze frames include the acting player's own position, marked <code>"actor": true</code>. Before the fix, <code>_support_features</code> in <code>src/dax/features/player_defense.py</code> treated that entry as an ordinary support player, so a defender's distance to their own action was measured as their distance to themselves -- <code>nearest_defender_distance</code> was effectively ~0m in <strong>73.6%</strong> of rows. The same root cause, via the attacker branch of the same freeze-frame split, produced the identical pattern in <code>nearest_attacker_distance</code> for <strong>20.0%</strong> of rows (<code>Ball Recovery</code>/<code>Interception</code> events where the recovering player is on the attacking side).</p>
+<p>Fix: <code>_exclude_actor_from_frame</code> now strips the <code>actor: true</code> entry before the attacker/defender split, for every column built from that candidate pool -- <code>nearest_attacker_distance</code>/<code>nearest_defender_distance</code>, <code>attacker_centroid_x/y</code>/<code>defender_centroid_x/y</code>, <code>attacker_spread</code>/<code>defender_spread</code>, <code>visible_attacker_count</code>/<code>visible_defender_count</code>, <code>attackers_within_5m/10m</code>/<code>defenders_within_5m/10m</code>, <code>local_numerical_balance_5m/10m</code>, <code>attacker_defender_ratio</code>, <code>defenders_between_ball_and_attacking_goal</code>.</p>
+<p>Verified fixed, directly against the current parquet:</p>
+<ul>
+<li>Rows with <code>nearest_defender_distance</code> &lt; 0.01m: <strong>0 of 56,068 (0.0%)</strong>, down from 73.6%.</li>
+<li>Rows with <code>nearest_attacker_distance</code> &lt; 0.01m: <strong>0 of 56,068 (0.0%)</strong>, down from 20.0%.</li>
+<li><code>nearest_defender_distance</code> now has mean <strong>9.49m</strong>, median <strong>6.35m</strong>, skew <strong>4.38</strong> -- right-skewed but consistent with genuine on-pitch spacing, not a ~0m spike.</li>
+</ul>
+<p><code>defender_centroid_x/y</code> and <code>defender_spread</code> (and their attacker-side counterparts) were built from the same corrected candidate pool and checked directly: <code>defender_centroid_x</code> ranges 0.04-119.10 with no near-zero clustering, and the 244 rows where <code>defender_spread == 0.0</code> (198 for <code>attacker_spread</code>) are single-visible-defender/attacker frames where a spread of zero is the correct value, not a residual self-reference artifact -- cleared.</p>
+<h3>3.2 Passive (<code>passive_defense.parquet</code>, n=1,593,181, base rate 5.97%)</h3>
+<h4>Strongest categorical correlates</h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Top categories (rate, n)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>phase_label</code></td>
+<td>high_press_proxy 14.79% (n=197,765); box_defence 14.06% (n=103,445); settled_low_block_proxy 5.58% (n=218,035)</td>
+</tr>
+<tr>
+<td><code>defender_zone</code></td>
+<td>attacking_third_center 9.87% (n=258,246); defensive_third_center 9.70% (n=403,528); attacking_third_right_flank 6.07% (n=44,089)</td>
+</tr>
+<tr>
+<td><code>on_ball_event_type</code></td>
+<td>Dribble 11.12% (n=21,436); Shot 7.09% (n=24,496); Carry 6.13% (n=714,233)</td>
+</tr>
+<tr>
+<td><code>defender_functional_role</code></td>
+<td>unclassified 6.28% (n=994,663); central_screen 5.76% (n=213,043); last_line 5.70% (n=216,551)</td>
+</tr>
+</tbody>
+</table>
+<h4>Strongest boolean correlates</h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Lift</th>
+<th>True rate (n)</th>
+<th>False rate (n)</th>
+<th>% True</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>is_in_defending_box</code></td>
+<td><strong>+12.31pp</strong></td>
+<td>17.39% (114,367)</td>
+<td>5.08% (1,478,814)</td>
+<td>7.2%</td>
+</tr>
+<tr>
+<td><code>is_in_attacking_box</code></td>
+<td><strong>+11.85pp</strong></td>
+<td>17.26% (74,676)</td>
+<td>5.41% (1,518,505)</td>
+<td>4.7%</td>
+</tr>
+<tr>
+<td><code>is_deep_zone</code></td>
+<td>+7.02pp</td>
+<td>11.53% (330,258)</td>
+<td>4.51% (1,262,923)</td>
+<td>20.7%</td>
+</tr>
+<tr>
+<td><code>is_high_zone</code></td>
+<td>+6.41pp</td>
+<td>11.51% (214,364)</td>
+<td>5.10% (1,378,817)</td>
+<td>13.5%</td>
+</tr>
+<tr>
+<td><code>has_option_3</code></td>
+<td><strong>-9.18pp</strong></td>
+<td>5.95% (1,591,000)</td>
+<td>15.13% (2,181)</td>
+<td>99.9%</td>
+</tr>
+<tr>
+<td><code>has_option_2</code></td>
+<td>-8.73pp</td>
+<td>5.96% (1,592,902)</td>
+<td>14.70% (279)</td>
+<td>100.0%</td>
+</tr>
+<tr>
+<td><code>is_wide_lane</code></td>
+<td>-2.76pp</td>
+<td>3.49% (165,072)</td>
+<td>6.25% (1,428,109)</td>
+<td>10.4%</td>
+</tr>
+</tbody>
+</table>
+<p>Small-n caution, explicit false-group sizes as requested:</p>
+<ul>
+<li><code>has_option_2</code>: False n=<strong>279</strong> -- below the n&lt;500 threshold, flagged small-n; the -8.73pp lift is the least trustworthy number in this table.</li>
+<li><code>has_option_3</code>: False n=<strong>2,181</strong> -- above the threshold, not flagged, but still a structurally rare group (fewer than 3 attackers were visible to rank).</li>
+<li><code>has_screened_outcome</code>: False n=<strong>2,581</strong> -- above the threshold; lift +5.47pp (True 5.97% vs False 0.50%), driven by the same "no next event existed" rarity.</li>
+</ul>
+<h4>Numerical shape</h4>
+<p>Heavily skewed:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>skew</th>
+<th>mean</th>
+<th>median</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>zone_defensive_value</code></td>
+<td>8.18</td>
+<td>0.024</td>
+<td>0.017</td>
+</tr>
+<tr>
+<td><code>top_option_1_threat_score</code></td>
+<td>7.91</td>
+<td>0.022</td>
+<td>0.016</td>
+</tr>
+<tr>
+<td><code>lane_screening_score_option_1</code></td>
+<td>3.11</td>
+<td>0.114</td>
+<td>0.065</td>
+</tr>
+<tr>
+<td><code>lane_screening_score_option_2</code></td>
+<td>3.07</td>
+<td>0.114</td>
+<td>0.064</td>
+</tr>
+<tr>
+<td><code>lane_screening_score_option_3</code></td>
+<td>2.94</td>
+<td>0.119</td>
+<td>0.067</td>
+</tr>
+<tr>
+<td><code>top_option_2_threat_score</code></td>
+<td>2.66</td>
+<td>0.015</td>
+<td>0.013</td>
+</tr>
+<tr>
+<td><code>top_option_3_threat_score</code></td>
+<td>1.85</td>
+<td>0.011</td>
+<td>0.011</td>
+</tr>
+<tr>
+<td><code>angle_to_attacking_goal</code></td>
+<td>1.71</td>
+<td>0.255</td>
+<td>0.200</td>
+</tr>
+<tr>
+<td><code>marking_tightness</code></td>
+<td>1.28</td>
+<td>6.81</td>
+<td>5.98</td>
+</tr>
+</tbody>
+</table>
+<p>Well-behaved (skew within ~±0.35 of zero): all <code>top_option_{1,2,3}_target_x/y</code>, <code>ball_x</code>, <code>ball_y</code>, <code>defender_x</code>, <code>defender_y</code>, <code>distance_to_attacking_box</code>, <code>distance_to_defending_box</code>, <code>distance_to_attacking_goal</code>, <code>distance_to_defending_goal</code>.</p>
+<p>The threat-score and lane-screening-score columns are all bounded in [0, ~1] and heavily right-skewed toward 0 -- most defender/option pairs carry negligible threat or screening value, with a long tail of high-value pairs. <code>n_extreme</code> is ~15,900-15,932 (~1.0%) for essentially every continuous column here, a mechanical consequence of the p99 definition at this row count, not a data-quality signal.</p>
+<h2>4. What was excluded, and why</h2>
+<table>
+<thead>
+<tr>
+<th>Column(s)</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>visibility_quality_band</code>, <code>visibility_limited</code>, <code>ball_inside_visible_area</code>, <code>action_inside_visible_area</code>, <code>local_5m_region_fully_visible</code>, <code>local_10m_region_fully_visible</code>, <code>visible_area_polygon_area</code>, <code>visible_area_fraction_of_pitch</code></td>
+<td>Camera/360-tracking-coverage metadata, not a football signal. These show real statistical lift with shots, but that's a confound: crowded, high-danger zones (own-box scrambles, counters) are simultaneously harder for the 360 tracking to fully capture <em>and</em> where shots cluster. The lift is about camera coverage, not defending.</td>
+</tr>
+<tr>
+<td><code>action_changed_possession</code>, <code>action_ended_possession</code>, <code>action_won_possession</code> (active only)</td>
+<td>Structural zero: exactly 0.00% shot rate by the target-window definition itself, not a genuine finding.</td>
+</tr>
+<tr>
+<td><code>freeze_frame_count</code></td>
+<td>Data-collection artifact, not a defensive feature.</td>
+</tr>
+<tr>
+<td><code>carrier_x</code>/<code>carrier_y</code> (passive)</td>
+<td>Verified 100%-identical to <code>ball_x</code>/<code>ball_y</code> (the on-ball event's location <em>is</em> the ball location in this table) -- dropped, with <code>ball_x</code>/<code>ball_y</code> kept as canonical.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Open item, not buried in a footnote: <code>action_x</code>/<code>action_y</code> (active) are still a known unresolved duplicate.</strong> They are verified 100%-identical to <code>ball_x</code>/<code>ball_y</code> in the current dataset -- the report generator's <code>check_duplicate_columns</code> assertion confirmed this again on this pass and would fail loudly if it ever stopped being true. They <em>should</em> be dropped, the same way <code>carrier_x</code>/<code>carrier_y</code> already were, but haven't been: they're required/canonical column names across 11 files in the modelling and analysis pipeline (<code>dax.models.schemas</code>/<code>specs</code>/<code>leakage</code>, <code>baseline_regression.py</code>, <code>baseline_logistic.py</code>, <code>dax.analysis.*</code>, <code>dax.coach_analysis.zones</code>, <code>analysis.player_features.*</code>), and dropping them needs a coordinated rename across all of those -- a separate, dedicated task, tracked by <code>tests/test_player_defense_geometry.py::test_no_duplicate_columns_on_real_player_defensive_actions_dataset</code>, which enforces that <code>action_x</code>/<code>ball_x</code> and <code>action_y</code>/<code>ball_y</code> are the <em>only</em> allowed duplicate pair.</p>
+<h2>5. Final candidate feature set</h2>
+<p>51 active features, 44 passive features, after every exclusion in Section 4.</p>
+<h3>Active (51)</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>n</th>
+<th>Columns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Categorical</td>
+<td>9</td>
+<td><code>phase_label</code>, <code>position</code>, <code>position_group</code>, <code>event_type</code>, <code>action_family</code>, <code>play_pattern</code>, <code>action_zone</code>, <code>phase_label_prev_event</code>, <code>period</code></td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td>13</td>
+<td><code>is_in_defending_box</code>, <code>is_in_attacking_box</code>, <code>is_central_lane</code>, <code>is_wide_lane</code>, <code>is_deep_zone</code>, <code>is_high_zone</code>, <code>counterpress</code>, <code>phase_changed_since_prev_event</code>, <code>action_was_under_opponent_possession</code>, <code>action_retained_defensive_team_control</code>, <code>has_previous_event</code>, <code>has_visible_attacker</code>, <code>has_visible_defender</code></td>
+</tr>
+<tr>
+<td>Continuous</td>
+<td>18</td>
+<td><code>match_time_seconds</code>, <code>possession_elapsed_seconds</code>, <code>distance_to_attacking_goal</code>, <code>distance_to_defending_goal</code>, <code>angle_to_attacking_goal</code>, <code>distance_to_attacking_box</code>, <code>distance_to_defending_box</code>, <code>attacking_goal_centrality</code>, <code>distance_to_center_line</code>, <code>nearest_attacker_distance</code>, <code>nearest_defender_distance</code>, <code>attacker_centroid_x</code>, <code>attacker_centroid_y</code>, <code>defender_centroid_x</code>, <code>defender_centroid_y</code>, <code>attacker_spread</code>, <code>defender_spread</code>, <code>attacker_defender_ratio</code></td>
+</tr>
+<tr>
+<td>Discrete</td>
+<td>11</td>
+<td><code>events_elapsed_in_possession</code>, <code>phase_transitions_observed_so_far</code>, <code>visible_attacker_count</code>, <code>visible_defender_count</code>, <code>attackers_within_5m</code>, <code>defenders_within_5m</code>, <code>attackers_within_10m</code>, <code>defenders_within_10m</code>, <code>defenders_between_ball_and_attacking_goal</code>, <code>local_numerical_balance_5m</code>, <code>local_numerical_balance_10m</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Passive (44)</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>n</th>
+<th>Columns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Categorical</td>
+<td>5</td>
+<td><code>on_ball_event_type</code>, <code>phase_label</code>, <code>defender_zone</code>, <code>defender_functional_role</code>, <code>period</code></td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td>11</td>
+<td><code>is_in_defending_box</code>, <code>is_in_attacking_box</code>, <code>is_deep_zone</code>, <code>is_high_zone</code>, <code>is_wide_lane</code>, <code>is_central_lane</code>, <code>has_option_2</code>, <code>has_option_3</code>, <code>has_screened_outcome</code>, <code>screens_top_option</code>, <code>is_goal_side_of_nearest_attacker</code></td>
+</tr>
+<tr>
+<td>Continuous</td>
+<td>26</td>
+<td><code>defender_x</code>, <code>defender_y</code>, <code>ball_x</code>, <code>ball_y</code>, <code>distance_to_attacking_goal</code>, <code>distance_to_defending_goal</code>, <code>angle_to_attacking_goal</code>, <code>distance_to_attacking_box</code>, <code>distance_to_defending_box</code>, <code>attacking_goal_centrality</code>, <code>distance_to_center_line</code>, <code>marking_tightness</code>, <code>zone_defensive_value</code>, <code>engagement_distance_to_carrier</code>, <code>top_option_1_target_x</code>, <code>top_option_1_target_y</code>, <code>top_option_1_threat_score</code>, <code>lane_screening_score_option_1</code>, <code>top_option_2_target_x</code>, <code>top_option_2_target_y</code>, <code>top_option_2_threat_score</code>, <code>lane_screening_score_option_2</code>, <code>top_option_3_target_x</code>, <code>top_option_3_target_y</code>, <code>top_option_3_threat_score</code>, <code>lane_screening_score_option_3</code></td>
+</tr>
+<tr>
+<td>Discrete</td>
+<td>2</td>
+<td><code>overload_score</code>, <code>defender_slot_index</code></td>
+</tr>
+</tbody>
+</table>
+<p>Cross-correlation testing has <strong>not</strong> been done in this pass for either dataset, so neither list has been pruned for redundancy -- e.g. <code>is_central_lane</code>/<code>is_wide_lane</code> are near-mirror pairs (active: +8.07pp vs -7.24pp; passive: +2.54pp vs -2.76pp) and <code>is_deep_zone</code>/<code>is_high_zone</code> carry near-identical lift on the active side (+7.22pp both). Both are kept as-is for now; pruning is the next EDA pass, not this one.</p>
+<h2>6. Open items / next steps</h2>
+<ol>
+<li><strong>Cross-correlation testing</strong> across both final feature lists -- not yet done. Candidate redundant pairs already visible from lift alone: <code>is_central_lane</code>/<code>is_wide_lane</code>, <code>is_deep_zone</code>/<code>is_high_zone</code> (active).</li>
+<li><strong>Resolve the <code>action_x</code>/<code>action_y</code> duplicate drop</strong> (Section 4) -- requires a coordinated rename across 11 downstream modules; currently guarded only by a test asserting the duplicate is the <em>only</em> allowed exception.</li>
+<li><strong>Small-n boolean lifts to treat with caution before modelling</strong>: <code>has_visible_attacker</code> (active, False n=31), <code>has_visible_defender</code> (active, False n=76), <code>has_option_2</code> (passive, False n=279).</li>
+<li><strong><code>n_extreme</code> at ~1% is mechanical, not a red flag</strong> -- every continuous column's extreme count is a direct consequence of the p99 clip definition; no column showed an anomalously large extreme population worth a separate follow-up.</li>
+<li><strong>No causal claims anywhere in the modelling writeup that follows this document</strong> -- every finding above is correlational only, per Section 2.</li>
+</ol>
+<hr />
+<p><strong>Changelog</strong> -- 2026-09-15: First EDA pass on the current feature builds. Reflects the <code>nearest_defender_distance</code>/<code>nearest_attacker_distance</code> actor-self-reference fix in <code>src/dax/features/player_defense.py</code> (verified 0.0% residual near-zero rows, up from 73.6%/20.0%), the <code>carrier_x</code>/<code>carrier_y</code> drop in <code>passive_defense.py</code>, the <code>action_inside_visible_area</code> drop in <code>player_defense.py</code>, and the 3+3 missingness flags added by <code>scripts/add_missingness_flags.py</code> (<code>has_visible_attacker</code>, <code>has_visible_defender</code>, <code>has_previous_event</code> on the active side; <code>has_option_2</code>, <code>has_option_3</code>, <code>has_screened_outcome</code> on the passive side). <code>action_x</code>/<code>action_y</code> remain an open, unresolved duplicate as documented in Section 4.</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feature Pipeline Audit Trail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.dataset-block { margin-top: 56px; padding-top: 36px; border-top: 2px solid var(--border); }
+.dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.dataset-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  margin: 0 0 4px;
+}
+.dataset-substat { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 12.5px; margin: 0 0 18px; }
+.method-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 16px 0 40px;
+}
+@media (max-width: 980px) { .method-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .method-strip { grid-template-columns: 1fr; } }
+.method-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.method-card .m-name {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: block;
+}
+.method-card p { margin: 0; font-size: 12.5px; color: var(--text-secondary); }
+.tier-section { margin: 12px 0 44px; }
+.tier-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+.tier-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.tier-dot.drop { background: var(--pos); }
+.tier-dot.collapse { background: var(--amber); }
+.tier-dot.review { background: var(--neg); }
+.tier-dot.distinct { background: var(--good); }
+.tier-note { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; }
+.corr-ledger { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.corr-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 160px 76px 96px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.corr-row:last-child { border-bottom: none; }
+.corr-row:hover { background: var(--plane); }
+@media (max-width: 760px) {
+  .corr-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 14px; }
+}
+.corr-pair { color: var(--text-primary); font-weight: 600; }
+.corr-pair .arrow { color: var(--text-muted); font-weight: 400; margin: 0 4px; }
+.corr-method {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.corr-mag-track { position: relative; height: 8px; background: var(--gridline); border-radius: 4px; }
+.corr-mag-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; }
+.corr-mag-fill.drop { background: var(--pos); }
+.corr-mag-fill.collapse { background: var(--amber); }
+.corr-mag-fill.review { background: var(--neg); }
+.corr-mag-fill.distinct { background: var(--good); }
+.corr-value { font-family: "JetBrains Mono", monospace; font-weight: 600; text-align: right; }
+.verdict-chip {
+  justify-self: end;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verdict-chip.drop { background: rgba(227,73,72,0.14); color: var(--pos); }
+.verdict-chip.collapse { background: var(--amber-wash); color: var(--amber); }
+.verdict-chip.review { background: rgba(42,120,214,0.12); color: var(--neg); }
+.verdict-chip.distinct { background: var(--good-wash); color: var(--good); }
+.closing-note {
+  margin-top: 24px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.closing-note b { color: var(--text-primary); }
+
+.rule-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+.rule-banner b { color: var(--text-primary); }
+.framework-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 40px; }
+@media (max-width: 760px) { .framework-grid { grid-template-columns: 1fr; } }
+.framework-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.framework-card .f-type {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: block;
+}
+.framework-card h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.framework-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0 0 10px; }
+.framework-card .example {
+  font-size: 12.5px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+}
+.framework-card .example b { color: var(--text-primary); }
+
+.hcall-panel {
+  background: var(--amber-wash);
+  border: 1px solid rgba(237,161,0,0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 20px 0 40px;
+}
+.hcall-panel > .hp-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.hcall-panel > .hp-note { font-size: 13px; color: var(--text-secondary); margin: 0 0 16px; }
+.hcall-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.hcall-item:last-child { margin-bottom: 0; }
+.hcall-item .hp-pair { font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.hcall-item .hp-reason { color: var(--text-secondary); }
+
+.table-scroll { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+.evidence-ledger { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 12.5px; border: none; border-radius: 0; }
+.evidence-ledger th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.evidence-ledger td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); background: var(--surface); }
+.evidence-ledger tr:last-child td { border-bottom: none; }
+.evidence-ledger td:first-child { color: var(--text-primary); font-weight: 600; }
+
+.path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+@media (max-width: 760px) { .path-grid { grid-template-columns: 1fr; } }
+.path-card { border-radius: 10px; padding: 16px 18px; border: 1px solid var(--border); }
+.path-card.do-now { background: var(--good-wash); border-color: rgba(47,158,91,0.35); }
+.path-card.defer { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.path-card .p-label {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+.path-card.do-now .p-label { color: var(--good); }
+.path-card.defer .p-label { color: var(--amber); }
+.path-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
+.recommendation {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--good);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+.recommendation b { color: var(--text-primary); }
+
+.pl-chart-frame { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 8px 0 28px; }
+.pl-node { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 0 10px 10px 0; padding: 16px 20px; margin-bottom: 14px; }
+.pl-node-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
+.pl-stage-tag { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-muted); }
+.pl-title { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 16px; margin: 2px 0 0; }
+.pl-status { font-family: "JetBrains Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 9px; border-radius: 999px; font-weight: 700; background: var(--good-wash); color: var(--good); white-space: nowrap; }
+.pl-delta { font-family: "JetBrains Mono", monospace; font-size: 11.5px; color: var(--text-muted); text-align: right; white-space: nowrap; }
+.pl-delta b { color: var(--text-primary); }
+.pl-finding { color: var(--text-secondary); font-size: 13.5px; margin: 0 0 8px; }
+.pl-link { font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.pl-link a { color: var(--neg); text-decoration: none; }
+.pl-link a:hover { text-decoration: underline; }
+.pl-legend { display: flex; gap: 20px; font-size: 11.5px; color: var(--text-muted); margin: 4px 0 16px; }
+.pl-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.pl-legend .dot { width: 9px; height: 9px; border-radius: 50%; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">EDA PIPELINE LOG</p>
+  <h1 class="title">Feature Pipeline Audit Trail</h1>
+  <p class="dek">Every stage that touched the candidate feature lists, in order -- what ran, what it found, what it dropped, merged, or engineered -- verified against feature_config.py and every stage's own report, not taken on trust.</p>
+  <div class="statbar"><div class="stat"><b>34</b><span>active features (final)</span></div><div class="stat"><b>38</b><span>passive features (final)</span></div><div class="stat"><b>13</b><span>pipeline stages</span></div><div class="stat"><b>5</b><span>stages that changed the count</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+
+<h2>Candidate feature count, every stage that changed it</h2>
+<p class="section-note">Computed from the documented per-stage deltas below, cross-checked against
+feature_config.py's live counts on every render -- this page fails to build if the two disagree.</p>
+
+<div class="pl-legend">
+  <span><span class="dot" style="background:var(--neg)"></span> active</span>
+  <span><span class="dot" style="background:var(--pos)"></span> passive</span>
+</div>
+<div class="pl-chart-frame">
+<svg viewBox="0 0 900 220" role="img" aria-label="Active and passive candidate feature count across every pipeline stage" style="width:100%; height:auto;">
+  <line x1="50" y1="20" x2="50" y2="190" stroke="var(--border)"></line>
+  <line x1="50" y1="190" x2="880" y2="190" stroke="var(--border)"></line>
+  <polyline points="50.0,36.2 119.2,36.2 188.3,92.9 257.5,157.6 326.7,157.6 395.8,157.6 465.0,157.6 534.2,173.8 603.3,173.8 672.5,173.8 741.7,173.8 810.8,173.8 880.0,173.8" fill="none" stroke="var(--neg)" stroke-width="2"></polyline><circle cx="50.0" cy="36.2" r="3" fill="var(--neg)"></circle><circle cx="119.2" cy="36.2" r="3" fill="var(--neg)"></circle><circle cx="188.3" cy="92.9" r="3" fill="var(--neg)"></circle><circle cx="257.5" cy="157.6" r="3" fill="var(--neg)"></circle><circle cx="326.7" cy="157.6" r="3" fill="var(--neg)"></circle><circle cx="395.8" cy="157.6" r="3" fill="var(--neg)"></circle><circle cx="465.0" cy="157.6" r="3" fill="var(--neg)"></circle><circle cx="534.2" cy="173.8" r="3" fill="var(--neg)"></circle><circle cx="603.3" cy="173.8" r="3" fill="var(--neg)"></circle><circle cx="672.5" cy="173.8" r="3" fill="var(--neg)"></circle><circle cx="741.7" cy="173.8" r="3" fill="var(--neg)"></circle><circle cx="810.8" cy="173.8" r="3" fill="var(--neg)"></circle><circle cx="880.0" cy="173.8" r="3" fill="var(--neg)"></circle>
+  <polyline points="50.0,92.9 119.2,92.9 188.3,44.3 257.5,84.8 326.7,133.3 395.8,133.3 465.0,133.3 534.2,133.3 603.3,141.4 672.5,141.4 741.7,141.4 810.8,141.4 880.0,141.4" fill="none" stroke="var(--pos)" stroke-width="2"></polyline><circle cx="50.0" cy="92.9" r="3" fill="var(--pos)"></circle><circle cx="119.2" cy="92.9" r="3" fill="var(--pos)"></circle><circle cx="188.3" cy="44.3" r="3" fill="var(--pos)"></circle><circle cx="257.5" cy="84.8" r="3" fill="var(--pos)"></circle><circle cx="326.7" cy="133.3" r="3" fill="var(--pos)"></circle><circle cx="395.8" cy="133.3" r="3" fill="var(--pos)"></circle><circle cx="465.0" cy="133.3" r="3" fill="var(--pos)"></circle><circle cx="534.2" cy="133.3" r="3" fill="var(--pos)"></circle><circle cx="603.3" cy="141.4" r="3" fill="var(--pos)"></circle><circle cx="672.5" cy="141.4" r="3" fill="var(--pos)"></circle><circle cx="741.7" cy="141.4" r="3" fill="var(--pos)"></circle><circle cx="810.8" cy="141.4" r="3" fill="var(--pos)"></circle><circle cx="880.0" cy="141.4" r="3" fill="var(--pos)"></circle>
+  <text x="50.0" y="212" font-size="9" font-family="JetBrains Mono, monospace" fill="var(--text-muted)" text-anchor="middle">00</text><text x="119.2" y="212" font-size="9" font-family="JetBrains Mono, monospace" fill="var(--text-muted)" text-anchor="middle">01-03</text><text x="188.3" y="212" font-size="9" font-family="JetBrains Mono, monospace" fill="var(--text-muted)" text-anchor="middle">04</text><text x="257.5" y="212" font-size="9" font-family="JetBrains Mono, monospace" fill="var(--text-muted)" text-anchor="middle">05</text><text x="326.7" y="212" font-size="9" font-family="JetBrains Mono, monospace" fill="var(--text-muted)" text-anchor="middle">06</text><text x="395.8" y="212" font-size="9" font-family="JetBrains Mono, monospace" fill="var(--text-muted)" text-anchor="middle">07</text><text x="465.0" y="212" font-size="9" font-family="JetBrains Mono, monospace" fill="var(--text-muted)" text-anchor="middle">08</text><text x="534.2" y="212" font-size="9" font-family="JetBrains Mono, monospace" fill="var(--text-muted)" text-anchor="middle">09</text><text x="603.3" y="212" font-size="9" font-family="JetBrains Mono, monospace" fill="var(--text-muted)" text-anchor="middle">10</text><text x="672.5" y="212" font-size="9" font-family="JetBrains Mono, monospace" fill="var(--text-muted)" text-anchor="middle">11</text><text x="741.7" y="212" font-size="9" font-family="JetBrains Mono, monospace" fill="var(--text-muted)" text-anchor="middle">12</text><text x="810.8" y="212" font-size="9" font-family="JetBrains Mono, monospace" fill="var(--text-muted)" text-anchor="middle">13</text><text x="880.0" y="212" font-size="9" font-family="JetBrains Mono, monospace" fill="var(--text-muted)" text-anchor="middle">14</text>
+</svg></div>
+
+<h2 style="margin-top:8px;">Every stage, in order</h2>
+<p class="section-note">Method and finding per stage, in the order it ran, linking to that stage's own report where one exists.</p>
+
+<div class="pl-node">
+  <div class="pl-node-head">
+    <div>
+      <span class="pl-stage-tag">STAGE 00</span>
+      <p class="pl-title">Baseline -- manual EDA</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="pl-status">DONE</span>
+      <p class="pl-delta">no change (51 / 44)</p>
+    </div>
+  </div>
+  <p class="pl-finding">Base category/flag/distribution atlases set the starting candidate lists and surfaced the marking-tightness / lane-screening reversals.</p>
+  <p class="pl-link"><a href="EDA_ANALYSIS.html">EDA_ANALYSIS.html</a></p>
+</div>
+<div class="pl-node">
+  <div class="pl-node-head">
+    <div>
+      <span class="pl-stage-tag">STAGE 01-03</span>
+      <p class="pl-title">Correlation, review &amp; report scripting</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="pl-status">DONE</span>
+      <p class="pl-delta">no change (51 / 44)</p>
+    </div>
+  </div>
+  <p class="pl-finding">Five type-matched association methods tiered into DROP/COLLAPSE/REVIEW/DISTINCT; REVIEW resolved against real flag-ledger lift, not r alone. Verdicts computed, not yet applied.</p>
+  <p class="pl-link"><a href="CORRELATION_ATLAS.html">CORRELATION_ATLAS.html</a></p>
+</div>
+<div class="pl-node">
+  <div class="pl-node-head">
+    <div>
+      <span class="pl-stage-tag">STAGE 04</span>
+      <p class="pl-title">Structural redesign</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="pl-status">DONE</span>
+      <p class="pl-delta">active <b>-7</b> &rarr; 44 &middot; passive <b>+6</b> &rarr; 50</p>
+    </div>
+  </div>
+  <p class="pl-finding">Applied resolved DROP verdicts. Passive-side raw option coordinates were a coordinate-frame artefact (r=0.88 with ball_x) -- replaced with ball-relative dx/dy/distance/angle (kept alongside the raw columns during a transition period).</p>
+  <p class="pl-link"><a href="REVIEW_METHODOLOGY.html">REVIEW_METHODOLOGY.html</a></p>
+</div>
+<div class="pl-node">
+  <div class="pl-node-head">
+    <div>
+      <span class="pl-stage-tag">STAGE 05</span>
+      <p class="pl-title">Collapse-tier resolution (clusters 1-4)</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="pl-status">DONE</span>
+      <p class="pl-delta">active <b>-8</b> &rarr; 36 &middot; passive <b>-5</b> &rarr; 45</p>
+    </div>
+  </div>
+  <p class="pl-finding">Drop-to-one on goal-proximity/possession-clock (active) and defender-position (passive) clusters; attacker/defender centroids merged into defender_attacker_gap_x/y (active). Cluster 5 (passive option threat-score ranks) deliberately left open.</p>
+  <p class="pl-link"><a href="CORRELATION_ATLAS.html">CORRELATION_ATLAS.html</a></p>
+</div>
+<div class="pl-node">
+  <div class="pl-node-head">
+    <div>
+      <span class="pl-stage-tag">STAGE 06</span>
+      <p class="pl-title">Drop raw option coordinates</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="pl-status">DONE</span>
+      <p class="pl-delta">passive <b>-6</b> &rarr; 39</p>
+    </div>
+  </div>
+  <p class="pl-finding">Ball-relative replacements from stage 04 confirmed working -- dropped the 6 raw top_option_n_target_x/y columns (kept as an internal computation, not a candidate feature).</p>
+  
+</div>
+<div class="pl-node">
+  <div class="pl-node-head">
+    <div>
+      <span class="pl-stage-tag">STAGE 07</span>
+      <p class="pl-title">V2 -- categorical REVIEW band + Type 5/6 rules</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="pl-status">DONE</span>
+      <p class="pl-delta">no change (36 / 39)</p>
+    </div>
+  </div>
+  <p class="pl-finding">Categorical pairs had no REVIEW band at all, and continuous<->continuous REVIEW pairs had no resolution rule. Both fixed in separate _v2 modules; V1 candidate lists untouched.</p>
+  <p class="pl-link"><a href="REVIEW_METHODOLOGY_V2.html">REVIEW_METHODOLOGY_V2.html</a></p>
+</div>
+<div class="pl-node">
+  <div class="pl-node-head">
+    <div>
+      <span class="pl-stage-tag">STAGE 08</span>
+      <p class="pl-title">Functional-role bucket fix</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="pl-status">DONE</span>
+      <p class="pl-delta">no change (36 / 39)</p>
+    </div>
+  </div>
+  <p class="pl-finding">62.4% "unclassified" wasn't sparse visibility -- a missing advanced+wide bucket plus narrow terciles. Added advanced_wide, renamed the n>=2 fallback to mid_block. Category-value change on an existing column, not a column add/drop.</p>
+  <p class="pl-link"><a href="PASSIVE_ARCHETYPES.html">PASSIVE_ARCHETYPES.html</a></p>
+</div>
+<div class="pl-node">
+  <div class="pl-node-head">
+    <div>
+      <span class="pl-stage-tag">STAGE 09</span>
+      <p class="pl-title">Multicollinearity (VIF)</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="pl-status">CONFIRMED</span>
+      <p class="pl-delta">active <b>-2</b> &rarr; 34</p>
+    </div>
+  </div>
+  <p class="pl-finding">Pairwise correlation cleared a 6-column active cluster; VIF didn't -- joint linear dependency invisible to pairwise correlation. Dropped both.</p>
+  <p class="pl-link"><a href="VIF_ANALYSIS.html">VIF_ANALYSIS.html</a></p>
+</div>
+<div class="pl-node">
+  <div class="pl-node-head">
+    <div>
+      <span class="pl-stage-tag">STAGE 10</span>
+      <p class="pl-title">Leakage audit</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="pl-status">CONFIRMED</span>
+      <p class="pl-delta">passive <b>-1</b> &rarr; 38</p>
+    </div>
+  </div>
+  <p class="pl-finding">has_screened_outcome is a censoring-mechanism proxy for the target's own truncated window, not defensive signal -- excluded.</p>
+  <p class="pl-link"><a href="LEAKAGE_AUDIT.html">LEAKAGE_AUDIT.html</a></p>
+</div>
+<div class="pl-node">
+  <div class="pl-node-head">
+    <div>
+      <span class="pl-stage-tag">STAGE 11</span>
+      <p class="pl-title">Football sanity check</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="pl-status">CONFIRMED</span>
+      <p class="pl-delta">no change (34 / 38)</p>
+    </div>
+  </div>
+  <p class="pl-finding">Independent recomputation of 4 derived features from raw geometry, compared row-for-row against stored output. Validation only -- no feature-list change.</p>
+  <p class="pl-link"><a href="FOOTBALL_SANITY_CHECK.html">FOOTBALL_SANITY_CHECK.html</a></p>
+</div>
+<div class="pl-node">
+  <div class="pl-node-head">
+    <div>
+      <span class="pl-stage-tag">STAGE 12</span>
+      <p class="pl-title">Passive archetype clustering</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="pl-status">CONFIRMED</span>
+      <p class="pl-delta">no change (34 / 38)</p>
+    </div>
+  </div>
+  <p class="pl-finding">KMeans within each defender_functional_role bucket, on a separate 16-feature analysis set. Downstream module -- doesn't touch feature_config.py's candidate lists.</p>
+  <p class="pl-link"><a href="PASSIVE_ARCHETYPES.html">PASSIVE_ARCHETYPES.html</a></p>
+</div>
+<div class="pl-node">
+  <div class="pl-node-head">
+    <div>
+      <span class="pl-stage-tag">STAGE 13</span>
+      <p class="pl-title">Canonical match-grouped split</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="pl-status">CONFIRMED</span>
+      <p class="pl-delta">no change (34 / 38)</p>
+    </div>
+  </div>
+  <p class="pl-finding">Frozen, shared TEST/CV match assignment for both legs. Model-validation infra -- no feature list touch.</p>
+  <p class="pl-link"><a href="SPLIT_VALIDATION.html">SPLIT_VALIDATION.html</a></p>
+</div>
+<div class="pl-node">
+  <div class="pl-node-head">
+    <div>
+      <span class="pl-stage-tag">STAGE 14</span>
+      <p class="pl-title">Post-lock correlation confirmation</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="pl-status">CONFIRMED</span>
+      <p class="pl-delta">no change (34 / 38)</p>
+    </div>
+  </div>
+  <p class="pl-finding">Re-ran correlation/review fresh against the final locked lists. Zero tier crossings found.</p>
+  <p class="pl-link"><a href="FEATURE_LOCK_CONFIRMATION.html">FEATURE_LOCK_CONFIRMATION.html</a></p>
+</div>
+
+<div class="closing-note" style="margin-top:8px;">
+<b>Reading this page:</b> stages 01-03, 07, 08, 11, 12, 13 and 14 are analysis or validation passes with no
+feature-list impact of their own -- they're listed because they're part of the same pipeline, not because they
+moved the count. The count only moves at stages 04, 05, 06, 09 and 10.
+</div>
+</div>
+</div>
+</body>
+</html>
