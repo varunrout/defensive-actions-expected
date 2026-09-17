@@ -368,6 +368,16 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <p>10,660 rows / 23 matches, evaluated exactly once each, after all cross-validation and variant
   comparison above was finalised. Consistent with the CV ranking: v1 leads on PR-AUC and by a wide
   margin on calibration; v2 slightly ahead of v3.</p>
+<p><strong>Model provenance for this readout:</strong> v2/v3 reuse the model objects already fit on
+  all train+val rows in this section's original run (<code>v2_weighted.joblib</code> /
+  <code>v3_weighted_interactions.joblib</code>). v1 was refit on the identical train+val rows,
+  features and settings (<code>LogisticRegression(random_state=42)</code>, no <code>class_weight</code>)
+  rather than reloading <code>v1_unweighted.joblib</code>, since that earlier artifact and its
+  <code>DesignMatrixBuilder</code> preprocessing state were not both persisted together in a directly
+  reloadable form. The refit intercept (-1.3164379<strong>047863153</strong>) matches the original
+  saved fit (-1.3164379<strong>03595758</strong>) to 8 significant figures &mdash; the residual is
+  solver-tolerance floating-point noise from <code>lbfgs</code>, not a different fit on different data.
+  The held-out test set was still touched exactly once for this purpose.</p>
 <p><strong>v1 CV-to-test check</strong> (added as a follow-up to the overfitting question raised in
   discussion): v1's PR-AUC went from 0.3521 (CV mean) to 0.3725 (held-out test) &mdash; an
   <em>increase</em>, not a drop. Same direction as v2 (0.3376&nbsp;&rarr;&nbsp;0.3594) and v3
