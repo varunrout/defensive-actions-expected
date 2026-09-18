@@ -480,15 +480,6 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
     <div class="chart-card"><img src="../../outputs/models/classification/charts/v3_weighted_interactions/prediction_distribution.png" alt="v3_weighted_interactions prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
   </div>
 </div>
-<div class="variant-block">
-  <p class="variant-title">v1b_quadratic <span style="font-weight:400;color:var(--text-muted);font-size:12px;">(rung 1, section 9)</span></p>
-  <div class="chart-grid">
-    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1b_quadratic/calibration_curve.png" alt="v1b_quadratic calibration curve"><p class="cc-label">calibration_curve.png</p></div>
-    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1b_quadratic/precision_recall_curve.png" alt="v1b_quadratic precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
-    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1b_quadratic/roc_curve.png" alt="v1b_quadratic ROC curve"><p class="cc-label">roc_curve.png</p></div>
-    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1b_quadratic/prediction_distribution.png" alt="v1b_quadratic prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
-  </div>
-</div>
 
 <h2>8. Deviations from instructions</h2>
 <div class="deviation-box">
@@ -622,89 +613,6 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   conclusion. Its main known weakness is PR-AUC degrading on low-positive-rate phase slices
   (<code>wide_defending_proxy</code>, <code>settled_mid_block_proxy</code>), which is an expected
   consequence of class imbalance within those slices rather than a defect specific to this model.</p>
-
-<h2>10. Rung 1 &mdash; quadratic terms for U-shaped features (<code>v1b_quadratic</code>)</h2>
-<p>EDA (<code>active_numerical_target_atlas.json</code>, cross-checked in section 6) already confirmed 4 of
-  the 32 locked features have a U-shaped, non-monotonic relationship with the target:
-  <code>defender_spread</code>, <code>distance_to_attacking_box</code>, <code>visible_defender_count</code>,
-  <code>defenders_between_ball_and_attacking_goal</code>. A plain logistic coefficient is a single slope
-  and structurally cannot represent a U-shape. <code>v1b_quadratic</code> is v1 plus one extra column per
-  feature &mdash; the square of that feature's already-standardized value &mdash; with everything else
-  held identical: same 32 base features, same preprocessing, same canonical split, still
-  <strong>unweighted</strong> (no <code>class_weight</code>, isolating shape from reweighting), same
-  <code>LogisticRegression(solver="lbfgs", max_iter=2000, random_state=42)</code>. 36 total input columns
-  (32 + 4 quadratic terms). Built by <code>scripts/train_v1b_quadratic.py</code>, which extends
-  <code>DesignMatrixBuilder</code>/<code>fit_predict_fold</code> in <code>train_active_binary_baseline.py</code>
-  (<code>add_quadratic=True</code>) rather than duplicating that logic.</p>
-
-<h3>10.1 CV and held-out test results</h3>
-<table>
-<tr><th></th><th>PR-AUC</th><th>ROC-AUC</th><th>Log loss</th><th>Brier</th><th>ECE</th></tr>
-<tr><td>v1 (CV, OOF)</td><td>0.3521</td><td>0.8177</td><td>0.2209</td><td>0.0614</td><td>0.0036</td></tr>
-<tr><td>v1b_quadratic (CV, OOF)</td><td>0.3542</td><td>0.8193</td><td>0.2203</td><td>0.0613</td><td>0.0027</td></tr>
-<tr><td>v1 (held-out test)</td><td>0.3725</td><td>0.8193</td><td>0.2047</td><td>0.0555</td><td>0.0107</td></tr>
-<tr><td>v1b_quadratic (held-out test)</td><td>0.3713</td><td>0.8204</td><td>0.2046</td><td>0.0556</td><td>0.0101</td></tr>
-</table>
-<p>Calibration stayed good on both readouts (ECE actually improved slightly, CV
-  0.0036&rarr;0.0027 and test 0.0107&rarr;0.0101) &mdash; as expected, since the training objective (plain
-  unweighted MLE) didn't change, only the input features did. No red flag here.</p>
-
-<h3>10.2 Is the CV lift real? (<code>significance_v1_vs_v1b_quadratic.json</code>)</h3>
-<p>Paired over the same 5 canonical CV folds: mean PR-AUC difference <strong>+0.0021</strong> (std 0.0011),
-  v1b_quadratic ahead of v1 in <strong>5 of 5 folds</strong>. Paired t-test: t=4.34, <strong>p=0.0122</strong>
-  &mdash; significant at the conventional 0.05 threshold. Wilcoxon: p=0.0625, the same n=5 exact-test floor
-  seen in section 9.1 (every fold the same sign, no smaller rank-sum configuration possible with 5 pairs).</p>
-<p>So, statistically: the CV lift is real and directionally consistent (5/5 folds), and the t-test calls it
-  significant. But the <em>effect size</em> is small &mdash; an order of magnitude smaller than v1's own
-  edge over v2/v3 (+0.0021 here vs +0.0142 / +0.0182 in section 9.1) &mdash; and it does <strong>not</strong>
-  show up on the single held-out-test readout at all: v1b_quadratic's test PR-AUC (0.3713) is marginally
-  <em>below</em> v1's (0.3725), a -0.0012 difference. That's within normal single-readout noise (not a
-  repeated/paired comparison on the test set, which was deliberately touched only once per variant), but it
-  means the CV-measured lift does not clearly generalise to an improvement on held-out data.</p>
-<p><strong>Honest read: this is the small/negative-information case, not the new-best-baseline case.</strong>
-  Curvature on these 4 specific U-shaped features buys a real but tiny, borderline-material CV improvement
-  and no held-out improvement. It does not close a meaningful fraction of whatever gap remains to a strong
-  classifier. That is itself useful: it says the next rung of the ladder should look at systematic
-  interaction discovery or a different model family (e.g. gradient boosting, which captures arbitrary
-  feature shape and interactions natively) rather than more feature engineering on these specific 4
-  features.</p>
-<p><strong>What the model actually learned about the 4 features</strong> (<code>v1b_quadratic.json</code>
-  coefficients): the quadratic term for <code>distance_to_attacking_box</code> is by far the largest of the
-  four (<code>quad__distance_to_attacking_box</code> = <strong>+0.278</strong>, vs its linear term at
-  -0.015) &mdash; confirming section 6's flagged mismatch (the <em>linear</em> v2 coefficient for this
-  feature had the wrong sign relative to its weak overall Spearman direction) was indeed a shape problem: a
-  positive quadratic term means the model now represents elevated risk at both distance extremes,
-  consistent with a U-shape opening upward. <code>defender_spread</code>'s quadratic term is small and
-  positive (+0.047, same direction as its documented U-shape). <code>visible_defender_count</code>
-  (-0.032) and <code>defenders_between_ball_and_attacking_goal</code> (-0.062) both got small
-  <em>negative</em> quadratic terms, which is the opposite curvature direction from their documented (weak)
-  U-shapes &mdash; consistent with those two having the weakest univariate signal of the four to begin with
-  (<code>active_numerical_target_atlas.json</code>: near-zero rho for both), so the quadratic term is
-  likely fitting noise rather than a real curvature correction for those two specifically.</p>
-
-<h3>10.3 Player-disjoint re-check (<code>player_disjoint_v1b_quadratic.json</code>)</h3>
-<p>A richer feature space is more leakage-prone in principle, so this was re-run for
-  <code>v1b_quadratic</code> specifically rather than assumed to still hold because v1 cleared it. Same
-  protocol as section 9.3: 5-fold <code>GroupKFold</code> on <code>player_id</code>, train+val rows only,
-  held-out test set untouched. <code>player_overlap_train_test == 0</code> confirmed and asserted for
-  every fold.</p>
-<table>
-<tr><th></th><th>PR-AUC</th><th>ROC-AUC</th><th>ECE</th></tr>
-<tr><td>v1 player-disjoint CV</td><td>0.3586 &plusmn; 0.0241</td><td>0.8202 &plusmn; 0.0072</td><td>0.0054 &plusmn; 0.0012</td></tr>
-<tr><td>v1b_quadratic player-disjoint CV</td><td>0.3606 &plusmn; 0.0254</td><td>0.8216 &plusmn; 0.0084</td><td>0.0057 &plusmn; 0.0020</td></tr>
-</table>
-<p>No meaningful divergence from v1's own player-disjoint numbers &mdash; the 4 quadratic terms did not
-  introduce a detectable leakage signal.</p>
-
-<h3>10.4 Bottom line</h3>
-<p><code>v1b_quadratic</code> is <strong>not</strong> promoted to "the" baseline by this prompt (per
-  constraints, that decision waits for the rest of the ladder). Result: curvature on the 4 known U-shaped
-  features gives a statistically real but practically tiny CV lift (+0.0021 PR-AUC, p=0.0122) that does not
-  clearly survive to the held-out test set (-0.0012, within single-readout noise but not a positive number).
-  Calibration and player-disjoint robustness both hold up. Read together, this is negative information in
-  the useful sense: these 4 features' curvature is not where v1's remaining headroom lives, so rung 2
-  should test systematic interaction discovery or a genuinely non-linear model family rather than more
-  polynomial terms on these specific features.</p>
 
 </div>
 </div>

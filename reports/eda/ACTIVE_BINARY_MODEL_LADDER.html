@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- Active-Binary Model Ladder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 900px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+
+.verdict-chip {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verdict-chip.confirms { background: var(--good-wash); color: var(--good); }
+.verdict-chip.mismatch { background: rgba(227,73,72,0.14); color: var(--pos); }
+.verdict-chip.flag { background: var(--amber-wash); color: var(--amber); }
+.variant-block { margin: 28px 0 44px; }
+.variant-title { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 16px; margin: 0 0 10px; }
+.chart-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 900px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+.chart-card img { width: 100%; height: auto; border-radius: 6px; display: block; background: var(--plane); cursor: zoom-in; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.chart-card img:hover { transform: scale(1.015); box-shadow: 0 4px 16px rgba(16,21,28,0.14); }
+.chart-card .cc-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 6px 2px 0; text-align: center; }
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p { margin: 0 0 10px; }
+.deviation-box p:last-child { margin-bottom: 0; }
+.gate-list { list-style: none; padding-left: 0; margin: 0 0 16px; }
+.gate-list li { margin-bottom: 10px; padding-left: 26px; position: relative; }
+.gate-list li::before { content: "\2192"; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+
+/* Chart lightbox: click any chart-card image to view it at full size. */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(9,12,16,0.78);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 5vh 5vw;
+  z-index: 1000;
+  cursor: zoom-out;
+}
+.lightbox.open { display: flex; }
+.lightbox figure { margin: 0; max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.lightbox img { max-width: 92vw; max-height: 82vh; width: auto; height: auto; border-radius: 10px; background: var(--surface); box-shadow: 0 20px 60px rgba(0,0,0,0.45); cursor: default; }
+.lightbox figcaption { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #e8eaee; text-align: center; }
+.lightbox-close {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.lightbox-close:hover { background: rgba(255,255,255,0.18); }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; Active leg &middot; Model ladder</p>
+    <h1 class="title">Active-Binary Model Ladder</h1>
+    <p class="dek">Everything built on top of the locked Rung 0 baseline
+      (<a href="ACTIVE_BINARY_BASELINE_SUMMARY.html" target="viewer">ACTIVE_BINARY_BASELINE_SUMMARY.html</a>),
+      one controlled rung at a time. Split into its own report (Prompt 42) so the baseline document stays
+      Rung-0-only as more rungs are tried.</p>
+    <div class="statbar">
+      <div class="stat"><b>v1_unweighted</b><span>rung 0 baseline (locked)</span></div>
+      <div class="stat"><b>Rung 1</b><span>rejected -- v1b_quadratic</span></div>
+      <div class="stat"><b>Rung 2</b><span>not yet run</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+<p>Scope: Rung 1 onward on the active-binary leg (<code>target_future_shot_10s</code>). Rung 0 (the 4
+  locked variants, their CV/held-out results, and the Prompt 38 post-lock validation) lives in
+  <a href="ACTIVE_BINARY_BASELINE_SUMMARY.html" target="viewer">ACTIVE_BINARY_BASELINE_SUMMARY.md</a> and
+  is not repeated here.</p>
+
+<h2>1. What a rung is</h2>
+<p>A <strong>rung</strong> is one controlled change to the locked Rung 0 baseline
+  (<code>v1_unweighted</code>): a single variable changed &mdash; feature shape, an interaction term, a
+  model family &mdash; with everything else held identical (same 32 locked features unless the rung
+  specifically changes that, same canonical <code>StratifiedGroupKFold</code> split, same target, no
+  ad-hoc tuning). A rung is tested against 3 fixed gates before it can be considered for adoption as the
+  new baseline:</p>
+<ul class="gate-list">
+<li><strong>Paired significance test vs the current best</strong> &mdash; refit both variants on the same
+  5 canonical CV folds, paired t-test + Wilcoxon signed-rank test on the per-fold PR-AUC difference.</li>
+<li><strong>Held-out-test confirmation</strong> &mdash; a single, one-time readout on the frozen 23-match
+  test set. This is the gate that actually decides the rung's fate: CV picks a candidate, the held-out
+  test either confirms or rejects it, and that result is not re-litigated after the fact to fit a
+  preferred narrative.</li>
+<li><strong>Player-disjoint leakage recheck</strong> &mdash; a <code>GroupKFold(player_id)</code>
+  fit-and-score run on train+val rows only (the frozen held-out test set is never touched by this check).
+  A richer or differently-shaped feature space is more leakage-prone in principle, so this is re-run for
+  every rung, not assumed to still hold because an earlier rung cleared it.</li>
+</ul>
+<p>Rung 0 (the baseline itself) and its own validation live in
+  <a href="ACTIVE_BINARY_BASELINE_SUMMARY.html" target="viewer">ACTIVE_BINARY_BASELINE_SUMMARY.html</a>.
+  This ladder builds on that document's <code>v1_unweighted</code> pick (held-out PR-AUC 0.372, ROC-AUC
+  0.819, ECE 0.011) as the baseline every rung is compared against.</p>
+
+<h2>2. Rung 1 &mdash; quadratic terms for U-shaped features (<code>v1b_quadratic</code>)</h2>
+<p>EDA (<code>active_numerical_target_atlas.json</code>, cross-checked in the baseline summary's section 6) already confirmed 4 of
+  the 32 locked features have a U-shaped, non-monotonic relationship with the target:
+  <code>defender_spread</code>, <code>distance_to_attacking_box</code>, <code>visible_defender_count</code>,
+  <code>defenders_between_ball_and_attacking_goal</code>. A plain logistic coefficient is a single slope
+  and structurally cannot represent a U-shape. <code>v1b_quadratic</code> is v1 plus one extra column per
+  feature &mdash; the square of that feature's already-standardized value &mdash; with everything else
+  held identical: same 32 base features, same preprocessing, same canonical split, still
+  <strong>unweighted</strong> (no <code>class_weight</code>, isolating shape from reweighting), same
+  <code>LogisticRegression(solver="lbfgs", max_iter=2000, random_state=42)</code>. 36 total input columns
+  (32 + 4 quadratic terms). Built by <code>scripts/train_v1b_quadratic.py</code>, which extends
+  <code>DesignMatrixBuilder</code>/<code>fit_predict_fold</code> in <code>train_active_binary_baseline.py</code>
+  (<code>add_quadratic=True</code>) rather than duplicating that logic.</p>
+
+<h3>2.1 CV and held-out test results</h3>
+<table>
+<tr><th></th><th>PR-AUC</th><th>ROC-AUC</th><th>Log loss</th><th>Brier</th><th>ECE</th></tr>
+<tr><td>v1 (CV, OOF)</td><td>0.3521</td><td>0.8177</td><td>0.2209</td><td>0.0614</td><td>0.0036</td></tr>
+<tr><td>v1b_quadratic (CV, OOF)</td><td>0.3542</td><td>0.8193</td><td>0.2203</td><td>0.0613</td><td>0.0027</td></tr>
+<tr><td>v1 (held-out test)</td><td>0.3725</td><td>0.8193</td><td>0.2047</td><td>0.0555</td><td>0.0107</td></tr>
+<tr><td>v1b_quadratic (held-out test)</td><td>0.3713</td><td>0.8204</td><td>0.2046</td><td>0.0556</td><td>0.0101</td></tr>
+</table>
+<p>Calibration stayed good on both readouts (ECE actually improved slightly, CV
+  0.0036&rarr;0.0027 and test 0.0107&rarr;0.0101) &mdash; as expected, since the training objective (plain
+  unweighted MLE) didn't change, only the input features did. No red flag here.</p>
+
+<h3>2.2 Is the CV lift real? (<code>significance_v1_vs_v1b_quadratic.json</code>)</h3>
+<p>Paired over the same 5 canonical CV folds: mean PR-AUC difference <strong>+0.0021</strong> (std 0.0011),
+  v1b_quadratic ahead of v1 in <strong>5 of 5 folds</strong>. Paired t-test: t=4.34, <strong>p=0.0122</strong>
+  &mdash; significant at the conventional 0.05 threshold. Wilcoxon: p=0.0625, the same n=5 exact-test floor
+  seen in the baseline summary's section 8.1 (every fold the same sign, no smaller rank-sum configuration possible with 5 pairs).</p>
+<p>So, statistically: the CV lift is real and directionally consistent (5/5 folds), and the t-test calls it
+  significant. But the <em>effect size</em> is small &mdash; an order of magnitude smaller than v1's own
+  edge over v2/v3 (+0.0021 here vs +0.0142 / +0.0182 in the baseline summary's section 8.1) &mdash; and it does <strong>not</strong>
+  show up on the single held-out-test readout at all: v1b_quadratic's test PR-AUC (0.3713) is marginally
+  <em>below</em> v1's (0.3725), a -0.0012 difference. That's within normal single-readout noise (not a
+  repeated/paired comparison on the test set, which was deliberately touched only once per variant), but it
+  means the CV-measured lift does not clearly generalise to an improvement on held-out data.</p>
+<p><strong>Honest read: this is the small/negative-information case, not the new-best-baseline case.</strong>
+  Curvature on these 4 specific U-shaped features buys a real but tiny, borderline-material CV improvement
+  and no held-out improvement. It does not close a meaningful fraction of whatever gap remains to a strong
+  classifier. That is itself useful: it says the next rung of the ladder should look at systematic
+  interaction discovery or a different model family (e.g. gradient boosting, which captures arbitrary
+  feature shape and interactions natively) rather than more feature engineering on these specific 4
+  features.</p>
+<p><strong>What the model actually learned about the 4 features</strong> (<code>v1b_quadratic.json</code>
+  coefficients): the quadratic term for <code>distance_to_attacking_box</code> is by far the largest of the
+  four (<code>quad__distance_to_attacking_box</code> = <strong>+0.278</strong>, vs its linear term at
+  -0.015) &mdash; confirming the baseline summary's section 6's flagged mismatch (the <em>linear</em> v2 coefficient for this
+  feature had the wrong sign relative to its weak overall Spearman direction) was indeed a shape problem: a
+  positive quadratic term means the model now represents elevated risk at both distance extremes,
+  consistent with a U-shape opening upward. <code>defender_spread</code>'s quadratic term is small and
+  positive (+0.047, same direction as its documented U-shape). <code>visible_defender_count</code>
+  (-0.032) and <code>defenders_between_ball_and_attacking_goal</code> (-0.062) both got small
+  <em>negative</em> quadratic terms, which is the opposite curvature direction from their documented (weak)
+  U-shapes &mdash; consistent with those two having the weakest univariate signal of the four to begin with
+  (<code>active_numerical_target_atlas.json</code>: near-zero rho for both), so the quadratic term is
+  likely fitting noise rather than a real curvature correction for those two specifically.</p>
+
+<h3>2.3 Player-disjoint re-check (<code>player_disjoint_v1b_quadratic.json</code>)</h3>
+<p>A richer feature space is more leakage-prone in principle, so this was re-run for
+  <code>v1b_quadratic</code> specifically rather than assumed to still hold because v1 cleared it. Same
+  protocol as the baseline summary's section 8.3: 5-fold <code>GroupKFold</code> on <code>player_id</code>, train+val rows only,
+  held-out test set untouched. <code>player_overlap_train_test == 0</code> confirmed and asserted for
+  every fold.</p>
+<table>
+<tr><th></th><th>PR-AUC</th><th>ROC-AUC</th><th>ECE</th></tr>
+<tr><td>v1 player-disjoint CV</td><td>0.3586 &plusmn; 0.0241</td><td>0.8202 &plusmn; 0.0072</td><td>0.0054 &plusmn; 0.0012</td></tr>
+<tr><td>v1b_quadratic player-disjoint CV</td><td>0.3606 &plusmn; 0.0254</td><td>0.8216 &plusmn; 0.0084</td><td>0.0057 &plusmn; 0.0020</td></tr>
+</table>
+<p>No meaningful divergence from v1's own player-disjoint numbers &mdash; the 4 quadratic terms did not
+  introduce a detectable leakage signal.</p>
+
+<h3>2.4 Bottom line</h3>
+<p><code>v1b_quadratic</code> is <strong>not</strong> promoted to "the" baseline by this prompt (per
+  constraints, that decision waits for the rest of the ladder). Result: curvature on the 4 known U-shaped
+  features gives a statistically real but practically tiny CV lift (+0.0021 PR-AUC, p=0.0122) that does not
+  clearly survive to the held-out test set (-0.0012, within single-readout noise but not a positive number).
+  Calibration and player-disjoint robustness both hold up. Read together, this is negative information in
+  the useful sense: these 4 features' curvature is not where v1's remaining headroom lives, so rung 2
+  should test systematic interaction discovery or a genuinely non-linear model family rather than more
+  polynomial terms on these specific features.</p>
+
+<div class="variant-block">
+  <p class="variant-title">v1b_quadratic <span style="font-weight:400;color:var(--text-muted);font-size:12px;">(rung 1)</span></p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1b_quadratic/calibration_curve.png" alt="v1b_quadratic calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1b_quadratic/precision_recall_curve.png" alt="v1b_quadratic precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1b_quadratic/roc_curve.png" alt="v1b_quadratic ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1b_quadratic/prediction_distribution.png" alt="v1b_quadratic prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+
+<h2>3. Rung 2 &mdash; systematic interactions (L1)</h2>
+<p><em>Not yet run.</em></p>
+
+</div>
+</div>
+<footer>
+  <p>Markdown source: <code>reports/eda/ACTIVE_BINARY_MODEL_LADDER.md</code>. Rung 0 baseline:
+    <code>reports/eda/ACTIVE_BINARY_BASELINE_SUMMARY.md</code>.</p>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+  <figure>
+    <img id="lightboxImg" src="" alt="">
+    <figcaption id="lightboxCaption"></figcaption>
+  </figure>
+</div>
+<script>
+(function () {
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightboxImg');
+  var lightboxCaption = document.getElementById('lightboxCaption');
+
+  function openLightbox(img) {
+    lightboxImg.src = img.currentSrc || img.src;
+    lightboxImg.alt = img.alt;
+    var variant = img.closest('.variant-block');
+    var title = variant ? variant.querySelector('.variant-title').textContent : '';
+    lightboxCaption.textContent = title ? (title + ' \u2014 ' + img.alt) : img.alt;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    lightboxImg.src = '';
+  }
+
+  document.querySelectorAll('.chart-card img').forEach(function (img) {
+    img.addEventListener('click', function () { openLightbox(img); });
+  });
+
+  lightbox.addEventListener('click', function (e) {
+    if (e.target === lightbox) closeLightbox();
+  });
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+})();
+</script>
+</body>
+</html>
