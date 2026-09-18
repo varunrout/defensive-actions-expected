@@ -1,5 +1,9 @@
 # Active-Binary Model Ladder
 
+> **Status update (Prompt 43):** Rung 2 (`v1c_systematic_interactions`) has been promoted to
+> standing reference model for the active-binary leg, replacing `v1_unweighted`. See the full
+> promotion decision in `reports/eda/ACTIVE_BINARY_MODELLING_CLOSEOUT.md` section 7.
+
 *Split out of `ACTIVE_BINARY_BASELINE_SUMMARY.md` (Prompt 42) so the locked Rung 0 baseline
 document doesn't keep growing as more rungs are tried. Rung 0 -- the 4 locked variants
 (`v0_dummy`, `v1_unweighted`, `v2_weighted`, `v3_weighted_interactions`), their CV/held-out
@@ -291,10 +295,16 @@ curve, ROC curve, prediction distribution).
 **Unlike rung 1, this rung's gain survives held-out test.** v1c beats v1 on PR-AUC in CV (+0.0109),
 on held-out test (+0.0022, same direction), in 5/5 paired CV folds against both v1 and
 v1b_quadratic (paired t p=0.0079 and p=0.0199), and in the player-disjoint recheck -- with
-calibration as good as or better than v1's throughout. Stated plainly, per the framing this ladder
-commits to: **this is a real, validated gain, and `v1c_systematic_interactions` is the new
-candidate baseline** for the active-binary leg, pending the same standing-baseline promotion
-discipline (not automatic from this prompt alone) that `v1_unweighted` itself went through.
+calibration as good as or better than v1's throughout. This rung's own 3-gate ladder check passed.
+
+**Update (Prompt 43): promotion confirmed.** The larger question this section originally left
+open -- not just "did this rung's isolated change work" but "should it replace the standing
+baseline everyone downstream builds on" -- was run through the same depth of scrutiny
+`v1_unweighted` itself went through (tournament-stratified check, error-slice comparison against
+v1's known weak spots, an interaction sanity check on the top surviving terms). All 4 promotion
+criteria held. **`v1c_systematic_interactions` is now the standing reference model** for the
+active-binary leg, replacing `v1_unweighted`. Full promotion evidence and verdict:
+`reports/eda/ACTIVE_BINARY_MODELLING_CLOSEOUT.md` section 7.
 
 What this does *not* settle: whether hand-tuned interaction search is now "done" for this target.
 116 surviving terms at C=0.1 is not a sparse, interpretable model -- it is evidence that

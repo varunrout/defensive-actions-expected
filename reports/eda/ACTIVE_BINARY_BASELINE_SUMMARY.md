@@ -1,5 +1,10 @@
 # Active-Binary Baseline Summary (v0-v3)
 
+> **Status update (Prompt 43):** `v1_unweighted` (this document's pick) has been superseded as
+> the active-binary leg's standing reference model by `v1c_systematic_interactions` — see the
+> promotion decision in `reports/eda/ACTIVE_BINARY_MODELLING_CLOSEOUT.md` section 7. This
+> document remains the accurate historical record of the Rung 0 comparison and is not rewritten.
+
 Target: `target_future_shot_10s`. Dataset: `data/features/player_defensive_actions.parquet`
 (56,068 rows / 115 matches -- confirmed real scale, not the 20-row/4-match
 fixture scale that the retired pre-lock `b0`-`b8` classification outputs used).

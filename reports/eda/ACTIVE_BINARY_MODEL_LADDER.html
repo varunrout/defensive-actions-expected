@@ -271,12 +271,19 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
     <div class="statbar">
       <div class="stat"><b>v1_unweighted</b><span>rung 0 baseline (locked)</span></div>
       <div class="stat"><b>Rung 1</b><span>rejected -- v1b_quadratic</span></div>
-      <div class="stat"><b>Rung 2</b><span>validated -- v1c_systematic_interactions</span></div>
+      <div class="stat"><b>Rung 2</b><span>promoted -- v1c_systematic_interactions</span></div>
     </div>
   </div>
 </div>
 <div class="wrap">
 <div class="article">
+<div class="deviation-box">
+<p><strong>Status update (Prompt 43):</strong> Rung 2 (<code>v1c_systematic_interactions</code>)
+  has been promoted to standing reference model for the active-binary leg, replacing
+  <code>v1_unweighted</code>. See the full promotion decision in
+  <a href="ACTIVE_BINARY_MODELLING_CLOSEOUT.html" target="viewer">ACTIVE_BINARY_MODELLING_CLOSEOUT.html</a>
+  section 7.</p>
+</div>
 <p>Scope: Rung 1 onward on the active-binary leg (<code>target_future_shot_10s</code>). Rung 0 (the 4
   locked variants, their CV/held-out results, and the Prompt 38 post-lock validation) lives in
   <a href="ACTIVE_BINARY_BASELINE_SUMMARY.html" target="viewer">ACTIVE_BINARY_BASELINE_SUMMARY.md</a> and
@@ -548,11 +555,18 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <p><strong>Unlike rung 1, this rung's gain survives held-out test.</strong> v1c beats v1 on PR-AUC
   in CV (+0.0109), on held-out test (+0.0022, same direction), in 5/5 paired CV folds against both
   v1 and v1b_quadratic (paired t p=0.0079 and p=0.0199), and in the player-disjoint recheck &mdash;
-  with calibration as good as or better than v1's throughout. Stated plainly, per the framing this
-  ladder commits to: <strong>this is a real, validated gain, and
-  <code>v1c_systematic_interactions</code> is the new candidate baseline</strong> for the
-  active-binary leg, pending the same standing-baseline promotion discipline (not automatic from
-  this prompt alone) that <code>v1_unweighted</code> itself went through.</p>
+  with calibration as good as or better than v1's throughout. This rung's own 3-gate ladder check
+  passed.</p>
+<p><strong>Update (Prompt 43): promotion confirmed.</strong> The larger question this section
+  originally left open &mdash; not just "did this rung's isolated change work" but "should it
+  replace the standing baseline everyone downstream builds on" &mdash; was run through the same
+  depth of scrutiny <code>v1_unweighted</code> itself went through (tournament-stratified check,
+  error-slice comparison against v1's known weak spots, an interaction sanity check on the top
+  surviving terms). All 4 promotion criteria held. <strong><code>v1c_systematic_interactions</code>
+  is now the standing reference model</strong> for the active-binary leg, replacing
+  <code>v1_unweighted</code>. Full promotion evidence and verdict:
+  <a href="ACTIVE_BINARY_MODELLING_CLOSEOUT.html" target="viewer">ACTIVE_BINARY_MODELLING_CLOSEOUT.html</a>
+  section 7.</p>
 <p>What this does <em>not</em> settle: whether hand-tuned interaction search is now "done" for
   this target. 116 surviving terms at C=0.1 is not a sparse, interpretable model &mdash; it is
   evidence that <em>something</em> in the interaction space matters (confirmed by the held-out

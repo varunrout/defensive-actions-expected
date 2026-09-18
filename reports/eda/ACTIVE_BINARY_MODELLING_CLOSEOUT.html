@@ -229,17 +229,19 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   <div class="masthead-inner">
     <p class="eyebrow">DAX &middot; Modelling &middot; Active leg &middot; Closeout</p>
     <h1 class="title">Active-Binary Baseline Modelling Closeout</h1>
-    <p class="dek">Prompts 36&ndash;39: retiring the stale pre-lock baselines, locking
-      <code>v1_unweighted</code> as the standing baseline, validating that pick, and testing
-      (and rejecting) the first rung of a planned model ladder. This is a decision record --
-      full tables and charts live in
-      <a href="ACTIVE_BINARY_BASELINE_SUMMARY.html" target="viewer">ACTIVE_BINARY_BASELINE_SUMMARY.html</a>
+    <p class="dek">Prompts 36&ndash;43: retiring the stale pre-lock baselines, locking
+      <code>v1_unweighted</code> as the original standing baseline, validating that pick, testing
+      (and rejecting) rung 1, testing and validating rung 2, and promoting
+      <code>v1c_systematic_interactions</code> as the new standing reference model. This is a
+      decision record -- full tables and charts live in
+      <a href="ACTIVE_BINARY_BASELINE_SUMMARY.html" target="viewer">ACTIVE_BINARY_BASELINE_SUMMARY.html</a>,
+      <a href="ACTIVE_BINARY_MODEL_LADDER.html" target="viewer">ACTIVE_BINARY_MODEL_LADDER.html</a>,
       and <code>outputs/models/validation/*.json</code>.</p>
     <div class="statbar">
-      <div class="stat"><b>v1_unweighted</b><span>standing baseline</span></div>
-      <div class="stat"><b>0.372</b><span>held-out PR-AUC</span></div>
-      <div class="stat"><b>0.819</b><span>held-out ROC-AUC</span></div>
-      <div class="stat"><b>0.011</b><span>held-out ECE</span></div>
+      <div class="stat"><b>v1c_systematic_interactions</b><span>promoted reference model</span></div>
+      <div class="stat"><b>0.375</b><span>held-out PR-AUC</span></div>
+      <div class="stat"><b>0.832</b><span>held-out ROC-AUC</span></div>
+      <div class="stat"><b>0.010</b><span>held-out ECE</span></div>
     </div>
   </div>
 </div>
@@ -251,8 +253,16 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   This is a decision record, not a re-listing of every number already in
   <code>ACTIVE_BINARY_BASELINE_SUMMARY.md</code> -- that document and the Prompt 38 validation JSONs under
   <code>outputs/models/validation/</code> are the source of truth for full tables; this one states what was
-  decided and why, and links out rather than duplicating. Written 2026-09-18, reading only
-  already-committed outputs (no models re-run for this report).</p>
+  decided and why, and links out rather than duplicating. Sections 1&ndash;6 written 2026-09-18
+  (Prompts 36&ndash;39); section 7 added 2026-09-18 (Prompt 43), reading only already-committed
+  outputs (no models re-run for this report or that section).</p>
+<div class="decision-box">
+<p><strong>Status (Prompt 43, current):</strong> <code>v1c_systematic_interactions</code> was
+  promoted to standing reference model for the active-binary leg &mdash; see section 7. Sections
+  1&ndash;6 below describe how <code>v1_unweighted</code> earned the <em>original</em>
+  standing-baseline status and remain accurate as history; they are not rewritten to reflect the
+  later promotion.</p>
+</div>
 
 <h2>1. What was decided</h2>
 <div class="decision-box">
@@ -360,6 +370,139 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   <code>r4_full_with_360</code>, which run at real scale and feed the two-part xG hurdle-model
   sensitivity analysis and a production-fixture test. Fixing the cap is a separate, scoped task, not
   part of this leg's baseline work.</p>
+</div>
+
+<h2>7. Promotion decision: <code>v1c_systematic_interactions</code> (Prompt 43)</h2>
+<p>Rung 2 (<code>v1c_systematic_interactions</code>, Prompt 41) cleared its own 3-gate ladder
+  check: paired significance vs v1 and v1b_quadratic (p=0.0079, p=0.0199, 5/5 folds), a
+  held-out-test gain that actually survived (PR-AUC 0.3747 vs v1's 0.3725 &mdash; rung 1's
+  didn't), and a player-disjoint recheck with zero overlap (full detail:
+  <a href="ACTIVE_BINARY_MODEL_LADDER.html" target="viewer">ACTIVE_BINARY_MODEL_LADDER.html</a>
+  section 3). That gate answers "is this rung's isolated change real?" &mdash; a smaller question
+  than "should this replace the standing baseline everyone downstream builds on?", which needs
+  the same depth of scrutiny <code>v1_unweighted</code> itself went through in section 3 above,
+  not just the ladder gate. This section runs that scrutiny and states the verdict.</p>
+<p><strong>A population note, stated plainly:</strong> Prompt 38's original tournament/error-slice
+  numbers for v1 (section 3 above) were built by scoring the <em>held-out test set</em> with v1's
+  final fit &mdash; verified by row count (10,660 rows / 23 matches, matching the test set
+  exactly, not train+val's 45,408 / 92). Since v1c's held-out test set was already read once in
+  Prompt 41 and this prompt's constraints forbid reading it again, the checks below instead use
+  genuine 5-fold cross-validated out-of-fold (OOF) predictions on train+val for <strong>both</strong>
+  v1 and v1c &mdash; an identical, fair population for both models, though not a literal replay of
+  Prompt 38's held-out-test-based v1 numbers (which remain unchanged and available in
+  <code>tournament_stratified_v1.json</code> / <code>error_analysis_v1.json</code> for reference).
+  Full detail: <code>outputs/models/validation/tournament_stratified_v1c.json</code> and
+  <code>.../error_analysis_v1c.json</code>.</p>
+
+<h3>7.1 Tournament-stratified check</h3>
+<p>Confirmed again (not assumed): train+val still spans only FIFA World Cup 2022 and UEFA Euro
+  2024. v1c beats v1 on <strong>both</strong> tournaments, by almost identical absolute
+  margins:</p>
+<table>
+<tr><th>Tournament</th><th>v1 PR-AUC (CV OOF)</th><th>v1c PR-AUC (CV OOF)</th><th>&Delta;</th></tr>
+<tr><td>FIFA World Cup 2022</td><td>0.3276</td><td>0.3383</td><td>+0.0108</td></tr>
+<tr><td>UEFA Euro 2024</td><td>0.3765</td><td>0.3873</td><td>+0.0108</td></tr>
+</table>
+<p>Calibration slope moved <em>closer</em> to the ideal 1.0 for v1c on both tournaments
+  (0.956&rarr;1.001 WC2022, 0.984&rarr;1.002 Euro2024); ECE stayed small for both models on both
+  slices (v1: 0.0039/0.0059, v1c: 0.0061/0.0042 &mdash; a small, mixed shift, not a calibration
+  breakdown on either tournament). <strong>Verdict: passes.</strong> The gain is not concentrated
+  in one tournament's quirks.</p>
+
+<h3>7.2 Error-slice comparison against v1's known weak spots</h3>
+<p>Prompt 38 flagged <code>wide_defending_proxy</code> (PR-AUC 0.077) and
+  <code>settled_mid_block_proxy</code> (0.090) as the weakest <code>phase_label</code> slices, and
+  <code>transition_defence</code> as a real calibration concern (+0.0254 over-prediction,
+  held-out test). On the CV-OOF population used here (absolute numbers differ from those
+  held-out-test figures because the population differs, per the note above &mdash; the comparison
+  that matters is v1 vs v1c <em>within this same population</em>):</p>
+<table>
+<tr><th>Slice</th><th>v1 PR-AUC</th><th>v1c PR-AUC</th><th>Verdict</th></tr>
+<tr><td><code>wide_defending_proxy</code></td><td>0.046</td><td>0.052</td><td>(a) improves</td></tr>
+<tr><td><code>settled_mid_block_proxy</code></td><td>0.068</td><td>0.082</td><td>(a) improves</td></tr>
+<tr><td><code>transition_defence</code></td><td>0.277</td><td>0.311</td><td>(a) improves substantially</td></tr>
+<tr><td><code>high_press_proxy</code></td><td>0.455</td><td>0.449</td><td>(c) small regression (-0.006)</td></tr>
+<tr><td>remaining 3 <code>phase_label</code> slices</td><td>--</td><td>--</td><td>(a) all improve</td></tr>
+</table>
+<p>6 of 7 <code>phase_label</code> slices improve; the one regression
+  (<code>high_press_proxy</code>) is small and not a new serious weak spot (still the
+  strongest-performing phase for both models). Calibration gaps stay under 0.003 in absolute
+  value for both models across every <code>phase_label</code> slice on this population &mdash; no
+  calibration collapse anywhere.</p>
+<p><code>position</code> (23 slices, full table in the JSON): the large majority improve, a
+  handful show small regressions (largest: <code>Center Forward</code> -0.027,
+  <code>Left Midfield</code> -0.026) &mdash; none approaching the scale of
+  <code>transition_defence</code>'s improvement, and none flip a previously-fine slice into a bad
+  one. Two low-row-count slices (<code>Goalkeeper</code>, n=701; <code>Right Attacking
+  Midfield</code>, n=547) show a calibration gap increase from ~0.002 to ~0.016-0.018 for v1c
+  &mdash; small in absolute terms, on the two thinnest slices in the table, flagged honestly as a
+  minor caveat rather than treated as disqualifying. <strong>Verdict: passes</strong>, with that
+  one noted, non-disqualifying caveat.</p>
+
+<h3>7.3 Interaction sanity check (top 10 surviving terms)</h3>
+<p>Going one level deeper than <code>ACTIVE_BINARY_MODEL_LADDER.md</code> section 3.5's first
+  pass, on the top 10 surviving terms by <code>|coefficient|</code> only:</p>
+<ol>
+<li><code>distance_to_attacking_box</code>&sup2; (+0.322) &mdash; U-shaped box-distance effect
+  (elevated risk very close to goal and in deep transitions). Matches the EDA-documented shape.
+  <strong>Sensible.</strong></li>
+<li><code>distance_to_attacking_box</code> &times; <code>defender_attacker_gap_x</code> (-0.211)
+  &mdash; zone-dependent defensive-gap effect; plausible but the exact sign of
+  <code>defender_attacker_gap_x</code>'s convention makes a fully confident read hard from the
+  coefficient alone. <strong>Plausible, not fully verifiable.</strong></li>
+<li><code>defender_attacker_gap_x</code>&sup2; (-0.207) &mdash; same caveat as #2.
+  <strong>Plausible, not fully verifiable.</strong></li>
+<li><code>nearest_attacker_distance</code>&sup2; (+0.142) &mdash; elevated risk both very close
+  to (compact danger) and very far from (open space, transitions) the nearest attacker.
+  <strong>Sensible.</strong></li>
+<li><code>attacking_goal_centrality</code> &times; <code>visible_defender_count</code> (+0.131)
+  &mdash; central position with many defenders visible; most plausibly a phase proxy (congested
+  central/box-defence moments are themselves dangerous) rather than "more defenders cause more
+  danger" literally. <strong>Sensible as a situational proxy, not a literal causal
+  reading.</strong></li>
+<li><code>distance_to_attacking_box</code> &times;
+  <code>defenders_between_ball_and_attacking_goal</code> (-0.124) &mdash; far from goal +
+  well-defended reduces risk, close + poorly-defended raises it. <strong>Sensible.</strong></li>
+<li><code>nearest_attacker_distance</code> &times; <code>attacker_defender_ratio</code> (+0.123)
+  &mdash; space plus a numerical attacking overload raises risk. <strong>Sensible.</strong></li>
+<li><code>nearest_attacker_distance</code> &times; <code>attacker_spread</code> (+0.123) &mdash;
+  space plus a stretched defence raises risk. <strong>Sensible.</strong></li>
+<li><code>visible_defender_count</code> &times; <code>attackers_within_5m</code> (-0.120) &mdash;
+  defensive presence near the attack lowers risk. <strong>Sensible.</strong></li>
+<li><code>angle_to_attacking_goal</code>&sup2; (-0.117) &mdash; risk falls at extreme (wide)
+  shooting angles relative to central ones: the textbook shooting-angle effect.
+  <strong>Sensible.</strong></li>
+</ol>
+<p><strong>Verdict: passes.</strong> 8 of the top 10 are clearly football-sensible; the other 2
+  are plausible but not confidently verifiable from the coefficient sign alone (both involve the
+  same engineered feature, <code>defender_attacker_gap_x</code>, whose sign convention this check
+  doesn't have enough context to fully pin down) &mdash; neither looks like an implausible sign or
+  an out-of-scale magnitude (all 10 sit in a similar ~0.11-0.32 range). No evidence of the top
+  terms chasing noise.</p>
+
+<h3>7.4 Verdict: promoted</h3>
+<div class="decision-box">
+<p>All 4 criteria hold:</p>
+<ul class="checklist">
+<li>Beats v1 on <strong>both</strong> tournament slices, by nearly identical margins (+0.0108
+  each) &mdash; not reliant on one tournament.</li>
+<li>Error-slice comparison shows net improvement (6/7 <code>phase_label</code> slices, the large
+  majority of <code>position</code> slices) with only small regressions and no new serious weak
+  spot.</li>
+<li>Top 10 surviving interaction terms are mostly (8/10) clearly football-sensible, the
+  remaining 2 plausible-but-unverifiable rather than noise-shaped.</li>
+<li>Calibration stays as good as v1's on the tournament and slice breakdowns too (calibration
+  slope closer to 1.0 on both tournaments; ECE small and mixed rather than degraded; one minor,
+  low-n calibration caveat noted in 7.2, not disqualifying).</li>
+</ul>
+<p><strong><code>v1c_systematic_interactions</code> is promoted to standing reference model for
+  the active-binary leg.</strong> <code>v1_unweighted</code> remains documented as the Rung 0
+  baseline it was built from and measured against throughout this promotion process (sections 1-6
+  above are unchanged history, not rewritten). Downstream work on this leg should now build on
+  <code>v1c_systematic_interactions</code>
+  (<code>outputs/models/classification/v1c_systematic_interactions.joblib</code>, C=0.1,
+  238-column design matrix per <code>scripts/train_v1c_systematic_interactions.py</code>) rather
+  than <code>v1_unweighted</code>.</p>
 </div>
 
 </div>
