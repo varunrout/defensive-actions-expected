@@ -224,3 +224,133 @@ describe which defensive geometry and positioning features are statistically
 associated with a lower observed rate of a shot in the following 10 seconds -- they do
 not establish that any individual defender's positioning *prevents* or *causes* that
 outcome, and none of the analysis above attempts to isolate a causal effect.
+
+## 11. Post-lock validation (p1_unweighted)
+
+Run by `scripts/models/validate_passive_binary_baselines.py` (single command, no split
+recomputation, no hyperparameter changes, existing comparison/held-out-readout CSVs
+untouched). Full outputs under `outputs/models/validation/`. Mirrors the active leg's
+Prompt 38, adapted for two real structural differences: no `player_id` to run a
+player-disjoint recheck against (replaced by a cluster-aware bootstrap, item 11.3), and
+the within-event row correlation flagged in section 2 above, which item 11.3 quantifies
+rather than just restates.
+
+### 11.1 Is the p1 pick statistically justified?
+
+Paired over the same 5 canonical CV folds (`significance_p1_vs_p2_p3.json`), refitting
+all three variants fold-by-fold:
+
+| Comparison | Mean &Delta; PR-AUC | Std &Delta; | Paired t (p) | Wilcoxon (p) |
+|---|---|---|---|---|
+| p1 vs p2 | +0.0028 | 0.0014 | t=4.56, **p=0.0104** | W=0, p=0.0625 |
+| p1 vs p3 | +0.0028 | 0.0013 | t=4.74, **p=0.0090** | W=0, p=0.0625 |
+
+p1 beats both p2 and p3 in **5 of 5 folds** on PR-AUC. The paired t-test says the gap is
+statistically significant at the conventional 0.05 threshold for both comparisons.
+Wilcoxon lands at the same 0.0625 floor seen on the active leg -- the minimum p-value
+five same-signed paired samples can produce, not a failure to reach significance so
+much as the ceiling of what n=5 can show non-parametrically. Read at face value, this
+test says the gap is real -- **but it assumes row-level independence within each fold's
+PR-AUC estimate**, which section 11.3 directly checks rather than assumes.
+
+### 11.2 Does p1 hold up across tournaments?
+
+`tournament_stratified_p1.json`. Same check as `FEATURE_LOCK_CONFIRMATION.json`'s
+tournament-stability section and the active leg's Prompt 38 re-confirmed for this leg's
+own matches, not assumed to transfer: **only 2 tournaments are represented** in
+`passive_defense.parquet`, not 3. UEFA Euro 2020 (`data/raw/matches/55_43.json`, 51
+matches) contributes **zero** rows -- confirmed directly by checking its 51 match IDs
+against the dataset's `match_id` column (0 overlap), the same finding as the active leg.
+The dataset's 115 matches are FIFA World Cup 2022 (64) and UEFA Euro 2024 (51) only.
+
+| Tournament | Held-out rows/matches | PR-AUC | ROC-AUC | Log loss | Brier | ECE |
+|---|---|---|---|---|---|---|
+| FIFA World Cup 2022 | 189,333 / 14 | 0.1678 | 0.7497 | 0.1810 | 0.0459 | 0.0063 |
+| UEFA Euro 2024 | 126,474 / 9 | 0.1821 | 0.7479 | 0.2044 | 0.0534 | 0.0044 |
+
+Train+val composition: 50 WC2022 matches / 42 Euro2024 matches. p1 performs comparably
+on both held-out slices -- PR-AUC is actually slightly *higher* on the smaller Euro 2024
+slice (0.182 vs 0.168), ROC-AUC essentially identical (0.748 vs 0.750), and calibration
+stays tight on both (ECE 0.0044 / 0.0063). No sign of the model being
+tournament-specific. (Both slices clear the &ge;2-matches/&ge;2-positives bar; neither
+is flagged as too-thin.)
+
+### 11.3 How much does the row-correlation caveat actually matter?
+
+`cluster_bootstrap_p1_vs_p2.json`. The held-out test set has 315,807 rows across
+**40,147 distinct `event_id` groups** (mean 7.87 rows/event, median 8). 1,000 bootstrap
+iterations each, seed 42, naive row-level vs cluster-by-`event_id`:
+
+| Quantity | Naive row-level CI (width) | Cluster-by-event CI (width) | Width ratio (cluster/naive) |
+|---|---|---|---|
+| p1 PR-AUC | [0.1692, 0.1783] (0.00906) | [0.1618, 0.1869] (0.02512) | **2.77x** |
+| p1 &minus; p2 PR-AUC | [0.00343, 0.00481] (0.00137) | [0.00275, 0.00570] (0.00295) | **2.15x** |
+
+The cluster-aware CI is **meaningfully wider than the naive one** -- roughly 2.2-2.8x,
+not a marginal difference. This is the row-correlation caveat from section 2 made
+concrete: treating each row as independent (as item 11.1's paired fold test and every
+CV/held-out metric elsewhere in this document does) understates the true uncertainty by
+about a factor of 2-3 on this leg's data. **The direction of the finding survives
+anyway**: both the naive CI (0.00343 to 0.00481) and the cluster-aware CI (0.00275 to
+0.00570) for p1&minus;p2's PR-AUC advantage lie entirely above zero -- p1's edge over p2
+is not an artifact of ignoring row correlation, it holds up under the more honest,
+wider interval too. What the row-correlation caveat changes is **how confidently the
+exact magnitude of that gap, and the precision of item 11.1's p-values, should be
+read** -- item 11.1's paired t-test (p=0.0104) is likely overconfident in its stated
+precision by roughly this same 2-3x factor, even though its qualitative conclusion
+(p1 beats p2/p3) is not overturned by this more careful check.
+
+### 11.4 Where does p1 systematically miss?
+
+`error_analysis_p1.json`, held-out test set (315,807 rows / 23 matches), same p1 fit as
+11.2. **Because rows in different `phase_label`/`defender_functional_role` groups can
+still share the same `event_id`** (a defending-team slot classified into one group sees
+teammates classified into other groups at the same on-ball event), these per-group
+counts and metrics are not fully independent of each other either -- the same
+row-correlation property quantified in 11.3, restated here rather than assumed away.
+
+**By `phase_label`:** PR-AUC ranges from a low of 0.030 (`wide_defending_proxy`,
+n=44,923, positive rate 1.9%) up to 0.270 (`high_press_proxy`, n=35,819, positive rate
+13.7%) and 0.240 (`box_defence`, n=20,373, positive rate 13.9%). The same pattern as the
+active leg: **PR-AUC tracks positive rate closely** -- phases with the rarest positives
+are where the model is worst at ranking them, the expected behaviour of a PR-based
+metric on imbalanced slices. Calibration is good almost everywhere (gaps &le;0.009)
+except `transition_defence` (gap +0.017, over-predicting by roughly half its 3.5%
+positive rate in that slice) -- worth a closer look if this model is used for per-phase
+thresholds.
+
+**By `defender_functional_role`:** 5 of 6 categories are broadly consistent (PR-AUC
+0.137-0.190, calibration gaps &le;0.007, n=31,289 to 165,541). The 6th,
+**`unclassified` (n=259, 0.02% of the test set), is a clear outlier**: PR-AUC 0.013,
+ROC-AUC 0.398 (*below* 0.5, i.e. worse than random ranking on this tiny slice), and a
+large calibration gap (+0.043, over-predicting roughly 4x its 1.2% positive rate). This
+category is reserved by construction for defender-slots with fewer than 2 nearby
+teammates to classify against (`defender_functional_role` bucket-fix note in
+`FEATURE_LOCK_CONFIRMATION.json`) -- it is the rarest, most structurally unusual slice
+in the dataset, and 259 rows (with perhaps only 3 positives, given a 1.2% rate) is far
+too few for any metric computed on it to be read as a real finding about the model
+rather than noise. Flagged as low-n, not treated as a genuine defect.
+
+### 11.5 Chart integrity
+
+Automated pass, not a visual audit: all 16 expected PNGs (4 variants &times;
+{`calibration_curve`, `precision_recall_curve`, `roc_curve`, `prediction_distribution`})
+exist, are non-empty, and are pixel-dimension-consistent per chart type across all 4
+variants. No missing, near-zero, unreadable, or inconsistently-sized files.
+
+### 11.6 Bottom line
+
+`p1_unweighted`'s pick is well-supported, with one honest caveat quantified rather than
+just flagged: its CV edge over p2/p3 is statistically significant by a paired t-test,
+and it performs comparably across both tournaments actually present in the dataset. The
+one real complication this leg has that the active leg didn't -- correlated rows within
+the same `event_id` -- was checked directly rather than left as an unquantified
+disclaimer: a cluster-aware bootstrap shows the naive row-level uncertainty estimate is
+about 2-3x too narrow, so item 11.1's p-values should be read as directionally correct
+but overconfident in their precision. The qualitative conclusion (p1 beats p2/p3) is not
+overturned by this more careful accounting -- both the naive and cluster-aware
+confidence intervals for p1's advantage over p2 stay entirely positive. p1's main known
+weakness is PR-AUC degrading on low-positive-rate phase slices (`wide_defending_proxy`,
+`counterpress_after_loss`), the same expected consequence of class imbalance seen on the
+active leg, plus one very-low-n `defender_functional_role` category (`unclassified`,
+n=259) that should not be read as a real finding given its size.

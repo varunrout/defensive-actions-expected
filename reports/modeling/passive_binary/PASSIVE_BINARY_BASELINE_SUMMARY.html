@@ -513,10 +513,125 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   positioning <em>prevents</em> or <em>causes</em> that outcome, and none of the analysis above attempts
   to isolate a causal effect.</p>
 
+<h2>12. Post-lock validation (p1_unweighted)</h2>
+<p>Run by <code>scripts/models/validate_passive_binary_baselines.py</code> (single command, no split
+  recomputation, no hyperparameter changes, existing comparison/held-out-readout CSVs untouched). Full
+  outputs under <code>outputs/models/validation/</code>. Mirrors the active leg's Prompt 38, adapted for
+  two real structural differences: no <code>player_id</code> to run a player-disjoint recheck against
+  (replaced by a cluster-aware bootstrap, section 12.3), and the within-event row correlation flagged in
+  section 2 above, which section 12.3 quantifies rather than just restates.</p>
+
+<h3>12.1 Is the p1 pick statistically justified?</h3>
+<p>Paired over the same 5 canonical CV folds (<code>significance_p1_vs_p2_p3.json</code>), refitting all
+  three variants fold-by-fold:</p>
+<table>
+<tr><th>Comparison</th><th>Mean &Delta; PR-AUC</th><th>Std &Delta;</th><th>Paired t (p)</th><th>Wilcoxon (p)</th></tr>
+<tr><td>p1 vs p2</td><td>+0.0028</td><td>0.0014</td><td>t=4.56, <strong>p=0.0104</strong></td><td>W=0, p=0.0625</td></tr>
+<tr><td>p1 vs p3</td><td>+0.0028</td><td>0.0013</td><td>t=4.74, <strong>p=0.0090</strong></td><td>W=0, p=0.0625</td></tr>
+</table>
+<p>p1 beats both p2 and p3 in <strong>5 of 5 folds</strong> on PR-AUC. The paired t-test says the gap is
+  statistically significant at the conventional 0.05 threshold for both comparisons. Wilcoxon lands at
+  the same 0.0625 floor seen on the active leg &mdash; the minimum p-value five same-signed paired
+  samples can produce, not a failure to reach significance so much as the ceiling of what n=5 can show
+  non-parametrically. Read at face value, this test says the gap is real &mdash; <strong>but it assumes
+  row-level independence within each fold's PR-AUC estimate</strong>, which section 12.3 directly checks
+  rather than assumes.</p>
+
+<h3>12.2 Does p1 hold up across tournaments?</h3>
+<p><code>tournament_stratified_p1.json</code>. Same check as
+  <code>FEATURE_LOCK_CONFIRMATION.json</code>'s tournament-stability section and the active leg's Prompt
+  38 re-confirmed for this leg's own matches, not assumed to transfer: <strong>only 2 tournaments are
+  represented</strong> in <code>passive_defense.parquet</code>, not 3. UEFA Euro 2020
+  (<code>data/raw/matches/55_43.json</code>, 51 matches) contributes <strong>zero</strong> rows &mdash;
+  confirmed directly by checking its 51 match IDs against the dataset's <code>match_id</code> column (0
+  overlap), the same finding as the active leg. The dataset's 115 matches are FIFA World Cup 2022 (64)
+  and UEFA Euro 2024 (51) only.</p>
+<table>
+<tr><th>Tournament</th><th>Held-out rows/matches</th><th>PR-AUC</th><th>ROC-AUC</th><th>Log loss</th><th>Brier</th><th>ECE</th></tr>
+<tr><td>FIFA World Cup 2022</td><td>189,333 / 14</td><td>0.1678</td><td>0.7497</td><td>0.1810</td><td>0.0459</td><td>0.0063</td></tr>
+<tr><td>UEFA Euro 2024</td><td>126,474 / 9</td><td>0.1821</td><td>0.7479</td><td>0.2044</td><td>0.0534</td><td>0.0044</td></tr>
+</table>
+<p>Train+val composition: 50 WC2022 matches / 42 Euro2024 matches. p1 performs comparably on both
+  held-out slices &mdash; PR-AUC is actually slightly <em>higher</em> on the smaller Euro 2024 slice
+  (0.182 vs 0.168), ROC-AUC essentially identical (0.748 vs 0.750), and calibration stays tight on both
+  (ECE 0.0044 / 0.0063). No sign of the model being tournament-specific. (Both slices clear the
+  &ge;2-matches/&ge;2-positives bar; neither is flagged as too-thin.)</p>
+
+<h3>12.3 How much does the row-correlation caveat actually matter?</h3>
+<p><code>cluster_bootstrap_p1_vs_p2.json</code>. The held-out test set has 315,807 rows across
+  <strong>40,147 distinct <code>event_id</code> groups</strong> (mean 7.87 rows/event, median 8). 1,000
+  bootstrap iterations each, seed 42, naive row-level vs cluster-by-<code>event_id</code>:</p>
+<table>
+<tr><th>Quantity</th><th>Naive row-level CI (width)</th><th>Cluster-by-event CI (width)</th><th>Width ratio (cluster/naive)</th></tr>
+<tr><td>p1 PR-AUC</td><td>[0.1692, 0.1783] (0.00906)</td><td>[0.1618, 0.1869] (0.02512)</td><td><strong>2.77x</strong></td></tr>
+<tr><td>p1 &minus; p2 PR-AUC</td><td>[0.00343, 0.00481] (0.00137)</td><td>[0.00275, 0.00570] (0.00295)</td><td><strong>2.15x</strong></td></tr>
+</table>
+<p>The cluster-aware CI is <strong>meaningfully wider than the naive one</strong> &mdash; roughly
+  2.2&ndash;2.8x, not a marginal difference. This is the row-correlation caveat from section 2 made
+  concrete: treating each row as independent (as section 12.1's paired fold test and every CV/held-out
+  metric elsewhere in this document does) understates the true uncertainty by about a factor of 2&ndash;3
+  on this leg's data. <strong>The direction of the finding survives anyway</strong>: both the naive CI
+  (0.00343 to 0.00481) and the cluster-aware CI (0.00275 to 0.00570) for p1&minus;p2's PR-AUC advantage
+  lie entirely above zero &mdash; p1's edge over p2 is not an artifact of ignoring row correlation, it
+  holds up under the more honest, wider interval too. What the row-correlation caveat changes is
+  <strong>how confidently the exact magnitude of that gap, and the precision of section 12.1's p-values,
+  should be read</strong> &mdash; section 12.1's paired t-test (p=0.0104) is likely overconfident in its
+  stated precision by roughly this same 2&ndash;3x factor, even though its qualitative conclusion (p1
+  beats p2/p3) is not overturned by this more careful check.</p>
+
+<h3>12.4 Where does p1 systematically miss?</h3>
+<p><code>error_analysis_p1.json</code>, held-out test set (315,807 rows / 23 matches), same p1 fit as
+  12.2. <strong>Because rows in different <code>phase_label</code>/<code>defender_functional_role</code>
+  groups can still share the same <code>event_id</code></strong> (a defending-team slot classified into
+  one group sees teammates classified into other groups at the same on-ball event), these per-group
+  counts and metrics are not fully independent of each other either &mdash; the same row-correlation
+  property quantified in 12.3, restated here rather than assumed away.</p>
+<p><strong>By <code>phase_label</code>:</strong> PR-AUC ranges from a low of 0.030
+  (<code>wide_defending_proxy</code>, n=44,923, positive rate 1.9%) up to 0.270
+  (<code>high_press_proxy</code>, n=35,819, positive rate 13.7%) and 0.240 (<code>box_defence</code>,
+  n=20,373, positive rate 13.9%). The same pattern as the active leg: <strong>PR-AUC tracks positive rate
+  closely</strong> &mdash; phases with the rarest positives are where the model is worst at ranking them,
+  the expected behaviour of a PR-based metric on imbalanced slices. Calibration is good almost everywhere
+  (gaps &le;0.009) except <code>transition_defence</code> (gap +0.017, over-predicting by roughly half
+  its 3.5% positive rate in that slice) &mdash; worth a closer look if this model is used for per-phase
+  thresholds.</p>
+<p><strong>By <code>defender_functional_role</code>:</strong> 5 of 6 categories are broadly consistent
+  (PR-AUC 0.137&ndash;0.190, calibration gaps &le;0.007, n=31,289 to 165,541). The 6th,
+  <strong><code>unclassified</code> (n=259, 0.02% of the test set), is a clear outlier</strong>: PR-AUC
+  0.013, ROC-AUC 0.398 (<em>below</em> 0.5, i.e. worse than random ranking on this tiny slice), and a
+  large calibration gap (+0.043, over-predicting roughly 4x its 1.2% positive rate). This category is
+  reserved by construction for defender-slots with fewer than 2 nearby teammates to classify against
+  (<code>defender_functional_role</code> bucket-fix note in <code>FEATURE_LOCK_CONFIRMATION.json</code>)
+  &mdash; it is the rarest, most structurally unusual slice in the dataset, and 259 rows (with perhaps
+  only 3 positives, given a 1.2% rate) is far too few for any metric computed on it to be read as a real
+  finding about the model rather than noise. Flagged as low-n, not treated as a genuine defect.</p>
+
+<h3>12.5 Chart integrity</h3>
+<p>Automated pass, not a visual audit: all 16 expected PNGs (4 variants &times;
+  {<code>calibration_curve</code>, <code>precision_recall_curve</code>, <code>roc_curve</code>,
+  <code>prediction_distribution</code>}) exist, are non-empty, and are pixel-dimension-consistent per
+  chart type across all 4 variants. No missing, near-zero, unreadable, or inconsistently-sized files.</p>
+
+<h3>12.6 Bottom line</h3>
+<p><code>p1_unweighted</code>'s pick is well-supported, with one honest caveat quantified rather than
+  just flagged: its CV edge over p2/p3 is statistically significant by a paired t-test, and it performs
+  comparably across both tournaments actually present in the dataset. The one real complication this leg
+  has that the active leg didn't &mdash; correlated rows within the same <code>event_id</code> &mdash;
+  was checked directly rather than left as an unquantified disclaimer: a cluster-aware bootstrap shows
+  the naive row-level uncertainty estimate is about 2&ndash;3x too narrow, so section 12.1's p-values
+  should be read as directionally correct but overconfident in their precision. The qualitative
+  conclusion (p1 beats p2/p3) is not overturned by this more careful accounting &mdash; both the naive
+  and cluster-aware confidence intervals for p1's advantage over p2 stay entirely positive. p1's main
+  known weakness is PR-AUC degrading on low-positive-rate phase slices (<code>wide_defending_proxy</code>,
+  <code>counterpress_after_loss</code>), the same expected consequence of class imbalance seen on the
+  active leg, plus one very-low-n <code>defender_functional_role</code> category
+  (<code>unclassified</code>, n=259) that should not be read as a real finding given its size.</p>
+
 </div>
 </div>
 <footer>
-  <p>Generated by <code>scripts/models/train_passive_binary_baseline.py</code>. Markdown source:
+  <p>Generated by <code>scripts/models/train_passive_binary_baseline.py</code> and
+    <code>scripts/models/validate_passive_binary_baselines.py</code>. Markdown source:
     <code>reports/modeling/passive_binary/PASSIVE_BINARY_BASELINE_SUMMARY.md</code>.</p>
 </footer>
 
