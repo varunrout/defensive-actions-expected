@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 
-SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "train_two_part_xg.py"
+SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "models" / "train_two_part_xg.py"
 SPEC = importlib.util.spec_from_file_location("train_two_part_xg_script", SCRIPT_PATH)
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC is not None and SPEC.loader is not None

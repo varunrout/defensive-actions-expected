@@ -77,7 +77,7 @@ def test_build_features_cli_creates_output_with_corrected_targets(tmp_path: Path
     input_path = _write_fixture_targets(tmp_path)
     output_path = tmp_path / "player_defensive_actions.parquet"
 
-    result = _run_cli("scripts/build_features.py", "--input", str(input_path), "--output", str(output_path))
+    result = _run_cli("scripts/features/build_features.py", "--input", str(input_path), "--output", str(output_path))
 
     assert result.returncode == 0, result.stderr
     assert output_path.exists()
@@ -119,7 +119,7 @@ def test_train_validate_and_generate_reports_clis_succeed_on_fixture_data(tmp_pa
     input_path = _write_fixture_targets(tmp_path)
     feature_path = tmp_path / "player_defensive_actions.parquet"
 
-    build_result = _run_cli("scripts/build_features.py", "--input", str(input_path), "--output", str(feature_path))
+    build_result = _run_cli("scripts/features/build_features.py", "--input", str(input_path), "--output", str(feature_path))
     assert build_result.returncode == 0, build_result.stderr
 
     models_dir = tmp_path / "models"
@@ -127,7 +127,7 @@ def test_train_validate_and_generate_reports_clis_succeed_on_fixture_data(tmp_pa
     oof_dir = tmp_path / "oof"
 
     train_result = _run_cli(
-        "scripts/train_models.py",
+        "scripts/models/train_models.py",
         "--task",
         "all",
         "--input",
@@ -146,7 +146,7 @@ def test_train_validate_and_generate_reports_clis_succeed_on_fixture_data(tmp_pa
     assert (validation_dir / "regression" / "regression_model_metrics.json").exists()
 
     validate_result = _run_cli(
-        "scripts/validate_models.py",
+        "scripts/models/validate_models.py",
         "--task",
         "all",
         "--validation-dir",
@@ -160,7 +160,7 @@ def test_train_validate_and_generate_reports_clis_succeed_on_fixture_data(tmp_pa
 
     report_path = tmp_path / "reports" / "VALIDATION_SUMMARY.md"
     report_result = _run_cli(
-        "scripts/generate_reports.py",
+        "scripts/analysis/generate_reports.py",
         "--baseline-metrics",
         str(validation_dir / "baseline" / "baseline_model_metrics.json"),
         "--regression-metrics",

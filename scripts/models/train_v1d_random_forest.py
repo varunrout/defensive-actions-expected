@@ -35,7 +35,7 @@ n_estimators / max_depth / min_samples_leaf grid-searched on the same
 Held-out test is read exactly once, after the grid is fixed.
 
 Usage:
-    python scripts/train_v1d_random_forest.py
+    python scripts/models/train_v1d_random_forest.py
 """
 
 from __future__ import annotations
@@ -55,8 +55,8 @@ from sklearn.inspection import permutation_importance
 from sklearn.model_selection import GroupKFold
 from sklearn.preprocessing import OneHotEncoder
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
+REPO_ROOT = Path(__file__).resolve().parents[2]  # scripts/<subfolder>/ -> repo root (prompt 48 move: was parents[1] at scripts/ root)
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "models"))  # prompt 48: sibling ladder scripts now live in scripts/models/, not scripts/
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import train_active_binary_baseline as tb  # noqa: E402

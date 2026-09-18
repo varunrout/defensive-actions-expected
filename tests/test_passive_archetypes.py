@@ -186,7 +186,7 @@ def test_real_dataset_every_bucket_row_labeled_and_unclassified_rows_null():
         pytest.skip("Built passive_defense.parquet not present in this environment.")
     df = pd.read_parquet(parquet_path, columns=["defender_functional_role", CLUSTER_ID_COLUMN, CLUSTER_NAME_COLUMN])
     if CLUSTER_ID_COLUMN not in df.columns:
-        pytest.skip("passive_defense.parquet has not had archetype labels built yet (run scripts/build_passive_archetype_labels.py).")
+        pytest.skip("passive_defense.parquet has not had archetype labels built yet (run scripts/features/build_passive_archetype_labels.py).")
 
     in_bucket = df["defender_functional_role"].isin(BUCKETS)
     assert df.loc[in_bucket, CLUSTER_ID_COLUMN].notna().all()
@@ -205,7 +205,7 @@ def test_real_parquet_and_report_cluster_mapping_match_exactly():
         pytest.skip("Built passive_defense.parquet / PASSIVE_ARCHETYPES.json not present in this environment.")
     df = pd.read_parquet(parquet_path, columns=["defender_functional_role", CLUSTER_ID_COLUMN, CLUSTER_NAME_COLUMN])
     if CLUSTER_ID_COLUMN not in df.columns:
-        pytest.skip("passive_defense.parquet has not had archetype labels built yet (run scripts/build_passive_archetype_labels.py).")
+        pytest.skip("passive_defense.parquet has not had archetype labels built yet (run scripts/features/build_passive_archetype_labels.py).")
 
     report = json.loads(report_path.read_text(encoding="utf-8"))
     for bucket in BUCKETS:

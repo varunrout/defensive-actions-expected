@@ -35,7 +35,7 @@ its already-locked hyperparameters from prompt 45
 exactly what prompt 43 did to get v1's own OOF numbers.
 
 Usage:
-    python scripts/validate_v1e_promotion.py
+    python scripts/models/validate_v1e_promotion.py
 """
 
 from __future__ import annotations
@@ -48,8 +48,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
+REPO_ROOT = Path(__file__).resolve().parents[2]  # scripts/<subfolder>/ -> repo root (prompt 48 move: was parents[1] at scripts/ root)
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "models"))  # prompt 48: sibling ladder scripts now live in scripts/models/, not scripts/
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import train_active_binary_baseline as tb  # noqa: E402

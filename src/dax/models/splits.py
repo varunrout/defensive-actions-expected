@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.model_selection import GroupKFold, StratifiedGroupKFold
 
 # The canonical, frozen match-grouped split (prompt 13) -- computed once by
-# scripts/compute_canonical_split.py, never regenerated per training run.
+# scripts/pipeline/compute_canonical_split.py, never regenerated per training run.
 # Both the active and passive legs read match_id -> split label from this
 # single file, so a match held out as TEST (or assigned to a given fold) is
 # the same match for both legs -- required for comparing active-model vs
@@ -20,14 +20,14 @@ def load_canonical_split(path: str | Path = CANONICAL_SPLIT_PATH) -> dict[str, s
     """Load the frozen match_id -> "test" | "fold0".."fold4" assignment.
 
     Raises FileNotFoundError with a clear message if the canonical split
-    hasn't been computed yet (run scripts/compute_canonical_split.py) --
+    hasn't been computed yet (run scripts/pipeline/compute_canonical_split.py) --
     never silently falls back to a fresh random split, since that would
     defeat the point of freezing one.
     """
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(
-            f"Canonical match split not found at {path}. Run scripts/compute_canonical_split.py once to "
+            f"Canonical match split not found at {path}. Run scripts/pipeline/compute_canonical_split.py once to "
             "generate it -- this loader deliberately does not fall back to computing a fresh split, since "
             "that would silently break comparability between runs and between the active and passive legs."
         )

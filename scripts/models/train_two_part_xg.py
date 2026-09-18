@@ -476,7 +476,7 @@ def main() -> None:
         except ValueError as exc:
             if not args.rebuild_classification_oof or rebuilt:
                 rebuild_cmd = (
-                    f"python scripts/train_models.py --task classification --input {args.input} "
+                    f"python scripts/models/train_models.py --task classification --input {args.input} "
                     f"--config {args.config} --output-dir {args.output_dir}"
                 )
                 raise ValueError(

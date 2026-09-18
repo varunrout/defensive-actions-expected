@@ -39,7 +39,7 @@ def _merge_full_population_stats(df: pd.DataFrame, results: dict) -> list[dict]:
     if CLUSTER_ID_COLUMN not in df.columns:
         raise ValueError(
             f"{CLUSTER_ID_COLUMN!r} not found in the passive_defense dataset -- run "
-            "scripts/build_passive_archetype_labels.py to fit and persist the archetype pipelines "
+            "scripts/features/build_passive_archetype_labels.py to fit and persist the archetype pipelines "
             "and write full-population labels before regenerating this report."
         )
 

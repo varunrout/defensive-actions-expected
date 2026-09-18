@@ -28,7 +28,7 @@ held-out test. This rung isolates the interaction question properly:
     fixed, and is then read exactly once.
 
 Usage:
-    python scripts/train_v1c_systematic_interactions.py
+    python scripts/models/train_v1c_systematic_interactions.py
 """
 
 from __future__ import annotations
@@ -47,8 +47,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GroupKFold
 from sklearn.preprocessing import OneHotEncoder, PolynomialFeatures, StandardScaler
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
+REPO_ROOT = Path(__file__).resolve().parents[2]  # scripts/<subfolder>/ -> repo root (prompt 48 move: was parents[1] at scripts/ root)
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "models"))  # prompt 48: sibling ladder scripts now live in scripts/models/, not scripts/
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import train_active_binary_baseline as tb  # noqa: E402

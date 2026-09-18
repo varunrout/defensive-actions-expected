@@ -75,7 +75,7 @@ def build_passive_defense_dataset(
     # 58 columns as of the carrier_x/carrier_y drop (both always identical to
     # ball_x/ball_y in this table -- the on-ball event's location is the ball
     # location; see build_passive_defense_rows' row assembly). Plus the 3
-    # missingness flags added by scripts/add_missingness_flags.py afterwards.
+    # missingness flags added by scripts/features/add_missingness_flags.py afterwards.
     out = pd.DataFrame(rows)
     out = out.sort_values(["match_id", "period", "event_order_in_possession", "defender_slot_index"]).reset_index(drop=True)
     output = Path(output_path)

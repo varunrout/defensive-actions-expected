@@ -1,4 +1,11 @@
-"""Compatibility wrapper for logistic baseline training."""
+"""Compatibility wrapper for logistic baseline training.
+
+Archived (prompt 48): superseded by the active-binary model ladder
+(scripts/models/train_active_binary_baseline.py and the v1b-v1e rung
+scripts). Nothing else in the repo imports or invokes this file
+(confirmed before archiving). Kept, not deleted, per standing project
+policy.
+"""
 
 from __future__ import annotations
 

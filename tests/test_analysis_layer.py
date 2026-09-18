@@ -156,7 +156,7 @@ def test_processed_schema_requires_type_not_event_type(tmp_path: Path) -> None:
     subprocess.run(
         [
             sys.executable,
-            "scripts/analyze_processed_data.py",
+            "scripts/analysis/analyze_processed_data.py",
             "--input",
             str(input_path),
             "--output-dir",
@@ -283,9 +283,9 @@ def test_cli_chart_orchestration_creates_expected_files(tmp_path: Path) -> None:
         "  spatial_difficulty: [spatial_style, difficulty_exposure]\n",
         encoding="utf-8",
     )
-    subprocess.run([sys.executable, "scripts/analyze_features.py", "--input", str(actions_path), "--output-dir", str(tmp_path / "features"), "--config", str(config_path)], check=True)
-    subprocess.run([sys.executable, "scripts/build_player_summary.py", "--input", str(actions_path), "--output", str(summary_path), "--config", str(config_path), "--charts-dir", str(tmp_path / "players")], check=True)
-    subprocess.run([sys.executable, "scripts/run_player_clustering.py", "--input", str(summary_path), "--output-dir", str(tmp_path / "clustering"), "--matrix-output", str(matrix_path), "--config", str(config_path), "--actions-input", str(actions_path)], check=True)
+    subprocess.run([sys.executable, "scripts/analysis/analyze_features.py", "--input", str(actions_path), "--output-dir", str(tmp_path / "features"), "--config", str(config_path)], check=True)
+    subprocess.run([sys.executable, "scripts/features/build_player_summary.py", "--input", str(actions_path), "--output", str(summary_path), "--config", str(config_path), "--charts-dir", str(tmp_path / "players")], check=True)
+    subprocess.run([sys.executable, "scripts/models/run_player_clustering.py", "--input", str(summary_path), "--output-dir", str(tmp_path / "clustering"), "--matrix-output", str(matrix_path), "--config", str(config_path), "--actions-input", str(actions_path)], check=True)
 
     expected = [
         tmp_path / "features" / "event_type_distribution.csv",
@@ -363,8 +363,8 @@ def test_k2_k3_and_position_outputs_created_by_cli(tmp_path: Path) -> None:
     production_player_actions_fixture(players=12, actions_per_player=4).to_parquet(actions_path, index=False)
     config_path = tmp_path / "analysis.yaml"
     config_path.write_text(Path("configs/analysis.yaml").read_text(encoding="utf-8").replace("minimum_player_actions: 30", "minimum_player_actions: 2").replace("minimum_action_threshold_sensitivity: [20, 30, 40, 50]", "minimum_action_threshold_sensitivity: [2, 3]"), encoding="utf-8")
-    subprocess.run([sys.executable, "scripts/build_player_summary.py", "--input", str(actions_path), "--output", str(summary_path), "--config", str(config_path), "--charts-dir", str(tmp_path / "players")], check=True)
-    subprocess.run([sys.executable, "scripts/run_player_clustering.py", "--input", str(summary_path), "--output-dir", str(tmp_path / "clustering"), "--matrix-output", str(matrix_path), "--config", str(config_path), "--actions-input", str(actions_path)], check=True)
+    subprocess.run([sys.executable, "scripts/features/build_player_summary.py", "--input", str(actions_path), "--output", str(summary_path), "--config", str(config_path), "--charts-dir", str(tmp_path / "players")], check=True)
+    subprocess.run([sys.executable, "scripts/models/run_player_clustering.py", "--input", str(summary_path), "--output-dir", str(tmp_path / "clustering"), "--matrix-output", str(matrix_path), "--config", str(config_path), "--actions-input", str(actions_path)], check=True)
     assert (tmp_path / "clustering" / "k2_k3_comparison.csv").exists()
     assert (tmp_path / "clustering" / "k2_k3_interpretation.md").exists()
     assert (tmp_path / "clustering" / "by_position").exists()
@@ -428,7 +428,7 @@ def test_bar_chart_uses_cluster_colour_mapping(tmp_path: Path) -> None:
 
 
 def test_position_aware_clustering_eligibility_uses_action_threshold(tmp_path: Path) -> None:
-    from scripts.run_player_clustering import _run_position_aware_clustering
+    from scripts.models.run_player_clustering import _run_position_aware_clustering
 
     summary = build_player_summary(production_player_actions_fixture(players=12, actions_per_player=4), min_actions=1)
     summary["position_group"] = ["centre_back"] * 6 + ["midfielder"] * 4 + ["forward"] * 2

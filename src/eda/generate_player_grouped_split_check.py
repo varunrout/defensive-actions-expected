@@ -1,7 +1,7 @@
 """CLI entrypoint: EDA open item #1 -- player-grouped CV stress test for the
 active leg's identity-leakage risk on `position`.
 
-Context: the canonical, frozen split (scripts/compute_canonical_split.py) is
+Context: the canonical, frozen split (scripts/pipeline/compute_canonical_split.py) is
 grouped by match_id, not player_id. That is the right default for evaluating
 match-to-match generalisation, but it does NOT guarantee a given player is
 absent from a fold's held-out validation rows if they only appear in a

@@ -8,7 +8,7 @@ defeats the point of freezing a shared, comparable split across the active
 and passive legs.
 
 Usage:
-    python scripts/compute_canonical_split.py
+    python scripts/pipeline/compute_canonical_split.py
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import StratifiedGroupKFold, train_test_split
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]  # scripts/<subfolder>/ -> repo root (prompt 48 move: was parents[1] at scripts/ root)
 OUTPUT_PATH = REPO_ROOT / "outputs" / "models" / "splits" / "match_assignment.json"
 
 ACTIVE_PATH = REPO_ROOT / "data" / "features" / "player_defensive_actions.parquet"

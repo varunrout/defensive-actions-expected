@@ -22,10 +22,10 @@ Active entry points:
 
 ```bash
 python scripts/run_pipeline.py --help
-python scripts/build_features.py --help
-python scripts/train_models.py --help
-python scripts/validate_models.py --help
-python scripts/generate_reports.py --help
+python scripts/features/build_features.py --help
+python scripts/models/train_models.py --help
+python scripts/models/validate_models.py --help
+python scripts/analysis/generate_reports.py --help
 ```
 
 Local checks:
@@ -40,19 +40,21 @@ python -m ruff check src scripts tests
 Supported execution order:
 
 1. `python scripts/run_pipeline.py --stage prepare-data` builds processed event tables with event context, phase proxies and corrected targets.
-2. `python scripts/build_features.py --input data/processed/events_with_targets.parquet --output data/features/player_defensive_actions.parquet` builds the player defensive actions table.
-3. `python scripts/train_models.py --task all` trains the supported logistic and regression baselines.
-4. `python scripts/validate_models.py --task all` generates validation plots and summary tables for trained baselines.
-5. `python scripts/generate_reports.py --report validation-summary` builds the canonical validation summary report.
+2. `python scripts/features/build_features.py --input data/processed/events_with_targets.parquet --output data/features/player_defensive_actions.parquet` builds the player defensive actions table.
+3. `python scripts/models/train_models.py --task all` trains the supported logistic and regression baselines.
+4. `python scripts/models/validate_models.py --task all` generates validation plots and summary tables for trained baselines.
+5. `python scripts/analysis/generate_reports.py --report validation-summary` builds the canonical validation summary report.
 
 Compatibility wrappers remain active for migration-safe legacy commands at:
 
 - `scripts/pipeline/pipeline.py`
 - `scripts/features/build_player_defense_dataset.py`
-- `scripts/models/train_baseline_logistic.py`
-- `scripts/models/train_baseline_regression.py`
-- `scripts/models/evaluate_baseline_model.py`
-- `scripts/models/evaluate_baseline_regression.py`
+
+The equivalent legacy baseline wrappers (`train_baseline_logistic.py`, `train_baseline_regression.py`,
+`evaluate_baseline_model.py`, `evaluate_baseline_regression.py`) were archived in prompt 48 -- superseded
+by the active-binary model ladder (`scripts/models/train_active_binary_baseline.py` and the `v1b`-`v1e`
+rung scripts) and confirmed unreferenced elsewhere before archiving. They are retained, not deleted, at
+`scripts/archive/pre_active_binary_ladder/` for reference only and are no longer active execution paths.
 
 ## Methodology summary
 
@@ -85,12 +87,12 @@ Historical pre-fix documents and outputs are retained under `docs/archive/pre_me
 Reusable analysis logic lives in `src/dax/analysis/` and is executed with thin CLI scripts. Run it after preparing data and building features, and before any final predictive model training:
 
 ```bash
-python scripts/analyze_processed_data.py --input data/processed/events_with_targets.parquet --output-dir outputs/analysis/data_quality
-python scripts/analyze_features.py --input data/features/player_defensive_actions.parquet --output-dir outputs/analysis/features
-python scripts/build_player_summary.py --input data/features/player_defensive_actions.parquet --output data/features/player_defensive_summary.parquet
-python scripts/run_player_clustering.py --input data/features/player_defensive_summary.parquet --output-dir outputs/analysis/clustering --config configs/analysis.yaml
-python scripts/build_descriptive_signals.py --input data/features/player_defensive_summary.parquet --clusters outputs/analysis/clustering/player_clusters.parquet --output data/features/player_defensive_signals_descriptive.parquet
-python scripts/generate_analysis_report.py --analysis-dir outputs/analysis --output outputs/analysis/reports/pre_model_analysis_report.md
+python scripts/analysis/analyze_processed_data.py --input data/processed/events_with_targets.parquet --output-dir outputs/analysis/data_quality
+python scripts/analysis/analyze_features.py --input data/features/player_defensive_actions.parquet --output-dir outputs/analysis/features
+python scripts/features/build_player_summary.py --input data/features/player_defensive_actions.parquet --output data/features/player_defensive_summary.parquet
+python scripts/models/run_player_clustering.py --input data/features/player_defensive_summary.parquet --output-dir outputs/analysis/clustering --config configs/analysis.yaml
+python scripts/features/build_descriptive_signals.py --input data/features/player_defensive_summary.parquet --clusters outputs/analysis/clustering/player_clusters.parquet --output data/features/player_defensive_signals_descriptive.parquet
+python scripts/analysis/generate_analysis_report.py --analysis-dir outputs/analysis --output outputs/analysis/reports/pre_model_analysis_report.md
 ```
 
 These analyses are descriptive foundations only: no final classifier/regressor is trained, no causal defensive value is claimed, and provisional signals are not true DAx.

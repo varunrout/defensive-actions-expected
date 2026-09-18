@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 
 
-SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "build_provisional_player_signals.py"
+SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "features" / "build_provisional_player_signals.py"
 SPEC = importlib.util.spec_from_file_location("build_provisional_player_signals_script", SCRIPT_PATH)
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC is not None and SPEC.loader is not None

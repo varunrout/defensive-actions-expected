@@ -95,7 +95,7 @@ def build_player_dataset(
     # analysis pipeline (dax.models.schemas/specs/leakage, baseline_regression.py,
     # baseline_logistic.py, dax.analysis.*, dax.coach_analysis.zones,
     # analysis.player_features.*) -- dropping them is a separate, dedicated
-    # task. 83 columns total once scripts/add_missingness_flags.py adds its
+    # task. 83 columns total once scripts/features/add_missingness_flags.py adds its
     # 3 missingness flags afterwards.
     out = pd.DataFrame(rows)
     if require_corrected_targets:

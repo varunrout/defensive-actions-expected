@@ -11,10 +11,10 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 def test_active_cli_help_commands() -> None:
     scripts = [
         "run_pipeline.py",
-        "build_features.py",
-        "train_models.py",
-        "validate_models.py",
-        "generate_reports.py",
+        "features/build_features.py",
+        "models/train_models.py",
+        "models/validate_models.py",
+        "analysis/generate_reports.py",
     ]
     for script in scripts:
         result = subprocess.run(

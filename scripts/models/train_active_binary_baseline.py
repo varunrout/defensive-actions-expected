@@ -13,7 +13,7 @@ numeric (median-impute + standard-scale).
 
 Split: the canonical, frozen match-grouped split in
 outputs/models/splits/match_assignment.json (5-fold, seed 42, computed once by
-scripts/compute_canonical_split.py). This script never computes a fresh split --
+scripts/pipeline/compute_canonical_split.py). This script never computes a fresh split --
 it only loads the existing assignment via dax.models.splits.
 
 Variants:
@@ -26,7 +26,7 @@ Variants:
                                  reports/analysis/shot_target/MASTER_FINDINGS.md section 6.
 
 Usage:
-    python scripts/train_active_binary_baseline.py
+    python scripts/models/train_active_binary_baseline.py
 """
 
 from __future__ import annotations
@@ -47,7 +47,7 @@ from dax.models.evaluation import classification_metrics
 from dax.models.splits import canonical_grouped_folds, canonical_test_mask, load_canonical_split
 from eda.feature_config import ACTIVE
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]  # scripts/<subfolder>/ -> repo root (prompt 48 move: was parents[1] at scripts/ root)
 DATA_PATH = REPO_ROOT / "data" / "features" / "player_defensive_actions.parquet"
 TARGET_COL = "target_future_shot_10s"
 GROUP_COL = "match_id"

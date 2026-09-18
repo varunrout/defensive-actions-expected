@@ -22,7 +22,7 @@ from dax.models.two_part_xg import (
 )
 
 # Load training script module for selection tests
-_SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "train_two_part_xg.py"
+_SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "models" / "train_two_part_xg.py"
 _SPEC = importlib.util.spec_from_file_location("train_two_part_xg_script", _SCRIPT_PATH)
 _MODULE = importlib.util.module_from_spec(_SPEC)
 assert _SPEC is not None and _SPEC.loader is not None
@@ -764,7 +764,7 @@ class TestNoShotConditionalMetrics:
         })
 
         # Import build_player_aggregates from the script
-        from scripts.build_provisional_player_signals import build_player_aggregates  # noqa: PLC0415
+        from scripts.features.build_provisional_player_signals import build_player_aggregates  # noqa: PLC0415
         signals = build_player_aggregates(two_part_oof)
         # All players have zero shots; conditional severity must be NaN
         assert signals["total_conditional_severity_suppression"].isna().all() or (signals["observed_shot_count"] == 0).all()

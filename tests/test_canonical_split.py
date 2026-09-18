@@ -16,7 +16,7 @@ from dax.models.splits import CANONICAL_SPLIT_PATH, load_canonical_split
 
 pytestmark = pytest.mark.skipif(
     not Path(CANONICAL_SPLIT_PATH).exists(),
-    reason="Canonical split not computed in this environment (run scripts/compute_canonical_split.py).",
+    reason="Canonical split not computed in this environment (run scripts/pipeline/compute_canonical_split.py).",
 )
 
 EXPECTED_TOTAL_MATCHES = 115
