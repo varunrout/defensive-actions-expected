@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- Passive-Binary Baseline Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 900px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+
+.verdict-chip {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verdict-chip.confirms { background: var(--good-wash); color: var(--good); }
+.verdict-chip.mismatch { background: rgba(227,73,72,0.14); color: var(--pos); }
+.verdict-chip.flag { background: var(--amber-wash); color: var(--amber); }
+.variant-block { margin: 28px 0 44px; }
+.variant-title { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 16px; margin: 0 0 10px; }
+.chart-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 900px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+.chart-card img { width: 100%; height: auto; border-radius: 6px; display: block; background: var(--plane); cursor: zoom-in; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.chart-card img:hover { transform: scale(1.015); box-shadow: 0 4px 16px rgba(16,21,28,0.14); }
+.chart-card .cc-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 6px 2px 0; text-align: center; }
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p { margin: 0 0 10px; }
+.deviation-box p:last-child { margin-bottom: 0; }
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(9,12,16,0.78);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 5vh 5vw;
+  z-index: 1000;
+  cursor: zoom-out;
+}
+.lightbox.open { display: flex; }
+.lightbox figure { margin: 0; max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.lightbox img { max-width: 92vw; max-height: 82vh; width: auto; height: auto; border-radius: 10px; background: var(--surface); box-shadow: 0 20px 60px rgba(0,0,0,0.45); cursor: default; }
+.lightbox figcaption { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #e8eaee; text-align: center; }
+.lightbox-close {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.lightbox-close:hover { background: rgba(255,255,255,0.18); }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; Passive leg</p>
+    <h1 class="title">Passive-Binary Baseline Summary (p0-p3)</h1>
+    <p class="dek">Four locked baseline variants for <code>target_future_shot_10s</code> on the real
+      passive/off-ball defensive-positioning dataset, using the canonical match-grouped split (shared
+      with the active leg) and the 38-feature locked passive feature set. This leg's Rung 0 -- no
+      model ladder in this document.</p>
+    <div class="statbar">
+      <div class="stat"><b>1,593,181 / 115</b><span>rows / matches (real data)</span></div>
+      <div class="stat"><b>38</b><span>locked passive features</span></div>
+      <div class="stat"><b>5-fold</b><span>canonical grouped CV, seed 42 (shared split)</span></div>
+      <div class="stat"><b>p1 &gt; p2 &#8776; p3</b><span>PR-AUC ranking (CV)</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+<p>Target: <code>target_future_shot_10s</code>, computed per-row from that row's own anchor timestamp
+  (never broadcast across a possession -- a leakage bug caught and fixed specifically on this leg
+  during design). Dataset: <code>data/features/passive_defense.parquet</code>.</p>
+
+<div class="deviation-box">
+<p><strong>Source note.</strong> The prompt for this baseline referenced
+  <code>claude/passive-defense-build-plan.md</code> as context. That file does not exist anywhere in
+  this repository (checked by full-repo search). Every claim in this document is instead verified
+  directly against the real, current sources: <code>src/eda/feature_config.py</code> (locked feature
+  lists), <code>reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json</code> (lock counts and
+  interaction-pair evidence), and <code>data/features/passive_defense.parquet</code> itself (row/match
+  counts, base rate, column presence).</p>
+</div>
+
+<h2>1. Feature set</h2>
+<p>All 38 locked <code>PASSIVE</code> features from <code>src/eda/feature_config.py</code> (4 categorical
+  + 6 boolean + 26 continuous + 2 discrete = 38). Unlike the active leg (34 locked &rarr; 32 used, 2
+  excluded for known data issues), no feature is excluded for this leg. Verified programmatically at
+  training time (an assertion in <code>scripts/models/train_passive_binary_baseline.py</code> fails the
+  run if the count drifts from 38).</p>
+<ul>
+  <li><strong>Categorical (4, one-hot):</strong> <code>on_ball_event_type</code>, <code>phase_label</code>,
+    <code>defender_functional_role</code>, <code>period</code></li>
+  <li><strong>Boolean (6, passthrough):</strong> <code>is_in_defending_box</code>, <code>is_in_attacking_box</code>,
+    <code>is_wide_lane</code>, <code>has_option_2</code>, <code>has_option_3</code>,
+    <code>is_goal_side_of_nearest_attacker</code></li>
+  <li><strong>Continuous (26) + discrete (2) = 28 numeric</strong> (median-impute + standard-scale)</li>
+</ul>
+<p><code>screened_option_was_avoided</code> and <code>has_screened_outcome</code> (the two leakage
+  exclusions confirmed in <code>feature_config.py</code>'s <code>EXCLUDED_COLUMNS_PASSIVE</code> and
+  <code>FEATURE_LOCK_CONFIRMATION.json</code>) are asserted absent from the locked list defensively in
+  the training script, not just assumed absent.</p>
+<p><strong>Data-quality note:</strong> <code>is_goal_side_of_nearest_attacker</code> is stored as an
+  object column (<code>True</code>/<code>False</code>/<code>None</code>), not a clean boolean &mdash;
+  279 of 1,593,181 rows (0.018%) are <code>None</code>. These are treated as <code>0.0</code> (the
+  majority/negative class) by the same astype-then-fillna pattern used on the active leg; the volume is
+  negligible enough not to warrant a separate missingness flag here.</p>
+
+<h2>2. Row unit: not one-row-per-independent-event</h2>
+<p><code>feature_config.py</code>'s own <code>row_description</code> is explicit: <strong>"one row per
+  visible defender-slot per on-ball attacking event."</strong> Each on-ball attacking event produces one
+  row per visible defending-team player-slot in that frame. Rows sharing the same <code>event_id</code>
+  describe the <em>same</em> attacking context &mdash; differing only in which defender-slot's geometry is
+  being described. This is a structurally different grain from the active leg, where each row is one
+  independent defensive action.</p>
+<p>The canonical <code>StratifiedGroupKFold</code> split (grouped by <code>match_id</code>, shared
+  unchanged with the active leg) still fully prevents cross-split leakage, since it groups at the match
+  level. But the within-fold row correlation between same-<code>event_id</code> rows is real: it is not
+  accounted for by any of the metrics below (which treat every row as an independent trial), and should
+  be read as a property of this leg's data rather than silently assumed away.</p>
+
+<h2>3. Base rate &mdash; not directly comparable to the active leg</h2>
+<p>5.97% overall (train+val: 6.08%, held-out test: 5.51%) vs the active leg's 7.79%. These describe
+  different things and should not be read as a direct comparison &mdash; the active leg's rows are
+  one-per-actual-defensive-action, the passive leg's rows are one-per-(defender-slot, attacking-event).</p>
+
+<h2>4. Split</h2>
+<p>The canonical, frozen match-grouped split in <code>outputs/models/splits/match_assignment.json</code>
+  (5-fold, seed 42, computed once by <code>scripts/pipeline/compute_canonical_split.py</code>, shared
+  unchanged with the active leg &mdash; not recomputed here). Train+val: 1,277,374 rows / 92 matches.
+  Held-out test: 315,807 rows / 23 matches. Same 92/23 match split as the active leg, confirming the
+  split is genuinely match-level and shared, not leg-specific.</p>
+
+<h2>5. Variants</h2>
+<table>
+<tr><th>Variant</th><th>Model</th><th>Notes</th></tr>
+<tr><td><code>p0_dummy</code></td><td><code>ConstantClassifier</code></td><td>training-fold positive rate for every row</td></tr>
+<tr><td><code>p1_unweighted</code></td><td><code>LogisticRegression</code></td><td>no <code>class_weight</code>, all 38 features</td></tr>
+<tr><td><code>p2_weighted</code></td><td><code>LogisticRegression(class_weight="balanced")</code></td><td>same features as p1</td></tr>
+<tr><td><code>p3_weighted_interactions</code></td><td>p2 + 5 interaction terms</td><td>see table below</td></tr>
+</table>
+<table>
+<tr><th>Pair</th><th>Evidence</th></tr>
+<tr><td><code>lane_screening_score_option_1</code> &times; <code>marking_tightness</code></td><td>classified <code>interactive</code> in <code>FEATURE_LOCK_CONFIRMATION.json</code></td></tr>
+<tr><td><code>lane_screening_score_option_2</code> &times; <code>engagement_distance_to_carrier</code></td><td>classified <code>interactive</code>, same source</td></tr>
+<tr><td><code>marking_tightness</code> &times; <code>engagement_distance_to_carrier</code></td><td>classified <code>interactive</code>, same source</td></tr>
+<tr><td><code>overload_score</code> &times; <code>attacking_goal_centrality</code></td><td>classified <code>interactive</code>, same source</td></tr>
+<tr><td><code>lane_screening_score_option_3</code> &times; <code>engagement_distance_to_carrier</code></td><td>not itself tested; extends the confirmed option-2 pair to the same family</td></tr>
+</table>
+<p>4 of the 5 pairs are pulled directly from <code>FEATURE_LOCK_CONFIRMATION.json</code>'s own
+  <code>pattern_analysis_findings.numeric_interaction</code> section (10 passive-side pairs tested; 8
+  <code>interactive</code>, 1 <code>substitutive</code>, 1 <code>additive</code>). The task brief's own
+  suggested pair <code>zone_defensive_value</code> &times; <code>engagement_distance_to_carrier</code>
+  was checked and <strong>not used</strong>: <code>zone_defensive_value</code> was dropped from the
+  locked passive feature set (Spearman r=-1.0 vs <code>distance_to_defending_goal</code>, which was kept
+  instead) &mdash; confirming the brief's own warning that some prose feature names no longer match the
+  exact locked columns.</p>
+
+<h2>6. Cross-validation results (5-fold, out-of-fold metrics)</h2>
+<table>
+<tr><th>Variant</th><th>PR-AUC (AP)</th><th>ROC-AUC</th><th>Log loss</th><th>Brier</th><th>Calib. slope</th><th>Calib. intercept</th><th>ECE</th></tr>
+<tr><td>p0_dummy</td><td>0.0578</td><td>0.4790</td><td>0.2292</td><td>0.0571</td><td>0.882</td><td>-0.322</td><td>0.0000</td></tr>
+<tr><td><strong>p1_unweighted</strong></td><td><strong>0.1928</strong></td><td>0.7487</td><td><strong>0.2035</strong></td><td><strong>0.0531</strong></td><td>0.986</td><td><strong>-0.032</strong></td><td><strong>0.0024</strong></td></tr>
+<tr><td>p2_weighted</td><td>0.1903</td><td>0.7507</td><td>0.5851</td><td>0.1957</td><td>0.951</td><td>-2.726</td><td>0.3542</td></tr>
+<tr><td>p3_weighted_interactions</td><td>0.1903</td><td><strong>0.7516</strong></td><td>0.5845</td><td>0.1955</td><td>0.951</td><td>-2.726</td><td>0.3538</td></tr>
+</table>
+<p>Per-fold average precision mean &plusmn; std: p0 0.0608 &plusmn; 0.0043; p1 0.1924 &plusmn; 0.0147;
+  p2 0.1896 &plusmn; 0.0137; p3 0.1896 &plusmn; 0.0137. Full per-metric fold mean/std for every variant
+  is in <code>outputs/models/comparisons/passive_binary_baseline_comparison.csv</code>.</p>
+<p><strong>PR-AUC ranking: p1 &gt; p2 &#8776; p3 &gt; p0.</strong> The same ranking pattern the active leg
+  found for v1 vs v2/v3, but checked, not assumed &mdash; p1 (unweighted) has the best PR-AUC of the
+  three fitted variants in cross-validation, essentially tied with p2 just ahead of it by 0.0025.</p>
+
+<h2>7. Held-out test readout (all 4 variants, single readout each, not used for selection)</h2>
+<table>
+<tr><th>Variant</th><th>PR-AUC</th><th>ROC-AUC</th><th>Log loss</th><th>Brier</th><th>Calib. slope</th><th>Calib. intercept</th><th>ECE</th></tr>
+<tr><td>p0_dummy</td><td>0.0551</td><td>0.5000</td><td>0.2136</td><td>0.0521</td><td>0.916</td><td>-0.335</td><td>0.0057</td></tr>
+<tr><td><strong>p1_unweighted</strong></td><td><strong>0.1736</strong></td><td>0.7498</td><td><strong>0.1904</strong></td><td><strong>0.0489</strong></td><td>0.982</td><td><strong>-0.134</strong></td><td><strong>0.0051</strong></td></tr>
+<tr><td>p2_weighted</td><td>0.1695</td><td>0.7515</td><td>0.5820</td><td>0.1941</td><td>0.933</td><td>-2.816</td><td>0.3572</td></tr>
+<tr><td>p3_weighted_interactions</td><td>0.1695</td><td><strong>0.7526</strong></td><td>0.5820</td><td>0.1941</td><td>0.933</td><td>-2.817</td><td>0.3571</td></tr>
+</table>
+<p>315,807 rows / 23 matches, evaluated exactly once per variant, after all cross-validation and
+  variant comparison above was finalised &mdash; one readout per variant, covering all 4 (including
+  p0/p1), unlike the active leg where the readout was split across two prompts and only covered v2/v3.
+  Consistent with the CV ranking: p1 leads on PR-AUC and by a wide margin on calibration.</p>
+<p><strong>CV-to-test check:</strong> p1's PR-AUC went from 0.1928 (CV mean) to 0.1736 (held-out test)
+  &mdash; a <strong>decrease</strong> of about 10% relative. This is the <em>opposite</em> direction from
+  the active leg's v1, which <em>increased</em> from CV to held-out test (0.3521 &rarr; 0.3725). Stated
+  plainly rather than assumed to mirror the active leg: this modest drop is consistent with ordinary
+  CV-to-test variance at this scale (fold std on CV was &plusmn;0.0147, a similar order of magnitude to
+  the 0.0192 CV-to-test gap) and with the held-out test set having a slightly lower base rate (5.51% vs
+  train+val's 6.08%), which mechanically caps achievable PR-AUC somewhat. It is not evidence of
+  overfitting on 1.28M training rows with L2 regularization by default &mdash; but it is a real,
+  honestly-reported difference from the active leg's pattern, not a repeat of it.</p>
+
+<h2>8. Winner and why</h2>
+<p><strong><code>p1_unweighted</code> wins</strong>, by PR-AUC, on both cross-validation (0.1928 vs
+  0.1903 for both p2 and p3) and the held-out readout (0.1736 vs 0.1695 for both p2 and p3). This
+  reproduces the active leg's v1-wins finding, but the reproduction was checked against this leg's own
+  numbers rather than assumed to transfer, and the calibration mechanism behind it is directly confirmed
+  here too, not just presumed:</p>
+<ul>
+  <li><strong><code>class_weight="balanced"</code> (p2/p3) inflates predicted probabilities far past the
+    true rate</strong>, exactly as on the active leg. Calibration intercept collapses from -0.03 (p1) to
+    -2.73 (p2/p3) in CV, and expected calibration error jumps from <strong>0.0024 to 0.354</strong>
+    &mdash; a roughly 150x increase, an even larger relative blowup than the active leg's
+    0.004&nbsp;&rarr;&nbsp;0.285 (~70x). Log loss and Brier score both roughly triple, the same
+    mechanical signature seen on the active leg.</li>
+  <li><strong>ROC-AUC very slightly favours the weighted variants</strong> (0.7516 p3 vs 0.7487 p1 in CV,
+    +0.003), the same small-and-not-decision-relevant pattern the active leg showed (+0.001 there).
+    ROC-AUC is not the selection metric here for the same reason stated on the active leg: this is an
+    imbalanced target (5.97% base rate, more imbalanced than the active leg's 7.79%), and PR-AUC is the
+    metric that actually separates these variants.</li>
+  <li><strong>p3's 5 interaction terms do not beat p2 by any meaningful margin</strong> &mdash; p3 is
+    marginally <em>below</em> p2 on PR-AUC in both CV (0.19028 vs 0.19032) and held-out (0.16947 vs
+    0.16954), a difference well inside noise. This mirrors the active leg's v3-vs-v2 finding, though here
+    the gap is even smaller than on the active leg (where v3 fell 0.0045 below v2 in CV; here it's 0.00004).</li>
+</ul>
+<p><strong>Bottom line:</strong> the active leg's mechanism &mdash; balanced class weighting trades a
+  negligible ROC-AUC gain for a large, mechanically-explained collapse in calibration, while genuinely
+  improving nothing about ranking quality on the metric that matters for an imbalanced target &mdash;
+  reproduces on the passive leg, checked directly against this leg's own CV and held-out numbers rather
+  than assumed. <code>p1_unweighted</code> is this leg's Rung 0 pick, on the same
+  PR-AUC-plus-calibration reasoning as the active leg's v1.</p>
+
+<h2>9. Charts</h2>
+<p>4 PNGs per variant (calibration curve, precision-recall curve, ROC curve, prediction distribution),
+  generated by <code>scripts/models/train_passive_binary_baseline.py</code> and saved under
+  <code>outputs/models/classification/charts/&lt;variant&gt;/</code>. That directory is gitignored (same
+  convention as the active leg) &mdash; regenerate by running the script if the images below don't resolve.</p>
+
+<div class="variant-block">
+  <p class="variant-title">p0_dummy</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p0_dummy/calibration_curve.png" alt="p0_dummy calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p0_dummy/precision_recall_curve.png" alt="p0_dummy precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p0_dummy/roc_curve.png" alt="p0_dummy ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p0_dummy/prediction_distribution.png" alt="p0_dummy prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">p1_unweighted</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1_unweighted/calibration_curve.png" alt="p1_unweighted calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1_unweighted/precision_recall_curve.png" alt="p1_unweighted precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1_unweighted/roc_curve.png" alt="p1_unweighted ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1_unweighted/prediction_distribution.png" alt="p1_unweighted prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">p2_weighted</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p2_weighted/calibration_curve.png" alt="p2_weighted calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p2_weighted/precision_recall_curve.png" alt="p2_weighted precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p2_weighted/roc_curve.png" alt="p2_weighted ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p2_weighted/prediction_distribution.png" alt="p2_weighted prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">p3_weighted_interactions</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p3_weighted_interactions/calibration_curve.png" alt="p3_weighted_interactions calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p3_weighted_interactions/precision_recall_curve.png" alt="p3_weighted_interactions precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p3_weighted_interactions/roc_curve.png" alt="p3_weighted_interactions ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p3_weighted_interactions/prediction_distribution.png" alt="p3_weighted_interactions prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+
+<h2>10. Deviations from instructions</h2>
+<div class="deviation-box">
+<p><strong><code>claude/passive-defense-build-plan.md</code> does not exist in this repository.</strong>
+  A full-repository search (file names and content) found no trace of this file under any name. Every
+  factual claim in this document that the prompt attributed to that build plan was instead verified
+  directly against the real, current sources: <code>data/features/passive_defense.parquet</code>
+  itself, <code>src/eda/feature_config.py</code>, and
+  <code>reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json</code>. All of the prompt's specific
+  factual claims checked out against these real sources except the interaction-pair suggestion noted in
+  section 5 (<code>zone_defensive_value</code>, which is not in the locked feature set).</p>
+<p><strong>Held-out-test readout covers all 4 variants (including p0/p1) in this single run</strong>, per
+  this leg's explicit instructions &mdash; unlike the active leg, where the CV and held-out readout were
+  split across two prompts and the readout only ever covered v2/v3. This was a deliberate instruction
+  difference for this leg, not an inconsistency.</p>
+<p><strong>Part B outputs are not git-tracked.</strong> Comparison CSVs, per-variant JSON/joblib and
+  charts under <code>outputs/models/**</code> follow this repository's existing <code>.gitignore</code>
+  convention. They're reproducible with a single command:
+  <code>python scripts/models/train_passive_binary_baseline.py</code>.</p>
+<p><strong>No model ladder in this document</strong> &mdash; Rung 0 only, per the prompt's explicit
+  constraint. Ladder rungs and post-lock validation (tournament-stratified check, error-slice analysis by
+  <code>phase_label</code>/<code>defender_functional_role</code>, and an event-disjoint or
+  archetype-stability recheck in place of the active leg's player-disjoint check, since this leg has no
+  <code>player_id</code>) are deferred to a follow-up prompt, mirroring the active leg's Prompt 38.</p>
+</div>
+
+<h2>11. Non-causal framing</h2>
+<p>As throughout this project: results in this document describe <strong>correlation with suppressed
+  shot risk</strong>, not causation. <code>p1_unweighted</code>'s coefficients and rankings describe which
+  defensive geometry and positioning features are statistically associated with a lower observed rate of
+  a shot in the following 10 seconds &mdash; they do not establish that any individual defender's
+  positioning <em>prevents</em> or <em>causes</em> that outcome, and none of the analysis above attempts
+  to isolate a causal effect.</p>
+
+</div>
+</div>
+<footer>
+  <p>Generated by <code>scripts/models/train_passive_binary_baseline.py</code>. Markdown source:
+    <code>reports/modeling/passive_binary/PASSIVE_BINARY_BASELINE_SUMMARY.md</code>.</p>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+  <figure>
+    <img id="lightboxImg" src="" alt="">
+    <figcaption id="lightboxCaption"></figcaption>
+  </figure>
+</div>
+<script>
+(function () {
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightboxImg');
+  var lightboxCaption = document.getElementById('lightboxCaption');
+
+  function openLightbox(img) {
+    lightboxImg.src = img.currentSrc || img.src;
+    lightboxImg.alt = img.alt;
+    var variant = img.closest('.variant-block');
+    var title = variant ? variant.querySelector('.variant-title').textContent : '';
+    lightboxCaption.textContent = title ? (title + ' — ' + img.alt) : img.alt;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    lightboxImg.src = '';
+  }
+
+  document.querySelectorAll('.chart-card img').forEach(function (img) {
+    img.addEventListener('click', function () { openLightbox(img); });
+  });
+
+  lightbox.addEventListener('click', function (e) {
+    if (e.target === lightbox) closeLightbox();
+  });
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+})();
+</script>
+</body>
+</html>
