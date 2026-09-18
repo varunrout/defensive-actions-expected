@@ -272,6 +272,7 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
       <div class="stat"><b>v1_unweighted</b><span>rung 0 baseline (locked)</span></div>
       <div class="stat"><b>Rung 1</b><span>rejected -- v1b_quadratic</span></div>
       <div class="stat"><b>Rung 2</b><span>promoted -- v1c_systematic_interactions</span></div>
+      <div class="stat"><b>Rung 3</b><span>diagnostic win -- v1d_random_forest</span></div>
     </div>
   </div>
 </div>
@@ -574,6 +575,169 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   interpretable follow-up (e.g. a stronger C, or L1 with stability selection across resamples) is
   a reasonable future step, but is out of scope for this prompt, which only had to answer whether
   systematic interactions beat isolated feature curvature (rung 1) &mdash; they did.</p>
+
+<h2>4. Rung 3 &mdash; Random Forest diagnostic (<code>v1d_random_forest</code>)</h2>
+<p>Rung 2's gain came from <em>explicitly</em> engineering 153 interaction/squared terms and
+  letting L1 prune them. This rung asks the question that approach can't answer on its own: does
+  a model that discovers interactions and non-linearity automatically, straight from the
+  <strong>raw</strong> 32 locked features (no engineered terms, no standardization &mdash; trees
+  don't need it and it would only obscure importances), find meaningfully more signal than the
+  hand-built approach did? Explicitly a <strong>diagnostic rung, not a promotion candidate in its
+  own right</strong> &mdash; the result decides how big an investment Rung 4 (gradient boosting)
+  should be, not whether to adopt Random Forest itself.</p>
+<p><code>RandomForestClassifier</code>, same 32 features, same categorical-one-hot/
+  boolean-passthrough blocks as v1, <code>random_state=42</code>, no <code>class_weight</code> as
+  the primary variant (mirrors the unweighted-wins-on-PR-AUC finding from v1 vs v2/v3 &mdash;
+  checked explicitly for trees too, see 4.3). <code>n_estimators</code>/<code>max_depth</code>/
+  <code>min_samples_leaf</code> grid-searched on the 5 canonical CV folds (train+val only);
+  held-out test read exactly once, after the grid was fixed.</p>
+
+<h3>4.1 Tuning (CV only, held-out test never touched)</h3>
+<table>
+<tr><th>n_estimators</th><th>max_depth</th><th>min_samples_leaf</th><th>OOF PR-AUC</th></tr>
+<tr><td>300</td><td>8</td><td>5</td><td>0.3650</td></tr>
+<tr><td>300</td><td>8</td><td>20</td><td>0.3624</td></tr>
+<tr><td>300</td><td>14</td><td>5</td><td>0.3980</td></tr>
+<tr><td>300</td><td>14</td><td>20</td><td>0.3895</td></tr>
+<tr><td>300</td><td>None</td><td>5</td><td>0.4007</td></tr>
+<tr><td>300</td><td>None</td><td>20</td><td>0.3907</td></tr>
+<tr><td>600</td><td>8</td><td>5</td><td>0.3665</td></tr>
+<tr><td>600</td><td>8</td><td>20</td><td>0.3634</td></tr>
+<tr><td>600</td><td>14</td><td>5</td><td>0.3988</td></tr>
+<tr><td>600</td><td>14</td><td>20</td><td>0.3907</td></tr>
+<tr><td><strong>600</strong></td><td><strong>None</strong></td><td><strong>5</strong></td><td><strong>0.4017 (chosen)</strong></td></tr>
+<tr><td>600</td><td>None</td><td>20</td><td>0.3914</td></tr>
+</table>
+<p>Clear pattern: <code>max_depth</code> dominates (unconstrained depth beats 14 beats 8 in every
+  <code>n_estimators</code>/<code>min_samples_leaf</code> pairing), <code>min_samples_leaf=5</code>
+  beats 20 throughout, and <code>n_estimators=600</code> beats 300 only marginally (+0.001 to
+  +0.002) at matched depth/leaf settings &mdash; diminishing returns from more trees, most of the
+  signal comes from letting individual trees grow deep. Not a boundary-starved grid: 8&rarr;14&rarr;None
+  shows a decelerating but still-positive trend, consistent with an actual interior-ish optimum
+  rather than "wants to go even deeper."</p>
+
+<h3>4.2 CV and held-out test results</h3>
+<table>
+<tr><th></th><th>PR-AUC</th><th>ROC-AUC</th><th>Log loss</th><th>Brier</th><th>Calib. slope</th><th>Calib. intercept</th><th>ECE</th></tr>
+<tr><td>v1c (CV, OOF)</td><td>0.3630</td><td>0.8288</td><td>0.2172</td><td>0.0608</td><td>1.004</td><td>0.001</td><td>0.0026</td></tr>
+<tr><td>v1d (CV, OOF)</td><td><strong>0.4017</strong></td><td>0.8181</td><td>0.2184</td><td>0.0598</td><td>1.180</td><td>0.314</td><td>0.0123</td></tr>
+<tr><td>v1c (held-out test)</td><td>0.3747</td><td>0.8321</td><td>0.2011</td><td>0.0551</td><td>1.027</td><td>-0.081</td><td>0.0103</td></tr>
+<tr><td>v1d (held-out test)</td><td><strong>0.4085</strong></td><td>0.8269</td><td>0.2017</td><td>0.0542</td><td>1.194</td><td>0.201</td><td>0.0183</td></tr>
+</table>
+<p><strong>Two things are both true and neither cancels the other out.</strong> PR-AUC: v1d beats
+  v1c by a wide margin, +0.0387 CV and +0.0338 held-out test (both far larger than rung 2's own
+  margin over v1, +0.0109/+0.0022) &mdash; this is a real, substantial ranking improvement from
+  letting a tree ensemble find its own interactions. Calibration: v1d is <strong>markedly
+  worse</strong> than v1c, exactly as the brief anticipated for raw RF probabilities &mdash; ECE
+  roughly <strong>4.7x worse on CV</strong> (0.0123 vs 0.0026) and <strong>1.8x worse on held-out
+  test</strong> (0.0183 vs 0.0103), with a calibration slope pulled well above 1.0 (1.18-1.19, vs
+  v1c's ~1.0-1.03) and a positive intercept (0.20-0.31, vs v1c's near-zero) &mdash; the textbook
+  signature of tree-ensemble overconfidence at the probability extremes. This is reported as a
+  genuine trade-off, not averaged into a vague "better overall": ranking and calibration are
+  answering different questions, and this project has treated both as first-class since prompt 36
+  (recall v2/v3's <code>class_weight="balanced"</code> cost 27x on ECE for a <em>worse</em> PR-AUC
+  &mdash; different shape of trade-off, same principle of not letting one metric hide the other).
+  That said, an ECE of 0.012-0.018 is still small in absolute terms and nowhere near v2/v3's
+  catastrophic 0.29 &mdash; "markedly worse than v1c" is not the same claim as "badly broken."
+  Post-hoc calibration (Platt scaling or isotonic regression) is a standard, well-understood fix
+  for exactly this symptom, noted here as a live option but deliberately not implemented in this
+  prompt (a rung 4 concern, per the brief).</p>
+
+<h3>4.3 Secondary comparison: does <code>class_weight</code> still lose for trees?</h3>
+<p>Checked explicitly rather than assumed: at the same tuned hyperparameters,
+  <code>class_weight="balanced_subsample"</code> gives a negligible PR-AUC change (OOF 0.4033 vs
+  unweighted's 0.4017, +0.0016) but an <strong>8x worse</strong> ECE (0.0986 vs 0.0123). The
+  v1-vs-v2/v3 finding holds for trees too &mdash; balancing the loss buys essentially nothing on
+  ranking here and is meaningfully worse for calibration, so <code>v1d_random_forest</code>
+  (unweighted) is correctly the primary variant. Full numbers:
+  <code>outputs/models/validation/v1d_class_weight_secondary_comparison.json</code>.</p>
+
+<h3>4.4 Is the gain real? (<code>significance_v1d_vs_v1c.json</code>)</h3>
+<p>Paired over the same 5 canonical CV folds, v1d beats v1c in <strong>5 of 5 folds</strong>: mean
+  PR-AUC difference <strong>+0.0386</strong> (std 0.0111), paired t-test t=7.77,
+  <strong>p=0.0015</strong>, Wilcoxon at the same n=5 exact-test floor (p=0.0625) seen in every
+  prior rung comparison. This is the largest, most unambiguous gap seen anywhere in this ladder
+  &mdash; roughly 3.6x rung 2's own margin over v1 in the same paired-CV framework (+0.0386 vs
+  +0.0109).</p>
+
+<h3>4.5 Player-disjoint re-check (<code>player_disjoint_v1d.json</code>)</h3>
+<p>A bagged tree ensemble is at least as capable of overfitting to player identity as the
+  interaction model was &mdash; checked from scratch, not skipped. 5-fold <code>GroupKFold</code>
+  on <code>player_id</code>, train+val rows only, held-out test set untouched.
+  <code>player_overlap_train_test == 0</code> confirmed and asserted for every fold.
+  Player-disjoint PR-AUC (0.4172) is actually <em>higher</em> than the match-grouped CV OOF number
+  (0.4017) &mdash; no leakage signal; if anything this is reassuring, not a concern.</p>
+
+<h3>4.6 Feature importance: does RF rediscover what v1c's interactions were built from?</h3>
+<p><strong>Top 15 by Gini importance</strong> (in-sample, biased toward high-cardinality/
+  continuous features &mdash; reported alongside permutation importance for exactly that reason):</p>
+<p><code>nearest_attacker_distance</code>, <code>defender_spread</code>,
+  <code>attacking_goal_centrality</code>, <code>distance_to_attacking_box</code>,
+  <code>angle_to_attacking_goal</code>, <code>attacker_spread</code>,
+  <code>attacker_defender_ratio</code>, <code>defender_attacker_gap_x</code>,
+  <code>match_time_seconds</code>, <code>defender_attacker_gap_y</code>,
+  <code>possession_elapsed_seconds</code>, <code>defenders_between_ball_and_attacking_goal</code>,
+  <code>event_type_Pressure</code>, <code>visible_defender_count</code>,
+  <code>defenders_within_10m</code>.</p>
+<p><strong>Top 15 by permutation importance</strong>, averaged across each fold's held-out portion
+  (never the final test set &mdash; fit on fold-train, permuted and scored on that fold's held-out
+  rows, 5 repeats per fold):</p>
+<p><code>event_type_Pressure</code>, <code>attacking_goal_centrality</code>,
+  <code>event_type_Ball Recovery</code>, <code>nearest_attacker_distance</code>,
+  <code>attacker_defender_ratio</code>, <code>distance_to_attacking_box</code>,
+  <code>action_was_under_opponent_possession</code>,
+  <code>action_retained_defensive_team_control</code>, <code>angle_to_attacking_goal</code>,
+  <code>defender_spread</code>, <code>event_type_Clearance</code>, <code>event_type_Block</code>,
+  <code>attacker_spread</code>, <code>is_in_defending_box</code>,
+  <code>defender_attacker_gap_x</code>.</p>
+<p><strong>Cross-validation between the two rungs' independent signals</strong> (not just their
+  PR-AUC numbers): strong agreement. Every one of the numeric features that anchored v1c's top-10
+  surviving interaction terms (<code>distance_to_attacking_box</code>,
+  <code>defender_attacker_gap_x</code>, <code>nearest_attacker_distance</code>,
+  <code>attacking_goal_centrality</code>, <code>angle_to_attacking_goal</code>,
+  <code>attacker_spread</code>, <code>attacker_defender_ratio</code>,
+  <code>defenders_between_ball_and_attacking_goal</code>) also appears in RF's Gini top-15, and
+  most of them in the permutation top-15 too &mdash; two structurally unrelated model families (an
+  L1-pruned expanded-linear model and a tree ensemble), fit independently, converged on the same
+  handful of features as the most important drivers of shot risk. That is a meaningfully stronger
+  form of validation than either model's PR-AUC alone.</p>
+<p>The Gini/permutation divergence is itself informative and matches the known bias:
+  <code>event_type</code> categories (<code>Pressure</code>, <code>Ball Recovery</code>) rank
+  low-ish in Gini (<code>event_type_Pressure</code> at #13, <code>event_type_Ball Recovery</code>
+  outside the Gini top-15) but <strong>first and third</strong> by permutation importance &mdash;
+  consistent with Gini's documented bias against low-cardinality one-hot columns in favour of
+  continuous features with many possible split points. The permutation ranking is the more
+  trustworthy read for <code>event_type</code>'s actual importance; both rankings agree on the
+  continuous/geometric features.</p>
+
+<div class="variant-block">
+  <p class="variant-title">v1d_random_forest <span style="font-weight:400;color:var(--text-muted);font-size:12px;">(rung 3)</span></p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1d_random_forest/calibration_curve.png" alt="v1d_random_forest calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1d_random_forest/precision_recall_curve.png" alt="v1d_random_forest precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1d_random_forest/roc_curve.png" alt="v1d_random_forest ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../outputs/models/classification/charts/v1d_random_forest/prediction_distribution.png" alt="v1d_random_forest prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+
+<h3>4.7 Bottom line</h3>
+<p>This is the first of the ladder's three anticipated honest outcomes, not the second or third:
+  <strong>RF clearly beats v1c on held-out PR-AUC</strong> (+0.0338, confirmed significant,
+  confirmed player-disjoint-stable), <strong>and calibration, while markedly worse, is workable
+  rather than broken</strong> (ECE 0.018 on held-out test &mdash; worse than v1c's 0.010, nowhere
+  near v2/v3's 0.29, and fixable in principle via standard post-hoc calibration, not attempted
+  here). Per the framing this rung was built to test: <strong>automatic interaction discovery
+  finds more than the hand-built approach did</strong>, and there is real headroom in this feature
+  set beyond what linear-plus-engineered-interactions captured. <strong>Rung 4 (gradient boosting)
+  is a well-justified next step with likely real additional upside</strong>, not merely a smaller
+  confirmatory check &mdash; consistent with RF's own result here suggesting the ceiling for this
+  feature set is meaningfully above v1c's PR-AUC.</p>
+<p>Per the brief, this diagnostic result does <strong>not</strong> trigger a Prompt-43-style
+  promotion audit for <code>v1d_random_forest</code> itself in this prompt &mdash; it reports the
+  ladder-gate result and the resulting scope for rung 4. Whether Random Forest, gradient boosting,
+  or a calibrated version of either eventually becomes the standing reference model is a separate,
+  later decision, made only once each candidate has cleared its own dedicated validation pass, per
+  this project's standing practice throughout prompts 36-43.</p>
 
 </div>
 </div>

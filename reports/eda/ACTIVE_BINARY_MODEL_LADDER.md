@@ -313,3 +313,159 @@ clean list of "the 5 interactions that matter." A tighter, more interpretable fo
 stronger C, or L1 with stability selection across resamples) is a reasonable future step, but is
 out of scope for this prompt, which only had to answer whether systematic interactions beat
 isolated feature curvature (rung 1) -- they did.
+
+## 4. Rung 3 -- Random Forest diagnostic (`v1d_random_forest`)
+
+Rung 2's gain came from *explicitly* engineering 153 interaction/squared terms and letting L1
+prune them. This rung asks the question that approach can't answer on its own: does a model that
+discovers interactions and non-linearity automatically, straight from the **raw** 32 locked
+features (no engineered terms, no standardization -- trees don't need it and it would only
+obscure importances), find meaningfully more signal than the hand-built approach did? Explicitly
+a **diagnostic rung, not a promotion candidate in its own right** -- the result decides how big an
+investment Rung 4 (gradient boosting) should be, not whether to adopt Random Forest itself.
+
+`RandomForestClassifier`, same 32 features, same categorical-one-hot/boolean-passthrough blocks
+as v1, `random_state=42`, no `class_weight` as the primary variant (mirrors the
+unweighted-wins-on-PR-AUC finding from v1 vs v2/v3 -- checked explicitly for trees too, see 4.2).
+`n_estimators`/`max_depth`/`min_samples_leaf` grid-searched on the 5 canonical CV folds
+(train+val only); held-out test read exactly once, after the grid was fixed.
+
+### 4.1 Tuning (CV only, held-out test never touched)
+
+| n_estimators | max_depth | min_samples_leaf | OOF PR-AUC |
+|---|---|---|---|
+| 300 | 8 | 5 | 0.3650 |
+| 300 | 8 | 20 | 0.3624 |
+| 300 | 14 | 5 | 0.3980 |
+| 300 | 14 | 20 | 0.3895 |
+| 300 | None | 5 | 0.4007 |
+| 300 | None | 20 | 0.3907 |
+| 600 | 8 | 5 | 0.3665 |
+| 600 | 8 | 20 | 0.3634 |
+| 600 | 14 | 5 | 0.3988 |
+| 600 | 14 | 20 | 0.3907 |
+| **600** | **None** | **5** | **0.4017 (chosen)** |
+| 600 | None | 20 | 0.3914 |
+
+Clear pattern: `max_depth` dominates (unconstrained depth beats 14 beats 8 in every
+`n_estimators`/`min_samples_leaf` pairing), `min_samples_leaf=5` beats 20 throughout, and
+`n_estimators=600` beats 300 only marginally (+0.001 to +0.002) at matched depth/leaf settings --
+diminishing returns from more trees, most of the signal comes from letting individual trees grow
+deep. Not a boundary-starved grid: 8&rarr;14&rarr;None shows a decelerating but still-positive
+trend, consistent with an actual interior-ish optimum rather than "wants to go even deeper."
+
+### 4.2 CV and held-out test results
+
+| | PR-AUC | ROC-AUC | Log loss | Brier | Calib. slope | Calib. intercept | ECE |
+|---|---|---|---|---|---|---|---|
+| v1c (CV, OOF) | 0.3630 | 0.8288 | 0.2172 | 0.0608 | 1.004 | 0.001 | 0.0026 |
+| v1d (CV, OOF) | **0.4017** | 0.8181 | 0.2184 | 0.0598 | 1.180 | 0.314 | 0.0123 |
+| v1c (held-out test) | 0.3747 | 0.8321 | 0.2011 | 0.0551 | 1.027 | -0.081 | 0.0103 |
+| v1d (held-out test) | **0.4085** | 0.8269 | 0.2017 | 0.0542 | 1.194 | 0.201 | 0.0183 |
+
+**Two things are both true and neither cancels the other out.** PR-AUC: v1d beats v1c by a wide
+margin, +0.0387 CV and +0.0338 held-out test (both far larger than rung 2's own margin over v1,
++0.0109/+0.0022) -- this is a real, substantial ranking improvement from letting a tree ensemble
+find its own interactions. Calibration: v1d is **markedly worse** than v1c, exactly as the brief
+anticipated for raw RF probabilities -- ECE roughly **4.7x worse on CV** (0.0123 vs 0.0026) and
+**1.8x worse on held-out test** (0.0183 vs 0.0103), with a calibration slope pulled well above 1.0
+(1.18-1.19, vs v1c's ~1.0-1.03) and a positive intercept (0.20-0.31, vs v1c's near-zero) --
+the textbook signature of tree-ensemble overconfidence at the probability extremes. This is
+reported as a genuine trade-off, not averaged into a vague "better overall": ranking and
+calibration are answering different questions, and this project has treated both as first-class
+since prompt 36 (recall v2/v3's `class_weight="balanced"` cost 27x on ECE for a *worse* PR-AUC --
+different shape of trade-off, same principle of not letting one metric hide the other). That
+said, an ECE of 0.012-0.018 is still small in absolute terms and nowhere near v2/v3's catastrophic
+0.29 -- "markedly worse than v1c" is not the same claim as "badly broken." Post-hoc calibration
+(Platt scaling or isotonic regression) is a standard, well-understood fix for exactly this
+symptom, noted here as a live option but deliberately not implemented in this prompt (a rung 4
+concern, per the brief).
+
+### 4.3 Secondary comparison: does `class_weight` still lose for trees?
+
+Checked explicitly rather than assumed: at the same tuned hyperparameters,
+`class_weight="balanced_subsample"` gives a negligible PR-AUC change (OOF 0.4033 vs unweighted's
+0.4017, +0.0016) but an **8x worse** ECE (0.0986 vs 0.0123). The v1-vs-v2/v3 finding holds for
+trees too -- balancing the loss buys essentially nothing on ranking here and is meaningfully worse
+for calibration, so `v1d_random_forest` (unweighted) is correctly the primary variant. Full
+numbers: `outputs/models/validation/v1d_class_weight_secondary_comparison.json`.
+
+### 4.4 Is the gain real? (`significance_v1d_vs_v1c.json`)
+
+Paired over the same 5 canonical CV folds, v1d beats v1c in **5 of 5 folds**: mean PR-AUC
+difference **+0.0386** (std 0.0111), paired t-test t=7.77, **p=0.0015**, Wilcoxon at the same n=5
+exact-test floor (p=0.0625) seen in every prior rung comparison. This is the largest, most
+unambiguous gap seen anywhere in this ladder -- roughly 3.6x rung 2's own margin over v1 in the
+same paired-CV framework (+0.0386 vs +0.0109).
+
+### 4.5 Player-disjoint re-check (`player_disjoint_v1d.json`)
+
+A bagged tree ensemble is at least as capable of overfitting to player identity as the
+interaction model was -- checked from scratch, not skipped. 5-fold `GroupKFold` on `player_id`,
+train+val rows only, held-out test set untouched. `player_overlap_train_test == 0` confirmed and
+asserted for every fold. Player-disjoint PR-AUC (0.4172) is actually *higher* than the
+match-grouped CV OOF number (0.4017) -- no leakage signal; if anything this is reassuring, not a
+concern.
+
+### 4.6 Feature importance: does RF rediscover what v1c's interactions were built from?
+
+**Top 15 by Gini importance** (in-sample, biased toward high-cardinality/continuous features --
+reported alongside permutation importance for exactly that reason):
+
+`nearest_attacker_distance`, `defender_spread`, `attacking_goal_centrality`,
+`distance_to_attacking_box`, `angle_to_attacking_goal`, `attacker_spread`,
+`attacker_defender_ratio`, `defender_attacker_gap_x`, `match_time_seconds`,
+`defender_attacker_gap_y`, `possession_elapsed_seconds`,
+`defenders_between_ball_and_attacking_goal`, `event_type_Pressure`, `visible_defender_count`,
+`defenders_within_10m`.
+
+**Top 15 by permutation importance**, averaged across each fold's held-out portion (never the
+final test set -- fit on fold-train, permuted and scored on that fold's held-out rows, 5 repeats
+per fold):
+
+`event_type_Pressure`, `attacking_goal_centrality`, `event_type_Ball Recovery`,
+`nearest_attacker_distance`, `attacker_defender_ratio`, `distance_to_attacking_box`,
+`action_was_under_opponent_possession`, `action_retained_defensive_team_control`,
+`angle_to_attacking_goal`, `defender_spread`, `event_type_Clearance`, `event_type_Block`,
+`attacker_spread`, `is_in_defending_box`, `defender_attacker_gap_x`.
+
+**Cross-validation between the two rungs' independent signals** (not just their PR-AUC numbers):
+strong agreement. Every one of the numeric features that anchored v1c's top-10 surviving
+interaction terms (`distance_to_attacking_box`, `defender_attacker_gap_x`,
+`nearest_attacker_distance`, `attacking_goal_centrality`, `angle_to_attacking_goal`,
+`attacker_spread`, `attacker_defender_ratio`, `defenders_between_ball_and_attacking_goal`) also
+appears in RF's Gini top-15, and most of them in the permutation top-15 too -- two structurally
+unrelated model families (an L1-pruned expanded-linear model and a tree ensemble), fit
+independently, converged on the same handful of features as the most important drivers of shot
+risk. That is a meaningfully stronger form of validation than either model's PR-AUC alone.
+
+The Gini/permutation divergence is itself informative and matches the known bias: `event_type`
+categories (`Pressure`, `Ball Recovery`) rank low-ish in Gini (`event_type_Pressure` at #13,
+`event_type_Ball Recovery` outside the Gini top-15) but **first and third** by permutation
+importance -- consistent with Gini's documented bias against low-cardinality one-hot columns in
+favour of continuous features with many possible split points. The permutation ranking is the
+more trustworthy read for `event_type`'s actual importance; both rankings agree on the
+continuous/geometric features.
+
+Charts: `outputs/models/classification/charts/v1d_random_forest/` (calibration curve, PR curve,
+ROC curve, prediction distribution).
+
+### 4.7 Bottom line
+
+This is the first of the ladder's three anticipated honest outcomes, not the second or third:
+**RF clearly beats v1c on held-out PR-AUC** (+0.0338, confirmed significant, confirmed
+player-disjoint-stable), **and calibration, while markedly worse, is workable rather than broken**
+(ECE 0.018 on held-out test -- worse than v1c's 0.010, nowhere near v2/v3's 0.29, and fixable
+in principle via standard post-hoc calibration, not attempted here). Per the framing this rung was
+built to test: **automatic interaction discovery finds more than the hand-built approach did**,
+and there is real headroom in this feature set beyond what linear-plus-engineered-interactions
+captured. **Rung 4 (gradient boosting) is a well-justified next step with likely real additional
+upside**, not merely a smaller confirmatory check -- consistent with RF's own result here
+suggesting the ceiling for this feature set is meaningfully above v1c's PR-AUC.
+
+Per the brief, this diagnostic result does **not** trigger a Prompt-43-style promotion audit for
+`v1d_random_forest` itself in this prompt -- it reports the ladder-gate result and the resulting
+scope for rung 4. Whether Random Forest, gradient boosting, or a calibrated version of either
+eventually becomes the standing reference model is a separate, later decision, made only once
+each candidate has cleared its own dedicated validation pass, per this project's standing
+practice throughout prompts 36-43.
