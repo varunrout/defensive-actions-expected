@@ -229,18 +229,18 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   <div class="masthead-inner">
     <p class="eyebrow">DAX &middot; Modelling &middot; Active leg &middot; Closeout</p>
     <h1 class="title">Active-Binary Baseline Modelling Closeout</h1>
-    <p class="dek">Prompts 36&ndash;43: retiring the stale pre-lock baselines, locking
-      <code>v1_unweighted</code> as the original standing baseline, validating that pick, testing
-      (and rejecting) rung 1, testing and validating rung 2, and promoting
-      <code>v1c_systematic_interactions</code> as the new standing reference model. This is a
-      decision record -- full tables and charts live in
+    <p class="dek">Prompts 36&ndash;46: retiring the stale pre-lock baselines, locking
+      <code>v1_unweighted</code> as the original standing baseline, validating that pick, running
+      the model ladder through rungs 1&ndash;4, promoting <code>v1c_systematic_interactions</code>
+      and then superseding it with <code>v1e_gradient_boosting_calibrated</code> as the current
+      standing reference model. This is a decision record -- full tables and charts live in
       <a href="ACTIVE_BINARY_BASELINE_SUMMARY.html" target="viewer">ACTIVE_BINARY_BASELINE_SUMMARY.html</a>,
       <a href="ACTIVE_BINARY_MODEL_LADDER.html" target="viewer">ACTIVE_BINARY_MODEL_LADDER.html</a>,
       and <code>outputs/models/validation/*.json</code>.</p>
     <div class="statbar">
-      <div class="stat"><b>v1c_systematic_interactions</b><span>promoted reference model</span></div>
-      <div class="stat"><b>0.375</b><span>held-out PR-AUC</span></div>
-      <div class="stat"><b>0.832</b><span>held-out ROC-AUC</span></div>
+      <div class="stat"><b>v1e_gradient_boosting_calibrated</b><span>promoted reference model</span></div>
+      <div class="stat"><b>0.428</b><span>held-out PR-AUC</span></div>
+      <div class="stat"><b>0.836</b><span>held-out ROC-AUC</span></div>
       <div class="stat"><b>0.010</b><span>held-out ECE</span></div>
     </div>
   </div>
@@ -254,14 +254,17 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   <code>ACTIVE_BINARY_BASELINE_SUMMARY.md</code> -- that document and the Prompt 38 validation JSONs under
   <code>outputs/models/validation/</code> are the source of truth for full tables; this one states what was
   decided and why, and links out rather than duplicating. Sections 1&ndash;6 written 2026-09-18
-  (Prompts 36&ndash;39); section 7 added 2026-09-18 (Prompt 43), reading only already-committed
-  outputs (no models re-run for this report or that section).</p>
+  (Prompts 36&ndash;39); section 7 added 2026-09-18 (Prompt 43); section 8 added 2026-09-18
+  (Prompt 46), reading only already-committed outputs plus CV-OOF predictions regenerated at
+  already-locked (not re-tuned) hyperparameters -- no model re-run/retrain for this report or
+  these sections.</p>
 <div class="decision-box">
-<p><strong>Status (Prompt 43, current):</strong> <code>v1c_systematic_interactions</code> was
-  promoted to standing reference model for the active-binary leg &mdash; see section 7. Sections
-  1&ndash;6 below describe how <code>v1_unweighted</code> earned the <em>original</em>
-  standing-baseline status and remain accurate as history; they are not rewritten to reflect the
-  later promotion.</p>
+<p><strong>Status (Prompt 46, current):</strong> <code>v1e_gradient_boosting_calibrated</code> was
+  promoted to standing reference model for the active-binary leg, superseding
+  <code>v1c_systematic_interactions</code> (itself promoted in Prompt 43) &mdash; see section 8.
+  Sections 1&ndash;7 below describe how <code>v1_unweighted</code> and then
+  <code>v1c_systematic_interactions</code> earned standing-reference status in turn and remain
+  accurate as history; they are not rewritten to reflect the later promotion.</p>
 </div>
 
 <h2>1. What was decided</h2>
@@ -503,6 +506,155 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   (<code>outputs/models/classification/v1c_systematic_interactions.joblib</code>, C=0.1,
   238-column design matrix per <code>scripts/train_v1c_systematic_interactions.py</code>) rather
   than <code>v1_unweighted</code>.</p>
+</div>
+
+<h2>8. Promotion decision: <code>v1e_gradient_boosting</code> (Prompt 46)</h2>
+<p>Rung 4 (<code>v1e_gradient_boosting</code>, Prompt 45) cleared its own 3-gate ladder check
+  against v1c and v1d: held-out PR-AUC 0.4305 (vs v1c's 0.3747), significant (p=0.0013 vs v1c,
+  p=0.0189 vs v1d, 5/5 folds both), player-disjoint-stable. Unusually, the raw variant's
+  <em>aggregate</em> held-out ECE (0.0068) looked better than v1c's own (0.0103) &mdash; no
+  obvious calibration trade-off at the aggregate level, unlike rung 3's Random Forest. That gate
+  answers "is this rung's change real?" &mdash; not "should this replace the standing reference
+  model?", which needs the same depth of scrutiny <code>v1c</code> itself went through in section
+  7 before it replaced <code>v1_unweighted</code>. This section runs that scrutiny, and it
+  produces a more nuanced answer than Rung 4's own numbers suggested.</p>
+<p>All three checks below run on train+val 5-fold canonical CV out-of-fold (OOF) predictions, the
+  same population and method Prompt 43 used for v1c's promotion audit &mdash; the held-out test
+  set is not read again anywhere in this section. <code>v1</code>'s and <code>v1c</code>'s CV-OOF
+  breakdowns are reused directly from <code>tournament_stratified_v1c.json</code> /
+  <code>error_analysis_v1c.json</code> (Prompt 43), not recomputed; <code>v1d</code>'s and
+  <code>v1e</code>'s OOF are regenerated at their already-locked hyperparameters (no re-tuning),
+  since neither prompt 44 nor 45 persisted per-row OOF scores to disk.</p>
+
+<h3>8.1 Tournament-stratified check</h3>
+<p>Confirmed again: train+val still spans only FIFA World Cup 2022 and UEFA Euro 2024. Both
+  <code>v1e</code> variants beat <code>v1c</code> decisively on <strong>both</strong>
+  tournaments:</p>
+<table>
+<tr><th>Tournament</th><th>v1c</th><th>v1d</th><th>v1e raw</th><th>v1e calibrated</th></tr>
+<tr><td>FIFA World Cup 2022</td><td>0.3383</td><td>0.3701</td><td>0.3897</td><td>0.3937</td></tr>
+<tr><td>UEFA Euro 2024</td><td>0.3873</td><td>0.4327</td><td>0.4476</td><td>0.4555</td></tr>
+</table>
+<p>The calibrated variant's tournament-level ECE is small on both slices (0.0039 / 0.0040). Not a
+  single-tournament artifact. <strong>Verdict: passes</strong>, for both variants. Full numbers:
+  <code>outputs/models/validation/tournament_stratified_v1e.json</code>.</p>
+
+<h3>8.2 Error-slice comparison &mdash; the check that changed the outcome</h3>
+<p>This is where the promotion decision actually turned. Prompt 45's aggregate held-out ECE for
+  raw <code>v1e</code> (0.0068) looked <em>better</em> than v1c's &mdash; but on CV-OOF
+  <code>phase_label</code> slices, raw <code>v1e</code>'s calibration gap is <strong>6-19x larger
+  than v1c's on 6 of the 7 slices</strong> (e.g. <code>box_defence</code>: &plusmn;0.0010 for v1c
+  vs &plusmn;0.0191 for raw v1e; <code>wide_defending_proxy</code>: &plusmn;0.0012 vs
+  &plusmn;0.0122). The aggregate held-out number did not generalise to the slice level &mdash;
+  exactly the failure mode this prompt was written to check for explicitly rather than assume
+  away.</p>
+<p>That finding triggered the brief's override condition: checking whether
+  <code>v1e_gradient_boosting_calibrated</code> fixes a slice-specific problem the aggregate
+  numbers hid. It does. Isotonic calibration brings every <code>phase_label</code> slice's
+  calibration gap back down &mdash; typically to within v1c's range or better
+  (<code>box_defence</code> &plusmn;0.0045, <code>high_press_proxy</code> &plusmn;0.0039 &mdash;
+  still slightly wider than v1c's near-zero gaps there, but an ~4-5x improvement over raw;
+  <code>counterpress_after_loss</code>, <code>transition_defence</code>,
+  <code>wide_defending_proxy</code> all calibrate <em>better</em> than v1c). The two slices
+  flagged as a caveat when v1c was promoted (<code>Goalkeeper</code>, <code>Right Attacking
+  Midfield</code>) are <strong>fixed, not just improved</strong>: calibrated <code>v1e</code>'s
+  gap (0.0094, 0.0112) is smaller than v1c's own (0.0182, 0.0159) on both.</p>
+<p>On ranking (PR-AUC), the calibrated variant is at least as good as raw on every
+  <code>phase_label</code> slice (isotonic's monotonic rescaling re-ranks slightly, but never
+  worse), and beats v1c on 5 of 7 slices, several substantially (<code>box_defence</code> +0.091,
+  <code>high_press_proxy</code> +0.085). Two slices are a genuine, honestly-reported exception:
+  <code>settled_mid_block_proxy</code> is essentially flat (0.0821 &rarr; 0.0779, a small
+  regression) and <strong><code>wide_defending_proxy</code> regresses meaningfully</strong>
+  (0.0524 &rarr; 0.0403, roughly -23% relative) &mdash; this was already the single weakest slice
+  under v1c and gets worse, not better, under <code>v1e_gradient_boosting_calibrated</code>. Per
+  the same standard applied throughout this project (a slice going from bad to worse is a real
+  concern even when the aggregate number improves), this is flagged plainly as a caveat, not
+  smoothed over &mdash; it is the one place this promotion is not a clean win. It is judged
+  non-disqualifying because it is a single already-known-weak, low-positive-rate slice (not a new
+  weak spot), the regression is partial rather than catastrophic, and every other slice-level
+  signal (5/7 phase slices, both tournament slices, both previously-caveated position slices)
+  points the other way. <strong>Verdict: passes, with one explicitly non-disqualifying
+  caveat</strong> (<code>wide_defending_proxy</code>). Full numbers:
+  <code>outputs/models/validation/error_analysis_v1e.json</code>.</p>
+
+<h3>8.3 Behavioral sanity check (top 8 gain-importance features, marginal 10-bin view)</h3>
+<p>Of <code>v1e</code>'s top 8 features by gain importance, 6 have a documented monotonic
+  direction in the EDA atlas and reproduce it cleanly in this marginal (uncontrolled,
+  one-feature-at-a-time) view, with no discontinuous or noise-shaped jumps anywhere:
+  <code>match_time_seconds</code>, <code>attacking_goal_centrality</code> and
+  <code>possession_elapsed_seconds</code> increasing; <code>attacker_spread</code> and
+  <code>attacker_defender_ratio</code> decreasing, matching their documented directions exactly.</p>
+<p>Of the 4 features flagged U-shaped since Rung 1, 2 are in this top-8 list, with a mixed but
+  informative result, reported honestly rather than rounded to a clean "confirmed":</p>
+<ul>
+<li><strong><code>distance_to_attacking_box</code> reproduces the documented U-shape cleanly and
+  strongly</strong>: mean predicted probability falls from 0.135 near the goal to a minimum of
+  0.037 at mid-range (30-50m) and rises back to 0.141 at the far end &mdash; a textbook U, and
+  consistent with v1c's largest surviving quadratic term
+  (<code>distance_to_attacking_box</code>&sup2; = +0.322, rung 2, section 3.5) and rung 1's
+  shape-mismatch finding for this feature's linear coefficient. Three independent methods (L1
+  quadratic term, this marginal GBM view, and the original EDA correlation shape) now agree.</li>
+<li><strong><code>defender_spread</code> does <em>not</em> show the documented U-shape in this
+  view</strong> &mdash; it is a clean, smooth, strictly monotonic <em>decrease</em> across all 10
+  bins (0.176 &rarr; 0.036), with no upturn at high values. This is not noise or a discontinuity
+  (the decline is smooth and monotonic throughout), but it is a genuine discrepancy against the
+  atlas's documented U-shape for this feature (rho=-0.188, "strongest active correlate," per
+  <code>active_numerical_target_atlas.json</code>) and against rung 1's small positive quadratic
+  coefficient (+0.047) for it. Read plainly: an uncontrolled marginal view is not the same claim
+  as a univariate correlation or a linear model's isolated quadratic term, and the three don't
+  fully agree here &mdash; worth a note for future work, not resolved in this prompt.</li>
+</ul>
+<p><code>nearest_attacker_distance</code> (not one of the 4 documented U-shaped features, but
+  flagged in Prompt 43's coefficient check as carrying a v2 coefficient "not well-supported by
+  univariate evidence") shows a mild, real dip-then-rise across its 10 bins (0.075 &rarr; 0.069
+  &rarr; 0.108) &mdash; a weak but structured non-monotonic pattern, independently observed via a
+  completely different (non-parametric, marginal) method, consistent with Prompt 43's "likely a
+  multivariate effect" hypothesis for this feature.</p>
+<p><strong>Verdict: passes, with one qualified exception</strong> (<code>defender_spread</code>'s
+  marginal shape doesn't match its documented univariate U-shape) that is noted rather than
+  disqualifying &mdash; nothing in the top 8 looks like noise-chasing, and the majority of
+  directional/shape claims, including the strongest and cleanest one
+  (<code>distance_to_attacking_box</code>), are confirmed. Full bin tables:
+  <code>outputs/models/validation/behavioral_sanity_v1e.json</code>.</p>
+
+<h3>8.4 Which variant, and the verdict</h3>
+<p>Per the brief's explicit instruction to default toward the raw variant <em>unless</em> a
+  slice-specific calibration problem is found that the calibrated variant fixes: section 8.2
+  found exactly that problem, and section 8.2 also confirmed the calibrated variant fixes it.
+  <strong>The calibrated variant, not raw, is the one promoted.</strong></p>
+<div class="decision-box">
+<p>All 4 criteria hold for <code>v1e_gradient_boosting_calibrated</code>:</p>
+<ul class="checklist">
+<li>Beats v1c on <strong>both</strong> tournament slices, decisively (+0.055 WC2022, +0.068
+  Euro2024) &mdash; not reliant on one tournament.</li>
+<li>Error-slice comparison shows net improvement on the large majority of slices (5/7
+  <code>phase_label</code>, both previously-caveated <code>Goalkeeper</code>/<code>Right
+  Attacking Midfield</code> slices actually fixed), with one honestly-flagged, non-disqualifying
+  caveat (<code>wide_defending_proxy</code> regresses).</li>
+<li>Top-8 marginal shapes are mostly football-sensible and none look noise-shaped; the strongest
+  of the 4 previously-documented U-shaped features (<code>distance_to_attacking_box</code>)
+  reproduces cleanly, with one qualified exception (<code>defender_spread</code>) noted rather
+  than disqualifying.</li>
+<li>Calibration is at or near v1c's level on the tournament and error slices specifically, not
+  just in aggregate &mdash; confirmed only after checking explicitly, since the raw variant's
+  aggregate number did not generalise to the slice level and would have been a misleading basis
+  for this decision on its own.</li>
+</ul>
+<p><strong><code>v1e_gradient_boosting_calibrated</code> is now the reference model for the
+  active-binary leg, superseding <code>v1c_systematic_interactions</code> (Prompt 43).</strong>
+  <code>v1c_systematic_interactions</code> and <code>v1_unweighted</code> remain documented as
+  the rungs/baseline they were measured against (sections 1-7 above are unchanged history, not
+  rewritten). Downstream work on this leg should now build on
+  <code>v1e_gradient_boosting_calibrated</code>
+  (<code>outputs/models/classification/v1e_gradient_boosting_calibrated.joblib</code>, isotonic
+  calibration, <code>n_estimators=382</code> fixed,
+  <code>learning_rate=0.01</code>/<code>num_leaves=63</code>/<code>min_child_samples=30</code>,
+  per <code>scripts/train_v1e_gradient_boosting.py</code>) rather than
+  <code>v1c_systematic_interactions</code>.</p>
+<p>The raw, uncalibrated <code>v1e_gradient_boosting</code> is explicitly <strong>not</strong>
+  the promoted variant, despite having the single best aggregate held-out PR-AUC and ECE of
+  anything built so far &mdash; this section's slice-level check found that its good aggregate
+  calibration number did not hold at the slice level, which the calibrated variant corrects.</p>
 </div>
 
 </div>

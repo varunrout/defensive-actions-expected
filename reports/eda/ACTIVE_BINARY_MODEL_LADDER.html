@@ -280,11 +280,13 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <div class="wrap">
 <div class="article">
 <div class="deviation-box">
-<p><strong>Status update (Prompt 43):</strong> Rung 2 (<code>v1c_systematic_interactions</code>)
-  has been promoted to standing reference model for the active-binary leg, replacing
-  <code>v1_unweighted</code>. See the full promotion decision in
+<p><strong>Status update (Prompt 46):</strong> Rung 4's calibrated variant
+  (<code>v1e_gradient_boosting_calibrated</code>) has been promoted to standing reference model
+  for the active-binary leg, superseding Rung 2's <code>v1c_systematic_interactions</code>
+  (itself promoted in Prompt 43, replacing <code>v1_unweighted</code>). See the full promotion
+  decision in
   <a href="ACTIVE_BINARY_MODELLING_CLOSEOUT.html" target="viewer">ACTIVE_BINARY_MODELLING_CLOSEOUT.html</a>
-  section 7.</p>
+  section 8.</p>
 </div>
 <p>Scope: Rung 1 onward on the active-binary leg (<code>target_future_shot_10s</code>). Rung 0 (the 4
   locked variants, their CV/held-out results, and the Prompt 38 post-lock validation) lives in
@@ -935,6 +937,20 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   section reports the ladder-gate result only. Four candidates now exist across the ladder (v1c,
   v1d, v1e raw, v1e calibrated); which one, if any, is put through a Prompt-43-style promotion
   audit is a separate decision for Varun and a later prompt, not decided here.</p>
+<p><strong>Update (Prompt 46): promotion confirmed, calibrated variant, not raw.</strong> The full
+  promotion audit found that raw <code>v1e</code>'s good aggregate held-out ECE did not
+  generalise to the slice level &mdash; its CV-OOF calibration gap on <code>phase_label</code>
+  slices was 6-19x larger than v1c's on 6 of 7 slices, a problem the aggregate number hid. The
+  calibrated variant fixes this (bringing slice-level calibration to within v1c's range or better
+  on most slices, and actually fixing the <code>Goalkeeper</code>/<code>Right Attacking
+  Midfield</code> calibration caveat noted when v1c was promoted) while keeping the ranking gain
+  on the large majority of slices, with one honestly-flagged exception
+  (<code>wide_defending_proxy</code> regresses, judged non-disqualifying).
+  <strong><code>v1e_gradient_boosting_calibrated</code> is now the standing reference
+  model</strong> for the active-binary leg, superseding <code>v1c_systematic_interactions</code>.
+  Full promotion evidence and verdict:
+  <a href="ACTIVE_BINARY_MODELLING_CLOSEOUT.html" target="viewer">ACTIVE_BINARY_MODELLING_CLOSEOUT.html</a>
+  section 8.</p>
 
 </div>
 </div>

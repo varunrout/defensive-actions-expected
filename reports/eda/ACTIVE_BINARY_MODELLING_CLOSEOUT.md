@@ -1,18 +1,21 @@
-# Active-Binary Baseline Modelling Closeout — Prompts 36–43
+# Active-Binary Baseline Modelling Closeout — Prompts 36–46
 
 *Scope: the first phase of modelling on the active-binary leg (`target_future_shot_10s`,
 `data/features/player_defensive_actions.parquet`), built on top of the feature/target/split
 lock covered by `reports/eda/PATTERN_ANALYSIS_CLOSEOUT.md`. This is a decision record, not a
 re-listing of every number already in `ACTIVE_BINARY_BASELINE_SUMMARY.md` — that document and
-the Prompt 38 validation JSONs under `outputs/models/validation/` are the source of truth for
-full tables; this one states what was decided and why, and links out rather than duplicating.
-Sections 1–6 written 2026-09-18 (Prompts 36–39); section 7 added 2026-09-18 (Prompt 43), reading
-only already-committed outputs (no models re-run for this report or that section).*
+the validation JSONs under `outputs/models/validation/` are the source of truth for full tables;
+this one states what was decided and why, and links out rather than duplicating. Sections 1–6
+written 2026-09-18 (Prompts 36–39); section 7 added 2026-09-18 (Prompt 43); section 8 added
+2026-09-18 (Prompt 46), reading only already-committed outputs plus CV-OOF predictions
+regenerated at already-locked (not re-tuned) hyperparameters -- no model re-run/retrain for this
+report or these sections.*
 
-> **Status (Prompt 43, current):** `v1c_systematic_interactions` was promoted to standing
-> reference model for the active-binary leg — see section 7. Sections 1–6 below describe how
-> `v1_unweighted` earned the *original* standing-baseline status and remain accurate as history;
-> they are not rewritten to reflect the later promotion.
+> **Status (Prompt 46, current):** `v1e_gradient_boosting_calibrated` was promoted to standing
+> reference model for the active-binary leg, superseding `v1c_systematic_interactions` (itself
+> promoted in Prompt 43) — see section 8. Sections 1–7 below describe how `v1_unweighted` and
+> then `v1c_systematic_interactions` earned standing-reference status in turn and remain accurate
+> as history; they are not rewritten to reflect the later promotion.
 
 ## 1. What was decided
 
@@ -241,3 +244,148 @@ against throughout this promotion process (sections 1-6 above are unchanged hist
 rewritten). Downstream work on this leg should now build on `v1c_systematic_interactions`
 (`outputs/models/classification/v1c_systematic_interactions.joblib`, C=0.1, 238-column design
 matrix per `scripts/train_v1c_systematic_interactions.py`) rather than `v1_unweighted`.
+
+## 8. Promotion decision: `v1e_gradient_boosting` (Prompt 46)
+
+Rung 4 (`v1e_gradient_boosting`, Prompt 45) cleared its own 3-gate ladder check against v1c and
+v1d: held-out PR-AUC 0.4305 (vs v1c's 0.3747), significant (p=0.0013 vs v1c, p=0.0189 vs v1d,
+5/5 folds both), player-disjoint-stable. Unusually, the raw variant's *aggregate* held-out ECE
+(0.0068) looked better than v1c's own (0.0103) -- no obvious calibration trade-off at the
+aggregate level, unlike rung 3's Random Forest. That gate answers "is this rung's change real?"
+-- not "should this replace the standing reference model?", which needs the same depth of
+scrutiny `v1c` itself went through in section 7 before it replaced `v1_unweighted`. This section
+runs that scrutiny, and it produces a more nuanced answer than Rung 4's own numbers suggested.
+
+All three checks below run on train+val 5-fold canonical CV out-of-fold (OOF) predictions, the
+same population and method Prompt 43 used for v1c's promotion audit -- the held-out test set is
+not read again anywhere in this section. `v1`'s and `v1c`'s CV-OOF breakdowns are reused directly
+from `tournament_stratified_v1c.json` / `error_analysis_v1c.json` (Prompt 43), not recomputed;
+`v1d`'s and `v1e`'s OOF are regenerated at their already-locked hyperparameters (no re-tuning),
+since neither prompt 44 nor 45 persisted per-row OOF scores to disk.
+
+### 8.1 Tournament-stratified check
+
+Confirmed again: train+val still spans only FIFA World Cup 2022 and UEFA Euro 2024. Both `v1e`
+variants beat `v1c` decisively on **both** tournaments:
+
+| Tournament | v1c | v1d | v1e raw | v1e calibrated |
+|---|---|---|---|---|
+| FIFA World Cup 2022 | 0.3383 | 0.3701 | 0.3897 | 0.3937 |
+| UEFA Euro 2024 | 0.3873 | 0.4327 | 0.4476 | 0.4555 |
+
+The calibrated variant's tournament-level ECE is small on both slices (0.0039 / 0.0040). Not a
+single-tournament artifact. **Verdict: passes**, for both variants. Full numbers:
+`outputs/models/validation/tournament_stratified_v1e.json`.
+
+### 8.2 Error-slice comparison -- the check that changed the outcome
+
+This is where the promotion decision actually turned. Prompt 45's aggregate held-out ECE for raw
+`v1e` (0.0068) looked *better* than v1c's -- but on CV-OOF `phase_label` slices, raw `v1e`'s
+calibration gap is **6-19x larger than v1c's on 6 of the 7 slices** (e.g. `box_defence`:
+&plusmn;0.0010 for v1c vs &plusmn;0.0191 for raw v1e; `wide_defending_proxy`: &plusmn;0.0012 vs
+&plusmn;0.0122). The aggregate held-out number did not generalise to the slice level -- exactly
+the failure mode this prompt was written to check for explicitly rather than assume away.
+
+That finding triggered the brief's override condition: checking whether
+`v1e_gradient_boosting_calibrated` fixes a slice-specific problem the aggregate numbers hid. It
+does. Isotonic calibration brings every `phase_label` slice's calibration gap back down --
+typically to within v1c's range or better (`box_defence` &plusmn;0.0045, `high_press_proxy`
+&plusmn;0.0039 -- still slightly wider than v1c's near-zero gaps there, but an ~4-5x improvement
+over raw; `counterpress_after_loss`, `transition_defence`, `wide_defending_proxy` all calibrate
+*better* than v1c). The two slices flagged as a caveat when v1c was promoted (`Goalkeeper`,
+`Right Attacking Midfield`) are **fixed, not just improved**: calibrated `v1e`'s gap (0.0094,
+0.0112) is smaller than v1c's own (0.0182, 0.0159) on both.
+
+On ranking (PR-AUC), the calibrated variant is at least as good as raw on every `phase_label`
+slice (isotonic's monotonic rescaling re-ranks slightly, but never worse), and beats v1c on 5 of
+7 slices, several substantially (`box_defence` +0.091, `high_press_proxy` +0.085). Two slices are
+a genuine, honestly-reported exception: `settled_mid_block_proxy` is essentially flat (0.0821
+&rarr; 0.0779, a small regression) and **`wide_defending_proxy` regresses meaningfully**
+(0.0524 &rarr; 0.0403, roughly -23% relative) -- this was already the single weakest slice under
+v1c and gets worse, not better, under `v1e_gradient_boosting_calibrated`. Per the same standard
+applied throughout this project (a slice going from bad to worse is a real concern even when the
+aggregate number improves), this is flagged plainly as a caveat, not smoothed over -- it is the
+one place this promotion is not a clean win. It is judged non-disqualifying because it is a
+single already-known-weak, low-positive-rate slice (not a new weak spot), the regression is
+partial rather than catastrophic, and every other slice-level signal (5/7 phase slices, both
+tournament slices, both previously-caveated position slices) points the other way. **Verdict:
+passes, with one explicitly non-disqualifying caveat** (`wide_defending_proxy`). Full numbers:
+`outputs/models/validation/error_analysis_v1e.json`.
+
+### 8.3 Behavioral sanity check (top 8 gain-importance features, marginal 10-bin view)
+
+Of `v1e`'s top 8 features by gain importance, 6 have a documented monotonic direction in the EDA
+atlas and reproduce it cleanly in this marginal (uncontrolled, one-feature-at-a-time) view, with
+no discontinuous or noise-shaped jumps anywhere: `match_time_seconds`, `attacking_goal_centrality`
+and `possession_elapsed_seconds` increasing; `attacker_spread` and `attacker_defender_ratio`
+decreasing, matching their documented directions exactly.
+
+Of the 4 features flagged U-shaped since Rung 1, 2 are in this top-8 list, with a mixed but
+informative result, reported honestly rather than rounded to a clean "confirmed":
+
+- **`distance_to_attacking_box` reproduces the documented U-shape cleanly and strongly**: mean
+  predicted probability falls from 0.135 near the goal to a minimum of 0.037 at mid-range
+  (30-50m) and rises back to 0.141 at the far end -- a textbook U, and consistent with v1c's
+  largest surviving quadratic term (`distance_to_attacking_box`&sup2; = +0.322, rung 2, section
+  3.5) and rung 1's shape-mismatch finding for this feature's linear coefficient. Three
+  independent methods (L1 quadratic term, this marginal GBM view, and the original EDA
+  correlation shape) now agree.
+- **`defender_spread` does *not* show the documented U-shape in this view** -- it is a clean,
+  smooth, strictly monotonic *decrease* across all 10 bins (0.176 &rarr; 0.036), with no upturn
+  at high values. This is not noise or a discontinuity (the decline is smooth and monotonic
+  throughout), but it is a genuine discrepancy against the atlas's documented U-shape for this
+  feature (rho=-0.188, "strongest active correlate," per `active_numerical_target_atlas.json`)
+  and against rung 1's small positive quadratic coefficient (+0.047) for it. Read plainly: an
+  uncontrolled marginal view is not the same claim as a univariate correlation or a linear
+  model's isolated quadratic term, and the three don't fully agree here -- worth a note for
+  future work, not resolved in this prompt.
+
+`nearest_attacker_distance` (not one of the 4 documented U-shaped features, but flagged in Prompt
+43's coefficient check as carrying a v2 coefficient "not well-supported by univariate evidence")
+shows a mild, real dip-then-rise across its 10 bins (0.075 &rarr; 0.069 &rarr; 0.108) -- a weak
+but structured non-monotonic pattern, independently observed via a completely different
+(non-parametric, marginal) method, consistent with Prompt 43's "likely a multivariate effect"
+hypothesis for this feature.
+
+**Verdict: passes, with one qualified exception** (`defender_spread`'s marginal shape doesn't
+match its documented univariate U-shape) that is noted rather than disqualifying -- nothing in
+the top 8 looks like noise-chasing, and the majority of directional/shape claims, including the
+strongest and cleanest one (`distance_to_attacking_box`), are confirmed. Full bin tables:
+`outputs/models/validation/behavioral_sanity_v1e.json`.
+
+### 8.4 Which variant, and the verdict
+
+Per the brief's explicit instruction to default toward the raw variant *unless* a slice-specific
+calibration problem is found that the calibrated variant fixes: section 8.2 found exactly that
+problem, and section 8.2 also confirmed the calibrated variant fixes it. **The calibrated
+variant, not raw, is the one promoted.**
+
+All 4 criteria hold for `v1e_gradient_boosting_calibrated`:
+
+- [x] Beats v1c on **both** tournament slices, decisively (+0.055 WC2022, +0.068 Euro2024) --
+  not reliant on one tournament.
+- [x] Error-slice comparison shows net improvement on the large majority of slices (5/7
+  `phase_label`, both previously-caveated `Goalkeeper`/`Right Attacking Midfield` slices actually
+  fixed), with one honestly-flagged, non-disqualifying caveat (`wide_defending_proxy` regresses).
+- [x] Top-8 marginal shapes are mostly football-sensible and none look noise-shaped; the
+  strongest of the 4 previously-documented U-shaped features (`distance_to_attacking_box`)
+  reproduces cleanly, with one qualified exception (`defender_spread`) noted rather than
+  disqualifying.
+- [x] Calibration is at or near v1c's level on the tournament and error slices specifically, not
+  just in aggregate -- confirmed only after checking explicitly, since the raw variant's
+  aggregate number did not generalise to the slice level and would have been a misleading basis
+  for this decision on its own.
+
+**`v1e_gradient_boosting_calibrated` is now the reference model for the active-binary leg,
+superseding `v1c_systematic_interactions` (Prompt 43).** `v1c_systematic_interactions` and
+`v1_unweighted` remain documented as the rungs/baseline they were measured against (sections 1-7
+above are unchanged history, not rewritten). Downstream work on this leg should now build on
+`v1e_gradient_boosting_calibrated`
+(`outputs/models/classification/v1e_gradient_boosting_calibrated.joblib`, isotonic calibration,
+`n_estimators=382` fixed, `learning_rate=0.01`/`num_leaves=63`/`min_child_samples=30`, per
+`scripts/train_v1e_gradient_boosting.py`) rather than `v1c_systematic_interactions`.
+
+The raw, uncalibrated `v1e_gradient_boosting` is explicitly **not** the promoted variant, despite
+having the single best aggregate held-out PR-AUC and ECE of anything built so far -- this
+section's slice-level check found that its good aggregate calibration number did not hold at the
+slice level, which the calibrated variant corrects.

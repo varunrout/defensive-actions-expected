@@ -1,8 +1,9 @@
 # Active-Binary Model Ladder
 
-> **Status update (Prompt 43):** Rung 2 (`v1c_systematic_interactions`) has been promoted to
-> standing reference model for the active-binary leg, replacing `v1_unweighted`. See the full
-> promotion decision in `reports/eda/ACTIVE_BINARY_MODELLING_CLOSEOUT.md` section 7.
+> **Status update (Prompt 46):** Rung 4's calibrated variant (`v1e_gradient_boosting_calibrated`)
+> has been promoted to standing reference model for the active-binary leg, superseding Rung 2's
+> `v1c_systematic_interactions` (itself promoted in Prompt 43, replacing `v1_unweighted`). See the
+> full promotion decision in `reports/eda/ACTIVE_BINARY_MODELLING_CLOSEOUT.md` section 8.
 
 *Split out of `ACTIVE_BINARY_BASELINE_SUMMARY.md` (Prompt 42) so the locked Rung 0 baseline
 document doesn't keep growing as more rungs are tried. Rung 0 -- the 4 locked variants
@@ -652,3 +653,15 @@ Per the brief, **no promotion audit is run in this prompt** for either `v1e_grad
 candidates now exist across the ladder (v1c, v1d, v1e raw, v1e calibrated); which one, if any, is
 put through a Prompt-43-style promotion audit is a separate decision for Varun and a later prompt,
 not decided here.
+
+**Update (Prompt 46): promotion confirmed, calibrated variant, not raw.** The full promotion
+audit found that raw `v1e`'s good aggregate held-out ECE did not generalise to the slice level --
+its CV-OOF calibration gap on `phase_label` slices was 6-19x larger than v1c's on 6 of 7 slices,
+a problem the aggregate number hid. The calibrated variant fixes this (bringing slice-level
+calibration to within v1c's range or better on most slices, and actually fixing the
+`Goalkeeper`/`Right Attacking Midfield` calibration caveat noted when v1c was promoted) while
+keeping the ranking gain on the large majority of slices, with one honestly-flagged exception
+(`wide_defending_proxy` regresses, judged non-disqualifying). **`v1e_gradient_boosting_calibrated`
+is now the standing reference model** for the active-binary leg, superseding
+`v1c_systematic_interactions`. Full promotion evidence and verdict:
+`reports/eda/ACTIVE_BINARY_MODELLING_CLOSEOUT.md` section 8.
