@@ -1,6 +1,6 @@
 """CLI entrypoint: render {active,passive}_numerical_target_atlas.json as
 self-contained HTML reports, in the same shared design system as the other
-reports/eda/*.html files (reuses render.html_shell + the finding/card
+reports/analysis/shot_target/*.html files (reuses render.html_shell + the finding/card
 vocabulary already established by the Category Atlas / Flag Ledger).
 
 Usage:
@@ -236,8 +236,8 @@ for visibility only.</p>""",
 
 def main() -> None:
     for dataset_key in ("active", "passive"):
-        in_path = REPO_ROOT / "reports" / "eda" / f"{dataset_key}_numerical_target_atlas.json"
-        out_path = REPO_ROOT / "reports" / "eda" / f"{dataset_key}_numerical_target_atlas.html"
+        in_path = REPO_ROOT / "reports" / "analysis" / "shot_target" / f"{dataset_key}_numerical_target_atlas.json"
+        out_path = REPO_ROOT / "reports" / "analysis" / "shot_target" / f"{dataset_key}_numerical_target_atlas.html"
         data = json.loads(in_path.read_text(encoding="utf-8"))
         html = build_report(data)
         html = html.replace("</style>", NUM_TARGET_CSS + "</style>", 1)

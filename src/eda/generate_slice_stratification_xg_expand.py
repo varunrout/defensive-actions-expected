@@ -5,7 +5,7 @@ slice stratification.
 
 Part A: the exact same 104-cell (feature, slicer) grid as prompt 25
 (generate_slice_stratification_expand.build_plan(), unchanged), computed
-against target_future_xg_10s / reports/eda_xg/ instead of the binary target.
+against target_future_xg_10s / reports/analysis/xg_target/ instead of the binary target.
 
 Same correction as prompt 25 (both prompts reuse the same premise, verified
 once against the live feature_config.py in that script's docstring):
@@ -50,7 +50,7 @@ from src.eda.generate_slice_stratification_expand import build_plan
 from src.eda.generate_slice_stratification_xg import _slice_one
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "SLICE_STRATIFICATION.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "SLICE_STRATIFICATION.json"
 
 
 def _given_shot_fields_for_category(

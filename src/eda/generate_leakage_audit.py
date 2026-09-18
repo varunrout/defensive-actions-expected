@@ -42,7 +42,7 @@ from scipy.stats import chi2_contingency
 from src.eda.feature_config import PASSIVE
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "LEAKAGE_AUDIT.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "LEAKAGE_AUDIT.json"
 
 TARGET = "target_future_shot_10s"
 NAME_PATTERNS = ["future", "next", "avoided", "outcome", "after"]

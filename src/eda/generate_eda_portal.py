@@ -1,4 +1,4 @@
-"""CLI entrypoint: build a single-tab portal shell (reports/eda/INDEX.html)
+"""CLI entrypoint: build a single-tab portal shell (reports/analysis/shot_target/INDEX.html)
 that lists every formal EDA report in one sidebar, grouped by pipeline
 stage, each opening in an embedded pane -- so reading through the whole
 EDA trail never requires more than one browser tab.
@@ -6,7 +6,7 @@ EDA trail never requires more than one browser tab.
 Pure HTML navigation (<a target="viewer">, no JavaScript required) so it
 works even with scripts disabled; a small amount of JS only handles
 highlighting the active link. The report list is generated from what's
-actually on disk in reports/eda/, not a hand-maintained list that can drift
+actually on disk in reports/analysis/shot_target/, not a hand-maintained list that can drift
 -- any file present but not in REPORT_GROUPS below is still listed, under
 "Other reports", so nothing silently disappears from the portal.
 
@@ -21,7 +21,7 @@ from pathlib import Path
 from src.eda.render import FONT_LINKS, esc
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-REPORTS_DIR = REPO_ROOT / "reports" / "eda"
+REPORTS_DIR = REPO_ROOT / "reports" / "analysis" / "shot_target"
 OUTPUT_PATH = REPORTS_DIR / "INDEX.html"
 
 DEFAULT_REPORT = "MASTER_FINDINGS.html"

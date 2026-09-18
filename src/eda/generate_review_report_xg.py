@@ -1,4 +1,4 @@
-"""CLI entrypoint: render reports/eda_xg/REVIEW_ANALYSIS.json as a
+"""CLI entrypoint: render reports/analysis/xg_target/REVIEW_ANALYSIS.json as a
 self-contained HTML report -- the xG counterpart to REVIEW_METHODOLOGY.html.
 
 Usage:
@@ -14,8 +14,8 @@ from src.eda import render
 from src.eda.render import esc
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-IN_PATH = REPO_ROOT / "reports" / "eda_xg" / "REVIEW_ANALYSIS.json"
-OUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "REVIEW_METHODOLOGY.html"
+IN_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "REVIEW_ANALYSIS.json"
+OUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "REVIEW_METHODOLOGY.html"
 
 
 def _evidence_row(r: dict) -> str:

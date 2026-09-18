@@ -3,7 +3,7 @@ same 3 has_option_2/has_option_3 confound tests, against mean xG instead of
 shot-rate percentage, each with a given_shot sub-object (same pattern
 generate_confound_analysis_xg.py already established).
 
-reports/eda_xg/CONFOUND_ANALYSIS.json currently only has the original 2
+reports/analysis/xg_target/CONFOUND_ANALYSIS.json currently only has the original 2
 tests mirrored (never received prompt 24 Part A's 5 additions) -- this is
 the first Part-A-style extension applied to that file, noted explicitly in
 the output rather than left to look like an established pattern.
@@ -25,7 +25,7 @@ from src.eda.generate_confound_analysis_part_d import TEST_1, TEST_2, TEST_3
 from src.eda.generate_confound_analysis_xg import SHOT_COL, TARGET_XG, _stratified_table_xg
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "CONFOUND_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "CONFOUND_ANALYSIS.json"
 
 
 def _marginal_table_xg_boolean(df: pd.DataFrame, col: str, labels: list[str]) -> tuple[pd.Series, list[dict]]:
@@ -84,7 +84,7 @@ def main() -> None:
     existing["tests"] = existing["tests"] + new_tests
     existing["part_d_extension_note"] = (
         "3 tests added by prompt 29 (xG mirror of the binary-target has_option_2/3 confound tests). "
-        "reports/eda_xg/CONFOUND_ANALYSIS.json had never received prompt 24 Part A's 5-test extension -- this is "
+        "reports/analysis/xg_target/CONFOUND_ANALYSIS.json had never received prompt 24 Part A's 5-test extension -- this is "
         "the FIRST Part-A-style extension applied to this file, not a continuation of an established xg pattern. "
         "The 2 pre-existing entries above this note are byte-for-byte unchanged."
     )

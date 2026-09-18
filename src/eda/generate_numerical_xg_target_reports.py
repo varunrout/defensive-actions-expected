@@ -1,4 +1,4 @@
-"""CLI entrypoint: render reports/eda_xg/{active,passive}_numerical_target_atlas.json
+"""CLI entrypoint: render reports/analysis/xg_target/{active,passive}_numerical_target_atlas.json
 as self-contained HTML reports. Visually the same system as the binary-target
 version (generate_numerical_target_reports.py, reused CSS/markup shape), but
 values are "mean xG" not "shot rate %" -- the binary version's report script
@@ -19,7 +19,7 @@ from src.eda.feature_config import DATASETS
 from src.eda.generate_numerical_target_reports import NUM_TARGET_CSS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR = REPO_ROOT / "reports" / "eda_xg"
+OUT_DIR = REPO_ROOT / "reports" / "analysis" / "xg_target"
 
 
 def _bin_rows_html(bins: list[dict]) -> str:
@@ -226,7 +226,7 @@ much above/below the middle third; monotonic increasing/decreasing if |Spearman 
 otherwise no-clear-pattern. <b>Train/test consistency</b> reuses the canonical match-grouped split
 (outputs/models/splits/match_assignment.json) -- checked whenever |rho| >= {data['rho_threshold']} or the bin
 range exceeds {data['range_trigger_ratio']}x the overall mean. This is a separate output set from the
-binary-target atlas (reports/eda/) -- different target, different scale, different thresholds. Does not change
+binary-target atlas (reports/analysis/shot_target/) -- different target, different scale, different thresholds. Does not change
 feature_config.py's locked candidate list.</p>""",
     )
 

@@ -37,8 +37,8 @@ from src.eda.feature_config_v2_historical import DATASETS_V2_HISTORICAL as DATAS
 from src.eda.feature_config_v2 import FAMILY_GROUPS, PART_B_RESOLVED_PAIRS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CORRELATION_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS_V2.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "REVIEW_ANALYSIS_V2.json"
+CORRELATION_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CORRELATION_ANALYSIS_V2.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "REVIEW_ANALYSIS_V2.json"
 
 TYPE1_R_THRESHOLD = 0.75
 TYPE2_R_THRESHOLD = 0.5

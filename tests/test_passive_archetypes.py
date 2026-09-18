@@ -200,7 +200,7 @@ def test_real_dataset_every_bucket_row_labeled_and_unclassified_rows_null():
 
 def test_real_parquet_and_report_cluster_mapping_match_exactly():
     parquet_path = REPO_ROOT / "data" / "features" / "passive_defense.parquet"
-    report_path = REPO_ROOT / "reports" / "eda" / "PASSIVE_ARCHETYPES.json"
+    report_path = REPO_ROOT / "reports" / "analysis" / "shot_target" / "PASSIVE_ARCHETYPES.json"
     if not parquet_path.exists() or not report_path.exists():
         pytest.skip("Built passive_defense.parquet / PASSIVE_ARCHETYPES.json not present in this environment.")
     df = pd.read_parquet(parquet_path, columns=["defender_functional_role", CLUSTER_ID_COLUMN, CLUSTER_NAME_COLUMN])

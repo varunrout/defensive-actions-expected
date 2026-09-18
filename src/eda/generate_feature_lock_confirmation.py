@@ -20,9 +20,9 @@ from pathlib import Path
 from src.eda.feature_config import ACTIVE, PASSIVE
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CORRELATION_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS.json"
-REVIEW_PATH = REPO_ROOT / "reports" / "eda" / "REVIEW_ANALYSIS.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "FEATURE_LOCK_CONFIRMATION.json"
+CORRELATION_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CORRELATION_ANALYSIS.json"
+REVIEW_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "REVIEW_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "FEATURE_LOCK_CONFIRMATION.json"
 
 EXPECTED_ACTIVE_COUNT = 34
 EXPECTED_PASSIVE_COUNT = 38

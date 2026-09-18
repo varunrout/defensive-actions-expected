@@ -7,7 +7,7 @@ features binned into quartiles together (4x4 grid), checking whether
 feature A's marginal gradient is stable across feature B's levels.
 
 Step 1 -- candidate selection, from evidence already in hand:
-Read reports/eda/SLICE_STRATIFICATION.json's cross_dataset_summary.
+Read reports/analysis/shot_target/SLICE_STRATIFICATION.json's cross_dataset_summary.
 genuine_divergences (320 entries) and collapse each dataset's slicers to
 prompt 27's CONSENSUS redundancy clusters (both metrics agree) before
 counting how many independent slicers each feature diverges on -- active
@@ -61,7 +61,7 @@ import pandas as pd
 from src.eda.feature_config import ACTIVE, PASSIVE
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "FEATURE_INTERACTION_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "FEATURE_INTERACTION_ANALYSIS.json"
 
 TARGET = "target_future_shot_10s"
 Q = 4
@@ -324,7 +324,7 @@ def main() -> None:
         },
         "candidate_selection": (
             "Top 5 active + top 5 passive features ranked by count of DISTINCT slicers (from "
-            "reports/eda/SLICE_STRATIFICATION.json's cross_dataset_summary.genuine_divergences) they diverge on, "
+            "reports/analysis/shot_target/SLICE_STRATIFICATION.json's cross_dataset_summary.genuine_divergences) they diverge on, "
             "after collapsing prompt 27's consensus-redundant slicer clusters to one representative each (active: "
             "phase_label_prev_event folds into phase_label; position_group -- not itself a locked feature, only "
             "used as a slicer in prompt 24's original cells -- folds into position, Cramer's V=1.0 per "

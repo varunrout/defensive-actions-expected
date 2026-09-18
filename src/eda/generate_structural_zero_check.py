@@ -21,7 +21,7 @@ import pandas as pd
 from src.eda.feature_config import ACTIVE, PASSIVE
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "STRUCTURAL_ZERO_CHECK.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "STRUCTURAL_ZERO_CHECK.json"
 
 SHOT_COL = "target_future_shot_10s"
 XG_COL = "target_future_xg_10s"

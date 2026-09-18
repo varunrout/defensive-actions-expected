@@ -35,7 +35,7 @@ from src.eda.generate_feature_interaction_analysis import PAIRS, Q, _bin_labeled
 from src.eda.generate_numerical_xg_target_analysis import FLAT_MARGIN_RATIO, SHOT_COL, TARGET
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "FEATURE_INTERACTION_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "FEATURE_INTERACTION_ANALYSIS.json"
 
 SUBSTITUTIVE_RATIO_MAX = 0.3
 ADDITIVE_MAGNITUDE_RATIO_MAX = 2.0
@@ -239,7 +239,7 @@ def main() -> None:
             ),
         },
         "candidate_selection": (
-            "Same 10 pairs as reports/eda/FEATURE_INTERACTION_ANALYSIS.json (binary target) -- see that file's "
+            "Same 10 pairs as reports/analysis/shot_target/FEATURE_INTERACTION_ANALYSIS.json (binary target) -- see that file's "
             "candidate_selection field and this repo's generate_feature_interaction_analysis.py module docstring "
             "for the full ranking derivation and football rationale per pair. Computed here against "
             "target_future_xg_10s for direct comparability, with a shot-conditional panel alongside the "

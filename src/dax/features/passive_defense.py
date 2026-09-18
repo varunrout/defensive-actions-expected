@@ -321,7 +321,7 @@ def _ball_relative_option_features(lane_occlusion: dict[str, Any], ball_x: float
 
     top_option_n_target_x/y are absolute pitch coordinates, which is why they
     correlate strongly with ball_x and with each other (correlation analysis:
-    reports/eda/CORRELATION_ANALYSIS.json) -- the same absolute position means
+    reports/analysis/shot_target/CORRELATION_ANALYSIS.json) -- the same absolute position means
     something different depending on where the ball is. These relative
     features carry the same underlying information without that confound.
     The raw _target_x/_target_y columns are kept alongside these (not

@@ -27,7 +27,7 @@ from src.eda.render import esc
 from src.eda.feature_config import ACTIVE, PASSIVE
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-REPORTS_DIR = REPO_ROOT / "reports" / "eda"
+REPORTS_DIR = REPO_ROOT / "reports" / "analysis" / "shot_target"
 OUTPUT_PATH = REPORTS_DIR / "EDA_PIPELINE_LOG.html"
 
 # One entry per stage that touched the candidate feature lists or is a named

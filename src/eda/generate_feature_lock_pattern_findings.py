@@ -3,7 +3,7 @@ findings into both lock-confirmation reports (extends them in place, does
 not create a third file).
 
 Premise correction, verified before writing anything: this prompt asks to
-pull from reports/eda/PATTERN_ANALYSIS_CLOSEOUT.md (prompt 32) -- that file
+pull from reports/analysis/shot_target/PATTERN_ANALYSIS_CLOSEOUT.md (prompt 32) -- that file
 does not exist (prompt 32 was never run in this session). The prompt's own
 "Method" section already requires re-reading every figure from its live
 source JSON rather than trusting the closeout doc, so this script does
@@ -15,10 +15,10 @@ claims tournament stability (Sec 4) and numeric interaction analysis
 computed independently per target and produce DIFFERENT verdicts on some
 features/pairs:
   - Tournament stability: 3/10 features differ between
-    reports/eda/TOURNAMENT_STABILITY_CHECK.json and the xg version
+    reports/analysis/shot_target/TOURNAMENT_STABILITY_CHECK.json and the xg version
     (defenders_within_5m, local_numerical_balance_5m, attackers_within_5m).
   - Numeric interaction: 6/10 pairs differ between
-    reports/eda/FEATURE_INTERACTION_ANALYSIS.json and the xg version's
+    reports/analysis/shot_target/FEATURE_INTERACTION_ANALYSIS.json and the xg version's
     unconditional classification.
 Both are therefore reported IN FULL in both lock-confirmation files (not
 cross-referenced), each scoped to its own target's actual numbers.
@@ -30,7 +30,7 @@ xg versions being literal mirrors (generate_correlation_vif_xg_mirror.py).
 These ARE cross-referenced from the xg file to the binary file rather than
 duplicated.
 
-Third correction: the prompt says reports/eda_xg/CONFOUND_ANALYSIS.json has
+Third correction: the prompt says reports/analysis/xg_target/CONFOUND_ANALYSIS.json has
 "2 tests" needing reproduction-confirmation. Reading it directly finds 5
 (prompt 29 already extended it with 3 has_option_2/3 tests) -- all 5 are
 reported, not just the original 2.
@@ -46,8 +46,8 @@ from collections import Counter
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-EDA_DIR = REPO_ROOT / "reports" / "eda"
-EDA_XG_DIR = REPO_ROOT / "reports" / "eda_xg"
+EDA_DIR = REPO_ROOT / "reports" / "analysis" / "shot_target"
+EDA_XG_DIR = REPO_ROOT / "reports" / "analysis" / "xg_target"
 
 BINARY_LOCK_PATH = EDA_DIR / "FEATURE_LOCK_CONFIRMATION.json"
 XG_LOCK_PATH = EDA_XG_DIR / "FEATURE_LOCK_CONFIRMATION_XG.json"
@@ -56,24 +56,24 @@ CLOSEOUT_PATH = EDA_DIR / "PATTERN_ANALYSIS_CLOSEOUT.md"
 
 PREMISE_CORRECTIONS = [
     (
-        "reports/eda/PATTERN_ANALYSIS_CLOSEOUT.md (prompt 32) does not exist in this session -- prompt 32 was "
+        "reports/analysis/shot_target/PATTERN_ANALYSIS_CLOSEOUT.md (prompt 32) does not exist in this session -- prompt 32 was "
         "never run. Every figure below is read directly from its live source JSON instead, which the prompt's "
         "own Method section required anyway."
     ),
     (
         "Tournament stability is NOT target-agnostic, despite the prompt's claim -- verified by diffing "
-        "reports/eda/TOURNAMENT_STABILITY_CHECK.json against reports/eda_xg/TOURNAMENT_STABILITY_CHECK.json "
+        "reports/analysis/shot_target/TOURNAMENT_STABILITY_CHECK.json against reports/analysis/xg_target/TOURNAMENT_STABILITY_CHECK.json "
         "directly: 3 of 10 features (defenders_within_5m, local_numerical_balance_5m, attackers_within_5m) get a "
         "DIFFERENT verdict depending on target. Reported in full in both lock-confirmation files, not "
         "cross-referenced."
     ),
     (
         "Numeric interaction analysis is NOT target-agnostic either -- verified by diffing "
-        "reports/eda/FEATURE_INTERACTION_ANALYSIS.json against the xg version's unconditional classification: "
+        "reports/analysis/shot_target/FEATURE_INTERACTION_ANALYSIS.json against the xg version's unconditional classification: "
         "6 of 10 pairs differ. Reported in full in both lock-confirmation files, not cross-referenced."
     ),
     (
-        "reports/eda_xg/CONFOUND_ANALYSIS.json has 5 tests, not the 2 the prompt assumed -- prompt 29 already "
+        "reports/analysis/xg_target/CONFOUND_ANALYSIS.json has 5 tests, not the 2 the prompt assumed -- prompt 29 already "
         "extended it with 3 has_option_2/3 tests. All 5 are reported here."
     ),
 ]
@@ -193,7 +193,7 @@ def build_binary_findings() -> dict:
     return {
         "source_note": (
             "Every number below re-read live from its source JSON at the time this section was generated -- see "
-            "generate_feature_lock_pattern_findings.py for the exact reads. reports/eda/PATTERN_ANALYSIS_CLOSEOUT.md "
+            "generate_feature_lock_pattern_findings.py for the exact reads. reports/analysis/shot_target/PATTERN_ANALYSIS_CLOSEOUT.md "
             "does not exist in this session; not used as a source."
         ),
         "numerical_vs_target_rankings": numerical_rankings(active_atlas, passive_atlas),
@@ -210,7 +210,7 @@ def build_binary_findings() -> dict:
         "slice_stratification": slice_stratification_binary_summary(slice_v1, slice_v2),
         "slicer_redundancy": {
             **slicer_redundancy_summary(slicer_redundancy),
-            "target_agnosticism_note": "Genuinely target-agnostic (confirmed: never references a target column, computed once, mirrored unchanged into reports/eda_xg/).",
+            "target_agnosticism_note": "Genuinely target-agnostic (confirmed: never references a target column, computed once, mirrored unchanged into reports/analysis/xg_target/).",
         },
         "numeric_interaction": {
             **numeric_interaction_summary(interaction),
@@ -222,7 +222,7 @@ def build_binary_findings() -> dict:
         },
         "player_level_validity": {
             **player_validity_summary(player_validity),
-            "target_agnosticism_note": "Genuinely target-agnostic (confirmed: never references a target column, computed once, mirrored unchanged into reports/eda_xg/).",
+            "target_agnosticism_note": "Genuinely target-agnostic (confirmed: never references a target column, computed once, mirrored unchanged into reports/analysis/xg_target/).",
         },
         "corrections_to_prompt_34s_premise": PREMISE_CORRECTIONS,
     }
@@ -242,7 +242,7 @@ def build_xg_findings() -> dict:
 
     return {
         "source_note": (
-            "Every number below re-read live from its source JSON. reports/eda/PATTERN_ANALYSIS_CLOSEOUT.md does "
+            "Every number below re-read live from its source JSON. reports/analysis/shot_target/PATTERN_ANALYSIS_CLOSEOUT.md does "
             "not exist in this session; not used as a source."
         ),
         "numerical_vs_target_rankings_xg": numerical_rankings(active_atlas, passive_atlas),
@@ -268,7 +268,7 @@ def build_xg_findings() -> dict:
             **tournament_stability_summary(tournament),
             "target_agnosticism_note": (
                 "NOT target-agnostic -- 3/10 features (defenders_within_5m, local_numerical_balance_5m, "
-                "attackers_within_5m) get a different verdict than reports/eda/FEATURE_LOCK_CONFIRMATION.json's "
+                "attackers_within_5m) get a different verdict than reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json's "
                 "tournament_stability section. Reported here in full, xg-specific, not cross-referenced."
             ),
         },
@@ -278,13 +278,13 @@ def build_xg_findings() -> dict:
             "n_pairs_where_unconditional_and_given_shot_agree": interaction["n_pairs_where_unconditional_and_given_shot_agree"],
             "target_agnosticism_note": (
                 "NOT target-agnostic -- 6/10 pairs' unconditional classification differs from "
-                "reports/eda/FEATURE_LOCK_CONFIRMATION.json's numeric_interaction section. Reported here in full, "
+                "reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json's numeric_interaction section. Reported here in full, "
                 "xg-specific, not cross-referenced."
             ),
         },
         "cross_referenced_target_agnostic_sections": {
-            "slicer_redundancy": "See reports/eda/FEATURE_LOCK_CONFIRMATION.json's pattern_analysis_findings.slicer_redundancy -- genuinely target-agnostic (confirmed), this analysis doesn't depend on target type.",
-            "player_level_validity": "See reports/eda/FEATURE_LOCK_CONFIRMATION.json's pattern_analysis_findings.player_level_validity -- genuinely target-agnostic (confirmed), active dataset only.",
+            "slicer_redundancy": "See reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json's pattern_analysis_findings.slicer_redundancy -- genuinely target-agnostic (confirmed), this analysis doesn't depend on target type.",
+            "player_level_validity": "See reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json's pattern_analysis_findings.player_level_validity -- genuinely target-agnostic (confirmed), active dataset only.",
         },
         "corrections_to_prompt_34s_premise": PREMISE_CORRECTIONS,
     }

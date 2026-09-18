@@ -1,6 +1,6 @@
 """CLI entrypoint: mirror the target-independent arm of the binary-target
 pipeline (Correlation Atlas V1/V2/V3, VIF Analysis, Slicer Redundancy Check,
-Player-Level Validity Check) into reports/eda_xg/, so the xG portal is a
+Player-Level Validity Check) into reports/analysis/xg_target/, so the xG portal is a
 complete, self-contained arm -- not missing the pieces that don't happen to
 change with the target.
 
@@ -36,8 +36,8 @@ from src.eda.generate_slicer_redundancy_report import build_report as build_slic
 from src.eda.generate_player_level_validity_report import build_report as build_player_level_validity
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-EDA_DIR = REPO_ROOT / "reports" / "eda"
-EDA_XG_DIR = REPO_ROOT / "reports" / "eda_xg"
+EDA_DIR = REPO_ROOT / "reports" / "analysis" / "shot_target"
+EDA_XG_DIR = REPO_ROOT / "reports" / "analysis" / "xg_target"
 
 TARGET_INDEPENDENT_BANNER = """
 <div class="finding" style="margin-bottom:24px;">

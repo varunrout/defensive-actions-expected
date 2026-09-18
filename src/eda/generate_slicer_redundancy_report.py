@@ -1,4 +1,4 @@
-"""CLI entrypoint: render reports/eda/SLICER_REDUNDANCY.json as a
+"""CLI entrypoint: render reports/analysis/shot_target/SLICER_REDUNDANCY.json as a
 self-contained HTML report, in the same shared design system as the other
 EDA reports.
 
@@ -15,8 +15,8 @@ from src.eda import render
 from src.eda.render import esc, finding_card
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda" / "SLICER_REDUNDANCY.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "SLICER_REDUNDANCY.html"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "SLICER_REDUNDANCY.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "SLICER_REDUNDANCY.html"
 
 VERDICT_CLASS = {"independent": "good", "partially redundant": "warn", "highly redundant": "severe"}
 

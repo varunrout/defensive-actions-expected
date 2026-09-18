@@ -1,4 +1,4 @@
-"""CLI entrypoint: render reports/eda_xg/SLICE_STRATIFICATION.json as a
+"""CLI entrypoint: render reports/analysis/xg_target/SLICE_STRATIFICATION.json as a
 self-contained HTML report -- the xG counterpart to SLICE_STRATIFICATION.html.
 
 Usage:
@@ -14,8 +14,8 @@ from src.eda import render
 from src.eda.render import esc, finding_card
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "SLICE_STRATIFICATION.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "SLICE_STRATIFICATION.html"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "SLICE_STRATIFICATION.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "SLICE_STRATIFICATION.html"
 
 
 OCCURRENCE_QUALITY_CLASS = {

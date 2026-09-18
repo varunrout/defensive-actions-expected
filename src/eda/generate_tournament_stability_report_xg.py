@@ -1,4 +1,4 @@
-"""CLI entrypoint: render reports/eda_xg/TOURNAMENT_STABILITY_CHECK.json as a
+"""CLI entrypoint: render reports/analysis/xg_target/TOURNAMENT_STABILITY_CHECK.json as a
 self-contained HTML report -- the xG counterpart to TOURNAMENT_STABILITY_CHECK.html.
 
 Usage:
@@ -14,9 +14,9 @@ from src.eda import render
 from src.eda.render import esc, finding_card
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "TOURNAMENT_STABILITY_CHECK.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "TOURNAMENT_STABILITY_CHECK.html"
-BINARY_INPUT_PATH = REPO_ROOT / "reports" / "eda" / "TOURNAMENT_STABILITY_CHECK.json"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "TOURNAMENT_STABILITY_CHECK.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "TOURNAMENT_STABILITY_CHECK.html"
+BINARY_INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "TOURNAMENT_STABILITY_CHECK.json"
 
 VERDICT_CLASS = {"arbitrary train/test noise": "v-no", "genuine tournament-level difference": "v-yes"}
 

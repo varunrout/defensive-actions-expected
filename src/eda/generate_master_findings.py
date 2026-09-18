@@ -7,13 +7,13 @@ the _load_* calls in main()), not copied from an intermediate summary.
 
 Source-document correction, verified before writing anything: the prompt
 names two documents that do not exist in this repo -- claude/passive-
-defense-build-plan.md and reports/eda/PATTERN_ANALYSIS_CLOSEOUT.md (prompt
+defense-build-plan.md and reports/analysis/shot_target/PATTERN_ANALYSIS_CLOSEOUT.md (prompt
 32 was never run in this session, confirmed already in prompt 34). Section
 2's phase history is built from src/eda/generate_pipeline_log.py's
 STAGE_HISTORY instead (the actual, live-asserted record of every stage that
 touched the candidate feature lists -- functionally the same content the
 build plan would have held). Section 5's exhaustive findings are built
-directly from reports/eda/FEATURE_LOCK_CONFIRMATION.json and reports/eda_xg/
+directly from reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json and reports/analysis/xg_target/
 FEATURE_LOCK_CONFIRMATION_XG.json's pattern_analysis_findings sections
 (prompt 34), which are themselves already live-verified against the
 individual pattern-analysis reports.
@@ -36,8 +36,8 @@ from src.eda.feature_config import ACTIVE, PASSIVE
 from src.eda.render import esc
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-EDA_DIR = REPO_ROOT / "reports" / "eda"
-EDA_XG_DIR = REPO_ROOT / "reports" / "eda_xg"
+EDA_DIR = REPO_ROOT / "reports" / "analysis" / "shot_target"
+EDA_XG_DIR = REPO_ROOT / "reports" / "analysis" / "xg_target"
 MD_OUTPUT_PATH = EDA_DIR / "MASTER_FINDINGS.md"
 HTML_OUTPUT_PATH = EDA_DIR / "MASTER_FINDINGS.html"
 
@@ -201,7 +201,7 @@ def build_section_3(correlation_diff: dict) -> list[dict]:
         ),
         note(
             "Cluster 5 -- decided, not deferred",
-            "Confound tests (reports/eda/CONFOUND_ANALYSIS.json) checked whether each option's threat-score "
+            "Confound tests (reports/analysis/shot_target/CONFOUND_ANALYSIS.json) checked whether each option's threat-score "
             "U-shape is explained by defender_x (the zone-danger confound): option 2's U-shape is "
             "<b>partially</b> explained (verdict 'partially', survives in 3/4 strata); option 3's is "
             "<b>not</b> explained (verdict 'no', survives in all 4/4 strata). This IS the resolving evidence: "

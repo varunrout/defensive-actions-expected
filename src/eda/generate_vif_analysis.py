@@ -36,7 +36,7 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 from src.eda.feature_config import DATASETS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "VIF_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "VIF_ANALYSIS.json"
 
 # Columns whose near-exact linear dependency on kept columns (attackers_within_Nm
 # - defenders_within_Nm) was confirmed by this analysis -- dropped from the

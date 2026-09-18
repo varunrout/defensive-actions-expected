@@ -1,5 +1,5 @@
 """CLI entrypoint: run passive-defence archetype clustering (Phase 8) per
-defender_functional_role bucket and write reports/eda/PASSIVE_ARCHETYPES.json.
+defender_functional_role bucket and write reports/analysis/shot_target/PASSIVE_ARCHETYPES.json.
 
 Usage:
     python -m src.eda.generate_passive_archetypes
@@ -27,7 +27,7 @@ from src.dax.analysis.passive_archetypes import (
 from src.eda.feature_config import PASSIVE
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "PASSIVE_ARCHETYPES.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "PASSIVE_ARCHETYPES.json"
 
 
 def _merge_full_population_stats(df: pd.DataFrame, results: dict) -> list[dict]:

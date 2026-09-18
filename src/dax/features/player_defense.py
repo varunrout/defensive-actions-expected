@@ -357,7 +357,7 @@ def _support_features(frame: Any, x: float, y: float, ball_x: float | None, acto
         "defender_centroid_x": d_centroid[0],
         "defender_centroid_y": d_centroid[1],
         # Defensive-shape-relative-to-attacking-shape gap (correlation
-        # analysis: reports/eda/CORRELATION_ANALYSIS.json COLLAPSE cluster 2,
+        # analysis: reports/analysis/shot_target/CORRELATION_ANALYSIS.json COLLAPSE cluster 2,
         # r=0.984/0.94 between the raw centroids). The two centroids
         # correlate because both blocks occupy similar pitch space, not
         # because they duplicate each other -- dropping either loses "whose

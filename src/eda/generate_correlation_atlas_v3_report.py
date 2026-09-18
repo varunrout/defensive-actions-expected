@@ -22,9 +22,9 @@ from src.eda import render
 from src.eda.generate_correlation_reports_v2 import _dataset_block, _method_strip
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS_V3.json"
-LOCKED_FULL_POPULATION_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ATLAS_V3.html"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CORRELATION_ANALYSIS_V3.json"
+LOCKED_FULL_POPULATION_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CORRELATION_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CORRELATION_ATLAS_V3.html"
 
 
 def _tier_diff_banner(locked_data: dict, v3_data: dict) -> str:

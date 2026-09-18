@@ -1,7 +1,7 @@
 """CLI entrypoint: summarise the frozen canonical match-grouped split
 (prompt 13) -- per-split, per-leg row/match counts and shot rates, plus the
 same integrity checks tests/test_canonical_split.py enforces -- and write
-reports/eda/SPLIT_VALIDATION.json.
+reports/analysis/shot_target/SPLIT_VALIDATION.json.
 
 Usage:
     python -m src.eda.generate_split_validation
@@ -19,7 +19,7 @@ from src.dax.models.splits import CANONICAL_SPLIT_PATH, load_canonical_split
 from src.eda.feature_config import ACTIVE, PASSIVE
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "SPLIT_VALIDATION.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "SPLIT_VALIDATION.json"
 
 TARGET = "target_future_shot_10s"
 N_FOLDS = 5

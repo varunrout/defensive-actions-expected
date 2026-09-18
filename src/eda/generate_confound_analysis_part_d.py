@@ -3,7 +3,7 @@ follow-up ("worth testing the same way as the marking-tightness/lane-screening
 reversals... but that is separate follow-up work, not part of this audit").
 has_option_2/has_option_3 show a large True-vs-False shot-rate gap (True
 5.95%/5.89% vs False 15.13%/17.09% -- read directly from
-reports/eda/LEAKAGE_AUDIT.json's part_d entries, not the prompt's slightly
+reports/analysis/shot_target/LEAKAGE_AUDIT.json's part_d entries, not the prompt's slightly
 different recalled figures) -- tested here with the exact confound method
 already in CONFOUND_ANALYSIS.json, extended for a boolean marginal.
 
@@ -40,7 +40,7 @@ from src.eda.feature_config import PASSIVE
 from src.eda.generate_confound_analysis import QCUT_N, TARGET, _stratified_table, _verdict
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "CONFOUND_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CONFOUND_ANALYSIS.json"
 
 TEST_1 = {
     "name": "has_option_2_vs_top_option_1_threat_score",

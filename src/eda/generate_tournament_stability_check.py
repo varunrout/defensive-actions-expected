@@ -39,7 +39,7 @@ from src.eda.generate_numerical_target_analysis import (
 from src.eda.tournament_mapping import load_match_tournament_map
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "TOURNAMENT_STABILITY_CHECK.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "TOURNAMENT_STABILITY_CHECK.json"
 
 # feature -> dataset key. nearest_defender_distance deliberately excluded
 # (already-known self-reference bug, a separate issue per prompt 24).
@@ -60,7 +60,7 @@ INVESTIGATE = {
 def _load_train_test_finding(feature: str, dataset_key: str) -> dict:
     """Restate prompt 21's already-known train/test finding for context --
     read directly from the existing atlas JSON, not re-typed by hand."""
-    atlas_path = REPO_ROOT / "reports" / "eda" / f"{dataset_key}_numerical_target_atlas.json"
+    atlas_path = REPO_ROOT / "reports" / "analysis" / "shot_target" / f"{dataset_key}_numerical_target_atlas.json"
     data = json.loads(atlas_path.read_text(encoding="utf-8"))
     entry = next(f for f in data["features"] if f["feature"] == feature)
     cc = entry["consistency_check"]

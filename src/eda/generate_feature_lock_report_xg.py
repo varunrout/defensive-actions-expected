@@ -1,4 +1,4 @@
-"""CLI entrypoint: render reports/eda_xg/FEATURE_LOCK_CONFIRMATION_XG.json
+"""CLI entrypoint: render reports/analysis/xg_target/FEATURE_LOCK_CONFIRMATION_XG.json
 as a self-contained HTML report -- the continuous-target counterpart to
 FEATURE_LOCK_CONFIRMATION.html.
 
@@ -15,8 +15,8 @@ from src.eda import render
 from src.eda.render import esc, finding_card
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "FEATURE_LOCK_CONFIRMATION_XG.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "FEATURE_LOCK_CONFIRMATION_XG.html"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "FEATURE_LOCK_CONFIRMATION_XG.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "FEATURE_LOCK_CONFIRMATION_XG.html"
 
 
 def _count_card(label: str, actual: int, expected: int, matches: bool) -> str:
@@ -181,7 +181,7 @@ the binary confirmation -- feature_config.py is not target-specific.</p>
         eyebrow="FEATURE LOCK CONFIRMATION -- XG",
         title="Post-Lock Correlation Confirmation (Continuous Target)",
         dek=(
-            "reports/eda/FEATURE_LOCK_CONFIRMATION.html only ever confirmed the lock against the binary target's "
+            "reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.html only ever confirmed the lock against the binary target's "
             "leakage check. Correlation/redundancy is target-agnostic (reused directly, not re-derived), but the "
             "leakage side is target-specific -- this folds the continuous-target leakage checks "
             "(LEAKAGE_AUDIT.json Parts C/D) into a formal confirmation the way prompt 14 did for binary. Extended "

@@ -44,7 +44,7 @@ from src.eda.generate_numerical_target_analysis import DISCRETE_CARDINALITY_THRE
 from src.eda.generate_slice_stratification import SMALL_N_THRESHOLD, _slice_one
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "SLICE_STRATIFICATION_V2.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "SLICE_STRATIFICATION_V2.json"
 
 ACTIVE_FEATURES = [
     "defender_spread", "attacker_spread", "attacking_goal_centrality", "attacker_defender_ratio",
@@ -204,7 +204,7 @@ def main() -> None:
         "target": TARGET,
         "small_n_threshold": SMALL_N_THRESHOLD,
         "v1_cross_reference": (
-            "See reports/eda/SLICE_STRATIFICATION.json (V1, prompts 24/25) for the original 118-cell grid over "
+            "See reports/analysis/shot_target/SLICE_STRATIFICATION.json (V1, prompts 24/25) for the original 118-cell grid over "
             "locked categorical slicers (phase_label, position/position_group, event_type, play_pattern, "
             "phase_label_prev_event, period, defender_functional_role, on_ball_event_type). V1 is untouched by "
             "this file -- V2 tests a disjoint slicer set (defender_archetype_name + every locked boolean flag) "

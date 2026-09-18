@@ -1,6 +1,6 @@
-"""CLI entrypoint: build a single-tab portal shell (reports/eda_xg/INDEX.html)
+"""CLI entrypoint: build a single-tab portal shell (reports/analysis/xg_target/INDEX.html)
 for the CONTINUOUS-target (target_future_xg_10s) report collection -- a
-separate portal from reports/eda/INDEX.html (the binary-target one), mirroring
+separate portal from reports/analysis/shot_target/INDEX.html (the binary-target one), mirroring
 its structure exactly. Kept separate on purpose: different target, different
 scale, different reports -- growing this list later (e.g. a category/boolean
 atlas against xG) should never get tangled with the binary-target trail.
@@ -16,7 +16,7 @@ from pathlib import Path
 from src.eda.render import FONT_LINKS, esc
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-REPORTS_DIR = REPO_ROOT / "reports" / "eda_xg"
+REPORTS_DIR = REPO_ROOT / "reports" / "analysis" / "xg_target"
 OUTPUT_PATH = REPORTS_DIR / "INDEX.html"
 
 DEFAULT_REPORT = "../eda/MASTER_FINDINGS.html"
@@ -163,7 +163,7 @@ def build_portal() -> str:
     <p class="sb-title">EDA Report Portal -- xG</p>
     <p class="sb-subtitle">{n_reports} report(s), continuous target only</p>
     {nav_html}
-    <p class="sb-note">Separate from the binary-target portal (reports/eda/INDEX.html) -- different target
+    <p class="sb-note">Separate from the binary-target portal (reports/analysis/shot_target/INDEX.html) -- different target
     (target_future_xg_10s), different scale, different thresholds.</p>
   </div>
   <div class="viewer-pane">

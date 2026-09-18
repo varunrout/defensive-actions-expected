@@ -300,7 +300,7 @@ def main() -> None:
 
     for dataset_key in ("active", "passive"):
         output = analyze_dataset(dataset_key, split_assignment)
-        out_path = REPO_ROOT / "reports" / "eda" / f"{dataset_key}_numerical_target_atlas.json"
+        out_path = REPO_ROOT / "reports" / "analysis" / "shot_target" / f"{dataset_key}_numerical_target_atlas.json"
         out_path.write_text(json.dumps(output, indent=2, default=str), encoding="utf-8")
         print(f"  Wrote {out_path}")
 

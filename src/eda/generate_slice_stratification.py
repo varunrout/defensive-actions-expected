@@ -42,7 +42,7 @@ from src.eda.feature_config import ACTIVE, PASSIVE
 from src.eda.generate_numerical_target_analysis import DISCRETE_CARDINALITY_THRESHOLD, TARGET, _bin_table, classify_shape
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "SLICE_STRATIFICATION.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "SLICE_STRATIFICATION.json"
 
 SMALL_N_THRESHOLD = 1000
 STRUCTURAL_CAUTION_CATEGORIES = {

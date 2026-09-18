@@ -23,7 +23,7 @@ from src.eda.generate_numerical_xg_target_analysis import FLAT_MARGIN_RATIO, TAR
 from src.eda.generate_slice_stratification import FEATURE_SLICER_PLAN, SMALL_N_THRESHOLD, STRUCTURAL_CAUTION_CATEGORIES
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "SLICE_STRATIFICATION.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "SLICE_STRATIFICATION.json"
 
 
 def _slice_one(feature: str, slicer: str, dataset_key: str, df: pd.DataFrame, flat_margin: float) -> dict:

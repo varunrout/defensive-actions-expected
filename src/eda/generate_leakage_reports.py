@@ -14,8 +14,8 @@ from src.eda import render
 from src.eda.render import esc
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda" / "LEAKAGE_AUDIT.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "LEAKAGE_AUDIT.html"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "LEAKAGE_AUDIT.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "LEAKAGE_AUDIT.html"
 
 
 def _ledger_row(label: str, method: str, magnitude_str: str, verdict: str, verdict_class: str) -> str:

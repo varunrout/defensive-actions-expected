@@ -13,7 +13,7 @@ disappearing.
 
 Distribution Atlas is NOT replicated here: compute_stats.continuous_distribution/
 discrete_distribution never reference target_col at all (they describe a
-feature's own shape) -- the existing reports/eda/*_distribution_atlas.html
+feature's own shape) -- the existing reports/analysis/shot_target/*_distribution_atlas.html
 already applies to both target contexts as-is, nothing to duplicate.
 
 Usage:
@@ -33,7 +33,7 @@ from src.eda.feature_config_v1_historical import ACTIVE_V1_HISTORICAL, PASSIVE_V
 from src.eda.render import FONT_LINKS, CSS, esc, finding_card, findings_grid
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_DIR = REPO_ROOT / "reports" / "eda_xg"
+OUTPUT_DIR = REPO_ROOT / "reports" / "analysis" / "xg_target"
 TARGET_XG = "target_future_xg_10s"
 SHOT_COL = "target_future_shot_10s"
 SMALL_N_GIVEN_SHOT_THRESHOLD = 30

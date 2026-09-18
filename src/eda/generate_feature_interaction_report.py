@@ -1,4 +1,4 @@
-"""CLI entrypoint: render reports/eda/FEATURE_INTERACTION_ANALYSIS.json as a
+"""CLI entrypoint: render reports/analysis/shot_target/FEATURE_INTERACTION_ANALYSIS.json as a
 self-contained HTML report, in the same shared design system as the other
 EDA reports.
 
@@ -15,8 +15,8 @@ from src.eda import render
 from src.eda.render import esc, finding_card
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda" / "FEATURE_INTERACTION_ANALYSIS.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "FEATURE_INTERACTION_ANALYSIS.html"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "FEATURE_INTERACTION_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "FEATURE_INTERACTION_ANALYSIS.html"
 
 CLASS_BADGE = {
     "interactive": ("v-yes", "INTERACTIVE -- genuine interaction-term candidate"),

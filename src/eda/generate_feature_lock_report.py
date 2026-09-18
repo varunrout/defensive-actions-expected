@@ -14,8 +14,8 @@ from src.eda import render
 from src.eda.render import esc, finding_card
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda" / "FEATURE_LOCK_CONFIRMATION.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "FEATURE_LOCK_CONFIRMATION.html"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "FEATURE_LOCK_CONFIRMATION.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "FEATURE_LOCK_CONFIRMATION.html"
 
 
 def _count_card(label: str, actual: int, expected: int, matches: bool) -> str:

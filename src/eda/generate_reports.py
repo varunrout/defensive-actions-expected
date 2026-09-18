@@ -18,7 +18,7 @@ from src.eda import render
 from src.eda.feature_config import DATASETS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_DIR = REPO_ROOT / "reports" / "eda"
+OUTPUT_DIR = REPO_ROOT / "reports" / "analysis" / "shot_target"
 
 
 def _check_duplicate_columns(df: pd.DataFrame, dataset_cfg: dict) -> None:

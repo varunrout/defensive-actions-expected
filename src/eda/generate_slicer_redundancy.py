@@ -41,7 +41,7 @@ from src.eda.correlation import cramers_v
 from src.eda.feature_config import ACTIVE, PASSIVE
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "SLICER_REDUNDANCY.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "SLICER_REDUNDANCY.json"
 
 INDEPENDENT_MAX = 0.1
 PARTIALLY_REDUNDANT_MAX = 0.3
@@ -218,8 +218,8 @@ def main() -> None:
                 "the confirmed one is phase_label vs phase_label_prev_event (active), the constructed lag pair. "
                 if n_highly_redundant_consensus > 0 else "none are confirmed by both metrics. "
             ) + (
-                "For that confirmed pair, the divergence counts in reports/eda/SLICE_STRATIFICATION.json (320 "
-                "genuine) and reports/eda_xg/SLICE_STRATIFICATION.json (363 unconditional / 90 given-shot) likely "
+                "For that confirmed pair, the divergence counts in reports/analysis/shot_target/SLICE_STRATIFICATION.json (320 "
+                "genuine) and reports/analysis/xg_target/SLICE_STRATIFICATION.json (363 unconditional / 90 given-shot) likely "
                 "double-count findings that show up under both phase_label and phase_label_prev_event -- a future "
                 "interaction-term shortlist for modelling should prefer one of the two, not both. The remaining "
                 "'partially redundant' pairs flagged by Cramer's V alone (see metrics_disagree in each pair) look "

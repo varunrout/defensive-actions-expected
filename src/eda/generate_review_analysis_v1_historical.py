@@ -23,8 +23,8 @@ from src.eda import generate_review_analysis as rev
 from src.eda.feature_config_v1_historical import DATASETS_V1_HISTORICAL
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CORRELATION_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS_V1_HISTORICAL.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "REVIEW_ANALYSIS_V1_HISTORICAL.json"
+CORRELATION_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CORRELATION_ANALYSIS_V1_HISTORICAL.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "REVIEW_ANALYSIS_V1_HISTORICAL.json"
 
 
 def main() -> None:

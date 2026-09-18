@@ -49,7 +49,7 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PARQUET_PATH = REPO_ROOT / "data" / "features" / "passive_defense.parquet"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "FOOTBALL_SANITY_CHECK.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "FOOTBALL_SANITY_CHECK.json"
 
 # Mirrors src/dax/features/passive_defense.py exactly -- do not let these
 # drift out of sync with the pipeline's own constants.
@@ -309,7 +309,7 @@ def main() -> None:
         status = "OK" if r["matches_known_result"] else "DISCREPANCY"
         print(f"[{status}] {r['check']}: known={r['known_result']}")
         if not r["matches_known_result"]:
-            print(f"  ACTUAL RESULT DIFFERS -- see reports/eda/FOOTBALL_SANITY_CHECK.json for details")
+            print(f"  ACTUAL RESULT DIFFERS -- see reports/analysis/shot_target/FOOTBALL_SANITY_CHECK.json for details")
 
     print("\nExample frames:")
     for name, info in example_frames.items():

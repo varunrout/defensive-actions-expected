@@ -1,4 +1,4 @@
-"""CLI entrypoint: prompt 24 Part A -- extend reports/eda/CONFOUND_ANALYSIS.json
+"""CLI entrypoint: prompt 24 Part A -- extend reports/analysis/shot_target/CONFOUND_ANALYSIS.json
 with 5 new tests, reusing generate_confound_analysis.py's exact method
 (quartile the marginal, quartile the confound, stratify, check whether the
 gradient survives) without altering the 2 existing tests in that file.
@@ -33,7 +33,7 @@ from src.eda.feature_config import ACTIVE, PASSIVE
 from src.eda.generate_confound_analysis import QCUT_N, _marginal_table, _stratified_table, _verdict
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "CONFOUND_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CONFOUND_ANALYSIS.json"
 
 TARGET = "target_future_shot_10s"
 

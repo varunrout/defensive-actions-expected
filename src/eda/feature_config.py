@@ -50,7 +50,7 @@ EXCLUDED_COLUMNS_PASSIVE = {
     # to compare against) -- it is a proxy for whether target_future_shot_10s's
     # own 10-second measurement window was truncated, not a defensive signal.
     # chi2 test of independence vs target_future_shot_10s: chi2=136.5,
-    # p=1.54e-31, dof=1 (reports/eda/LEAKAGE_AUDIT.json). has_screened_outcome=False
+    # p=1.54e-31, dof=1 (reports/analysis/shot_target/LEAKAGE_AUDIT.json). has_screened_outcome=False
     # (2,581 rows) shows a 0.50% shot rate vs 5.97% for True -- a ~11.9x gap driven
     # by target-window truncation (a false negative -- no time left for a shot --
     # is far more likely than a genuine successful defensive outcome when the
@@ -62,12 +62,12 @@ EXCLUDED_COLUMNS_PASSIVE = {
     "has_screened_outcome": (
         "Leakage exclusion (not a correlation-tier verdict): censoring-mechanism proxy for target_future_shot_10s's "
         "own 10s window being truncated at end-of-period/match, not defensive signal -- chi2=136.5, p=1.54e-31 vs "
-        "target_future_shot_10s (0.50% shot rate when False [n=2,581] vs 5.97% when True); see reports/eda/LEAKAGE_AUDIT.json"
+        "target_future_shot_10s (0.50% shot rate when False [n=2,581] vs 5.97% when True); see reports/analysis/shot_target/LEAKAGE_AUDIT.json"
     ),
 }
 
-# Redundancy-driven removals from reports/eda/CORRELATION_ANALYSIS.json (DROP
-# tier) and reports/eda/REVIEW_ANALYSIS.json (Type 1/2 drop verdicts) --
+# Redundancy-driven removals from reports/analysis/shot_target/CORRELATION_ANALYSIS.json (DROP
+# tier) and reports/analysis/shot_target/REVIEW_ANALYSIS.json (Type 1/2 drop verdicts) --
 # regenerate both before trusting these against a changed feature build. Each
 # entry names which surviving column/pair drove the removal, for traceability.
 #
@@ -89,7 +89,7 @@ REDUNDANCY_DROPPED_ACTIVE = {
     "action_family": "CORRELATION_ANALYSIS DROP tier: Cramer's V=1.0 vs event_type (kept, more granular)",
     "distance_to_center_line": "CORRELATION_ANALYSIS DROP tier: Spearman r=-1.0 vs attacking_goal_centrality (kept)",
     # COLLAPSE-tier cluster resolutions (prompt 5/5) -- see REVIEW_METHODOLOGY.html
-    # and reports/eda/CORRELATION_ANALYSIS.json for the r/eta values.
+    # and reports/analysis/shot_target/CORRELATION_ANALYSIS.json for the r/eta values.
     "distance_to_attacking_goal": "Cluster 1 (goal-proximity, drop-to-one): mutually r/eta >= 0.94 with distance_to_attacking_box, distance_to_defending_goal/box, action_zone -- kept distance_to_attacking_box (is_in_attacking_box lift +11.99pp is the most predictive single cut)",
     "distance_to_defending_goal": "Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal",
     "distance_to_defending_box": "Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal",
@@ -110,12 +110,12 @@ REDUNDANCY_DROPPED_ACTIVE = {
     # columns was well under 0.90) because the redundancy is a joint linear
     # dependency across three columns at once. VIF for these six columns was
     # effectively infinite (correlation-matrix condition number ~1e14-1e15,
-    # SVD failed to converge) before the drop -- see reports/eda/VIF_ANALYSIS.json.
+    # SVD failed to converge) before the drop -- see reports/analysis/shot_target/VIF_ANALYSIS.json.
     # Dropping local_numerical_balance_5m/10m loses no information: both are
     # exactly recoverable from attackers_within_Nm - defenders_within_Nm,
     # which stay in the candidate list.
-    "local_numerical_balance_5m": "VIF analysis: near-exact linear combination of attackers_within_5m - defenders_within_5m (both kept); joint multicollinearity invisible to pairwise correlation, caught by VIF, not a COLLAPSE/REVIEW tier verdict -- see reports/eda/VIF_ANALYSIS.json",
-    "local_numerical_balance_10m": "VIF analysis: near-exact linear combination of attackers_within_10m - defenders_within_10m (both kept); joint multicollinearity invisible to pairwise correlation, caught by VIF, not a COLLAPSE/REVIEW tier verdict -- see reports/eda/VIF_ANALYSIS.json",
+    "local_numerical_balance_5m": "VIF analysis: near-exact linear combination of attackers_within_5m - defenders_within_5m (both kept); joint multicollinearity invisible to pairwise correlation, caught by VIF, not a COLLAPSE/REVIEW tier verdict -- see reports/analysis/shot_target/VIF_ANALYSIS.json",
+    "local_numerical_balance_10m": "VIF analysis: near-exact linear combination of attackers_within_10m - defenders_within_10m (both kept); joint multicollinearity invisible to pairwise correlation, caught by VIF, not a COLLAPSE/REVIEW tier verdict -- see reports/analysis/shot_target/VIF_ANALYSIS.json",
 }
 
 REDUNDANCY_DROPPED_PASSIVE = {
@@ -134,7 +134,7 @@ REDUNDANCY_DROPPED_PASSIVE = {
     # Prompt 6/6: transition period over for Part A (prompt 4/4). The raw
     # absolute target_x/y columns were deliberately kept alongside the
     # ball-relative replacements until those were confirmed working (they
-    # were -- see reports/eda/CORRELATION_ANALYSIS.json). Coordinate-frame
+    # were -- see reports/analysis/shot_target/CORRELATION_ANALYSIS.json). Coordinate-frame
     # cleanup, not a redundancy judgment call: no information is lost, since
     # dx/dy/distance_from_ball/angle_from_ball are strictly more useful for
     # the same signal (they generalise across the pitch; raw coordinates
@@ -154,7 +154,7 @@ REDUNDANCY_DROPPED_PASSIVE = {
 # threat_score, r=0.902) is kept as two separate features, permanently.
 # Reasoning: raw pairwise correlation between them is high, but the two
 # columns do NOT behave identically once conditioned on the same third
-# variable (zone_defensive_value, reports/eda/CONFOUND_ANALYSIS.json).
+# variable (zone_defensive_value, reports/analysis/shot_target/CONFOUND_ANALYSIS.json).
 # top_option_3_threat_score's U-shape survives that conditioning in every
 # stratum (verdict "no", 4/4 strata) -- genuine independent signal, not a
 # repackaged zone-danger effect. top_option_2_threat_score's U-shape is
@@ -165,7 +165,7 @@ REDUNDANCY_DROPPED_PASSIVE = {
 # risk losing option 3's independent signal specifically. This substitutes
 # for the originally-planned baseline-model feature-importance gate (no
 # baseline model exists yet) with confound evidence that already answers
-# the question the gate was meant to answer. See reports/eda/MASTER_FINDINGS.md
+# the question the gate was meant to answer. See reports/analysis/shot_target/MASTER_FINDINGS.md
 # section 3 for the full writeup. add_option_rank_aggregates below is kept
 # for reference but will not be wired into any pipeline on this evidence.
 PASSIVE_COLLAPSE_OPTION_RANKS = False
@@ -175,7 +175,7 @@ def add_option_rank_aggregates(df: pd.DataFrame) -> pd.DataFrame:
     """Collapse top_option_2/3_* into aggregate "backup option" features.
 
     Scaffolded per the Part B structural-redesign deferral in
-    reports/eda/REVIEW_METHODOLOGY.html -- NOT called by any default pipeline.
+    reports/analysis/shot_target/REVIEW_METHODOLOGY.html -- NOT called by any default pipeline.
     Only flip PASSIVE_COLLAPSE_OPTION_RANKS to True, and start calling this,
     once a baseline model's feature importance for top_option_2_*/
     top_option_3_* shows they aren't pulling their own weight individually.

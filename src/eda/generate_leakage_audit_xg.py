@@ -27,7 +27,7 @@ from src.eda.feature_config import PASSIVE
 from src.eda.generate_leakage_audit import _candidate_columns, part_a
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "LEAKAGE_AUDIT.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "LEAKAGE_AUDIT.json"
 
 TARGET_XG = "target_future_xg_10s"
 

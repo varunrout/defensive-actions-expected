@@ -1,5 +1,5 @@
 """CLI entrypoint: prompt 25 -- full feature x slicer cross-product slice
-analysis. Extends reports/eda/SLICE_STRATIFICATION.json (prompt 24 Part C's
+analysis. Extends reports/analysis/shot_target/SLICE_STRATIFICATION.json (prompt 24 Part C's
 7 ad-hoc features, each sliced 2 ways = 14 leaf cells) with the full,
 explicit cross-product of locked numerical features against locked
 categorical slicers, per dataset. Same method as prompt 24 (_slice_one,

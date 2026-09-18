@@ -21,7 +21,7 @@ This check is TARGET-INDEPENDENT: row concentration, per-feature ICC
 against player_id, and train/test player overlap never reference
 target_future_shot_10s or target_future_xg_10s at all -- the numbers are
 identical whichever target a model downstream would use. Mirrored into
-reports/eda_xg/ unchanged (same pattern already established for Correlation
+reports/analysis/xg_target/ unchanged (same pattern already established for Correlation
 Atlas / VIF / Slicer Redundancy in generate_correlation_vif_xg_mirror.py),
 not recomputed against xg.
 
@@ -53,7 +53,7 @@ from src.eda.correlation import cramers_v, correlation_ratio
 from src.eda.feature_config import ACTIVE, PASSIVE
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "PLAYER_LEVEL_VALIDITY_CHECK.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "PLAYER_LEVEL_VALIDITY_CHECK.json"
 SPLIT_PATH = REPO_ROOT / "outputs" / "models" / "splits" / "match_assignment.json"
 
 ICC_THRESHOLD = 0.3
@@ -190,7 +190,7 @@ def main() -> None:
         "target_independence_note": (
             "Row concentration, per-feature ICC/Cramer's V against player_id, and train/test player overlap "
             "never reference target_future_shot_10s or target_future_xg_10s -- these numbers are identical "
-            "whichever target a downstream model uses. Mirrored unchanged into reports/eda_xg/, not recomputed."
+            "whichever target a downstream model uses. Mirrored unchanged into reports/analysis/xg_target/, not recomputed."
         ),
         "row_concentration": concentration,
         "icc_threshold": ICC_THRESHOLD,

@@ -32,13 +32,13 @@ from src.eda.generate_tournament_stability_check import INVESTIGATE
 from src.eda.tournament_mapping import load_match_tournament_map
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "TOURNAMENT_STABILITY_CHECK.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "TOURNAMENT_STABILITY_CHECK.json"
 
 
 def _load_train_test_finding(feature: str, dataset_key: str) -> dict:
     """Restate the xG atlas's already-known train/test finding for context --
     read directly from the existing atlas JSON, not re-typed by hand."""
-    atlas_path = REPO_ROOT / "reports" / "eda_xg" / f"{dataset_key}_numerical_target_atlas.json"
+    atlas_path = REPO_ROOT / "reports" / "analysis" / "xg_target" / f"{dataset_key}_numerical_target_atlas.json"
     data = json.loads(atlas_path.read_text(encoding="utf-8"))
     entry = next(f for f in data["features"] if f["feature"] == feature)
     cc = entry["consistency_check"]

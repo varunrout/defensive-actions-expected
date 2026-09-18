@@ -32,7 +32,7 @@ import pandas as pd
 from src.eda.feature_config import PASSIVE
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "CONFOUND_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CONFOUND_ANALYSIS.json"
 
 TARGET = "target_future_shot_10s"
 QCUT_N = 4

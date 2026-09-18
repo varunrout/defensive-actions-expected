@@ -15,8 +15,8 @@ from src.eda.render import esc
 from src.eda.feature_config import DATASETS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda" / "VIF_ANALYSIS.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "VIF_ANALYSIS.html"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "VIF_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "VIF_ANALYSIS.html"
 
 THRESHOLD_LOW = 5
 THRESHOLD_HIGH = 10

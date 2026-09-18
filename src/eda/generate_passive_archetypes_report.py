@@ -14,8 +14,8 @@ from src.eda import render
 from src.eda.render import esc
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda" / "PASSIVE_ARCHETYPES.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "PASSIVE_ARCHETYPES.html"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "PASSIVE_ARCHETYPES.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "PASSIVE_ARCHETYPES.html"
 
 BUCKET_LABELS = {
     "last_line": "Last Line",

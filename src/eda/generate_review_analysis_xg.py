@@ -43,8 +43,8 @@ from src.eda.generate_review_analysis import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CORRELATION_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS_V1_HISTORICAL.json"
-OUT_DIR = REPO_ROOT / "reports" / "eda_xg"
+CORRELATION_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CORRELATION_ANALYSIS_V1_HISTORICAL.json"
+OUT_DIR = REPO_ROOT / "reports" / "analysis" / "xg_target"
 OUTPUT_PATH = OUT_DIR / "REVIEW_ANALYSIS.json"
 TARGET_XG = "target_future_xg_10s"
 

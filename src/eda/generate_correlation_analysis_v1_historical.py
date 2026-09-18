@@ -5,7 +5,7 @@ analyze_dataset exactly, except the feature lists come from
 feature_config_v1_historical.py instead of feature_config.py's current
 (final, locked) lists.
 
-Writes reports/eda/CORRELATION_ANALYSIS_V1_HISTORICAL.json -- a separate
+Writes reports/analysis/shot_target/CORRELATION_ANALYSIS_V1_HISTORICAL.json -- a separate
 file from CORRELATION_ANALYSIS.json, which stays exactly as stage 14 left
 it (the post-lock confirmation pass, scored against the current list). This
 script never touches that file.
@@ -28,7 +28,7 @@ from src.eda.feature_config_v1_historical import DATASETS_V1_HISTORICAL
 from src.eda.generate_correlation_analysis import METHODOLOGY, _feature_type_map, _print_summary
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS_V1_HISTORICAL.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CORRELATION_ANALYSIS_V1_HISTORICAL.json"
 
 PASSIVE_SAMPLE_SEED = 42
 PASSIVE_SAMPLE_N = 300_000

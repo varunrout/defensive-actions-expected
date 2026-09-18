@@ -14,8 +14,8 @@ from src.eda import render
 from src.eda.render import esc
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda" / "SPLIT_VALIDATION.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "SPLIT_VALIDATION.html"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "SPLIT_VALIDATION.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "SPLIT_VALIDATION.html"
 
 SPLIT_LABELS = {
     "test": "TEST (held out)",

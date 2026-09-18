@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EDA Report Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1; --plane: #eceee8; --surface: #ffffff;
+  --text-primary: #10151c; --text-secondary: #4c525b; --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09); --accent: #2a78d6; --accent-wash: rgba(42,120,214,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+    --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09); --accent: #3987e5; --accent-wash: rgba(57,135,229,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+  --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09); --accent: #3987e5; --accent-wash: rgba(57,135,229,0.14);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif; font-size: 14px; }
+.shell { display: grid; grid-template-columns: 300px 1fr; height: 100vh; }
+@media (max-width: 760px) { .shell { grid-template-columns: 1fr; height: auto; } .viewer-pane { height: 80vh; } }
+.sidebar {
+  background: var(--plane); border-right: 1px solid var(--border); overflow-y: auto; padding: 18px 14px 40px;
+  scrollbar-width: thin; scrollbar-color: var(--text-muted) transparent;
+}
+.sidebar::-webkit-scrollbar { width: 7px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 4px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+.sb-title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 16px; margin: 4px 6px 2px; }
+.sb-subtitle { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.04em; margin: 0 6px 18px; }
+.sb-group { margin-bottom: 6px; }
+.sb-group-title { font-family: "JetBrains Mono", monospace; font-size: 10.5px; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--text-muted); padding: 12px 10px 6px; }
+.sb-link { display: block; padding: 8px 10px; border-radius: 6px; color: var(--text-secondary);
+  text-decoration: none; font-size: 13px; line-height: 1.35; margin-bottom: 1px; }
+.sb-link:hover { background: var(--surface); color: var(--text-primary); }
+.sb-link.active { background: var(--accent-wash); color: var(--accent); font-weight: 600; }
+.sb-file { display: block; font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); margin-top: 1px; }
+.viewer-pane { background: var(--surface); }
+.viewer-pane iframe { width: 100%; height: 100%; border: none; display: block; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sidebar">
+    <p class="sb-title">EDA Report Portal</p>
+    <p class="sb-subtitle">32 reports, one tab</p>
+    <div class="sb-group"><div class="sb-group-title">Overview</div><a class="sb-link" href="MASTER_FINDINGS.html" target="viewer">Master Findings -- start here<span class="sb-file">MASTER_FINDINGS.html</span></a><a class="sb-link" href="PATTERN_ANALYSIS_CLOSEOUT.html" target="viewer">Pattern Analysis Closeout (prompts 21-31)<span class="sb-file">PATTERN_ANALYSIS_CLOSEOUT.html</span></a><a class="sb-link" href="EDA_PIPELINE_LOG.html" target="viewer">Pipeline Audit Trail<span class="sb-file">EDA_PIPELINE_LOG.html</span></a></div><div class="sb-group"><div class="sb-group-title">Base EDA (stage 00)</div><a class="sb-link" href="EDA_ANALYSIS.html" target="viewer">Narrative Summary<span class="sb-file">EDA_ANALYSIS.html</span></a><a class="sb-link" href="active_category_atlas.html" target="viewer">Active -- Category Atlas<span class="sb-file">active_category_atlas.html</span></a><a class="sb-link" href="active_flag_ledger.html" target="viewer">Active -- Flag Ledger<span class="sb-file">active_flag_ledger.html</span></a><a class="sb-link" href="active_distribution_atlas.html" target="viewer">Active -- Distribution Atlas<span class="sb-file">active_distribution_atlas.html</span></a><a class="sb-link" href="active_distribution_atlas_reconstructed.html" target="viewer">Active -- Distribution Atlas (reconstructed pool)<span class="sb-file">active_distribution_atlas_reconstructed.html</span></a><a class="sb-link" href="active_numerical_target_atlas.html" target="viewer">Active -- Numerical Target Atlas<span class="sb-file">active_numerical_target_atlas.html</span></a><a class="sb-link" href="passive_category_atlas.html" target="viewer">Passive -- Category Atlas<span class="sb-file">passive_category_atlas.html</span></a><a class="sb-link" href="passive_flag_ledger.html" target="viewer">Passive -- Flag Ledger<span class="sb-file">passive_flag_ledger.html</span></a><a class="sb-link" href="passive_distribution_atlas.html" target="viewer">Passive -- Distribution Atlas<span class="sb-file">passive_distribution_atlas.html</span></a><a class="sb-link" href="passive_distribution_atlas_reconstructed.html" target="viewer">Passive -- Distribution Atlas (reconstructed pool)<span class="sb-file">passive_distribution_atlas_reconstructed.html</span></a><a class="sb-link" href="passive_numerical_target_atlas.html" target="viewer">Passive -- Numerical Target Atlas<span class="sb-file">passive_numerical_target_atlas.html</span></a></div><div class="sb-group"><div class="sb-group-title">Correlation &amp; Review</div><a class="sb-link" href="CORRELATION_ATLAS.html" target="viewer">Correlation Atlas -- V1 (51/44, stage 01)<span class="sb-file">CORRELATION_ATLAS.html</span></a><a class="sb-link" href="REVIEW_METHODOLOGY.html" target="viewer">Review Methodology -- V1<span class="sb-file">REVIEW_METHODOLOGY.html</span></a><a class="sb-link" href="CORRELATION_ATLAS_V2.html" target="viewer">Correlation Atlas -- V2 (36/39, stage 07)<span class="sb-file">CORRELATION_ATLAS_V2.html</span></a><a class="sb-link" href="REVIEW_METHODOLOGY_V2.html" target="viewer">Review Methodology -- V2<span class="sb-file">REVIEW_METHODOLOGY_V2.html</span></a><a class="sb-link" href="CORRELATION_ATLAS_V3.html" target="viewer">Correlation Atlas -- V3 (34/38, train+val only)<span class="sb-file">CORRELATION_ATLAS_V3.html</span></a></div><div class="sb-group"><div class="sb-group-title">Redundancy checks</div><a class="sb-link" href="VIF_ANALYSIS.html" target="viewer">Multicollinearity (VIF)<span class="sb-file">VIF_ANALYSIS.html</span></a><a class="sb-link" href="CONFOUND_ANALYSIS.html" target="viewer">Confound (Reversal) Testing<span class="sb-file">CONFOUND_ANALYSIS.html</span></a><a class="sb-link" href="LEAKAGE_AUDIT.html" target="viewer">Leakage Audit<span class="sb-file">LEAKAGE_AUDIT.html</span></a><a class="sb-link" href="TOURNAMENT_STABILITY_CHECK.html" target="viewer">Tournament Stability Check<span class="sb-file">TOURNAMENT_STABILITY_CHECK.html</span></a><a class="sb-link" href="SLICE_STRATIFICATION.html" target="viewer">Slice Stratification (V1 -- categorical slicers)<span class="sb-file">SLICE_STRATIFICATION.html</span></a><a class="sb-link" href="SLICE_STRATIFICATION_V2.html" target="viewer">Slice Stratification V2 -- archetype + boolean slicers<span class="sb-file">SLICE_STRATIFICATION_V2.html</span></a><a class="sb-link" href="SLICER_REDUNDANCY.html" target="viewer">Slicer Redundancy Check<span class="sb-file">SLICER_REDUNDANCY.html</span></a><a class="sb-link" href="FEATURE_INTERACTION_ANALYSIS.html" target="viewer">Feature Interaction Analysis (numeric x numeric)<span class="sb-file">FEATURE_INTERACTION_ANALYSIS.html</span></a></div><div class="sb-group"><div class="sb-group-title">Validation</div><a class="sb-link" href="FOOTBALL_SANITY_CHECK.html" target="viewer">Football Sanity Check<span class="sb-file">FOOTBALL_SANITY_CHECK.html</span></a></div><div class="sb-group"><div class="sb-group-title">Modelling infrastructure</div><a class="sb-link" href="PASSIVE_ARCHETYPES.html" target="viewer">Passive Archetype Clustering<span class="sb-file">PASSIVE_ARCHETYPES.html</span></a><a class="sb-link" href="SPLIT_VALIDATION.html" target="viewer">Canonical Match-Grouped Split<span class="sb-file">SPLIT_VALIDATION.html</span></a><a class="sb-link" href="PLAYER_LEVEL_VALIDITY_CHECK.html" target="viewer">Player-Level Validity Check (active only)<span class="sb-file">PLAYER_LEVEL_VALIDITY_CHECK.html</span></a><a class="sb-link" href="PLAYER_GROUPED_SPLIT_CHECK.html" target="viewer">Player-Grouped Split Check (identity-leakage stress test)<span class="sb-file">PLAYER_GROUPED_SPLIT_CHECK.html</span></a></div><div class="sb-group"><div class="sb-group-title">Confirmation</div><a class="sb-link" href="FEATURE_LOCK_CONFIRMATION.html" target="viewer">Feature Lock Confirmation + Pattern Findings<span class="sb-file">FEATURE_LOCK_CONFIRMATION.html</span></a></div><div class="sb-group"><div class="sb-group-title">Modelling</div><a class="sb-link" href="../../modeling/INDEX.html" target="viewer">Modelling reports (baseline, ladder, closeout)<span class="sb-file">../../modeling/INDEX.html</span></a></div>
+  </div>
+  <div class="viewer-pane">
+    <iframe id="viewer" name="viewer" src="MASTER_FINDINGS.html" title="Selected EDA report"></iframe>
+  </div>
+</div>
+<script>
+(function() {
+  var frame = document.getElementById('viewer');
+  var links = document.querySelectorAll('.sb-link');
+  function setActive(href) {
+    links.forEach(function(a) {
+      a.classList.toggle('active', a.getAttribute('href') === href);
+    });
+  }
+  links.forEach(function(a) {
+    a.addEventListener('click', function() { setActive(a.getAttribute('href')); });
+  });
+  setActive(frame.getAttribute('src'));
+})();
+</script>
+</body>
+</html>

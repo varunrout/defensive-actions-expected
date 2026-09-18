@@ -1,11 +1,11 @@
 """CLI entrypoint: Distribution Atlas over the RECONSTRUCTED pre-drop
 51/44-era numerical pool (31 active / 34 passive), not the current locked
-19/28 -- the existing reports/eda/*_distribution_atlas.html only ever
+19/28 -- the existing reports/analysis/shot_target/*_distribution_atlas.html only ever
 covered feature_config.py's locked continuous+discrete lists, so the 12
 active / 6 passive dropped numerical columns never got a distribution card
 anywhere. Target-independent (continuous_distribution/discrete_distribution
 never reference a target column), so this single atlas is valid for both
-the binary and xG contexts -- written to reports/eda_xg/ since that's where
+the binary and xG contexts -- written to reports/analysis/xg_target/ since that's where
 the gap was noticed, using the same locked/dropped tagging as every other
 atlas in this pool-reconstruction effort.
 
@@ -29,7 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # Target-independent content -- written to both portals so the gap (dropped
 # numerical columns having no distribution card anywhere) is closed in both
 # places, not just the one where it was first noticed.
-OUTPUT_DIRS = [REPO_ROOT / "reports" / "eda_xg", REPO_ROOT / "reports" / "eda"]
+OUTPUT_DIRS = [REPO_ROOT / "reports" / "analysis" / "xg_target", REPO_ROOT / "reports" / "analysis" / "shot_target"]
 
 DIST_CSS = """
 .dist-card-wrap { position: relative; border-radius: 12px; }
@@ -136,9 +136,9 @@ def generate(dataset_key: str) -> dict:
     paths = []
     for out_dir in OUTPUT_DIRS:
         out_dir.mkdir(parents=True, exist_ok=True)
-        # reports/eda/ already has a locked-only *_distribution_atlas.html
+        # reports/analysis/shot_target/ already has a locked-only *_distribution_atlas.html
         # (generate_reports.py) -- never overwrite that; this reconstructed
-        # version gets a distinct name there. reports/eda_xg/ has no such
+        # version gets a distinct name there. reports/analysis/xg_target/ has no such
         # file yet, so the plain name is fine.
         filename = (
             f"{dataset_key}_distribution_atlas.html" if out_dir.name == "eda_xg"

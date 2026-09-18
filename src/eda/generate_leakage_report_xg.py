@@ -1,4 +1,4 @@
-"""CLI entrypoint: render reports/eda_xg/LEAKAGE_AUDIT.json as a
+"""CLI entrypoint: render reports/analysis/xg_target/LEAKAGE_AUDIT.json as a
 self-contained HTML report -- the xG counterpart to LEAKAGE_AUDIT.html.
 
 Usage:
@@ -14,8 +14,8 @@ from src.eda import render
 from src.eda.render import esc
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "LEAKAGE_AUDIT.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "LEAKAGE_AUDIT.html"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "LEAKAGE_AUDIT.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "LEAKAGE_AUDIT.html"
 
 
 def _ledger_row(label: str, method: str, magnitude_str: str, verdict: str, verdict_class: str) -> str:

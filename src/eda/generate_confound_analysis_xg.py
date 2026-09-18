@@ -24,7 +24,7 @@ from src.eda.feature_config import PASSIVE
 from src.eda.generate_confound_analysis import TEST_1, TEST_2, QCUT_N, _verdict
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "CONFOUND_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "CONFOUND_ANALYSIS.json"
 
 TARGET_XG = "target_future_xg_10s"
 SHOT_COL = "target_future_shot_10s"

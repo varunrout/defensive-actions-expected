@@ -6,7 +6,7 @@ Target: target_future_shot_10s. Dataset: data/features/player_defensive_actions.
 Feature set: the 34 locked ACTIVE features from src/eda/feature_config.py, minus
 nearest_defender_distance (known self-reference bug, ~73.6% of rows approx 0m per
 the distribution atlas) and defenders_within_5m (confirmed substitutive/nested
-with defenders_within_10m for this target -- see reports/eda/FEATURE_INTERACTION_ANALYSIS.json,
+with defenders_within_10m for this target -- see reports/analysis/shot_target/FEATURE_INTERACTION_ANALYSIS.json,
 "defenders_within_5m x defenders_within_10m -> substitutive"). That leaves 32 features:
 6 categorical (one-hot), 9 boolean (passthrough), 11 continuous + 6 discrete = 17
 numeric (median-impute + standard-scale).
@@ -22,8 +22,8 @@ Variants:
   v2_weighted                -- LogisticRegression(class_weight="balanced")
   v3_weighted_interactions   -- v2 + 5 explicit interaction-term pairs confirmed
                                  interactive for this target in
-                                 reports/eda/FEATURE_INTERACTION_ANALYSIS.json and
-                                 reports/eda/MASTER_FINDINGS.md section 6.
+                                 reports/analysis/shot_target/FEATURE_INTERACTION_ANALYSIS.json and
+                                 reports/analysis/shot_target/MASTER_FINDINGS.md section 6.
 
 Usage:
     python scripts/train_active_binary_baseline.py
@@ -65,7 +65,7 @@ EXCLUDED_FOR_THIS_LEG = {
     ),
     "defenders_within_5m": (
         "confirmed substitutive/nested with defenders_within_10m for this target "
-        "-- reports/eda/FEATURE_INTERACTION_ANALYSIS.json classifies "
+        "-- reports/analysis/shot_target/FEATURE_INTERACTION_ANALYSIS.json classifies "
         "'defenders_within_5m x defenders_within_10m' as substitutive (5m is a "
         "subset of 10m by construction)"
     ),

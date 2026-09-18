@@ -38,7 +38,7 @@ from src.dax.models.splits import canonical_test_mask, load_canonical_split, mak
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ACTIVE_PATH = REPO_ROOT / "data" / "features" / "player_defensive_actions.parquet"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "PLAYER_GROUPED_SPLIT_CHECK.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "PLAYER_GROUPED_SPLIT_CHECK.json"
 
 TARGET = "target_future_shot_10s"
 XG_TARGET = "target_future_xg_10s"

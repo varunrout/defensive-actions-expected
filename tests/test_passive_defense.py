@@ -237,7 +237,7 @@ def test_lane_occlusion_features_with_no_attackers_are_null_and_overload_zero():
 #
 # top_option_n_target_x/y are absolute pitch coordinates, which is why they
 # correlated strongly with ball_x/ball_y and with each other (see
-# reports/eda/CORRELATION_ANALYSIS.json). The ball-relative dx/dy/distance/
+# reports/analysis/shot_target/CORRELATION_ANALYSIS.json). The ball-relative dx/dy/distance/
 # angle features carry the same information without that confound. Fixture:
 # ball at (60, 40); A1=(100, 40) -> dx=40, dy=0; A2=(100, 60) -> dx=40, dy=20.
 

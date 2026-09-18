@@ -35,7 +35,7 @@ from src.eda.generate_slice_stratification_v2 import (
 from src.eda.generate_slice_stratification_xg import SMALL_N_THRESHOLD, _slice_one
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "SLICE_STRATIFICATION_V2.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "SLICE_STRATIFICATION_V2.json"
 
 
 def _given_shot_fields(cat_df: pd.DataFrame, feature: str, is_discrete_cardinality: bool, edges, flat_margin_given_shot: float, ref_shape_given_shot: str, already_small_n: bool, small_n_threshold: int) -> dict:
@@ -258,7 +258,7 @@ def main() -> None:
         "flat_margins_by_dataset": {k: round(v, 6) for k, v in flat_margins.items()},
         "flat_margins_given_shot_by_dataset": {k: round(v, 6) for k, v in flat_margins_given_shot.items()},
         "v1_cross_reference": (
-            "See reports/eda_xg/SLICE_STRATIFICATION.json (V1, prompts 25/26) for the original 118-cell grid over "
+            "See reports/analysis/xg_target/SLICE_STRATIFICATION.json (V1, prompts 25/26) for the original 118-cell grid over "
             "locked categorical slicers. V1 is untouched by this file -- V2 tests a disjoint slicer set "
             "(defender_archetype_name + every locked boolean flag)."
         ),

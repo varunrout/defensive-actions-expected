@@ -1,4 +1,4 @@
-"""CLI entrypoint: render reports/eda_xg/CONFOUND_ANALYSIS.json as a
+"""CLI entrypoint: render reports/analysis/xg_target/CONFOUND_ANALYSIS.json as a
 self-contained HTML report -- the xG counterpart to CONFOUND_ANALYSIS.html.
 
 Usage:
@@ -14,9 +14,9 @@ from src.eda import render
 from src.eda.render import esc
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "CONFOUND_ANALYSIS.json"
-BINARY_INPUT_PATH = REPO_ROOT / "reports" / "eda" / "CONFOUND_ANALYSIS.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "CONFOUND_ANALYSIS.html"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "CONFOUND_ANALYSIS.json"
+BINARY_INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CONFOUND_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "CONFOUND_ANALYSIS.html"
 
 
 def _qbar_row(b: dict, max_val: float, small: bool = False) -> str:

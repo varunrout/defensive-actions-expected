@@ -19,7 +19,7 @@ from src.eda import correlation as corr
 from src.eda.feature_config import DATASETS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CORRELATION_ANALYSIS.json"
 
 PASSIVE_SAMPLE_SEED = 42
 PASSIVE_SAMPLE_N = 300_000

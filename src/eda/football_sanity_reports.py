@@ -16,9 +16,9 @@ from src.eda import render
 from src.eda.render import esc
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INPUT_PATH = REPO_ROOT / "reports" / "eda" / "FOOTBALL_SANITY_CHECK.json"
+INPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "FOOTBALL_SANITY_CHECK.json"
 PARQUET_PATH = REPO_ROOT / "data" / "features" / "passive_defense.parquet"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "FOOTBALL_SANITY_CHECK.html"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "FOOTBALL_SANITY_CHECK.html"
 
 # Role swatches -- deliberately siblings of the canonical palette, not reuses
 # of --accent/--pos/--neg/--amber/--good, since those are reserved for

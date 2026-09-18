@@ -24,10 +24,10 @@ from src.eda.render import esc
 from src.eda.feature_config import DATASETS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CORRELATION_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS_V1_HISTORICAL.json"
-REVIEW_PATH = REPO_ROOT / "reports" / "eda" / "REVIEW_ANALYSIS_V1_HISTORICAL.json"
-ATLAS_OUTPUT = REPO_ROOT / "reports" / "eda" / "CORRELATION_ATLAS.html"
-METHODOLOGY_OUTPUT = REPO_ROOT / "reports" / "eda" / "REVIEW_METHODOLOGY.html"
+CORRELATION_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CORRELATION_ANALYSIS_V1_HISTORICAL.json"
+REVIEW_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "REVIEW_ANALYSIS_V1_HISTORICAL.json"
+ATLAS_OUTPUT = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CORRELATION_ATLAS.html"
+METHODOLOGY_OUTPUT = REPO_ROOT / "reports" / "analysis" / "shot_target" / "REVIEW_METHODOLOGY.html"
 
 METHOD_DESCRIPTIONS = [
     ("Spearman ρ", "continuous ↔ continuous", "Monotonic rank correlation, robust to the heavy right-skew present in several features (e.g. top_option_1_threat_score skew 7.91) where Pearson would understate the relationship."),

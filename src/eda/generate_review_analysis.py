@@ -23,8 +23,8 @@ from src.eda import compute_stats as cs
 from src.eda.feature_config import DATASETS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CORRELATION_PATH = REPO_ROOT / "reports" / "eda" / "CORRELATION_ANALYSIS.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda" / "REVIEW_ANALYSIS.json"
+CORRELATION_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "CORRELATION_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "REVIEW_ANALYSIS.json"
 
 TYPE1_R_THRESHOLD = 0.75
 TYPE2_R_THRESHOLD = 0.5

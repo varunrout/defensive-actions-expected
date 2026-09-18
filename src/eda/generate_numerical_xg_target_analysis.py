@@ -6,8 +6,8 @@ this one"). Same discipline, same reconstructed pre-drop numerical pool
 which features exist, not which target they're compared against), adapted
 for a continuous, heavily zero-inflated target instead of a 0-100% rate.
 
-Kept as a fully separate output set (reports/eda_xg/, its own portal) from
-the binary-target reports in reports/eda/ -- different target, different
+Kept as a fully separate output set (reports/analysis/xg_target/, its own portal) from
+the binary-target reports in reports/analysis/shot_target/ -- different target, different
 scale, different thresholds; conflating them into the same folder/portal
 would blur that distinction rather than clarify it.
 
@@ -47,7 +47,7 @@ from src.eda.generate_numerical_target_analysis import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR = REPO_ROOT / "reports" / "eda_xg"
+OUT_DIR = REPO_ROOT / "reports" / "analysis" / "xg_target"
 TARGET = "target_future_xg_10s"
 SHOT_COL = "target_future_shot_10s"
 

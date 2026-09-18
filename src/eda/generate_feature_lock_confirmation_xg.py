@@ -1,5 +1,5 @@
 """CLI entrypoint: prompt 33 -- post-lock correlation confirmation,
-continuous target. reports/eda/FEATURE_LOCK_CONFIRMATION.json (prompt 14)
+continuous target. reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json (prompt 14)
 only ever confirmed the locked feature set against the BINARY target's
 leakage check (has_screened_outcome, chi2=136.5 vs target_future_shot_10s).
 
@@ -10,7 +10,7 @@ already-computed correlation_diff directly and states explicitly that it's
 identical by construction, rather than silently re-deriving the same
 numbers a second time.
 
-What IS target-specific is the leakage side. reports/eda_xg/LEAKAGE_AUDIT.json
+What IS target-specific is the leakage side. reports/analysis/xg_target/LEAKAGE_AUDIT.json
 already has the continuous-target legs of Part C (has_screened_outcome vs
 target_future_xg_10s, 1.3x weaker effect, p=0.043 -- much weaker than the
 binary leg's ~12x ratio at p=1.5e-31, but the censoring MECHANISM is
@@ -33,10 +33,10 @@ from pathlib import Path
 from src.eda.feature_config import ACTIVE, PASSIVE
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-BINARY_LOCK_PATH = REPO_ROOT / "reports" / "eda" / "FEATURE_LOCK_CONFIRMATION.json"
-LEAKAGE_XG_PATH = REPO_ROOT / "reports" / "eda_xg" / "LEAKAGE_AUDIT.json"
-CONFOUND_XG_PATH = REPO_ROOT / "reports" / "eda_xg" / "CONFOUND_ANALYSIS.json"
-OUTPUT_PATH = REPO_ROOT / "reports" / "eda_xg" / "FEATURE_LOCK_CONFIRMATION_XG.json"
+BINARY_LOCK_PATH = REPO_ROOT / "reports" / "analysis" / "shot_target" / "FEATURE_LOCK_CONFIRMATION.json"
+LEAKAGE_XG_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "LEAKAGE_AUDIT.json"
+CONFOUND_XG_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "CONFOUND_ANALYSIS.json"
+OUTPUT_PATH = REPO_ROOT / "reports" / "analysis" / "xg_target" / "FEATURE_LOCK_CONFIRMATION_XG.json"
 
 EXPECTED_ACTIVE_COUNT = 34
 EXPECTED_PASSIVE_COUNT = 38
@@ -55,7 +55,7 @@ def _has_option_followup_verdicts() -> dict | None:
     if len(tests) != 3:
         return None
     return {
-        "closed_by": "prompt 29 (reports/eda_xg/CONFOUND_ANALYSIS.json)",
+        "closed_by": "prompt 29 (reports/analysis/xg_target/CONFOUND_ANALYSIS.json)",
         "n_tests": len(tests),
         "verdicts": {t["name"]: t["verdict"]["verdict"] for t in tests},
     }
@@ -122,7 +122,7 @@ def main() -> None:
         "changes_since_last_full_run": binary_lock["changes_since_last_full_run"],
         "correlation_diff": binary_lock["correlation_diff"],
         "correlation_diff_note": (
-            "IDENTICAL to reports/eda/FEATURE_LOCK_CONFIRMATION.json's correlation_diff, by construction, not "
+            "IDENTICAL to reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json's correlation_diff, by construction, not "
             "independently re-derived -- correlation clustering (feature vs feature) never references a target "
             "column, so re-running it against a different target would produce the exact same pairs and tiers. "
             "Reused directly from the binary confirmation rather than silently recomputed, so this file's numbers "
@@ -135,7 +135,7 @@ def main() -> None:
         "verdict": (
             f"The locked feature set ({active_count} active / {passive_count} passive) is confirmed internally "
             "consistent for continuous-target (target_future_xg_10s) modelling -- same counts as the binary "
-            "confirmation (reports/eda/FEATURE_LOCK_CONFIRMATION.json), since correlation/redundancy is "
+            "confirmation (reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json), since correlation/redundancy is "
             "target-agnostic. One target-specific caveat: has_screened_outcome's leakage effect is present but "
             "materially weaker on xg (1.3x vs ~12x, p=0.043 vs p=1.5e-31) -- the drop is still warranted on "
             "structural grounds, more strongly evidenced on the binary target than on xg."
