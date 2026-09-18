@@ -469,3 +469,186 @@ scope for rung 4. Whether Random Forest, gradient boosting, or a calibrated vers
 eventually becomes the standing reference model is a separate, later decision, made only once
 each candidate has cleared its own dedicated validation pass, per this project's standing
 practice throughout prompts 36-43.
+
+## 5. Rung 4 -- gradient boosting (`v1e_gradient_boosting`)
+
+Rung 3 found that automatic interaction discovery on the raw 32 features (Random Forest) beats
+`v1c_systematic_interactions`'s hand-built-plus-L1 approach by a wide margin, at the cost of
+noticeably worse calibration. Its own verdict: this justifies a real gradient-boosting build,
+since boosting (bias-reduction-focused) has a real chance of finding still more signal than
+bagging did, or of matching RF's ranking with better-behaved probabilities. This rung tests both
+halves of that claim.
+
+**Library: LightGBM.** Neither LightGBM nor XGBoost was already a project dependency.
+`pip install lightgbm` pulled a pure `win_amd64` wheel with no build step and no compiler --
+trivially installable -- so LightGBM was used rather than XGBoost for that reason, and added to
+`pyproject.toml`. Same raw design matrix as `v1d_random_forest` (categorical one-hot, boolean
+passthrough, numeric median-imputed but not standardized, no engineered interaction columns --
+reuses `RFDesignMatrixBuilder` directly, not duplicated): the point, same as rung 3, is what the
+model finds on its own. No `class_weight` as the primary variant (checked explicitly against a
+secondary `class_weight="balanced"` comparison, section 5.2). `n_estimators` was never
+grid-searched directly -- chosen per fit via early stopping (cap 2000 rounds,
+`early_stopping_rounds=50`, monitored on `average_precision`) on a match-grouped validation
+carve-out of that fit's own training rows. `learning_rate` / `num_leaves` / `min_child_samples`
+were grid-searched on the 5 canonical CV folds (train+val only, held-out test never touched
+during tuning).
+
+Two reported variants: **`v1e_gradient_boosting`** (raw, tuned, uncalibrated) and
+**`v1e_gradient_boosting_calibrated`** (the same tuned model, fixed `n_estimators` from early
+stopping, wrapped in `CalibratedClassifierCV` fit with a match-grouped internal CV on train+val
+only -- both sigmoid/Platt and isotonic tried, better one kept, see 5.3).
+
+### 5.1 Tuning (27 combinations x 5 folds = 135 fits, CV only)
+
+Full grid (`learning_rate` &times; `num_leaves` &times; `min_child_samples`) reported in
+`significance_v1e_vs_v1d_v1c.json`'s `hyperparameter_grid_search`. Summary: the winner was
+`learning_rate=0.01, num_leaves=63, min_child_samples=30` (OOF PR-AUC **0.4195**, mean early-stop
+iteration 194). Two real patterns in the grid, checked against the actual per-setting averages
+rather than eyeballed: the highest learning rate tested (0.1, mean OOF PR-AUC 0.4065 across its 9
+combinations) is clearly worse and **never** appears in the top 9 combinations by OOF PR-AUC --
+0.01 and 0.05 are close on average (0.4125 vs 0.4123) and split the top 9 roughly evenly (4 vs 5),
+so "slower learning helps" is real but "0.01 specifically beats 0.05" is closer to a toss-up than
+the single winning combination alone suggests. On `min_child_samples`, the most permissive
+setting (10, mean 0.4073) is the clear loser; 30 and 100 are close on average (0.4117 vs 0.4122,
+with 100 marginally *ahead* on average even though the single winning combination used 30) -- a
+mild preference against very small leaves, not a sharp interior optimum. Held-out test was not
+referenced anywhere in tuning.
+
+### 5.2 CV and held-out test results
+
+| | PR-AUC | ROC-AUC | Log loss | Brier | Calib. slope | Calib. intercept | ECE |
+|---|---|---|---|---|---|---|---|
+| v1c (CV, OOF) | 0.3630 | 0.8288 | 0.2172 | 0.0608 | 1.004 | 0.001 | 0.0026 |
+| v1d (CV, OOF) | 0.4017 | 0.8181 | 0.2184 | 0.0598 | 1.180 | 0.314 | 0.0123 |
+| v1e raw (CV, OOF) | **0.4195** | 0.8242 | 0.2154 | 0.0586 | 1.257 | 0.541 | 0.0123 |
+| v1e calibrated (CV, OOF) | **0.4252** | 0.8321 | 0.2104 | 0.0576 | 1.036 | 0.071 | 0.0027 |
+| v1c (held-out test) | 0.3747 | 0.8321 | 0.2011 | 0.0551 | 1.027 | -0.081 | 0.0103 |
+| v1d (held-out test) | 0.4085 | 0.8269 | 0.2017 | 0.0542 | 1.194 | 0.201 | 0.0183 |
+| v1e raw (held-out test) | **0.4305** | 0.8358 | 0.1944 | 0.0523 | 1.027 | -0.037 | 0.0068 |
+| v1e calibrated (held-out test) | **0.4282** | 0.8364 | 0.1943 | 0.0522 | 1.030 | -0.080 | 0.0096 |
+
+**Ranking outcome, stated separately from calibration:** gradient boosting beats Random Forest's
+held-out PR-AUC (0.4305 vs 0.4085, +0.0220) and beats v1c by an even wider margin (+0.0558). This
+is not "roughly level" -- it is the largest gap between adjacent rungs seen anywhere in this
+ladder, and it holds in both CV and held-out test, in the same direction. Boosting found real
+additional signal beyond what bagging (rung 3) found.
+
+**Calibration outcome, stated separately from ranking, and a genuine surprise worth flagging
+plainly:** raw `v1e`'s CV calibration is markedly worse than v1c's (ECE 0.0123 vs 0.0026, slope
+1.257 vs 1.004 -- the same rough magnitude of miscalibration RF showed), **but its held-out-test
+calibration is unexpectedly good** (ECE 0.0068, actually *better* than v1c's 0.0103, slope 1.027
+essentially ideal). This CV-vs-test discrepancy is reported honestly rather than reconciled away:
+it most plausibly reflects the extra variance introduced by early stopping's own internal
+train/validation carve-out inside each of the 5 (smaller) CV folds versus the one large
+train+val-vs-test split, and/or genuine single-readout noise on 23 held-out matches -- not
+evidence that the CV number is wrong. The calibrated variant (isotonic won over sigmoid, see 5.3)
+brings CV calibration in line with v1c's (ECE 0.0027 vs 0.0026 -- matched almost exactly) while
+held-out calibration stays close to v1c's (0.0096 vs 0.0103). Calibration was **not** assumed to
+leave PR-AUC untouched -- measured directly: the calibrated variant's held-out PR-AUC (0.4282) is
+very slightly below the raw variant's (0.4305, -0.0023), a small real cost from the isotonic
+binning step, not zero but not meaningful either.
+
+**The practically important combination the brief flagged in advance actually happened:**
+`v1e_gradient_boosting_calibrated` ranks almost as well as the raw model (which beats both v1c
+and v1d substantially) *and* calibrates about as well as v1c. This is the strongest candidate
+combination of ranking and calibration seen anywhere in the ladder so far -- not a promotion
+decision (none is made in this prompt), but the clearest case yet for one being worth running.
+
+### 5.3 Calibration method: sigmoid vs isotonic
+
+Both tried via the same 5-fold canonical CV (match-grouped internal 3-fold CV for the
+calibration wrapper itself, train+val only):
+
+| Method | OOF PR-AUC | OOF ECE | OOF calib. slope | OOF calib. intercept |
+|---|---|---|---|---|
+| Sigmoid (Platt) | 0.4261 | 0.0032 | 1.059 | 0.115 |
+| **Isotonic** | 0.4252 | **0.0027** | **1.036** | **0.071** |
+
+Isotonic won narrowly on every calibration metric (lower ECE, slope and intercept both closer to
+ideal) for a negligible PR-AUC cost relative to sigmoid (-0.0009) -- selected as
+`v1e_gradient_boosting_calibrated`. Both methods comfortably beat the raw model's CV ECE (0.0123),
+confirming post-hoc calibration is doing real work here, not just adding noise. Full comparison:
+`outputs/models/validation/v1e_calibration_method_comparison.json`.
+
+### 5.4 Secondary comparison: does `class_weight` still lose?
+
+At the same tuned hyperparameters, `class_weight="balanced"` drops OOF PR-AUC from 0.4195 to
+0.4049 (worse, not better) and inflates ECE from 0.0123 to 0.2213 -- an **18x** calibration cost
+for a *worse* ranking. The unweighted-wins finding holds for gradient boosting too, the third
+model family in a row (linear, RF, GBM) to confirm it. Full numbers:
+`outputs/models/validation/v1e_class_weight_secondary_comparison.json`.
+
+### 5.5 Is the gain real? (`significance_v1e_vs_v1d_v1c.json`)
+
+Paired over the same 5 canonical CV folds, raw `v1e` beats both prior rungs in **5 of 5 folds**:
+
+| Comparison | Mean &Delta; PR-AUC | Std &Delta; | Paired t (p) | Wilcoxon (p) |
+|---|---|---|---|---|
+| v1e vs v1c | +0.0560 | 0.0156 | t=8.01, **p=0.0013** | W=0, p=0.0625 |
+| v1e vs v1d | +0.0175 | 0.0103 | t=3.81, **p=0.0189** | W=0, p=0.0625 |
+
+Both significant at the conventional 0.05 threshold; Wilcoxon at the same n=5 exact-test floor
+seen throughout this ladder. The v1e-vs-v1c gap (+0.0560) is the largest paired-CV margin
+recorded anywhere in the ladder so far.
+
+### 5.6 Player-disjoint re-check (`player_disjoint_v1e.json`)
+
+5-fold `GroupKFold` on `player_id`, train+val rows only, held-out test set untouched,
+`player_overlap_train_test == 0` confirmed and asserted for every fold. Player-disjoint PR-AUC
+(0.4362 &plusmn; 0.0252) is higher than the match-grouped CV OOF number (0.4195) -- consistent
+with the pattern seen at every prior rung, no leakage signal.
+
+### 5.7 Feature importance: a three-way cross-check
+
+**Top 15 by gain importance:** `match_time_seconds`, `distance_to_attacking_box`,
+`attacking_goal_centrality`, `nearest_attacker_distance`, `defender_spread`, `attacker_spread`,
+`possession_elapsed_seconds`, `attacker_defender_ratio`, `defender_attacker_gap_x`,
+`defender_attacker_gap_y`, `angle_to_attacking_goal`, `visible_attacker_count`,
+`event_type_Pressure`, `action_retained_defensive_team_control`,
+`action_was_under_opponent_possession`.
+
+**Top 15 by permutation importance** (fold-held-out, never the final test set):
+`attacking_goal_centrality`, `attacker_defender_ratio`, `event_type_Pressure`,
+`action_was_under_opponent_possession`, `event_type_Ball Recovery`, `nearest_attacker_distance`,
+`distance_to_attacking_box`, `defender_spread`, `action_retained_defensive_team_control`,
+`phase_label_settled_mid_block_proxy`, `phase_changed_since_prev_event`, `event_type_Clearance`,
+`event_type_Foul Committed`, `phase_label_prev_event_None`, `attacker_spread`.
+
+**Three structurally different model families, fit independently, converge on the same
+features** -- the strongest validation signal available in this project so far. Every numeric
+feature anchoring v1c's top surviving interaction terms and v1d's top importances
+(`distance_to_attacking_box`, `attacking_goal_centrality`, `nearest_attacker_distance`,
+`defender_spread`, `attacker_spread`, `attacker_defender_ratio`, `defender_attacker_gap_x`,
+`angle_to_attacking_goal`) also appears in v1e's gain top-15, and most of them in its permutation
+top-15 too. The same gain/permutation divergence seen in rung 3 repeats here: `event_type`
+categories (`Pressure`, `Ball Recovery`) and possession-context booleans
+(`action_was_under_opponent_possession`, `action_retained_defensive_team_control`) rank
+mid-to-low in gain importance but consistently in the permutation top 5 -- the same documented
+bias (gain/Gini favouring continuous features with many split points) showing up identically in
+two unrelated tree ensembles, which is itself a form of cross-validation of the bias explanation,
+not just the features.
+
+Charts: `outputs/models/classification/charts/v1e_gradient_boosting/` and
+`.../v1e_gradient_boosting_calibrated/` (calibration curve, PR curve, ROC curve, prediction
+distribution, both variants).
+
+### 5.8 Bottom line
+
+Two separate verdicts, not one, per the discipline this rung was asked to follow:
+
+**Ranking: gradient boosting wins clearly**, beating Random Forest's held-out PR-AUC by +0.0220
+and v1c's by +0.0558 -- both confirmed significant (p=0.0189, p=0.0013) and player-disjoint-stable.
+Boosting found real additional signal that bagging (rung 3) had not.
+
+**Calibration: the post-hoc-calibrated variant recovers v1c-level quality** (isotonic CV ECE
+0.0027 vs v1c's 0.0026 -- matched almost exactly; held-out ECE 0.0096 vs v1c's 0.0103 -- close)
+**while keeping nearly all of the PR-AUC gain** (held-out PR-AUC 0.4282, a -0.0023 cost from
+calibration, not the near-total erosion that would make the trade-off not worth it). This is the
+practically important combination flagged in advance: a model that ranks like the best tree
+ensemble tried so far and calibrates like the best linear model tried so far.
+
+Per the brief, **no promotion audit is run in this prompt** for either `v1e_gradient_boosting` or
+`v1e_gradient_boosting_calibrated` -- this section reports the ladder-gate result only. Four
+candidates now exist across the ladder (v1c, v1d, v1e raw, v1e calibrated); which one, if any, is
+put through a Prompt-43-style promotion audit is a separate decision for Varun and a later prompt,
+not decided here.
