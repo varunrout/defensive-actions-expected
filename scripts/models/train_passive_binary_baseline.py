@@ -140,20 +140,48 @@ def load_data() -> pd.DataFrame:
     return df
 
 
+# Rung 1 (prompt 51) quadratic features: the locked, continuous features whose
+# relationship to target_future_shot_10s is classified strictly "U-shaped" (not the
+# weaker "inverse-U" bucket) in reports/analysis/shot_target/passive_numerical_target_atlas.json,
+# verified directly against that atlas rather than assumed to mirror the active leg's 4
+# U-shaped features (which are different columns on a different dataset). 6 features
+# clear this bar, not 4 -- not forced to match the active leg's count:
+#   top_option_1/2/3_threat_score (U-shaped, |rho| 0.067-0.085 -- also this leg's 3
+#     strongest-correlated features overall per FEATURE_LOCK_CONFIRMATION.json's
+#     pattern_analysis_findings.numerical_vs_target_rankings.passive_top)
+#   ball_x, defender_x (U-shaped, |rho| 0.036-0.042)
+#   angle_to_attacking_goal (U-shaped, |rho| 0.030)
+# The weaker "inverse-U" bucket (top_option_3_dx/dy, top_option_2_dy, defender_y,
+# |rho| 0.002-0.031) is deliberately excluded -- inverse-U is a distinct, much weaker
+# shape classification in that atlas, not the same finding restated.
+QUADRATIC_FEATURES = [
+    "top_option_1_threat_score",
+    "top_option_2_threat_score",
+    "top_option_3_threat_score",
+    "ball_x",
+    "defender_x",
+    "angle_to_attacking_goal",
+]
+for _qf in QUADRATIC_FEATURES:
+    assert _qf in CONTINUOUS_COLS, f"{_qf} must be one of the locked continuous passive features"
+
+
 class DesignMatrixBuilder:
     """Fold-safe design-matrix builder: fit on train rows only, transform both.
 
     Same preprocessing pattern as the active leg's DesignMatrixBuilder
     (categorical -> OneHotEncoder, numeric -> median-impute + StandardScaler,
-    boolean -> passthrough), adapted to the passive feature list. No
-    quadratic-term support here -- this is Rung 0 only, no ladder in this
-    prompt. Interaction terms (p3 only) are 5 explicit numeric x numeric
-    products built from the already-fitted standardized numeric block, so
-    there is no additional leakage risk.
+    boolean -> passthrough), adapted to the passive feature list. Interaction
+    terms (p3 only) are 5 explicit numeric x numeric products built from the
+    already-fitted standardized numeric block, so there is no additional
+    leakage risk. Quadratic terms (p1b_quadratic only, prompt 51) are the
+    square of each QUADRATIC_FEATURES column's already-standardized value,
+    named quad__<feature>, same convention as the active leg's Rung 1.
     """
 
-    def __init__(self, add_interactions: bool = False):
+    def __init__(self, add_interactions: bool = False, add_quadratic: bool = False):
         self.add_interactions = add_interactions
+        self.add_quadratic = add_quadratic
         self.ohe = OneHotEncoder(handle_unknown="ignore")
         self.num_imputer = SimpleImputer(strategy="median")
         self.num_scaler = StandardScaler()
@@ -197,6 +225,18 @@ class DesignMatrixBuilder:
             blocks.append(inter_block)
             names.extend(inter_names)
 
+        if self.add_quadratic:
+            quad_block_cols = []
+            quad_names = []
+            for feat in QUADRATIC_FEATURES:
+                std_col = num_block[:, num_names.index(feat)]
+                quad_block_cols.append(std_col ** 2)
+                quad_names.append(f"quad__{feat}")
+
+            quad_block = np.column_stack(quad_block_cols)
+            blocks.append(quad_block)
+            names.extend(quad_names)
+
         x = np.column_stack(blocks)
         return x, names
 
@@ -209,7 +249,8 @@ def fit_predict_fold(train_df, test_df, y_train, y_test, variant: str):
         return score, None, None
 
     add_interactions = variant == "p3_weighted_interactions"
-    builder = DesignMatrixBuilder(add_interactions=add_interactions).fit(train_df)
+    add_quadratic = variant == "p1b_quadratic"
+    builder = DesignMatrixBuilder(add_interactions=add_interactions, add_quadratic=add_quadratic).fit(train_df)
     x_train, feature_names = builder.transform(train_df)
     x_test, _ = builder.transform(test_df)
 

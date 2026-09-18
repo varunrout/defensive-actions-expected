@@ -216,12 +216,25 @@ def _bootstrap_ci(values: np.ndarray) -> dict:
     return {"mean": float(values.mean()), "ci_lo": float(lo), "ci_hi": float(hi), "width": float(hi - lo)}
 
 
-def item3_cluster_bootstrap(y_test: np.ndarray, score_p1: np.ndarray, score_p2: np.ndarray, event_ids: np.ndarray) -> dict:
+def item3_cluster_bootstrap(
+    y_test: np.ndarray,
+    score_p1: np.ndarray,
+    score_p2: np.ndarray,
+    event_ids: np.ndarray,
+    label_a: str = "p1",
+    label_b: str = "p2",
+) -> dict:
     """Naive row-level bootstrap vs cluster bootstrap (grouped by
-    EVENT_GROUP_COL) on the held-out test set, for p1's PR-AUC and for
-    (p1 - p2)'s PR-AUC difference. Quantifies whether the row-correlation
-    caveat Prompt 49 flagged actually widens the uncertainty on p1's
-    apparent advantage, and by how much."""
+    EVENT_GROUP_COL) on the held-out test set, for score_p1's PR-AUC and for
+    (score_p1 - score_p2)'s PR-AUC difference. Quantifies whether the
+    row-correlation caveat Prompt 49 flagged actually widens the uncertainty
+    on score_p1's apparent advantage, and by how much.
+
+    label_a/label_b only affect the output dict's key names (default "p1"/
+    "p2", matching the original Prompt 50 p1-vs-p2 call) -- reused unchanged
+    by the model-ladder scripts (prompt 51) for e.g. p1b_quadratic-vs-p1,
+    passing label_a="p1b_quadratic", label_b="p1_unweighted".
+    """
     rng = np.random.default_rng(BOOTSTRAP_SEED)
     n = len(y_test)
 
@@ -275,12 +288,12 @@ def item3_cluster_bootstrap(y_test: np.ndarray, score_p1: np.ndarray, score_p2: 
         "held_out_test_n_events": int(n_events),
         "avg_rows_per_event": float(rows_per_event.mean()),
         "median_rows_per_event": float(np.median(rows_per_event)),
-        "p1_average_precision": {
+        f"{label_a}_average_precision": {
             "naive_row_level": naive_p1_ci,
             "cluster_by_event": cluster_p1_ci,
             "cluster_to_naive_width_ratio": float(cluster_p1_ci["width"] / naive_p1_ci["width"]),
         },
-        "p1_minus_p2_average_precision": {
+        f"{label_a}_minus_{label_b}_average_precision": {
             "naive_row_level": naive_diff_ci,
             "cluster_by_event": cluster_diff_ci,
             "cluster_to_naive_width_ratio": float(cluster_diff_ci["width"] / naive_diff_ci["width"]),
