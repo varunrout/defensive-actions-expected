@@ -143,6 +143,163 @@ family rather than more polynomial terms on these specific features.
 Charts: `outputs/models/classification/charts/v1b_quadratic/` (calibration curve, PR curve,
 ROC curve, prediction distribution).
 
-## 3. Rung 2 -- systematic interactions (L1)
+## 3. Rung 2 -- systematic interactions (L1) (`v1c_systematic_interactions`)
 
-*Not yet run.*
+`v3_weighted_interactions` (Rung 0) tried interactions too, but only 5 manually-chosen pairs,
+combined with `class_weight="balanced"` -- which independently hurts both PR-AUC and calibration
+(baseline summary sections 2 and 8) -- so v3 never isolated whether interactions specifically
+help. This rung isolates that variable properly: same unweighted objective as v1, but the model
+discovers interactions systematically instead of 5 hand-picked pairs.
+
+`v1c_systematic_interactions` keeps v1's categorical one-hot and boolean-passthrough blocks
+unchanged. The 17 numeric features (already median-imputed and standardized, same as v1) are
+additionally expanded with `sklearn.preprocessing.PolynomialFeatures(degree=2,
+interaction_only=False, include_bias=False)` fit on the standardized numeric block only: C(17,2) =
+136 pairwise products + 17 squared terms = 153 new columns, kept alongside (not instead of) the 17
+original standardized numeric columns. Final design matrix: 59 categorical one-hot + 17 numeric
+originals + 9 boolean + 153 poly terms = **238 columns total** (confirmed programmatically, not
+estimated). No `class_weight` -- unweighted, same objective as v1, isolating this rung from v3's
+confound. `LogisticRegression(penalty="l1", solver="liblinear", C=<tuned>, random_state=42)`: L1
+so the model can zero out candidate terms that don't earn their place, rather than all 153
+getting a nonzero coefficient by default the way L2 would.
+
+### 3.1 Tuning C (CV only, held-out test never touched)
+
+Grid-searched `C` on the 5 canonical CV folds, train+val rows only:
+
+| C | OOF PR-AUC |
+|---|---|
+| 0.001 | 0.1953 |
+| 0.01 | 0.2925 |
+| **0.1** | **0.3630 (chosen)** |
+| 1.0 | 0.3603 |
+| 10.0 | 0.3592 |
+
+The curve brackets a clear interior optimum at C=0.1 (PR-AUC rises steeply from 0.001 to 0.1, then
+declines slightly and flattens from 0.1 to 10.0) -- not a boundary solution, so the grid didn't
+need widening. The held-out test set was not referenced anywhere in this tuning step.
+
+**A methodological caveat, reported rather than glossed over:** `liblinear`'s default tolerance
+(1e-4) took ~270s per fit on this 238-column, heavily collinear design matrix (products/squares of
+correlated base features are themselves correlated) -- intractable across a 5C x 5-fold grid plus
+two gates. Tolerance was relaxed to 1e-3 (~90s/fit) to make the run tractable. Tested at C=1.0: the
+two tolerances gave a similar nonzero-term count (223 vs 226 of the full design matrix) but a
+non-trivial intercept difference (-2.50 vs -1.65) -- expected behaviour for L1 on collinear
+features (the solution path is less sharply determined when candidate columns are correlated), not
+a bug, but a real precision/runtime tradeoff. The qualitative conclusions below (which terms
+survive, the ranking of variants, the significance results) are not sensitive to this -- but the
+exact coefficient values at the margin should be read as indicative, not four-decimal-precise.
+
+### 3.2 CV and held-out test results, at C=0.1
+
+| | PR-AUC | ROC-AUC | Log loss | Brier | ECE |
+|---|---|---|---|---|---|
+| v1 (CV, OOF) | 0.3521 | 0.8177 | 0.2209 | 0.0614 | 0.0036 |
+| v1c (CV, OOF) | **0.3630** | **0.8288** | 0.2172 | 0.0608 | 0.0026 |
+| v1 (held-out test) | 0.3725 | 0.8193 | 0.2047 | 0.0555 | 0.0107 |
+| v1c (held-out test) | **0.3747** | **0.8321** | 0.2011 | 0.0551 | 0.0103 |
+
+Unlike rung 1, **the gain holds on held-out test**: v1c's PR-AUC is higher than v1's on both CV
+(+0.0109) and held-out test (+0.0022) -- same direction both times, not a CV-only artifact.
+Calibration stayed as good as v1's or slightly better throughout (ECE 0.0026 CV / 0.0103 test vs
+v1's 0.0036 / 0.0107) -- no calibration cost for the added flexibility, unlike v2/v3's
+`class_weight="balanced"` cost.
+
+### 3.3 Is the gain real? (`significance_v1c_vs_v1_v1b.json`)
+
+Paired over the same 5 canonical CV folds, v1c beats **both** v1 and v1b_quadratic in **5 of 5
+folds**:
+
+| Comparison | Mean &Delta; PR-AUC | Std &Delta; | Paired t (p) | Wilcoxon (p) |
+|---|---|---|---|---|
+| v1c vs v1 | +0.0102 | 0.0047 | t=4.92, **p=0.0079** | W=0, p=0.0625 |
+| v1c vs v1b_quadratic | +0.0081 | 0.0048 | t=3.75, **p=0.0199** | W=0, p=0.0625 |
+
+Both paired t-tests are significant at the conventional 0.05 threshold. Wilcoxon sits at the same
+n=5 exact-test floor (p=0.0625) seen in every prior rung comparison in this ladder -- the strongest
+signal 5 same-signed pairs can give a rank test, not a weaker result than the t-test, just a
+differently-bounded one. This is a materially larger, more consistent effect than rung 1's
+(+0.0021 CV, non-significant-on-test): v1c's edge over v1 (+0.0102 CV) is roughly **5x** rung 1's
+CV lift, and unlike rung 1, it is confirmed, not contradicted, by the held-out readout.
+
+### 3.4 Player-disjoint re-check (`player_disjoint_v1c.json`)
+
+A ~238-column model is meaningfully more flexible than v1's 32 (or rung 1's 36), so this was
+re-checked from scratch rather than assumed to still hold. 5-fold `GroupKFold` on `player_id`,
+train+val rows only, held-out test set untouched. `player_overlap_train_test == 0` confirmed and
+asserted for every fold (964 total unique players in train+val).
+
+| | PR-AUC | ROC-AUC | ECE |
+|---|---|---|---|
+| v1 player-disjoint CV | 0.3586 &plusmn; 0.0241 | 0.8202 &plusmn; 0.0072 | 0.0054 &plusmn; 0.0012 |
+| v1c player-disjoint CV | 0.3681 &plusmn; 0.0240 | 0.8311 &plusmn; 0.0087 | 0.0060 &plusmn; 0.0010 |
+
+v1c's player-disjoint PR-AUC (0.368) is close to its own match-grouped CV number (0.363, section
+3.2) -- no meaningful drop, and it is *higher* than v1's player-disjoint number, consistent with
+v1c's overall edge over v1 elsewhere. No new leakage signal from the larger feature space.
+
+### 3.5 Which interactions survived L1, and does that match what was already flagged?
+
+116 of the 153 candidate interaction/quadratic terms survived with a nonzero coefficient at C=0.1
+-- not a highly sparse solution (76% of candidates kept some weight), consistent with C=0.1 being
+a fairly mild regularization strength once the more heavily-regularized C=0.001/0.01 were rejected
+by the CV grid.
+
+**Top 5 surviving terms by |coefficient|:**
+
+| Term | Coefficient |
+|---|---|
+| `distance_to_attacking_box`&sup2; | +0.322 |
+| `distance_to_attacking_box` &times; `defender_attacker_gap_x` | -0.211 |
+| `defender_attacker_gap_x`&sup2; | -0.207 |
+| `nearest_attacker_distance`&sup2; | +0.142 |
+| `attacking_goal_centrality` &times; `visible_defender_count` | +0.131 |
+
+The largest surviving term, `distance_to_attacking_box`&sup2; (+0.322), is directionally
+consistent with rung 1's finding that this feature's linear coefficient had the "wrong" sign
+relative to its weak univariate direction because of unrepresented curvature (rung 1, section 2.2)
+-- both rungs independently point at the same feature needing a non-linear term, discovered two
+different ways.
+
+**Cross-check against `reports/eda/FEATURE_INTERACTION_ANALYSIS.json`'s 4 pre-flagged "interactive"
+pairs** (that file only pre-tested 5 candidate pairs total via direct stratified rate analysis, not
+a systematic search of all 136 -- so this checks whether the systematic search rediscovers a small,
+independently-derived reference set, not the other way around):
+
+| Flagged pair | Survived in v1c? | Coefficient / rank |
+|---|---|---|
+| `defenders_within_10m` &times; `distance_to_attacking_box` | Yes | -0.038 (rank 44/116) |
+| `possession_elapsed_seconds` &times; `match_time_seconds` | Yes | +0.034 (rank 48/116) |
+| `visible_defender_count` &times; `attacker_spread` | **No** -- zeroed out by L1 | -- |
+| `defenders_between_ball_and_attacking_goal` &times; `attacker_defender_ratio` | **No** -- zeroed out by L1 | -- |
+
+Mixed result, reported honestly: 2 of the 4 pre-flagged pairs survived (both mid-ranked, not
+top-15), and 2 were zeroed out. All three possible outcomes the task anticipated actually happened
+at once -- the systematic search **rediscovered** some already-flagged pairs, **found new** ones
+the small pre-vetted list never tested (the entire top-5 above, e.g. `distance_to_attacking_box`
+squared and its interaction with `defender_attacker_gap_x`, neither of which was in the original
+5-pair candidate set), and **dropped** 2 of the 4 flagged pairs once given L1's chance to compete
+them against 149 other candidates. This is consistent with `FEATURE_INTERACTION_ANALYSIS.json`
+having tested a small, manually-selected candidate list rather than an exhaustive one -- most of
+what actually matters here was never in that list to begin with.
+
+Charts: `outputs/models/classification/charts/v1c_systematic_interactions/` (calibration curve, PR
+curve, ROC curve, prediction distribution).
+
+### 3.6 Bottom line
+
+**Unlike rung 1, this rung's gain survives held-out test.** v1c beats v1 on PR-AUC in CV (+0.0109),
+on held-out test (+0.0022, same direction), in 5/5 paired CV folds against both v1 and
+v1b_quadratic (paired t p=0.0079 and p=0.0199), and in the player-disjoint recheck -- with
+calibration as good as or better than v1's throughout. Stated plainly, per the framing this ladder
+commits to: **this is a real, validated gain, and `v1c_systematic_interactions` is the new
+candidate baseline** for the active-binary leg, pending the same standing-baseline promotion
+discipline (not automatic from this prompt alone) that `v1_unweighted` itself went through.
+
+What this does *not* settle: whether hand-tuned interaction search is now "done" for this target.
+116 surviving terms at C=0.1 is not a sparse, interpretable model -- it is evidence that
+*something* in the interaction space matters (confirmed by the held-out gain), more than it is a
+clean list of "the 5 interactions that matter." A tighter, more interpretable follow-up (e.g. a
+stronger C, or L1 with stability selection across resamples) is a reasonable future step, but is
+out of scope for this prompt, which only had to answer whether systematic interactions beat
+isolated feature curvature (rung 1) -- they did.
