@@ -129,9 +129,16 @@ class DesignMatrixBuilder:
     polynomial terms on standardized inputs).
     """
 
-    def __init__(self, add_interactions: bool = False, add_quadratic: bool = False):
+    def __init__(self, add_interactions: bool = False, add_quadratic: bool = False, quadratic_features: list[str] | None = None):
         self.add_interactions = add_interactions
         self.add_quadratic = add_quadratic
+        # Defaults to the module-level QUADRATIC_FEATURES (v1b_quadratic's own
+        # U-shaped feature set) when not given -- existing v0-v1e behavior is
+        # unchanged. A caller can pass its own list (e.g. the active-continuous
+        # leg's Rung 1, prompt 55, whose shot-conditional curvature candidates
+        # are a different set entirely) without touching this shared class's
+        # default for the binary leg.
+        self.quadratic_features = quadratic_features if quadratic_features is not None else QUADRATIC_FEATURES
         self.ohe = OneHotEncoder(handle_unknown="ignore")
         self.num_imputer = SimpleImputer(strategy="median")
         self.num_scaler = StandardScaler()
@@ -194,7 +201,7 @@ class DesignMatrixBuilder:
         if self.add_quadratic:
             quad_block_cols = []
             quad_names = []
-            for feat in QUADRATIC_FEATURES:
+            for feat in self.quadratic_features:
                 std_col = num_block[:, num_names.index(feat)]
                 quad_block_cols.append(std_col ** 2)
                 quad_names.append(f"quad__{feat}")

@@ -65,6 +65,8 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 .deviation-box p:last-child { margin-bottom: 0; }
 .verdict-box { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
 .verdict-box p { margin: 0; }
+.fail-box { background: rgba(227,73,72,0.10); border: 1px solid rgba(227,73,72,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.fail-box p { margin: 0; }
 .variant-block { margin: 28px 0 44px; }
 .variant-title { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 16px; margin: 0 0 10px; }
 .chart-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
@@ -246,6 +248,15 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
     <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1_lognormal_glm/feature_coefficients.png" alt="c1_lognormal_glm feature coefficients"><p class="cc-label">feature_coefficients.png</p></div>
   </div>
 </div>
+<div class="variant-block">
+  <p class="variant-title">c1b_quadratic (Rung 1, section 12)</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1b_quadratic/predicted_vs_observed_log.png" alt="c1b_quadratic predicted vs observed (log scale)"><p class="cc-label">predicted_vs_observed_log.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1b_quadratic/residual_distribution.png" alt="c1b_quadratic residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1b_quadratic/calibration_bins.png" alt="c1b_quadratic calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1b_quadratic/feature_coefficients.png" alt="c1b_quadratic feature coefficients (including quadratic terms)"><p class="cc-label">feature_coefficients.png</p></div>
+  </div>
+</div>
 
 <h2>11. Rung-0 result</h2>
 <div class="verdict-box"><p><strong><code>c1_lognormal_glm</code> clears Rung 0</strong> against the
@@ -255,10 +266,95 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   baseline. No model ladder is built in this document &mdash; Rung 0 only, mirroring the binary
   legs' own Prompt 36/49 discipline; ladder rungs are Prompt 55+.</p></div>
 
+<h2>12. Rung 1 &mdash; <code>c1b_quadratic</code> (prompt 55)</h2>
+<p><strong>Structural note on this document, decided explicitly rather than defaulted into</strong>:
+  the active-binary leg split its baseline summary from its model-ladder doc at Prompt 42, once 2
+  rungs existed beyond Rung 0 (Rungs 1 and 2). This leg currently has only 1 rung beyond Rung 0 --
+  the same timing this document appends Rung 1 to the existing baseline summary rather than
+  splitting into a separate ladder doc yet. That split will happen once a second rung is built
+  (Prompt 56+), consistent with the binary legs' own precedent, not before.</p>
+
+<h3>12.1 Reconfirming shot-conditional nonlinearity from real data, not the rough chat shortlist</h3>
+<p>The rough chat check that motivated this rung looked at 7 features and found
+  <code>visible_attacker_count</code> (pearson -0.13, spearman -0.16) as the strongest, with
+  <code>defenders_within_10m</code> flagged for a "mild threshold-like jump at its top bin."
+  <code>scripts/analysis/check_shot_conditional_nonlinearity.py</code> reproduces this properly
+  across all 32 locked features on the real shot-conditional subset (n=4,368), computing
+  Pearson/Spearman for numeric features, point-biserial for boolean features, and ANOVA eta-squared
+  for categorical features (quadratic terms are only meaningful for the 17 numeric features --
+  squaring a 0/1 boolean or a one-hot categorical dummy is a no-op, stated explicitly rather than
+  silently skipped). Full output:
+  <code>outputs/models/validation/shot_conditional_nonlinearity_check.json</code>.</p>
+<p><strong>The systematic check confirms the chat shortlist's top feature and finds one it missed.</strong>
+  <code>visible_attacker_count</code> is confirmed as the single strongest association across all 32
+  features (|r|=0.161) &mdash; and <code>visible_defender_count</code> (|r|=0.135), a feature the
+  7-feature chat shortlist never checked, ranks 3rd overall. (The chat shortlist's
+  <code>distance_to_center_line</code> is not usable as a check at all &mdash; reconfirmed here that
+  it is not one of the 32 locked ACTIVE features; it was dropped from the locked set for redundancy
+  with <code>attacking_goal_centrality</code> before this leg's work began.)</p>
+<p><strong>Curvature, specifically</strong>: the quintile-binning diagnostic flags several features
+  as non-linear, but most of those have near-zero absolute correlation (7 features between |r|=0.005
+  and |r|=0.05) &mdash; indistinguishable from sampling noise on ~870-900-row bins drawn from a
+  target with excess kurtosis ~13-14, and <strong>not used as quadratic candidates</strong>. Only 3
+  features clear a real signal-plus-shape bar:</p>
+<table>
+<tr><th>Feature</th><th>|r|</th><th>Curvature shape</th><th>Note</th></tr>
+<tr><td><code>visible_attacker_count</code></td><td>0.161</td><td>accelerating monotonic (top-bin jump &gt;2x other gaps)</td><td>strongest feature overall, real signal + real curvature</td></tr>
+<tr><td><code>defenders_within_10m</code></td><td>0.088</td><td>accelerating monotonic (top-bin jump &gt;2x other gaps)</td><td>the specific feature the rough chat check flagged &mdash; reconfirmed, not just asserted</td></tr>
+<tr><td><code>defender_spread</code></td><td>0.052</td><td>genuine but asymmetric U-shape</td><td>weaker evidence than the top two; included as the marginal case it is</td></tr>
+</table>
+<p><code>QUADRATIC_FEATURES_C1B = [visible_attacker_count, defenders_within_10m, defender_spread]</code>
+  &mdash; 3 features, not the active-binary leg's 4, and none of the same features (that leg's
+  U-shaped set was computed on the full zero+positive dataset and is not reused here; the one name
+  that happens to overlap, <code>defender_spread</code>, was independently reconfirmed on this leg's
+  own shot-conditional data, not carried over by assumption).</p>
+
+<h3>12.2 c1b_quadratic results</h3>
+<p>Same 32 locked features, same <code>DesignMatrixBuilder</code> and <code>LinearRegression</code>
+  as <code>c1</code>, plus one <code>quad__&lt;feature&gt;</code> column per feature above.</p>
+<table>
+<tr><th>Variant</th><th>Common log RMSE (CV)</th><th>Common log RMSE (held-out)</th><th>Naive MAE (held-out)</th><th>Corrected R&sup2; (held-out)</th></tr>
+<tr><td><code>c1_lognormal_glm</code></td><td>1.0014</td><td>0.9951</td><td>0.0778</td><td>0.0371</td></tr>
+<tr><td><code>c1b_quadratic</code></td><td>1.0027</td><td>0.9975</td><td>0.0779</td><td>0.0349</td></tr>
+</table>
+<p><strong><code>c1b_quadratic</code> does not beat <code>c1</code> &mdash; on either CV or
+  held-out, on either the common-scale metric or original-scale MAE/R&sup2;.</strong> The
+  common-scale log RMSE is marginally <em>worse</em> for <code>c1b</code> in both CV (+0.0013) and
+  held-out (+0.0024), and corrected R&sup2; is also marginally worse (0.0349 vs 0.0371).</p>
+
+<h3>12.3 Significance test, c1b vs c1</h3>
+<p><code>outputs/models/validation/significance_c1_vs_c1b_quadratic.json</code>: mean diff
+  (c1b &minus; c1) common-scale log RMSE = <strong>+0.0014</strong> (c1b worse, not better), paired
+  t-test <strong>p=0.2073</strong>, Wilcoxon p=0.1875. <strong>Does not clear significance in either
+  direction</strong> &mdash; this is not a "significant regression" so much as a null result: the
+  quadratic terms make essentially no detectable difference, worse or better.</p>
+
+<h3>12.4 This is a real finding about this leg, not a modelling failure</h3>
+<div class="fail-box"><p>Stated plainly, per this prompt's own explicit instruction not to bury a
+  null result under favourable-sounding framing: <strong><code>c1b_quadratic</code> shows no real
+  improvement over <code>c1</code>, and this connects directly to section 12.1's weak-correlation
+  finding, not a coincidence.</strong> Every one of the 32 locked features correlates weakly with
+  shot quality once a shot is already guaranteed to happen (strongest at |r|=0.16) &mdash; squared
+  terms on 3 of the strongest-available features simply don't have much genuine curvature signal to
+  capture once the (already weak) linear terms have done their part. The surviving quadratic
+  coefficients themselves are small (<code>quad__defenders_within_10m</code> +0.022,
+  <code>quad__visible_attacker_count</code> -0.015, <code>quad__defender_spread</code> +0.015)
+  &mdash; consistent with "present but negligible," not "the model found nothing at all."</p></div>
+<p>This is the same kind of honest ladder-rung outcome as the active-binary leg's own Rung 1
+  (Prompt 39, <code>v1b_quadratic</code> also failed to survive held-out test there, for different
+  underlying reasons). The active-continuous leg's shot-conditional signal is simply weak &mdash;
+  this was flagged as a real possibility in this prompt's own brief before any code was written, and
+  the real data bears it out. <strong><code>c1_lognormal_glm</code> remains this leg's best
+  Rung-0/Rung-1 candidate</strong>; <code>c1b_quadratic</code> is not promoted or preferred over it.
+  Whether later rungs (interaction terms, tree-based models &mdash; Prompt 56+) can extract more
+  signal than a linear model can from this weak a feature set is an open question for those rungs to
+  answer on their own evidence, not assumed from this rung's result.</p>
+
 </div>
 </div>
 <footer>
-  <p>Generated by <code>scripts/models/train_active_continuous_baseline.py</code>. Markdown source:
+  <p>Generated by <code>scripts/models/train_active_continuous_baseline.py</code> and
+    <code>scripts/models/train_c1b_quadratic.py</code>. Markdown source:
     <code>reports/modeling/active_continuous/ACTIVE_CONTINUOUS_BASELINE_SUMMARY.md</code>.</p>
 </footer>
 

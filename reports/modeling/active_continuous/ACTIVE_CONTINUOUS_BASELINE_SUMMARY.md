@@ -192,3 +192,92 @@ readout against a trivial baseline. No model ladder is built in this document --
 only, mirroring the binary legs' own Prompt 36/49 discipline; ladder rungs (quadratic/interaction
 terms, random forest, gradient boosting, mirroring the binary legs' Rungs 1-4) are Prompt 55+, after
 this Rung 0 is reviewed.
+
+## 11. Rung 1 -- `c1b_quadratic` (prompt 55)
+
+**Structural note on this document, decided explicitly rather than defaulted into**: the active-binary
+leg split its baseline summary from its model-ladder doc at Prompt 42, once 2 rungs existed beyond
+Rung 0 (Rungs 1 and 2). This leg currently has only 1 rung beyond Rung 0 -- the same timing this
+document appends Rung 1 to the existing baseline summary rather than splitting into a separate
+ladder doc yet. That split will happen once a second rung is built (Prompt 56+), consistent with the
+binary legs' own precedent, not before.
+
+### 11.1 Reconfirming shot-conditional nonlinearity from real data, not the rough chat shortlist
+
+The rough chat check that motivated this rung looked at 7 features and found
+`visible_attacker_count` (pearson -0.13, spearman -0.16) as the strongest, with `defenders_within_10m`
+flagged for a "mild threshold-like jump at its top bin." `scripts/analysis/check_shot_conditional_nonlinearity.py`
+reproduces this properly across all 32 locked features on the real shot-conditional subset (n=4,368),
+computing Pearson/Spearman for numeric features, point-biserial for boolean features, and ANOVA
+eta-squared for categorical features (quadratic terms are only meaningful for the 17 numeric
+features -- squaring a 0/1 boolean or a one-hot categorical dummy is a no-op, stated explicitly
+rather than silently skipped). Full output:
+`outputs/models/validation/shot_conditional_nonlinearity_check.json`.
+
+**The systematic check confirms the chat shortlist's top feature and finds one it missed.**
+`visible_attacker_count` is confirmed as the single strongest association across all 32 features
+(|r|=0.161) -- and `visible_defender_count` (|r|=0.135), a feature the 7-feature chat shortlist
+never checked, ranks 3rd overall. (The chat shortlist's `distance_to_center_line` is not usable as a
+check at all -- reconfirmed here that it is not one of the 32 locked ACTIVE features; it was dropped
+from the locked set for redundancy with `attacking_goal_centrality` before this leg's work began.)
+
+**Curvature, specifically**: the quintile-binning diagnostic (5 roughly-equal bins of each numeric
+feature, mean `log(xg)` per bin) flags several features as non-linear, but most of those have
+near-zero absolute correlation (7 features between |r|=0.005 and |r|=0.05) -- indistinguishable from
+sampling noise on ~870-900-row bins drawn from a target with excess kurtosis ~13-14, and **not used
+as quadratic candidates**. Only 3 features clear a real signal-plus-shape bar:
+
+| Feature | \|r\| | Curvature shape | Note |
+|---|---|---|---|
+| `visible_attacker_count` | 0.161 | accelerating monotonic (top-bin jump &gt;2x other gaps) | strongest feature overall, real signal + real curvature |
+| `defenders_within_10m` | 0.088 | accelerating monotonic (top-bin jump &gt;2x other gaps) | the specific feature the rough chat check flagged -- reconfirmed, not just asserted |
+| `defender_spread` | 0.052 | genuine but asymmetric U-shape | weaker evidence than the top two; included as the marginal case it is |
+
+`QUADRATIC_FEATURES_C1B = [visible_attacker_count, defenders_within_10m, defender_spread]` -- 3
+features, not the active-binary leg's 4, and none of the same features (that leg's U-shaped set --
+`defender_spread`, `distance_to_attacking_box`, `visible_defender_count`,
+`defenders_between_ball_and_attacking_goal` -- was computed on the full zero+positive dataset and is
+not reused here; the one name that happens to overlap, `defender_spread`, was independently
+reconfirmed on this leg's own shot-conditional data, not carried over by assumption).
+
+### 11.2 `c1b_quadratic` results
+
+Same 32 locked features, same `DesignMatrixBuilder` and `LinearRegression` as `c1`, plus one
+`quad__<feature>` column per feature in `QUADRATIC_FEATURES_C1B` above.
+
+| Variant | Common log RMSE (CV) | Common log RMSE (held-out) | Naive MAE (held-out) | Corrected R² (held-out) |
+|---|---|---|---|---|
+| `c1_lognormal_glm` | 1.0014 | 0.9951 | 0.0778 | 0.0371 |
+| `c1b_quadratic` | 1.0027 | 0.9975 | 0.0779 | 0.0349 |
+
+**`c1b_quadratic` does not beat `c1` -- on either CV or held-out, on either the common-scale metric
+or original-scale MAE/R².** The common-scale log RMSE is marginally *worse* for `c1b` in both CV
+(+0.0013) and held-out (+0.0024), and corrected R² is also marginally worse (0.0349 vs 0.0371).
+
+### 11.3 Significance test, c1b vs c1
+
+`outputs/models/validation/significance_c1_vs_c1b_quadratic.json`: mean diff (c1b - c1) common-scale
+log RMSE = **+0.0014** (c1b worse, not better), paired t-test **p=0.2073**, Wilcoxon p=0.1875. **Does
+not clear significance in either direction** -- this is not a "significant regression" so much as a
+null result: the quadratic terms make essentially no detectable difference, worse or better.
+
+### 11.4 This is a real finding about this leg, not a modelling failure
+
+Stated plainly, per this prompt's own explicit instruction not to bury a null result under
+favourable-sounding framing: **`c1b_quadratic` shows no real improvement over `c1`, and this
+connects directly to item 1's weak-correlation finding, not a coincidence.** Every one of the 32
+locked features correlates weakly with shot quality once a shot is already guaranteed to happen
+(strongest at |r|=0.16) -- squared terms on 3 of the strongest-available features simply don't have
+much genuine curvature signal to capture once the (already weak) linear terms have done their part.
+The surviving quadratic coefficients themselves are small (`quad__defenders_within_10m` +0.022,
+`quad__visible_attacker_count` -0.015, `quad__defender_spread` +0.015) -- consistent with "present
+but negligible," not "the model found nothing at all."
+
+This is the same kind of honest ladder-rung outcome as the active-binary leg's own Rung 1 (Prompt
+39, `v1b_quadratic` also failed to survive held-out test there, for different underlying reasons).
+The active-continuous leg's shot-conditional signal is simply weak -- this was flagged as a real
+possibility in this prompt's own brief before any code was written, and the real data bears it out.
+**`c1_lognormal_glm` remains this leg's best Rung-0/Rung-1 candidate**; `c1b_quadratic` is not
+promoted or preferred over it. Whether later rungs (interaction terms, tree-based models --
+Prompt 56+) can extract more signal than a linear model can from this weak a feature set is an open
+question for those rungs to answer on their own evidence, not assumed from this rung's result.
