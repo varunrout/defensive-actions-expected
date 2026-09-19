@@ -1,5 +1,9 @@
 # Active-Continuous Model Ladder
 
+> **Status update (Prompt 58):** `c1d_random_forest` (Rung 2) has been promoted to standing
+> reference E[xg|shot] component for the active-continuous leg's hurdle pipeline, superseding
+> `c1_lognormal_glm`. See the full promotion decision in section 6 below.
+
 *Split out of `ACTIVE_CONTINUOUS_BASELINE_SUMMARY.md` (prompt 56, once a second rung existed beyond
 Rung 0) so the locked Rung 0 baseline document doesn't keep growing as more rungs are tried --
 mirroring the binary legs' own split point (`ACTIVE_BINARY_MODEL_LADDER.md`, Prompt 42). Rung 0 --
@@ -435,3 +439,112 @@ Wilcoxon), and every original-scale accuracy metric on the held-out set orders `
 not reframed as a win because it still beats the linear baseline** -- `c1d_random_forest` remains
 this leg's best regression candidate after Rung 3. Per prompt 57's explicit constraint, no promotion
 audit is run in this prompt regardless of this result.
+
+## 6. Promotion decision: `c1d_random_forest` (prompt 58)
+
+`c1d_random_forest`'s ladder gate (Rung 2, section 4) answered "is this rung's change real?" --
+5/5 CV folds, p=0.0126. This section answers the deeper question: should it replace
+`c1_lognormal_glm` as the leg's standing reference E[xg|shot] component? Four checks, all run via
+`scripts/models/validate_c1d_promotion.py` (train+val CV-OOF predictions for items 1-3, the same
+held-out test set Prompt 54 already used for item 4's diagnostic, read once):
+
+**Environment note, disclosed rather than buried**: this audit uncovered that Prompts 56-58's model
+training had been run under the wrong Python interpreter (Anaconda base, scikit-learn 1.5.1 /
+LightGBM 4.6.0) instead of this project's own `.venv` (scikit-learn 1.9.0 / LightGBM 4.7.0, the
+version the standing classifier `v1e_gradient_boosting_calibrated.joblib` was actually fit under).
+Reloading that classifier under the wrong sklearn version silently produced garbage P(shot) values
+(mean 0.53 instead of the true ~0.08) -- confirmed by comparing against the exact, already-on-record
+held-out PR-AUC (0.4282) and ECE (0.0096) for that model, which only reproduced correctly under
+`.venv`. `c1d_random_forest` and `c1e_gradient_boosting` were retrained fresh under `.venv` to confirm
+fidelity -- **every reported number in Rungs 2 and 3 above reproduced within 4th-decimal noise**
+(e.g. `c1d` vs `c1` mean diff -0.0211 both times, chosen hyperparameters identical), so those
+sections stand unchanged. All of this prompt's own checks were run under `.venv`.
+
+### 6.1 Tournament-stratified check (`tournament_stratified_c1d.json`)
+
+Reconfirmed: only 2 tournaments present in this leg's positive train+val rows (FIFA World Cup 2022,
+1,746 rows; UEFA Euro 2024, 1,854 rows) -- both slices large enough to trust, no thin-slice caveat
+needed here. `c1d_random_forest` beats `c1_lognormal_glm` on **both** tournaments, not concentrated
+in one:
+
+| Tournament | Rows | `c1` common log RMSE | `c1d` common log RMSE | `c1` corrected R² | `c1d` corrected R² |
+|---|---|---|---|---|---|
+| FIFA World Cup 2022 | 1,746 | 1.0272 | 0.9984 | 0.0315 | 0.0615 |
+| UEFA Euro 2024 | 1,854 | 0.9764 | 0.9627 | 0.0246 | 0.0553 |
+
+The gain is if anything larger on WC2022 (corrected R² +0.030) than Euro2024 (+0.031, essentially the
+same) -- genuinely balanced, not a one-tournament artifact.
+
+### 6.2 Error-slice comparison (`error_analysis_c1d_regression.json`)
+
+`phase_label` x `position`, MAE on the xg scale, corrected back-transform. **23 of 28 slices with
+>=30 rows improve, 5 are about the same (|MAE diff| < 0.005), zero regress.** 2 slices are correctly
+flagged and excluded as too thin to trust (`Goalkeeper`, n=4; `Right Attacking Midfield`, n=28) --
+the same two positions the active-binary leg's own promotion audits (Prompts 43/46) flagged as
+thin/weak-spot-prone, a useful cross-leg consistency check even though the underlying metric differs.
+No new weak spot is introduced anywhere `c1d` has enough rows to be judged.
+
+### 6.3 Feature-shape sanity check (`feature_shape_sanity_c1d.json`)
+
+10-bin marginal view (not controlled), top 8 features by `c1d`'s Gini importance, ~360 rows/bin
+throughout (no thin bins on any of the 8 features -- a jagged pattern here would not be a small-bin
+artifact). One line each:
+
+- **`attacking_goal_centrality`**: mostly monotonic increasing toward the top bins -- matches its
+  documented strong positive correlation (rank #2, |r|=0.14).
+- **`distance_to_attacking_box`**: non-monotonic (dips through the middle bins, highest at both the
+  nearest and farthest bins) -- smooth across evenly-sized bins, not jagged, but this is a genuinely
+  unusual shape worth a specific flag: it's the feature that jumped from correlation rank #21 to
+  importance rank #2 (Rung 2/3's headline finding), and this marginal view shows *why* a linear model
+  couldn't see it -- the relationship isn't monotonic, so a single Pearson r washes it out even though
+  real structure exists.
+- **`visible_attacker_count`**: mostly monotonic decreasing with an uptick at the very top bin --
+  matches Rung 1's documented "accelerating monotonic, top-bin jump" curvature finding exactly.
+- **`match_time_seconds`**: flat and noisy (range -2.75 to -2.92, no trend) -- consistent with its
+  modest importance ranking; not concerning, reads as genuinely weak signal rather than a
+  masked pattern.
+- **`defender_spread`**: smooth monotonic decrease then plateau -- broadly consistent with Rung 1's
+  "genuine but asymmetric U-shape" finding for this feature.
+- **`angle_to_attacking_goal`**: rises then falls, peaking in the early-mid bins -- a plausible
+  football shape (an optimal shooting-angle range outperforming both very acute and very wide
+  angles), smooth across bins.
+- **`defender_attacker_gap_x`**: a smooth, symmetric inverted-U peaking near gap=0 -- a coherent
+  shape (defender/attacker roughly aligned in the x-axis associates with higher predicted quality
+  than either extreme), not noise.
+- **`nearest_attacker_distance`**: mostly flat with mild noise -- consistent with its weak importance
+  ranking.
+
+**None of the 8 look discontinuous or noise-shaped** given the bin sizes involved (~360 rows/bin, no
+thin bins flagged). `distance_to_attacking_box`'s non-monotonic shape is the one to watch, but it is
+smooth and directly explains this rung's headline finding rather than contradicting it.
+
+### 6.4 Hurdle pipeline re-run -- the decisive check (`hurdle_pipeline_readout_c1d.json`)
+
+Prompt 54's exact diagnostic, `v1e_gradient_boosting_calibrated`'s P(shot) (unchanged, reused
+predict-only) times `c1d_random_forest`'s E[xg|shot] (also reused predict-only, never refit) in
+place of `c1_lognormal_glm`'s, on the same full held-out test set (10,660 rows):
+
+| | RMSE | MAE | R² |
+|---|---|---|---|
+| Trivial baseline (on record) | 0.04845 | 0.01498 | ~0.0000 |
+| `c1`-based hurdle (Prompt 54, on record) | 0.04487 | 0.01190 | 0.1426 |
+| `c1d`-based hurdle (this prompt) | **0.04416** | **0.01107** | **0.1693** |
+
+**A real, consistent-direction end-to-end improvement on all three metrics** -- RMSE -0.00070, MAE
+-0.00083, R² +0.0267. Modest in absolute size (as expected: P(shot) dominates the product for most
+of the 10,660 rows, the large majority of which never see a shot at all), but the direction is
+unambiguous and matches items 1-3's own direction. This is the check the promotion decision actually
+rests on for this leg, and it clears.
+
+### 6.5 Decision: promoted
+
+**All four criteria from this prompt's own promotion bar are met**: beats `c1` on both tournament
+slices (not reliant on either alone), net-improves on the error-slice breakdown with zero
+regressions among trustworthy slices, the feature-shape checks are football-sensible and not
+dominated by thin-bin noise, and the re-run hurdle pipeline shows a real, consistent improvement
+over the `c1`-based numbers already on record.
+
+**`c1d_random_forest` is now the reference E[xg|shot] component for the active-continuous leg's
+hurdle pipeline, superseding `c1_lognormal_glm` (Prompt 54); `c1_lognormal_glm` remains documented
+as the Rung 0 baseline it was measured against, and `c1e_gradient_boosting` remains documented as
+the rung that didn't clear the bar against it.**

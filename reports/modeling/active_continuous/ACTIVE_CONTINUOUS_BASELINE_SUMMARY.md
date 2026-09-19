@@ -1,5 +1,10 @@
 # Active-Continuous Baseline Summary (c0-c1)
 
+> **Status update (Prompt 58):** `c1_lognormal_glm` (Rung 0, this document) is no longer the active
+> reference E[xg|shot] component -- `c1d_random_forest` was promoted in its place. See the promotion
+> decision in [`ACTIVE_CONTINUOUS_MODEL_LADDER.md`](ACTIVE_CONTINUOUS_MODEL_LADDER.md) section 6.
+> `c1_lognormal_glm` remains documented below as the Rung 0 baseline it was measured against.
+
 Target: `target_future_xg_10s` (the continuous, shot-conditional counterpart of the active-binary
 leg's `target_future_shot_10s`). Dataset: `data/features/player_defensive_actions.parquet`, filtered
 to the 4,368 rows where `target_future_shot_10s == 1` (reconfirmed directly against the real
