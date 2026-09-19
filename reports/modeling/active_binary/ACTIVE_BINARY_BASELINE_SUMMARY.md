@@ -10,6 +10,9 @@ Target: `target_future_shot_10s`. Dataset: `data/features/player_defensive_actio
 (56,068 rows / 115 matches -- confirmed real scale, not the 20-row/4-match
 fixture scale that the retired pre-lock `b0`-`b8` classification outputs used).
 
+*For the full math behind these models -- derived from first principles, with real worked
+examples -- see [`MATH_BEHIND_IT.md`](../MATH_BEHIND_IT.md).*
+
 ## 1. Feature set
 
 32 of the 34 locked ACTIVE features from `src/eda/feature_config.py` (`ACTIVE`

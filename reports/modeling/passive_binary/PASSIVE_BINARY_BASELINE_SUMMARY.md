@@ -12,6 +12,9 @@ this leg during design; nothing in this baseline re-derives the target). Dataset
 `data/features/passive_defense.parquet` (1,593,181 rows / 115 matches -- confirmed real
 scale directly against the parquet, not assumed from prose).
 
+*For the full math behind these models -- derived from first principles, with real worked
+examples -- see [`MATH_BEHIND_IT.md`](../MATH_BEHIND_IT.md).*
+
 **Source note:** the prompt for this baseline referenced `claude/passive-defense-build-plan.md`
 as context. That file does not exist anywhere in this repository (checked by full-repo
 search). Every claim below is instead verified directly against the real, current sources:
