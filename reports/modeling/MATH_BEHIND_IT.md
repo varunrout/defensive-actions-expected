@@ -59,123 +59,145 @@ function that takes *any* number (however big or small) and squeezes it into tha
 ever quite touching 0 or 1.
 
 **Log-odds: the bridge between "any number" and "a probability."** Here's the trick. Instead of
-predicting the probability `p` directly, predict something called the **log-odds** of `p`.
-"Odds" is a familiar idea from betting: if something has probability `p` of happening, its odds are
-`p / (1-p)` -- "how many times more likely it is to happen than not." Odds range from 0 (impossible)
-to infinity (certain), which is already better than a raw probability (bounded above at 1), but
-still not symmetric or well-behaved for arithmetic. Taking the **logarithm** of the odds fixes that:
-`log(odds)` ranges over *all* real numbers, from -infinity (impossible) to +infinity (certain),
-with 0 meaning "50-50." That is exactly the unrestricted range a weighted sum of features naturally
-produces. So the model computes:
+predicting the probability $p$ directly, predict something called the **log-odds** of $p$.
+"Odds" is a familiar idea from betting: if something has probability $p$ of happening, its odds are
+$\dfrac{p}{1-p}$ -- "how many times more likely it is to happen than not." Odds range from $0$
+(impossible) to $\infty$ (certain), which is already better than a raw probability (bounded above
+at 1), but still not symmetric or well-behaved for arithmetic. Taking the **logarithm** of the odds
+fixes that: $\log(\text{odds})$ ranges over *all* real numbers, from $-\infty$ (impossible) to
+$+\infty$ (certain), with $0$ meaning "50-50." That is exactly the unrestricted range a weighted
+sum of features naturally produces. So the model computes:
 
-```
-z = intercept + coef_1 * feature_1 + coef_2 * feature_2 + ... + coef_n * feature_n
-```
+$$
+z = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_n x_n
+$$
 
-and treats `z` as the log-odds: `z = log( p / (1-p) )`.
+where $\beta_0$ is the intercept, each $\beta_i$ ("beta-i") is a fitted coefficient, and each $x_i$
+is that row's value for feature $i$.
 
-**Deriving the sigmoid function.** Given `z = log(p / (1-p))`, we want to go the other way: given
-`z`, what is `p`? This is pure algebra, one step at a time.
+and treats $z$ as the log-odds: $z = \log\left(\dfrac{p}{1-p}\right)$.
 
-```
-z = log( p / (1-p) )
-exp(z) = p / (1-p)                          [undo the log by exponentiating both sides]
-exp(z) * (1-p) = p                          [multiply both sides by (1-p)]
-exp(z) - exp(z)*p = p                       [distribute]
-exp(z) = p + exp(z)*p                       [move the p-terms together]
-exp(z) = p * (1 + exp(z))                   [factor out p]
-p = exp(z) / (1 + exp(z))                   [divide]
-```
+**Deriving the sigmoid function.** Given $z = \log\left(\dfrac{p}{1-p}\right)$, we want to go the
+other way: given $z$, what is $p$? This is pure algebra, one step at a time.
 
-Divide the top and bottom of that last fraction by `exp(z)`:
+$$ z = \log\left(\frac{p}{1-p}\right) $$
 
-```
-p = 1 / (1 + exp(-z))
-```
+*(the definition of log-odds)*
 
-This is the **sigmoid function**, usually written `sigmoid(z) = 1 / (1 + exp(-z))`. Two things fall
-straight out of this algebra, not just eyeballing a graph:
+$$ e^{z} = \frac{p}{1-p} $$
 
-- **It's always between 0 and 1.** `exp(-z)` is always a positive number (any real number raised as
-  a power of `e` is positive), so `1 + exp(-z)` is always bigger than 1, so `1 / (1 + exp(-z))` is
-  always between 0 and 1, no matter what `z` is.
-- **It's symmetric around `z=0`, `p=0.5`.** When `z=0`, `exp(-0)=1`, so `p = 1/(1+1) = 0.5`. When
-  `z` is a large positive number, `exp(-z)` shrinks toward 0, so `p` climbs toward 1. When `z` is a
-  large negative number, `exp(-z)` blows up, so `p` shrinks toward 0.
+*(undo the log by exponentiating both sides)*
+
+$$ e^{z}(1-p) = p $$
+
+*(multiply both sides by $(1-p)$)*
+
+$$ e^{z} - e^{z}p = p $$
+
+*(distribute)*
+
+$$ e^{z} = p + e^{z}p $$
+
+*(move the $p$ terms together)*
+
+$$ e^{z} = p\,(1 + e^{z}) $$
+
+*(factor out $p$)*
+
+$$ p = \frac{e^{z}}{1 + e^{z}} $$
+
+*(divide)*
+
+Divide the top and bottom of that last fraction by $e^{z}$:
+
+$$
+p = \frac{1}{1 + e^{-z}}
+$$
+
+This is the **sigmoid function**, usually written $\sigma(z) = \dfrac{1}{1 + e^{-z}}$. Two things
+fall straight out of this algebra, not just eyeballing a graph:
+
+- **It's always between 0 and 1.** $e^{-z}$ is always a positive number (any real number raised as
+  a power of $e$ is positive), so $1 + e^{-z}$ is always bigger than 1, so $\dfrac{1}{1+e^{-z}}$ is
+  always between 0 and 1, no matter what $z$ is.
+- **It's symmetric around $z=0$, $p=0.5$.** When $z=0$, $e^{-0}=1$, so $p = \frac{1}{1+1} = 0.5$.
+  When $z$ is a large positive number, $e^{-z}$ shrinks toward 0, so $p$ climbs toward 1. When $z$
+  is a large negative number, $e^{-z}$ blows up, so $p$ shrinks toward 0.
 
 **Deriving log-loss from maximum likelihood.** Now: how does the model *learn* the right
-coefficients? Every row in the training data has an actual outcome, `y`, which is either 1 (a shot
+coefficients? Every row in the training data has an actual outcome, $y$, which is either 1 (a shot
 happened) or 0 (it didn't). This is called a **Bernoulli trial** -- a single yes/no event with some
-probability `p` of "yes." The probability of what actually happened, for one row, can be written as
+probability $p$ of "yes." The probability of what actually happened, for one row, can be written as
 a single formula that works for both cases:
 
-```
-P(y | p) = p^y * (1-p)^(1-y)
-```
+$$
+P(y \mid p) = p^{y}(1-p)^{1-y}
+$$
 
-Check this makes sense: if `y=1`, this becomes `p^1 * (1-p)^0 = p` (the probability of "yes"). If
-`y=0`, this becomes `p^0 * (1-p)^1 = 1-p` (the probability of "no"). One formula, both cases.
+Check this makes sense: if $y=1$, this becomes $p^{1}(1-p)^{0} = p$ (the probability of "yes"). If
+$y=0$, this becomes $p^{0}(1-p)^{1} = 1-p$ (the probability of "no"). One formula, both cases.
 
 If we assume every row's outcome is independent of every other row's (a simplifying assumption --
 section 2.8 below is exactly about a leg where this assumption needs revisiting), the probability
 of the *entire dataset* looking the way it actually looked is the **product** of every row's
 individual probability:
 
-```
-Likelihood = P(y_1|p_1) * P(y_2|p_2) * ... * P(y_N|p_N)
-           = product over all rows of [ p_i^(y_i) * (1-p_i)^(1-y_i) ]
-```
+$$
+\mathcal{L} = \prod_{i=1}^{N} P(y_i \mid p_i) = \prod_{i=1}^{N} p_i^{y_i}(1-p_i)^{1-y_i}
+$$
 
-"Maximum likelihood estimation" means: choose the coefficients that make this number as large as
-possible -- i.e., choose the coefficients that make the data we actually observed look as
-*unsurprising* as possible under the model.
+("$\prod$", capital pi, means "multiply all of these together," the same way "$\sum$" means "add
+all of these together.") "Maximum likelihood estimation" means: choose the coefficients that make
+this number $\mathcal{L}$ as large as possible -- i.e., choose the coefficients that make the data
+we actually observed look as *unsurprising* as possible under the model.
 
 **Why take the log.** Multiplying tens of thousands of numbers, each between 0 and 1, produces a
 number so close to zero a computer can't represent it accurately (this is a real numerical problem,
 not just an inconvenience). Taking the logarithm turns every product into a **sum** --
-`log(a*b) = log(a) + log(b)` -- which is both numerically stable to compute and easier to take
-derivatives of. Because `log` is a strictly increasing function, whatever coefficients maximize the
+$\log(ab) = \log(a) + \log(b)$ -- which is both numerically stable to compute and easier to take
+derivatives of. Because $\log$ is a strictly increasing function, whatever coefficients maximize the
 likelihood also maximize its log -- nothing about *which* answer is best changes, only how easy it
 is to compute.
 
-```
-log(Likelihood) = sum over all rows of [ y_i * log(p_i) + (1-y_i) * log(1-p_i) ]
-```
+$$
+\log \mathcal{L} = \sum_{i=1}^{N} \Big[\, y_i \log(p_i) + (1-y_i)\log(1-p_i) \,\Big]
+$$
 
 **Why negate it.** Every optimization routine in every ML library (including the `lbfgs` solver
 this project uses) is written to *minimize* something, by convention. "Maximize the log-likelihood"
 and "minimize the negative log-likelihood" are the exact same problem, just phrased with a sign
-flip. Negate, and divide by the number of rows `N` to get an average (so the number doesn't grow
+flip. Negate, and divide by the number of rows $N$ to get an average (so the number doesn't grow
 just because the dataset is bigger) -- and this is **log-loss**:
 
-```
-log-loss = -(1/N) * sum over all rows of [ y_i * log(p_i) + (1-y_i) * log(1-p_i) ]
-         = -mean( y*log(p) + (1-y)*log(1-p) )
-```
+$$
+\text{log-loss} = -\frac{1}{N}\sum_{i=1}^{N}\Big[\, y_i \log(p_i) + (1-y_i)\log(1-p_i) \,\Big]
+= -\,\overline{y\log(p) + (1-y)\log(1-p)}
+$$
 
-This is exactly the formula every classification metric library uses. It was not handed down from
-nowhere -- it is "how surprised was the model by the true outcomes, on average," derived directly
-from treating each row as a coin-flip with the model's own predicted probability.
+(the overline means "the average of this quantity across all rows"). This is exactly the formula
+every classification metric library uses. It was not handed down from nowhere -- it is "how
+surprised was the model by the true outcomes, on average," derived directly from treating each row
+as a coin-flip with the model's own predicted probability.
 
 **A brief look at the gradient (why the model can actually be fit at all).** To let a computer find
 the coefficients that minimize log-loss, it needs to know, for each coefficient, "if I nudge this
 coefficient up slightly, does the loss go up or down, and by how much?" That's the derivative
 (gradient) of the loss with respect to each coefficient. This turns out to have an unusually clean
-form. First, the derivative of the sigmoid function with respect to its input `z`:
+form. First, the derivative of the sigmoid function with respect to its input $z$:
 
-```
-d(sigmoid(z))/dz = sigmoid(z) * (1 - sigmoid(z)) = p * (1-p)
-```
+$$
+\frac{d\,\sigma(z)}{dz} = \sigma(z)\big(1-\sigma(z)\big) = p(1-p)
+$$
 
-(This itself is a short derivation from the quotient rule applied to `1/(1+exp(-z))`, omitted here
-since the result is what matters for what follows.) Then, using the chain rule (the derivative of
-log-loss with respect to `p`, times the derivative of `p` with respect to `z`, times the derivative
-of `z` with respect to one coefficient `coef_j`, which is just that coefficient's feature value
-`x_j`), the whole chain collapses to a remarkably simple result:
+(This itself is a short derivation from the quotient rule applied to $\frac{1}{1+e^{-z}}$, omitted
+here since the result is what matters for what follows.) Then, using the chain rule (the derivative
+of log-loss with respect to $p$, times the derivative of $p$ with respect to $z$, times the
+derivative of $z$ with respect to one coefficient $\beta_j$, which is just that coefficient's
+feature value $x_j$), the whole chain collapses to a remarkably simple result:
 
-```
-d(log-loss)/d(coef_j) = mean( (p_i - y_i) * x_ij )
-```
+$$
+\frac{\partial\,\text{log-loss}}{\partial \beta_j} = \overline{(p_i - y_i)\,x_{ij}}
+$$
 
 In words: **the gradient for each coefficient is just "how wrong was the prediction, on average,
 weighted by how much that feature was present."** If the model is systematically over-predicting on
@@ -203,13 +225,14 @@ one-hot dummies for `phase_label`, `position`, `event_type`, etc., plus the rema
 features) contribute a combined **-2.41572** -- not itemized here for readability, but included in
 full in the total below (full breakdown: `outputs/models/classification/v1_unweighted.json`).
 
-```
-z = intercept + (sum of all 85 contributions)
-  = -1.31644 + 0.74183 + (-2.41572)
-  = -2.99033
-
-sigmoid(z) = 1 / (1 + exp(2.99033)) = 0.04786
-```
+$$
+\begin{aligned}
+z &= \beta_0 + (\text{sum of all 85 contributions}) \\
+  &= -1.31644 + 0.74183 + (-2.41572) \\
+  &= -2.99033 \\[4pt]
+\sigma(z) &= \frac{1}{1+e^{2.99033}} = 0.04786
+\end{aligned}
+$$
 
 **The model's real, actually-stored prediction for this row is `0.047865`** -- matching the
 hand-computed `sigmoid(z)` above to 9 decimal places (verified by
@@ -227,22 +250,22 @@ the minority class.
 
 **Deriving the modified loss.** Ordinary log-loss treats every row equally:
 
-```
-log-loss = -mean( y*log(p) + (1-y)*log(1-p) )
-```
+$$
+\text{log-loss} = -\,\overline{y\log(p) + (1-y)\log(1-p)}
+$$
 
-Balanced weighting multiplies each row's term by a weight `w_i` that depends only on its class:
-positive rows get weight `w_pos = N / (2 * N_pos)`, negative rows get `w_neg = N / (2 * N_neg)`
-(this specific formula is scikit-learn's convention; the shape of the argument below holds for any
-inverse-frequency weighting). The loss becomes:
+Balanced weighting multiplies each row's term by a weight $w_i$ that depends only on its class:
+positive rows get weight $w_{\text{pos}} = \dfrac{N}{2N_{\text{pos}}}$, negative rows get
+$w_{\text{neg}} = \dfrac{N}{2N_{\text{neg}}}$ (this specific formula is scikit-learn's convention;
+the shape of the argument below holds for any inverse-frequency weighting). The loss becomes:
 
-```
-weighted log-loss = -mean( w_i * [ y_i*log(p_i) + (1-y_i)*log(1-p_i) ] )
-```
+$$
+\text{weighted log-loss} = -\,\overline{w_i\Big[y_i\log(p_i) + (1-y_i)\log(1-p_i)\Big]}
+$$
 
-Since positives are rare (`N_pos` small), `w_pos` is large -- getting a positive row wrong now costs
-much more than before. Since negatives are common, `w_neg` is small -- getting a negative row wrong
-costs less than before.
+Since positives are rare ($N_{\text{pos}}$ small), $w_{\text{pos}}$ is large -- getting a positive
+row wrong now costs much more than before. Since negatives are common, $w_{\text{neg}}$ is small --
+getting a negative row wrong costs less than before.
 
 **Why this breaks calibration, not just in principle but by construction.** The whole derivation in
 section 1.1 relied on one specific fact: minimizing *unweighted* log-loss is mathematically
@@ -317,18 +340,19 @@ every pairwise product and every squared term from the 17 numeric features gives
 columns (`C(17,2)=136` pairwise + 17 squared) -- far too many to trust blindly; some of these will
 be spurious. L1 (Lasso) regularization adds a penalty to the loss:
 
-```
-L1 loss = log-loss + lambda * sum( |coef_j| )
-```
+$$
+\text{L1 loss} = \text{log-loss} + \lambda \sum_j |\beta_j|
+$$
 
-where `lambda` (`1/C` in scikit-learn's notation) controls how strongly extra coefficients are
-punished, and `|coef_j|` is the absolute value of each coefficient (distance from zero, ignoring
+where $\lambda$ ($1/C$ in scikit-learn's notation) controls how strongly extra coefficients are
+punished, and $|\beta_j|$ is the absolute value of each coefficient (distance from zero, ignoring
 sign). Why absolute value rather than squaring (which is L2/Ridge, the "other" common penalty)?
 The geometric picture makes this concrete without needing calculus. Picture the space of possible
 coefficient values as a 2-D plane (just two coefficients, for the picture -- the real thing has
-hundreds of dimensions, but the shape argument doesn't change). The L1 penalty `|c1| + |c2| <= budget`
-traces out a **diamond** (a square rotated 45 degrees) around the origin. The L2 penalty
-`c1^2 + c2^2 <= budget` traces out a **circle**. Fitting the model means finding where the
+hundreds of dimensions, but the shape argument doesn't change). The L1 penalty
+$|\beta_1| + |\beta_2| \le \text{budget}$ traces out a **diamond** (a square rotated 45 degrees)
+around the origin. The L2 penalty $\beta_1^2 + \beta_2^2 \le \text{budget}$ traces out a
+**circle**. Fitting the model means finding where the
 loss function's own "best unconstrained answer" contour first touches this constraint shape. A
 circle has no corners -- the touching point can land anywhere on its smooth boundary, and will
 generally have *both* coefficients nonzero. A diamond has sharp corners sitting exactly on the axes
@@ -359,9 +383,9 @@ re-standardization of the polynomial block (so the interaction term itself has c
 the rest of the design matrix, not just its raw product), this term's real design-matrix value is
 **0.43514**. Its real contribution to this row's log-odds:
 
-```
-contribution = coefficient * design_matrix_value = -0.21064 * 0.43514 = -0.09166
-```
+$$
+\text{contribution} = \beta \times x = -0.21064 \times 0.43514 = -0.09166
+$$
 
 A genuinely small nudge on this particular row -- but a real, physically interpretable one: this
 interaction term says "the further the action is from the attacking box, *and* the more the
@@ -375,42 +399,43 @@ verification JSON.)
 **Deriving Gini impurity.** A Random Forest builds many decision trees, and each tree decides where
 to split by asking: "which yes/no question about the data most cleanly separates positives from
 negatives?" To measure "cleanly," first derive a way to measure *messiness*. Take a set of rows
-where a fraction `p` are positive (shot followed) and `1-p` are negative. Imagine picking two rows
+where a fraction $p$ are positive (shot followed) and $1-p$ are negative. Imagine picking two rows
 from this set at random, with replacement, and asking "do they have different labels?" The
-probability of picking a positive-then-negative pair is `p * (1-p)`; the probability of
-negative-then-positive is `(1-p) * p`. Add these (both orders count as "different"):
+probability of picking a positive-then-negative pair is $p(1-p)$; the probability of
+negative-then-positive is $(1-p)p$. Add these (both orders count as "different"):
 
-```
-Gini = p*(1-p) + (1-p)*p = 2*p*(1-p)
-```
+$$
+\text{Gini} = p(1-p) + (1-p)p = 2p(1-p)
+$$
 
-which is algebraically the same as `1 - p^2 - (1-p)^2` (expand `p^2 + (1-p)^2 = p^2 + 1 - 2p + p^2`,
-so `1 - p^2 - (1-p)^2 = 1 - 2p^2 - 1 + 2p = 2p - 2p^2 = 2p(1-p)` -- the two forms are identical).
-Gini is 0 when `p=0` or `p=1` (every row the same label, two random draws can never disagree -- a
-perfectly "pure," unmessy set), and at its maximum when `p=0.5` (maximum disagreement).
+which is algebraically the same as $1 - p^2 - (1-p)^2$ (expand $p^2+(1-p)^2 = p^2+1-2p+p^2$, so
+$1-p^2-(1-p)^2 = 1-2p^2-1+2p = 2p-2p^2 = 2p(1-p)$ -- the two forms are identical). Gini is 0 when
+$p=0$ or $p=1$ (every row the same label, two random draws can never disagree -- a perfectly
+"pure," unmessy set), and at its maximum when $p=0.5$ (maximum disagreement).
 
 **Deriving information gain with a tiny toy example, before real numbers.** A split's quality is
 "how much messiness did we remove." Toy example: 10 rows, 4 positive / 6 negative before any split
-(`p=0.4`).
+($p=0.4$).
 
-```
-Gini_before = 1 - 0.4^2 - 0.6^2 = 1 - 0.16 - 0.36 = 0.48
-```
+$$
+\text{Gini}_{\text{before}} = 1 - 0.4^2 - 0.6^2 = 1 - 0.16 - 0.36 = 0.48
+$$
 
-Split into two groups of 5: left group has 1 positive / 4 negative (`p=0.2`), right group has 3
-positive / 2 negative (`p=0.6`):
+Split into two groups of 5: left group has 1 positive / 4 negative ($p=0.2$), right group has 3
+positive / 2 negative ($p=0.6$):
 
-```
-Gini_left  = 1 - 0.2^2 - 0.8^2 = 1 - 0.04 - 0.64 = 0.32
-Gini_right = 1 - 0.6^2 - 0.4^2 = 1 - 0.36 - 0.16 = 0.48
-```
+$$
+\text{Gini}_{\text{left}} = 1 - 0.2^2 - 0.8^2 = 0.32 \qquad\quad
+\text{Gini}_{\text{right}} = 1 - 0.6^2 - 0.4^2 = 0.48
+$$
 
 Weighted average impurity after the split (both groups are half the data, so weight 0.5 each):
 
-```
-Gini_after = 0.5*0.32 + 0.5*0.48 = 0.16 + 0.24 = 0.40
-Information gain = Gini_before - Gini_after = 0.48 - 0.40 = 0.08
-```
+$$
+\text{Gini}_{\text{after}} = 0.5(0.32) + 0.5(0.48) = 0.40
+\qquad
+\text{Information gain} = \text{Gini}_{\text{before}} - \text{Gini}_{\text{after}} = 0.48 - 0.40 = 0.08
+$$
 
 A tree considers every possible feature and every possible threshold, computes this gain for each,
 and picks whichever split produces the largest gain -- the split that does the most to separate the
@@ -418,13 +443,13 @@ two classes.
 
 **Deriving why averaging many trees reduces variance (bagging).** Each individual tree, fit on a
 bootstrap-resampled subset of the training rows, is a high-variance predictor -- change the sample
-slightly and a single tree's predictions can shift a lot. But if you had `n` *fully independent*
-estimates of the same underlying quantity, each with variance `Var(single)`, the variance of their
-average is a textbook result:
+slightly and a single tree's predictions can shift a lot. But if you had $n$ *fully independent*
+estimates of the same underlying quantity, each with variance $\text{Var}(\text{single})$, the
+variance of their average is a textbook result:
 
-```
-Var(mean of n independent estimates) = Var(single) / n
-```
+$$
+\text{Var}(\text{mean of } n \text{ independent estimates}) = \frac{\text{Var}(\text{single})}{n}
+$$
 
 In words: averaging cancels out each estimate's own individual noise, because the noise points in
 random, unrelated directions and partly cancels out, while the shared true signal (which every tree
@@ -441,13 +466,9 @@ has 600 individual trees, each a full `DecisionTreeClassifier` saved inside the 
 real enough to query directly, not a substitute. On the same real held-out row (row 0, match
 `3857257`), the first 5 trees' real predicted probabilities:
 
-```
-Tree 1: 0.0000
-Tree 2: 0.2857
-Tree 3: 0.0000
-Tree 4: 0.0000
-Tree 5: 0.5714
-```
+$$
+\hat{p}_1=0.0000,\quad \hat{p}_2=0.2857,\quad \hat{p}_3=0.0000,\quad \hat{p}_4=0.0000,\quad \hat{p}_5=0.5714
+$$
 
 Mean of these 5: **0.1714**. Mean of all 600 real trees: **0.074959** -- and the forest's own real
 `predict_proba` for this row is **0.074959**, matching the mean of all 600 individual trees exactly
@@ -470,12 +491,17 @@ form of gradient descent -- not on a handful of coefficients like logistic regre
 predicted values themselves (hence "functional" gradient descent: the thing being optimized is a
 whole function, approximated tree by tree).
 
-Recall from section 1.1 that log-loss's gradient with respect to the raw score `z` (before the
+Recall from section 1.1 that log-loss's gradient with respect to the raw score $z$ (before the
 chain rule reached all the way down to individual coefficients) has the clean form
-`p - y` -- the model's predicted probability minus the true label. This is exactly what each new
-tree in gradient boosting is trained to predict: not the raw label `y` itself, but the **residual**
-`p - y` -- "in which direction, and by how much, is my current combined score wrong for this row?"
-If the current model badly overestimates a row's risk (`p` too high, `y=0`), the residual is a large
+
+$$
+\frac{\partial\,\text{log-loss}}{\partial z} = p - y
+$$
+
+-- the model's predicted probability minus the true label. This is exactly what each new tree in
+gradient boosting is trained to predict: not the raw label $y$ itself, but the **residual**
+$p - y$ -- "in which direction, and by how much, is my current combined score wrong for this row?"
+If the current model badly overestimates a row's risk ($p$ too high, $y=0$), the residual is a large
 positive number, and the next tree learns to push its own contribution for rows like that one
 downward -- literally correcting the mistake, one small tree at a time.
 
@@ -504,7 +530,7 @@ LightGBM booster:
 | 50 | -2.3255 |
 | 382 (final, `best_iteration_`) | **-2.8272** |
 
-`sigmoid(-2.8272) = 0.055874` -- matching the model's real stored `predict_proba` for this row
+$\sigma(-2.8272) = 0.055874$ -- matching the model's real stored `predict_proba` for this row
 exactly (`active_1_6_gradient_boosting`, `verified_match: true`). Notice the raw score does not
 move monotonically toward its final value round by round (it actually rises slightly between round
 1 and round 50 before falling further) -- each tree is correcting whatever the *current* combined
@@ -519,11 +545,11 @@ exactly the same objective as "output the true probability." Platt scaling fixes
 model's raw scores as the *only* input to a brand-new, tiny logistic regression -- literally the
 same derivation as section 1.1, but with one input variable (the raw score) instead of 32:
 
-```
-calibrated_p = sigmoid( A * raw_score + B )
-```
+$$
+p_{\text{calibrated}} = \sigma\big(A \cdot \text{raw\_score} + B\big)
+$$
 
-where `A` and `B` are fit, by the exact same maximum-likelihood log-loss minimization derived in
+where $A$ and $B$ are fit, by the exact same maximum-likelihood log-loss minimization derived in
 1.1, on a held-out slice of the training data -- learning a simple rescaling that corrects
 systematic over- or under-confidence in the raw scores.
 
@@ -627,10 +653,11 @@ of how the canonical split orders held-out matches, not a meaningful link), real
 Sum of these 6 shown contributions: **+0.26188**. The other 50 design-matrix columns contribute a
 combined **-3.05337** (full breakdown: `outputs/models/classification/p1_unweighted.json`).
 
-```
+$$
 z = -1.49191 + 0.26188 + (-3.05337) = -4.28340
-sigmoid(z) = 1 / (1 + exp(4.28340)) = 0.013608
-```
+\qquad
+\sigma(z) = \frac{1}{1+e^{4.28340}} = 0.013608
+$$
 
 **Matches the model's real stored prediction, 0.013608, exactly** (`passive_2_1_p1_linear`,
 `verified_match: true`). Real label `y=0` -- another well-calibrated call.
@@ -679,9 +706,9 @@ i.e. `defender_y * ball_y`, real fitted coefficient **-0.43264**. On the same re
 `defender_y = 31.913`, `ball_y = 39.9` (raw values), giving a real (re-standardized) design-matrix
 value of **-0.54622**, and a real contribution to this row's log-odds:
 
-```
-contribution = -0.43264 * -0.54622 = +0.23632
-```
+$$
+\text{contribution} = -0.43264 \times (-0.54622) = +0.23632
+$$
 
 267 pairwise interaction terms survived L1 on this leg (of 378 candidates) -- a smaller *fraction*
 pruned than the active leg's terms, but this leg's design matrix is also much larger overall.
@@ -718,7 +745,7 @@ checkpoints:
 | 50 | -3.6677 |
 | 164 (final, `best_iteration_`) | **-4.2187** |
 
-`sigmoid(-4.2187) = 0.014504`, matching the model's real stored prediction exactly
+$\sigma(-4.2187) = 0.014504$, matching the model's real stored prediction exactly
 (`passive_2_5_gradient_boosting`, `verified_match: true`). Unlike the active leg's example row, this
 leg's raw score moves consistently in one direction round over round -- another honest, real
 difference between two real rows, not a general rule about how boosting always behaves.
