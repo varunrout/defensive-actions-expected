@@ -282,6 +282,15 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 </div>
 <div class="wrap">
 <div class="article">
+<div class="deviation-box">
+<p><strong>Status update (Prompt 52):</strong> <code>p1_unweighted</code> (this document's pick)
+  has been superseded as the passive-binary leg's standing reference model by
+  <code>p1e_gradient_boosting_calibrated</code> &mdash; see the promotion decision in
+  <a href="PASSIVE_BINARY_MODEL_LADDER.html" target="viewer">PASSIVE_BINARY_MODEL_LADDER.html</a>
+  section 7. This document remains the accurate historical record of the Rung 0 comparison and is
+  not rewritten.</p>
+</div>
+
 <p>Target: <code>target_future_shot_10s</code>, computed per-row from that row's own anchor timestamp
   (never broadcast across a possession -- a leakage bug caught and fixed specifically on this leg
   during design). Dataset: <code>data/features/passive_defense.parquet</code>.</p>

@@ -1,13 +1,18 @@
 # Passive-Binary Model Ladder
 
+> **Status update (Prompt 52):** `p1e_gradient_boosting_calibrated` has been promoted to standing
+> reference model for the passive-binary leg, superseding `p1_unweighted` -- with one explicit
+> caveat (the `defender_functional_role="unclassified"` slice, n=259). See the full promotion
+> decision in section 7 below.
+
 *Split out of `PASSIVE_BINARY_BASELINE_SUMMARY.md` into its own document, mirroring the active
 leg's Rung-0-doc / ladder-doc split (Prompt 42). Rung 0 -- the 4 locked variants (`p0_dummy`,
 `p1_unweighted`, `p2_weighted`, `p3_weighted_interactions`), their CV/held-out results, and the
 post-lock validation -- stays in
 [`PASSIVE_BINARY_BASELINE_SUMMARY.md`](PASSIVE_BINARY_BASELINE_SUMMARY.md). This document is
-everything built on top of that locked baseline, starting from Rung 1. No promotion audit is run
-in this document, whatever the results -- that is a separate follow-up once the full ladder is in
-and reviewed.*
+everything built on top of that locked baseline, starting from Rung 1. Sections 2-6 are the ladder
+itself (Prompt 51) and deliberately ran no promotion audit; section 7 (Prompt 52) is that audit,
+run once the full ladder was in.*
 
 ## 1. What a rung is
 
@@ -339,6 +344,142 @@ before them. This is the expected shape of a ladder converging on the same under
 increasingly flexible model families, not a contradiction -- and it is reported as exactly that
 shape, not smoothed into a single "the ladder keeps winning" headline.
 
-**No promotion decision is made in this document.** Per this prompt's explicit constraint, that is
-a separate follow-up once the full ladder is in and reviewed against the active leg's own
-promotion-audit precedent (Prompts 43/46).
+**No promotion decision was made in Prompt 51 (sections 1-6 above).** Per that prompt's explicit
+constraint, the promotion audit was deferred to a separate follow-up once the full ladder was in --
+that audit is section 7 below.
+
+## 7. Promotion decision: `p1e_gradient_boosting_calibrated`
+
+Mirrors the active leg's Prompts 43 (tournament + error-slice + sanity-check promotion framework)
+and 46 (raw-vs-calibrated decision logic, and the specific trap of an aggregate calibration number
+hiding a slice-level problem), adapted for this leg's real differences: no player-disjoint recheck
+(no `player_id` -- the cluster-by-`event_id` bootstrap from Prompt 50 is used everywhere the active
+leg used one), and error slices are `phase_label` / `defender_functional_role` (confirmed against
+`src/eda/feature_config.py`'s `PASSIVE["categorical"]`, not a player-position field this leg does
+not have). Run by `scripts/models/validate_p1e_calibrated_promotion.py` -- no variant was retrained;
+every score reused an already-fitted, already-saved model, scored via a freshly-fit (cheap,
+deterministic) preprocessing builder that reproduces the original held-out readout exactly (spot
+checked: reproduced `p1c`'s held-out PR-AUC to 4 decimal places, 0.20126 vs the recorded 0.2013).
+
+### 7.1 Tournament-stratified check
+
+`tournament_stratified_p1e_calibrated.json` (+ `tournament_stratified_p1c.json`, produced here since
+it didn't already exist). PR-AUC by tournament, held-out test:
+
+| Tournament | `p1_unweighted` | `p1c_systematic_interactions` | `p1e_gradient_boosting_calibrated` |
+|---|---|---|---|
+| FIFA World Cup 2022 | 0.1678 | 0.1952 | **0.2153** |
+| UEFA Euro 2024 | 0.1821 | 0.2103 | **0.2183** |
+
+The candidate beats both `p1` and `p1c` on **both** tournament slices, with no reversal on either
+-- the aggregate held-out advantage is not being carried by one tournament while losing the other.
+**Passes.**
+
+### 7.2 Error-slice analysis
+
+`error_analysis_p1e_calibrated.json` (+ `error_analysis_p1c.json`, produced here since it didn't
+already exist), directly diffable against `error_analysis_p1.json`. By PR-AUC, `p1e_calibrated`
+beats `p1c` on **every `phase_label` slice** (7/7) and **every `defender_functional_role` slice
+except one** (5/6): `wide_defending_proxy` -- the weakest active-leg-analog slice, flagged for
+special attention in this prompt -- improves from p1's 0.0297 and p1c's 0.0345 to **0.0400** (still
+this leg's weakest phase by a wide margin in absolute terms, since it has this leg's lowest
+positive rate, but it improves over both `p1` and `p1c` in relative terms, the same "PR-AUC tracks
+positive rate" pattern already documented in Prompt 50, not a new problem).
+
+**The one exception**: `defender_functional_role="unclassified"` (n=259, 0.08% of the held-out
+test set) -- `p1c` (0.0366) beats `p1e_calibrated` (0.0199), which in turn beats `p1` (0.0127). This
+is the same structurally tiny, reserved-for-n<2-teammates bucket already flagged as too small to
+trust in Prompt 50's post-lock validation. Reported as an explicit caveat, not silently dropped, but
+not disqualifying given its size. **Passes, with one low-n caveat.**
+
+### 7.3 Slice-level calibration check (the Prompt 46 trap, checked directly)
+
+`slice_level_calibration_p1e_calibrated_vs_p1c_vs_p1.json`. Prompt 51's ladder doc reported
+near-tied aggregate held-out ECE (`p1e_calibrated` 0.0044 vs `p1c` 0.0043) -- explicitly **not**
+relied on here. Per-slice `calibration_gap` (mean predicted &minus; positive rate), `p1e_calibrated`
+vs `p1c`:
+
+| `phase_label` slice | `p1c` gap | `p1e_calibrated` gap | Verdict |
+|---|---|---|---|
+| `settled_mid_block_proxy` | -0.0004 | -0.0005 | comparable |
+| `wide_defending_proxy` | +0.0060 | +0.0047 | better |
+| `settled_low_block_proxy` | -0.0048 | -0.0035 | better |
+| `counterpress_after_loss` | +0.0071 | +0.0079 | comparable |
+| `high_press_proxy` | +0.0080 | +0.0102 | worse (largest relative gap, still small absolute) |
+| `transition_defence` | +0.0159 | +0.0140 | better |
+| `box_defence` | +0.0129 | +0.0100 | better |
+
+`defender_functional_role` slices show the same pattern: 4 of 6 comparable-to-better, `last_line`
+marginally worse (+0.0029 &rarr; +0.0036), `unclassified` about the same (both already large on a
+259-row slice).
+
+**No slice shows the active leg's disqualifying pattern** (raw `v1e` was 6-19x worse than `v1c` at
+some `phase_label` slices despite a favourable aggregate ECE). Here, the single largest relative
+miss (`high_press_proxy`, +28% relative) is still under 0.011 in absolute terms, and most slices are
+comparable-to-better. **The near-tied aggregate ECE genuinely holds at the slice level -- this
+candidate does not fall into the trap Prompt 46 found on the active leg. Passes.**
+
+### 7.4 Behavioral sanity check
+
+`behavioral_sanity_p1e_calibrated.json`. Top 6 features by GBM gain importance (Rung 4's own
+ranking), binned marginal view on **in-sample train+val predictions** -- true CV-OOF predictions
+for this variant were never persisted as data in Prompt 51 (only chart PNGs), and regenerating them
+would require refitting the calibrated GBM across 5 folds, which this prompt's own constraints
+prohibit; this substitution is stated explicitly, not silently made.
+
+| Feature | Shape | Football-sensible? |
+|---|---|---|
+| `defender_x` | Clean U-shape: highest risk very close to own goal (x&lt;20) or far up pitch (x&gt;94), lowest in the 53-81 mid-zone | Yes -- deep exposure and transition vulnerability at the extremes |
+| `ball_x` | Same U-shape pattern as `defender_x` | Yes -- ball near either goal is elevated risk |
+| `top_option_3_threat_score` | Sharp drop from the lowest bin, then flat/slightly rising | Yes -- low-threat-score rows are dominated by a different (higher-risk) population |
+| `phase_label` | `high_press_proxy` (0.150) and `box_defence` (0.138) highest; `wide_defending_proxy` (0.024) lowest | Yes -- matches the same phase ranking seen throughout this project |
+| `ball_y` | Mild inverse-U: lowest risk near the touchlines, peak in central width | Yes -- central areas carry more threat than wide areas |
+| `top_option_1_threat_score` | Mostly monotonic decreasing, slight uptick at the top bin | Yes -- broadly consistent with the documented shape |
+
+Every bin has &gt;120,000 rows; `mean_predicted` tracks `positive_rate` closely in every single bin
+(expected for an in-sample calibrated-model view, but also confirms none of these marginal shapes
+are noise-shaped or discontinuous). **All 6 features pass -- no noise-shaped or discontinuous
+relationship found.**
+
+### 7.5 Cluster-bootstrap check vs `p1c` specifically
+
+`cluster_bootstrap_p1e_calibrated_vs_p1c.json`. Prompt 51's own cluster bootstrap for `p1e` was only
+run against `p1_unweighted`; this is the first cluster-aware check of the candidate's edge over
+`p1c` -- the only comparator its significance test actually cleared (p=0.036). 1,000 iterations,
+naive row-level vs cluster-by-`event_id`, held-out test:
+
+| Quantity | Naive CI (width) | Cluster CI (width) | Width ratio |
+|---|---|---|---|
+| `p1e_calibrated` &minus; `p1c` PR-AUC | [0.0122, 0.0177] (0.0054) | [0.0086, 0.0222] (0.0136) | **2.51x** |
+
+Both CIs are **entirely positive** -- the cluster-aware CI, ~2.5x wider than the naive one (in line
+with every other cluster-bootstrap check on this leg), still excludes zero. **The candidate's edge
+over `p1c` is not an artifact of ignoring row correlation, and not an artifact of relying on the
+naive per-fold significance test alone. Passes.**
+
+### 7.6 Verdict: promote, with one explicit caveat
+
+All 5 checks pass:
+
+1. Tournament check: beats both `p1` and `p1c` on both tournaments. &#10003;
+2. Error-slice comparison: improves on `p1c` in 12 of 13 slices; the one exception
+   (`defender_functional_role="unclassified"`, n=259) is a structurally tiny, already-flagged
+   low-n bucket, not a new serious weak spot. &#10003; (caveated)
+3. Slice-level calibration: the near-tied aggregate ECE holds at the slice level -- no active-leg-style
+   hidden trap. &#10003;
+4. Behavioral sanity: all 6 dominant features show football-sensible marginal shapes. &#10003;
+5. Cluster-bootstrap vs `p1c`: edge survives the cluster-aware CI (2.51x wider, still entirely
+   positive). &#10003;
+
+**`p1e_gradient_boosting_calibrated` is promoted to the passive-binary leg's standing reference
+model, superseding `p1_unweighted`.** `p1_unweighted` remains documented as the Rung 0 baseline it
+was built from and measured against -- `PASSIVE_BINARY_BASELINE_SUMMARY.md` is not rewritten. The
+one caveat carried forward: the `defender_functional_role="unclassified"` slice (0.08% of held-out
+rows) is not improved by this promotion and should not be trusted for per-slice decisions given its
+size, the same caveat standard as the active leg's `v1c` promotion
+(`Goalkeeper`/`Right Attacking Midfield`).
+
+**What changes downstream**: `p1e_gradient_boosting_calibrated` is now the reference model for the
+passive-binary leg, superseding `p1_unweighted`; `p1_unweighted` remains documented as the Rung 0
+baseline it was built from and measured against. No further model-ladder work is implied by this
+promotion -- that is a separate decision.

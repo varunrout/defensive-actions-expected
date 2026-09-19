@@ -1,5 +1,11 @@
 # Passive-Binary Baseline Summary (p0-p3)
 
+> **Status update (Prompt 52):** `p1_unweighted` (this document's pick) has been superseded as
+> the passive-binary leg's standing reference model by `p1e_gradient_boosting_calibrated` -- see
+> the promotion decision in `reports/modeling/passive_binary/PASSIVE_BINARY_MODEL_LADDER.md`
+> section 7. This document remains the accurate historical record of the Rung 0 comparison and is
+> not rewritten.
+
 Target: `target_future_shot_10s`, computed per-row from that row's own anchor timestamp
 (never broadcast across a possession -- a leakage bug caught and fixed specifically on
 this leg during design; nothing in this baseline re-derives the target). Dataset:
