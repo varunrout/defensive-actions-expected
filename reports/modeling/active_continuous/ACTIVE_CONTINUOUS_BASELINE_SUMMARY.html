@@ -257,6 +257,15 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
     <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1b_quadratic/feature_coefficients.png" alt="c1b_quadratic feature coefficients (including quadratic terms)"><p class="cc-label">feature_coefficients.png</p></div>
   </div>
 </div>
+<div class="variant-block">
+  <p class="variant-title">c1d_random_forest (Rung 2, section 14)</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1d_random_forest/predicted_vs_observed_log.png" alt="c1d_random_forest predicted vs observed (log scale)"><p class="cc-label">predicted_vs_observed_log.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1d_random_forest/residual_distribution.png" alt="c1d_random_forest residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1d_random_forest/calibration_bins.png" alt="c1d_random_forest calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1d_random_forest/feature_coefficients.png" alt="c1d_random_forest feature importance (Gini, top 15)"><p class="cc-label">feature_coefficients.png (Gini feature importance)</p></div>
+  </div>
+</div>
 
 <h2>11. Rung-0 result</h2>
 <div class="verdict-box"><p><strong><code>c1_lognormal_glm</code> clears Rung 0</strong> against the
@@ -350,11 +359,202 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   signal than a linear model can from this weak a feature set is an open question for those rungs to
   answer on their own evidence, not assumed from this rung's result.</p>
 
+<h2>13. Rung 2 &mdash; <code>c1c_systematic_interactions</code> is SKIPPED (prompt 56)</h2>
+<p>The rung that would mirror the active-binary leg's own Rung 2 (Prompt 41 &mdash; full pairwise
+  interactions + squares over the numeric features) is <strong>explicitly skipped, not
+  forgotten</strong>, on two independent pieces of evidence that already exist and do not need to be
+  re-derived.</p>
+<p><strong>Evidence 1 &mdash; the shot-conditional interaction panel is already 10/10
+  inconclusive.</strong>
+  <code>reports/analysis/xg_target/FEATURE_INTERACTION_ANALYSIS.json</code> already ran the
+  shot-conditional (given-shot) version of the interaction-pair panel on the same 5 hand-picked
+  active-leg numeric x numeric pairs used for the binary-target leg's own interaction analysis:</p>
+<table>
+<tr><th>Pair</th><th>Marginal delta, given shot</th><th>vs threshold (0.052053)</th></tr>
+<tr><td><code>defenders_within_10m</code> x <code>distance_to_attacking_box</code></td><td>+0.030442</td><td>below (~0.6x)</td></tr>
+<tr><td><code>visible_defender_count</code> x <code>attacker_spread</code></td><td>-0.029744</td><td>below (~0.6x)</td></tr>
+<tr><td><code>defenders_within_5m</code> x <code>defenders_within_10m</code></td><td>-0.004408</td><td>below by ~12x (order of magnitude)</td></tr>
+<tr><td><code>possession_elapsed_seconds</code> x <code>match_time_seconds</code></td><td>+0.003062</td><td>below by ~17x (order of magnitude)</td></tr>
+<tr><td><code>defenders_between_ball_and_attacking_goal</code> x <code>attacker_defender_ratio</code></td><td>-0.006192</td><td>below by ~8x</td></tr>
+</table>
+<p>All 5 active-leg pairs classify <code>inconclusive</code> given a shot (the passive leg's 5 pairs
+  are also 10/10 inconclusive, for the same reason: <code>xg</code>-given-shot is a much noisier,
+  lower-signal target than shot occurrence itself). This was decided 2026-09-17 as a final result,
+  not loosened to force a classification &mdash; see the file's own
+  <code>given_shot_threshold_decision</code> field for the full reasoning (loosening the threshold
+  specifically because these pairs fail to clear it would be tuning the threshold to the result,
+  which this project's methodology has consistently avoided).</p>
+<p><strong>Evidence 2 &mdash; a direct systematic check already ran and found nothing worth the
+  complexity.</strong> A rough chat-derived check ran the actual <code>c1c</code>-shaped model
+  directly: all 17 numeric ACTIVE features, full pairwise interactions + squares
+  (<code>PolynomialFeatures(degree=2)</code>, 170 columns), Ridge-regularized, 5-fold CV on the same
+  4,368 positive rows. Plain additive linear regression scored mean CV
+  <strong>R&sup2;=0.047</strong>; the best Ridge-regularized full-interaction expansion (alpha=100)
+  reached only <strong>R&sup2;=0.055</strong> &mdash; a gain smaller than the fold-to-fold noise
+  itself (individual folds ranged 0.001-0.09 under the same regularization), and lighter
+  regularization actively made results <em>worse</em> (one fold went negative).</p>
+<p><strong>Decision: <code>c1c_systematic_interactions</code> is not built.</strong> Two independent
+  checks &mdash; a targeted 5-pair given-shot interaction panel and a full systematic
+  polynomial-expansion regression &mdash; both already answer the question a <code>c1c</code> rung
+  would ask, and both answer it the same way: hand-built or brute-force interaction/quadratic terms
+  do not find usable signal on this leg's weak, ~4,368-row shot-conditional target. This is a closed
+  decision for this leg, not deferred; it would only be revisited if new evidence specifically
+  contradicted both findings above.</p>
+
+<h2>14. Rung 2 &mdash; <code>c1d_random_forest</code> (prompt 56)</h2>
+<p>Instead of the interaction rung, Rung 2 goes straight to a <code>RandomForestRegressor</code> on
+  the same 32 locked features, raw (non-standardized, non-polynomial-expanded) design matrix &mdash;
+  mirroring the active-binary leg's own Rung 3 (<code>v1d_random_forest</code>, Prompt 44). The
+  question: can automatic, sample-efficient nonlinearity/interaction discovery find signal that
+  neither the hand-built quadratic terms (Rung 1) nor the brute-force polynomial expansion (the
+  evidence above) could?</p>
+
+<h3>14.1 Hyperparameter grid, sized for this leg's small sample</h3>
+<p>The active-binary leg's own Rung 3 grid (<code>N_ESTIMATORS_GRID=[300,600]</code>,
+  <code>MAX_DEPTH_GRID=[8,14,None]</code>, <code>MIN_SAMPLES_LEAF_GRID=[5,20]</code>) was sized for
+  ~9,000 rows per training fold. This leg's positive-row subset is a fraction of that (3,600 trainval
+  rows total, ~2,880 per training fold in 5-fold CV) &mdash; reusing the binary leg's
+  <code>min_samples_leaf</code> floor of 5 would risk badly overfit leaves. The grid used here:
+  <code>N_ESTIMATORS_GRID=[200]</code> (fixed; more trees rarely hurts and this dataset is cheap),
+  <code>MAX_DEPTH_GRID=[4, 8, None]</code>, <code>MIN_SAMPLES_LEAF_GRID=[10, 30, 60]</code> (9
+  combinations total).</p>
+<p><strong>CV-internal overfitting is real and reported plainly</strong>, per this prompt's own
+  instruction not to blindly pick the train-CV-best config. Full grid (chosen by lowest OOF
+  common-scale log RMSE, not by training-fold fit):</p>
+<table>
+<tr><th>n_estimators</th><th>max_depth</th><th>min_samples_leaf</th><th>OOF common log RMSE</th><th>OOF corrected R&sup2;</th><th>mean train R&sup2;</th><th>train &minus; OOF gap</th></tr>
+<tr><td>200</td><td>4</td><td>10</td><td>0.9911</td><td>0.0500</td><td>0.1632</td><td>0.1131</td></tr>
+<tr><td>200</td><td>4</td><td>30</td><td>0.9914</td><td>0.0459</td><td>0.1494</td><td>0.1035</td></tr>
+<tr><td>200</td><td>4</td><td>60</td><td>0.9928</td><td>0.0405</td><td>0.1344</td><td>0.0939</td></tr>
+<tr><td>200</td><td>8</td><td>10</td><td><strong>0.9801</strong></td><td><strong>0.0597</strong></td><td>0.3641</td><td>0.3044</td></tr>
+<tr><td>200</td><td>8</td><td>30</td><td>0.9828</td><td>0.0535</td><td>0.2565</td><td>0.2030</td></tr>
+<tr><td>200</td><td>8</td><td>60</td><td>0.9877</td><td>0.0452</td><td>0.1835</td><td>0.1383</td></tr>
+<tr><td>200</td><td>None</td><td>10</td><td>0.9804</td><td>0.0496</td><td>0.5089</td><td>0.4594</td></tr>
+<tr><td>200</td><td>None</td><td>30</td><td>0.9826</td><td>0.0525</td><td>0.2779</td><td>0.2253</td></tr>
+<tr><td>200</td><td>None</td><td>60</td><td>0.9876</td><td>0.0451</td><td>0.1850</td><td>0.1399</td></tr>
+</table>
+<p><code>max_depth=None, min_samples_leaf=10</code> shows the worst overfitting of the grid (train
+  R&sup2;=0.51 vs OOF R&sup2;=0.05, a 0.46 gap) yet does <em>not</em> win on OOF score &mdash;
+  confirming the deepest/least constrained tree is memorizing noise, not finding real signal, exactly
+  the failure mode this prompt flagged as a risk to watch for. The chosen config
+  (<code>max_depth=8, min_samples_leaf=10</code>) still shows a real gap (train R&sup2;=0.36 vs OOF
+  R&sup2;=0.06, 0.30) but wins on OOF score cleanly &mdash; shallower configs
+  (<code>max_depth=4</code>) have smaller gaps but <em>also</em> worse OOF scores across the board,
+  so constraining further would trade away real signal to chase a smaller (but not zero) overfit gap.
+  The selection rule used throughout this leg &mdash; lowest OOF/held-out score, not training-fold
+  fit &mdash; is the correct one here specifically because it already penalizes the overfit configs
+  on their own terms.</p>
+
+<h3>14.2 <code>c1d_random_forest</code> vs <code>c1_lognormal_glm</code> &mdash; ranking and calibration, reported separately</h3>
+<p><strong>Ranking (common-scale log RMSE, lower is better) &mdash; <code>c1d_random_forest</code>
+  wins, consistently:</strong></p>
+<table>
+<tr><th>Variant</th><th>Common log RMSE (CV)</th><th>Common log RMSE (held-out)</th></tr>
+<tr><td><code>c1_lognormal_glm</code></td><td>1.0014</td><td>0.9951</td></tr>
+<tr><td><code>c1d_random_forest</code></td><td>0.9801</td><td>0.9553</td></tr>
+</table>
+<p>Paired significance test
+  (<code>outputs/models/validation/significance_c1_vs_c1d_random_forest.json</code>): mean diff (c1d
+  &minus; c1) = <strong>-0.0211</strong> (c1d better), paired t-test <strong>p=0.0126</strong>,
+  Wilcoxon <strong>p=0.0625</strong>. <code>c1d_random_forest</code>'s common-scale log RMSE is lower
+  than <code>c1</code>'s on <strong>all 5 of 5 CV folds</strong> (0.940 vs 0.964, 0.950 vs 0.983,
+  1.056 vs 1.084, 1.056 vs 1.062, 0.889 vs 0.903) &mdash; a consistent, if modest, directional win,
+  and the paired t-test clears p&lt;0.05 (Wilcoxon is borderline at p=0.0625, expected with only 5
+  paired observations). Same small-n caution as every other significance test on this leg applies: 5
+  folds is directionally informative, not proof.</p>
+<p><strong>Calibration and original-scale accuracy (held-out test) &mdash; also favors
+  <code>c1d_random_forest</code>, with one caveat:</strong></p>
+<table>
+<tr><th>Variant</th><th>Naive MAE</th><th>Naive R&sup2;</th><th>Naive Spearman</th><th>Corrected MAE</th><th>Corrected R&sup2;</th><th>Corrected prediction bias</th></tr>
+<tr><td><code>c1_lognormal_glm</code></td><td>0.0778</td><td>-0.0638</td><td>0.3078</td><td>0.0863</td><td>0.0371</td><td>-0.0089</td></tr>
+<tr><td><code>c1d_random_forest</code></td><td>0.0745</td><td>-0.0152</td><td>0.3781</td><td>0.0786</td><td>0.0925</td><td>-0.0223</td></tr>
+</table>
+<p><code>c1d_random_forest</code> beats <code>c1</code> on every accuracy metric here &mdash; lower
+  MAE (both back-transforms), higher R&sup2; (both), and meaningfully better rank correlation
+  (Spearman 0.378 vs 0.308). <strong>The one place it is worse</strong>: corrected prediction bias is
+  larger in magnitude (-0.0223 vs -0.0089) &mdash; the RF under-predicts mean xG by about 2.5x as much
+  as <code>c1</code> does on the held-out set, even though its <em>variance</em>-driven error
+  (RMSE/MAE) is smaller. Ranking and calibration mostly point the same direction here (unusual for
+  this leg, where Rung 1 saw them roughly tied and both flat) but are not identical, and the bias gap
+  is reported rather than smoothed over.</p>
+
+<h3>14.3 Feature importance cross-check against the linear-correlation ranking and the 3 quadratic candidates</h3>
+<p>Top 10 (of 15 reported) features by Gini importance and by fold-held-out permutation importance
+  (<code>outputs/models/regression/c1d_random_forest.json</code>):</p>
+<table>
+<tr><th>Rank</th><th>Gini importance</th><th>Permutation importance (fold held-out)</th></tr>
+<tr><td>1</td><td><code>attacking_goal_centrality</code> (0.1178)</td><td><code>attacking_goal_centrality</code> (0.0886)</td></tr>
+<tr><td>2</td><td><code>distance_to_attacking_box</code> (0.0925)</td><td><code>distance_to_attacking_box</code> (0.0354)</td></tr>
+<tr><td>3</td><td><code>visible_attacker_count</code> (0.0743)</td><td><code>event_type_Clearance</code> (0.0235)</td></tr>
+<tr><td>4</td><td><code>match_time_seconds</code> (0.0739)</td><td><code>visible_attacker_count</code> (0.0188)</td></tr>
+<tr><td>5</td><td><code>defender_spread</code> (0.0642)</td><td><code>angle_to_attacking_goal</code> (0.0080)</td></tr>
+<tr><td>6</td><td><code>angle_to_attacking_goal</code> (0.0567)</td><td><code>defender_spread</code> (0.0076)</td></tr>
+<tr><td>7</td><td><code>defender_attacker_gap_x</code> (0.0527)</td><td><code>visible_defender_count</code> (0.0076)</td></tr>
+<tr><td>8</td><td><code>nearest_attacker_distance</code> (0.0511)</td><td><code>nearest_attacker_distance</code> (0.0060)</td></tr>
+<tr><td>9</td><td><code>attacker_spread</code> (0.0495)</td><td><code>event_type_Ball Recovery</code> (0.0045)</td></tr>
+<tr><td>10</td><td><code>defender_attacker_gap_y</code> (0.0482)</td><td><code>defenders_between_ball_and_attacking_goal</code> (0.0027)</td></tr>
+</table>
+<p><strong>Cross-check against Rung 0/1's systematic correlation ranking
+  (<code>shot_conditional_nonlinearity_check.json</code>)</strong>: the two top RF features tell two
+  different stories. <code>attacking_goal_centrality</code> was already the correlation ranking's #2
+  feature (|r|=0.1405) &mdash; RF agrees this is important, no surprise. But
+  <code>distance_to_attacking_box</code> ranked only <strong>#21 of 32</strong> by absolute linear
+  correlation (|r|=0.0205) and jumps to <strong>#2 by both Gini and permutation importance</strong>
+  &mdash; this is exactly the kind of thing a tree can see that a linear correlation coefficient
+  cannot: the feature likely carries real information through a nonlinear shape or an interaction
+  with another feature (e.g. shot angle, or defender positioning) rather than a monotonic linear
+  relationship with <code>log(xg)</code>. This is the headline new finding from this rung, not a
+  footnote.</p>
+<p><strong>Cross-check against the 3 Rung-1 quadratic candidates</strong>
+  (<code>visible_attacker_count</code>, <code>defenders_within_10m</code>,
+  <code>defender_spread</code>):</p>
+<ul>
+<li><strong><code>visible_attacker_count</code></strong> (correlation rank #1, |r|=0.1611): RF ranks
+  it #3 by Gini (0.0743), #4 by permutation (0.0188) &mdash; still clearly important under RF, just
+  not the single most important feature once the tree can also use
+  <code>attacking_goal_centrality</code> and <code>distance_to_attacking_box</code>. Consistent with
+  a real, strong, roughly-linear-plus-mild-curvature signal (which is exactly what
+  <code>c1b_quadratic</code>'s own coefficient table found for this feature).</li>
+<li><strong><code>defender_spread</code></strong> (correlation rank #9, |r|=0.0521): RF ranks it
+  <strong>higher</strong> relative to its linear-correlation position &mdash; #5 by Gini (0.0642), #6
+  by permutation (0.0076). This is mild positive evidence that the tree is finding real
+  (nonlinear/interaction) information in this feature beyond what a Pearson correlation captures,
+  consistent with <code>c1b</code>'s own U-shape finding for this feature even though
+  <code>c1b</code>'s linear quadratic term for it was small.</li>
+<li><strong><code>defenders_within_10m</code></strong> (correlation rank #7, |r|=0.0879): RF ranks it
+  <strong>#16 by Gini (0.0152) and outside the permutation top 20 entirely</strong> &mdash; the tree
+  does <em>not</em> confirm this feature as strongly informative, despite it being the specific
+  feature the original rough chat check flagged for a "threshold-like jump." This lines up with
+  <code>c1b_quadratic</code>'s own result, where this feature's quadratic coefficient (+0.022) was
+  the smallest and least reliable of the three quadratic terms.</li>
+</ul>
+<p><strong>Interpretation</strong>: 2 of the 3 Rung-1 quadratic candidates
+  (<code>visible_attacker_count</code>, <code>defender_spread</code>) get some independent support
+  from RF importance; <code>defenders_within_10m</code> does not. This is a coherent cross-check, not
+  a coincidence &mdash; it agrees with which of <code>c1b</code>'s three quadratic terms actually
+  looked substantive versus negligible.</p>
+
+<h3>14.4 Ladder-gate outcome for this rung, no promotion audit</h3>
+<div class="verdict-box"><p><strong><code>c1d_random_forest</code> clears the Rung-2 gate against
+  <code>c1_lognormal_glm</code></strong> &mdash; a consistent (5-of-5 folds), statistically
+  significant-by-paired-t-test (p=0.0126) improvement on the fair common-scale ranking metric, and a
+  clean win on every held-out accuracy metric except prediction bias magnitude. This is a genuinely
+  positive result for the leg, in contrast to Rung 1's null result, and it connects back to this
+  rung's own feature-importance cross-check: <code>distance_to_attacking_box</code>'s jump from
+  correlation rank #21 to importance rank #2 is concrete evidence that there <em>was</em> real
+  nonlinear/interaction signal in this 32-feature set all along &mdash; Rung 1's hand-picked quadratic
+  terms and the brute-force polynomial expansion (Evidence 2, section 13) simply weren't the right
+  shape to find it, while a tree-based model was. Per this prompt's explicit constraint, no promotion
+  audit is run in this prompt regardless of this result &mdash; this section reports the Rung-2 gate
+  outcome only, the same discipline the active-binary leg's own Prompt 44 followed for its own Rung
+  3.</p></div>
+
 </div>
 </div>
 <footer>
-  <p>Generated by <code>scripts/models/train_active_continuous_baseline.py</code> and
-    <code>scripts/models/train_c1b_quadratic.py</code>. Markdown source:
+  <p>Generated by <code>scripts/models/train_active_continuous_baseline.py</code>,
+    <code>scripts/models/train_c1b_quadratic.py</code> and
+    <code>scripts/models/train_c1d_random_forest.py</code>. Markdown source:
     <code>reports/modeling/active_continuous/ACTIVE_CONTINUOUS_BASELINE_SUMMARY.md</code>.</p>
 </footer>
 
