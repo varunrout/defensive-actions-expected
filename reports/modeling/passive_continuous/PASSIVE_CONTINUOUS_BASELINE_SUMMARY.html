@@ -107,6 +107,128 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <p><em>For the full math behind the models this leg reuses (logistic regression, gradient boosting,
   calibration), see <a href="../MATH_BEHIND_IT.html" target="viewer">MATH_BEHIND_IT.html</a>.</em></p>
 
+<div class="deviation-box">
+<p><strong>Data-quality correction (Prompt 60):</strong> <code>d0_dummy</code>/<code>d1_lognormal_glm</code>
+  were refit after fixing a thin-category artifact in <code>defender_functional_role</code>'s
+  encoding. See section 0 below for the full root-cause writeup. The corrected numbers replace the
+  originals throughout this document; nothing else in sections 1-11 changed as a result (confirmed,
+  not assumed &mdash; see section 0's "what actually changed" summary).</p>
+</div>
+
+<h2>0. Data-quality correction: <code>defender_functional_role_unclassified</code> (Prompt 60)</h2>
+<p><strong>What was found.</strong> <code>d1_lognormal_glm</code>'s (original Prompt 59 fit) largest-
+  magnitude coefficient by a wide margin was <code>defender_functional_role_unclassified</code>
+  (coef -0.58, roughly 2x the next-largest at -0.31). On the positive-row subset <code>d1</code> is
+  fit on, <code>unclassified</code> has only <strong>5 rows out of 95,048</strong> (0.005%); on the
+  full <code>passive_defense.parquet</code> (all rows, not just positive), it accounts for
+  <strong>1,026 of 1,593,181</strong> rows (0.064%) &mdash; still thin, but not as extreme as the
+  5-row slice made it look at first glance, both counts reported rather than only the more dramatic
+  one. Their mean xg (0.0227) really is much lower than every other role (~0.10 across the other 5
+  categories) &mdash; but n=5 cannot support that as a real football finding; it is the linear model
+  overfitting to a near-singleton bucket.</p>
+<p><strong>Root cause, read directly from source rather than assumed.</strong>
+  <code>src/dax/features/passive_defense.py</code>'s <code>_functional_roles</code> function assigns
+  <code>unclassified</code> <strong>exclusively when a frame has fewer than 2 visible defenders</strong>
+  &mdash; there is structurally nothing to measure depth/laterality "relative to" when only 0 or 1
+  defenders are visible. It is not a geometric edge case, missing tracking data, or a classification
+  failure on ambiguous input &mdash; it is a deliberate, distinct "nothing to compare against"
+  bucket. The function's own docstring states this explicitly: <em>"unclassified and mid_block mean
+  different things -- couldn't-measure vs. measured-and-ordinary -- and must never be treated as
+  interchangeable downstream."</em> <code>src/dax/analysis/passive_archetypes.py</code>
+  independently confirms the same reasoning in its own module docstring, excluding
+  <code>unclassified</code> from its archetype clustering for the identical "n&lt;2 structural case,
+  not a behavioural population" reason. Two independent pieces of this codebase already agree on this
+  distinction before this prompt ever looked at it.</p>
+<p><strong>Fold-in into <code>mid_block</code> (the modal category) was considered and
+  rejected.</strong> Both source files' own docstrings explicitly warn against conflating "couldn't
+  measure" with "measured and ordinary." There is no principled basis to assign these n&lt;2 rows to
+  <em>any</em> of the 5 measured roles &mdash; the whole reason they are unclassified is that
+  role-relative geometry could not be computed for them at all, not that it was computed and happened
+  to look ordinary.</p>
+<p><strong>Fix implemented (model-input preprocessing only &mdash;
+  <code>passive_defense.parquet</code> is untouched, not regenerated, not rewritten).</strong> In
+  <code>scripts/models/train_passive_binary_baseline.py</code>'s <code>DesignMatrixBuilder</code>
+  (the exact class both this leg's and the passive-binary leg's training scripts import &mdash; one
+  shared place, not duplicated per script), <code>"unclassified"</code> is excluded from the
+  categories the <code>OneHotEncoder</code> is fit on for <code>defender_functional_role</code>
+  specifically. With <code>handle_unknown="ignore"</code> already set, any row carrying this value
+  &mdash; at fit time or transform time, on either leg &mdash; now gets an <strong>all-zero</strong>
+  <code>defender_functional_role_*</code> block: no invented role label, no thin dummy column of its
+  own, and no row dropped from the dataset (every other one of the 38 features is still used for that
+  row). A future refit of the passive-binary leg's own <code>p1</code>-<code>p3</code> (not done in
+  this prompt &mdash; see below) would pick up this fix automatically, by design.</p>
+<p><strong>What actually changed after refitting <code>d0</code>/<code>d1</code> with the
+  fix.</strong></p>
+<ul>
+<li><em>Gate result: essentially unchanged, confirmed not assumed.</em> Given the fix touches 2 of
+  77,646 train+val rows and 3 of 17,402 held-out rows, the expectation was the Rung-0 gate result
+  shouldn't move much &mdash; confirmed directly: common-scale log RMSE CV = 1.0345 (was 1.0345),
+  paired t p=0.0053 (was 0.0053), 5/5 folds (unchanged), held-out common-scale log RMSE = 1.0374 (was
+  1.0374), hurdle pipeline RMSE/MAE/R&sup2; = 0.03726/0.00980/0.0426 (all unchanged to displayed
+  precision). Every number in sections 1-11 below is the refit number, and none of them moved outside
+  rounding noise.</li>
+<li><em>Coefficients: the specific fix worked, and nothing else jumped into the gap.</em> New top-10
+  <code>d1_lognormal_glm</code> coefficients
+  (<code>outputs/models/regression/d1_lognormal_glm.json</code>):
+  <table>
+  <tr><th>Rank</th><th>Feature</th><th>Coefficient</th></tr>
+  <tr><td>1</td><td><code>defender_functional_role_advanced_wide</code></td><td>0.742</td></tr>
+  <tr><td>2</td><td><code>defender_functional_role_last_line</code></td><td>0.705</td></tr>
+  <tr><td>3</td><td><code>defender_functional_role_wide_cover</code></td><td>0.698</td></tr>
+  <tr><td>4</td><td><code>defender_functional_role_central_screen</code></td><td>0.687</td></tr>
+  <tr><td>5</td><td><code>defender_functional_role_mid_block</code></td><td>0.648</td></tr>
+  <tr><td>6</td><td><code>has_option_3</code></td><td>-0.312</td></tr>
+  <tr><td>7</td><td><code>on_ball_event_type_Shot</code></td><td>0.253</td></tr>
+  <tr><td>8</td><td><code>has_option_2</code></td><td>0.171</td></tr>
+  <tr><td>9</td><td><code>on_ball_event_type_Carry</code></td><td>-0.170</td></tr>
+  <tr><td>10</td><td><code>phase_label_counterpress_after_loss</code></td><td>0.108</td></tr>
+  </table>
+  <code>defender_functional_role_unclassified</code> no longer exists as its own dummy, as intended.
+  The 5 real role coefficients now cluster tightly together (0.648-0.742, a spread of only 0.094)
+  rather than one outlier at 2x the next-largest &mdash; this is the expected, healthier consequence
+  of removing a near-singleton category from a one-hot encoding that never drops a reference level
+  (every category gets its own dummy, so the design matrix is rank-deficient and the intercept/dummy
+  split is not uniquely identified; <code>unclassified</code>'s near-pure separation was previously
+  absorbing part of that redistribution unstably). Every non-role coefficient
+  (<code>has_option_3</code>, <code>on_ball_event_type_Shot</code>, <code>has_option_2</code>, etc.)
+  is <strong>identical to 4 decimal places</strong> to the original Prompt 59 fit &mdash; the fix is
+  precisely localized to the role encoding, nothing else moved.</li>
+<li><em>Scan for other thin-category artifacts, not just re-checking the one already found.</em>
+  Every categorical and boolean column among the 38 locked PASSIVE features was checked for value
+  counts on the positive-row subset <code>d1</code> fits on. Nothing else approaches
+  <code>unclassified</code>'s original severity: the next-thinnest category is
+  <code>has_option_2 == False</code> (330 of 95,048 positive rows, 0.35%), two orders of magnitude
+  less extreme than <code>unclassified</code>'s 5 rows, and its coefficient (0.171, rank 8) shows no
+  sign of the same overfit-to-a-singleton pattern. <code>period == 5</code> is thinner still on the
+  <em>full</em> parquet (52 of 1,593,181 rows) but has <strong>zero</strong> positive-row
+  representation at all, so it never appears as a category in <code>d1</code>'s own fit in the first
+  place. No further fix was needed for this leg's regression.</li>
+</ul>
+<p><strong>Cross-check: does the same artifact exist on the passive-binary leg? (informational only,
+  no changes made).</strong> <code>defender_functional_role</code> is also a locked feature for the
+  passive-binary leg's already-promoted <code>p1e_gradient_boosting_calibrated</code> (a
+  gradient-boosted model, structurally much less prone to this failure mode) and for the linear
+  <code>p1_unweighted</code>/<code>p2_weighted</code>/<code>p3_weighted_interactions</code> variants.
+  Reading their already-fitted coefficient JSONs directly (read-only &mdash; <strong>none of these
+  were retrained, refit, or touched in this prompt</strong>):</p>
+<table>
+<tr><th>Variant</th><th><code>defender_functional_role_unclassified</code> coefficient</th><th>Rank by |coef|</th></tr>
+<tr><td><code>p1_unweighted</code></td><td>-0.389</td><td>not top-8, but the largest-magnitude of the 6 role dummies</td></tr>
+<tr><td><code>p2_weighted</code></td><td><strong>-2.269</strong></td><td><strong>#1 of all 51 features</strong></td></tr>
+<tr><td><code>p3_weighted_interactions</code></td><td><strong>-2.343</strong></td><td><strong>#1 of all features</strong></td></tr>
+</table>
+<p><strong>The same artifact is present, and materially worse on <code>p2</code>/<code>p3</code></strong>
+  (this leg's own full dataset, 1,026 of 1,593,181 rows, 0.064% &mdash; thinner in proportion than
+  the positive-row-only 0.005% <code>d1</code> saw, which is the reverse of the direction that would
+  make this less concerning) &mdash; <code>unclassified</code> is the single largest-magnitude
+  coefficient in the entire model for both <code>p2_weighted</code> and
+  <code>p3_weighted_interactions</code>, well ahead of <code>on_ball_event_type_Shot</code>.
+  <strong>This is reported here as a follow-up item for a future prompt to decide whether it's worth
+  revisiting</strong>, since <code>p1e_gradient_boosting_calibrated</code> (not
+  <code>p2</code>/<code>p3</code>) is this leg's actual promoted, standing reference model and per
+  this prompt's own constraint none of <code>p1</code>/<code>p2</code>/<code>p3</code>/<code>p1e</code>
+  were retrained or repromoted here.</p>
+
 <h2>1. Why a hurdle architecture, not a single regression</h2>
 <p>Two things about the passive dataset were reconfirmed directly against real data before writing
   this script (not assumed to transfer from the active leg's own Prompt 54 checks).</p>

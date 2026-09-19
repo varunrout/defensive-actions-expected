@@ -57,6 +57,17 @@ readout across two runs, and the readout only covered v2/v3), this script
 produces one held-out-test readout per variant (including p0/p1) in a single
 run, per this leg's explicit instructions.
 
+Prompt 60 data-quality fix (DesignMatrixBuilder only, read the class docstring):
+defender_functional_role == "unclassified" is excluded from the categories
+the shared design-matrix encoder is fit on -- see DesignMatrixBuilder for
+the full root-cause writeup. This is a preprocessing-time decision; the
+locked passive_defense.parquet column itself is untouched, and p0-p3's
+already-fitted artifacts in this prompt were NOT refit (that only happened
+for the passive-continuous leg's d0/d1, in scripts/models/
+train_passive_continuous_baseline.py) -- a future refit of p0-p3 would pick
+up this fix automatically since it shares this exact class, which is by
+design (Prompt 60 item 2's explicit requirement), not an oversight.
+
 Usage:
     python scripts/models/train_passive_binary_baseline.py
 """
@@ -166,6 +177,47 @@ for _qf in QUADRATIC_FEATURES:
     assert _qf in CONTINUOUS_COLS, f"{_qf} must be one of the locked continuous passive features"
 
 
+
+# Prompt 60 data-quality fix, shared by every script that imports this class
+# (train_passive_binary_baseline.py itself and train_passive_continuous_baseline.py).
+#
+# Root cause (confirmed against src/dax/features/passive_defense.py's
+# _functional_roles docstring and src/dax/analysis/passive_archetypes.py's
+# own module docstring, not assumed): defender_functional_role ==
+# "unclassified" is reserved EXCLUSIVELY for frames with fewer than 2
+# visible defenders -- there is structurally nothing to measure depth/
+# laterality "relative to". It is not a geometric edge case, missing
+# tracking data, or classification failure -- it is a distinct, deliberate
+# "nothing to compare against" bucket, and both source files explicitly
+# warn it must never be treated as interchangeable with mid_block
+# ("measured, ordinary") or with any other measured role. Confirmed rare:
+# 1,026 of 1,593,181 rows on the full passive_defense.parquet (0.064%), 5
+# of 95,048 on the positive-row subset (0.005%) -- too thin to support its
+# own coefficient. d1_lognormal_glm (Prompt 59) fit this category a
+# coefficient of -0.58, ~2x the next-largest, driven entirely by n=5 rows
+# whose mean xg (0.023) is an artifact of that near-singleton bucket, not a
+# real football finding (every real role's mean xg sits ~0.10).
+#
+# Fold-in into mid_block (the modal category) was considered and REJECTED:
+# both source files' own docstrings explicitly warn against conflating
+# "couldn't measure" with "measured and ordinary". There is no principled
+# basis to assign these n<2 rows to ANY of the 5 measured roles -- the
+# whole reason they are unclassified is that role-relative geometry could
+# not be computed for them at all.
+#
+# Fix (model-input preprocessing only -- the locked passive_defense.parquet
+# column is NOT touched, rewritten, or regenerated): "unclassified" is
+# excluded from the categories the OneHotEncoder is fit on for
+# defender_functional_role specifically. With handle_unknown="ignore"
+# already set, any row carrying this value -- at fit time or transform
+# time, on either leg -- gets an all-zero defender_functional_role_* block:
+# no invented role label, no thin dummy column of its own, and no row
+# dropped from the dataset (every other one of the 38 features is still
+# used for that row).
+ROLE_COL = "defender_functional_role"
+ROLE_EXCLUDED_CATEGORIES = {"unclassified"}
+
+
 class DesignMatrixBuilder:
     """Fold-safe design-matrix builder: fit on train rows only, transform both.
 
@@ -177,16 +229,33 @@ class DesignMatrixBuilder:
     leakage risk. Quadratic terms (p1b_quadratic only, prompt 51) are the
     square of each QUADRATIC_FEATURES column's already-standardized value,
     named quad__<feature>, same convention as the active leg's Rung 1.
+
+    Prompt 60: defender_functional_role's "unclassified" category is
+    excluded from the fitted OneHotEncoder's categories (see the
+    ROLE_COL/ROLE_EXCLUDED_CATEGORIES note above this class for the full
+    root-cause writeup) -- rows carrying it get an all-zero
+    defender_functional_role_* block via handle_unknown="ignore", rather
+    than their own thin dummy column or a football-indefensible fold-in.
     """
 
     def __init__(self, add_interactions: bool = False, add_quadratic: bool = False):
         self.add_interactions = add_interactions
         self.add_quadratic = add_quadratic
-        self.ohe = OneHotEncoder(handle_unknown="ignore")
         self.num_imputer = SimpleImputer(strategy="median")
         self.num_scaler = StandardScaler()
 
     def fit(self, train_df: pd.DataFrame) -> "DesignMatrixBuilder":
+        # categories built explicitly (rather than OneHotEncoder's default
+        # "auto") solely so defender_functional_role's category list can
+        # exclude "unclassified" while every other categorical column keeps
+        # its normal auto-detected categories.
+        categories = []
+        for col in CATEGORICAL_COLS:
+            values = pd.unique(train_df[col].dropna())
+            if col == ROLE_COL:
+                values = [v for v in values if v not in ROLE_EXCLUDED_CATEGORIES]
+            categories.append(sorted(values))
+        self.ohe = OneHotEncoder(handle_unknown="ignore", categories=categories)
         self.ohe.fit(train_df[CATEGORICAL_COLS])
         num_imputed = self.num_imputer.fit_transform(train_df[NUMERIC_COLS])
         self.num_scaler.fit(num_imputed)

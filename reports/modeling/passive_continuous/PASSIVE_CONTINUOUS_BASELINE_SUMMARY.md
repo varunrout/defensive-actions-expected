@@ -11,6 +11,121 @@ before that (Prompts 36/49).
 *For the full math behind the models this leg reuses (logistic regression, gradient boosting,
 calibration), see [`../MATH_BEHIND_IT.md`](../MATH_BEHIND_IT.md).*
 
+> **Data-quality correction (Prompt 60):** `d0_dummy`/`d1_lognormal_glm` were refit after fixing a
+> thin-category artifact in `defender_functional_role`'s encoding. See section 0 below for the full
+> root-cause writeup. The corrected numbers replace the originals throughout this document; nothing
+> else in sections 1-11 changed as a result (confirmed, not assumed -- see section 0's "what actually
+> changed" summary).
+
+## 0. Data-quality correction: `defender_functional_role_unclassified` (Prompt 60)
+
+**What was found.** `d1_lognormal_glm`'s (original Prompt 59 fit) largest-magnitude coefficient by a
+wide margin was `defender_functional_role_unclassified` (coef -0.58, roughly 2x the next-largest at
+-0.31). On the positive-row subset `d1` is fit on, `unclassified` has only **5 rows out of 95,048**
+(0.005%); on the full `passive_defense.parquet` (all rows, not just positive), it accounts for
+**1,026 of 1,593,181** rows (0.064%) -- still thin, but not as extreme as the 5-row slice made it
+look at first glance, both counts reported rather than only the more dramatic one. Their mean xg
+(0.0227) really is much lower than every other role (~0.10 across the other 5 categories) -- but
+n=5 cannot support that as a real football finding; it is the linear model overfitting to a
+near-singleton bucket.
+
+**Root cause, read directly from source rather than assumed.**
+`src/dax/features/passive_defense.py`'s `_functional_roles` function assigns `unclassified`
+**exclusively when a frame has fewer than 2 visible defenders** -- there is structurally nothing to
+measure depth/laterality "relative to" when only 0 or 1 defenders are visible. It is not a geometric
+edge case, missing tracking data, or a classification failure on ambiguous input -- it is a
+deliberate, distinct "nothing to compare against" bucket. The function's own docstring states this
+explicitly: *"unclassified and mid_block mean different things -- couldn't-measure vs.
+measured-and-ordinary -- and must never be treated as interchangeable downstream."*
+`src/dax/analysis/passive_archetypes.py` independently confirms the same reasoning in its own module
+docstring, excluding `unclassified` from its archetype clustering for the identical "n<2 structural
+case, not a behavioural population" reason. Two independent pieces of this codebase already agree on
+this distinction before this prompt ever looked at it.
+
+**Fold-in into `mid_block` (the modal category) was considered and rejected.** Both source files'
+own docstrings explicitly warn against conflating "couldn't measure" with "measured and ordinary."
+There is no principled basis to assign these n<2 rows to *any* of the 5 measured roles -- the whole
+reason they are unclassified is that role-relative geometry could not be computed for them at all,
+not that it was computed and happened to look ordinary.
+
+**Fix implemented (model-input preprocessing only -- `passive_defense.parquet` is untouched, not
+regenerated, not rewritten).** In `scripts/models/train_passive_binary_baseline.py`'s
+`DesignMatrixBuilder` (the exact class both this leg's and the passive-binary leg's training scripts
+import -- one shared place, not duplicated per script), `"unclassified"` is excluded from the
+categories the `OneHotEncoder` is fit on for `defender_functional_role` specifically. With
+`handle_unknown="ignore"` already set, any row carrying this value -- at fit time or transform time,
+on either leg -- now gets an **all-zero** `defender_functional_role_*` block: no invented role label,
+no thin dummy column of its own, and no row dropped from the dataset (every other one of the 38
+features is still used for that row). A future refit of the passive-binary leg's own `p1`-`p3`
+(not done in this prompt -- see section below) would pick up this fix automatically, by design.
+
+**What actually changed after refitting `d0`/`d1` with the fix.**
+
+- *Gate result: essentially unchanged, confirmed not assumed.* Given the fix touches 2 of 77,646
+  train+val rows and 3 of 17,402 held-out rows, the expectation was the Rung-0 gate result shouldn't
+  move much -- confirmed directly: common-scale log RMSE CV = 1.0345 (was 1.0345), paired t
+  p=0.0053 (was 0.0053), 5/5 folds (unchanged), held-out common-scale log RMSE = 1.0374 (was
+  1.0374), hurdle pipeline RMSE/MAE/R² = 0.03726/0.00980/0.0426 (all unchanged to displayed
+  precision). Every number in sections 1-11 below is the refit number, and none of them moved
+  outside rounding noise.
+- *Coefficients: the specific fix worked, and nothing else jumped into the gap.* New top-10
+  `d1_lognormal_glm` coefficients (`outputs/models/regression/d1_lognormal_glm.json`):
+
+  | Rank | Feature | Coefficient |
+  |---|---|---|
+  | 1 | `defender_functional_role_advanced_wide` | 0.742 |
+  | 2 | `defender_functional_role_last_line` | 0.705 |
+  | 3 | `defender_functional_role_wide_cover` | 0.698 |
+  | 4 | `defender_functional_role_central_screen` | 0.687 |
+  | 5 | `defender_functional_role_mid_block` | 0.648 |
+  | 6 | `has_option_3` | -0.312 |
+  | 7 | `on_ball_event_type_Shot` | 0.253 |
+  | 8 | `has_option_2` | 0.171 |
+  | 9 | `on_ball_event_type_Carry` | -0.170 |
+  | 10 | `phase_label_counterpress_after_loss` | 0.108 |
+
+  `defender_functional_role_unclassified` no longer exists as its own dummy, as intended. The 5 real
+  role coefficients now cluster tightly together (0.648-0.742, a spread of only 0.094) rather than
+  one outlier at 2x the next-largest -- this is the expected, healthier consequence of removing a
+  near-singleton category from a one-hot encoding that never drops a reference level (every category
+  gets its own dummy, so the design matrix is rank-deficient and the intercept/dummy split is not
+  uniquely identified; `unclassified`'s near-pure separation was previously absorbing part of that
+  redistribution unstably). Every non-role coefficient (`has_option_3`, `on_ball_event_type_Shot`,
+  `has_option_2`, etc.) is **identical to 4 decimal places** to the original Prompt 59 fit -- the fix
+  is precisely localized to the role encoding, nothing else moved.
+- *Scan for other thin-category artifacts, not just re-checking the one already found.* Every
+  categorical and boolean column among the 38 locked PASSIVE features was checked for value counts on
+  the positive-row subset `d1` fits on. Nothing else approaches `unclassified`'s original severity:
+  the next-thinnest category is `has_option_2 == False` (330 of 95,048 positive rows, 0.35%), two
+  orders of magnitude less extreme than `unclassified`'s 5 rows, and its coefficient (0.171, rank 8)
+  shows no sign of the same overfit-to-a-singleton pattern. `period == 5` is thinner still on the
+  *full* parquet (52 of 1,593,181 rows) but has **zero** positive-row representation at all, so it
+  never appears as a category in `d1`'s own fit in the first place. No further fix was needed for
+  this leg's regression.
+
+**Cross-check: does the same artifact exist on the passive-binary leg? (informational only, no
+changes made).** `defender_functional_role` is also a locked feature for the passive-binary leg's
+already-promoted `p1e_gradient_boosting_calibrated` (a gradient-boosted model, structurally much less
+prone to this failure mode) and for the linear `p1_unweighted`/`p2_weighted`/
+`p3_weighted_interactions` variants. Reading their already-fitted coefficient JSONs directly
+(read-only -- **none of these were retrained, refit, or touched in this prompt**):
+
+| Variant | `defender_functional_role_unclassified` coefficient | Rank by \|coef\| |
+|---|---|---|
+| `p1_unweighted` | -0.389 | not top-8, but the largest-magnitude of the 6 role dummies |
+| `p2_weighted` | **-2.269** | **#1 of all 51 features** |
+| `p3_weighted_interactions` | **-2.343** | **#1 of all features** |
+
+**The same artifact is present, and materially worse on `p2`/`p3`** (this leg's own full dataset,
+1,026 of 1,593,181 rows, 0.064% -- thinner in proportion than the positive-row-only 0.005% `d1` saw,
+which is the reverse of the direction that would make this less concerning) -- `unclassified` is the
+single largest-magnitude coefficient in the entire model for both `p2_weighted` and
+`p3_weighted_interactions`, well ahead of `on_ball_event_type_Shot`. **This is reported here as a
+follow-up item for a future prompt to decide whether it's worth revisiting**, since
+`p1e_gradient_boosting_calibrated` (not `p2`/`p3`) is this leg's actual promoted, standing reference
+model and per this prompt's own constraint none of `p1`/`p2`/`p3`/`p1e` were retrained or repromoted
+here.
+
 ## 1. Why a hurdle architecture, not a single regression
 
 Two things about the passive dataset were reconfirmed directly against real data before writing
