@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- Active-Continuous Baseline Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1; --plane: #eceee8; --surface: #ffffff;
+  --text-primary: #10151c; --text-secondary: #4c525b; --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09); --gridline: #e2e4de;
+  --accent: #e34948; --pos: #e34948; --neg: #2a78d6;
+  --amber: #eda100; --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b; --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+    --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09); --gridline: #232a34;
+    --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+    --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+  --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09); --gridline: #232a34;
+  --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+  --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary); font-family: "Public Sans", -apple-system, sans-serif; font-size: 15px; line-height: 1.5; }
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead { background: var(--bg); border-bottom: 1px solid var(--border); padding: 40px 24px 32px; }
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow { font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; color: var(--accent); font-weight: 600; margin: 0 0 10px; }
+h1.title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: clamp(26px, 4vw, 38px); margin: 0 0 12px; color: var(--text-primary); }
+.dek { color: var(--text-secondary); max-width: 64ch; margin: 0 0 24px; font-size: 15.5px; }
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b { display: block; font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; color: var(--text-primary); }
+.stat span { display: block; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+footer { border-top: 1px solid var(--border); padding: 28px 24px 60px; max-width: 1180px; margin: 0 auto; }
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 900px; }
+.article h2 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; margin: 44px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.article h2:first-of-type { margin-top: 0; }
+.article h3 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 17px; margin: 30px 0 4px; color: var(--accent); }
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article code { font-family: "JetBrains Mono", monospace; font-size: 0.88em; background: var(--plane); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--neg); }
+.article ul, .article ol { color: var(--text-secondary); font-size: 14.5px; padding-left: 22px; margin: 0 0 16px; }
+.article li { margin-bottom: 6px; }
+.article table { width: 100%; border-collapse: collapse; margin: 4px 0 22px; font-size: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.article th { text-align: left; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.03em; color: var(--text-muted); background: var(--plane); padding: 9px 12px; border-bottom: 1px solid var(--border); }
+.article td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p:last-child { margin-bottom: 0; }
+.verdict-box { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.verdict-box p { margin: 0; }
+.variant-block { margin: 28px 0 44px; }
+.variant-title { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 16px; margin: 0 0 10px; }
+.chart-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 900px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+.chart-card img { width: 100%; height: auto; border-radius: 6px; display: block; background: var(--plane); cursor: zoom-in; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.chart-card img:hover { transform: scale(1.015); box-shadow: 0 4px 16px rgba(16,21,28,0.14); }
+.chart-card .cc-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 6px 2px 0; text-align: center; }
+.lightbox { position: fixed; inset: 0; background: rgba(9,12,16,0.78); display: none; align-items: center; justify-content: center; padding: 5vh 5vw; z-index: 1000; cursor: zoom-out; }
+.lightbox.open { display: flex; }
+.lightbox figure { margin: 0; max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.lightbox img { max-width: 92vw; max-height: 82vh; width: auto; height: auto; border-radius: 10px; background: var(--surface); box-shadow: 0 20px 60px rgba(0,0,0,0.45); cursor: default; }
+.lightbox figcaption { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #e8eaee; text-align: center; }
+.lightbox-close { position: absolute; top: 18px; right: 24px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+.lightbox-close:hover { background: rgba(255,255,255,0.18); }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; Active leg &middot; Continuous</p>
+    <h1 class="title">Active-Continuous Baseline Summary (c0-c1)</h1>
+    <p class="dek">Rung 0 of the active-continuous leg: a two-part ("hurdle") architecture for
+      <code>target_future_xg_10s</code> -- the already-promoted binary classifier for
+      <code>P(shot)</code>, combined with a new log-scale regression for
+      <code>E[xg | shot]</code>, fit only on the 4,368 shot-positive rows.</p>
+    <div class="statbar">
+      <div class="stat"><b>4,368</b><span>shot-positive rows (of 56,068)</span></div>
+      <div class="stat"><b>Log-normal</b><span>best-fitting family, hurdle architecture</span></div>
+      <div class="stat"><b>c1 &gt; c0</b><span>Rung 0 result, p=0.0004</span></div>
+      <div class="stat"><b>10s window</b><span>accepted limitation, not revisited here</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+<p><em>For the full math behind the models this leg reuses (logistic regression, gradient boosting,
+  calibration), see <a href="../MATH_BEHIND_IT.html" target="viewer">MATH_BEHIND_IT.html</a>.</em></p>
+
+<h2>1. Why a hurdle architecture, not a single regression</h2>
+<p>Two rough analyses (done directly in chat, cited here since they are not yet committed elsewhere
+  in this repo) settled the two open questions this leg's design depends on.</p>
+<p><strong>Distribution shape.</strong> <code>target_future_xg_10s</code>'s shot-conditional
+  distribution (the 4,368 rows where a shot did follow) is heavily right-skewed (skew ~3.2-3.3,
+  excess kurtosis ~13-14) and, critically, <strong>not bounded at 1</strong> &mdash; reconfirmed
+  directly against the real data: <strong>7 of the 4,368 positive rows have
+  <code>target_future_xg_10s &gt; 1</code></strong> (max observed: 1.239). This happens because the
+  target sums xG across <em>every</em> shot in the 10-second window, not one shot's probability.
+  This single fact rules out beta regression outright and makes a single Tweedie regression across
+  all rows a worse fit than treating "does a shot happen" and "how much xG, given it does" as two
+  separate, differently-shaped problems. Log-normal was the best-fitting family among
+  log-normal/gamma/weibull/beta for the positive-row distribution. This is why this leg is built as
+  a <strong>two-part ("hurdle") model</strong>.</p>
+<p><strong>Window length &mdash; an accepted, documented limitation, not an open question.</strong>
+  A separate sensitivity check (25-match sample, real target-building code, horizons 5/10/15/20/30s
+  plus an uncapped possession-bound run) found the existing 10-second window captures only ~41% of
+  possessions that eventually produce a shot (median time-to-shot, within a possession that does
+  produce one: 14 seconds). Widening to a full possession-bound framing was checked and found worse:
+  some possessions run 60-390+ seconds, well past where the original action's own features remain a
+  fair predictor. <strong>Varun's explicit decision: keep the existing 10-second window.</strong>
+  This baseline does not revisit that decision.</p>
+
+<h2>2. Confirmed inputs</h2>
+<p><strong>Classifier half, reused exactly, never retrained.</strong>
+  <code>v1e_gradient_boosting_calibrated</code> &mdash; confirmed as the active-binary leg's actual
+  promoted standing reference model directly against <code>ACTIVE_BINARY_MODEL_LADDER.md</code>'s
+  own status banner (Prompt 46), not assumed. No saved held-out prediction array existed for it, so
+  its held-out score here was regenerated by loading the saved model and scoring through a
+  freshly-fit preprocessing builder &mdash; the identical reuse pattern verified to reproduce an
+  original held-out score exactly in Prompt 52.</p>
+<p><strong>Feature set.</strong> The same 32 locked ACTIVE features as the binary leg. No new
+  features added, none removed.</p>
+<p><strong>Positive-row structure.</strong> 4,368 of 56,068 rows: 3,600 / 92 matches train+val,
+  768 / 23 matches held-out test. Per-fold counts: fold 0=758, fold 1=830, fold 2=631, fold 3=753,
+  fold 4=628. <strong>No fold has fewer than 100 positive rows.</strong></p>
+
+<h2>3. Rung 0 variants</h2>
+<table>
+<tr><th>Variant</th><th>Model</th><th>Notes</th></tr>
+<tr><td><code>c0_dummy</code></td><td><code>DummyRegressor(strategy="mean")</code> on <code>log1p(xg)</code></td><td>training-fold mean, back-transformed via <code>expm1</code></td></tr>
+<tr><td><code>c1_lognormal_glm</code></td><td><code>LinearRegression()</code> on <code>log(xg)</code></td><td>natural log; same 32 features, same <code>DesignMatrixBuilder</code></td></tr>
+</table>
+<p><code>c0</code> and <code>c1</code> are fit on different log transforms by this leg's own design
+  &mdash; <strong>their own "native" log-scale RMSE/MAE numbers are not directly comparable</strong>
+  (<code>log1p(0.05)=0.049</code> vs <code>log(0.05)=-3.0</code>). Section 4 uses a
+  <strong>common-scale</strong> metric instead.</p>
+
+<h2>4. Cross-validation results (5-fold, OOF metrics)</h2>
+<table>
+<tr><th>Variant</th><th>Common log RMSE</th><th>Common log MAE</th><th>Naive MAE</th><th>Corrected MAE</th><th>Naive R&sup2;</th><th>Corrected R&sup2;</th></tr>
+<tr><td><code>c0_dummy</code></td><td>1.1409</td><td>0.9437</td><td>0.0837</td><td>0.0837</td><td>-0.0040</td><td>-0.0040</td></tr>
+<tr><td><strong><code>c1_lognormal_glm</code></strong></td><td><strong>1.0014</strong></td><td><strong>0.7914</strong></td><td><strong>0.0721</strong></td><td>0.0823</td><td>-0.0473</td><td><strong>0.0294</strong></td></tr>
+</table>
+<p><code>c1</code> beats <code>c0</code> on the fair common-scale log RMSE/MAE, on original-scale
+  naive MAE, and on corrected R&sup2;. <code>c1</code>'s naive R&sup2; is negative despite ranking
+  rows better than <code>c0</code> &mdash; resolved in section 5.</p>
+
+<h2>5. Two back-transforms: naive vs log-normal-corrected</h2>
+<p>Exponentiating a log-scale prediction directly (<code>exp(pred)</code>) recovers the
+  <strong>median</strong> of the implied log-normal distribution, not its mean &mdash; and
+  <code>E[xg]</code> is what the downstream hurdle combination actually needs. By Jensen's
+  inequality, the naive back-transform systematically under-predicts the true conditional mean. The
+  standard correction, <code>exp(pred + &sigma;&sup2;/2)</code>, fixes this.</p>
+<p>Real numbers, <code>c1</code>, held-out test: fitted <code>&sigma;&sup2; = 0.934</code>, giving a
+  mean correction factor <code>exp(0.934/2) &asymp; 1.60</code>.</p>
+<p><strong>Which one the hurdle combination should use, and why: the corrected back-transform.</strong>
+  Naive <code>exp(pred)</code> has lower MAE (CV: 0.0721 vs 0.0823) &mdash; but MAE is minimized by
+  the median, and naive <code>exp(pred)</code> is approximately a median-type estimator. R&sup2; and
+  RMSE-type metrics, about matching the mean, tell the opposite story: naive R&sup2; is negative
+  (-0.047), corrected R&sup2; is positive (+0.029). Since the hurdle combination needs an unbiased
+  mean estimate, the corrected back-transform is used throughout, reported honestly alongside the
+  naive numbers rather than only quoting whichever looks better.</p>
+
+<h2>6. Calibration (5 bins by predicted value, held-out test, <code>c1</code> corrected)</h2>
+<table>
+<tr><th>Bin</th><th>n</th><th>Mean predicted xg</th><th>Mean actual xg</th><th>Gap</th></tr>
+<tr><td>0 (lowest)</td><td>154</td><td>0.0604</td><td>0.0881</td><td>-0.0277</td></tr>
+<tr><td>1</td><td>154</td><td>0.0788</td><td>0.1041</td><td>-0.0254</td></tr>
+<tr><td>2</td><td>154</td><td>0.0958</td><td>0.0812</td><td>+0.0145</td></tr>
+<tr><td>3</td><td>153</td><td>0.1161</td><td>0.1079</td><td>+0.0082</td></tr>
+<tr><td>4 (highest)</td><td>153</td><td>0.1611</td><td>0.1753</td><td>-0.0142</td></tr>
+</table>
+<p>No dramatic systematic bias in either direction &mdash; gaps are small relative to bin means and
+  don't monotonically worsen at either extreme. Not a clean, tight calibration curve (this leg's
+  smaller sample and heavy skew make that a high bar), but no glaring directional fault.</p>
+
+<h2>7. Held-out test readout (single readout, not used for selection)</h2>
+<table>
+<tr><th>Variant</th><th>Common log RMSE</th><th>Naive MAE</th><th>Corrected MAE</th><th>Naive R&sup2;</th><th>Corrected R&sup2;</th></tr>
+<tr><td><code>c0_dummy</code></td><td>1.1154</td><td>0.0890</td><td>0.0890</td><td>-0.0117</td><td>-0.0117</td></tr>
+<tr><td><strong><code>c1_lognormal_glm</code></strong></td><td><strong>0.9951</strong></td><td><strong>0.0778</strong></td><td>0.0863</td><td>-0.0638</td><td><strong>0.0371</strong></td></tr>
+</table>
+<p>Same direction as CV throughout. <code>c1</code>'s corrected R&sup2; actually improves slightly
+  from CV (0.0294) to held-out (0.0371) &mdash; no sign of overfitting on this leg's smaller
+  sample.</p>
+
+<h2>8. Paired significance test, c1 vs c0</h2>
+<p>Common-scale log RMSE, per canonical CV fold: <code>c1</code> beats <code>c0</code> in
+  <strong>5 of 5 folds</strong> (mean diff -0.1394). Paired t-test t=-11.04,
+  <strong>p=0.0004</strong>. Wilcoxon signed-rank p=0.0625, the same 5-fold floor seen throughout
+  this project.</p>
+<p><strong>Read cautiously</strong>: this leg's per-fold sample (628-830 positive rows) is much
+  smaller than the binary legs'. Reported plainly, not suppressed &mdash; directionally informative,
+  not strong statistical proof on its own. 5/5 folds agreeing, plus the held-out readout confirming
+  the same ranking, is a real, multi-angle-consistent signal.</p>
+
+<h2>9. Full hurdle pipeline readout (diagnostic, not the Rung-0 gate)</h2>
+<table>
+<tr><th></th><th>RMSE</th><th>MAE</th><th>R&sup2;</th></tr>
+<tr><td>Hurdle pipeline (<code>P(shot) &times; E[xg|shot]</code>)</td><td><strong>0.0449</strong></td><td><strong>0.0119</strong></td><td><strong>0.1426</strong></td></tr>
+<tr><td>Trivial baseline (unconditional train-set mean)</td><td>0.0485</td><td>0.0150</td><td>~0.0000</td></tr>
+</table>
+<p>The two-part architecture beats the trivial constant-mean baseline on every metric &mdash; a
+  real, positive first read on whether combining the two already-separately-validated halves works
+  end to end. <strong>This is explicitly a diagnostic, not the Rung-0 gate</strong>: the Rung-0
+  promotion decision rests on the regression-only <code>c1</code>-vs-<code>c0</code> comparison
+  (sections 4/8), since that is the piece this prompt actually built.</p>
+
+<h2>10. Charts</h2>
+<p>4 PNGs per variant, saved under <code>outputs/models/regression/charts/&lt;variant&gt;/</code>
+  (gitignored &mdash; regenerate by running <code>scripts/models/train_active_continuous_baseline.py</code>
+  if the images below don't resolve).</p>
+<div class="variant-block">
+  <p class="variant-title">c0_dummy</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c0_dummy/predicted_vs_observed_log.png" alt="c0_dummy predicted vs observed (log scale)"><p class="cc-label">predicted_vs_observed_log.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c0_dummy/residual_distribution.png" alt="c0_dummy residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c0_dummy/calibration_bins.png" alt="c0_dummy calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c0_dummy/feature_coefficients.png" alt="c0_dummy feature coefficients (n/a)"><p class="cc-label">feature_coefficients.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">c1_lognormal_glm</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1_lognormal_glm/predicted_vs_observed_log.png" alt="c1_lognormal_glm predicted vs observed (log scale)"><p class="cc-label">predicted_vs_observed_log.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1_lognormal_glm/residual_distribution.png" alt="c1_lognormal_glm residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1_lognormal_glm/calibration_bins.png" alt="c1_lognormal_glm calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1_lognormal_glm/feature_coefficients.png" alt="c1_lognormal_glm feature coefficients"><p class="cc-label">feature_coefficients.png</p></div>
+  </div>
+</div>
+
+<h2>11. Rung-0 result</h2>
+<div class="verdict-box"><p><strong><code>c1_lognormal_glm</code> clears Rung 0</strong> against the
+  <code>c0_dummy</code> floor: consistent direction across CV and held-out test, on the fair
+  common-scale log metric and on original-scale MAE/R&sup2;, with a statistically significant (if
+  small-n-cautioned) paired test, and a positive first end-to-end hurdle readout against a trivial
+  baseline. No model ladder is built in this document &mdash; Rung 0 only, mirroring the binary
+  legs' own Prompt 36/49 discipline; ladder rungs are Prompt 55+.</p></div>
+
+</div>
+</div>
+<footer>
+  <p>Generated by <code>scripts/models/train_active_continuous_baseline.py</code>. Markdown source:
+    <code>reports/modeling/active_continuous/ACTIVE_CONTINUOUS_BASELINE_SUMMARY.md</code>.</p>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+  <figure>
+    <img id="lightboxImg" src="" alt="">
+    <figcaption id="lightboxCaption"></figcaption>
+  </figure>
+</div>
+<script>
+(function () {
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightboxImg');
+  var lightboxCaption = document.getElementById('lightboxCaption');
+  function openLightbox(img) {
+    lightboxImg.src = img.currentSrc || img.src;
+    lightboxImg.alt = img.alt;
+    var variant = img.closest('.variant-block');
+    var title = variant ? variant.querySelector('.variant-title').textContent : '';
+    lightboxCaption.textContent = title ? (title + ' — ' + img.alt) : img.alt;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    lightboxImg.src = '';
+  }
+  document.querySelectorAll('.chart-card img').forEach(function (img) {
+    img.addEventListener('click', function () { openLightbox(img); });
+  });
+  lightbox.addEventListener('click', function (e) { if (e.target === lightbox) closeLightbox(); });
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLightbox(); });
+})();
+</script>
+</body>
+</html>
