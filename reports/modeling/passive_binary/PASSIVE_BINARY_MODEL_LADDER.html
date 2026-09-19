@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- Passive-Binary Model Ladder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1; --plane: #eceee8; --surface: #ffffff;
+  --text-primary: #10151c; --text-secondary: #4c525b; --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09); --gridline: #e2e4de;
+  --accent: #e34948; --pos: #e34948; --neg: #2a78d6;
+  --amber: #eda100; --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b; --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+    --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09); --gridline: #232a34;
+    --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+    --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+  --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09); --gridline: #232a34;
+  --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+  --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary); font-family: "Public Sans", -apple-system, sans-serif; font-size: 15px; line-height: 1.5; }
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead { background: var(--bg); border-bottom: 1px solid var(--border); padding: 40px 24px 32px; }
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow { font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; color: var(--accent); font-weight: 600; margin: 0 0 10px; }
+h1.title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: clamp(26px, 4vw, 38px); margin: 0 0 12px; color: var(--text-primary); }
+.dek { color: var(--text-secondary); max-width: 68ch; margin: 0 0 24px; font-size: 15.5px; }
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b { display: block; font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; color: var(--text-primary); }
+.stat span { display: block; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+footer { border-top: 1px solid var(--border); padding: 28px 24px 60px; max-width: 1180px; margin: 0 auto; }
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 940px; }
+.article > p:first-child { font-family: "JetBrains Mono", monospace; font-size: 12.5px; color: var(--text-muted); margin: 0 0 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.article h2 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; margin: 44px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.article h2:first-of-type { margin-top: 0; }
+.article h3 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 17px; margin: 30px 0 4px; color: var(--accent); }
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-primary); }
+.article code { font-family: "JetBrains Mono", monospace; font-size: 0.88em; background: var(--plane); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--neg); }
+.article ul, .article ol { color: var(--text-secondary); font-size: 14.5px; padding-left: 22px; margin: 0 0 16px; }
+.article li { margin-bottom: 6px; }
+.article table { width: 100%; border-collapse: collapse; margin: 4px 0 22px; font-size: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.article th { text-align: left; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.03em; color: var(--text-muted); background: var(--plane); padding: 9px 12px; border-bottom: 1px solid var(--border); }
+.article td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p { margin: 0 0 10px; }
+.deviation-box p:last-child { margin-bottom: 0; }
+.verdict-box { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.verdict-box p { margin: 0; }
+.fail-box { background: rgba(227,73,72,0.10); border: 1px solid rgba(227,73,72,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.fail-box p { margin: 0; }
+
+.variant-block { margin: 28px 0 44px; }
+.variant-title { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 16px; margin: 0 0 10px; }
+.chart-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 900px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+.chart-card img { width: 100%; height: auto; border-radius: 6px; display: block; background: var(--plane); cursor: zoom-in; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.chart-card img:hover { transform: scale(1.015); box-shadow: 0 4px 16px rgba(16,21,28,0.14); }
+.chart-card .cc-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 6px 2px 0; text-align: center; }
+
+.lightbox { position: fixed; inset: 0; background: rgba(9,12,16,0.78); display: none; align-items: center; justify-content: center; padding: 5vh 5vw; z-index: 1000; cursor: zoom-out; }
+.lightbox.open { display: flex; }
+.lightbox figure { margin: 0; max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.lightbox img { max-width: 92vw; max-height: 82vh; width: auto; height: auto; border-radius: 10px; background: var(--surface); box-shadow: 0 20px 60px rgba(0,0,0,0.45); cursor: default; }
+.lightbox figcaption { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #e8eaee; text-align: center; }
+.lightbox-close { position: absolute; top: 18px; right: 24px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+.lightbox-close:hover { background: rgba(255,255,255,0.18); }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; Passive leg</p>
+    <h1 class="title">Passive-Binary Model Ladder</h1>
+    <p class="dek">Rungs 1-4 built on the locked <code>p1_unweighted</code> baseline, adapted for
+      this leg's own features, row-correlation structure, and cluster-bootstrap gate (no
+      <code>player_id</code> to run a player-disjoint recheck against). No promotion decision is
+      made in this document.</p>
+    <div class="statbar">
+      <div class="stat"><b>0.1736 &rarr; 0.2162</b><span>held-out PR-AUC, Rung 0 &rarr; best Rung 4</span></div>
+      <div class="stat"><b>4</b><span>rungs, each gated 3 ways</span></div>
+      <div class="stat"><b>5-fold</b><span>canonical grouped CV, seed 42 (shared split)</span></div>
+      <div class="stat"><b>2/4</b><span>rungs clear rung-to-rung significance</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+<p>Split out of <code>PASSIVE_BINARY_BASELINE_SUMMARY.md</code> into its own document, mirroring
+  the active leg's Rung-0-doc / ladder-doc split (Prompt 42). Rung 0 stays in
+  <a href="PASSIVE_BINARY_BASELINE_SUMMARY.html" target="viewer">PASSIVE_BINARY_BASELINE_SUMMARY.html</a>.
+  No promotion audit is run in this document, whatever the results.</p>
+
+<h2>1. What a rung is</h2>
+<p>A <strong>rung</strong> is one controlled change to the locked Rung 0 baseline
+  (<code>p1_unweighted</code>): a single variable changed &mdash; feature shape, an interaction
+  term, a model family &mdash; with everything else held identical (same 38 locked features unless
+  the rung specifically changes that, same canonical <code>StratifiedGroupKFold</code> split shared
+  with the active leg, same target). Every rung is tested against 3 fixed gates:</p>
+<ol>
+  <li><strong>Paired significance test vs the current best</strong> &mdash; refit both variants on
+    the same 5 canonical CV folds, paired t-test + Wilcoxon signed-rank test on the per-fold PR-AUC
+    difference.</li>
+  <li><strong>Held-out-test confirmation</strong> &mdash; a single, one-time readout on the frozen
+    23-match test set.</li>
+  <li><strong>Cluster-by-<code>event_id</code> bootstrap</strong> &mdash; this leg's replacement for
+    the active leg's player-disjoint recheck, since <code>passive_defense.parquet</code> has no
+    <code>player_id</code> column. Naive row-level and cluster-by-<code>event_id</code> bootstrap
+    CIs (1,000 iterations each, method established in Prompt 50) are computed side by side for each
+    rung's advantage over <code>p1_unweighted</code> on the held-out test set.</li>
+</ol>
+<p>This ladder builds on <code>p1_unweighted</code>'s held-out PR-AUC 0.1736, ROC-AUC 0.7498,
+  ECE 0.0051 as the baseline every rung is compared against.</p>
+<p><strong>A structural note carried over from Rung 0</strong>: every metric below still treats
+  each row as an independent trial, even though rows sharing an <code>event_id</code> are not
+  independent (Prompt 50's cluster bootstrap quantified this at roughly a 2-3x understatement of
+  true uncertainty for Rung 0's own p1-vs-p2 comparison). The cluster-bootstrap gate at each rung
+  below is exactly the mechanism for checking whether that caveat changes the rung's headline
+  conclusion.</p>
+<p><strong>Computational-scale note</strong>, stated once rather than repeated at every rung: this
+  leg's train+val set (1,277,374 rows) is roughly 28x the active leg's (45,408 rows). Every rung
+  below trims its hyperparameter/C grid relative to the active leg's equivalent rung, and states
+  the exact trim and reasoning rather than silently shrinking it.</p>
+
+<h2>2. Rung 1 &mdash; quadratic terms for U-shaped features (<code>p1b_quadratic</code>)</h2>
+<p><strong>Which features, and why &mdash; verified against this leg's own EDA, not the active
+  leg's.</strong> The active leg's Rung 1 used 4 features that don't exist on the passive leg's
+  feature list at all. This leg's own
+  <code>reports/analysis/shot_target/passive_numerical_target_atlas.json</code> was read directly:
+  of the 38 locked features, 6 are classified strictly <code>"U-shaped"</code> (not the weaker
+  <code>"inverse-U"</code> bucket) &mdash; <code>top_option_1/2/3_threat_score</code> (this leg's 3
+  strongest-correlated features overall), <code>ball_x</code>, <code>defender_x</code>, and
+  <code>angle_to_attacking_goal</code>. 6 features, not forced to match the active leg's count of
+  4.</p>
+<p><code>p1b_quadratic</code> adds one <code>quad__&lt;feature&gt;</code> column per feature above
+  to the 38 base features. No <code>class_weight</code> (unweighted, like p1).</p>
+
+<h3>2.1 Results</h3>
+<table>
+<tr><th></th><th>CV PR-AUC</th><th>Held-out PR-AUC</th><th>CV ROC-AUC</th><th>Held-out ROC-AUC</th><th>CV ECE</th><th>Held-out ECE</th></tr>
+<tr><td><code>p1_unweighted</code> (Rung 0)</td><td>0.1928</td><td>0.1736</td><td>0.7487</td><td>0.7498</td><td>0.0024</td><td>0.0051</td></tr>
+<tr><td><code>p1b_quadratic</code></td><td><strong>0.1983</strong></td><td><strong>0.1805</strong></td><td>0.7621</td><td>0.7658</td><td>0.0018</td><td>0.0045</td></tr>
+</table>
+<p><strong>Gate 1 &mdash; significance:</strong> mean PR-AUC diff +0.0056, paired t=4.56,
+  <strong>p=0.0104</strong> (significant), Wilcoxon p=0.0625 (5-fold floor). p1b beats p1 in 5/5
+  folds.</p>
+<p><strong>Gate 2 &mdash; held-out confirmation:</strong> held-out PR-AUC improves from 0.1736 to
+  0.1805, same direction as CV. <strong>Headline divergence from the active leg, stated plainly:</strong>
+  the active leg's Rung 1 did <em>not</em> survive held-out test (its CV gain evaporated) &mdash;
+  this leg's Rung 1 <em>does</em> survive, with a real, consistent gain in both CV and held-out.
+  Checked, not assumed to repeat the active leg's result in either direction.</p>
+<p><strong>Gate 3 &mdash; cluster bootstrap:</strong> diff (p1b&minus;p1) naive CI [0.0051, 0.0085]
+  (width 0.0034), cluster CI [0.0044, 0.0097] (width 0.0053), <strong>width ratio 1.57x</strong>.
+  Both entirely positive &mdash; less inflation than Rung 0's own p1-vs-p2 comparison (2.15x).</p>
+<div class="verdict-box"><p><strong>Verdict: p1b_quadratic passes all 3 gates.</strong> Unlike the
+  active leg's Rung 1, this is a real, adoptable improvement over Rung 0 on this leg's own
+  evidence.</p></div>
+
+<h2>3. Rung 2 &mdash; systematic interactions (L1) (<code>p1c_systematic_interactions</code>)</h2>
+<p>Every pairwise product and squared term
+  (<code>PolynomialFeatures(degree=2, interaction_only=False, include_bias=False)</code>) generated
+  from this leg's own 28-feature numeric block (26 continuous + 2 discrete &mdash; <strong>not</strong>
+  the active leg's 17), combined unchanged with the categorical/boolean blocks: C(28,2)=378 pairwise
+  + 28 squared = 406 new columns, 462 total design-matrix columns. L1-penalized
+  <code>LogisticRegression(penalty="l1", solver="liblinear")</code>, C grid-searched on the 5
+  canonical CV folds only.</p>
+<div class="deviation-box"><p><strong>Grid deviation, stated up front:</strong> C &isin; {0.01, 1.0}
+  (2 values, not the active leg's 5), and liblinear's tol relaxed to 1e-2 (vs the active leg's
+  1e-3). A timed probe fit on a ~200K-row subsample (~1/6 of a real CV fold) took ~118s at this
+  tolerance; scaling to the real ~1M-row folds made a full 5-point grid impractical for this
+  session, so the grid was trimmed to the active leg's own range endpoints.</p></div>
+
+<h3>3.1 Results</h3>
+<table>
+<tr><th></th><th>C grid tested</th><th>Chosen C</th><th>CV PR-AUC</th><th>Held-out PR-AUC</th></tr>
+<tr><td><code>p1c_systematic_interactions</code></td><td>0.01, 1.0</td><td><strong>0.01</strong></td><td><strong>0.2160</strong></td><td><strong>0.2013</strong></td></tr>
+</table>
+<p>C=0.01 (strong regularization) won by a small margin over C=1.0 (OOF PR-AUC 0.2160 vs 0.2153).</p>
+<p><strong>Gate 1 &mdash; significance:</strong> vs p1, mean diff +0.0233, t=10.89,
+  <strong>p=0.0004</strong>; vs p1b, mean diff +0.0177, t=18.25, <strong>p=0.00005</strong>. Both
+  highly significant.</p>
+<p><strong>Gate 2 &mdash; held-out confirmation:</strong> held-out PR-AUC 0.2013, clearly ahead of
+  both p1 (0.1736) and p1b (0.1805), same direction as CV.</p>
+<p><strong>Gate 3 &mdash; cluster bootstrap:</strong> diff (p1c&minus;p1) naive CI [0.0249, 0.0306]
+  (width 0.0057), cluster CI [0.0226, 0.0335] (width 0.0110), <strong>width ratio 1.92x</strong>.
+  Both entirely positive.</p>
+<div class="verdict-box"><p><strong>Verdict: p1c_systematic_interactions passes all 3 gates</strong>,
+  by a clearly larger margin than Rung 1.</p></div>
+
+<h3>3.2 What survived L1, and does it match what was already flagged?</h3>
+<p>At C=0.01, <strong>286 of 406 poly/interaction terms survived</strong> with nonzero coefficient
+  &mdash; L1 pruned less than a third. Top 15 by <code>|coef|</code>:</p>
+<table>
+<tr><th>Rank</th><th>Term</th><th>Coefficient</th></tr>
+<tr><td>1</td><td><code>poly__defender_y__x__ball_y</code></td><td>-0.4326</td></tr>
+<tr><td>2</td><td><code>poly__defender_x__sq</code></td><td>+0.3576</td></tr>
+<tr><td>3</td><td><code>poly__defender_x__x__ball_x</code></td><td>+0.3287</td></tr>
+<tr><td>4</td><td><code>poly__ball_y__sq</code></td><td>-0.2602</td></tr>
+<tr><td>5</td><td><code>poly__ball_y__x__top_option_3_dy</code></td><td>-0.2364</td></tr>
+<tr><td>6</td><td><code>poly__ball_x__x__top_option_1_distance_from_ball</code></td><td>+0.1925</td></tr>
+<tr><td>7</td><td><code>poly__top_option_1_dx__x__top_option_3_dx</code></td><td>+0.1852</td></tr>
+<tr><td>8</td><td><code>poly__overload_score__x__defender_slot_index</code></td><td>+0.1799</td></tr>
+<tr><td>9</td><td><code>poly__ball_x__sq</code></td><td>-0.1616</td></tr>
+<tr><td>10</td><td><code>poly__ball_x__x__top_option_1_threat_score</code></td><td>-0.1518</td></tr>
+<tr><td>11</td><td><code>poly__defender_x__x__top_option_1_distance_from_ball</code></td><td>-0.1517</td></tr>
+<tr><td>12</td><td><code>poly__top_option_3_threat_score__sq</code></td><td>+0.1489</td></tr>
+<tr><td>13</td><td><code>poly__ball_y__x__top_option_2_dy</code></td><td>-0.1484</td></tr>
+<tr><td>14</td><td><code>poly__ball_x__x__top_option_3_dx</code></td><td>+0.1450</td></tr>
+<tr><td>15</td><td><code>poly__defender_x__x__defender_slot_index</code></td><td>-0.1440</td></tr>
+</table>
+<p><strong>Cross-check against <code>FEATURE_LOCK_CONFIRMATION.json</code>'s
+  <code>numeric_interaction</code> findings:</strong> that section tested 10 hand-picked pairs from
+  the lane-screening/marking-tightness/overload-score family (the same family Prompt 49's
+  <code>p3_weighted_interactions</code> used). <strong>None of those 10 pairs appear in the top 15
+  survivors above.</strong> The model ignores that curated family in favour of raw
+  geometric-coordinate interactions instead &mdash; reported plainly rather than forced into
+  agreement.</p>
+<p><strong>Cross-check against Rung 1's chosen features:</strong> 3 of Rung 1's 6 quadratic features
+  reappear directly as top-15 squared terms here &mdash; <code>defender_x</code> (rank 2),
+  <code>ball_y</code>/<code>ball_x</code> (ranks 4 and 9), and
+  <code>top_option_3_threat_score</code> (rank 12). Genuine independent confirmation that these
+  features carry real nonlinear signal.</p>
+
+<h2>4. Rung 3 &mdash; Random Forest diagnostic (<code>p1d_random_forest</code>)</h2>
+<p>Diagnostic probe (not a promotion candidate in its own right): raw 38 locked features, no manual
+  feature engineering, median-imputed but not standardized. The question: does automatic interaction
+  discovery find meaningfully more than Rung 2's hand-engineered L1 approach?</p>
+<div class="deviation-box"><p><strong>Grid deviation, stated up front:</strong> 3 hyperparameter
+  combinations, not the active leg's 12 (<code>n_estimators</code>&isin;{150},
+  <code>max_depth</code>&isin;{10,16}, <code>min_samples_leaf</code>&isin;{200,500}), and
+  <code>min_samples_leaf</code> set far higher than the active leg's 5-20. At this leg's ~28x row
+  count, the active leg's grid is not tractable in this session's timeframe and would badly overfit
+  individual leaves regardless &mdash; a real finding about how tree hyperparameters should scale
+  with row count, not a silent shortcut.</p></div>
+
+<h3>4.1 Results</h3>
+<table>
+<tr><th>Hyperparameters</th><th>CV PR-AUC</th></tr>
+<tr><td>n_est=150, depth=10, leaf=200</td><td>0.2094</td></tr>
+<tr><td><strong>n_est=150, depth=16, leaf=200</strong></td><td><strong>0.2182</strong></td></tr>
+<tr><td>n_est=150, depth=16, leaf=500</td><td>0.2138</td></tr>
+</table>
+<table>
+<tr><th></th><th>CV PR-AUC</th><th>Held-out PR-AUC</th><th>CV calib. slope</th><th>CV calib. intercept</th><th>CV ECE</th><th>Held-out ECE</th></tr>
+<tr><td><code>p1d_random_forest</code></td><td><strong>0.2182</strong></td><td><strong>0.2078</strong></td><td>1.139</td><td>+0.327</td><td>0.0049</td><td>0.0070</td></tr>
+</table>
+<p><strong>Gate 1 &mdash; significance vs p1c:</strong> mean diff +0.0025, t=1.26,
+  <strong>p=0.275 &mdash; NOT significant</strong>. The first rung-vs-rung comparison on this leg
+  that fails to clear conventional significance; p1d is numerically ahead of p1c on both CV (0.2182
+  vs 0.2160) and held-out (0.2078 vs 0.2013), but the CV gap (0.0025) is small relative to fold
+  noise (std 0.0044). Reported plainly: <strong>p1d does not clear the significance gate against
+  p1c</strong>, even though directionally ahead.</p>
+<p><strong>Gate 2 &mdash; held-out confirmation:</strong> 0.2078, ahead of p1c's 0.2013 &mdash;
+  consistent direction, but see Gate 1's caveat.</p>
+<p><strong>Gate 3 &mdash; cluster bootstrap</strong> (vs p1): diff naive CI [0.0315, 0.0373] (width
+  0.0058), cluster CI [0.0270, 0.0422] (width 0.0152), <strong>width ratio 2.62x</strong>. Both
+  entirely positive &mdash; p1d's advantage over Rung 0 is real, even though its advantage over the
+  prior rung (p1c) does not clear significance.</p>
+<p><strong>Calibration, reported separately from ranking</strong> (same two-part discipline as the
+  active leg): RF is noticeably worse-calibrated than the linear rungs &mdash; calibration slope
+  1.139 (vs p1c's 0.988) and intercept +0.327 (vs p1c's -0.030) in CV, though absolute ECE stays
+  low (0.0049 CV, 0.0070 held-out). The same qualitative pattern the active leg found for its RF
+  rung.</p>
+<p><strong>Secondary: <code>class_weight="balanced_subsample"</code>:</strong> OOF PR-AUC 0.2205 vs
+  unweighted 0.2182 &mdash; a small gain, unlike every prior rung's finding that weighting never
+  helps. But ECE explodes from 0.0049 to 0.2932, the same catastrophic calibration-destruction
+  mechanism. The small PR-AUC uptick does not change this leg's standing conclusion.</p>
+<div class="fail-box"><p><strong>Verdict: p1d_random_forest passes gates 2 and 3 (vs the Rung 0
+  baseline) but fails gate 1 (vs the immediately-prior rung, p1c).</strong> A real, reported
+  outcome rather than a forced pass or fail.</p></div>
+
+<h2>5. Rung 4 &mdash; gradient boosting (<code>p1e_gradient_boosting</code>, + calibrated)</h2>
+<p>LightGBM, already a project dependency. Same design matrix as p1d
+  (<code>RFDesignMatrixBuilder</code>, reused directly).</p>
+<div class="deviation-box"><p><strong>Grid deviation, stated up front:</strong> 4 hyperparameter
+  combinations (<code>learning_rate</code>&isin;{0.05,0.1} x <code>num_leaves</code>&isin;{31,63} x
+  <code>min_child_samples</code>={500}), not the active leg's 27, and the early-stopping cap is
+  1000 rounds not 2000. In practice this leg's early stopping converges fast regardless of the cap
+  (mean <code>best_iteration_</code> 116 rounds at the chosen params) &mdash; the round cap was not
+  the binding constraint the grid size was.</p></div>
+
+<h3>5.1 Raw variant results</h3>
+<table>
+<tr><th>Hyperparameters</th><th>CV PR-AUC</th></tr>
+<tr><td><strong>lr=0.05, leaves=31, min_child=500</strong></td><td><strong>0.2239</strong></td></tr>
+<tr><td>lr=0.05, leaves=63, min_child=500</td><td>0.2213</td></tr>
+<tr><td>lr=0.1, leaves=31, min_child=500</td><td>0.2199</td></tr>
+<tr><td>lr=0.1, leaves=63, min_child=500</td><td>0.2163</td></tr>
+</table>
+<table>
+<tr><th></th><th>CV PR-AUC</th><th>Held-out PR-AUC</th><th>CV ROC-AUC</th><th>Held-out ROC-AUC</th></tr>
+<tr><td><code>p1e_gradient_boosting</code> (raw)</td><td><strong>0.2239</strong></td><td><strong>0.2108</strong></td><td>0.7829</td><td>0.7850</td></tr>
+</table>
+<p>Best CV PR-AUC of any rung so far; held-out score (0.2108) edges out p1d's (0.2078).</p>
+<p><strong>Gate 1a &mdash; significance vs p1d</strong> (raw): mean diff +0.0061, t=1.65,
+  <strong>p=0.174 &mdash; NOT significant</strong>. The two tree-based rungs are statistically
+  indistinguishable from each other on CV.</p>
+<p><strong>Gate 1b &mdash; significance vs the best linear candidate</strong>
+  (<code>p1c_systematic_interactions</code>): mean diff +0.0086, t=3.10, <strong>p=0.036 &mdash;
+  significant</strong> by paired t-test, though Wilcoxon lands at p=0.125 (n=5 floor, direction
+  consistent but not independently significant). p1e is distinguishable from the best linear
+  candidate, though not from the other tree-based candidate (p1d).</p>
+<p><strong>Gate 3 &mdash; cluster bootstrap</strong> (vs p1): diff naive CI [0.0340, 0.0403] (width
+  0.0063), cluster CI [0.0297, 0.0457] (width 0.0161), <strong>width ratio 2.56x</strong>. Both
+  entirely positive.</p>
+
+<h3>5.2 Calibrated variant</h3>
+<p>Both sigmoid and isotonic <code>CalibratedClassifierCV</code> were fit (match-grouped internal
+  CV, train+val only); isotonic chosen by lower OOF ECE.</p>
+<table>
+<tr><th>Method</th><th>CV PR-AUC</th><th>CV ECE</th></tr>
+<tr><td>raw (uncalibrated)</td><td>0.2239</td><td>0.0028</td></tr>
+<tr><td>sigmoid</td><td>0.2287</td><td>0.0022</td></tr>
+<tr><td><strong>isotonic (chosen)</strong></td><td><strong>0.2270</strong></td><td><strong>0.0018</strong></td></tr>
+</table>
+<table>
+<tr><th></th><th>CV PR-AUC</th><th>Held-out PR-AUC</th><th>CV calib. slope</th><th>Held-out calib. intercept</th><th>CV ECE</th><th>Held-out ECE</th></tr>
+<tr><td><code>p1e_gradient_boosting_calibrated</code></td><td><strong>0.2270</strong></td><td><strong>0.2162</strong></td><td>1.049</td><td><strong>+0.006</strong></td><td>0.0018</td><td>0.0044</td></tr>
+</table>
+<p>Two findings worth stating precisely rather than rounding to a single verdict:</p>
+<ul>
+  <li><strong>Calibration improved ranking too, not just probabilities</strong>: isotonic's CV
+    PR-AUC (0.2270) is <em>higher</em> than raw's (0.2239) &mdash; unusual, since calibration
+    wrappers typically trade a little ranking quality for better probabilities. Held-out PR-AUC
+    (0.2162) is the best of any rung on this leg.</li>
+  <li><strong>Calibration intercept improves to essentially zero</strong> on held-out (+0.006, vs
+    raw's -0.040 and RF's +0.28), the tightest bias of any variant tried. But held-out ECE is
+    <em>marginally higher</em> for the calibrated variant than raw (0.0044 vs 0.0039) &mdash; both
+    small in absolute terms, reported as-is rather than selectively quoted.</li>
+</ul>
+
+<h3>5.3 Feature importance: four-way cross-method agreement</h3>
+<p>Gain importance (top 5): <code>defender_x</code>, <code>ball_x</code>,
+  <code>top_option_3_threat_score</code>, <code>phase_label_high_press_proxy</code>,
+  <code>ball_y</code>. Permutation importance, fold-held-out (top 5): <code>defender_x</code>,
+  <code>ball_y</code>, <code>on_ball_event_type_Shot</code>, <code>ball_x</code>,
+  <code>top_option_1_threat_score</code>.</p>
+<p>This closes a four-way independent cross-check across every rung of this ladder: this leg's own
+  EDA correlation atlas (Rung 1), L1 coefficient survival (Rung 2), Random Forest Gini +
+  permutation importance (Rung 3), and now LightGBM gain + permutation importance all agree that
+  <code>defender_x</code>, <code>ball_x</code>/<code>ball_y</code>, and the
+  <code>top_option_N_threat_score</code> features are this leg's dominant defensive signal. No
+  single method drove this conclusion in isolation.</p>
+
+<h3>5.4 Secondary: class_weight="balanced"</h3>
+<p>OOF PR-AUC 0.2158 vs unweighted 0.2239 &mdash; this time not even a small gain, a real loss
+  &mdash; for the same catastrophic calibration cost (ECE 0.0028 &rarr; 0.3029) seen at every rung
+  on this leg. The unweighted-wins finding holds without qualification through the whole ladder.</p>
+
+<div class="verdict-box"><p><strong>Verdict: p1e_gradient_boosting_calibrated passes gates 2 and 3
+  comfortably and is the best held-out PR-AUC and best held-out calibration-intercept result of any
+  rung tried on this leg</strong>, but gate 1 is mixed: not statistically distinguishable from p1d
+  (the other tree-based rung), but distinguishable from the best linear candidate. No promotion
+  audit is run here, per this prompt's explicit constraint.</p></div>
+
+<h3>5.5 Charts</h3>
+<p>4 PNGs per model artifact, generated by
+  <code>scripts/models/train_p1b_quadratic.py</code>, <code>train_p1c_systematic_interactions.py</code>,
+  <code>train_p1d_random_forest.py</code> and <code>train_p1e_gradient_boosting.py</code>, saved
+  under <code>outputs/models/classification/charts/&lt;variant&gt;/</code> (gitignored, same
+  convention as Rung 0 &mdash; regenerate by running the relevant script if the images below don't
+  resolve).</p>
+
+<div class="variant-block">
+  <p class="variant-title">p1b_quadratic</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1b_quadratic/calibration_curve.png" alt="p1b_quadratic calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1b_quadratic/precision_recall_curve.png" alt="p1b_quadratic precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1b_quadratic/roc_curve.png" alt="p1b_quadratic ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1b_quadratic/prediction_distribution.png" alt="p1b_quadratic prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">p1c_systematic_interactions</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1c_systematic_interactions/calibration_curve.png" alt="p1c_systematic_interactions calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1c_systematic_interactions/precision_recall_curve.png" alt="p1c_systematic_interactions precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1c_systematic_interactions/roc_curve.png" alt="p1c_systematic_interactions ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1c_systematic_interactions/prediction_distribution.png" alt="p1c_systematic_interactions prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">p1d_random_forest</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1d_random_forest/calibration_curve.png" alt="p1d_random_forest calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1d_random_forest/precision_recall_curve.png" alt="p1d_random_forest precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1d_random_forest/roc_curve.png" alt="p1d_random_forest ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1d_random_forest/prediction_distribution.png" alt="p1d_random_forest prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">p1e_gradient_boosting (raw)</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1e_gradient_boosting/calibration_curve.png" alt="p1e_gradient_boosting calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1e_gradient_boosting/precision_recall_curve.png" alt="p1e_gradient_boosting precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1e_gradient_boosting/roc_curve.png" alt="p1e_gradient_boosting ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1e_gradient_boosting/prediction_distribution.png" alt="p1e_gradient_boosting prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">p1e_gradient_boosting_calibrated</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1e_gradient_boosting_calibrated/calibration_curve.png" alt="p1e_gradient_boosting_calibrated calibration curve"><p class="cc-label">calibration_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1e_gradient_boosting_calibrated/precision_recall_curve.png" alt="p1e_gradient_boosting_calibrated precision-recall curve"><p class="cc-label">precision_recall_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1e_gradient_boosting_calibrated/roc_curve.png" alt="p1e_gradient_boosting_calibrated ROC curve"><p class="cc-label">roc_curve.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/classification/charts/p1e_gradient_boosting_calibrated/prediction_distribution.png" alt="p1e_gradient_boosting_calibrated prediction distribution"><p class="cc-label">prediction_distribution.png</p></div>
+  </div>
+</div>
+
+<h2>6. Ladder summary</h2>
+<table>
+<tr><th>Variant</th><th>CV PR-AUC</th><th>Held-out PR-AUC</th><th>Held-out ECE</th><th>Significance vs prior rung</th><th>Passes cluster-bootstrap gate vs p1?</th></tr>
+<tr><td><code>p1_unweighted</code> (Rung 0)</td><td>0.1928</td><td>0.1736</td><td>0.0051</td><td>--</td><td>--</td></tr>
+<tr><td><code>p1b_quadratic</code> (Rung 1)</td><td>0.1983</td><td>0.1805</td><td>0.0045</td><td>p=0.0104 (sig.)</td><td>Yes (1.57x)</td></tr>
+<tr><td><code>p1c_systematic_interactions</code> (Rung 2)</td><td>0.2160</td><td>0.2013</td><td>0.0043</td><td>p=0.0004 vs p1b (sig.)</td><td>Yes (1.92x)</td></tr>
+<tr><td><code>p1d_random_forest</code> (Rung 3)</td><td>0.2182</td><td>0.2078</td><td>0.0070</td><td>p=0.275 vs p1c (NOT sig.)</td><td>Yes (2.62x)</td></tr>
+<tr><td><code>p1e_gradient_boosting</code> (Rung 4, raw)</td><td>0.2239</td><td>0.2108</td><td>0.0039</td><td>p=0.174 vs p1d (NOT sig.)</td><td>Yes (2.56x)</td></tr>
+<tr><td><code>p1e_gradient_boosting_calibrated</code> (Rung 4)</td><td>0.2270</td><td><strong>0.2162</strong></td><td>0.0044</td><td>(calibration of raw p1e)</td><td>Yes (inherits raw's gate)</td></tr>
+</table>
+<p>Every rung's held-out PR-AUC is monotonically ahead of the one before it, and every rung's
+  cluster bootstrap confirms a real advantage over the Rung 0 baseline that survives the
+  row-correlation caveat. But the <em>rung-to-rung</em> significance gate stops being clearable
+  partway through the ladder: Rungs 1 and 2 each cleared it decisively against their immediate
+  predecessor; Rungs 3 and 4 (both tree-based) are directionally ahead but not statistically
+  distinguishable from the rung immediately before them. This is the expected shape of a ladder
+  converging on the same underlying signal from increasingly flexible model families, not a
+  contradiction &mdash; reported as exactly that shape, not smoothed into a single
+  "the ladder keeps winning" headline.</p>
+<p><strong>No promotion decision is made in this document.</strong> Per this prompt's explicit
+  constraint, that is a separate follow-up once the full ladder is in and reviewed against the
+  active leg's own promotion-audit precedent (Prompts 43/46).</p>
+
+</div>
+</div>
+<footer>
+  <p>Generated by <code>scripts/models/train_p1b_quadratic.py</code>,
+    <code>train_p1c_systematic_interactions.py</code>, <code>train_p1d_random_forest.py</code> and
+    <code>train_p1e_gradient_boosting.py</code>. Markdown source:
+    <code>reports/modeling/passive_binary/PASSIVE_BINARY_MODEL_LADDER.md</code>.</p>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+  <figure>
+    <img id="lightboxImg" src="" alt="">
+    <figcaption id="lightboxCaption"></figcaption>
+  </figure>
+</div>
+<script>
+(function () {
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightboxImg');
+  var lightboxCaption = document.getElementById('lightboxCaption');
+
+  function openLightbox(img) {
+    lightboxImg.src = img.currentSrc || img.src;
+    lightboxImg.alt = img.alt;
+    var variant = img.closest('.variant-block');
+    var title = variant ? variant.querySelector('.variant-title').textContent : '';
+    lightboxCaption.textContent = title ? (title + ' — ' + img.alt) : img.alt;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    lightboxImg.src = '';
+  }
+
+  document.querySelectorAll('.chart-card img').forEach(function (img) {
+    img.addEventListener('click', function () { openLightbox(img); });
+  });
+
+  lightbox.addEventListener('click', function (e) {
+    if (e.target === lightbox) closeLightbox();
+  });
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+})();
+</script>
+</body>
+</html>
