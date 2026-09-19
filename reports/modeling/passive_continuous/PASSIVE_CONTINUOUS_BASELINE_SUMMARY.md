@@ -339,3 +339,102 @@ active leg did is a decision for after this Rung 0 is reviewed, not assumed here
 
 This is the fourth and final leg of the project's model-ladder structure -- all four legs (active
 binary, passive binary, active continuous, passive continuous) now have a real, validated Rung 0.
+
+## 12. Rung 1 -- `d1b_quadratic` (prompt 61)
+
+**Structural note on this document, decided explicitly rather than defaulted into**: the
+active-continuous leg appended its own Rung 1 (`c1b_quadratic`, prompt 55) directly to its baseline
+summary rather than splitting into a separate ladder doc, and only split once a second rung existed
+(`ACTIVE_CONTINUOUS_MODEL_LADDER.md`, prompt 56). This leg is at the identical point -- 1 rung beyond
+Rung 0 -- so the same timing applies: Rung 1 is appended here, not split out yet. That split will
+happen once a second rung is built on this leg, consistent with both the active-continuous leg's own
+precedent and the binary legs' before that.
+
+### 12.1 Reconfirming shot-conditional nonlinearity from real data, systematically
+
+A rough chat check of the shot-conditional signal (positive rows only, n=95,048) found every one of
+the 26 locked continuous PASSIVE features correlates very weakly with `log(xg)` once conditioned on a
+shot occurring -- strongest `lane_screening_score_option_1` (pearson +0.057, spearman +0.065),
+followed by `lane_screening_score_option_2` (+0.053/+0.063) and `engagement_distance_to_carrier`
+(-0.049/-0.049); everything else under 0.04, `overload_score` near zero (+0.006). This is genuinely
+weaker than the active leg's own Rung 1 starting point (active's strongest shot-conditional
+correlation, `visible_attacker_count`, was |r|=0.16 -- over 2x stronger). The likely explanation:
+this leg's rows describe one individual defender's geometry relative to a single event, not an
+aggregated picture of the whole defensive shape the way the active leg's features are -- a lone
+defender's positioning plausibly has less individual leverage over eventual shot quality than the
+attacking side's own aggregate spatial features do.
+
+`scripts/analysis/check_shot_conditional_nonlinearity_passive.py` reproduces this properly across all
+38 locked PASSIVE features (not just the 26 continuous the chat check covered -- it missed both
+discrete features, `overload_score` and `defender_slot_index`), computing Pearson/Spearman for the 28
+numeric features, point-biserial for boolean features, and ANOVA eta-squared for categorical features.
+Full output: `outputs/models/validation/shot_conditional_nonlinearity_check_passive.json`.
+
+**The systematic check confirms the chat shortlist's top-3 by correlation magnitude, but finds none
+of them curved.** Among numeric features: `lane_screening_score_option_1` (|r|=0.0646),
+`lane_screening_score_option_2` (|r|=0.0630), and `lane_screening_score_option_3` (|r|=0.0478, a
+4th chat feature not in the original 3-feature shortlist but the same family) are the 3
+strongest-correlated numeric features overall -- reconfirmed, not a stale shortlist. **But the
+quintile-binning curvature diagnostic flags all three `monotonic_linear`**: a straight trend, no
+curvature a squared term would add beyond what the linear term already captures. Being
+top-correlated does not make them quadratic-term candidates here -- the diagnostic says plainly they
+are not.
+
+**Only one numeric feature clears both bars** (a correlation magnitude in the same range as the top 3,
+*and* a genuine non-linear curvature flag):
+
+| Feature | \|r\| | Curvature shape | Note |
+|---|---|---|---|
+| `engagement_distance_to_carrier` | 0.049 | monotonic, concentrated gap at the low-x end (>2x the other gaps) | rank #4 by correlation, the only feature combining real magnitude with real curvature |
+
+Quintile means: -2.764, -2.828, -2.874, -2.905, -2.919 (log xg), on ~19,010 rows per bin -- a genuine
+diminishing-returns/concave shape, not a binning artifact given the bin size. Every other numeric
+feature flagged with curvature by the same diagnostic has |r| well under 0.04 (many under 0.02) --
+indistinguishable from noise on a target this weak, and not used as candidates.
+
+`QUADRATIC_FEATURES_D1B = [engagement_distance_to_carrier]` -- **1 feature, not the active leg's 3**,
+and none of the active leg's own quadratic candidates (which mostly don't exist in the passive
+feature set at all). This is explicitly the minimal-single-candidate case the task brief allowed for
+when the underlying signal is this weak, not a watered-down copy of the active leg's approach.
+
+### 12.2 `d1b_quadratic` results
+
+Same 38 locked features, same `DesignMatrixBuilder` and `LinearRegression` as `d1` (including the
+`defender_functional_role_unclassified` exclusion fix from Prompt 60, reused exactly, not
+reintroduced), plus one `quad__engagement_distance_to_carrier` column.
+
+| Variant | Common log RMSE (CV) | Common log RMSE (held-out) | Naive MAE (held-out) | Corrected R² (held-out) |
+|---|---|---|---|---|
+| `d1_lognormal_glm` | 1.0345 | 1.0374 | 0.0718 | 0.0078 |
+| `d1b_quadratic` | 1.0346 | 1.0374 | 0.0718 | 0.0077 |
+
+**`d1b_quadratic` does not beat `d1` -- on either CV or held-out, on any metric, and the numbers are
+not merely close, they are essentially identical** (differences in the 4th-5th decimal place, smaller
+than the active leg's own already-small Rung 1 gap). The single surviving quadratic coefficient
+(`quad__engagement_distance_to_carrier`) is **+0.0038** -- negligible in magnitude.
+
+### 12.3 Significance test, d1b vs d1
+
+`outputs/models/validation/significance_d1_vs_d1b_quadratic.json`: mean diff (d1b - d1) common-scale
+log RMSE = **+0.0000** (indistinguishable), paired t-test **p=0.5013**, Wilcoxon p=0.625. **Does not
+clear significance in either direction, and by a wide margin** -- this is an even more emphatic null
+result than the active leg's own Rung 1 (p=0.2073 there; p=0.50 here). Per-fold unique-event counts
+(minimum 1,512, same as Rung 0) confirm this is not a thin-sample artifact -- the effective sample
+size is large enough that a real effect this size would very likely have shown up.
+
+### 12.4 This is a real finding about this leg, not a modelling failure
+
+Stated plainly: **`d1b_quadratic` shows no real improvement over `d1`, and this connects directly to
+section 12.1's already-documented weak-correlation finding, not a coincidence.** This leg's
+shot-conditional correlations were already markedly weaker than the active leg's own Rung 1 starting
+point before any quadratic term was tried (strongest |r|=0.065 here vs |r|=0.16 there) -- one weak
+feature's squared term, chosen precisely because it was the *only* feature showing genuine curvature
+at all, simply doesn't have enough underlying signal to move a fair, common-scale metric measurably.
+This is not a surprise; it is the expected continuation of a pattern already visible in item 1's own
+numbers before the model was ever fit.
+
+**`d1_lognormal_glm` remains this leg's best Rung-0/Rung-1 candidate**; `d1b_quadratic` is not
+promoted or preferred over it. Whether later rungs (interaction terms, tree-based models) can extract
+more signal than a linear model can from this weak a feature set -- a real open question given how
+thoroughly this leg's own linear/quadratic signal has now been exhausted -- is left for those rungs
+to answer on their own evidence, not assumed from this rung's result.

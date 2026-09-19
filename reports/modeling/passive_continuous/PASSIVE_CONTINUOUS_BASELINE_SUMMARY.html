@@ -438,6 +438,15 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
     <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1_lognormal_glm/feature_coefficients.png" alt="d1_lognormal_glm feature coefficients"><p class="cc-label">feature_coefficients.png</p></div>
   </div>
 </div>
+<div class="variant-block">
+  <p class="variant-title">d1b_quadratic (Rung 1, section 12)</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1b_quadratic/predicted_vs_observed_log.png" alt="d1b_quadratic predicted vs observed (log scale)"><p class="cc-label">predicted_vs_observed_log.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1b_quadratic/residual_distribution.png" alt="d1b_quadratic residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1b_quadratic/calibration_bins.png" alt="d1b_quadratic calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1b_quadratic/feature_coefficients.png" alt="d1b_quadratic feature coefficients (including quadratic term)"><p class="cc-label">feature_coefficients.png</p></div>
+  </div>
+</div>
 
 <h2>11. Rung-0 result</h2>
 <div class="verdict-box"><p><strong><code>d1_lognormal_glm</code> clears Rung 0</strong> against the
@@ -453,10 +462,107 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   (active binary, passive binary, active continuous, passive continuous) now have a real, validated
   Rung 0.</p>
 
+<h2>12. Rung 1 &mdash; <code>d1b_quadratic</code> (prompt 61)</h2>
+<p><strong>Structural note on this document, decided explicitly rather than defaulted into</strong>:
+  the active-continuous leg appended its own Rung 1 (<code>c1b_quadratic</code>, prompt 55) directly
+  to its baseline summary rather than splitting into a separate ladder doc, and only split once a
+  second rung existed (<code>ACTIVE_CONTINUOUS_MODEL_LADDER.html</code>, prompt 56). This leg is at
+  the identical point &mdash; 1 rung beyond Rung 0 &mdash; so the same timing applies: Rung 1 is
+  appended here, not split out yet. That split will happen once a second rung is built on this leg,
+  consistent with both the active-continuous leg's own precedent and the binary legs' before that.</p>
+
+<h3>12.1 Reconfirming shot-conditional nonlinearity from real data, systematically</h3>
+<p>A rough chat check of the shot-conditional signal (positive rows only, n=95,048) found every one
+  of the 26 locked continuous PASSIVE features correlates very weakly with <code>log(xg)</code> once
+  conditioned on a shot occurring &mdash; strongest <code>lane_screening_score_option_1</code>
+  (pearson +0.057, spearman +0.065), followed by <code>lane_screening_score_option_2</code>
+  (+0.053/+0.063) and <code>engagement_distance_to_carrier</code> (-0.049/-0.049); everything else
+  under 0.04, <code>overload_score</code> near zero (+0.006). This is genuinely weaker than the
+  active leg's own Rung 1 starting point (active's strongest shot-conditional correlation,
+  <code>visible_attacker_count</code>, was |r|=0.16 &mdash; over 2x stronger). The likely
+  explanation: this leg's rows describe one individual defender's geometry relative to a single
+  event, not an aggregated picture of the whole defensive shape the way the active leg's features
+  are &mdash; a lone defender's positioning plausibly has less individual leverage over eventual shot
+  quality than the attacking side's own aggregate spatial features do.</p>
+<p><code>scripts/analysis/check_shot_conditional_nonlinearity_passive.py</code> reproduces this
+  properly across all 38 locked PASSIVE features (not just the 26 continuous the chat check covered
+  &mdash; it missed both discrete features, <code>overload_score</code> and
+  <code>defender_slot_index</code>), computing Pearson/Spearman for the 28 numeric features,
+  point-biserial for boolean features, and ANOVA eta-squared for categorical features. Full output:
+  <code>outputs/models/validation/shot_conditional_nonlinearity_check_passive.json</code>.</p>
+<p><strong>The systematic check confirms the chat shortlist's top-3 by correlation magnitude, but
+  finds none of them curved.</strong> Among numeric features: <code>lane_screening_score_option_1</code>
+  (|r|=0.0646), <code>lane_screening_score_option_2</code> (|r|=0.0630), and
+  <code>lane_screening_score_option_3</code> (|r|=0.0478, a 4th chat feature not in the original
+  3-feature shortlist but the same family) are the 3 strongest-correlated numeric features overall
+  &mdash; reconfirmed, not a stale shortlist. <strong>But the quintile-binning curvature diagnostic
+  flags all three <code>monotonic_linear</code></strong>: a straight trend, no curvature a squared
+  term would add beyond what the linear term already captures. Being top-correlated does not make
+  them quadratic-term candidates here &mdash; the diagnostic says plainly they are not.</p>
+<p><strong>Only one numeric feature clears both bars</strong> (a correlation magnitude in the same
+  range as the top 3, <em>and</em> a genuine non-linear curvature flag):</p>
+<table>
+<tr><th>Feature</th><th>|r|</th><th>Curvature shape</th><th>Note</th></tr>
+<tr><td><code>engagement_distance_to_carrier</code></td><td>0.049</td><td>monotonic, concentrated gap at the low-x end (&gt;2x the other gaps)</td><td>rank #4 by correlation, the only feature combining real magnitude with real curvature</td></tr>
+</table>
+<p>Quintile means: -2.764, -2.828, -2.874, -2.905, -2.919 (log xg), on ~19,010 rows per bin &mdash; a
+  genuine diminishing-returns/concave shape, not a binning artifact given the bin size. Every other
+  numeric feature flagged with curvature by the same diagnostic has |r| well under 0.04 (many under
+  0.02) &mdash; indistinguishable from noise on a target this weak, and not used as candidates.</p>
+<p><code>QUADRATIC_FEATURES_D1B = [engagement_distance_to_carrier]</code> &mdash; <strong>1 feature,
+  not the active leg's 3</strong>, and none of the active leg's own quadratic candidates (which
+  mostly don't exist in the passive feature set at all). This is explicitly the
+  minimal-single-candidate case the task brief allowed for when the underlying signal is this weak,
+  not a watered-down copy of the active leg's approach.</p>
+
+<h3>12.2 d1b_quadratic results</h3>
+<p>Same 38 locked features, same <code>DesignMatrixBuilder</code> and <code>LinearRegression</code>
+  as <code>d1</code> (including the <code>defender_functional_role_unclassified</code> exclusion fix
+  from Prompt 60, reused exactly, not reintroduced), plus one
+  <code>quad__engagement_distance_to_carrier</code> column.</p>
+<table>
+<tr><th>Variant</th><th>Common log RMSE (CV)</th><th>Common log RMSE (held-out)</th><th>Naive MAE (held-out)</th><th>Corrected R&sup2; (held-out)</th></tr>
+<tr><td><code>d1_lognormal_glm</code></td><td>1.0345</td><td>1.0374</td><td>0.0718</td><td>0.0078</td></tr>
+<tr><td><code>d1b_quadratic</code></td><td>1.0346</td><td>1.0374</td><td>0.0718</td><td>0.0077</td></tr>
+</table>
+<p><strong><code>d1b_quadratic</code> does not beat <code>d1</code> &mdash; on either CV or
+  held-out, on any metric, and the numbers are not merely close, they are essentially
+  identical</strong> (differences in the 4th-5th decimal place, smaller than the active leg's own
+  already-small Rung 1 gap). The single surviving quadratic coefficient
+  (<code>quad__engagement_distance_to_carrier</code>) is <strong>+0.0038</strong> &mdash; negligible
+  in magnitude.</p>
+
+<h3>12.3 Significance test, d1b vs d1</h3>
+<p><code>outputs/models/validation/significance_d1_vs_d1b_quadratic.json</code>: mean diff (d1b
+  &minus; d1) common-scale log RMSE = <strong>+0.0000</strong> (indistinguishable), paired t-test
+  <strong>p=0.5013</strong>, Wilcoxon p=0.625. <strong>Does not clear significance in either
+  direction, and by a wide margin</strong> &mdash; this is an even more emphatic null result than the
+  active leg's own Rung 1 (p=0.2073 there; p=0.50 here). Per-fold unique-event counts (minimum 1,512,
+  same as Rung 0) confirm this is not a thin-sample artifact &mdash; the effective sample size is
+  large enough that a real effect this size would very likely have shown up.</p>
+
+<h3>12.4 This is a real finding about this leg, not a modelling failure</h3>
+<div class="fail-box"><p>Stated plainly: <strong><code>d1b_quadratic</code> shows no real
+  improvement over <code>d1</code>, and this connects directly to section 12.1's already-documented
+  weak-correlation finding, not a coincidence.</strong> This leg's shot-conditional correlations were
+  already markedly weaker than the active leg's own Rung 1 starting point before any quadratic term
+  was tried (strongest |r|=0.065 here vs |r|=0.16 there) &mdash; one weak feature's squared term,
+  chosen precisely because it was the <em>only</em> feature showing genuine curvature at all, simply
+  doesn't have enough underlying signal to move a fair, common-scale metric measurably. This is not a
+  surprise; it is the expected continuation of a pattern already visible in item 1's own numbers
+  before the model was ever fit.</p></div>
+<p><strong><code>d1_lognormal_glm</code> remains this leg's best Rung-0/Rung-1
+  candidate</strong>; <code>d1b_quadratic</code> is not promoted or preferred over it. Whether later
+  rungs (interaction terms, tree-based models) can extract more signal than a linear model can from
+  this weak a feature set &mdash; a real open question given how thoroughly this leg's own
+  linear/quadratic signal has now been exhausted &mdash; is left for those rungs to answer on their
+  own evidence, not assumed from this rung's result.</p>
+
 </div>
 </div>
 <footer>
-  <p>Generated by <code>scripts/models/train_passive_continuous_baseline.py</code>. Markdown source:
+  <p>Generated by <code>scripts/models/train_passive_continuous_baseline.py</code> and
+    <code>scripts/models/train_d1b_quadratic.py</code>. Markdown source:
     <code>reports/modeling/passive_continuous/PASSIVE_CONTINUOUS_BASELINE_SUMMARY.md</code>.</p>
 </footer>
 

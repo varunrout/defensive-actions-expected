@@ -238,9 +238,18 @@ class DesignMatrixBuilder:
     than their own thin dummy column or a football-indefensible fold-in.
     """
 
-    def __init__(self, add_interactions: bool = False, add_quadratic: bool = False):
+    def __init__(self, add_interactions: bool = False, add_quadratic: bool = False, quadratic_features: list[str] | None = None):
         self.add_interactions = add_interactions
         self.add_quadratic = add_quadratic
+        # Defaults to the module-level QUADRATIC_FEATURES (p1b_quadratic's own
+        # unconditional-target U-shaped set) when not given -- existing p0-p3
+        # behavior is unchanged. A caller can pass its own list (e.g. the
+        # passive-continuous leg's Rung 1, prompt 61, whose shot-conditional
+        # curvature candidate is a different feature entirely) without
+        # touching this shared class's default for the binary leg. Same
+        # override mechanism the active leg's own DesignMatrixBuilder gained
+        # in prompt 55 for the identical reason.
+        self.quadratic_features = quadratic_features if quadratic_features is not None else QUADRATIC_FEATURES
         self.num_imputer = SimpleImputer(strategy="median")
         self.num_scaler = StandardScaler()
 
@@ -297,7 +306,7 @@ class DesignMatrixBuilder:
         if self.add_quadratic:
             quad_block_cols = []
             quad_names = []
-            for feat in QUADRATIC_FEATURES:
+            for feat in self.quadratic_features:
                 std_col = num_block[:, num_names.index(feat)]
                 quad_block_cols.append(std_col ** 2)
                 quad_names.append(f"quad__{feat}")
