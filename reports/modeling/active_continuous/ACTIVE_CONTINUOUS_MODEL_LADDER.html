@@ -99,6 +99,7 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
       <div class="stat"><b>Rung 1</b><span>null result &mdash; c1b_quadratic</span></div>
       <div class="stat"><b>Rung 2 (c1c)</b><span>skipped, evidence-based</span></div>
       <div class="stat"><b>Rung 2 (c1d)</b><span>clears gate &mdash; c1d_random_forest</span></div>
+      <div class="stat"><b>Rung 3</b><span>doesn't beat RF &mdash; c1e_gradient_boosting</span></div>
     </div>
   </div>
 </div>
@@ -417,11 +418,154 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   </div>
 </div>
 
+<h2>5. Rung 3 &mdash; <code>c1e_gradient_boosting</code> (prompt 57)</h2>
+<p><code>c1d_random_forest</code> (Rung 2) was this leg's first real win, and it surfaced genuine
+  nonlinear signal (<code>distance_to_attacking_box</code>, correlation rank #21, importance rank #2)
+  that neither linear rung had found. That result is the reason to test gradient boosting directly,
+  mirroring the active-binary leg's own Rung 4 (<code>v1e_gradient_boosting</code>, Prompt 45)
+  &mdash; a different tree-ensemble method worth checking once one tree method already found real
+  structure, not assumed to help just because RF did. <code>c1c_systematic_interactions</code>
+  remains skipped (section 3); this rung does not revisit that decision.</p>
+
+<h3>5.1 Library and grid, trimmed for this leg's small sample</h3>
+<p><strong>LightGBM</strong>, matching the active-binary leg's own <code>v1e_gradient_boosting</code>
+  choice (confirmed available in this environment, version 4.6.0) &mdash; kept consistent rather than
+  introducing XGBoost as a second boosting library without a specific reason to.</p>
+<p>The active-binary leg's own Rung 4 grid (<code>LEARNING_RATE=[0.01,0.05,0.1]</code>,
+  <code>NUM_LEAVES=[15,31,63]</code>, <code>MIN_CHILD_SAMPLES=[10,30,100]</code>) was sized for
+  ~36,000 rows per training fold. This leg trains on ~2,880 rows per fold &mdash;
+  <code>num_leaves=63</code> or <code>min_child_samples=10</code> would badly overfit a tree that
+  shallow a dataset, the same reasoning Rung 2 applied to the RF grid. Grid used here:
+  <code>LEARNING_RATE_GRID=[0.01, 0.05, 0.1]</code> (unchanged &mdash; doesn't scale with row count
+  the way leaf-size parameters do), <code>NUM_LEAVES_GRID=[7, 15, 31]</code> (trimmed down from
+  <code>[15,31,63]</code>), <code>MIN_CHILD_SAMPLES_GRID=[20, 50, 100]</code> (raised from
+  <code>[10,30,100]</code>) &mdash; 27 combinations, each trained with early stopping (max 2,000
+  trees, 50-round patience) on a match-grouped carve-out of the training fold, mirroring
+  <code>train_v1e_gradient_boosting.py</code>'s own fitting procedure.</p>
+<p><strong>CV-internal overfitting is present across the whole grid, more so than Rung 2's RF
+  grid.</strong> Every one of the 27 configurations shows a meaningful train-vs-OOF R&sup2; gap
+  (range 0.13-0.27) &mdash; gradient boosting's sequential, error-correcting structure fits
+  training-fold noise more readily than RF's independent-tree averaging did, on a sample this small.
+  The chosen config (<code>learning_rate=0.1, num_leaves=15, min_child_samples=50</code>, mean
+  early-stopped at 18 trees) has gap 0.16, in the middle of the grid's range, not the smallest --
+  but it wins cleanly on OOF common-scale log RMSE (0.9851, best of all 27), the selection rule this
+  leg uses throughout. Grid extremes that looked most promising on paper did not help:
+  <code>num_leaves=31</code> configs cluster among the <em>worst</em> OOF scores (gaps 0.20-0.27)
+  despite fitting the training folds best of anyone (train R&sup2; up to 0.31) &mdash; confirming
+  that letting the trees widen doesn't buy real signal here, it buys memorization. Full grid
+  (<code>outputs/models/validation/significance_c1e_vs_c1_c1d.json</code>'s
+  <code>hyperparameter_grid_search</code> field) is reported in full, not cherry-picked.</p>
+
+<h3>5.2 <code>c1e_gradient_boosting</code> vs <code>c1_lognormal_glm</code> and <code>c1d_random_forest</code> &mdash; the RF bar matters more</h3>
+<p><strong>Beats the linear baseline, same as Rung 2 did:</strong></p>
+<table>
+<tr><th>Variant</th><th>Common log RMSE (CV)</th><th>Common log RMSE (held-out)</th></tr>
+<tr><td><code>c1_lognormal_glm</code></td><td>1.0014</td><td>0.9951</td></tr>
+<tr><td><code>c1e_gradient_boosting</code></td><td>0.9851</td><td>0.9672</td></tr>
+</table>
+<p>vs <code>c1_lognormal_glm</code>: mean diff -0.0156 (c1e better), paired t-test
+  <strong>p=0.0402</strong>, Wilcoxon p=0.0625 &mdash; clears significance on the fair common-scale
+  metric, similar in size to Rung 2's own edge over <code>c1</code>.</p>
+<p><strong>Does not beat <code>c1d_random_forest</code> &mdash; the bar that actually matters for
+  this rung:</strong></p>
+<table>
+<tr><th>Variant</th><th>Common log RMSE (CV)</th><th>Common log RMSE (held-out)</th></tr>
+<tr><td><code>c1d_random_forest</code></td><td>0.9801</td><td>0.9553</td></tr>
+<tr><td><code>c1e_gradient_boosting</code></td><td>0.9851</td><td>0.9672</td></tr>
+</table>
+<p>vs <code>c1d_random_forest</code>: mean diff <strong>+0.0055</strong> (c1e worse), paired t-test
+  <strong>p=0.3098</strong>, Wilcoxon <strong>p=0.4375</strong> &mdash; not close to significant, and
+  the direction favors RF. Per-fold: <code>c1e</code> beats <code>c1d</code> on 2 of 5 folds (folds 1
+  and 3) and loses on 3 of 5 (folds 0, 2, 4) &mdash; a genuinely mixed, noise-level result, not a
+  near-miss in one consistent direction.</p>
+<p><strong>Original-scale accuracy (held-out test) &mdash; <code>c1e</code> sits between
+  <code>c1</code> and <code>c1d</code> on every metric, never ahead of <code>c1d</code>:</strong></p>
+<table>
+<tr><th>Variant</th><th>Naive MAE</th><th>Naive R&sup2;</th><th>Naive Spearman</th><th>Corrected MAE</th><th>Corrected R&sup2;</th></tr>
+<tr><td><code>c1_lognormal_glm</code></td><td>0.0778</td><td>-0.0638</td><td>0.3078</td><td>0.0863</td><td>0.0371</td></tr>
+<tr><td><code>c1e_gradient_boosting</code></td><td>0.0759</td><td>-0.0453</td><td>0.3567</td><td>0.0817</td><td>0.0803</td></tr>
+<tr><td><code>c1d_random_forest</code></td><td>0.0745</td><td>-0.0152</td><td>0.3781</td><td>0.0786</td><td>0.0925</td></tr>
+</table>
+<p>Every single metric orders the same way: <code>c1</code> worst, <code>c1e</code> in the middle,
+  <code>c1d</code> best. Ranking (Spearman) and calibration (R&sup2;/MAE) agree with each other here,
+  and they agree with the significance test: <code>c1e_gradient_boosting</code> is a real
+  improvement over the linear baseline and a real (if narrow) step back from Random Forest.</p>
+
+<h3>5.3 Calibration: does the log-normal correction still hold for GBM's residuals?</h3>
+<p><strong>Yes, and by a wide margin &mdash; this rung did not need a separate calibrated
+  variant.</strong> Held-out calibration-bin mean absolute gap: naive back-transform
+  (<code>exp(pred)</code>) = <strong>0.0496</strong>, log-normal-corrected
+  (<code>exp(pred + &sigma;&sup2;/2)</code>) = <strong>0.0172</strong> &mdash; the correction cuts
+  the average calibration gap by roughly 3x for GBM, at least as strong an effect as it had for the
+  linear and RF rungs. GBM's own residual variance structure is not meaningfully different from what
+  the global log-normal correction already assumes &mdash; there was no evidence (from the
+  calibration-bin comparison, the actual test this item asked for) that a GBM-specific correction
+  mechanism was needed, so none was built. This also explains why
+  <code>c1e_gradient_boosting</code>'s corrected R&sup2; (0.0803) clears its naive R&sup2; (-0.0453)
+  by such a wide margin, same pattern as every other rung on this leg.</p>
+
+<h3>5.4 Feature importance: a three-way cross-check with RF and the linear-correlation ranking</h3>
+<p>Top 10 (of 15 reported) features by LightGBM gain importance and by fold-held-out permutation
+  importance (<code>outputs/models/regression/c1e_gradient_boosting.json</code>):</p>
+<table>
+<tr><th>Rank</th><th>Gain importance</th><th>Permutation importance (fold held-out)</th></tr>
+<tr><td>1</td><td><code>distance_to_attacking_box</code> (34.0)</td><td><code>attacking_goal_centrality</code> (0.0711)</td></tr>
+<tr><td>2</td><td><code>match_time_seconds</code> (28.0)</td><td><code>distance_to_attacking_box</code> (0.0337)</td></tr>
+<tr><td>3</td><td><code>attacking_goal_centrality</code> (21.0)</td><td><code>event_type_Clearance</code> (0.0241)</td></tr>
+<tr><td>4</td><td><code>visible_attacker_count</code> (20.0)</td><td><code>visible_attacker_count</code> (0.0223)</td></tr>
+<tr><td>5</td><td><code>defender_spread</code> (18.0)</td><td><code>angle_to_attacking_goal</code> (0.0065)</td></tr>
+<tr><td>6</td><td><code>visible_defender_count</code> (15.0)</td><td><code>nearest_attacker_distance</code> (0.0062)</td></tr>
+<tr><td>7</td><td><code>event_type_Clearance</code> (14.0)</td><td><code>visible_defender_count</code> (0.0057)</td></tr>
+<tr><td>8</td><td><code>defender_attacker_gap_x</code> (13.0)</td><td><code>defender_spread</code> (0.0049)</td></tr>
+<tr><td>9</td><td><code>angle_to_attacking_goal</code> (12.0)</td><td><code>play_pattern_From Counter</code> (0.0042)</td></tr>
+<tr><td>10</td><td><code>nearest_attacker_distance</code> (9.0)</td><td><code>defender_attacker_gap_x</code> (0.0042)</td></tr>
+</table>
+<p><strong>GBM agrees with RF on the headline finding, independently.</strong> By permutation
+  importance, GBM's top 2 are <code>attacking_goal_centrality</code> and
+  <code>distance_to_attacking_box</code> &mdash; the <em>exact same top 2, in the same order</em>, as
+  <code>c1d_random_forest</code>'s own permutation ranking (section 4.3). And by gain importance,
+  <code>distance_to_attacking_box</code> is GBM's single most important feature (34.0, ahead of
+  everything else), despite ranking only #21 of 32 by linear correlation (|r|=0.0205). Two
+  independent tree-ensemble methods, fit with entirely different algorithms (bagged/averaged trees vs
+  sequential/boosted trees), converge on the same feature being far more informative than its linear
+  correlation suggested &mdash; this is much stronger evidence than either method alone that Rung 1's
+  quadratic terms and Rung 2's skipped polynomial expansion (both linear-in-parameters) were
+  structurally the wrong tool for this feature, not that the feature itself lacks signal.</p>
+<p><code>event_type_Clearance</code> also appears in both models' permutation top 10 (GBM rank #3, RF
+  rank #3 too), a second point of independent agreement between the two tree methods that the
+  correlation ranking (which only covers the 17 numeric features, not one-hot categorical levels)
+  could not have surfaced at all.</p>
+
+<h3>5.5 Ladder-gate outcome: RF remains this leg's best candidate, and that is a legitimate result</h3>
+<div class="fail-box"><p><strong><code>c1e_gradient_boosting</code> does not clear a real edge over
+  <code>c1d_random_forest</code>.</strong> It clears significance against the linear baseline
+  (<code>c1</code>, p=0.0402) by roughly the same margin Rung 2 did, and the feature-importance
+  cross-check independently confirms Rung 2's headline finding (<code>distance_to_attacking_box</code>
+  mattering far more than linear correlation suggested). But against the bar that actually matters
+  for this rung &mdash; the current best, <code>c1d_random_forest</code> &mdash; the result is a
+  genuine, mixed-direction tie (2 of 5 folds better, 3 of 5 worse, p=0.31 paired t-test, p=0.44
+  Wilcoxon), and every original-scale accuracy metric on the held-out set orders <code>c1e</code>
+  strictly between <code>c1</code> and <code>c1d</code>, never ahead of it. <strong>This is reported
+  plainly as the headline finding of this rung, not reframed as a win because it still beats the
+  linear baseline</strong> &mdash; <code>c1d_random_forest</code> remains this leg's best regression
+  candidate after Rung 3. Per prompt 57's explicit constraint, no promotion audit is run in this
+  prompt regardless of this result.</p></div>
+<div class="variant-block">
+  <p class="variant-title">c1e_gradient_boosting <span style="font-weight:400;color:var(--text-muted);font-size:12px;">(rung 3)</span></p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1e_gradient_boosting/predicted_vs_observed_log.png" alt="c1e_gradient_boosting predicted vs observed (log scale)"><p class="cc-label">predicted_vs_observed_log.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1e_gradient_boosting/residual_distribution.png" alt="c1e_gradient_boosting residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1e_gradient_boosting/calibration_bins.png" alt="c1e_gradient_boosting calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/c1e_gradient_boosting/feature_coefficients.png" alt="c1e_gradient_boosting feature importance (gain, top 15)"><p class="cc-label">feature_coefficients.png (gain feature importance)</p></div>
+  </div>
+</div>
+
 </div>
 </div>
 <footer>
-  <p>Generated by <code>scripts/models/train_c1b_quadratic.py</code> and
-    <code>scripts/models/train_c1d_random_forest.py</code>. Markdown source:
+  <p>Generated by <code>scripts/models/train_c1b_quadratic.py</code>,
+    <code>scripts/models/train_c1d_random_forest.py</code> and
+    <code>scripts/models/train_c1e_gradient_boosting.py</code>. Markdown source:
     <code>reports/modeling/active_continuous/ACTIVE_CONTINUOUS_MODEL_LADDER.md</code>. Rung 0
     baseline:
     <a href="ACTIVE_CONTINUOUS_BASELINE_SUMMARY.html" target="viewer">ACTIVE_CONTINUOUS_BASELINE_SUMMARY.html</a>.</p>

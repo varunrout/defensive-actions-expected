@@ -298,3 +298,140 @@ brute-force polynomial expansion (section 3 above) simply weren't the right shap
 tree-based model was. Per prompt 56's explicit constraint, no promotion audit is run in this prompt
 regardless of this result -- this section reports the Rung-2 gate outcome only, the same discipline
 the active-binary leg's own Prompt 44 followed for its own Rung 3.
+
+## 5. Rung 3 -- `c1e_gradient_boosting` (prompt 57)
+
+`c1d_random_forest` (Rung 2) was this leg's first real win, and it surfaced genuine nonlinear signal
+(`distance_to_attacking_box`, correlation rank #21, importance rank #2) that neither linear rung had
+found. That result is the reason to test gradient boosting directly, mirroring the active-binary
+leg's own Rung 4 (`v1e_gradient_boosting`, Prompt 45) -- a different tree-ensemble method worth
+checking once one tree method already found real structure, not assumed to help just because RF did.
+`c1c_systematic_interactions` remains skipped (section 3); this rung does not revisit that decision.
+
+### 5.1 Library and grid, trimmed for this leg's small sample
+
+**LightGBM**, matching the active-binary leg's own `v1e_gradient_boosting` choice (confirmed
+available in this environment, version 4.6.0) -- kept consistent rather than introducing XGBoost as
+a second boosting library without a specific reason to.
+
+The active-binary leg's own Rung 4 grid (`LEARNING_RATE=[0.01,0.05,0.1]`, `NUM_LEAVES=[15,31,63]`,
+`MIN_CHILD_SAMPLES=[10,30,100]`) was sized for ~36,000 rows per training fold. This leg trains on
+~2,880 rows per fold -- `num_leaves=63` or `min_child_samples=10` would badly overfit a tree that
+shallow a dataset, the same reasoning Rung 2 applied to the RF grid. Grid used here:
+`LEARNING_RATE_GRID=[0.01, 0.05, 0.1]` (unchanged -- doesn't scale with row count the way leaf-size
+parameters do), `NUM_LEAVES_GRID=[7, 15, 31]` (trimmed down from `[15,31,63]`),
+`MIN_CHILD_SAMPLES_GRID=[20, 50, 100]` (raised from `[10,30,100]`) -- 27 combinations, each trained
+with early stopping (max 2,000 trees, 50-round patience) on a match-grouped carve-out of the training
+fold, mirroring `train_v1e_gradient_boosting.py`'s own fitting procedure.
+
+**CV-internal overfitting is present across the whole grid, more so than Rung 2's RF grid.** Every
+one of the 27 configurations shows a meaningful train-vs-OOF R² gap (range 0.13-0.27) -- gradient
+boosting's sequential, error-correcting structure fits training-fold noise more readily than RF's
+independent-tree averaging did, on a sample this small. The chosen config
+(`learning_rate=0.1, num_leaves=15, min_child_samples=50`, mean early-stopped at 18 trees) has gap
+0.16, in the middle of the grid's range, not the smallest -- but it wins cleanly on OOF common-scale
+log RMSE (0.9851, best of all 27), the selection rule this leg uses throughout. Grid extremes that
+looked most promising on paper did not help: `num_leaves=31` configs cluster among the *worst* OOF
+scores (gaps 0.20-0.27) despite fitting the training folds best of anyone (train R² up to 0.31) --
+confirming that letting the trees widen doesn't buy real signal here, it buys memorization. Full
+grid (`outputs/models/validation/significance_c1e_vs_c1_c1d.json`'s
+`hyperparameter_grid_search` field) is reported in full, not cherry-picked.
+
+### 5.2 `c1e_gradient_boosting` vs `c1_lognormal_glm` and `c1d_random_forest` -- the RF bar matters more
+
+**Beats the linear baseline, same as Rung 2 did:**
+
+| Variant | Common log RMSE (CV) | Common log RMSE (held-out) |
+|---|---|---|
+| `c1_lognormal_glm` | 1.0014 | 0.9951 |
+| `c1e_gradient_boosting` | 0.9851 | 0.9672 |
+
+vs `c1_lognormal_glm`: mean diff -0.0156 (c1e better), paired t-test **p=0.0402**, Wilcoxon p=0.0625
+-- clears significance on the fair common-scale metric, similar in size to Rung 2's own edge over
+`c1`.
+
+**Does not beat `c1d_random_forest` -- the bar that actually matters for this rung:**
+
+| Variant | Common log RMSE (CV) | Common log RMSE (held-out) |
+|---|---|---|
+| `c1d_random_forest` | 0.9801 | 0.9553 |
+| `c1e_gradient_boosting` | 0.9851 | 0.9672 |
+
+vs `c1d_random_forest`: mean diff **+0.0055** (c1e worse), paired t-test **p=0.3098**, Wilcoxon
+**p=0.4375** -- not close to significant, and the direction favors RF. Per-fold: `c1e` beats `c1d` on
+2 of 5 folds (folds 1 and 3) and loses on 3 of 5 (folds 0, 2, 4) -- a genuinely mixed, noise-level
+result, not a near-miss in one consistent direction.
+
+**Original-scale accuracy (held-out test) -- `c1e` sits between `c1` and `c1d` on every metric, never
+ahead of `c1d`:**
+
+| Variant | Naive MAE | Naive R² | Naive Spearman | Corrected MAE | Corrected R² |
+|---|---|---|---|---|---|
+| `c1_lognormal_glm` | 0.0778 | -0.0638 | 0.3078 | 0.0863 | 0.0371 |
+| `c1e_gradient_boosting` | 0.0759 | -0.0453 | 0.3567 | 0.0817 | 0.0803 |
+| `c1d_random_forest` | 0.0745 | -0.0152 | 0.3781 | 0.0786 | 0.0925 |
+
+Every single metric orders the same way: `c1` worst, `c1e` in the middle, `c1d` best. Ranking
+(Spearman) and calibration (R²/MAE) agree with each other here, and they agree with the significance
+test: `c1e_gradient_boosting` is a real improvement over the linear baseline and a real (if narrow)
+step back from Random Forest.
+
+### 5.3 Calibration: does the log-normal correction still hold for GBM's residuals?
+
+**Yes, and by a wide margin -- this rung did not need a separate calibrated variant.** Held-out
+calibration-bin mean absolute gap: naive back-transform (`exp(pred)`) = **0.0496**, log-normal-corrected
+(`exp(pred + σ²/2)`) = **0.0172** -- the correction cuts the average calibration gap by roughly 3x for
+GBM, at least as strong an effect as it had for the linear and RF rungs. GBM's own residual variance
+structure is not meaningfully different from what the global log-normal correction already assumes --
+there was no evidence (from the calibration-bin comparison, item 2's actual test) that a GBM-specific
+correction mechanism was needed, so none was built. This also explains why `c1e_gradient_boosting`'s
+corrected R² (0.0803) clears its naive R² (-0.0453) by such a wide margin, same pattern as every
+other rung on this leg.
+
+### 5.4 Feature importance: a three-way cross-check with RF and the linear-correlation ranking
+
+Top 10 (of 15 reported) features by LightGBM gain importance and by fold-held-out permutation
+importance (`outputs/models/regression/c1e_gradient_boosting.json`):
+
+| Rank | Gain importance | Permutation importance (fold held-out) |
+|---|---|---|
+| 1 | `distance_to_attacking_box` (34.0) | `attacking_goal_centrality` (0.0711) |
+| 2 | `match_time_seconds` (28.0) | `distance_to_attacking_box` (0.0337) |
+| 3 | `attacking_goal_centrality` (21.0) | `event_type_Clearance` (0.0241) |
+| 4 | `visible_attacker_count` (20.0) | `visible_attacker_count` (0.0223) |
+| 5 | `defender_spread` (18.0) | `angle_to_attacking_goal` (0.0065) |
+| 6 | `visible_defender_count` (15.0) | `nearest_attacker_distance` (0.0062) |
+| 7 | `event_type_Clearance` (14.0) | `visible_defender_count` (0.0057) |
+| 8 | `defender_attacker_gap_x` (13.0) | `defender_spread` (0.0049) |
+| 9 | `angle_to_attacking_goal` (12.0) | `play_pattern_From Counter` (0.0042) |
+| 10 | `nearest_attacker_distance` (9.0) | `defender_attacker_gap_x` (0.0042) |
+
+**GBM agrees with RF on the headline finding, independently.** By permutation importance, GBM's top
+2 are `attacking_goal_centrality` and `distance_to_attacking_box` -- the *exact same top 2, in the
+same order*, as `c1d_random_forest`'s own permutation ranking (section 4.3). And by gain importance,
+`distance_to_attacking_box` is GBM's single most important feature (34.0, ahead of everything else),
+despite ranking only #21 of 32 by linear correlation (|r|=0.0205). Two independent tree-ensemble
+methods, fit with entirely different algorithms (bagged/averaged trees vs sequential/boosted trees),
+converge on the same feature being far more informative than its linear correlation suggested -- this
+is much stronger evidence than either method alone that Rung 1's quadratic terms and Rung 2's
+skipped polynomial expansion (both linear-in-parameters) were structurally the wrong tool for this
+feature, not that the feature itself lacks signal.
+
+`event_type_Clearance` also appears in both models' permutation top 10 (GBM rank #3, RF rank #3
+too), a second point of independent agreement between the two tree methods that the correlation
+ranking (which only covers the 17 numeric features, not one-hot categorical levels) could not have
+surfaced at all.
+
+### 5.5 Ladder-gate outcome: RF remains this leg's best candidate, and that is a legitimate result
+
+**`c1e_gradient_boosting` does not clear a real edge over `c1d_random_forest`.** It clears
+significance against the linear baseline (`c1`, p=0.0402) by roughly the same margin Rung 2 did, and
+the feature-importance cross-check independently confirms Rung 2's headline finding
+(`distance_to_attacking_box` mattering far more than linear correlation suggested). But against the
+bar that actually matters for this rung -- the current best, `c1d_random_forest` -- the result is a
+genuine, mixed-direction tie (2 of 5 folds better, 3 of 5 worse, p=0.31 paired t-test, p=0.44
+Wilcoxon), and every original-scale accuracy metric on the held-out set orders `c1e` strictly between
+`c1` and `c1d`, never ahead of it. **This is reported plainly as the headline finding of this rung,
+not reframed as a win because it still beats the linear baseline** -- `c1d_random_forest` remains
+this leg's best regression candidate after Rung 3. Per prompt 57's explicit constraint, no promotion
+audit is run in this prompt regardless of this result.
