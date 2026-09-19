@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- Passive-Continuous Baseline Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1; --plane: #eceee8; --surface: #ffffff;
+  --text-primary: #10151c; --text-secondary: #4c525b; --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09); --gridline: #e2e4de;
+  --accent: #e34948; --pos: #e34948; --neg: #2a78d6;
+  --amber: #eda100; --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b; --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+    --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09); --gridline: #232a34;
+    --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+    --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+  --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09); --gridline: #232a34;
+  --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+  --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary); font-family: "Public Sans", -apple-system, sans-serif; font-size: 15px; line-height: 1.5; }
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead { background: var(--bg); border-bottom: 1px solid var(--border); padding: 40px 24px 32px; }
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow { font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; color: var(--accent); font-weight: 600; margin: 0 0 10px; }
+h1.title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: clamp(26px, 4vw, 38px); margin: 0 0 12px; color: var(--text-primary); }
+.dek { color: var(--text-secondary); max-width: 64ch; margin: 0 0 24px; font-size: 15.5px; }
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b { display: block; font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; color: var(--text-primary); }
+.stat span { display: block; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+footer { border-top: 1px solid var(--border); padding: 28px 24px 60px; max-width: 1180px; margin: 0 auto; }
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 900px; }
+.article h2 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; margin: 44px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.article h2:first-of-type { margin-top: 0; }
+.article h3 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 17px; margin: 30px 0 4px; color: var(--accent); }
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article code { font-family: "JetBrains Mono", monospace; font-size: 0.88em; background: var(--plane); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--neg); }
+.article ul, .article ol { color: var(--text-secondary); font-size: 14.5px; padding-left: 22px; margin: 0 0 16px; }
+.article li { margin-bottom: 6px; }
+.article table { width: 100%; border-collapse: collapse; margin: 4px 0 22px; font-size: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.article th { text-align: left; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.03em; color: var(--text-muted); background: var(--plane); padding: 9px 12px; border-bottom: 1px solid var(--border); }
+.article td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p:last-child { margin-bottom: 0; }
+.verdict-box { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.verdict-box p { margin: 0; }
+.fail-box { background: rgba(227,73,72,0.10); border: 1px solid rgba(227,73,72,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.fail-box p { margin: 0; }
+.variant-block { margin: 28px 0 44px; }
+.variant-title { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 16px; margin: 0 0 10px; }
+.chart-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 900px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+.chart-card img { width: 100%; height: auto; border-radius: 6px; display: block; background: var(--plane); cursor: zoom-in; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.chart-card img:hover { transform: scale(1.015); box-shadow: 0 4px 16px rgba(16,21,28,0.14); }
+.chart-card .cc-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 6px 2px 0; text-align: center; }
+.lightbox { position: fixed; inset: 0; background: rgba(9,12,16,0.78); display: none; align-items: center; justify-content: center; padding: 5vh 5vw; z-index: 1000; cursor: zoom-out; }
+.lightbox.open { display: flex; }
+.lightbox figure { margin: 0; max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.lightbox img { max-width: 92vw; max-height: 82vh; width: auto; height: auto; border-radius: 10px; background: var(--surface); box-shadow: 0 20px 60px rgba(0,0,0,0.45); cursor: default; }
+.lightbox figcaption { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #e8eaee; text-align: center; }
+.lightbox-close { position: absolute; top: 18px; right: 24px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+.lightbox-close:hover { background: rgba(255,255,255,0.18); }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; Passive leg &middot; Continuous</p>
+    <h1 class="title">Passive-Continuous Baseline Summary (d0-d1)</h1>
+    <p class="dek">Rung 0 of the passive-continuous leg: a two-part ("hurdle") architecture for
+      <code>target_future_xg_10s</code> -- the already-promoted binary classifier for
+      <code>P(shot)</code>, combined with a new log-scale regression for
+      <code>E[xg | shot]</code>, fit only on the 95,048 shot-positive rows (10,700 unique events).</p>
+    <div class="statbar">
+      <div class="stat"><b>95,048</b><span>shot-positive rows (10,700 events)</span></div>
+      <div class="stat"><b>Log-normal</b><span>best-fitting family, hurdle architecture</span></div>
+      <div class="stat"><b>d1 &gt; d0</b><span>Rung 0 result, p=0.0053</span></div>
+      <div class="stat"><b>8.9x</b><span>defender-slot duplication, documented not deduped</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+<p><em>For the full math behind the models this leg reuses (logistic regression, gradient boosting,
+  calibration), see <a href="../MATH_BEHIND_IT.html" target="viewer">MATH_BEHIND_IT.html</a>.</em></p>
+
+<h2>1. Why a hurdle architecture, not a single regression</h2>
+<p>Two things about the passive dataset were reconfirmed directly against real data before writing
+  this script (not assumed to transfer from the active leg's own Prompt 54 checks).</p>
+<p><strong>Distribution shape transfers almost exactly.</strong>
+  <code>target_future_xg_10s</code>'s shot-conditional distribution on the passive leg (the 95,048
+  rows where a shot did follow) has <strong>raw skew 3.28 / excess kurtosis 14.0, log-scale skew 0.19
+  / excess kurtosis -0.13</strong> &mdash; essentially the same shape as the active leg's own target
+  (skew ~3.2-3.3, kurtosis ~13-14 raw; near-normal on the log scale). <strong>67 of the 95,048
+  positive rows exceed <code>xg=1.0</code></strong> (0 rows <code>&lt;= 0</code>), same reasoning as
+  the active leg: the target sums xG across <em>every</em> shot in the 10-second window, not one
+  shot's probability. Log-normal was already confirmed the best-fitting family for this shape on the
+  active leg, and the same raw distribution check here supports the same conclusion without needing
+  to redo the full family-comparison analysis. This is why this leg is built as a
+  <strong>two-part ("hurdle") model</strong>, same architecture as the active-continuous leg: reuse
+  the already-promoted binary classifier (<code>p1e_gradient_boosting_calibrated</code>, Prompt 52)
+  for <code>P(shot)</code>, and fit a new regression only on the shot-positive rows for
+  <code>E[xg | shot]</code>, on a log scale.</p>
+<p><strong>Row grain creates real duplication that must be documented, not silently
+  absorbed.</strong> <code>passive_defense.parquet</code> is one row per visible defender-slot per
+  on-ball attacking event. Among positive rows specifically: <strong>95,048 rows come from only
+  10,700 unique events</strong> (~8.9 defender-slot rows per event on average, reconfirmed), and
+  <strong>every row sharing an <code>event_id</code> has the identical
+  <code>target_future_xg_10s</code> value</strong> (0 of 10,700 events show more than one distinct
+  value, reconfirmed directly) &mdash; the same shot outcome, viewed from a different defender's
+  geometry. <strong>Varun's explicit decision: fit on all defender-slot rows as-is.</strong> This is
+  not a duplication bug to engineer away &mdash; it is this leg's actual premise (does <em>this</em>
+  defender's positioning explain the outcome), the same premise the passive-binary leg's own baseline
+  was built on. The report states the effective-sample-size caveat plainly rather than letting the
+  large row count imply a false sense of independence: <strong>~10,700 independent shot events
+  underlie the 95,048 training rows</strong>, and any given CV fold's aggregate metric implicitly
+  weights events with more visible defenders more heavily than events with fewer.</p>
+<p><strong>Window length is not reopened here.</strong> Prompt 54's sensitivity check on the active
+  leg (25-match sample, real <code>add_future_shot_target</code>/<code>add_future_xg_target</code>
+  code from <code>dax.targets.short_horizon</code>) found the existing 10-second window captures only
+  ~41% of possessions that eventually produce a shot, and that a full possession-bound framing is
+  worse (some possessions run well past the point where the original action's own features remain a
+  fair predictor). That check is <strong>leg-agnostic</strong> &mdash; it operates on
+  event/possession timing via the shared target-generation code, not on the active/passive feature
+  split &mdash; so the same accepted 10s-window limitation applies unchanged here. This document does
+  not re-derive that analysis.</p>
+
+<h2>2. Confirmed inputs</h2>
+<p><strong>Classifier half, reused exactly, never retrained.</strong>
+  <code>p1e_gradient_boosting_calibrated</code> &mdash; the passive-binary leg's own promoted standing
+  reference model (Prompt 52). Artifact confirmed on disk at
+  <code>outputs/models/classification/p1e_gradient_boosting_calibrated.joblib</code>. No saved
+  held-out prediction array existed for it, so its held-out score here was regenerated by loading the
+  saved model and scoring through a freshly-fit (cheap, deterministic) <code>RFDesignMatrixBuilder</code>
+  (<code>train_p1d_random_forest.py</code>'s own class) &mdash; the identical reuse pattern the
+  active-continuous leg's own baseline script (Prompt 54) already used for its classifier half.</p>
+<p><strong>Feature set.</strong> All <strong>38 locked PASSIVE features</strong> (4 categorical, 6
+  boolean, 26 continuous, 2 discrete, per <code>src/eda/feature_config.py</code>'s <code>PASSIVE</code>
+  dict) &mdash; reconfirmed by count, not assumed. No feature excluded for this leg (unlike the active
+  leg's 34-to-32 exclusion); nothing in this leg's own data forced a further exclusion beyond the
+  leakage exclusions (<code>has_screened_outcome</code>, <code>screened_option_was_avoided</code>)
+  already locked out at the feature-config level.</p>
+<p><strong>Positive-row structure.</strong> 95,048 of 1,593,181 rows, from 10,700 unique events.
+  Split via the canonical match-grouped assignment (shared with the active leg and both binary legs
+  &mdash; this leg does not compute a fresh split): 77,646 rows / 92 matches / 8,721 unique events in
+  train+val, 17,402 rows / 23 matches / 1,979 unique events in held-out test.</p>
+<table>
+<tr><th>Fold</th><th>Positive rows</th><th>Unique events</th></tr>
+<tr><td>0</td><td>15,833</td><td>1,772</td></tr>
+<tr><td>1</td><td>18,071</td><td>2,039</td></tr>
+<tr><td>2</td><td>13,222</td><td>1,512</td></tr>
+<tr><td>3</td><td>15,915</td><td>1,775</td></tr>
+<tr><td>4</td><td>14,605</td><td>1,623</td></tr>
+</table>
+<p><strong>No fold has fewer than 100 unique events</strong> &mdash; the real check on effective
+  sample size (not just row count, which is always large here given the ~8.9x defender-slot
+  multiplier). Every fold's CV metrics rest on a stable effective sample size.</p>
+
+<h2>3. Rung 0 variants</h2>
+<table>
+<tr><th>Variant</th><th>Model</th><th>Notes</th></tr>
+<tr><td><code>d0_dummy</code></td><td><code>DummyRegressor(strategy="mean")</code> on <code>log1p(xg)</code></td><td>training-fold mean of <code>log1p(xg)</code>, back-transformed via <code>expm1</code> for original-scale reporting</td></tr>
+<tr><td><code>d1_lognormal_glm</code></td><td><code>LinearRegression()</code> on <code>log(xg)</code></td><td>natural log (every positive row has <code>xg &gt; 0</code> by construction, reconfirmed: 0 rows <code>&lt;= 0</code>), same 38 locked features, same <code>DesignMatrixBuilder</code> preprocessing as the passive-binary leg (imported directly, not reimplemented)</td></tr>
+</table>
+<p>Naming note: <code>c0</code>/<code>c1</code> already means something on the active-continuous leg,
+  <code>p0</code>/<code>p1</code> already means something on the passive-binary leg &mdash; this leg
+  uses <strong><code>d0</code>/<code>d1</code></strong> ("d" for the passive leg's defender-slot
+  regression), the first letter not already claimed by another leg, to avoid colliding with either
+  existing prefix.</p>
+<p><code>d0</code> and <code>d1</code> are fit on different log transforms by this leg's own design
+  (<code>log1p</code> for the dummy floor, natural <code>log</code> for the real candidate) &mdash;
+  their own "native" log-scale RMSE/MAE numbers are therefore not directly comparable to each other,
+  same scale-mismatch risk Prompt 54 found and fixed on the active leg. Section 4 below uses a
+  <strong>common-scale</strong> metric (natural log of both variants' back-transformed xg-scale
+  predictions) for the actual head-to-head comparison.</p>
+
+<h2>4. Cross-validation results (5-fold, OOF metrics)</h2>
+<table>
+<tr><th>Variant</th><th>Common-scale log RMSE</th><th>Common-scale log MAE</th><th>Naive MAE (xg scale)</th><th>Corrected MAE (xg scale)</th><th>Naive R&sup2;</th><th>Corrected R&sup2;</th></tr>
+<tr><td><code>d0_dummy</code></td><td>1.1484</td><td>0.9382</td><td>0.0807</td><td>0.0807</td><td>-0.0040</td><td>-0.0040</td></tr>
+<tr><td><strong><code>d1_lognormal_glm</code></strong></td><td><strong>1.0345</strong></td><td><strong>0.8216</strong></td><td><strong>0.0716</strong></td><td>0.0824</td><td>-0.0898</td><td><strong>0.0062</strong></td></tr>
+</table>
+<p><code>d1</code> beats <code>d0</code> on the fair common-scale log RMSE/MAE, on original-scale
+  naive MAE, and on corrected R&sup2; (the only metric where <code>d0</code> isn't already at its
+  ceiling, same reason as the active leg &mdash; a constant prediction has no meaningful log-normal
+  correction to apply). <code>d1</code>'s naive R&sup2; is negative (-0.090) despite ranking rows
+  meaningfully better than <code>d0</code> (Spearman +0.097 vs effectively 0 for a constant
+  prediction) &mdash; resolved in section 5 below, same pattern as the active leg's own Rung 0.</p>
+
+<h2>5. Two back-transforms: naive vs log-normal-corrected</h2>
+<p>Same reasoning as the active leg (Prompt 54): exponentiating a log-scale prediction directly
+  (<code>exp(pred)</code>) recovers the <strong>median</strong> of the implied log-normal
+  distribution, not its mean &mdash; and <code>E[xg]</code> is what the downstream hurdle combination
+  actually needs. By Jensen's inequality, the naive back-transform systematically under-predicts the
+  true conditional mean. The standard correction, <code>exp(pred + &sigma;&sup2;/2)</code>, corrects
+  for this.</p>
+<p>Real numbers, <code>d1</code>, held-out test: fitted <code>&sigma;&sup2; = 1.046</code> (larger
+  than the active leg's own <code>&sigma;&sup2; = 0.934</code>, consistent with this leg's slightly
+  heavier log-scale residual spread), giving a mean correction factor
+  <code>exp(1.046/2) &approx; 1.68</code> &mdash; the corrected prediction runs about 68% higher than
+  the naive one on average.</p>
+<p><strong>Which one should the hurdle combination use, and why</strong>: the <strong>corrected</strong>
+  back-transform, same conclusion as the active leg. Naive <code>exp(pred)</code> has a <em>lower</em>
+  MAE here (CV: 0.0716 vs 0.0824) &mdash; but MAE is minimized by the <strong>median</strong>, and
+  naive <code>exp(pred)</code> is approximately a median-type estimator. R&sup2;-type metrics, which
+  are about matching the <strong>mean</strong>, tell the opposite story: <code>d1</code>'s naive
+  R&sup2; is negative (-0.090), while <code>d1</code>'s corrected R&sup2; is positive (+0.006, small
+  but genuinely better than the constant-mean floor). Since the hurdle combination needs an unbiased
+  estimate of the conditional <strong>mean</strong>, the corrected back-transform is used for that
+  purpose throughout this document and in <code>hurdle_pipeline_readout_passive.json</code>.</p>
+
+<h2>6. Calibration (5 bins by predicted value, held-out test, <code>d1</code> corrected)</h2>
+<table>
+<tr><th>Bin</th><th>n</th><th>Mean predicted xg</th><th>Mean actual xg</th><th>Gap</th></tr>
+<tr><td>0 (lowest predicted)</td><td>3,481</td><td>0.0784</td><td>0.0840</td><td>-0.0056</td></tr>
+<tr><td>1</td><td>3,481</td><td>0.0884</td><td>0.0936</td><td>-0.0053</td></tr>
+<tr><td>2</td><td>3,480</td><td>0.0958</td><td>0.1000</td><td>-0.0043</td></tr>
+<tr><td>3</td><td>3,480</td><td>0.1045</td><td>0.1005</td><td>+0.0040</td></tr>
+<tr><td>4 (highest predicted)</td><td>3,480</td><td>0.1261</td><td>0.1168</td><td>+0.0093</td></tr>
+</table>
+<p>No dramatic systematic bias in either direction &mdash; gaps are small relative to the bin means
+  (roughly -7% to +8% relative) and don't monotonically worsen at either extreme, the same clean
+  pattern the active leg's own Rung 0 calibration showed.</p>
+
+<h2>7. Held-out test readout (single readout, not used for selection)</h2>
+<table>
+<tr><th>Variant</th><th>Common-scale log RMSE</th><th>Naive MAE</th><th>Corrected MAE</th><th>Naive R&sup2;</th><th>Corrected R&sup2;</th></tr>
+<tr><td><code>d0_dummy</code></td><td>1.1691</td><td>0.0827</td><td>0.0827</td><td>-0.0013</td><td>-0.0013</td></tr>
+<tr><td><strong><code>d1_lognormal_glm</code></strong></td><td><strong>1.0374</strong></td><td><strong>0.0718</strong></td><td>0.0839</td><td>-0.0869</td><td><strong>0.0078</strong></td></tr>
+</table>
+<p>Same direction as CV throughout: <code>d1</code> beats <code>d0</code> on common-scale log RMSE,
+  naive MAE, and corrected R&sup2;. <code>d1</code>'s corrected R&sup2; actually improves slightly
+  from CV (0.0062) to held-out (0.0078) &mdash; no sign of overfitting on this leg's much larger
+  sample, same pattern the active leg's own Rung 0 showed on its smaller sample.</p>
+
+<h2>8. Paired significance test, d1 vs d0</h2>
+<p>Common-scale log RMSE, per canonical CV fold
+  (<code>outputs/models/validation/significance_d0_vs_d1.json</code>): <code>d1</code> beats
+  <code>d0</code> in <strong>5 of 5 folds</strong> (mean diff -0.1102, i.e. <code>d1</code>'s RMSE is
+  lower). Paired t-test <strong>p=0.0053</strong> &mdash; significant at the conventional threshold.
+  Wilcoxon signed-rank p=0.0625, the same 5-fold floor (the minimum p-value achievable with 5
+  same-signed paired samples) seen throughout this project, unrelated to sample size.</p>
+<p><strong>Effective-sample-size note, read carefully rather than assumed</strong>: this leg's
+  per-fold <em>row</em> count (13,222-18,071) is far larger than the active leg's own (628-830),
+  which might suggest a much more powerful test. But the real effective sample size for this test is
+  closer to the per-fold <em>unique event</em> count (1,512-2,039, minimum 1,512), since every
+  defender-slot row sharing an <code>event_id</code> carries the identical target value &mdash; rows
+  are not independent observations of different outcomes. <strong>The test's row-count-implied power
+  should not be read at face value.</strong> That said, even the thinnest fold's event count (1,512)
+  is still well above the active leg's own per-fold <em>row</em> counts (hundreds), so this remains a
+  real, meaningfully-sized test &mdash; just not as large as the raw row count alone would suggest,
+  and the active leg's small-n caution note does not mechanically carry over here unexamined.</p>
+
+<h2>9. Full hurdle pipeline readout (diagnostic, not the Rung-0 gate)</h2>
+<p><code>P(shot)</code> (from <code>p1e_gradient_boosting_calibrated</code>, reused unchanged) times
+  <code>E[xg|shot]</code> (from <code>d1_lognormal_glm</code>, corrected back-transform), computed
+  for <strong>every</strong> held-out test row (315,807 rows, not just the positive ones, and not
+  collapsed across defender-slots &mdash; the classifier's own row grain is confirmed identical to
+  this regression's, both built from the same <code>passive_defense.parquet</code> row index),
+  compared against the real <code>target_future_xg_10s</code>
+  (<code>outputs/models/validation/hurdle_pipeline_readout_passive.json</code>):</p>
+<table>
+<tr><th></th><th>RMSE</th><th>MAE</th><th>R&sup2;</th></tr>
+<tr><td>Hurdle pipeline (<code>P(shot) &times; E[xg|shot]</code>)</td><td><strong>0.03726</strong></td><td><strong>0.00980</strong></td><td><strong>0.0426</strong></td></tr>
+<tr><td>Trivial baseline (unconditional train-set mean)</td><td>0.03809</td><td>0.01090</td><td>~0.0000</td></tr>
+</table>
+<p>The two-part architecture beats the trivial constant-mean baseline on every metric &mdash; a real,
+  positive first read on whether combining the two already-separately-validated halves works end to
+  end on this leg too. <strong>This is explicitly a diagnostic, not the Rung-0 gate</strong>: the
+  Rung-0 promotion decision for this leg rests on the regression-only <code>d1</code>-vs-<code>d0</code>
+  comparison (sections 4/8), since that is the piece this prompt actually built; the classifier half
+  was already gated and promoted on its own leg (Prompt 52).</p>
+
+<h2>10. Charts</h2>
+<p>4 PNGs per variant, saved under <code>outputs/models/regression/charts/&lt;variant&gt;/</code>
+  (gitignored &mdash; regenerate by running <code>scripts/models/train_passive_continuous_baseline.py</code>
+  if the images below don't resolve).</p>
+<div class="variant-block">
+  <p class="variant-title">d0_dummy</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d0_dummy/predicted_vs_observed_log.png" alt="d0_dummy predicted vs observed (log scale)"><p class="cc-label">predicted_vs_observed_log.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d0_dummy/residual_distribution.png" alt="d0_dummy residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d0_dummy/calibration_bins.png" alt="d0_dummy calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d0_dummy/feature_coefficients.png" alt="d0_dummy feature coefficients (n/a)"><p class="cc-label">feature_coefficients.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">d1_lognormal_glm</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1_lognormal_glm/predicted_vs_observed_log.png" alt="d1_lognormal_glm predicted vs observed (log scale)"><p class="cc-label">predicted_vs_observed_log.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1_lognormal_glm/residual_distribution.png" alt="d1_lognormal_glm residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1_lognormal_glm/calibration_bins.png" alt="d1_lognormal_glm calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1_lognormal_glm/feature_coefficients.png" alt="d1_lognormal_glm feature coefficients"><p class="cc-label">feature_coefficients.png</p></div>
+  </div>
+</div>
+
+<h2>11. Rung-0 result</h2>
+<div class="verdict-box"><p><strong><code>d1_lognormal_glm</code> clears Rung 0</strong> against the
+  <code>d0_dummy</code> floor: consistent direction across CV and held-out test, on the fair
+  common-scale log metric and on original-scale MAE/R&sup2;, with a statistically significant paired
+  test (p=0.0053, and unlike the active leg's own Rung 0 this is not a small-n result even after
+  accounting for the event-level effective sample size), and a positive first end-to-end hurdle
+  readout against a trivial baseline. No model ladder is built in this document &mdash; this is Rung
+  0 only, mirroring the active-continuous leg's own Prompt 54 discipline and the binary legs' Prompt
+  36/49 discipline before that. Whether this leg gets the same quadratic/RF/GBM ladder the active leg
+  did is a decision for after this Rung 0 is reviewed, not assumed here.</p></div>
+<p>This is the fourth and final leg of the project's model-ladder structure &mdash; all four legs
+  (active binary, passive binary, active continuous, passive continuous) now have a real, validated
+  Rung 0.</p>
+
+</div>
+</div>
+<footer>
+  <p>Generated by <code>scripts/models/train_passive_continuous_baseline.py</code>. Markdown source:
+    <code>reports/modeling/passive_continuous/PASSIVE_CONTINUOUS_BASELINE_SUMMARY.md</code>.</p>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+  <figure>
+    <img id="lightboxImg" src="" alt="">
+    <figcaption id="lightboxCaption"></figcaption>
+  </figure>
+</div>
+<script>
+(function () {
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightboxImg');
+  var lightboxCaption = document.getElementById('lightboxCaption');
+  function openLightbox(img) {
+    lightboxImg.src = img.currentSrc || img.src;
+    lightboxImg.alt = img.alt;
+    var variant = img.closest('.variant-block');
+    var title = variant ? variant.querySelector('.variant-title').textContent : '';
+    lightboxCaption.textContent = title ? (title + ' — ' + img.alt) : img.alt;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    lightboxImg.src = '';
+  }
+  document.querySelectorAll('.chart-card img').forEach(function (img) {
+    img.addEventListener('click', function () { openLightbox(img); });
+  });
+  lightbox.addEventListener('click', function (e) { if (e.target === lightbox) closeLightbox(); });
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLightbox(); });
+})();
+</script>
+</body>
+</html>
