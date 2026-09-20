@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- Passive-Continuous Model Ladder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1; --plane: #eceee8; --surface: #ffffff;
+  --text-primary: #10151c; --text-secondary: #4c525b; --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09); --gridline: #e2e4de;
+  --accent: #e34948; --pos: #e34948; --neg: #2a78d6;
+  --amber: #eda100; --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b; --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+    --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09); --gridline: #232a34;
+    --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+    --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+  --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09); --gridline: #232a34;
+  --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+  --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary); font-family: "Public Sans", -apple-system, sans-serif; font-size: 15px; line-height: 1.5; }
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead { background: var(--bg); border-bottom: 1px solid var(--border); padding: 40px 24px 32px; }
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow { font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; color: var(--accent); font-weight: 600; margin: 0 0 10px; }
+h1.title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: clamp(26px, 4vw, 38px); margin: 0 0 12px; color: var(--text-primary); }
+.dek { color: var(--text-secondary); max-width: 64ch; margin: 0 0 24px; font-size: 15.5px; }
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b { display: block; font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; color: var(--text-primary); }
+.stat span { display: block; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+footer { border-top: 1px solid var(--border); padding: 28px 24px 60px; max-width: 1180px; margin: 0 auto; }
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 900px; }
+.article h2 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; margin: 44px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.article h2:first-of-type { margin-top: 0; }
+.article h3 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 17px; margin: 30px 0 4px; color: var(--accent); }
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article code { font-family: "JetBrains Mono", monospace; font-size: 0.88em; background: var(--plane); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--neg); }
+.article ul, .article ol { color: var(--text-secondary); font-size: 14.5px; padding-left: 22px; margin: 0 0 16px; }
+.article li { margin-bottom: 6px; }
+.article table { width: 100%; border-collapse: collapse; margin: 4px 0 22px; font-size: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.article th { text-align: left; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.03em; color: var(--text-muted); background: var(--plane); padding: 9px 12px; border-bottom: 1px solid var(--border); }
+.article td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p:last-child { margin-bottom: 0; }
+.verdict-box { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.verdict-box p { margin: 0; }
+.fail-box { background: rgba(227,73,72,0.10); border: 1px solid rgba(227,73,72,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.fail-box p { margin: 0; }
+.variant-block { margin: 28px 0 44px; }
+.variant-title { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 16px; margin: 0 0 10px; }
+.chart-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 900px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+.chart-card img { width: 100%; height: auto; border-radius: 6px; display: block; background: var(--plane); cursor: zoom-in; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.chart-card img:hover { transform: scale(1.015); box-shadow: 0 4px 16px rgba(16,21,28,0.14); }
+.chart-card .cc-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 6px 2px 0; text-align: center; }
+.lightbox { position: fixed; inset: 0; background: rgba(9,12,16,0.78); display: none; align-items: center; justify-content: center; padding: 5vh 5vw; z-index: 1000; cursor: zoom-out; }
+.lightbox.open { display: flex; }
+.lightbox figure { margin: 0; max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.lightbox img { max-width: 92vw; max-height: 82vh; width: auto; height: auto; border-radius: 10px; background: var(--surface); box-shadow: 0 20px 60px rgba(0,0,0,0.45); cursor: default; }
+.lightbox figcaption { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #e8eaee; text-align: center; }
+.lightbox-close { position: absolute; top: 18px; right: 24px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+.lightbox-close:hover { background: rgba(255,255,255,0.18); }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; Passive leg &middot; Continuous &middot; Model ladder</p>
+    <h1 class="title">Passive-Continuous Model Ladder</h1>
+    <p class="dek">Everything built on top of the locked Rung 0 baseline
+      (<a href="PASSIVE_CONTINUOUS_BASELINE_SUMMARY.html" target="viewer">PASSIVE_CONTINUOUS_BASELINE_SUMMARY.html</a>),
+      one controlled rung at a time. Split into its own report (prompt 62, once a second rung
+      existed beyond Rung 0) so the baseline document stays Rung-0-only as more rungs are tried.</p>
+    <div class="statbar">
+      <div class="stat"><b>d1_lognormal_glm</b><span>rung 0 baseline (locked)</span></div>
+      <div class="stat"><b>Rung 1</b><span>null result &mdash; d1b_quadratic</span></div>
+      <div class="stat"><b>Rung 2 (d1c)</b><span>skipped, evidence-based</span></div>
+      <div class="stat"><b>Rung 2 (d1d)</b><span>doesn't clear significance &mdash; d1d_random_forest</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+<p>Scope: Rung 1 onward on the passive-continuous leg (<code>target_future_xg_10s</code>,
+  shot-conditional). Rung 0 (the 2 locked variants, their CV/held-out results, the full hurdle
+  pipeline readout, and the Prompt 60 data-quality correction) lives in
+  <a href="PASSIVE_CONTINUOUS_BASELINE_SUMMARY.html" target="viewer">PASSIVE_CONTINUOUS_BASELINE_SUMMARY.md</a>
+  and is not repeated here.</p>
+
+<h2>1. What a rung is</h2>
+<p>A <strong>rung</strong> is one controlled change to the locked Rung 0 baseline
+  (<code>d1_lognormal_glm</code>): a single variable changed &mdash; feature shape, an interaction
+  term, a model family &mdash; with everything else held identical (same 38 locked features unless
+  the rung specifically changes that, same canonical match-grouped 5-fold split, same
+  <code>log(xg)</code> target on the same shot-positive rows, all defender-slot rows per the
+  standing row-duplication decision, no ad-hoc tuning). A rung is tested against 2 fixed gates
+  before it can be considered for adoption as the new baseline:</p>
+<ol>
+<li><strong>Paired significance test vs the current best</strong> &mdash; refit both variants on the
+  same 5 canonical CV folds, paired t-test + Wilcoxon signed-rank test on the per-fold common-scale
+  log RMSE difference.</li>
+<li><strong>Held-out-test confirmation</strong> &mdash; a single, one-time readout on the frozen
+  held-out test set (17,402 positive rows / 1,979 unique events). This is the gate that actually
+  decides the rung's fate: CV picks a candidate, the held-out test either confirms or rejects it.</li>
+</ol>
+<p>Given this leg's row-duplication structure, every significance test on this leg reports
+  fold-level unique-event counts alongside row counts &mdash; the effective sample size is closer to
+  the event count than the row count, and that distinction is checked explicitly each time, not
+  assumed away by the large row counts.</p>
+<p>Rung 0 (the baseline itself) lives in
+  <a href="PASSIVE_CONTINUOUS_BASELINE_SUMMARY.html" target="viewer">PASSIVE_CONTINUOUS_BASELINE_SUMMARY.html</a>.
+  This ladder builds on that document's <code>d1_lognormal_glm</code> pick (held-out common-scale
+  log RMSE 1.0374, corrected R&sup2; 0.0078) as the baseline every rung is compared against.</p>
+
+<h2>2. Rung 1 &mdash; <code>d1b_quadratic</code> (prompt 61)</h2>
+
+<h3>2.1 Reconfirming shot-conditional nonlinearity from real data, systematically</h3>
+<p>A rough chat check of the shot-conditional signal (positive rows only, n=95,048) found every one
+  of the 26 locked continuous PASSIVE features correlates very weakly with <code>log(xg)</code> once
+  conditioned on a shot occurring &mdash; strongest <code>lane_screening_score_option_1</code>
+  (pearson +0.057, spearman +0.065), followed by <code>lane_screening_score_option_2</code>
+  (+0.053/+0.063) and <code>engagement_distance_to_carrier</code> (-0.049/-0.049); everything else
+  under 0.04, <code>overload_score</code> near zero (+0.006). This is genuinely weaker than the
+  active leg's own Rung 1 starting point (active's strongest shot-conditional correlation,
+  <code>visible_attacker_count</code>, was |r|=0.16 &mdash; over 2x stronger). The likely
+  explanation: this leg's rows describe one individual defender's geometry relative to a single
+  event, not an aggregated picture of the whole defensive shape the way the active leg's features
+  are &mdash; a lone defender's positioning plausibly has less individual leverage over eventual shot
+  quality than the attacking side's own aggregate spatial features do.</p>
+<p><code>scripts/analysis/check_shot_conditional_nonlinearity_passive.py</code> reproduces this
+  properly across all 38 locked PASSIVE features (not just the 26 continuous the chat check covered
+  &mdash; it missed both discrete features, <code>overload_score</code> and
+  <code>defender_slot_index</code>), computing Pearson/Spearman for the 28 numeric features,
+  point-biserial for boolean features, and ANOVA eta-squared for categorical features. Full output:
+  <code>outputs/models/validation/shot_conditional_nonlinearity_check_passive.json</code>.</p>
+<p><strong>The systematic check confirms the chat shortlist's top-3 by correlation magnitude, but
+  finds none of them curved.</strong> Among numeric features: <code>lane_screening_score_option_1</code>
+  (|r|=0.0646), <code>lane_screening_score_option_2</code> (|r|=0.0630), and
+  <code>lane_screening_score_option_3</code> (|r|=0.0478, a 4th chat feature not in the original
+  3-feature shortlist but the same family) are the 3 strongest-correlated numeric features overall
+  &mdash; reconfirmed, not a stale shortlist. <strong>But the quintile-binning curvature diagnostic
+  flags all three <code>monotonic_linear</code></strong>: a straight trend, no curvature a squared
+  term would add beyond what the linear term already captures. Being top-correlated does not make
+  them quadratic-term candidates here &mdash; the diagnostic says plainly they are not.</p>
+<p><strong>Only one numeric feature clears both bars</strong> (a correlation magnitude in the same
+  range as the top 3, <em>and</em> a genuine non-linear curvature flag):</p>
+<table>
+<tr><th>Feature</th><th>|r|</th><th>Curvature shape</th><th>Note</th></tr>
+<tr><td><code>engagement_distance_to_carrier</code></td><td>0.049</td><td>monotonic, concentrated gap at the low-x end (&gt;2x the other gaps)</td><td>rank #4 by correlation, the only feature combining real magnitude with real curvature</td></tr>
+</table>
+<p>Quintile means: -2.764, -2.828, -2.874, -2.905, -2.919 (log xg), on ~19,010 rows per bin &mdash; a
+  genuine diminishing-returns/concave shape, not a binning artifact given the bin size. Every other
+  numeric feature flagged with curvature by the same diagnostic has |r| well under 0.04 (many under
+  0.02) &mdash; indistinguishable from noise on a target this weak, and not used as candidates.</p>
+<p><code>QUADRATIC_FEATURES_D1B = [engagement_distance_to_carrier]</code> &mdash; <strong>1 feature,
+  not the active leg's 3</strong>, and none of the active leg's own quadratic candidates (which
+  mostly don't exist in the passive feature set at all). This is explicitly the
+  minimal-single-candidate case the task brief allowed for when the underlying signal is this weak,
+  not a watered-down copy of the active leg's approach.</p>
+
+<h3>2.2 d1b_quadratic results</h3>
+<p>Same 38 locked features, same <code>DesignMatrixBuilder</code> and <code>LinearRegression</code>
+  as <code>d1</code> (including the <code>defender_functional_role_unclassified</code> exclusion fix
+  from Prompt 60, reused exactly, not reintroduced), plus one
+  <code>quad__engagement_distance_to_carrier</code> column.</p>
+<table>
+<tr><th>Variant</th><th>Common log RMSE (CV)</th><th>Common log RMSE (held-out)</th><th>Naive MAE (held-out)</th><th>Corrected R&sup2; (held-out)</th></tr>
+<tr><td><code>d1_lognormal_glm</code></td><td>1.0345</td><td>1.0374</td><td>0.0718</td><td>0.0078</td></tr>
+<tr><td><code>d1b_quadratic</code></td><td>1.0346</td><td>1.0374</td><td>0.0718</td><td>0.0077</td></tr>
+</table>
+<p><strong><code>d1b_quadratic</code> does not beat <code>d1</code> &mdash; on either CV or
+  held-out, on any metric, and the numbers are not merely close, they are essentially
+  identical</strong> (differences in the 4th-5th decimal place, smaller than the active leg's own
+  already-small Rung 1 gap). The single surviving quadratic coefficient
+  (<code>quad__engagement_distance_to_carrier</code>) is <strong>+0.0038</strong> &mdash; negligible
+  in magnitude.</p>
+
+<h3>2.3 Significance test, d1b vs d1</h3>
+<p><code>outputs/models/validation/significance_d1_vs_d1b_quadratic.json</code>: mean diff (d1b
+  &minus; d1) common-scale log RMSE = <strong>+0.0000</strong> (indistinguishable), paired t-test
+  <strong>p=0.5013</strong>, Wilcoxon p=0.625. <strong>Does not clear significance in either
+  direction, and by a wide margin</strong> &mdash; this is an even more emphatic null result than
+  the active leg's own Rung 1 (p=0.2073 there; p=0.50 here). Per-fold unique-event counts (minimum
+  1,512, same as Rung 0) confirm this is not a thin-sample artifact &mdash; the effective sample size
+  is large enough that a real effect this size would very likely have shown up.</p>
+
+<h3>2.4 This is a real finding about this leg, not a modelling failure</h3>
+<div class="fail-box"><p>Stated plainly: <strong><code>d1b_quadratic</code> shows no real
+  improvement over <code>d1</code>, and this connects directly to section 2.1's already-documented
+  weak-correlation finding, not a coincidence.</strong> This leg's shot-conditional correlations were
+  already markedly weaker than the active leg's own Rung 1 starting point before any quadratic term
+  was tried (strongest |r|=0.065 here vs |r|=0.16 there) &mdash; one weak feature's squared term,
+  chosen precisely because it was the <em>only</em> feature showing genuine curvature at all, simply
+  doesn't have enough underlying signal to move a fair, common-scale metric measurably. This is not a
+  surprise; it is the expected continuation of a pattern already visible in item 1's own numbers
+  before the model was ever fit.</p></div>
+<p><strong><code>d1_lognormal_glm</code> remains this leg's best Rung-0/Rung-1
+  candidate</strong>; <code>d1b_quadratic</code> is not promoted or preferred over it.</p>
+<div class="variant-block">
+  <p class="variant-title">d1b_quadratic <span style="font-weight:400;color:var(--text-muted);font-size:12px;">(rung 1)</span></p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1b_quadratic/predicted_vs_observed_log.png" alt="d1b_quadratic predicted vs observed (log scale)"><p class="cc-label">predicted_vs_observed_log.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1b_quadratic/residual_distribution.png" alt="d1b_quadratic residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1b_quadratic/calibration_bins.png" alt="d1b_quadratic calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1b_quadratic/feature_coefficients.png" alt="d1b_quadratic feature coefficients (including quadratic term)"><p class="cc-label">feature_coefficients.png</p></div>
+  </div>
+</div>
+
+<h2>3. Rung 2 &mdash; <code>d1c_systematic_interactions</code> is SKIPPED (prompt 62)</h2>
+<p>The rung that would mirror the active-continuous leg's own skipped <code>c1c</code> (Prompt 56)
+  is <strong>explicitly skipped, not forgotten</strong>, on a rough chat check run directly against
+  real data before this rung was built, mirroring the diligence Prompt 56 applied to the active leg
+  &mdash; more decisively here:</p>
+<ol>
+<li><strong>Plain additive linear regression</strong> (28 numeric PASSIVE features, standardized,
+  5-fold grouped CV, positive rows only) scores mean CV <strong>R&sup2; = -0.0042</strong> &mdash;
+  already negative, i.e. this simple linear model is doing no better than predicting the training
+  mean on held-out folds.</li>
+<li><strong>Full pairwise-interaction + squared-term expansion</strong>
+  (<code>PolynomialFeatures(degree=2)</code>, 406 columns from 28 features), Ridge-regularized at
+  alpha=1 and alpha=100, scores mean CV <strong>R&sup2; of -0.0249 and -0.0230</strong> respectively
+  &mdash; <strong>worse</strong> than the plain linear model, not just a smaller gain than noise (the
+  active leg's own finding). Lighter regularization makes it actively worse, same direction as the
+  active leg's own check, but the interaction expansion never even matches the (already weak)
+  additive baseline here.</li>
+</ol>
+<p><strong>Decision: <code>d1c_systematic_interactions</code> is not built.</strong> Both the plain
+  linear model and every tested interaction-expansion variant score negative CV R&sup2; on this
+  leg's data &mdash; there is no additive-linear or interaction-expansion signal here worth
+  systematizing. This is a closed decision for this leg, not deferred; it would only be revisited if
+  new evidence specifically contradicted the numbers above.</p>
+
+<h2>4. Rung 2 &mdash; <code>d1d_random_forest</code> (prompt 62)</h2>
+<p>Instead of the interaction rung, Rung 2 goes straight to a <code>RandomForestRegressor</code> on
+  the same 38 locked features, raw (non-standardized, non-polynomial-expanded) design matrix &mdash;
+  mirroring the active-continuous leg's own Rung 2 (<code>c1d_random_forest</code>, Prompt 56). The
+  question: can automatic, sample-efficient nonlinearity/interaction discovery find signal that
+  neither the hand-built quadratic term (Rung 1) nor the brute-force polynomial expansion (section 3
+  above) could?</p>
+
+<h3>4.1 Hyperparameter grid, sized for this leg's real (but duplicated) scale</h3>
+<p>This leg's per-fold <strong>row</strong> count (~13,200-18,100) is far larger than the active
+  leg's own Rung 2 grid target (~2,880 rows/training-fold), but the effective sample size &mdash;
+  unique <strong>events</strong>, ~1,500-2,000/fold &mdash; is only about 2x the active leg's, not
+  ~5x. The grid used here: <code>N_ESTIMATORS_GRID=[200]</code>,
+  <code>MAX_DEPTH_GRID=[6, 10, None]</code>, <code>MIN_SAMPLES_LEAF_GRID=[30, 100, 300]</code> --
+  <code>min_samples_leaf</code>'s floor is set well above the active leg's own <code>[10,30,60]</code>
+  range specifically because a leaf of even 60 raw rows here could still be as few as ~7 unique
+  events (rows/event ~8.9), thinner than it looks from the row count alone.</p>
+<p><strong>CV-internal overfitting is severe at the grid's unconstrained end, and it tracks the
+  event count, not the row count.</strong> Full grid (chosen by lowest OOF common-scale log RMSE):</p>
+<table>
+<tr><th>max_depth</th><th>min_samples_leaf</th><th>OOF common log RMSE</th><th>OOF corrected R&sup2;</th><th>mean train R&sup2;</th><th>train &minus; OOF gap</th></tr>
+<tr><td>6</td><td>30</td><td>1.0335</td><td>0.0002</td><td>0.1369</td><td>0.1368</td></tr>
+<tr><td>6</td><td>100</td><td>1.0324</td><td>0.0039</td><td>0.1230</td><td>0.1191</td></tr>
+<tr><td>6</td><td>300</td><td>1.0323</td><td>0.0069</td><td>0.0981</td><td>0.0912</td></tr>
+<tr><td>10</td><td>30</td><td>1.0383</td><td>-0.0161</td><td>0.3818</td><td>0.3979</td></tr>
+<tr><td>10</td><td>100</td><td>1.0339</td><td>-0.0021</td><td>0.2928</td><td>0.2949</td></tr>
+<tr><td><strong>10</strong></td><td><strong>300</strong></td><td><strong>1.0319</strong></td><td><strong>0.0063</strong></td><td>0.1839</td><td>0.1776</td></tr>
+<tr><td>None</td><td>30</td><td>1.0471</td><td>-0.0577</td><td><strong>0.8360</strong></td><td><strong>0.8936</strong></td></tr>
+<tr><td>None</td><td>100</td><td>1.0378</td><td>-0.0149</td><td>0.4725</td><td>0.4873</td></tr>
+<tr><td>None</td><td>300</td><td>1.0323</td><td>0.0053</td><td>0.2184</td><td>0.2131</td></tr>
+</table>
+<p><code>max_depth=None, min_samples_leaf=30</code> memorizes the training folds almost completely
+  (train R&sup2;=0.84) while scoring <em>negative</em> OOF R&sup2; (-0.058) &mdash; an 0.89
+  train-minus-OOF gap, by far the worst overfitting seen on either continuous leg's own Rung 2 grid,
+  and a direct illustration of the event-vs-row distinction: with only ~30 raw rows required per leaf
+  (as few as ~3-4 unique events), the deepest, least-constrained trees are trivially able to memorize
+  individual events' duplicated rows rather than learning anything general. The chosen config
+  (<code>max_depth=10, min_samples_leaf=300</code>) still shows a real gap (train R&sup2;=0.18 vs OOF
+  R&sup2;=0.006) but wins cleanly on OOF score, and every config with <code>min_samples_leaf=300</code>
+  (roughly 33+ unique events per leaf at this leg's ~8.9 rows/event ratio) clusters together with the
+  smallest gaps in the grid &mdash; exactly where the event-count reasoning predicts the safer
+  configs should land.</p>
+
+<h3>4.2 <code>d1d_random_forest</code> vs <code>d1_lognormal_glm</code> &mdash; ranking and calibration, reported separately</h3>
+<p><strong>Ranking (common-scale log RMSE) &mdash; <code>d1d_random_forest</code> wins directionally
+  on every fold but one, without clearing significance:</strong></p>
+<table>
+<tr><th>Variant</th><th>Common log RMSE (CV)</th><th>Common log RMSE (held-out)</th></tr>
+<tr><td><code>d1_lognormal_glm</code></td><td>1.0345</td><td>1.0374</td></tr>
+<tr><td><code>d1d_random_forest</code></td><td>1.0319</td><td>1.0322</td></tr>
+</table>
+<p>Paired significance test
+  (<code>outputs/models/validation/significance_d1_vs_d1d_random_forest.json</code>): mean diff (d1d
+  &minus; d1) = <strong>-0.0025</strong> (d1d better), paired t-test <strong>p=0.5760</strong>,
+  Wilcoxon <strong>p=0.4375</strong>. <code>d1d_random_forest</code>'s common-scale log RMSE is lower
+  than <code>d1</code>'s on <strong>4 of 5 CV folds</strong> (fold 4 is the exception, 1.0092 vs
+  0.9979) &mdash; a real, consistent-<em>direction</em> edge, but small and not statistically
+  significant given this leg's effective (event-level) sample size. Per-fold unique-event counts
+  range 1,512-2,039 (minimum 1,512) &mdash; the same standing caveat as every other test on this leg:
+  large row counts, more modest effective sample size, checked explicitly rather than assumed away.</p>
+<p><strong>Calibration and original-scale accuracy (held-out test) &mdash; also favors
+  <code>d1d_random_forest</code>, more visibly than the ranking test alone suggests:</strong></p>
+<table>
+<tr><th>Variant</th><th>Naive MAE</th><th>Naive R&sup2;</th><th>Corrected MAE</th><th>Corrected R&sup2;</th></tr>
+<tr><td><code>d1_lognormal_glm</code></td><td>0.0718</td><td>-0.0869</td><td>0.0839</td><td>0.0078</td></tr>
+<tr><td><code>d1d_random_forest</code></td><td>0.0711</td><td>-0.0731</td><td>0.0797</td><td><strong>0.0211</strong></td></tr>
+</table>
+<p>Corrected R&sup2; nearly triples (0.0078 -&gt; 0.0211) and corrected MAE improves meaningfully
+  (0.0839 -&gt; 0.0797). <strong>Ranking and calibration agree in direction here</strong> &mdash; both
+  favor <code>d1d_random_forest</code> &mdash; but the ranking test's own significance gate does not
+  clear, so this is reported as a real but modest, statistically inconclusive improvement, not a
+  confirmed win.</p>
+
+<h3>4.3 Feature importance: does RF find what the linear methods couldn't?</h3>
+<p>Top 10 (of 15 reported) features by Gini importance and by fold-held-out permutation importance
+  (<code>outputs/models/regression/d1d_random_forest.json</code>):</p>
+<table>
+<tr><th>Rank</th><th>Gini importance</th><th>Permutation importance (fold held-out)</th></tr>
+<tr><td>1</td><td><code>ball_x</code> (0.1821)</td><td><code>ball_x</code> (0.0370)</td></tr>
+<tr><td>2</td><td><code>ball_y</code> (0.0753)</td><td><code>top_option_3_dx</code> (0.0066)</td></tr>
+<tr><td>3</td><td><code>top_option_3_distance_from_ball</code> (0.0701)</td><td><code>ball_y</code> (0.0058)</td></tr>
+<tr><td>4</td><td><code>top_option_1_dx</code> (0.0644)</td><td><code>top_option_3_distance_from_ball</code> (0.0049)</td></tr>
+<tr><td>5</td><td><code>top_option_1_threat_score</code> (0.0612)</td><td><code>on_ball_event_type_Carry</code> (0.0045)</td></tr>
+<tr><td>6</td><td><code>top_option_3_threat_score</code> (0.0611)</td><td><code>defender_x</code> (0.0034)</td></tr>
+<tr><td>7</td><td><code>top_option_3_dx</code> (0.0585)</td><td><code>top_option_1_threat_score</code> (0.0030)</td></tr>
+<tr><td>8</td><td><code>top_option_2_distance_from_ball</code> (0.0525)</td><td><code>top_option_3_threat_score</code> (0.0023)</td></tr>
+<tr><td>9</td><td><code>top_option_1_angle_from_ball</code> (0.0458)</td><td><code>top_option_1_angle_from_ball</code> (0.0023)</td></tr>
+<tr><td>10</td><td><code>top_option_1_distance_from_ball</code> (0.0437)</td><td><code>top_option_1_dx</code> (0.0022)</td></tr>
+</table>
+<p><strong><code>ball_x</code> is the clear headline finding, exactly the "RF found something linear
+  missed" pattern the active leg's own Rung 2 showed with <code>distance_to_attacking_box</code>.</strong>
+  By linear correlation, <code>ball_x</code> ranks only <strong>#15 of 38</strong>
+  (|r|=0.0184, <code>shot_conditional_nonlinearity_check_passive.json</code>) &mdash; weak enough
+  that it wasn't remotely close to a Rung 1 quadratic candidate. By RF, it is the single most
+  important feature by both Gini (0.182, more than 2x the next-highest) and permutation importance
+  (0.037, also far ahead of #2). The tree found real structure in the ball's absolute pitch position
+  that a linear/Pearson-Spearman view on this leg's own data could not surface. Two more features
+  with the same pattern: <code>top_option_3_distance_from_ball</code> (correlation rank #6, RF Gini
+  rank #3) and <code>top_option_1_dx</code> (correlation rank #18, RF Gini rank #4) both rank
+  meaningfully higher under RF than under linear correlation.</p>
+<p><strong>Rung 1's own quadratic candidate, <code>engagement_distance_to_carrier</code>, is NOT
+  confirmed by RF &mdash; ranked near the bottom of all 54 encoded features.</strong> Gini rank
+  <strong>39th of 54</strong> (importance 0.000044, essentially zero) and permutation rank
+  <strong>25th of 54</strong> (importance 0.0000113, also essentially zero), despite being the
+  4th-strongest feature by linear correlation and the one feature Rung 1 judged worth a quadratic
+  term. RF does not see this feature as informative at all once it has access to the full 38-feature
+  raw design matrix &mdash; consistent with, and reinforcing, Rung 1's own null result: the weak
+  curvature signal <code>engagement_distance_to_carrier</code> showed in isolation does not survive
+  contact with a model that can also draw on everything else.</p>
+
+<h3>4.4 Ladder-gate outcome for this rung, no promotion audit</h3>
+<div class="fail-box"><p><strong><code>d1d_random_forest</code> does not clear significance against
+  <code>d1_lognormal_glm</code></strong> (p=0.576), the third independent check on this leg to come
+  back this way: Rung 1's quadratic term (p=0.50), the skipped <code>d1c</code> interaction
+  expansion (negative CV R&sup2; even before regularization is loosened), and now Rung 2's random
+  forest (a real, 4-of-5-fold directional edge and a near-tripling of corrected R&sup2;, but not
+  statistically significant given this leg's effective event-level sample size). <strong>This
+  convergence &mdash; three structurally different approaches, none clearing a real bar &mdash; is
+  itself the headline finding for this leg, not a footnote</strong>: this leg's per-defender
+  features carry meaningfully less shot-conditional signal than the active leg's aggregate
+  whole-defense features do, and that ceiling has now been checked from three independent angles
+  rather than assumed from one. Per this prompt's explicit constraint, no promotion audit is run in
+  this prompt regardless of this result &mdash; <code>d1_lognormal_glm</code> remains this leg's best
+  regression candidate, and this section reports the Rung-2 gate outcome only.</p></div>
+<div class="variant-block">
+  <p class="variant-title">d1d_random_forest <span style="font-weight:400;color:var(--text-muted);font-size:12px;">(rung 2)</span></p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1d_random_forest/predicted_vs_observed_log.png" alt="d1d_random_forest predicted vs observed (log scale)"><p class="cc-label">predicted_vs_observed_log.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1d_random_forest/residual_distribution.png" alt="d1d_random_forest residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1d_random_forest/calibration_bins.png" alt="d1d_random_forest calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/d1d_random_forest/feature_coefficients.png" alt="d1d_random_forest feature importance (Gini, top 15)"><p class="cc-label">feature_coefficients.png (Gini feature importance)</p></div>
+  </div>
+</div>
+
+</div>
+</div>
+<footer>
+  <p>Generated by <code>scripts/models/train_d1b_quadratic.py</code> and
+    <code>scripts/models/train_d1d_random_forest.py</code>. Markdown source:
+    <code>reports/modeling/passive_continuous/PASSIVE_CONTINUOUS_MODEL_LADDER.md</code>. Rung 0
+    baseline:
+    <a href="PASSIVE_CONTINUOUS_BASELINE_SUMMARY.html" target="viewer">PASSIVE_CONTINUOUS_BASELINE_SUMMARY.html</a>.</p>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+  <figure>
+    <img id="lightboxImg" src="" alt="">
+    <figcaption id="lightboxCaption"></figcaption>
+  </figure>
+</div>
+<script>
+(function () {
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightboxImg');
+  var lightboxCaption = document.getElementById('lightboxCaption');
+  function openLightbox(img) {
+    lightboxImg.src = img.currentSrc || img.src;
+    lightboxImg.alt = img.alt;
+    var variant = img.closest('.variant-block');
+    var title = variant ? variant.querySelector('.variant-title').textContent : '';
+    lightboxCaption.textContent = title ? (title + ' — ' + img.alt) : img.alt;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    lightboxImg.src = '';
+  }
+  document.querySelectorAll('.chart-card img').forEach(function (img) {
+    img.addEventListener('click', function () { openLightbox(img); });
+  });
+  lightbox.addEventListener('click', function (e) { if (e.target === lightbox) closeLightbox(); });
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLightbox(); });
+})();
+</script>
+</body>
+</html>
