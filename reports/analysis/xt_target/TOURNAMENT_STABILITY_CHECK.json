@@ -1,0 +1,1109 @@
+{
+  "dataset": "active",
+  "leg": "active-binary only (passive leg out of scope for this target)",
+  "target": "target_xt_delta",
+  "target_scale": {
+    "target": "target_xt_delta",
+    "n_rows": 56068,
+    "n_defined": 56036,
+    "n_nan": 32,
+    "mean": -0.00131579,
+    "std": 0.06498593,
+    "skew": 0.0933,
+    "excess_kurtosis": 8.846,
+    "pct_zero": 11.309,
+    "pct_negative": 47.002,
+    "pct_positive": 41.689,
+    "xg_mean_same_rows": 0.00811039,
+    "xg_std_same_rows": 0.0480329,
+    "xg_flat_margin_absolute": 0.00405519,
+    "xg_flat_margin_as_fraction_of_xg_std": 0.084425,
+    "flat_margin": 0.00548646,
+    "range_trigger": 0.01097292,
+    "near_identical_threshold": 0.00548646,
+    "distinct_signal_threshold": 0.01645938,
+    "n_nonzero": 49699,
+    "mean_nonzero": -0.00148356,
+    "std_nonzero": 0.06900304,
+    "flat_margin_nonzero": 0.00582561,
+    "scale_note": "ADAPTATION 1. target_xt_delta is roughly symmetric with a near-zero, NEGATIVE mean (-0.001316), so the xg_target suite's convention of expressing every threshold as a multiple of the overall mean target value is meaningless here (it would flip signs and collapse to nothing). Instead the xg convention is TRANSLATED, not replaced: xg's own flat_margin (0.5 x mean xg = 0.004055 on these same rows) is re-expressed as a fraction of xg's own standard deviation (0.048033), giving 0.084425, and that fraction is applied to target_xt_delta's standard deviation (0.064986). Every number in this calculation is computed at runtime from the real parquet, not carried over from a writeup. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged.",
+    "conditional_panel_note": "ADAPTATION 2. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta has no shot column behind it; its structural-zero analogue is the 11.3% of rows with an EXACTLY zero delta (the action did not cross an xT grid-cell boundary). The conditional panel throughout this suite is therefore 'given a non-zero delta' (target_xt_delta != 0), never 'given a shot'.",
+    "direction_note": "ADAPTATION 3. Sign carries the football meaning: POSITIVE target_xt_delta = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. Rankings are by |magnitude| across BOTH directions, never one-sided 'higher is worse' lift, and every table also reports the negative/positive/zero share behind its mean.",
+    "log_transform_note": "NOT an adaptation: checked directly rather than assumed -- the xg_target report suite never log-transforms its target anywhere (every xg report uses the raw groupby mean of target_future_xg_10s). The log1p framing in this project belongs to the modelling legs, not to this report suite, so there was no log-transform to remove."
+  },
+  "tournaments": [
+    "WC2022",
+    "Euro2024"
+  ],
+  "n_quantile_bins": 10,
+  "flat_margin": 0.00548646,
+  "step_0_scope_note": "The xg portal's TOURNAMENT_STABILITY_CHECK covers all 10 features in generate_tournament_stability_check.INVESTIGATE (6 active + 4 passive). This prompt is scoped to the active leg, so the same imported list is filtered to its 6 ACTIVE entries and the 4 passive ones are omitted -- a scope reduction, not a methodology change. The list is imported rather than re-derived from this portal's own flagged-inconsistent features, exactly as the xg version does, so the same features are compared across all three targets.",
+  "excluded_from_investigation": {
+    "nearest_defender_distance": "already-known self-reference bug (73.6% of rows ~0m) -- a separate issue, not investigated here. Carried over unchanged."
+  },
+  "methodology": "xT-delta counterpart to the xg and binary TOURNAMENT_STABILITY_CHECKs -- same tournament split, same imported feature list (active half), same bin edges computed once on the pooled data and reused for both tournaments, same classify_shape() heuristic. The ONLY change is flat_margin, which is translated from the xg suite's 0.5x-mean-xg convention via xg's own standard-deviation fraction, because a multiple of this target's near-zero NEGATIVE mean would be meaningless. One field has no xg counterpart: zero_crossing_differs_between_tournaments, which asks whether the binned curve changes DIRECTION between tournaments -- impossible to ask of a non-negative target.",
+  "prompt_64_cross_references": {
+    "distribution_shape": "Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.2): target_xt_delta is roughly symmetric (skew +0.093), heavy-tailed (excess kurtosis 8.85), 47.0% negative / 41.7% positive / 11.3% exactly zero. This is a fundamentally different shape from target_future_xg_10s, which is strictly non-negative, zero-inflated and heavily right-skewed. Any methodology that assumed non-negativity had to be adapted explicitly -- see this module's Adaptation 1/2/3 notes, restated in every report."
+  },
+  "features": [
+    {
+      "feature": "defenders_within_10m",
+      "dataset": "active",
+      "train_test_finding": {
+        "in_atlas": true,
+        "overall_shape": "U-shaped",
+        "spearman_rho": -0.0603,
+        "train_val_shape": "U-shaped",
+        "test_shape": "U-shaped",
+        "train_test_consistent": true
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 31041,
+          "n_matches": 64,
+          "shape": "U-shaped",
+          "mean_xt_range": 0.29074827,
+          "bin_mean_min": -0.04270521,
+          "bin_mean_max": 0.24804306,
+          "curve_crosses_zero": true,
+          "bins": [
+            {
+              "bin": "0.0",
+              "n": 4589,
+              "mean_xt": 0.00364381,
+              "pct_negative": 47.59,
+              "pct_positive": 46.52
+            },
+            {
+              "bin": "1.0",
+              "n": 6655,
+              "mean_xt": 0.00053646,
+              "pct_negative": 46.97,
+              "pct_positive": 42.54
+            },
+            {
+              "bin": "10.0",
+              "n": 11,
+              "mean_xt": 0.01585769,
+              "pct_negative": 36.36,
+              "pct_positive": 54.55
+            },
+            {
+              "bin": "11.0",
+              "n": 2,
+              "mean_xt": 0.24804306,
+              "pct_negative": 0.0,
+              "pct_positive": 100.0
+            },
+            {
+              "bin": "2.0",
+              "n": 5872,
+              "mean_xt": -0.00193838,
+              "pct_negative": 46.68,
+              "pct_positive": 40.05
+            },
+            {
+              "bin": "3.0",
+              "n": 3407,
+              "mean_xt": -0.0049385,
+              "pct_negative": 46.87,
+              "pct_positive": 39.15
+            },
+            {
+              "bin": "4.0",
+              "n": 1514,
+              "mean_xt": -0.01722881,
+              "pct_negative": 49.74,
+              "pct_positive": 38.11
+            },
+            {
+              "bin": "5.0",
+              "n": 742,
+              "mean_xt": -0.0297369,
+              "pct_negative": 52.83,
+              "pct_positive": 37.2
+            },
+            {
+              "bin": "6.0",
+              "n": 367,
+              "mean_xt": -0.03250035,
+              "pct_negative": 47.14,
+              "pct_positive": 41.14
+            },
+            {
+              "bin": "7.0",
+              "n": 247,
+              "mean_xt": -0.04080019,
+              "pct_negative": 50.61,
+              "pct_positive": 41.7
+            },
+            {
+              "bin": "8.0",
+              "n": 104,
+              "mean_xt": -0.04270521,
+              "pct_negative": 46.15,
+              "pct_positive": 45.19
+            },
+            {
+              "bin": "9.0",
+              "n": 48,
+              "mean_xt": -0.00218886,
+              "pct_negative": 45.83,
+              "pct_positive": 45.83
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 25027,
+          "n_matches": 51,
+          "shape": "inverse-U",
+          "mean_xt_range": 0.09053752,
+          "bin_mean_min": -0.08451765,
+          "bin_mean_max": 0.00601987,
+          "curve_crosses_zero": true,
+          "bins": [
+            {
+              "bin": "0.0",
+              "n": 3609,
+              "mean_xt": 0.00601987,
+              "pct_negative": 48.19,
+              "pct_positive": 46.38
+            },
+            {
+              "bin": "1.0",
+              "n": 5337,
+              "mean_xt": 0.00145637,
+              "pct_negative": 46.82,
+              "pct_positive": 43.9
+            },
+            {
+              "bin": "10.0",
+              "n": 16,
+              "mean_xt": -0.05308471,
+              "pct_negative": 50.0,
+              "pct_positive": 31.25
+            },
+            {
+              "bin": "2.0",
+              "n": 4651,
+              "mean_xt": -0.00229004,
+              "pct_negative": 47.58,
+              "pct_positive": 39.73
+            },
+            {
+              "bin": "3.0",
+              "n": 2888,
+              "mean_xt": -0.00457675,
+              "pct_negative": 48.61,
+              "pct_positive": 38.05
+            },
+            {
+              "bin": "4.0",
+              "n": 1503,
+              "mean_xt": -0.01038509,
+              "pct_negative": 50.3,
+              "pct_positive": 37.19
+            },
+            {
+              "bin": "5.0",
+              "n": 821,
+              "mean_xt": -0.02146649,
+              "pct_negative": 50.79,
+              "pct_positive": 36.05
+            },
+            {
+              "bin": "6.0",
+              "n": 403,
+              "mean_xt": -0.01616055,
+              "pct_negative": 46.65,
+              "pct_positive": 41.19
+            },
+            {
+              "bin": "7.0",
+              "n": 220,
+              "mean_xt": -0.05133048,
+              "pct_negative": 54.09,
+              "pct_positive": 36.82
+            },
+            {
+              "bin": "8.0",
+              "n": 130,
+              "mean_xt": -0.01792659,
+              "pct_negative": 43.08,
+              "pct_positive": 43.08
+            },
+            {
+              "bin": "9.0",
+              "n": 42,
+              "mean_xt": -0.08451765,
+              "pct_negative": 66.67,
+              "pct_positive": 26.19
+            }
+          ]
+        }
+      },
+      "verdict": "genuine tournament-level difference",
+      "verdict_reason": "Shape classification differs between tournaments (WC2022: U-shaped, Euro2024: inverse-U) -- consistent with a real difference between the two populations (rules, pitch dimensions, squad quality), not just arbitrary train/test noise.",
+      "zero_crossing_differs_between_tournaments": false
+    },
+    {
+      "feature": "defenders_within_5m",
+      "dataset": "active",
+      "train_test_finding": {
+        "in_atlas": true,
+        "overall_shape": "U-shaped",
+        "spearman_rho": -0.0198,
+        "train_val_shape": "U-shaped",
+        "test_shape": "U-shaped",
+        "train_test_consistent": true
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 31041,
+          "n_matches": 64,
+          "shape": "U-shaped",
+          "mean_xt_range": 0.31158422,
+          "bin_mean_min": -0.06354116,
+          "bin_mean_max": 0.24804306,
+          "curve_crosses_zero": true,
+          "bins": [
+            {
+              "bin": "0.0",
+              "n": 16890,
+              "mean_xt": 0.00116675,
+              "pct_negative": 49.2,
+              "pct_positive": 44.29
+            },
+            {
+              "bin": "1.0",
+              "n": 8686,
+              "mean_xt": -0.00300224,
+              "pct_negative": 44.85,
+              "pct_positive": 39.34
+            },
+            {
+              "bin": "2.0",
+              "n": 2269,
+              "mean_xt": -0.009139,
+              "pct_negative": 43.28,
+              "pct_positive": 40.19
+            },
+            {
+              "bin": "3.0",
+              "n": 572,
+              "mean_xt": -0.01996013,
+              "pct_negative": 43.53,
+              "pct_positive": 41.96
+            },
+            {
+              "bin": "4.0",
+              "n": 203,
+              "mean_xt": -0.03862889,
+              "pct_negative": 52.22,
+              "pct_positive": 39.41
+            },
+            {
+              "bin": "5.0",
+              "n": 66,
+              "mean_xt": -0.06354116,
+              "pct_negative": 53.03,
+              "pct_positive": 37.88
+            },
+            {
+              "bin": "6.0",
+              "n": 28,
+              "mean_xt": 0.00190477,
+              "pct_negative": 46.43,
+              "pct_positive": 50.0
+            },
+            {
+              "bin": "7.0",
+              "n": 4,
+              "mean_xt": -0.05669614,
+              "pct_negative": 50.0,
+              "pct_positive": 50.0
+            },
+            {
+              "bin": "8.0",
+              "n": 1,
+              "mean_xt": 0.24804306,
+              "pct_negative": 0.0,
+              "pct_positive": 100.0
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 25027,
+          "n_matches": 51,
+          "shape": "inverse-U",
+          "mean_xt_range": 0.25000518,
+          "bin_mean_min": -0.24804306,
+          "bin_mean_max": 0.00196212,
+          "curve_crosses_zero": true,
+          "bins": [
+            {
+              "bin": "0.0",
+              "n": 13765,
+              "mean_xt": 0.00196212,
+              "pct_negative": 49.59,
+              "pct_positive": 43.84
+            },
+            {
+              "bin": "1.0",
+              "n": 6765,
+              "mean_xt": -0.00235009,
+              "pct_negative": 45.94,
+              "pct_positive": 39.56
+            },
+            {
+              "bin": "2.0",
+              "n": 2040,
+              "mean_xt": -0.00938225,
+              "pct_negative": 44.9,
+              "pct_positive": 37.6
+            },
+            {
+              "bin": "3.0",
+              "n": 521,
+              "mean_xt": -0.01999634,
+              "pct_negative": 45.87,
+              "pct_positive": 40.12
+            },
+            {
+              "bin": "4.0",
+              "n": 190,
+              "mean_xt": -0.02293122,
+              "pct_negative": 46.84,
+              "pct_positive": 40.53
+            },
+            {
+              "bin": "5.0",
+              "n": 81,
+              "mean_xt": -0.0662314,
+              "pct_negative": 53.09,
+              "pct_positive": 30.86
+            },
+            {
+              "bin": "6.0",
+              "n": 28,
+              "mean_xt": -0.07866331,
+              "pct_negative": 64.29,
+              "pct_positive": 32.14
+            },
+            {
+              "bin": "7.0",
+              "n": 2,
+              "mean_xt": 0.0,
+              "pct_negative": 50.0,
+              "pct_positive": 50.0
+            },
+            {
+              "bin": "8.0",
+              "n": 1,
+              "mean_xt": -0.24804306,
+              "pct_negative": 100.0,
+              "pct_positive": 0.0
+            }
+          ]
+        }
+      },
+      "verdict": "genuine tournament-level difference",
+      "verdict_reason": "Shape classification differs between tournaments (WC2022: U-shaped, Euro2024: inverse-U) -- consistent with a real difference between the two populations (rules, pitch dimensions, squad quality), not just arbitrary train/test noise.",
+      "zero_crossing_differs_between_tournaments": false
+    },
+    {
+      "feature": "events_elapsed_in_possession",
+      "dataset": "active",
+      "train_test_finding": {
+        "in_atlas": true,
+        "overall_shape": "no-clear-pattern",
+        "spearman_rho": -0.0363,
+        "train_val_shape": null,
+        "test_shape": null,
+        "train_test_consistent": null
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 31041,
+          "n_matches": 64,
+          "shape": "no-clear-pattern",
+          "mean_xt_range": 0.00843865,
+          "bin_mean_min": -0.00557337,
+          "bin_mean_max": 0.00286528,
+          "curve_crosses_zero": true,
+          "bins": [
+            {
+              "bin": "(0.999, 2.0]",
+              "n": 4227,
+              "mean_xt": -0.00557337,
+              "pct_negative": 38.44,
+              "pct_positive": 34.16
+            },
+            {
+              "bin": "(2.0, 4.0]",
+              "n": 3265,
+              "mean_xt": 0.00286528,
+              "pct_negative": 45.79,
+              "pct_positive": 44.07
+            },
+            {
+              "bin": "(4.0, 6.0]",
+              "n": 2518,
+              "mean_xt": 0.00114123,
+              "pct_negative": 45.39,
+              "pct_positive": 44.36
+            },
+            {
+              "bin": "(6.0, 9.0]",
+              "n": 3420,
+              "mean_xt": -0.00123123,
+              "pct_negative": 46.58,
+              "pct_positive": 44.59
+            },
+            {
+              "bin": "(9.0, 12.0]",
+              "n": 2787,
+              "mean_xt": -0.00125137,
+              "pct_negative": 48.4,
+              "pct_positive": 42.84
+            },
+            {
+              "bin": "(12.0, 17.0]",
+              "n": 3530,
+              "mean_xt": -0.00159169,
+              "pct_negative": 48.24,
+              "pct_positive": 42.97
+            },
+            {
+              "bin": "(17.0, 22.0]",
+              "n": 2716,
+              "mean_xt": -0.00078539,
+              "pct_negative": 46.8,
+              "pct_positive": 45.32
+            },
+            {
+              "bin": "(22.0, 30.0]",
+              "n": 2907,
+              "mean_xt": -0.00071206,
+              "pct_negative": 47.47,
+              "pct_positive": 44.48
+            },
+            {
+              "bin": "(30.0, 45.0]",
+              "n": 2969,
+              "mean_xt": -0.00169437,
+              "pct_negative": 49.38,
+              "pct_positive": 42.2
+            },
+            {
+              "bin": "(45.0, 243.0]",
+              "n": 2685,
+              "mean_xt": -0.00351873,
+              "pct_negative": 53.74,
+              "pct_positive": 37.62
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 25027,
+          "n_matches": 51,
+          "shape": "no-clear-pattern",
+          "mean_xt_range": 0.00941047,
+          "bin_mean_min": -0.00679947,
+          "bin_mean_max": 0.002611,
+          "curve_crosses_zero": true,
+          "bins": [
+            {
+              "bin": "(0.999, 2.0]",
+              "n": 2950,
+              "mean_xt": -0.00463354,
+              "pct_negative": 38.78,
+              "pct_positive": 31.93
+            },
+            {
+              "bin": "(2.0, 4.0]",
+              "n": 2495,
+              "mean_xt": 0.002611,
+              "pct_negative": 46.49,
+              "pct_positive": 43.33
+            },
+            {
+              "bin": "(4.0, 6.0]",
+              "n": 1985,
+              "mean_xt": 0.00253511,
+              "pct_negative": 45.24,
+              "pct_positive": 43.83
+            },
+            {
+              "bin": "(6.0, 9.0]",
+              "n": 2580,
+              "mean_xt": 0.00062499,
+              "pct_negative": 46.86,
+              "pct_positive": 43.8
+            },
+            {
+              "bin": "(9.0, 12.0]",
+              "n": 2130,
+              "mean_xt": 0.00028297,
+              "pct_negative": 46.53,
+              "pct_positive": 45.73
+            },
+            {
+              "bin": "(12.0, 17.0]",
+              "n": 2751,
+              "mean_xt": -0.00120021,
+              "pct_negative": 48.09,
+              "pct_positive": 43.55
+            },
+            {
+              "bin": "(17.0, 22.0]",
+              "n": 2133,
+              "mean_xt": 0.00073997,
+              "pct_negative": 47.02,
+              "pct_positive": 44.07
+            },
+            {
+              "bin": "(22.0, 30.0]",
+              "n": 2447,
+              "mean_xt": -0.00233088,
+              "pct_negative": 49.08,
+              "pct_positive": 42.13
+            },
+            {
+              "bin": "(30.0, 45.0]",
+              "n": 2823,
+              "mean_xt": -0.00162518,
+              "pct_negative": 51.86,
+              "pct_positive": 40.49
+            },
+            {
+              "bin": "(45.0, 243.0]",
+              "n": 2718,
+              "mean_xt": -0.00679947,
+              "pct_negative": 54.34,
+              "pct_positive": 37.86
+            }
+          ]
+        }
+      },
+      "verdict": "arbitrary train/test noise",
+      "verdict_reason": "Same shape classification (no-clear-pattern) in both WC2022 and Euro2024 -- a genuine tournament-level population difference would be expected to show up here, and it doesn't.",
+      "zero_crossing_differs_between_tournaments": false
+    },
+    {
+      "feature": "local_numerical_balance_5m",
+      "dataset": "active",
+      "train_test_finding": {
+        "in_atlas": true,
+        "overall_shape": "U-shaped",
+        "spearman_rho": -0.0137,
+        "train_val_shape": "U-shaped",
+        "test_shape": "inverse-U",
+        "train_test_consistent": false
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 31041,
+          "n_matches": 64,
+          "shape": "U-shaped",
+          "mean_xt_range": 0.1631046,
+          "bin_mean_min": -0.07743201,
+          "bin_mean_max": 0.08567259,
+          "curve_crosses_zero": true,
+          "bins": [
+            {
+              "bin": "-1.0",
+              "n": 4033,
+              "mean_xt": -0.00327808,
+              "pct_negative": 42.57,
+              "pct_positive": 41.58
+            },
+            {
+              "bin": "-2.0",
+              "n": 1148,
+              "mean_xt": -0.0043726,
+              "pct_negative": 41.03,
+              "pct_positive": 44.25
+            },
+            {
+              "bin": "-3.0",
+              "n": 192,
+              "mean_xt": -0.00647275,
+              "pct_negative": 39.06,
+              "pct_positive": 47.4
+            },
+            {
+              "bin": "-4.0",
+              "n": 63,
+              "mean_xt": -0.03785873,
+              "pct_negative": 53.97,
+              "pct_positive": 38.1
+            },
+            {
+              "bin": "-5.0",
+              "n": 11,
+              "mean_xt": 0.08567259,
+              "pct_negative": 27.27,
+              "pct_positive": 54.55
+            },
+            {
+              "bin": "-6.0",
+              "n": 3,
+              "mean_xt": -0.07743201,
+              "pct_negative": 66.67,
+              "pct_positive": 33.33
+            },
+            {
+              "bin": "0.0",
+              "n": 9090,
+              "mean_xt": -0.00046872,
+              "pct_negative": 47.45,
+              "pct_positive": 41.54
+            },
+            {
+              "bin": "1.0",
+              "n": 12649,
+              "mean_xt": -0.00150337,
+              "pct_negative": 49.26,
+              "pct_positive": 42.97
+            },
+            {
+              "bin": "2.0",
+              "n": 1403,
+              "mean_xt": -0.00357626,
+              "pct_negative": 48.4,
+              "pct_positive": 43.05
+            },
+            {
+              "bin": "3.0",
+              "n": 120,
+              "mean_xt": -0.00994757,
+              "pct_negative": 54.17,
+              "pct_positive": 38.33
+            },
+            {
+              "bin": "4.0",
+              "n": 7,
+              "mean_xt": 0.02293018,
+              "pct_negative": 42.86,
+              "pct_positive": 57.14
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 25027,
+          "n_matches": 51,
+          "shape": "U-shaped",
+          "mean_xt_range": 0.16098101,
+          "bin_mean_min": -0.03695948,
+          "bin_mean_max": 0.12402153,
+          "curve_crosses_zero": true,
+          "bins": [
+            {
+              "bin": "-1.0",
+              "n": 3137,
+              "mean_xt": -0.00145483,
+              "pct_negative": 44.63,
+              "pct_positive": 41.66
+            },
+            {
+              "bin": "-2.0",
+              "n": 955,
+              "mean_xt": -0.00017535,
+              "pct_negative": 39.37,
+              "pct_positive": 43.87
+            },
+            {
+              "bin": "-3.0",
+              "n": 203,
+              "mean_xt": -0.02137799,
+              "pct_negative": 45.81,
+              "pct_positive": 39.41
+            },
+            {
+              "bin": "-4.0",
+              "n": 52,
+              "mean_xt": -0.03695948,
+              "pct_negative": 50.0,
+              "pct_positive": 38.46
+            },
+            {
+              "bin": "-5.0",
+              "n": 8,
+              "mean_xt": 0.0459779,
+              "pct_negative": 50.0,
+              "pct_positive": 50.0
+            },
+            {
+              "bin": "0.0",
+              "n": 7228,
+              "mean_xt": -0.00102332,
+              "pct_negative": 47.98,
+              "pct_positive": 40.8
+            },
+            {
+              "bin": "1.0",
+              "n": 10509,
+              "mean_xt": -0.0009812,
+              "pct_negative": 49.62,
+              "pct_positive": 42.81
+            },
+            {
+              "bin": "2.0",
+              "n": 1201,
+              "mean_xt": -0.00236003,
+              "pct_negative": 51.04,
+              "pct_positive": 39.63
+            },
+            {
+              "bin": "3.0",
+              "n": 89,
+              "mean_xt": 0.00267606,
+              "pct_negative": 48.31,
+              "pct_positive": 43.82
+            },
+            {
+              "bin": "4.0",
+              "n": 9,
+              "mean_xt": 0.00682106,
+              "pct_negative": 33.33,
+              "pct_positive": 44.44
+            },
+            {
+              "bin": "5.0",
+              "n": 2,
+              "mean_xt": 0.12402153,
+              "pct_negative": 0.0,
+              "pct_positive": 50.0
+            }
+          ]
+        }
+      },
+      "verdict": "arbitrary train/test noise",
+      "verdict_reason": "Same shape classification (U-shaped) in both WC2022 and Euro2024 -- a genuine tournament-level population difference would be expected to show up here, and it doesn't.",
+      "zero_crossing_differs_between_tournaments": false
+    },
+    {
+      "feature": "match_time_seconds",
+      "dataset": "active",
+      "train_test_finding": {
+        "in_atlas": true,
+        "overall_shape": "flat",
+        "spearman_rho": -0.0052,
+        "train_val_shape": null,
+        "test_shape": null,
+        "train_test_consistent": null
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 31041,
+          "n_matches": 64,
+          "shape": "flat",
+          "mean_xt_range": 0.00460565,
+          "bin_mean_min": -0.00343841,
+          "bin_mean_max": 0.00116724,
+          "curve_crosses_zero": true,
+          "bins": [
+            {
+              "bin": "(1.999, 516.0]",
+              "n": 3013,
+              "mean_xt": -0.00064373,
+              "pct_negative": 45.4,
+              "pct_positive": 42.42
+            },
+            {
+              "bin": "(516.0, 1137.0]",
+              "n": 3060,
+              "mean_xt": -0.00343841,
+              "pct_negative": 48.01,
+              "pct_positive": 39.08
+            },
+            {
+              "bin": "(1137.0, 1749.0]",
+              "n": 2998,
+              "mean_xt": -0.0020811,
+              "pct_negative": 45.4,
+              "pct_positive": 42.46
+            },
+            {
+              "bin": "(1749.0, 2390.0]",
+              "n": 3044,
+              "mean_xt": 0.00027294,
+              "pct_negative": 44.78,
+              "pct_positive": 44.28
+            },
+            {
+              "bin": "(2390.0, 2877.0]",
+              "n": 3180,
+              "mean_xt": -0.00052011,
+              "pct_negative": 47.92,
+              "pct_positive": 41.35
+            },
+            {
+              "bin": "(2877.0, 3417.0]",
+              "n": 3301,
+              "mean_xt": 0.00116724,
+              "pct_negative": 45.38,
+              "pct_positive": 44.44
+            },
+            {
+              "bin": "(3417.0, 4037.0]",
+              "n": 3107,
+              "mean_xt": -0.00149279,
+              "pct_negative": 47.31,
+              "pct_positive": 42.32
+            },
+            {
+              "bin": "(4037.0, 4689.0]",
+              "n": 3043,
+              "mean_xt": -0.00066028,
+              "pct_negative": 47.55,
+              "pct_positive": 41.6
+            },
+            {
+              "bin": "(4689.0, 5338.5]",
+              "n": 3064,
+              "mean_xt": -0.00336093,
+              "pct_negative": 47.03,
+              "pct_positive": 41.68
+            },
+            {
+              "bin": "(5338.5, 7495.0]",
+              "n": 3214,
+              "mean_xt": -0.00333317,
+              "pct_negative": 47.51,
+              "pct_positive": 40.07
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 25027,
+          "n_matches": 51,
+          "shape": "flat",
+          "mean_xt_range": 0.00350786,
+          "bin_mean_min": -0.00314563,
+          "bin_mean_max": 0.00036223,
+          "curve_crosses_zero": true,
+          "bins": [
+            {
+              "bin": "(1.999, 516.0]",
+              "n": 2592,
+              "mean_xt": -0.00144827,
+              "pct_negative": 46.41,
+              "pct_positive": 42.48
+            },
+            {
+              "bin": "(516.0, 1137.0]",
+              "n": 2548,
+              "mean_xt": -0.00143073,
+              "pct_negative": 48.51,
+              "pct_positive": 39.95
+            },
+            {
+              "bin": "(1137.0, 1749.0]",
+              "n": 2603,
+              "mean_xt": -0.00182415,
+              "pct_negative": 46.79,
+              "pct_positive": 41.61
+            },
+            {
+              "bin": "(1749.0, 2390.0]",
+              "n": 2562,
+              "mean_xt": -0.00314563,
+              "pct_negative": 46.96,
+              "pct_positive": 40.91
+            },
+            {
+              "bin": "(2390.0, 2877.0]",
+              "n": 2428,
+              "mean_xt": -0.00081288,
+              "pct_negative": 46.21,
+              "pct_positive": 42.75
+            },
+            {
+              "bin": "(2877.0, 3417.0]",
+              "n": 2307,
+              "mean_xt": -6.28e-05,
+              "pct_negative": 48.2,
+              "pct_positive": 40.53
+            },
+            {
+              "bin": "(3417.0, 4037.0]",
+              "n": 2488,
+              "mean_xt": 0.00027863,
+              "pct_negative": 48.43,
+              "pct_positive": 40.76
+            },
+            {
+              "bin": "(4037.0, 4689.0]",
+              "n": 2561,
+              "mean_xt": -0.00112077,
+              "pct_negative": 47.09,
+              "pct_positive": 40.96
+            },
+            {
+              "bin": "(4689.0, 5338.5]",
+              "n": 2533,
+              "mean_xt": -0.00267127,
+              "pct_negative": 49.39,
+              "pct_positive": 40.43
+            },
+            {
+              "bin": "(5338.5, 7495.0]",
+              "n": 2390,
+              "mean_xt": 0.00036223,
+              "pct_negative": 46.61,
+              "pct_positive": 43.01
+            }
+          ]
+        }
+      },
+      "verdict": "arbitrary train/test noise",
+      "verdict_reason": "Same shape classification (flat) in both WC2022 and Euro2024 -- a genuine tournament-level population difference would be expected to show up here, and it doesn't.",
+      "zero_crossing_differs_between_tournaments": false
+    },
+    {
+      "feature": "attackers_within_5m",
+      "dataset": "active",
+      "train_test_finding": {
+        "in_atlas": true,
+        "overall_shape": "monotonic decreasing",
+        "spearman_rho": -0.0533,
+        "train_val_shape": "monotonic decreasing",
+        "test_shape": "inverse-U",
+        "train_test_consistent": false
+      },
+      "n_unmapped_rows": 0,
+      "per_tournament": {
+        "WC2022": {
+          "n_rows": 31041,
+          "n_matches": 64,
+          "shape": "U-shaped",
+          "mean_xt_range": 0.34460125,
+          "bin_mean_min": -0.09655819,
+          "bin_mean_max": 0.24804306,
+          "curve_crosses_zero": true,
+          "bins": [
+            {
+              "bin": "0.0",
+              "n": 7956,
+              "mean_xt": 0.0052544,
+              "pct_negative": 44.66,
+              "pct_positive": 45.14
+            },
+            {
+              "bin": "1.0",
+              "n": 17162,
+              "mean_xt": -0.00285093,
+              "pct_negative": 48.44,
+              "pct_positive": 41.67
+            },
+            {
+              "bin": "2.0",
+              "n": 3141,
+              "mean_xt": -0.01003823,
+              "pct_negative": 47.41,
+              "pct_positive": 39.92
+            },
+            {
+              "bin": "3.0",
+              "n": 392,
+              "mean_xt": -0.01811573,
+              "pct_negative": 50.0,
+              "pct_positive": 39.03
+            },
+            {
+              "bin": "4.0",
+              "n": 62,
+              "mean_xt": -0.07250894,
+              "pct_negative": 61.29,
+              "pct_positive": 30.65
+            },
+            {
+              "bin": "5.0",
+              "n": 5,
+              "mean_xt": -0.09655819,
+              "pct_negative": 60.0,
+              "pct_positive": 40.0
+            },
+            {
+              "bin": "6.0",
+              "n": 1,
+              "mean_xt": 0.24804306,
+              "pct_negative": 0.0,
+              "pct_positive": 100.0
+            }
+          ]
+        },
+        "Euro2024": {
+          "n_rows": 25027,
+          "n_matches": 51,
+          "shape": "inverse-U",
+          "mean_xt_range": 0.25558471,
+          "bin_mean_min": -0.24804306,
+          "bin_mean_max": 0.00754165,
+          "curve_crosses_zero": true,
+          "bins": [
+            {
+              "bin": "0.0",
+              "n": 6094,
+              "mean_xt": 0.00754165,
+              "pct_negative": 44.95,
+              "pct_positive": 45.32
+            },
+            {
+              "bin": "1.0",
+              "n": 14030,
+              "mean_xt": -0.00264196,
+              "pct_negative": 49.15,
+              "pct_positive": 41.43
+            },
+            {
+              "bin": "2.0",
+              "n": 2848,
+              "mean_xt": -0.00931211,
+              "pct_negative": 48.53,
+              "pct_positive": 37.92
+            },
+            {
+              "bin": "3.0",
+              "n": 343,
+              "mean_xt": -0.02486598,
+              "pct_negative": 54.23,
+              "pct_positive": 34.11
+            },
+            {
+              "bin": "4.0",
+              "n": 64,
+              "mean_xt": -0.05632997,
+              "pct_negative": 50.0,
+              "pct_positive": 35.94
+            },
+            {
+              "bin": "5.0",
+              "n": 12,
+              "mean_xt": -0.03007436,
+              "pct_negative": 33.33,
+              "pct_positive": 33.33
+            },
+            {
+              "bin": "6.0",
+              "n": 2,
+              "mean_xt": -0.24804306,
+              "pct_negative": 100.0,
+              "pct_positive": 0.0
+            }
+          ]
+        }
+      },
+      "verdict": "genuine tournament-level difference",
+      "verdict_reason": "Shape classification differs between tournaments (WC2022: U-shaped, Euro2024: inverse-U) -- consistent with a real difference between the two populations (rules, pitch dimensions, squad quality), not just arbitrary train/test noise.",
+      "zero_crossing_differs_between_tournaments": false
+    }
+  ]
+}

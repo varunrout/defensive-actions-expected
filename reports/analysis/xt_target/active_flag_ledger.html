@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Active Defensive Actions: Flag Ledger (xT delta)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.xg-card.locked { border-left: 4px solid var(--good); }
+.xg-card.dropped { border-left: 4px solid var(--amber); }
+.xg-status-badge { font-family: "JetBrains Mono", monospace; font-size: 9.5px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px; font-weight: 700; margin-left: 8px; vertical-align: middle; }
+.xg-status-badge.locked { background: var(--good-wash); color: var(--good); }
+.xg-status-badge.dropped { background: var(--amber-wash); color: var(--amber); }
+.xg-reason { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 2px 0 10px; }
+.xt-dirbar { display: inline-block; width: 110px; height: 7px; border-radius: 3px; overflow: hidden;
+  background: var(--plane); vertical-align: middle; margin-left: 6px; }
+.xt-dirbar i { display: inline-block; height: 100%; }
+.xt-dirbar i.neg { background: var(--neg); }
+.xt-dirbar i.zero { background: var(--text-muted); opacity: 0.45; }
+.xt-dirbar i.pos { background: var(--good); }
+.xt-clearance-note { border-left: 4px solid var(--amber); background: var(--amber-wash); padding: 12px 14px;
+  border-radius: 8px; margin: 14px 0; font-size: 12.5px; line-height: 1.55; }
+.xt-adapt { border-left: 4px solid var(--accent); background: var(--accent-wash); padding: 12px 14px;
+  border-radius: 8px; margin: 14px 0; font-size: 12.5px; line-height: 1.55; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">FLAG LEDGER -- XT DELTA &middot; ACTIVE-BINARY LEG ONLY</p>
+  <h1 class="title">Active Defensive Actions: Flag Ledger (xT delta)</h1>
+  <p class="dek">Every boolean column ranked by |mean-xT-delta lift|, reconstructed pre-drop ACTIVE pool, one row
+  per actual defensive action. Active-binary leg only.</p>
+  <div class="statbar"><div class="stat"><b>56,068</b><span>active rows</span></div><div class="stat"><b>-0.00132</b><span>mean xT delta</span></div><div class="stat"><b>-0.00148</b><span>mean given non-zero</span></div><div class="stat"><b>13</b><span>boolean columns</span></div><div class="stat"><b>4</b><span>dropped, still shown</span></div></div>
+</div></div>
+<div class="wrap">
+
+<div class="xt-adapt">
+<b>Methodology adapted for a symmetric, sign-carrying target -- stated, not assumed.</b>
+<p style="margin:8px 0 0;">ADAPTATION 1. target_xt_delta is roughly symmetric with a near-zero, NEGATIVE mean (-0.001316), so the xg_target suite&#x27;s convention of expressing every threshold as a multiple of the overall mean target value is meaningless here (it would flip signs and collapse to nothing). Instead the xg convention is TRANSLATED, not replaced: xg&#x27;s own flat_margin (0.5 x mean xg = 0.004055 on these same rows) is re-expressed as a fraction of xg&#x27;s own standard deviation (0.048033), giving 0.084425, and that fraction is applied to target_xt_delta&#x27;s standard deviation (0.064986). Every number in this calculation is computed at runtime from the real parquet, not carried over from a writeup. Scale-free thresholds (|Spearman rho| &gt;= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged.</p>
+<p style="margin:8px 0 0;">ADAPTATION 2. The xg_target suite&#x27;s second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta has no shot column behind it; its structural-zero analogue is the 11.3% of rows with an EXACTLY zero delta (the action did not cross an xT grid-cell boundary). The conditional panel throughout this suite is therefore &#x27;given a non-zero delta&#x27; (target_xt_delta != 0), never &#x27;given a shot&#x27;.</p>
+<p style="margin:8px 0 0;">ADAPTATION 3. Sign carries the football meaning: POSITIVE target_xt_delta = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. Rankings are by |magnitude| across BOTH directions, never one-sided &#x27;higher is worse&#x27; lift, and every table also reports the negative/positive/zero share behind its mean.</p>
+<p style="margin:8px 0 0;">NOT an adaptation: checked directly rather than assumed -- the xg_target report suite never log-transforms its target anywhere (every xg report uses the raw groupby mean of target_future_xg_10s). The log1p framing in this project belongs to the modelling legs, not to this report suite, so there was no log-transform to remove.</p>
+</div><div class="findings"><div class="finding"><span class="tag">lift</span><p><b>is_in_attacking_box</b> &mdash; True rows are MORE threat-increasing: lift -0.110621 (True -0.100327 vs False +0.010294). Ranked by |lift|, both directions.</p></div><div class="finding"><span class="tag">lift</span><p><b>is_in_defending_box</b> &mdash; True rows are MORE threat-reducing: lift +0.087427 (True +0.078558 vs False -0.008869). Ranked by |lift|, both directions.</p></div><div class="finding"><span class="tag">pool</span><p><b>13 boolean columns (9 locked + 4 dropped-but-included)</b> &mdash; reconstructed pre-drop 51-era ACTIVE pool, same source lists as the xg Flag Ledger.</p></div><div class="finding flag"><span class="tag">small n</span><p><b>has_visible_defender</b> &mdash; has a True or False group under 500 rows (n_true=55960, n_false=76) -- lift estimate is noisy.</p></div><div class="finding flag"><span class="tag">small n</span><p><b>has_visible_attacker</b> &mdash; has a True or False group under 500 rows (n_true=56005, n_false=31) -- lift estimate is noisy.</p></div></div>
+<h2 class="section-title">Flag Ledger -- xT delta</h2><p class="section-note">Diverging bars ranked by <b>absolute</b> lift in mean xT delta, centered on zero -- explicitly both directions, since a negative lift (True rows coincide with threat rising) is just as much a finding as a positive one on this target. Green LOCKED / amber DROPPED badge per row. The two small three-colour bars per row are the True and False groups' negative/zero/positive shares. Expand a row for the non-zero-delta lift.</p>
+<div class="xt-clearance-note">
+<b>A finding this ledger's own methodology does NOT surface -- stated rather than omitted.</b>
+<p style="margin:8px 0;">Prompt 64's motivating result is that the three <code>action_*_possession</code> flags
+stop being degenerate zeros on this target. <b>None of the three appears as a row below.</b> Not because the
+finding fails, but because this ledger is built from the reconstructed pre-drop 51-era pool
+(<code>feature_config_v1_historical.ACTIVE_V1_HISTORICAL</code>), and all three were already out of the
+candidate list before that snapshot was taken -- only <code>action_was_under_opponent_possession</code> survived
+into it. The ledger's pool construction, mirrored unchanged from the xg version, therefore cannot show them.</p>
+<p style="margin:8px 0;">Rather than let the finding disappear on a technicality, the same
+<code>boolean_xt_lift</code> function used for every row below was run on the three columns OFF-POOL. Measured
+on this run:</p>
+<ul style="margin:8px 0 0 18px;"><li><code>action_won_possession</code>: True-group mean <b>-0.003521</b> over n=3,600 (21.0% exactly zero, 42.8% negative, 36.2% positive) &mdash; lift <b>-0.002357</b></li><li><code>action_changed_possession</code>: True-group mean <b>-0.001211</b> over n=4,656 (23.5% exactly zero, 40.7% negative, 35.8% positive) &mdash; lift <b>+0.000114</b></li><li><code>action_ended_possession</code>: True-group mean <b>-0.001211</b> over n=4,656 (23.5% exactly zero, 40.7% negative, 35.8% positive) &mdash; lift <b>+0.000114</b></li></ul>
+<p style="margin:8px 0;">Against <code>target_future_shot_10s</code> these rows are 100% identical zeros -- which
+is the stated reason feature_config.py excludes them ("structural zero (0.00% shot rate by target-window
+definition)"). Against <code>target_xt_delta</code> roughly 77-79% of them are non-zero with real spread. This
+reproduces Prompt 64's central result on the full active dataset rather than only inside the two slices it
+examined.</p>
+<p style="margin:8px 0 0;">Reported as an observation about the target, <b>not</b> a proposal to unlock these
+columns. They stay excluded in feature_config.py; changing it is outside this report suite's remit, and any such
+change would need its own leakage review. They are also covered in this portal's Leakage Audit, Part C&prime;.</p>
+</div><div class="ledger">
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: -0.100327 (n=5881)  False: +0.010294 (n=50155)">
+  <div class="ledger-label">is_in_attacking_box<span class="xg-status-badge locked">LOCKED</span><span class="pct">10.5% True</span>
+    <br><span class="pct">True <span class="xt-dirbar" title="87.8% negative / 8.4% zero / 3.8% positive"><i class="neg" style="width:87.8%"></i><i class="zero" style="width:8.4%"></i><i class="pos" style="width:3.8%"></i></span> &middot; False <span class="xt-dirbar" title="42.2% negative / 11.7% zero / 46.1% positive"><i class="neg" style="width:42.2%"></i><i class="zero" style="width:11.7%"></i><i class="pos" style="width:46.1%"></i></span></span>
+  </div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <div class="ledger-figs"><span class="lift">-0.110621</span><br>T -0.100327 &middot; F +0.010294</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a non-zero delta (n_true=5,385, n_false=44,314) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given non-zero delta <span class="lift">-0.121219</span> &middot; T -0.109568 &middot; F +0.011651
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: +0.078558 (n=4841)  False: -0.008869 (n=51195)">
+  <div class="ledger-label">is_in_defending_box<span class="xg-status-badge locked">LOCKED</span><span class="pct">8.6% True</span>
+    <br><span class="pct">True <span class="xt-dirbar" title="7.2% negative / 11.3% zero / 81.5% positive"><i class="neg" style="width:7.2%"></i><i class="zero" style="width:11.3%"></i><i class="pos" style="width:81.5%"></i></span> &middot; False <span class="xt-dirbar" title="50.8% negative / 11.3% zero / 37.9% positive"><i class="neg" style="width:50.8%"></i><i class="zero" style="width:11.3%"></i><i class="pos" style="width:37.9%"></i></span></span>
+  </div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:39.52%"></div>
+  </div>
+  <div class="ledger-figs"><span class="lift">+0.087427</span><br>T +0.078558 &middot; F -0.008869</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a non-zero delta (n_true=4,292, n_false=45,407) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given non-zero delta <span class="lift">+0.098606</span> &middot; T +0.088607 &middot; F -0.009999
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: -0.053798 (n=13507)  False: +0.015352 (n=42529)">
+  <div class="ledger-label">is_high_zone<span class="xg-status-badge dropped">DROPPED</span><span class="pct">24.1% True &middot; <span class="xg-reason" style="display:inline;">Type 2 REVIEW resolution: near-total subset of is_in_attacking_box (kept, higher lift +11.99pp vs +7.22pp)</span></span>
+    <br><span class="pct">True <span class="xt-dirbar" title="86.7% negative / 8.7% zero / 4.7% positive"><i class="neg" style="width:86.7%"></i><i class="zero" style="width:8.7%"></i><i class="pos" style="width:4.7%"></i></span> &middot; False <span class="xt-dirbar" title="34.4% negative / 12.1% zero / 53.5% positive"><i class="neg" style="width:34.4%"></i><i class="zero" style="width:12.1%"></i><i class="pos" style="width:53.5%"></i></span></span>
+  </div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:31.26%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <div class="ledger-figs"><span class="lift">-0.069151</span><br>T -0.053798 &middot; F +0.015352</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a non-zero delta (n_true=12,335, n_false=37,364) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given non-zero delta <span class="lift">-0.076385</span> &middot; T -0.058910 &middot; F +0.017475
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: +0.050821 (n=11438)  False: -0.014687 (n=44598)">
+  <div class="ledger-label">is_deep_zone<span class="xg-status-badge dropped">DROPPED</span><span class="pct">20.4% True &middot; <span class="xg-reason" style="display:inline;">Type 2 REVIEW resolution: near-total subset of is_in_defending_box (kept, higher lift +12.04pp vs +7.22pp)</span></span>
+    <br><span class="pct">True <span class="xt-dirbar" title="5.2% negative / 10.5% zero / 84.3% positive"><i class="neg" style="width:5.2%"></i><i class="zero" style="width:10.5%"></i><i class="pos" style="width:84.3%"></i></span> &middot; False <span class="xt-dirbar" title="57.7% negative / 11.5% zero / 30.8% positive"><i class="neg" style="width:57.7%"></i><i class="zero" style="width:11.5%"></i><i class="pos" style="width:30.8%"></i></span></span>
+  </div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:29.61%"></div>
+  </div>
+  <div class="ledger-figs"><span class="lift">+0.065508</span><br>T +0.050821 &middot; F -0.014687</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a non-zero delta (n_true=10,239, n_false=39,460) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given non-zero delta <span class="lift">+0.073372</span> &middot; T +0.056772 &middot; F -0.016600
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: -0.001338 (n=55960)  False: +0.015220 (n=76)">
+  <div class="ledger-label">has_visible_defender<span class="small-n-badge">small n</span><span class="xg-status-badge locked">LOCKED</span><span class="pct">99.9% True</span>
+    <br><span class="pct">True <span class="xt-dirbar" title="47.0% negative / 11.3% zero / 41.7% positive"><i class="neg" style="width:47.0%"></i><i class="zero" style="width:11.3%"></i><i class="pos" style="width:41.7%"></i></span> &middot; False <span class="xt-dirbar" title="42.1% negative / 0.0% zero / 57.9% positive"><i class="neg" style="width:42.1%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:57.9%"></i></span></span>
+  </div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:7.48%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <div class="ledger-figs"><span class="lift">-0.016558</span><br>T -0.001338 &middot; F +0.015220</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a non-zero delta (n_true=49,623, n_false=76) (small n) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given non-zero delta <span class="lift">-0.016729</span> &middot; T -0.001509 &middot; F +0.015220
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: -0.004870 (n=43001)  False: +0.010408 (n=13035)">
+  <div class="ledger-label">action_was_under_opponent_possession<span class="xg-status-badge locked">LOCKED</span><span class="pct">76.7% True</span>
+    <br><span class="pct">True <span class="xt-dirbar" title="50.2% negative / 8.1% zero / 41.7% positive"><i class="neg" style="width:50.2%"></i><i class="zero" style="width:8.1%"></i><i class="pos" style="width:41.7%"></i></span> &middot; False <span class="xt-dirbar" title="36.6% negative / 21.8% zero / 41.6% positive"><i class="neg" style="width:36.6%"></i><i class="zero" style="width:21.8%"></i><i class="pos" style="width:41.6%"></i></span></span>
+  </div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:6.91%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <div class="ledger-figs"><span class="lift">-0.015278</span><br>T -0.004870 &middot; F +0.010408</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a non-zero delta (n_true=39,508, n_false=10,191) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given non-zero delta <span class="lift">-0.018613</span> &middot; T -0.005300 &middot; F +0.013313
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: -0.004993 (n=39401)  False: +0.007394 (n=16635)">
+  <div class="ledger-label">action_retained_defensive_team_control<span class="xg-status-badge locked">LOCKED</span><span class="pct">70.3% True</span>
+    <br><span class="pct">True <span class="xt-dirbar" title="50.8% negative / 7.0% zero / 42.2% positive"><i class="neg" style="width:50.8%"></i><i class="zero" style="width:7.0%"></i><i class="pos" style="width:42.2%"></i></span> &middot; False <span class="xt-dirbar" title="37.9% negative / 21.6% zero / 40.4% positive"><i class="neg" style="width:37.9%"></i><i class="zero" style="width:21.6%"></i><i class="pos" style="width:40.4%"></i></span></span>
+  </div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:5.60%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <div class="ledger-figs"><span class="lift">-0.012387</span><br>T -0.004993 &middot; F +0.007394</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a non-zero delta (n_true=36,664, n_false=13,035) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given non-zero delta <span class="lift">-0.014801</span> &middot; T -0.005366 &middot; F +0.009436
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: -0.006247 (n=24343)  False: +0.002472 (n=31693)">
+  <div class="ledger-label">is_central_lane<span class="xg-status-badge dropped">DROPPED</span><span class="pct">43.4% True &middot; <span class="xg-reason" style="display:inline;">Type 1 REVIEW resolution: point-biserial r=0.854 vs attacking_goal_centrality (kept)</span></span>
+    <br><span class="pct">True <span class="xt-dirbar" title="48.3% negative / 11.8% zero / 39.9% positive"><i class="neg" style="width:48.3%"></i><i class="zero" style="width:11.8%"></i><i class="pos" style="width:39.9%"></i></span> &middot; False <span class="xt-dirbar" title="46.0% negative / 10.9% zero / 43.0% positive"><i class="neg" style="width:46.0%"></i><i class="zero" style="width:10.9%"></i><i class="pos" style="width:43.0%"></i></span></span>
+  </div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.94%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <div class="ledger-figs"><span class="lift">-0.008719</span><br>T -0.006247 &middot; F +0.002472</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a non-zero delta (n_true=21,465, n_false=28,234) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given non-zero delta <span class="lift">-0.009859</span> &middot; T -0.007085 &middot; F +0.002775
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: -0.001320 (n=56005)  False: +0.006792 (n=31)">
+  <div class="ledger-label">has_visible_attacker<span class="small-n-badge">small n</span><span class="xg-status-badge locked">LOCKED</span><span class="pct">99.9% True</span>
+    <br><span class="pct">True <span class="xt-dirbar" title="47.0% negative / 11.3% zero / 41.7% positive"><i class="neg" style="width:47.0%"></i><i class="zero" style="width:11.3%"></i><i class="pos" style="width:41.7%"></i></span> &middot; False <span class="xt-dirbar" title="48.4% negative / 3.2% zero / 48.4% positive"><i class="neg" style="width:48.4%"></i><i class="zero" style="width:3.2%"></i><i class="pos" style="width:48.4%"></i></span></span>
+  </div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.67%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <div class="ledger-figs"><span class="lift">-0.008112</span><br>T -0.001320 &middot; F +0.006792</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a non-zero delta (n_true=49,669, n_false=30) (small n) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given non-zero delta <span class="lift">-0.008507</span> &middot; T -0.001489 &middot; F +0.007018
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: -0.003851 (n=27384)  False: +0.001107 (n=28652)">
+  <div class="ledger-label">phase_changed_since_prev_event<span class="xg-status-badge locked">LOCKED</span><span class="pct">48.9% True</span>
+    <br><span class="pct">True <span class="xt-dirbar" title="53.6% negative / 1.5% zero / 44.9% positive"><i class="neg" style="width:53.6%"></i><i class="zero" style="width:1.5%"></i><i class="pos" style="width:44.9%"></i></span> &middot; False <span class="xt-dirbar" title="40.7% negative / 20.7% zero / 38.6% positive"><i class="neg" style="width:40.7%"></i><i class="zero" style="width:20.7%"></i><i class="pos" style="width:38.6%"></i></span></span>
+  </div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:2.24%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <div class="ledger-figs"><span class="lift">-0.004959</span><br>T -0.003851 &middot; F +0.001107</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a non-zero delta (n_true=26,971, n_false=22,728) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given non-zero delta <span class="lift">-0.005306</span> &middot; T -0.003910 &middot; F +0.001396
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: +0.002079 (n=15392)  False: -0.002601 (n=40644)">
+  <div class="ledger-label">is_wide_lane<span class="xg-status-badge dropped">DROPPED</span><span class="pct">27.5% True &middot; <span class="xg-reason" style="display:inline;">Type 1 REVIEW resolution: point-biserial r=-0.785 vs attacking_goal_centrality (kept)</span></span>
+    <br><span class="pct">True <span class="xt-dirbar" title="44.9% negative / 11.3% zero / 43.8% positive"><i class="neg" style="width:44.9%"></i><i class="zero" style="width:11.3%"></i><i class="pos" style="width:43.8%"></i></span> &middot; False <span class="xt-dirbar" title="47.8% negative / 11.3% zero / 40.9% positive"><i class="neg" style="width:47.8%"></i><i class="zero" style="width:11.3%"></i><i class="pos" style="width:40.9%"></i></span></span>
+  </div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:2.12%"></div>
+  </div>
+  <div class="ledger-figs"><span class="lift">+0.004680</span><br>T +0.002079 &middot; F -0.002601</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a non-zero delta (n_true=13,651, n_false=36,048) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given non-zero delta <span class="lift">+0.005277</span> &middot; T +0.002344 &middot; F -0.002933
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: +0.001524 (n=8689)  False: -0.001837 (n=47347)">
+  <div class="ledger-label">counterpress<span class="xg-status-badge locked">LOCKED</span><span class="pct">15.5% True</span>
+    <br><span class="pct">True <span class="xt-dirbar" title="41.2% negative / 17.8% zero / 41.1% positive"><i class="neg" style="width:41.2%"></i><i class="zero" style="width:17.8%"></i><i class="pos" style="width:41.1%"></i></span> &middot; False <span class="xt-dirbar" title="48.1% negative / 10.1% zero / 41.8% positive"><i class="neg" style="width:48.1%"></i><i class="zero" style="width:10.1%"></i><i class="pos" style="width:41.8%"></i></span></span>
+  </div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.52%"></div>
+  </div>
+  <div class="ledger-figs"><span class="lift">+0.003361</span><br>T +0.001524 &middot; F -0.001837</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a non-zero delta (n_true=7,147, n_false=42,552) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given non-zero delta <span class="lift">+0.003897</span> &middot; T +0.001853 &middot; F -0.002044
+</div>
+</details>
+</div>
+<div style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:2px;">
+<div class="ledger-row" style="border-bottom:none;" title="True: -0.001163 (n=51515)  False: -0.003054 (n=4521)">
+  <div class="ledger-label">has_previous_event<span class="xg-status-badge locked">LOCKED</span><span class="pct">91.9% True</span>
+    <br><span class="pct">True <span class="xt-dirbar" title="48.1% negative / 9.1% zero / 42.8% positive"><i class="neg" style="width:48.1%"></i><i class="zero" style="width:9.1%"></i><i class="pos" style="width:42.8%"></i></span> &middot; False <span class="xt-dirbar" title="34.4% negative / 36.4% zero / 29.2% positive"><i class="neg" style="width:34.4%"></i><i class="zero" style="width:36.4%"></i><i class="pos" style="width:29.2%"></i></span></span>
+  </div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.85%"></div>
+  </div>
+  <div class="ledger-figs"><span class="lift">+0.001891</span><br>T -0.001163 &middot; F -0.003054</div>
+</div>
+<details>
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--neg); padding:2px 14px;">
+  given a non-zero delta (n_true=46,823, n_false=2,876) -- click to expand
+</summary>
+<div class="ledger-figs" style="padding:4px 14px 6px; text-align:left;">
+  lift given non-zero delta <span class="lift">+0.003521</span> &middot; T -0.001280 &middot; F -0.004801
+</div>
+</details>
+</div></div>
+</div>
+</body>
+</html>

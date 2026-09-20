@@ -1,0 +1,49 @@
+{
+  "dataset": "active",
+  "leg": "active-binary only (passive leg out of scope for this target)",
+  "target": "target_xt_delta",
+  "n_rows": 56068,
+  "target_distribution": {
+    "target": "target_xt_delta",
+    "n_rows": 56068,
+    "n_defined": 56036,
+    "n_nan": 32,
+    "mean": -0.00131579,
+    "std": 0.06498593,
+    "skew": 0.0933,
+    "excess_kurtosis": 8.846,
+    "pct_zero": 11.309,
+    "pct_negative": 47.002,
+    "pct_positive": 41.689,
+    "xg_mean_same_rows": 0.00811039,
+    "xg_std_same_rows": 0.0480329,
+    "xg_flat_margin_absolute": 0.00405519,
+    "xg_flat_margin_as_fraction_of_xg_std": 0.084425,
+    "flat_margin": 0.00548646,
+    "range_trigger": 0.01097292,
+    "near_identical_threshold": 0.00548646,
+    "distinct_signal_threshold": 0.01645938,
+    "n_nonzero": 49699,
+    "mean_nonzero": -0.00148356,
+    "std_nonzero": 0.06900304,
+    "flat_margin_nonzero": 0.00582561,
+    "scale_note": "ADAPTATION 1. target_xt_delta is roughly symmetric with a near-zero, NEGATIVE mean (-0.001316), so the xg_target suite's convention of expressing every threshold as a multiple of the overall mean target value is meaningless here (it would flip signs and collapse to nothing). Instead the xg convention is TRANSLATED, not replaced: xg's own flat_margin (0.5 x mean xg = 0.004055 on these same rows) is re-expressed as a fraction of xg's own standard deviation (0.048033), giving 0.084425, and that fraction is applied to target_xt_delta's standard deviation (0.064986). Every number in this calculation is computed at runtime from the real parquet, not carried over from a writeup. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged.",
+    "conditional_panel_note": "ADAPTATION 2. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta has no shot column behind it; its structural-zero analogue is the 11.3% of rows with an EXACTLY zero delta (the action did not cross an xT grid-cell boundary). The conditional panel throughout this suite is therefore 'given a non-zero delta' (target_xt_delta != 0), never 'given a shot'.",
+    "direction_note": "ADAPTATION 3. Sign carries the football meaning: POSITIVE target_xt_delta = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. Rankings are by |magnitude| across BOTH directions, never one-sided 'higher is worse' lift, and every table also reports the negative/positive/zero share behind its mean.",
+    "log_transform_note": "NOT an adaptation: checked directly rather than assumed -- the xg_target report suite never log-transforms its target anywhere (every xg report uses the raw groupby mean of target_future_xg_10s). The log1p framing in this project belongs to the modelling legs, not to this report suite, so there was no log-transform to remove."
+  },
+  "target_histogram": {
+    "n_bins": 61,
+    "symmetric_cap_abs_p99": 0.24857372,
+    "n_rows_inside_cap": 55619,
+    "n_rows_clipped": 417
+  },
+  "feature_cards_are_target_independent": "continuous_distribution / discrete_distribution never reference a target column -- the feature cards in the HTML are reproduced from the same functions the xg portal's atlas uses, unchanged.",
+  "variants": {
+    "active_distribution_atlas.html": "locked ACTIVE candidate list (19 numerical columns)",
+    "active_distribution_atlas_reconstructed.html": "reconstructed pre-drop pool (31 numerical columns)"
+  },
+  "prompt_64_cross_references": {
+    "distribution_shape": "Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.2): target_xt_delta is roughly symmetric (skew +0.093), heavy-tailed (excess kurtosis 8.85), 47.0% negative / 41.7% positive / 11.3% exactly zero. This is a fundamentally different shape from target_future_xg_10s, which is strictly non-negative, zero-inflated and heavily right-skewed. Any methodology that assumed non-negativity had to be adapted explicitly -- see this module's Adaptation 1/2/3 notes, restated in every report."
+  }
+}

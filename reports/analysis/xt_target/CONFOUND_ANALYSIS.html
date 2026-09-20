@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Active Dataset Confound (Reversal) Testing (xT delta)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.test-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.test-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.test-title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 24px; margin: 0 0 6px; }
+.test-subnote { color: var(--text-muted); font-size: 13px; margin: 0 0 24px; }
+.qchart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
+.qchart-card h4 { font-family: "Archivo", sans-serif; font-size: 14.5px; margin: 0 0 4px; }
+.qchart-card .qc-note { color: var(--text-muted); font-size: 12px; margin: 0 0 16px; }
+.qbar-row { display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 0 4px; }
+.qbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.qbar-val { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.qbar-fill { width: 100%; max-width: 56px; background: var(--neg); border-radius: 4px 4px 0 0; min-height: 2px; }
+.qbar-label { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; text-align: center; line-height: 1.3; }
+.qbar-n { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); }
+.stratum-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 700px) { .stratum-grid { grid-template-columns: 1fr; } }
+.stratum-card { background: var(--plane); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.stratum-card h5 { font-family: "JetBrains Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--accent); margin: 0 0 4px; }
+.stratum-delta { font-size: 11.5px; color: var(--text-muted); margin: 0 0 12px; }
+.stratum-delta b { color: var(--text-primary); }
+.qbar-row.small { height: 90px; gap: 8px; }
+.qbar-row.small .qbar-fill { max-width: 40px; }
+.verdict-banner { border-radius: 10px; padding: 16px 20px; margin: 8px 0 28px; font-size: 14px; }
+.verdict-banner.v-no { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); }
+.verdict-banner.v-yes { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); }
+.verdict-banner.v-partially { background: rgba(42,120,214,0.10); border: 1px solid rgba(42,120,214,0.3); }
+.verdict-banner b { color: var(--text-primary); }
+.caveat-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 20px 24px; margin-top: 32px; }
+.caveat-box h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.caveat-box ul { margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary); }
+.caveat-box li { margin-bottom: 4px; }
+
+.dataset-block { margin-top: 56px; padding-top: 36px; border-top: 2px solid var(--border); }
+.dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.dataset-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  margin: 0 0 4px;
+}
+.dataset-substat { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 12.5px; margin: 0 0 18px; }
+.method-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 16px 0 40px;
+}
+@media (max-width: 980px) { .method-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .method-strip { grid-template-columns: 1fr; } }
+.method-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.method-card .m-name {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: block;
+}
+.method-card p { margin: 0; font-size: 12.5px; color: var(--text-secondary); }
+.tier-section { margin: 12px 0 44px; }
+.tier-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+.tier-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.tier-dot.drop { background: var(--pos); }
+.tier-dot.collapse { background: var(--amber); }
+.tier-dot.review { background: var(--neg); }
+.tier-dot.distinct { background: var(--good); }
+.tier-note { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; }
+.corr-ledger { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.corr-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 160px 76px 96px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.corr-row:last-child { border-bottom: none; }
+.corr-row:hover { background: var(--plane); }
+@media (max-width: 760px) {
+  .corr-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 14px; }
+}
+.corr-pair { color: var(--text-primary); font-weight: 600; }
+.corr-pair .arrow { color: var(--text-muted); font-weight: 400; margin: 0 4px; }
+.corr-method {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.corr-mag-track { position: relative; height: 8px; background: var(--gridline); border-radius: 4px; }
+.corr-mag-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; }
+.corr-mag-fill.drop { background: var(--pos); }
+.corr-mag-fill.collapse { background: var(--amber); }
+.corr-mag-fill.review { background: var(--neg); }
+.corr-mag-fill.distinct { background: var(--good); }
+.corr-value { font-family: "JetBrains Mono", monospace; font-weight: 600; text-align: right; }
+.verdict-chip {
+  justify-self: end;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verdict-chip.drop { background: rgba(227,73,72,0.14); color: var(--pos); }
+.verdict-chip.collapse { background: var(--amber-wash); color: var(--amber); }
+.verdict-chip.review { background: rgba(42,120,214,0.12); color: var(--neg); }
+.verdict-chip.distinct { background: var(--good-wash); color: var(--good); }
+.closing-note {
+  margin-top: 24px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.closing-note b { color: var(--text-primary); }
+
+.rule-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+.rule-banner b { color: var(--text-primary); }
+.framework-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 40px; }
+@media (max-width: 760px) { .framework-grid { grid-template-columns: 1fr; } }
+.framework-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.framework-card .f-type {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: block;
+}
+.framework-card h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.framework-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0 0 10px; }
+.framework-card .example {
+  font-size: 12.5px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+}
+.framework-card .example b { color: var(--text-primary); }
+
+.hcall-panel {
+  background: var(--amber-wash);
+  border: 1px solid rgba(237,161,0,0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 20px 0 40px;
+}
+.hcall-panel > .hp-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.hcall-panel > .hp-note { font-size: 13px; color: var(--text-secondary); margin: 0 0 16px; }
+.hcall-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.hcall-item:last-child { margin-bottom: 0; }
+.hcall-item .hp-pair { font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.hcall-item .hp-reason { color: var(--text-secondary); }
+
+.table-scroll { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+.evidence-ledger { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 12.5px; border: none; border-radius: 0; }
+.evidence-ledger th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.evidence-ledger td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); background: var(--surface); }
+.evidence-ledger tr:last-child td { border-bottom: none; }
+.evidence-ledger td:first-child { color: var(--text-primary); font-weight: 600; }
+
+.path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+@media (max-width: 760px) { .path-grid { grid-template-columns: 1fr; } }
+.path-card { border-radius: 10px; padding: 16px 18px; border: 1px solid var(--border); }
+.path-card.do-now { background: var(--good-wash); border-color: rgba(47,158,91,0.35); }
+.path-card.defer { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.path-card .p-label {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+.path-card.do-now .p-label { color: var(--good); }
+.path-card.defer .p-label { color: var(--amber); }
+.path-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
+.recommendation {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--good);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+.recommendation b { color: var(--text-primary); }
+
+.xtq-row { display: flex; align-items: stretch; gap: 10px; margin: 14px 0 6px; }
+.xtq-col { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.xtq-track { position: relative; width: 100%; height: 130px; background: var(--plane); border-radius: 4px; }
+.xtq-track .mid { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--text-primary); opacity: 0.35; }
+.xtq-bar { position: absolute; left: 22%; width: 56%; border-radius: 3px; }
+.xtq-bar.pos { bottom: 50%; background: var(--good); }
+.xtq-bar.neg { top: 50%; background: var(--neg); }
+.xtq-val { font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+.xtq-label { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--text-secondary); margin-top: 5px; text-align: center; }
+.xtq-n { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); }
+.xtq-row.small .xtq-track { height: 78px; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">CONFOUND ANALYSIS -- XT DELTA &amp;middot; ACTIVE-BINARY LEG ONLY</p>
+  <h1 class="title">Active Dataset Confound (Reversal) Testing (xT delta)</h1>
+  <p class="dek">One test mirrored from the only active confound test that exists in this repo, one new test motivated by Prompt 64's Clearance/action_x finding. The verdict function is reused byte-for-byte (sign-only, already target-scale-agnostic); each test carries a non-zero-delta panel in place of the xg version's shot-conditional one. Active-binary leg only.</p>
+  <div class="statbar"><div class="stat"><b>56,068</b><span>rows (active)</span></div><div class="stat"><b>2</b><span>tests</span></div><div class="stat"><b>1</b><span>mirrored / 1 new</span></div><div class="stat"><b>1</b><span>diverge from binary-target verdict</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+
+<div class="rule-banner"><b>Scope, confirmed by reading the source.</b> CONFIRMED BY READING THE SOURCE: reports/analysis/xg_target/CONFOUND_ANALYSIS.json&#x27;s 5 tests are ALL passive-dataset tests on passive-only columns, produced by generate_confound_analysis_xg.py (2) and generate_confound_analysis_part_d_xg.py (3). Exactly one active-dataset confound test exists anywhere in this repo for any target -- &#x27;defenders_within_10m_vs_box_proximity&#x27; in the binary portal, from generate_confound_analysis_part_a.py; the xg portal never received it. Test 1 below mirrors that test exactly. Test 2 is new and is labelled as new.</div>
+<div class="rule-banner" style="margin-top:16px;"><b>Method, and what did and did not need adapting.</b>
+Same quartile/boolean-stratification method as the binary and xg confound analyses. _verdict() is imported from generate_confound_analysis and reused BYTE-FOR-BYTE -- it compares only the SIGN of first-to-last deltas across strata, never a magnitude threshold, so it is target-scale-agnostic and needed no adaptation (the same reason generate_confound_analysis_xg.py reused it). QCUT_N=4 unchanged. Only the table builders differ: mean target_xt_delta instead of a shot-rate percentage, with the negative/zero/positive shares added. Each test carries a &#x27;given_nonzero_delta&#x27; sub-object in place of the xg version&#x27;s &#x27;given_shot&#x27; -- this target&#x27;s structural-zero analogue (Adaptation 2).</div>
+<div class="rule-banner" style="margin-top:16px;"><b>Reading the numbers.</b> ADAPTATION 3. Sign carries the football meaning: POSITIVE target_xt_delta = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. Rankings are by |magnitude| across BOTH directions, never one-sided &#x27;higher is worse&#x27; lift, and every table also reports the negative/positive/zero share behind its mean.</div>
+
+<div class="test-block">
+  <h2 class="test-title">defenders_within_10m vs box proximity (xT delta)</h2>
+  <p class="test-subnote">Marginal: <code>defenders_within_10m</code> (numeric)
+  vs proposed confound: <code>is_in_attacking_box</code> (boolean) --
+  more nearby defenders correlating with more danger (not less) is opposite naive intuition -- plausibly because defenders converge precisely when the situation is already dangerous (box proximity)</p>
+  <div class="finding"><span class="tag">provenance</span><p><b>mirrored or new -- said which</b> &mdash; MIRROR of the only active-dataset confound test that exists anywhere in this repo: reports/analysis/shot_target/CONFOUND_ANALYSIS.json&#x27;s &#x27;defenders_within_10m_vs_box_proximity&#x27;, added by generate_confound_analysis_part_a.py. The xg portal never received it -- its own CONFOUND_ANALYSIS.json holds 5 passive-only tests. Same marginal column, same quartile labels, same live confound-selection rule, same reliability caveat, run against target_xt_delta.</p></div>
+  <div class="finding"><span class="tag">confound selection</span><p><b>both candidates checked on this run</b> &mdash; Checked both candidates directly on this run: corr(defenders_within_10m, is_in_defending_box)=0.2397, corr(defenders_within_10m, is_in_attacking_box)=0.2825 -- used is_in_attacking_box, the stronger correlation. Same rule the binary-target version applies.</p></div><div class="finding flag"><span class="tag">reliability caveat</span><p><b>read the numbers as pooled-population description</b> &mdash; UNRELIABLE, not a clean finding -- caveat carried forward from the binary-target version and re-checked against this portal&#x27;s own Tournament Stability Check: defenders_within_10m is a GENUINE TOURNAMENT-LEVEL DIFFERENCE, not arbitrary train/test noise. This test runs on the pooled 115-match population, which mixes two populations. Read the numbers below as a description of the pooled data, not as evidence about a single stable phenomenon.</p></div>
+  
+<div class="finding flag" style="margin:16px 0;">
+<span class="tag">diverges from the binary-target version of this same test</span>
+<p>Binary target (<code>target_future_shot_10s</code>) verdict: <b>no</b>. xT-delta verdict:
+<b>partially</b>. Same stratification, same columns, same <code>_verdict()</code> function -- the two
+targets genuinely disagree here. Don't assume the binary-target conclusion carries over.</p>
+</div>
+  <div class="verdict-banner v-partially">
+  <b>Unconditional verdict: PARTIALLY</b> &mdash; The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.
+  (1/2 strata)
+  </div>
+  <div class="qchart-card">
+    <h4>Marginal mean target_xt_delta by defenders_within_10m</h4>
+    <p class="qc-note">Unconditioned. Bars diverge from the centre line: green up = xT fell (threat reduced),
+    red down = xT rose. Hover a bar for its negative/zero/positive row shares.</p>
+    <div class="xtq-row">
+<div class="xtq-col">
+  <span class="xtq-val">+0.002466</span>
+  <div class="xtq-track" title="47% neg / 8% zero / 44% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:5.8%"></div></div>
+  <span class="xtq-label">Q1 fewest</span>
+  <span class="xtq-n">n=20,190</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.002094</span>
+  <div class="xtq-track" title="47% neg / 13% zero / 40% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:4.9%"></div></div>
+  <span class="xtq-label">Q2</span>
+  <span class="xtq-n">n=10,523</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.004773</span>
+  <div class="xtq-track" title="48% neg / 14% zero / 39% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:11.2%"></div></div>
+  <span class="xtq-label">Q3</span>
+  <span class="xtq-n">n=6,295</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.021361</span>
+  <div class="xtq-track" title="50% neg / 12% zero / 38% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-label">Q4 most</span>
+  <span class="xtq-n">n=6,170</span>
+</div></div>
+  </div>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>False</h5>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.026148</b></p>
+  <div class="xtq-row small">
+<div class="xtq-col">
+  <span class="xtq-val">+0.007228</span>
+  <div class="xtq-track" title="44% neg / 9% zero / 47% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:10.8%"></div></div>
+  <span class="xtq-label">Q1 fewest</span>
+  <span class="xtq-n">n=19,019</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.003662</span>
+  <div class="xtq-track" title="44% neg / 13% zero / 43% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:5.5%"></div></div>
+  <span class="xtq-label">Q2</span>
+  <span class="xtq-n">n=9,785</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.008404</span>
+  <div class="xtq-track" title="42% neg / 15% zero / 44% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:12.6%"></div></div>
+  <span class="xtq-label">Q3</span>
+  <span class="xtq-n">n=5,500</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.033377</span>
+  <div class="xtq-track" title="32% neg / 13% zero / 55% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-label">Q4 most</span>
+  <span class="xtq-n">n=4,148</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>True</h5>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>-0.058769</b></p>
+  <div class="xtq-row small">
+<div class="xtq-col">
+  <span class="xtq-val">-0.074883</span>
+  <div class="xtq-track" title="94% neg / 3% zero / 3% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:28.0%"></div></div>
+  <span class="xtq-label">Q1 fewest</span>
+  <span class="xtq-n">n=1,171</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.078414</span>
+  <div class="xtq-track" title="90% neg / 7% zero / 3% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:29.3%"></div></div>
+  <span class="xtq-label">Q2</span>
+  <span class="xtq-n">n=738</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.095929</span>
+  <div class="xtq-track" title="90% neg / 7% zero / 3% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:35.9%"></div></div>
+  <span class="xtq-label">Q3</span>
+  <span class="xtq-n">n=795</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.133652</span>
+  <div class="xtq-track" title="87% neg / 10% zero / 3% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-label">Q4 most</span>
+  <span class="xtq-n">n=2,022</span>
+</div></div>
+</div></div>
+  
+<h3 style="margin-top:24px;">Given a non-zero delta (n=49,699)</h3>
+<p class="test-subnote">Same marginal + stratified-by-confound structure, restricted to
+<code>target_xt_delta != 0</code> -- this target's structural-zero analogue of the xg report's
+"given a shot happened" panel (Adaptation 2). It asks whether the pattern is about the size of the threat swing
+rather than about whether the action crossed an xT grid-cell boundary at all.</p>
+
+<div class="finding" style="margin:16px 0;">
+<span class="tag">holds once the zero mass is removed</span>
+<p>The pattern survives restricting to rows with a non-zero delta (marginal range 0.026883) -- it is about the
+SIZE and DIRECTION of the threat swing, not merely about which rows registered any swing at all. Same verdict as
+unconditional: <b>partially</b>.</p>
+</div>
+<div class="verdict-banner v-partially">
+<b>Non-zero-delta verdict: PARTIALLY</b> &mdash; The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.
+(1/2 strata)
+</div>
+<div class="qchart-card"><h4>Marginal mean delta, non-zero-delta subset</h4><div class="xtq-row">
+<div class="xtq-col">
+  <span class="xtq-val">+0.002687</span>
+  <div class="xtq-track" title="52% neg / 0% zero / 48% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:5.6%"></div></div>
+  <span class="xtq-label">Q1 fewest</span>
+  <span class="xtq-n">n=18,531</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.002407</span>
+  <div class="xtq-track" title="54% neg / 0% zero / 46% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:5.0%"></div></div>
+  <span class="xtq-label">Q2</span>
+  <span class="xtq-n">n=9,154</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.005529</span>
+  <div class="xtq-track" title="55% neg / 0% zero / 45% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:11.4%"></div></div>
+  <span class="xtq-label">Q3</span>
+  <span class="xtq-n">n=5,434</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.024196</span>
+  <div class="xtq-track" title="57% neg / 0% zero / 43% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-label">Q4 most</span>
+  <span class="xtq-n">n=5,447</span>
+</div></div></div>
+<div class="stratum-grid">
+<div class="stratum-card">
+  <h5>False</h5>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.030373</b></p>
+  <div class="xtq-row small">
+<div class="xtq-col">
+  <span class="xtq-val">+0.007903</span>
+  <div class="xtq-track" title="49% neg / 0% zero / 51% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:10.3%"></div></div>
+  <span class="xtq-label">Q1 fewest</span>
+  <span class="xtq-n">n=17,395</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.004232</span>
+  <div class="xtq-track" title="51% neg / 0% zero / 49% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:5.5%"></div></div>
+  <span class="xtq-label">Q2</span>
+  <span class="xtq-n">n=8,467</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.009842</span>
+  <div class="xtq-track" title="49% neg / 0% zero / 51% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:12.9%"></div></div>
+  <span class="xtq-label">Q3</span>
+  <span class="xtq-n">n=4,696</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.038277</span>
+  <div class="xtq-track" title="37% neg / 0% zero / 63% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-label">Q4 most</span>
+  <span class="xtq-n">n=3,617</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>True</h5>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>-0.070485</b></p>
+  <div class="xtq-row small">
+<div class="xtq-col">
+  <span class="xtq-val">-0.077190</span>
+  <div class="xtq-track" title="97% neg / 0% zero / 3% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:26.1%"></div></div>
+  <span class="xtq-label">Q1 fewest</span>
+  <span class="xtq-n">n=1,136</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.084235</span>
+  <div class="xtq-track" title="96% neg / 0% zero / 4% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:28.5%"></div></div>
+  <span class="xtq-label">Q2</span>
+  <span class="xtq-n">n=687</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.103338</span>
+  <div class="xtq-track" title="97% neg / 0% zero / 3% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:35.0%"></div></div>
+  <span class="xtq-label">Q3</span>
+  <span class="xtq-n">n=738</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.147675</span>
+  <div class="xtq-track" title="96% neg / 0% zero / 4% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-label">Q4 most</span>
+  <span class="xtq-n">n=1,830</span>
+</div></div>
+</div></div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">Clearance&#x27;s negative mean delta vs defending-box proximity (xT delta)<span class="nf-badge type" style="margin-left:8px;">NEW TEST</span></h2>
+  <p class="test-subnote">Marginal: <code>event_type</code> (category_indicator)
+  vs proposed confound: <code>is_in_defending_box</code> (boolean) --
+  Clearance&#x27;s strongly negative mean delta is an artefact of WHERE clearances happen (deep in the defending box, a high-xT cell that xt_after scores as the post-action location), not of clearances themselves -- so conditioning on defending-box proximity should flatten it</p>
+  <div class="finding"><span class="tag">provenance</span><p><b>mirrored or new -- said which</b> &mdash; NEW TEST -- it has no counterpart in the xg or binary portals and is labelled as new rather than presented as an established one. It exists because Prompt 64&#x27;s Clearance/action_x finding resurfaced in this portal&#x27;s Category Atlas exactly as predicted (Clearance ranks last of 8 event_type categories), and the confound-testing method is the right established instrument in this suite for asking whether a marginal pattern survives conditioning.</p></div>
+  <div class="finding flag"><span class="tag">carried forward from Prompt 64</span><p><b>Clearance / action_x artefact</b> &mdash; Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.1/3.4): for Clearance events, action_x/action_y -- this target&#x27;s definition of the post-action location, and therefore of xt_after -- is the location the clearance was taken FROM, not where the ball ends up. Last-ditch clearances are very often taken deep in the defending box, a high-xT cell by construction, so Clearance rows carry a systematically negative delta even though a clearance is a good defensive outcome. Prompt 64 measured this directly at -0.0315 mean delta for Clearance inside the action_ended_possession slice, against +0.0009 to +0.0076 for every other event type there. This is a measurement artefact of the xt_after definition, NOT evidence that clearances are bad defending.</p></div>
+  
+  <div class="verdict-banner v-partially">
+  <b>Unconditional verdict: PARTIALLY</b> &mdash; The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.
+  (1/2 strata)
+  </div>
+  <div class="qchart-card">
+    <h4>Marginal mean target_xt_delta by event_type</h4>
+    <p class="qc-note">Unconditioned. Bars diverge from the centre line: green up = xT fell (threat reduced),
+    red down = xT rose. Hover a bar for its negative/zero/positive row shares.</p>
+    <div class="xtq-row">
+<div class="xtq-col">
+  <span class="xtq-val">+0.001199</span>
+  <div class="xtq-track" title="47% neg / 12% zero / 42% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:1.8%"></div></div>
+  <span class="xtq-label">not Clearance</span>
+  <span class="xtq-n">n=51,852</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.032482</span>
+  <div class="xtq-track" title="53% neg / 5% zero / 42% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-label">Clearance</span>
+  <span class="xtq-n">n=4,184</span>
+</div></div>
+  </div>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>False</h5>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>-0.072884</b></p>
+  <div class="xtq-row small">
+<div class="xtq-col">
+  <span class="xtq-val">-0.004549</span>
+  <div class="xtq-track" title="49% neg / 12% zero / 39% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:2.9%"></div></div>
+  <span class="xtq-label">not Clearance</span>
+  <span class="xtq-n">n=48,161</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.077433</span>
+  <div class="xtq-track" title="71% neg / 5% zero / 24% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-label">Clearance</span>
+  <span class="xtq-n">n=3,034</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>True</h5>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.009906</b></p>
+  <div class="xtq-row small">
+<div class="xtq-col">
+  <span class="xtq-val">+0.076205</span>
+  <div class="xtq-track" title="8% neg / 13% zero / 79% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:44.2%"></div></div>
+  <span class="xtq-label">not Clearance</span>
+  <span class="xtq-n">n=3,691</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.086111</span>
+  <div class="xtq-track" title="6% neg / 5% zero / 89% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-label">Clearance</span>
+  <span class="xtq-n">n=1,150</span>
+</div></div>
+</div></div>
+  
+<h3 style="margin-top:24px;">Given a non-zero delta (n=49,699)</h3>
+<p class="test-subnote">Same marginal + stratified-by-confound structure, restricted to
+<code>target_xt_delta != 0</code> -- this target's structural-zero analogue of the xg report's
+"given a shot happened" panel (Adaptation 2). It asks whether the pattern is about the size of the threat swing
+rather than about whether the action crossed an xT grid-cell boundary at all.</p>
+
+<div class="finding" style="margin:16px 0;">
+<span class="tag">holds once the zero mass is removed</span>
+<p>The pattern survives restricting to rows with a non-zero delta (marginal range 0.035464) -- it is about the
+SIZE and DIRECTION of the threat swing, not merely about which rows registered any swing at all. Same verdict as
+unconditional: <b>partially</b>.</p>
+</div>
+<div class="verdict-banner v-partially">
+<b>Non-zero-delta verdict: PARTIALLY</b> &mdash; The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.
+(1/2 strata)
+</div>
+<div class="qchart-card"><h4>Marginal mean delta, non-zero-delta subset</h4><div class="xtq-row">
+<div class="xtq-col">
+  <span class="xtq-val">+0.001360</span>
+  <div class="xtq-track" title="53% neg / 0% zero / 47% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:2.0%"></div></div>
+  <span class="xtq-label">not Clearance</span>
+  <span class="xtq-n">n=45,714</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.034104</span>
+  <div class="xtq-track" title="56% neg / 0% zero / 44% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-label">Clearance</span>
+  <span class="xtq-n">n=3,985</span>
+</div></div></div>
+<div class="stratum-grid">
+<div class="stratum-card">
+  <h5>False</h5>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>-0.075969</b></p>
+  <div class="xtq-row small">
+<div class="xtq-col">
+  <span class="xtq-val">-0.005154</span>
+  <div class="xtq-track" title="56% neg / 0% zero / 44% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:3.2%"></div></div>
+  <span class="xtq-label">not Clearance</span>
+  <span class="xtq-n">n=42,511</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">-0.081123</span>
+  <div class="xtq-track" title="75% neg / 0% zero / 25% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-label">Clearance</span>
+  <span class="xtq-n">n=2,896</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>True</h5>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.003119</b></p>
+  <div class="xtq-row small">
+<div class="xtq-col">
+  <span class="xtq-val">+0.087815</span>
+  <div class="xtq-track" title="9% neg / 0% zero / 91% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:48.3%"></div></div>
+  <span class="xtq-label">not Clearance</span>
+  <span class="xtq-n">n=3,203</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.090934</span>
+  <div class="xtq-track" title="6% neg / 0% zero / 94% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-label">Clearance</span>
+  <span class="xtq-n">n=1,089</span>
+</div></div>
+</div></div>
+</div>
+</div>
+</div>
+</body>
+</html>
