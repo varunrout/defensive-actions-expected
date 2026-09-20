@@ -1,5 +1,13 @@
 # xT-Delta Target Prototype (Prompt 64) — Active-Binary Leg Only
 
+> **Superseded (Prompt 66):** this document's `xt_after` definition (`xT(action_x, action_y)` — the
+> defensive action's own recorded location) has been replaced by a possession-outcome definition
+> (value of the next same-possession event, or 0 if the action ends the possession) that fixes the
+> Clearance artifact section 3.1/3.4 below describe rather than merely documenting it. See
+> [`XT_TARGET_PROTOTYPE_V2.md`](XT_TARGET_PROTOTYPE_V2.md) for the corrected methodology and full
+> re-validated results. This document is kept as-is, not deleted or rewritten — it remains the
+> accurate record of what Prompt 64 actually did and found at the time.
+
 Prototype only. Not a committed project report, no HTML twin. Scoped to the active-binary leg
 (`data/features/player_defensive_actions.parquet`) per the agreed prototype-first plan — the passive
 leg and both continuous legs are untouched. `player_defensive_actions.parquet` and
