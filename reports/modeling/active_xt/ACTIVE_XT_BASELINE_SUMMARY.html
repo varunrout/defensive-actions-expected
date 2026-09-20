@@ -105,6 +105,13 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <div class="wrap">
 <div class="article">
 
+<div class="deviation-box"><p><strong>Status update (Prompt 73):</strong> <code>x1_two_stage_huber</code>
+  (Rung 0, this document) is no longer the active reference model for this leg &mdash;
+  <code>x1c_random_forest</code> was promoted in its place. See the promotion decision in
+  <a href="ACTIVE_XT_MODEL_LADDER.html" target="viewer">ACTIVE_XT_MODEL_LADDER.html</a> section 3.7.
+  <code>x1_two_stage_huber</code> remains documented below as the Rung 0 baseline it was measured
+  against.</p></div>
+
 <p><em>Prompt scope: active-binary leg only. Passive-xT's own Rung 0 is a separate, later prompt.
   This document does not build past Rung 0 &mdash; no gradient boosting, no promotion decision, no
   full ladder.</em></p>
@@ -319,113 +326,25 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <p><strong>No model ladder is built in this document</strong> &mdash; this is Rung 0 only,
   mirroring the binary and continuous legs' own Prompt 36/49/54/59 discipline. Passive-xT's own
   Rung 0 (a separate, later prompt) has not been started here.</p>
-<p><em>Split note (prompt 71): Rung 1 (<code>x1b_quadratic</code>, below) is appended directly to
-  this document, not split into a separate ladder doc yet &mdash; mirroring <code>c1</code>'s own
-  precedent (<code>ACTIVE_CONTINUOUS_BASELINE_SUMMARY.html</code>), which stayed a single document
-  through its own Rung 1 and only split once a second rung (Rung 2,
-  <code>c1d_random_forest</code>) existed. The same threshold applies here: this document remains
-  Rung-0-and-1 until a Rung 2 (random forest, out of scope for this prompt) is built.</em></p>
-
-<h2>11. Rung 1: x1b_quadratic (prompt 71)</h2>
-<h3>11.1 Step 0 -- where do quadratic/interaction terms go, and why</h3>
-<p><code>x1</code> has two surfaces (Stage A logistic classifier for P(nonzero), Stage B Huber
-  regression for E[delta|nonzero]), unlike <code>v1b</code>'s single classifier or
-  <code>c1b</code>'s single regression head &mdash; <code>c1b</code> is the closer precedent
-  structurally, but even <code>c1b</code> only ever had <strong>one</strong> surface to expand:
-  its classifier half (<code>v1e</code>) was reused unchanged, never re-fit with new terms. This
-  leg is the first one where both halves are actually fit inside the same rung, so which
-  surface(s) get the new terms has no direct precedent to copy &mdash; it is answered here from
-  this leg's own data, not assumed.</p>
-<p>Checked directly against
-  <code>reports/analysis/xt_target/active_numerical_target_atlas.json</code>, read via its
-  <code>bins_nonzero_delta</code> panel first (exactly where Prompt 70's motivating problem
-  &mdash; the tail-calibration gap &mdash; lives). Three features clear a real-curvature bar, the
-  same standard <code>c1b</code> used:</p>
-<table>
-<tr><th>Feature</th><th>r vs. nonzero delta</th><th>Pattern</th></tr>
-<tr><td><code>distance_to_attacking_box</code></td><td><strong>0.157</strong> (strongest numeric correlate)</td><td>clean 8-of-8 monotonic increase across 9 bins, accelerating in the final three gaps</td></tr>
-<tr><td><code>defender_attacker_gap_x</code></td><td>-0.062</td><td>genuine inverted-U: rises for 4 bins, peaks, falls for 5</td></tr>
-<tr><td><code>visible_defender_count</code></td><td>0.047</td><td>atlas's own <code>shape</code> field: U-shaped; dip then accelerating rise</td></tr>
-</table>
-<p>Several other features show apparent tail spikes (e.g. <code>defenders_within_10m</code>'s
-  bin-11 mean of +0.177) that are <strong>not</strong> used &mdash; every one sits on
-  <code>small_n</code>-flagged bins (n&le;23, some n=1), indistinguishable from noise.</p>
-<p><strong>The same atlas also reports each bin's zero-rate</strong> for these same three
-  features: <code>distance_to_attacking_box</code>'s zero-rate is not flat (14.9% -&gt; 26.5%
-  -&gt; 15.3%, an inverted-U of its own); <code>defender_attacker_gap_x</code>'s zero-rate ranges
-  15.9%-25.9% with the same rise-then-fall shape; <code>visible_defender_count</code>'s zero-rate
-  ranges 8.4%-26.6%. <strong>This is the evidence the Step-0 decision rests on</strong>: the same
-  three features show real curvature in <em>both</em> the zero-rate (Stage A) and the nonzero
-  magnitude (Stage B).</p>
-<div class="verdict-box"><p><strong>Decision: expand both stages with the identical feature
-  set.</strong> Not independently tuned per stage &mdash; there is no evidence a different
-  curvature shape applies to one stage vs. the other, and a second classifier-specific list
-  without its own evidence would be exactly the "add terms everywhere" default to avoid.</p></div>
-
-<h3>11.2 Feature-set construction</h3>
-<p><strong>Quadratic (3 features)</strong>:
-  <code>QUADRATIC_FEATURES_X1B = ["distance_to_attacking_box", "defender_attacker_gap_x", "visible_defender_count"]</code></p>
-<p><strong>Interaction (1 pair)</strong>: reused directly from
-  <code>reports/analysis/xt_target/FEATURE_INTERACTION_ANALYSIS.json</code> (Prompt 65/67's own
-  xT-specific findings, not re-discovered from scratch). Of 5 curated ACTIVE pairs, 2 are
-  <code>interactive</code>; the first (<code>defenders_within_5m x defenders_within_10m</code>) is
-  not usable (excluded feature); the second is used:
-  <code>INTERACTION_PAIR_X1B = ("visible_defender_count", "attacker_spread")</code>. Both stages'
-  design matrices gain 35 columns total (32 locked + 3 quadratic + 1 interaction).</p>
-
-<h3>11.3 Cross-validation results (5-fold, OOF metrics)</h3>
-<table>
-<tr><th>Variant</th><th>RMSE</th><th>MAE</th><th>R&sup2;</th><th>Spearman</th><th>Zero-row MAE</th><th>Nonzero-row MAE</th></tr>
-<tr><td><code>x1_two_stage_huber</code></td><td>0.05394</td><td>0.02069</td><td>0.1514</td><td><strong>0.5242</strong></td><td><strong>0.00478</strong></td><td><strong>0.02468</strong></td></tr>
-<tr><td><code>x1b_quadratic</code></td><td><strong>0.05391</strong></td><td>0.02070</td><td><strong>0.1525</strong></td><td>0.5233</td><td>0.00481</td><td>0.02468</td></tr>
-</table>
-<p>Movement is real but tiny in every column: RMSE improves by 0.00004 (0.07% relative), R&sup2;
-  improves by 0.0011, MAE and nonzero-row MAE are flat, and Spearman/zero-row MAE are each
-  marginally worse. Not the shape of a rung that meaningfully improved the model.</p>
-
-<h3>11.4 Paired significance test, x1b vs x1</h3>
-<p>Per-fold RMSE: <code>x1b</code> beats <code>x1</code> in 5 of 5 folds, small and consistent
-  enough to produce a significant paired t-test (t=-7.37, <strong>p=0.0018</strong>) despite a
-  practically negligible effect size &mdash; mean diff -0.00004, roughly two orders of magnitude
-  smaller than Rung 0's own <code>x1</code>-vs-<code>x0</code> mean diff (-0.00461). Wilcoxon
-  p=0.0625, the same 5-fold floor seen throughout this project. <strong>A significant p-value here
-  is not being read as "clears the bar"</strong> &mdash; see section 11.6.</p>
-
-<h3>11.5 Calibration -- the actual motivating question for this rung</h3>
-<table>
-<tr><th>Bin</th><th>x1 gap (Rung 0)</th><th>x1b gap (this rung)</th><th>Change</th></tr>
-<tr><td>0 (most negative predicted)</td><td>+0.02074</td><td><strong>+0.02113</strong></td><td>worse by 0.00039</td></tr>
-<tr><td>1</td><td>+0.00038</td><td>-0.00019</td><td>flips sign, similar magnitude</td></tr>
-<tr><td>2</td><td>+0.00009</td><td>-0.00019</td><td>flips sign, similar magnitude</td></tr>
-<tr><td>3</td><td>+0.00059</td><td>+0.00081</td><td>worse by 0.00022</td></tr>
-<tr><td>4 (most positive predicted)</td><td>-0.01713</td><td><strong>-0.01725</strong></td><td>worse by 0.00012</td></tr>
-</table>
-<div class="fail-box"><p><strong>The tail-calibration gap that motivated this entire rung did not
-  narrow &mdash; it is unchanged to worse.</strong> Bin 0's gap widens slightly (+0.02074 -&gt;
-  +0.02113); bin 4's gap widens slightly too (-0.01713 -&gt; -0.01725). The limitation Prompt 70
-  identified is a property of <code>HuberRegressor</code>'s own loss function (its robustness to
-  outliers caps how far it will move a prediction toward an extreme observed value), not a
-  property of the linear functional form the added terms were meant to fix. A curved relationship
-  fit with a still-Huber loss is still capped the same way at the tails.</p></div>
-
-<h3>11.6 Promotion call</h3>
-<div class="fail-box"><p><strong><code>x1b_quadratic</code> does not clear the bar to replace
-  <code>x1</code> as the standing baseline.</strong> The aggregate metrics move in
-  <code>x1b</code>'s favor by an amount too small to matter operationally, and the one metric this
-  rung actually exists to move &mdash; the tail-calibration gap &mdash; did not improve; if
-  anything it is marginally worse. A statistically significant paired test is not being treated as
-  sufficient on its own.</p></div>
-<p><strong><code>x1_two_stage_huber</code> remains the standing baseline</strong>, carried forward
-  into the leg's next rung (random forest, out of scope for this prompt). A valid, reportable
-  Rung-1 outcome, not a failure to fix before moving on: the Step-0 evidence was real, it just was
-  not the right kind of fix for a loss-function-driven calibration limitation.</p>
+<p><em>Split note (prompt 73): this document previously appended Rung 1 (<code>x1b_quadratic</code>,
+  prompt 71) directly below this section, on the stated basis that the split into a separate
+  ladder document would happen "once a second rung is built." That threshold is now crossed
+  (Rung 2, <code>x1c_random_forest</code>, prompt 73) &mdash; Rungs 1 and 2 have moved to
+  <a href="ACTIVE_XT_MODEL_LADDER.html" target="viewer">ACTIVE_XT_MODEL_LADDER.html</a>, mirroring
+  <code>active_continuous</code>'s own split point (<code>ACTIVE_CONTINUOUS_MODEL_LADDER.html</code>,
+  split at its own Rung 2). This document is Rung-0-only from here on. <strong>Status:
+  <code>x1c_random_forest</code> (Rung 2) has since been promoted to standing baseline,
+  superseding <code>x1_two_stage_huber</code></strong> &mdash; see
+  <a href="ACTIVE_XT_MODEL_LADDER.html" target="viewer">ACTIVE_XT_MODEL_LADDER.html</a> section 3.7.
+  <code>x1_two_stage_huber</code> remains documented above as the Rung 0 baseline it was measured
+  against.</em></p>
 
 </div>
 </div>
 <footer>
-  <p>Generated by <code>scripts/models/train_active_xt_baseline.py</code> and
-    <code>scripts/models/train_x1b_quadratic.py</code>. Markdown source:
-    <code>reports/modeling/active_xt/ACTIVE_XT_BASELINE_SUMMARY.md</code>.</p>
+  <p>Generated by <code>scripts/models/train_active_xt_baseline.py</code>. Markdown source:
+    <code>reports/modeling/active_xt/ACTIVE_XT_BASELINE_SUMMARY.md</code>. Model ladder (Rung 1+):
+    <a href="ACTIVE_XT_MODEL_LADDER.html" target="viewer">ACTIVE_XT_MODEL_LADDER.html</a>.</p>
 </footer>
 
 <div class="lightbox" id="lightbox">

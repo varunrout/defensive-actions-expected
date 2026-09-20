@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- Active-xT Model Ladder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1; --plane: #eceee8; --surface: #ffffff;
+  --text-primary: #10151c; --text-secondary: #4c525b; --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09); --gridline: #e2e4de;
+  --accent: #e34948; --pos: #e34948; --neg: #2a78d6;
+  --amber: #eda100; --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b; --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+    --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09); --gridline: #232a34;
+    --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+    --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+  --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09); --gridline: #232a34;
+  --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+  --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary); font-family: "Public Sans", -apple-system, sans-serif; font-size: 15px; line-height: 1.5; }
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead { background: var(--bg); border-bottom: 1px solid var(--border); padding: 40px 24px 32px; }
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow { font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; color: var(--accent); font-weight: 600; margin: 0 0 10px; }
+h1.title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: clamp(26px, 4vw, 38px); margin: 0 0 12px; color: var(--text-primary); }
+.dek { color: var(--text-secondary); max-width: 64ch; margin: 0 0 24px; font-size: 15.5px; }
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b { display: block; font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; color: var(--text-primary); }
+.stat span { display: block; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+footer { border-top: 1px solid var(--border); padding: 28px 24px 60px; max-width: 1180px; margin: 0 auto; }
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 900px; }
+.article h2 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; margin: 44px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.article h2:first-of-type { margin-top: 0; }
+.article h3 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 17px; margin: 30px 0 4px; color: var(--accent); }
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article code { font-family: "JetBrains Mono", monospace; font-size: 0.88em; background: var(--plane); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--neg); }
+.article ul, .article ol { color: var(--text-secondary); font-size: 14.5px; padding-left: 22px; margin: 0 0 16px; }
+.article li { margin-bottom: 6px; }
+.article table { width: 100%; border-collapse: collapse; margin: 4px 0 22px; font-size: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.article th { text-align: left; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.03em; color: var(--text-muted); background: var(--plane); padding: 9px 12px; border-bottom: 1px solid var(--border); }
+.article td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p:last-child { margin-bottom: 0; }
+.verdict-box { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.verdict-box p { margin: 0; }
+.fail-box { background: rgba(227,73,72,0.10); border: 1px solid rgba(227,73,72,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.fail-box p { margin: 0; }
+.variant-block { margin: 28px 0 44px; }
+.variant-title { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 16px; margin: 0 0 10px; }
+.chart-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 900px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+.chart-card img { width: 100%; height: auto; border-radius: 6px; display: block; background: var(--plane); cursor: zoom-in; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.chart-card img:hover { transform: scale(1.015); box-shadow: 0 4px 16px rgba(16,21,28,0.14); }
+.chart-card .cc-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 6px 2px 0; text-align: center; }
+.lightbox { position: fixed; inset: 0; background: rgba(9,12,16,0.78); display: none; align-items: center; justify-content: center; padding: 5vh 5vw; z-index: 1000; cursor: zoom-out; }
+.lightbox.open { display: flex; }
+.lightbox figure { margin: 0; max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.lightbox img { max-width: 92vw; max-height: 82vh; width: auto; height: auto; border-radius: 10px; background: var(--surface); box-shadow: 0 20px 60px rgba(0,0,0,0.45); cursor: default; }
+.lightbox figcaption { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #e8eaee; text-align: center; }
+.lightbox-close { position: absolute; top: 18px; right: 24px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+.lightbox-close:hover { background: rgba(255,255,255,0.18); }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; Active leg &middot; xT delta</p>
+    <h1 class="title">Active-xT Model Ladder</h1>
+    <p class="dek">Rungs 1-2 of the active-xT leg, built on top of the locked Rung 0 baseline
+      (<code>x1_two_stage_huber</code>): quadratic/interaction terms (<code>x1b</code>, did not
+      clear the bar) and random forest (<code>x1c</code>, cleared it decisively and is now the
+      standing baseline).</p>
+    <div class="statbar">
+      <div class="stat"><b>x1b</b><span>Rung 1: did not clear x1 (tail gap unchanged)</span></div>
+      <div class="stat"><b>x1c &gt; x1</b><span>Rung 2: p=0.00006, R&sup2; 0.15 -&gt; 0.45</span></div>
+      <div class="stat"><b>10-35x</b><span>tail-calibration gap reduction, x1c vs x1</span></div>
+      <div class="stat"><b>Promoted</b><span>x1c_random_forest is the new standing baseline</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+
+<div class="verdict-box"><p><strong>Status update (Prompt 73):</strong> <code>x1c_random_forest</code>
+  (Rung 2) has cleared this rung's ladder gate against <code>x1_two_stage_huber</code> and is
+  promoted to the leg's new standing baseline. See section 3.7 below. <code>x1b_quadratic</code>
+  (Rung 1) did not clear its own gate and remains documented as the rung that didn't win.</p></div>
+
+<p><em>Split out of <code>ACTIVE_XT_BASELINE_SUMMARY.md</code> (prompt 73, once a second rung
+  &mdash; Rung 2, <code>x1c_random_forest</code> &mdash; existed beyond Rung 0) so the locked
+  Rung 0 baseline document doesn't keep growing as more rungs are tried &mdash; mirroring
+  <code>active_continuous</code>'s own exact split point
+  (<code>ACTIVE_CONTINUOUS_MODEL_LADDER.html</code>, split at its own Rung 2,
+  <code>c1d_random_forest</code>) and the binary legs' split points before that. Rung 0 &mdash;
+  the two locked variants (<code>x0_dummy</code>, <code>x1_two_stage_huber</code>), the
+  architecture decision, and the Rung-0 calibration finding &mdash; stays in
+  <a href="ACTIVE_XT_BASELINE_SUMMARY.html" target="viewer">ACTIVE_XT_BASELINE_SUMMARY.html</a>.
+  This document is everything built on top of that locked Rung 0 baseline, starting from Rung 1.
+  This is a pure reorganization for Rung 1's material: no numbers changed, verified by rendering
+  both HTML documents in-browser after the split, same verification <code>active_continuous</code>'s
+  own split commit used.</em></p>
+
+<h2>1. What a rung is</h2>
+<p>A <strong>rung</strong> is one controlled change to the current standing baseline: a single
+  variable changed &mdash; feature shape, an interaction term, a model family &mdash; with
+  everything else held identical (same 32 locked features unless the rung specifically changes
+  that, same canonical match-grouped 5-fold split, same signed <code>target_xt_delta_v2</code>
+  target, no ad-hoc tuning beyond what a rung's own grid search covers). A rung is tested against
+  2 fixed gates before it can be considered for adoption as the new baseline:</p>
+<ol>
+<li><strong>Paired significance test vs the current standing baseline</strong> &mdash; refit both
+  variants on the same 5 canonical CV folds, paired t-test + Wilcoxon signed-rank test on the
+  per-fold RMSE difference (no log-transform on this leg's signed target, so no common-scale
+  correction is needed the way the continuous legs' <code>log1p</code>-vs-<code>log</code>
+  mismatch required).</li>
+<li><strong>Held-out-test confirmation</strong> &mdash; a single, one-time readout on the frozen
+  held-out test set (10,595 rows / 23 matches). This is the gate that actually decides the rung's
+  fate: CV picks a candidate, the held-out test either confirms or rejects it, and that result is
+  not re-litigated after the fact to fit a preferred narrative.</li>
+</ol>
+<p>This leg carries a <strong>third, rung-specific check no other leg's ladder needs</strong>: the
+  5-bin calibration table first built at Rung 0 (<code>ACTIVE_XT_BASELINE_SUMMARY.html</code>
+  section 7), because Rung 0 identified a real, specific limitation (the two tail bins
+  under-predicting magnitude by 3x or more) that is the actual open question this ladder has been
+  tracking since it started &mdash; an aggregate metric improving without that gap closing would
+  be an incomplete answer, not a full one, per Prompt 71/73's own explicit instruction not to let
+  a better-looking aggregate number stand in for the motivating problem.</p>
+<p>Rung 0 (the baseline itself) lives in
+  <a href="ACTIVE_XT_BASELINE_SUMMARY.html" target="viewer">ACTIVE_XT_BASELINE_SUMMARY.html</a>.
+  This ladder builds on that document's <code>x1_two_stage_huber</code> pick (held-out RMSE
+  0.05309, R&sup2; 0.1519) as the baseline every rung up through Rung 1 is compared against; Rung 2
+  changes the comparison baseline to <code>x1c_random_forest</code> once it is promoted
+  (section 3.7).</p>
+
+<h2>2. Rung 1 -- x1b_quadratic (prompt 71)</h2>
+<h3>2.1 Step 0 -- where do quadratic/interaction terms go, and why</h3>
+<p><code>x1</code> has two surfaces (Stage A logistic classifier for P(nonzero), Stage B Huber
+  regression for E[delta|nonzero]), unlike <code>v1b</code>'s single classifier or
+  <code>c1b</code>'s single regression head &mdash; <code>c1b</code> is the closer precedent
+  structurally, but even <code>c1b</code> only ever had <strong>one</strong> surface to expand:
+  its classifier half (<code>v1e</code>) was reused unchanged, never re-fit with new terms. This
+  leg is the first one where both halves are actually fit inside the same rung, so which
+  surface(s) get the new terms has no direct precedent to copy &mdash; it is answered here from
+  this leg's own data, not assumed.</p>
+<p>Checked directly against
+  <code>reports/analysis/xt_target/active_numerical_target_atlas.json</code>, read via its
+  <code>bins_nonzero_delta</code> panel first (exactly where Prompt 70's motivating problem
+  &mdash; the tail-calibration gap &mdash; lives). Three features clear a real-curvature bar, the
+  same standard <code>c1b</code> used:</p>
+<table>
+<tr><th>Feature</th><th>r vs. nonzero delta</th><th>Pattern</th></tr>
+<tr><td><code>distance_to_attacking_box</code></td><td><strong>0.157</strong> (strongest numeric correlate)</td><td>clean 8-of-8 monotonic increase across 9 bins, accelerating in the final three gaps</td></tr>
+<tr><td><code>defender_attacker_gap_x</code></td><td>-0.062</td><td>genuine inverted-U: rises for 4 bins, peaks, falls for 5</td></tr>
+<tr><td><code>visible_defender_count</code></td><td>0.047</td><td>atlas's own <code>shape</code> field: U-shaped; dip then accelerating rise</td></tr>
+</table>
+<p>Several other features show apparent tail spikes (e.g. <code>defenders_within_10m</code>'s
+  bin-11 mean of +0.177) that are <strong>not</strong> used &mdash; every one sits on
+  <code>small_n</code>-flagged bins (n&le;23, some n=1), indistinguishable from noise.</p>
+<p><strong>The same atlas also reports each bin's zero-rate</strong> for these same three
+  features: <code>distance_to_attacking_box</code>'s zero-rate is not flat (14.9% -&gt; 26.5%
+  -&gt; 15.3%, an inverted-U of its own); <code>defender_attacker_gap_x</code>'s zero-rate ranges
+  15.9%-25.9% with the same rise-then-fall shape; <code>visible_defender_count</code>'s zero-rate
+  ranges 8.4%-26.6%. <strong>This is the evidence the Step-0 decision rests on</strong>: the same
+  three features show real curvature in <em>both</em> the zero-rate (Stage A) and the nonzero
+  magnitude (Stage B).</p>
+<div class="verdict-box"><p><strong>Decision: expand both stages with the identical feature
+  set.</strong> Not independently tuned per stage &mdash; there is no evidence a different
+  curvature shape applies to one stage vs. the other, and a second classifier-specific list
+  without its own evidence would be exactly the "add terms everywhere" default to avoid.</p></div>
+
+<h3>2.2 Feature-set construction</h3>
+<p><strong>Quadratic (3 features)</strong>:
+  <code>QUADRATIC_FEATURES_X1B = ["distance_to_attacking_box", "defender_attacker_gap_x", "visible_defender_count"]</code></p>
+<p><strong>Interaction (1 pair)</strong>: reused directly from
+  <code>reports/analysis/xt_target/FEATURE_INTERACTION_ANALYSIS.json</code> (Prompt 65/67's own
+  xT-specific findings, not re-discovered from scratch). Of 5 curated ACTIVE pairs, 2 are
+  <code>interactive</code>; the first (<code>defenders_within_5m x defenders_within_10m</code>) is
+  not usable (excluded feature); the second is used:
+  <code>INTERACTION_PAIR_X1B = ("visible_defender_count", "attacker_spread")</code>. Both stages'
+  design matrices gain 35 columns total (32 locked + 3 quadratic + 1 interaction).</p>
+
+<h3>2.3 Cross-validation results (5-fold, OOF metrics)</h3>
+<table>
+<tr><th>Variant</th><th>RMSE</th><th>MAE</th><th>R&sup2;</th><th>Spearman</th><th>Zero-row MAE</th><th>Nonzero-row MAE</th></tr>
+<tr><td><code>x1_two_stage_huber</code></td><td>0.05394</td><td>0.02069</td><td>0.1514</td><td><strong>0.5242</strong></td><td><strong>0.00478</strong></td><td><strong>0.02468</strong></td></tr>
+<tr><td><code>x1b_quadratic</code></td><td><strong>0.05391</strong></td><td>0.02070</td><td><strong>0.1525</strong></td><td>0.5233</td><td>0.00481</td><td>0.02468</td></tr>
+</table>
+<p>Movement is real but tiny in every column: RMSE improves by 0.00004 (0.07% relative), R&sup2;
+  improves by 0.0011, MAE and nonzero-row MAE are flat, and Spearman/zero-row MAE are each
+  marginally worse. Not the shape of a rung that meaningfully improved the model.</p>
+
+<h3>2.4 Paired significance test, x1b vs x1</h3>
+<p>Per-fold RMSE: <code>x1b</code> beats <code>x1</code> in 5 of 5 folds, small and consistent
+  enough to produce a significant paired t-test (t=-7.37, <strong>p=0.0018</strong>) despite a
+  practically negligible effect size &mdash; mean diff -0.00004, roughly two orders of magnitude
+  smaller than Rung 0's own <code>x1</code>-vs-<code>x0</code> mean diff (-0.00461). Wilcoxon
+  p=0.0625, the same 5-fold floor seen throughout this project. <strong>A significant p-value here
+  is not being read as "clears the bar"</strong> &mdash; see section 2.6.</p>
+
+<h3>2.5 Calibration -- the actual motivating question for this rung</h3>
+<table>
+<tr><th>Bin</th><th>x1 gap (Rung 0)</th><th>x1b gap (this rung)</th><th>Change</th></tr>
+<tr><td>0 (most negative predicted)</td><td>+0.02074</td><td><strong>+0.02113</strong></td><td>worse by 0.00039</td></tr>
+<tr><td>1</td><td>+0.00038</td><td>-0.00019</td><td>flips sign, similar magnitude</td></tr>
+<tr><td>2</td><td>+0.00009</td><td>-0.00019</td><td>flips sign, similar magnitude</td></tr>
+<tr><td>3</td><td>+0.00059</td><td>+0.00081</td><td>worse by 0.00022</td></tr>
+<tr><td>4 (most positive predicted)</td><td>-0.01713</td><td><strong>-0.01725</strong></td><td>worse by 0.00012</td></tr>
+</table>
+<div class="fail-box"><p><strong>The tail-calibration gap that motivated this entire rung did not
+  narrow &mdash; it is unchanged to worse.</strong> Bin 0's gap widens slightly (+0.02074 -&gt;
+  +0.02113); bin 4's gap widens slightly too (-0.01713 -&gt; -0.01725). The limitation Prompt 70
+  identified is a property of <code>HuberRegressor</code>'s own loss function (its robustness to
+  outliers caps how far it will move a prediction toward an extreme observed value), not a
+  property of the linear functional form the added terms were meant to fix. A curved relationship
+  fit with a still-Huber loss is still capped the same way at the tails.</p></div>
+
+<h3>2.6 Promotion call</h3>
+<div class="fail-box"><p><strong><code>x1b_quadratic</code> does not clear the bar to replace
+  <code>x1</code> as the standing baseline.</strong> The aggregate metrics move in
+  <code>x1b</code>'s favor by an amount too small to matter operationally, and the one metric this
+  rung actually exists to move &mdash; the tail-calibration gap &mdash; did not improve; if
+  anything it is marginally worse. A statistically significant paired test is not being treated as
+  sufficient on its own.</p></div>
+<p><strong><code>x1_two_stage_huber</code> remained the standing baseline</strong> carried forward
+  into Rung 2 below. A valid, reportable Rung-1 outcome, not a failure to fix before moving on:
+  the Step-0 evidence was real, it just was not the right kind of fix for a loss-function-driven
+  calibration limitation.</p>
+
+<h2>3. Rung 2 -- x1c_random_forest (prompt 73)</h2>
+<p><code>x1b_quadratic</code> (Rung 1) established that the tail-calibration problem is a
+  property of <code>HuberRegressor</code>'s own loss function, not the linear functional form
+  &mdash; more curved features fed into the same robust-but-capping loss function didn't move the
+  tail bins. This rung tests the next, different hypothesis: does changing the
+  <strong>model family</strong> entirely (random forest, whose leaf-averaging has a fundamentally
+  different mechanism for handling extreme observations) close the gap that more features on the
+  same loss function could not.</p>
+
+<h3>3.1 Step 1 -- which surface(s) get replaced with a random forest, and why</h3>
+<p>Checked directly against <code>train_c1d_random_forest.py</code> before deciding anything
+  here, per this leg's own standing discipline (Prompt 71 Step 0) of checking the closer
+  structural precedent rather than defaulting. <code>c1d_random_forest</code> replaced ONLY
+  <code>c1</code>'s regression head with a random forest &mdash; its classifier half
+  (<code>v1e_gradient_boosting_calibrated</code>) was reused EXACTLY as already fitted, never
+  re-tuned or re-fit with a different family.</p>
+<p>But the REASON <code>c1d</code> only touched one surface is structural, not evidence-based:
+  <code>v1e</code> is a separately-built, already-promoted model belonging to an entirely
+  different leg (active-binary), reused via composition across leg boundaries &mdash; it was
+  never part of <code>c1</code>'s own Rung 0/1/2 ladder at all, so there was nothing of
+  <code>c1</code>'s own to leave untouched on the classifier side.</p>
+<p>That reasoning does not transfer to <code>x1</code>. Both of <code>x1</code>'s surfaces
+  (Stage A classifier for P(nonzero), Stage B regressor for E[delta|nonzero]) were built together,
+  inside this leg's own Rung 0 (Prompt 70) &mdash; neither is a cross-leg reused artifact. Rung
+  1's own Step 0 (section 2.1) already established, with real numbers, that the same candidate
+  features show real curvature in <em>both</em> the zero-rate (Stage A's target) and the
+  nonzero-delta magnitude (Stage B's target) &mdash; no asymmetric evidence here to justify
+  upgrading one surface's model family while leaving the other on a weaker one.</p>
+<div class="verdict-box"><p><strong>Decision: replace both stages with RandomForest</strong> --
+  <code>RandomForestClassifier</code> for P(nonzero), <code>RandomForestRegressor</code> for
+  E[delta|nonzero]. Each tuned independently on its own natural OOF metric (classifier: ROC-AUC;
+  regressor: RMSE on the raw signed delta) rather than jointly grid-searched &mdash; the combined
+  prediction is a simple product of the two independently-best models, the same composition
+  <code>x1</code>/<code>x1b</code> already use.</p></div>
+
+<h3>3.2 Hyperparameter grids, sized for this leg's real row counts</h3>
+<p>Classifier trains on ~36-45k rows/fold (full trainval, 45,166 rows total); regressor trains on
+  ~29-36k rows/fold (nonzero-only trainval, 36,121 rows total) &mdash; between <code>c1d</code>'s
+  small scale (~3,500 rows) and <code>d1d</code>'s much larger duplicated-row scale (hundreds of
+  thousands). Grid used for both stages: <code>N_ESTIMATORS=200</code> (fixed),
+  <code>MAX_DEPTH_GRID=[6, 10, None]</code>, <code>MIN_SAMPLES_LEAF_GRID=[20, 50, 150]</code> (9
+  combinations each, 18 total).</p>
+<p><strong>Classifier grid</strong> (chosen by OOF ROC-AUC):</p>
+<table>
+<tr><th>max_depth</th><th>min_samples_leaf</th><th>OOF ROC-AUC</th><th>Train ROC-AUC</th><th>Train &minus; OOF gap</th></tr>
+<tr><td>6</td><td>20</td><td>0.7360</td><td>0.7521</td><td>0.0160</td></tr>
+<tr><td>6</td><td>50</td><td>0.7357</td><td>0.7492</td><td>0.0134</td></tr>
+<tr><td>6</td><td>150</td><td>0.7322</td><td>0.7430</td><td>0.0107</td></tr>
+<tr><td>10</td><td>20</td><td>0.7553</td><td>0.8036</td><td>0.0483</td></tr>
+<tr><td>10</td><td>50</td><td>0.7513</td><td>0.7851</td><td>0.0337</td></tr>
+<tr><td>10</td><td>150</td><td>0.7418</td><td>0.7615</td><td>0.0197</td></tr>
+<tr><td><strong>None</strong></td><td><strong>20</strong></td><td><strong>0.7635</strong></td><td>0.8775</td><td>0.1140</td></tr>
+<tr><td>None</td><td>50</td><td>0.7561</td><td>0.8145</td><td>0.0584</td></tr>
+<tr><td>None</td><td>150</td><td>0.7438</td><td>0.7683</td><td>0.0245</td></tr>
+</table>
+<p><strong>Regressor grid</strong> (chosen by OOF RMSE):</p>
+<table>
+<tr><th>max_depth</th><th>min_samples_leaf</th><th>OOF RMSE</th><th>OOF R&sup2;</th><th>Train R&sup2;</th><th>Train &minus; OOF gap</th></tr>
+<tr><td>6</td><td>20</td><td>0.04967</td><td>0.4240</td><td>0.4616</td><td>0.0376</td></tr>
+<tr><td>6</td><td>50</td><td>0.05037</td><td>0.4078</td><td>0.4376</td><td>0.0298</td></tr>
+<tr><td>6</td><td>150</td><td>0.05165</td><td>0.3773</td><td>0.3924</td><td>0.0151</td></tr>
+<tr><td>10</td><td>20</td><td>0.04788</td><td>0.4648</td><td>0.5513</td><td>0.0865</td></tr>
+<tr><td>10</td><td>50</td><td>0.04893</td><td>0.4411</td><td>0.4862</td><td>0.0452</td></tr>
+<tr><td>10</td><td>150</td><td>0.05121</td><td>0.3878</td><td>0.4053</td><td>0.0175</td></tr>
+<tr><td><strong>None</strong></td><td><strong>20</strong></td><td><strong>0.04757</strong></td><td><strong>0.4717</strong></td><td>0.5746</td><td>0.1029</td></tr>
+<tr><td>None</td><td>50</td><td>0.04884</td><td>0.4433</td><td>0.4922</td><td>0.0490</td></tr>
+<tr><td>None</td><td>150</td><td>0.05118</td><td>0.3885</td><td>0.4065</td><td>0.0181</td></tr>
+</table>
+<p>Both grids pick the same corner (<code>max_depth=None, min_samples_leaf=20</code>) &mdash; the
+  least-constrained config in the grid, and also the one with the largest train-minus-OOF gap on
+  both stages (classifier 0.1140, regressor 0.1029). <strong>This gap is real and reported
+  plainly, not hidden</strong>: the winning config is genuinely overfitting the training folds
+  more than the shallower alternatives. But the selection rule used throughout this project
+  &mdash; pick by OOF/held-out score, not training-fold fit &mdash; is the correct one here
+  specifically because it already penalizes overfit configs on their own terms: every shallower
+  alternative shows a smaller gap <em>and</em> a worse OOF score. The gap sizes here (0.10-0.11)
+  sit in a similar range to <code>c1d</code>'s own chosen-config gap (0.30) and well below
+  <code>c1d</code>'s worst-in-grid gap (0.46) &mdash; not an alarming level of overfitting by
+  this project's own established scale.</p>
+
+<h3>3.3 x1c_random_forest vs x1_two_stage_huber -- ranking (CV and held-out)</h3>
+<table>
+<tr><th>Variant</th><th>RMSE (CV)</th><th>RMSE (held-out)</th><th>R&sup2; (CV)</th><th>R&sup2; (held-out)</th><th>Spearman (held-out)</th></tr>
+<tr><td><code>x1_two_stage_huber</code></td><td>0.05394</td><td>0.05309</td><td>0.1514</td><td>0.1519</td><td>0.5180</td></tr>
+<tr><td><strong><code>x1c_random_forest</code></strong></td><td><strong>0.04346</strong></td><td><strong>0.04277</strong></td><td><strong>0.4491</strong></td><td><strong>0.4495</strong></td><td><strong>0.5947</strong></td></tr>
+</table>
+<p>A large, consistent win on every metric &mdash; RMSE down ~19.5% (CV) / ~19.4% (held-out),
+  R&sup2; roughly <strong>tripling</strong> (0.15 -&gt; 0.45), Spearman rank correlation improving
+  too (0.518 -&gt; 0.595). CV and held-out results are near-identical, no sign of the
+  tuning-selected overfitting gap leaking into the final held-out readout.</p>
+<table>
+<tr><th>Variant</th><th>Zero-row MAE</th><th>Nonzero-row MAE</th></tr>
+<tr><td><code>x1_two_stage_huber</code></td><td><strong>0.00488</strong></td><td>0.02469</td></tr>
+<tr><td><code>x1c_random_forest</code></td><td>0.00678</td><td><strong>0.02066</strong></td></tr>
+</table>
+<p>Same pattern Rung 0 already established for <code>x1</code> vs <code>x0</code>:
+  <code>x1c</code>'s classifier stage occasionally assigns real nonzero probability to rows that
+  turn out to be exactly zero (a real, small cost), but this is more than offset by a large
+  nonzero-row MAE improvement (16% lower) &mdash; consistent with <code>x1c</code>'s
+  much-improved P(nonzero) classifier (ROC-AUC 0.762 held-out vs <code>x1</code>'s 0.710)
+  actually distinguishing rows better.</p>
+
+<h3>3.4 Paired significance test, x1c vs x1</h3>
+<p>Per-fold RMSE, compared against the <strong>standing baseline <code>x1_two_stage_huber</code>,
+  not <code>x1b_quadratic</code></strong> (which did not win promotion in Rung 1):
+  <code>x1c</code> beats <code>x1</code> in <strong>5 of 5 folds</strong>, mean diff
+  <strong>-0.01054</strong> (RMSE ~19.5% lower). Paired t-test t=-17.48,
+  <strong>p=0.00006</strong> &mdash; clearly significant, roughly two orders of magnitude larger
+  in effect size than Rung 1's own result (mean diff -0.00004). Wilcoxon p=0.0625, the same
+  5-fold floor seen throughout this project.</p>
+
+<h3>3.5 Calibration -- does random forest's nonlinearity close the gap that quadratic terms couldn't?</h3>
+<table>
+<tr><th>Bin</th><th>x1 gap (Rung 0)</th><th>x1b gap (Rung 1)</th><th>x1c gap (this rung)</th></tr>
+<tr><td>0 (most negative predicted)</td><td>+0.02074</td><td>+0.02113</td><td><strong>+0.00194</strong></td></tr>
+<tr><td>1</td><td>+0.00038</td><td>-0.00019</td><td>+0.00065</td></tr>
+<tr><td>2</td><td>+0.00009</td><td>-0.00019</td><td>-0.00004</td></tr>
+<tr><td>3</td><td>+0.00059</td><td>+0.00081</td><td>+0.00026</td></tr>
+<tr><td>4 (most positive predicted)</td><td>-0.01713</td><td>-0.01725</td><td><strong>-0.00049</strong></td></tr>
+</table>
+<div class="verdict-box"><p><strong>Yes &mdash; decisively, and this is the headline result of
+  this rung.</strong> Bin 0's gap shrinks from +0.02074/+0.02113 to <strong>+0.00194</strong>
+  &mdash; roughly a <strong>10-11x reduction</strong>. Bin 4's gap shrinks from
+  -0.01713/-0.01725 to <strong>-0.00049</strong> &mdash; roughly a <strong>35x reduction</strong>.
+  Every middle bin also lands closer to zero than either linear-family variant. Where
+  <code>x1b</code> (more curved features, same Huber loss) left the tail gap unchanged to worse,
+  <code>x1c</code> (same features, tree-ensemble averaging instead of a robust linear loss)
+  closes it almost entirely.</p></div>
+<p>This directly confirms Rung 1's own diagnosis: the limitation was the <em>loss function's</em>
+  structural cap on how far a prediction could move toward an extreme observed value, not a lack
+  of curvature in the features themselves &mdash; a random forest's leaf-averaging mechanism does
+  not carry that same cap, and the real curvature this leg's features do have (established with
+  real bin evidence at Rung 1) is exactly what the trees can now exploit.</p>
+
+<h3>3.6 Feature importance</h3>
+<p>Top 10 permutation-importance features (fold-held-out, nonzero-delta rows):</p>
+<table>
+<tr><th>Rank</th><th>Feature</th><th>Mean permutation importance</th></tr>
+<tr><td>1</td><td><code>phase_label_prev_event_box_defence</code></td><td>+0.001550</td></tr>
+<tr><td>2</td><td><code>distance_to_attacking_box</code></td><td>+0.000686</td></tr>
+<tr><td>3</td><td><code>event_type_Block</code></td><td>+0.000435</td></tr>
+<tr><td>4</td><td><code>phase_label_prev_event_high_press_proxy</code></td><td>+0.000375</td></tr>
+<tr><td>5</td><td><code>attacking_goal_centrality</code></td><td>+0.000353</td></tr>
+<tr><td>6</td><td><code>event_type_Pressure</code></td><td>+0.000309</td></tr>
+<tr><td>7</td><td><code>event_type_Ball Recovery</code></td><td>+0.000289</td></tr>
+<tr><td>8</td><td><code>nearest_attacker_distance</code></td><td>+0.000164</td></tr>
+<tr><td>9</td><td><code>defender_spread</code></td><td>+0.000143</td></tr>
+<tr><td>10</td><td><code>action_retained_defensive_team_control</code></td><td>+0.000135</td></tr>
+</table>
+<p><strong>Cross-check against Rung 1's own quadratic candidates</strong>
+  (<code>distance_to_attacking_box</code>, <code>defender_attacker_gap_x</code>,
+  <code>visible_defender_count</code>): <code>distance_to_attacking_box</code> (Rung 1's
+  strongest candidate, r=0.157) is confirmed here too &mdash; RF ranks it #2 by permutation
+  importance, independent agreement that this feature carries real, exploitable signal. The
+  other two do not appear in the top 10 here &mdash; RF finds more value in
+  <code>phase_label_prev_event</code> categories and <code>event_type</code> levels than in those
+  two specific numeric shapes, a genuinely different picture from Rung 1's own numeric-only
+  curvature check, not a contradiction of it. <code>attacking_goal_centrality</code> (rank #5)
+  and <code>defender_spread</code> (rank #9) both also appeared in the active-continuous leg's
+  own <code>c1d_random_forest</code> top-10 &mdash; not the same target or leg, but a recurring
+  pattern of these two features carrying real signal for shot/threat-adjacent targets on the
+  active side of this project more broadly.</p>
+
+<h3>3.7 Ladder-gate outcome for this rung, no promotion audit</h3>
+<div class="verdict-box"><p><strong><code>x1c_random_forest</code> clears the Rung-2 gate against
+  <code>x1_two_stage_huber</code>, decisively.</strong> A consistent (5-of-5 folds),
+  statistically significant (p=0.00006) improvement on RMSE, a near-tripling of R&sup2; on both
+  CV and held-out with no CV-to-held-out drop-off, and &mdash; the result this whole ladder has
+  been tracking since Rung 0 &mdash; a 10-35x reduction in the tail-calibration gap that neither
+  Rung 0 nor Rung 1 could close.</p></div>
+<p>Per this prompt's explicit constraint, no deeper promotion audit (tournament-stratified check,
+  error-slice comparison, feature-shape sanity check &mdash; the kind of 4-part deep dive
+  <code>c1d</code>'s own later promotion prompt, Prompt 58, ran) is performed here; this section
+  reports the Rung-2 ladder-gate outcome only, the same discipline <code>c1d_random_forest</code>'s
+  own Rung-2 prompt (56) followed before its own separate promotion-audit prompt (58).</p>
+<p><strong><code>x1c_random_forest</code> is now the leg's standing baseline</strong>, replacing
+  <code>x1_two_stage_huber</code>. <code>x1_two_stage_huber</code> remains documented as the
+  Rung-0 baseline it was measured against, and <code>x1b_quadratic</code> remains documented as
+  the Rung-1 rung that didn't clear its own bar. No further rung (gradient boosting or otherwise)
+  is built in this prompt.</p>
+
+</div>
+</div>
+<footer>
+  <p>Generated by <code>scripts/models/train_x1b_quadratic.py</code> and
+    <code>scripts/models/train_x1c_random_forest.py</code>. Markdown source:
+    <code>reports/modeling/active_xt/ACTIVE_XT_MODEL_LADDER.md</code>. Rung 0 baseline:
+    <a href="ACTIVE_XT_BASELINE_SUMMARY.html" target="viewer">ACTIVE_XT_BASELINE_SUMMARY.html</a>.</p>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+  <figure>
+    <img id="lightboxImg" src="" alt="">
+    <figcaption id="lightboxCaption"></figcaption>
+  </figure>
+</div>
+<script>
+(function () {
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightboxImg');
+  var lightboxCaption = document.getElementById('lightboxCaption');
+  function openLightbox(img) {
+    lightboxImg.src = img.currentSrc || img.src;
+    lightboxImg.alt = img.alt;
+    var variant = img.closest('.variant-block');
+    var title = variant ? variant.querySelector('.variant-title').textContent : '';
+    lightboxCaption.textContent = title ? (title + ' — ' + img.alt) : img.alt;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    lightboxImg.src = '';
+  }
+  document.querySelectorAll('.chart-card img').forEach(function (img) {
+    img.addEventListener('click', function () { openLightbox(img); });
+  });
+  lightbox.addEventListener('click', function (e) { if (e.target === lightbox) closeLightbox(); });
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLightbox(); });
+})();
+</script>
+</body>
+</html>

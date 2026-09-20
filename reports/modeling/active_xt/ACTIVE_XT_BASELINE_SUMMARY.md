@@ -1,5 +1,10 @@
 # Active-xT Baseline Summary (x0-x1)
 
+> **Status update (Prompt 73):** `x1_two_stage_huber` (Rung 0, this document) is no longer the
+> active reference model for this leg -- `x1c_random_forest` was promoted in its place. See the
+> promotion decision in [`ACTIVE_XT_MODEL_LADDER.md`](ACTIVE_XT_MODEL_LADDER.md) section 3.7.
+> `x1_two_stage_huber` remains documented below as the Rung 0 baseline it was measured against.
+
 Target: `target_xt_delta_v2` (active-binary leg, Prompts 64/66/67, fully EDA'd and locked against
 the 34 locked ACTIVE features per `reports/analysis/xt_target/FEATURE_LOCK_CONFIRMATION_XT.json`).
 Dataset: `data/features/player_defensive_actions.parquet` (56,068 rows, read-only, unmodified)
@@ -234,135 +239,13 @@ shape rather than reopening the question each time.
 continuous legs' own Prompt 36/49/54/59 discipline. Passive-xT's own Rung 0 (a separate,
 later prompt) has not been started here.
 
-*Split note (prompt 71): Rung 1 (`x1b_quadratic`, below) is appended directly to this document,
-not split into a separate ladder doc yet -- mirroring `c1`'s own precedent
-(`ACTIVE_CONTINUOUS_BASELINE_SUMMARY.md`), which stayed a single document through its own Rung 1
-and only split once a second rung (Rung 2, `c1d_random_forest`) existed. The same threshold
-applies here: this document remains Rung-0-and-1 until a Rung 2 (random forest, out of scope for
-this prompt) is built.*
-
-## 11. Rung 1: `x1b_quadratic` (prompt 71)
-
-### 11.1 Step 0 -- where do quadratic/interaction terms go, and why
-
-`x1` has two surfaces (Stage A logistic classifier for P(nonzero), Stage B Huber regression for
-E[delta|nonzero]), unlike `v1b`'s single classifier or `c1b`'s single regression head -- `c1b` is
-the closer precedent structurally (also a two-part active-continuous leg), but even `c1b` only
-ever had **one** surface to expand: its classifier half (`v1e`) was reused unchanged, never
-re-fit with new terms. This leg is the first one where both halves are actually fit inside the
-same rung, so which surface(s) get the new terms has no direct precedent to copy -- it is
-answered here from this leg's own data, not assumed.
-
-Checked directly against `reports/analysis/xt_target/active_numerical_target_atlas.json`, read
-via its `bins_nonzero_delta` panel first (since that is exactly where Prompt 70's motivating
-problem -- the tail-calibration gap -- lives: the magnitude of nonzero deltas). Three features
-clear a real-curvature bar, the same standard `c1b` used (a genuine, non-monotonic or
-accelerating pattern, not a straight line, and not a `small_n`-flagged tail artefact):
-
-| Feature | r vs. nonzero delta | Pattern |
-|---|---|---|
-| `distance_to_attacking_box` | **0.157** (strongest numeric correlate on this leg) | clean 8-of-8 monotonic increase across its 9 bins, with the final three gaps larger than the first six -- accelerating-monotonic, same shape `c1b`'s own `visible_attacker_count`/`defenders_within_10m` showed |
-| `defender_attacker_gap_x` | -0.062 | genuine inverted-U: rises for 4 bins, peaks, falls for 5 -- not a straight line |
-| `visible_defender_count` | 0.047 | the atlas's own `shape` field: `U-shaped`; dip then accelerating rise across its non-thin bins |
-
-Several other numeric features show apparent tail spikes (e.g. `defenders_within_10m`'s bin-11
-mean of +0.177, `attackers_within_10m`'s bin-9 mean of +0.193) that are **not** used -- reconfirmed
-directly against the atlas's own `small_n` flags, every one of those spikes sits on n&le;23 rows,
-several on n=1, indistinguishable from noise on a target with excess kurtosis 18.33. Padding the
-candidate list with these would be exactly the "quadratic terms on features with no real signal"
-mistake `c1b`'s own docstring warns against.
-
-**The same atlas also reports each bin's zero-rate for these same three features** (its
-unconditional `bins` panel; `pct_zero = 100 - pct_negative - pct_positive`):
-`distance_to_attacking_box`'s zero-rate is not flat across bins (14.9% -> 26.5% -> 15.3%, an
-inverted-U of its own), `defender_attacker_gap_x`'s zero-rate ranges 15.9%-25.9% with the same
-rise-then-fall shape, and `visible_defender_count`'s zero-rate ranges 8.4%-26.6%. **This is the
-evidence the Step-0 decision rests on**: the same three features show real curvature in *both*
-the zero-rate (what Stage A predicts) and the nonzero-delta magnitude (what Stage B predicts) --
-not a coincidence to ignore, and not a default to "add terms everywhere" either, since the
-candidate set was selected for its regression-stage evidence first (Prompt 70's own motivating
-problem) and only kept for the classifier stage because the *same* features independently clear
-a curvature bar there too.
-
-**Decision: expand both stages with the identical feature set.** Not independently tuned per
-stage -- there is no evidence in hand that a different curvature shape applies to one stage vs.
-the other for these three features, and inventing a second, classifier-specific candidate list
-without its own evidence would be exactly the "add terms everywhere" default this prompt was
-told to avoid.
-
-### 11.2 Feature-set construction
-
-**Quadratic (3 features, not a fixed count)**:
-`QUADRATIC_FEATURES_X1B = ["distance_to_attacking_box", "defender_attacker_gap_x", "visible_defender_count"]`
-
-**Interaction (1 pair)**: reused directly from
-`reports/analysis/xt_target/FEATURE_INTERACTION_ANALYSIS.json` (Prompt 65/67's own xT-specific
-interaction findings, target `target_xt_delta_v2`, not re-discovered from scratch). Of its 5
-curated ACTIVE pairs, 2 are classified `interactive`: `defenders_within_5m x defenders_within_10m`
-and `visible_defender_count x attacker_spread`. The first pair is not usable here --
-`defenders_within_5m` is excluded from this leg's 32 locked modelling features (structurally
-nested inside `defenders_within_10m`, Prompt 70's own feature-set decision, unchanged here). The
-second pair is fully eligible (both features are locked modelling features) and is used:
-`INTERACTION_PAIR_X1B = ("visible_defender_count", "attacker_spread")`.
-
-Both terms are appended to both stages' design matrices (35 columns total: 32 locked features + 3
-quadratic + 1 interaction).
-
-### 11.3 Cross-validation results (5-fold, OOF metrics)
-
-| Variant | RMSE | MAE | R² | Spearman | Zero-row MAE | Nonzero-row MAE |
-|---|---|---|---|---|---|---|
-| `x1_two_stage_huber` | 0.05394 | 0.02069 | 0.1514 | **0.5242** | **0.00478** | **0.02468** |
-| `x1b_quadratic` | **0.05391** | 0.02070 | **0.1525** | 0.5233 | 0.00481 | 0.02468 |
-
-Movement is real but tiny in every column: RMSE improves by 0.00004 (0.07% relative), R² improves
-by 0.0011, MAE and nonzero-row MAE are flat to the 5th decimal, and Spearman and zero-row MAE are
-each marginally *worse*. This is not the shape of a rung that meaningfully improved the model.
-
-### 11.4 Paired significance test, `x1b` vs `x1`
-
-Per-fold RMSE (`outputs/models/validation/significance_x1_vs_x1b_quadratic.json`): `x1b` beats
-`x1` in 5 of 5 folds, but the per-fold differences are small and consistent enough to produce a
-significant paired t-test (t=-7.37, **p=0.0018**) despite the practically negligible effect size
--- mean diff -0.00004, roughly two orders of magnitude smaller than Rung 0's own `x1`-vs-`x0`
-mean diff (-0.00461). Wilcoxon signed-rank p=0.0625, the same 5-fold floor seen throughout this
-project. **A significant p-value here is not being read as "clears the bar"** -- see section 11.6.
-
-### 11.5 Calibration -- the actual motivating question for this rung
-
-| Bin | `x1` gap (Rung 0) | `x1b` gap (this rung) | Change |
-|---|---|---|---|
-| 0 (most negative predicted) | +0.02074 | **+0.02113** | worse by 0.00039 |
-| 1 | +0.00038 | -0.00019 | flips sign, magnitude similar |
-| 2 | +0.00009 | -0.00019 | flips sign, magnitude similar |
-| 3 | +0.00059 | +0.00081 | worse by 0.00022 |
-| 4 (most positive predicted) | -0.01713 | **-0.01725** | worse by 0.00012 |
-
-**The tail-calibration gap that motivated this entire rung did not narrow -- it is unchanged to
-worse.** Bin 0's gap (the more negative-magnitude tail) widens slightly (+0.02074 -> +0.02113);
-bin 4's gap widens slightly too (-0.01713 -> -0.01725). The middle bins move by amounts smaller
-than the bin-to-bin noise already present in Rung 0's own table. Stated plainly: adding curvature
-that the underlying feature-target relationship genuinely has did not translate into `x1b`
-predicting the extreme rows any better, because the limitation Prompt 70 identified is a property
-of `HuberRegressor`'s own loss function (its robustness to outliers is what caps how far it will
-move a prediction toward an extreme observed value), not a property of the linear functional form
-the added quadratic/interaction terms were meant to fix. A curved relationship fit with a still-Huber
-loss is still capped the same way at the tails.
-
-### 11.6 Promotion call
-
-**`x1b_quadratic` does not clear the bar to replace `x1` as the standing baseline.** The aggregate
-metrics move in `x1b`'s favor by an amount too small to matter operationally (RMSE 0.07% lower,
-R² +0.0011), and the one metric this rung actually exists to move -- the tail-calibration gap --
-did not improve; if anything it is marginally worse. A statistically significant paired test
-(section 11.4) is not being treated as sufficient on its own, since a real effect can still be
-too small to be worth carrying forward, and this leg's own Step-0 evidence (the tail bins) is a
-closer read of practical value than a p-value computed on a sub-0.0001 mean RMSE difference.
-
-**`x1_two_stage_huber` remains the standing baseline**, carried forward into the leg's next rung
-(random forest, out of scope for this prompt). This is a valid, reportable Rung-1 outcome, not a
-failure to fix before moving on: the evidence in section 11.1 was real (the candidate features do
-show genuine curvature in both stages' target quantities), and testing that evidence properly
-required actually fitting the expanded model rather than assuming curvature terms would help
-because the correlation coefficients looked non-trivial -- they were real, they just were not the
-right kind of fix for a loss-function-driven calibration limitation.
+*Split note (prompt 73): this document previously appended Rung 1 (`x1b_quadratic`, prompt 71)
+directly below this section, on the stated basis that the split into a separate ladder document
+would happen "once a second rung is built." That threshold is now crossed (Rung 2,
+`x1c_random_forest`, prompt 73) -- Rungs 1 and 2 have moved to
+[`ACTIVE_XT_MODEL_LADDER.md`](ACTIVE_XT_MODEL_LADDER.md), mirroring `active_continuous`'s own
+split point (`ACTIVE_CONTINUOUS_MODEL_LADDER.md`, split at its own Rung 2). This document is
+Rung-0-only from here on. **Status: `x1c_random_forest` (Rung 2) has since been promoted to
+standing baseline, superseding `x1_two_stage_huber`** -- see
+[`ACTIVE_XT_MODEL_LADDER.md`](ACTIVE_XT_MODEL_LADDER.md) section 3.7. `x1_two_stage_huber` remains
+documented below as the Rung 0 baseline it was measured against.*
