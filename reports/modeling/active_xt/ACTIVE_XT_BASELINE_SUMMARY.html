@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- Active-xT Baseline Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1; --plane: #eceee8; --surface: #ffffff;
+  --text-primary: #10151c; --text-secondary: #4c525b; --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09); --gridline: #e2e4de;
+  --accent: #e34948; --pos: #e34948; --neg: #2a78d6;
+  --amber: #eda100; --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b; --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+    --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09); --gridline: #232a34;
+    --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+    --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+  --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09); --gridline: #232a34;
+  --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+  --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary); font-family: "Public Sans", -apple-system, sans-serif; font-size: 15px; line-height: 1.5; }
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead { background: var(--bg); border-bottom: 1px solid var(--border); padding: 40px 24px 32px; }
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow { font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; color: var(--accent); font-weight: 600; margin: 0 0 10px; }
+h1.title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: clamp(26px, 4vw, 38px); margin: 0 0 12px; color: var(--text-primary); }
+.dek { color: var(--text-secondary); max-width: 64ch; margin: 0 0 24px; font-size: 15.5px; }
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b { display: block; font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; color: var(--text-primary); }
+.stat span { display: block; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+footer { border-top: 1px solid var(--border); padding: 28px 24px 60px; max-width: 1180px; margin: 0 auto; }
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 900px; }
+.article h2 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; margin: 44px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.article h2:first-of-type { margin-top: 0; }
+.article h3 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 17px; margin: 30px 0 4px; color: var(--accent); }
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article code { font-family: "JetBrains Mono", monospace; font-size: 0.88em; background: var(--plane); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--neg); }
+.article ul, .article ol { color: var(--text-secondary); font-size: 14.5px; padding-left: 22px; margin: 0 0 16px; }
+.article li { margin-bottom: 6px; }
+.article table { width: 100%; border-collapse: collapse; margin: 4px 0 22px; font-size: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.article th { text-align: left; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.03em; color: var(--text-muted); background: var(--plane); padding: 9px 12px; border-bottom: 1px solid var(--border); }
+.article td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p:last-child { margin-bottom: 0; }
+.verdict-box { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.verdict-box p { margin: 0; }
+.fail-box { background: rgba(227,73,72,0.10); border: 1px solid rgba(227,73,72,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.fail-box p { margin: 0; }
+.variant-block { margin: 28px 0 44px; }
+.variant-title { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 16px; margin: 0 0 10px; }
+.chart-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 900px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+.chart-card img { width: 100%; height: auto; border-radius: 6px; display: block; background: var(--plane); cursor: zoom-in; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.chart-card img:hover { transform: scale(1.015); box-shadow: 0 4px 16px rgba(16,21,28,0.14); }
+.chart-card .cc-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 6px 2px 0; text-align: center; }
+.lightbox { position: fixed; inset: 0; background: rgba(9,12,16,0.78); display: none; align-items: center; justify-content: center; padding: 5vh 5vw; z-index: 1000; cursor: zoom-out; }
+.lightbox.open { display: flex; }
+.lightbox figure { margin: 0; max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.lightbox img { max-width: 92vw; max-height: 82vh; width: auto; height: auto; border-radius: 10px; background: var(--surface); box-shadow: 0 20px 60px rgba(0,0,0,0.45); cursor: default; }
+.lightbox figcaption { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #e8eaee; text-align: center; }
+.lightbox-close { position: absolute; top: 18px; right: 24px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+.lightbox-close:hover { background: rgba(255,255,255,0.18); }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; Active leg &middot; xT delta</p>
+    <h1 class="title">Active-xT Baseline Summary (x0-x1)</h1>
+    <p class="dek">Rung 0 of the active-xT leg: an architecture decision (two-stage, not lognormal
+      hurdle, not single-stage) backed by real evidence that the target's structural zero mass is
+      predictable from locked features, followed by a dummy floor and one two-stage baseline
+      (classifier &times; Huber regression) for the signed target <code>target_xt_delta_v2</code>.</p>
+    <div class="statbar">
+      <div class="stat"><b>55,761</b><span>rows with a defined target (of 56,068)</span></div>
+      <div class="stat"><b>Two-stage</b><span>classify zero/nonzero, then signed Huber regression</span></div>
+      <div class="stat"><b>x1 &gt; x0</b><span>Rung 0 result, p=0.00003</span></div>
+      <div class="stat"><b>20.15%</b><span>rows exactly zero -- structural, not noise</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+
+<p><em>Prompt scope: active-binary leg only. Passive-xT's own Rung 0 is a separate, later prompt.
+  This document does not build past Rung 0 &mdash; no gradient boosting, no promotion decision, no
+  full ladder.</em></p>
+
+<h2>1. Architecture decision, with evidence -- the load-bearing question this prompt answers</h2>
+<p><code>target_xt_delta_v2</code> does not match either architecture this project has used so far.</p>
+<p><strong>Not the lognormal hurdle used by <code>c1d</code>/<code>d1</code>.</strong> That
+  architecture needs a zero/positive-mass split feeding a <em>strictly-positive</em> continuous
+  regression head. <code>target_xt_delta_v2</code> is signed: reconfirmed directly against the
+  joined data, 35.4%/44.4%/20.2% negative/positive/zero per
+  <code>XT_TARGET_PROTOTYPE_V2.md</code>, and this script's own load step reconfirms 11,238 of
+  55,761 defined rows (20.15%) are <strong>exactly</strong> zero. A log transform of a signed
+  quantity does not exist, so a lognormal head is not an option here, full stop &mdash; not a
+  judgement call.</p>
+<p><strong>Not an ordinary single-distribution continuous target either, prima facie.</strong> The
+  20.15% exact-zero mass is structural, not noise: Prompt 66 established that <code>xt_after</code>
+  is forced to <code>0.0</code> whenever an action ends its own possession, so
+  <code>target_xt_delta_v2 = xt_before - 0 = xt_before</code> for that entire slice, by
+  construction. Fitting one plain regression across all rows risks the model learning to predict
+  close to the grand mean everywhere and missing that these are two genuinely different regimes
+  (denied-to-zero vs. continued-possession) &mdash; but only if that zero/nonzero split is actually
+  <em>predictable</em> from the features a model gets to see. That is the empirical question this
+  section had to settle before choosing an architecture, not something to assume either way.</p>
+<p><strong>Checked directly, not re-derived from scratch</strong>, against
+  <code>reports/analysis/xt_target/active_category_atlas.json</code> and
+  <code>active_flag_ledger.json</code>:</p>
+<table>
+<tr><th>Locked feature</th><th>Split</th><th>pct exactly zero</th></tr>
+<tr><td><code>event_type</code> (categorical)</td><td>Ball Recovery</td><td>5.70%</td></tr>
+<tr><td><code>event_type</code></td><td>Interception</td><td>9.13%</td></tr>
+<tr><td><code>event_type</code></td><td>Block</td><td>11.97%</td></tr>
+<tr><td><code>event_type</code></td><td>Clearance</td><td>6.98%</td></tr>
+<tr><td><code>event_type</code></td><td>50/50</td><td>19.29%</td></tr>
+<tr><td><code>event_type</code></td><td>Duel</td><td>25.50%</td></tr>
+<tr><td><code>event_type</code></td><td>Pressure</td><td>26.78%</td></tr>
+<tr><td><code>event_type</code></td><td>Foul Committed</td><td>27.94%</td></tr>
+<tr><td><code>action_retained_defensive_team_control</code> (boolean)</td><td>True</td><td>24.19%</td></tr>
+<tr><td><code>action_retained_defensive_team_control</code></td><td>False</td><td>10.63%</td></tr>
+<tr><td><code>is_in_attacking_box</code> (boolean)</td><td>True</td><td>12.56%</td></tr>
+<tr><td><code>is_in_attacking_box</code></td><td>False</td><td>21.04%</td></tr>
+<tr><td><code>is_in_defending_box</code> (boolean)</td><td>True</td><td>13.84%</td></tr>
+<tr><td><code>is_in_defending_box</code></td><td>False</td><td>20.75%</td></tr>
+</table>
+<p><code>event_type</code> alone spans a ~5x range (5.70% to 27.94%) in zero-rate, and it is a
+  <strong>locked modelling feature</strong>, not one of the three off-pool possession flags
+  (<code>action_ended_possession</code>/<code>action_changed_possession</code>/<code>action_won_possession</code>)
+  that mechanically <em>trigger</em> the zero &mdash; those remain excluded from
+  <code>feature_config.py</code> (reconfirmed still excluded) and are not used anywhere in this
+  script either, since including them would make a classifier stage trivially perfect by
+  construction rather than a genuine prediction from football-shape features. The boolean flags
+  above show the same pattern: real, several-fold variation in zero-rate from features genuinely
+  available to a model at prediction time.</p>
+<div class="verdict-box"><p><strong>Decision: two-stage architecture.</strong> Stage A &mdash; a
+  plain <code>LogisticRegression</code> classifying "this row's delta is nonzero" from the 32
+  locked features. Stage B &mdash; a <code>HuberRegressor</code> (robust to this leg's heavy tails
+  &mdash; excess kurtosis 18.33 &mdash; and explicitly <strong>not</strong> lognormal, per the
+  prompt's own constraint) fit only on the nonzero-delta rows, predicting the signed delta directly
+  with no transform. Combined: <code>E[delta] = P(nonzero) &times; E[delta | nonzero]</code>, since
+  <code>E[delta | zero] = 0</code> exactly by construction.</p></div>
+<p><code>HuberRegressor</code> was chosen over plain <code>LinearRegression</code> specifically
+  because of this target's heavy tails (a plain least-squares fit would let a small number of
+  large-magnitude rows dominate the fit); gradient boosting and random forest regression are
+  explicitly out of scope for Rung 0 and saved for a later rung.</p>
+<p><strong>Naming.</strong> <code>v</code> (active-binary shot target), <code>c</code>
+  (active-continuous xg), <code>p</code> (passive-binary), <code>d</code> (passive-continuous) are
+  all already claimed &mdash; confirmed directly against <code>scripts/models/</code>,
+  <code>reports/modeling/</code>, and <code>outputs/models/</code>. <code>x</code> (for xT) is
+  unclaimed. Used from Rung 0 onward: <code>x0_dummy</code>, <code>x1_two_stage_huber</code>.</p>
+
+<h2>2. Confirmed inputs</h2>
+<p><strong>Join.</strong> <code>player_defensive_actions.parquet</code> (56,068 rows, one row per
+  <code>event_id</code>, confirmed no duplicates) left-joined in memory against
+  <code>active_binary_xt_delta_v2.parquet</code> (also one row per <code>event_id</code>, confirmed
+  no duplicates) by <code>event_id</code>. Row count unchanged by the join &mdash; 307 rows have
+  <code>target_xt_delta_v2 == NaN</code> (Prompt 66/67's own count, reconfirmed here) and are
+  dropped, leaving <strong>55,761 rows</strong> for this leg's modelling.</p>
+<p><strong>Feature set.</strong> The same 32 locked ACTIVE features <code>v1</code>/<code>c1</code>
+  already use: 34 locked ACTIVE features minus <code>nearest_defender_distance</code>
+  (self-reference data bug, target-agnostic) and <code>defenders_within_5m</code> (structurally
+  nested inside <code>defenders_within_10m</code>, also target-agnostic). Reused directly from
+  <code>train_active_binary_baseline.py</code>'s own <code>DesignMatrixBuilder</code> and column
+  lists &mdash; not reimplemented.</p>
+<p><strong>Split.</strong> The canonical, frozen match-grouped split in
+  <code>outputs/models/splits/match_assignment.json</code> (5-fold, seed 42), loaded via
+  <code>dax.models.splits</code>, never rebuilt.</p>
+<table>
+<tr><th></th><th>Rows</th><th>Matches</th></tr>
+<tr><td>Train+val</td><td>45,166</td><td>92</td></tr>
+<tr><td>Held-out test</td><td>10,595</td><td>23</td></tr>
+</table>
+<p>Nonzero-delta rows per canonical CV fold: fold 0 = 6,819, fold 1 = 8,085, fold 2 = 6,921, fold 3
+  = 7,374, fold 4 = 6,922 &mdash; every fold well above the thin-fold floors used elsewhere in this
+  project.</p>
+<p><strong>Metric-convention flag.</strong> <code>dax.models.evaluation.regression_metrics</code>
+  and <code>dax.models.two_part_xg.compute_hurdle_metrics</code> both hardcode their zero/nonzero
+  split as <code>y_true &gt; 0</code> &mdash; correct for a non-negative xg target,
+  <strong>wrong</strong> for this leg's signed target. Neither helper is reused for the zero/nonzero
+  breakdown here; this script computes its own split on <code>y_true == 0</code> /
+  <code>y_true != 0</code>, and overall MAE/RMSE/R&sup2;/Spearman are computed directly rather than
+  through either helper.</p>
+
+<h2>3. Rung 0 variants</h2>
+<table>
+<tr><th>Variant</th><th>Model</th><th>Notes</th></tr>
+<tr><td><code>x0_dummy</code></td><td><code>ConstantRegressor(stat="mean")</code> on raw <code>target_xt_delta_v2</code></td><td>training-fold grand mean for every row, no transform</td></tr>
+<tr><td><code>x1_two_stage_huber</code></td><td><code>LogisticRegression</code> (P(nonzero)) &times; <code>HuberRegressor</code> (E[delta|nonzero])</td><td>both stages use the same 32 locked features; regression head fit only on nonzero-delta training rows</td></tr>
+</table>
+<p>Unlike <code>c0</code>/<code>c1</code> or <code>d0</code>/<code>d1</code>, neither
+  <code>x0</code> nor <code>x1</code> uses a log transform, so there is no native-vs-common-scale
+  mismatch to correct for here.</p>
+
+<h2>4. Cross-validation results (5-fold, OOF metrics)</h2>
+<table>
+<tr><th>Variant</th><th>RMSE</th><th>MAE</th><th>R&sup2;</th><th>Spearman</th><th>Zero-row MAE</th><th>Nonzero-row MAE</th></tr>
+<tr><td><code>x0_dummy</code></td><td>0.05856</td><td>0.02344</td><td>-0.0002</td><td>-0.0076</td><td><strong>0.00346</strong></td><td>0.02844</td></tr>
+<tr><td><strong><code>x1_two_stage_huber</code></strong></td><td><strong>0.05394</strong></td><td><strong>0.02069</strong></td><td><strong>0.1514</strong></td><td><strong>0.5242</strong></td><td>0.00478</td><td><strong>0.02468</strong></td></tr>
+</table>
+<p><code>x1</code> beats <code>x0</code> on RMSE, MAE, R&sup2;, Spearman, and nonzero-row MAE.
+  <code>x0</code>'s Spearman is undefined in practice (a constant prediction has no variance to
+  correlate against). <code>x0</code> slightly beats <code>x1</code> on zero-row MAE (0.00346 vs
+  0.00478) &mdash; read honestly, not glossed over: <code>x0</code> always predicts a value close
+  to the overall mean (~0.0035, itself close to zero), so it is cheaply accurate on the
+  exactly-zero rows almost by accident, while <code>x1</code>'s classifier stage occasionally
+  assigns nonzero probability to a row that turns out to be exactly zero, incurring a small real
+  cost there. This does not change the overall verdict: <code>x1</code>'s big win on nonzero-row
+  MAE (12.5% lower) and R&sup2; (from -0.0002 to +0.151) more than compensates.</p>
+
+<h2>5. Paired significance test, x1 vs x0</h2>
+<p>Per-fold RMSE: <code>x1</code> beats <code>x0</code> in <strong>5 of 5 folds</strong> (mean diff
+  -0.00461). Paired t-test t=-20.75, <strong>p=0.00003</strong> &mdash; clearly significant.
+  Wilcoxon signed-rank p=0.0625, the same 5-fold floor seen throughout this project. No
+  common-scale correction needed for this test, since neither variant is log-transformed.</p>
+
+<h2>6. Classifier-stage diagnostic (P(nonzero), OOF) -- diagnostic only, not the Rung-0 gate</h2>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>ROC-AUC</td><td>0.7103</td></tr>
+<tr><td>Average precision</td><td>0.9093</td></tr>
+<tr><td>Brier score</td><td>0.1469</td></tr>
+</table>
+<p>A P(nonzero) ROC-AUC of 0.71 is real, moderate signal &mdash; consistent with section 1's
+  evidence, not overwhelming. Average precision is high (0.91) mostly because the positive class
+  (nonzero) is the 79.85% majority, not because the classifier is unusually sharp. <strong>This is
+  a diagnostic on one internal piece of <code>x1</code>, not the Rung-0 gate</strong>: the Rung-0
+  promotion decision rests on the combined-prediction <code>x1</code>-vs-<code>x0</code>
+  regression comparison in sections 4-5.</p>
+
+<h2>7. Calibration (5 bins by predicted value, held-out test, x1)</h2>
+<table>
+<tr><th>Bin</th><th>n</th><th>Mean predicted</th><th>Mean actual</th><th>Gap (predicted - actual)</th></tr>
+<tr><td>0 (most negative predicted)</td><td>2,119</td><td>-0.00783</td><td>-0.02857</td><td>+0.02074</td></tr>
+<tr><td>1</td><td>2,119</td><td>-0.00156</td><td>-0.00194</td><td>+0.00038</td></tr>
+<tr><td>2</td><td>2,119</td><td>-0.00020</td><td>-0.00030</td><td>+0.00009</td></tr>
+<tr><td>3</td><td>2,119</td><td>0.00312</td><td>0.00252</td><td>+0.00059</td></tr>
+<tr><td>4 (most positive predicted)</td><td>2,119</td><td>0.02621</td><td>0.04333</td><td>-0.01713</td></tr>
+</table>
+<p>The middle three bins track closely, gaps under 0.0006. The two tail bins do not: bin 0
+  under-predicts the magnitude of the most-negative rows (actual delta more than 3x more negative
+  than predicted), and bin 4 under-predicts the magnitude of the most-positive rows the same way.
+  Both tails point the same direction &mdash; <code>x1</code> systematically pulls extreme rows
+  toward the middle, a plausible consequence of choosing <code>HuberRegressor</code> for its
+  robustness to outliers: the same property that protects the fit from being dominated by extreme
+  rows also makes it structurally conservative about predicting extreme values. A genuine Rung-0
+  finding to carry into later rungs, not something to correct at this rung.</p>
+
+<h2>8. Held-out test readout (single readout, not used for selection)</h2>
+<table>
+<tr><th>Variant</th><th>RMSE</th><th>MAE</th><th>R&sup2;</th><th>Spearman</th><th>Zero-row MAE</th><th>Nonzero-row MAE</th></tr>
+<tr><td><code>x0_dummy</code></td><td>0.05765</td><td>0.02327</td><td>-0.0001</td><td>NaN</td><td><strong>0.00347</strong></td><td>0.02844</td></tr>
+<tr><td><strong><code>x1_two_stage_huber</code></strong></td><td><strong>0.05309</strong></td><td><strong>0.02059</strong></td><td><strong>0.1519</strong></td><td><strong>0.5180</strong></td><td>0.00488</td><td><strong>0.02469</strong></td></tr>
+</table>
+<p>Same direction and near-identical magnitude as CV throughout &mdash; <code>x1</code>'s held-out
+  R&sup2; (0.1519) is essentially unchanged from CV (0.1514). No sign of overfitting on this
+  rung.</p>
+
+<h2>9. Charts</h2>
+<p>4 PNGs per variant, saved under <code>outputs/models/regression/charts/&lt;variant&gt;/</code>
+  (gitignored &mdash; regenerate by running
+  <code>scripts/models/train_active_xt_baseline.py</code> if the images below don't resolve).</p>
+<div class="variant-block">
+  <p class="variant-title">x0_dummy</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x0_dummy/predicted_vs_observed.png" alt="x0_dummy predicted vs observed"><p class="cc-label">predicted_vs_observed.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x0_dummy/residual_distribution.png" alt="x0_dummy residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x0_dummy/calibration_bins.png" alt="x0_dummy calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x0_dummy/feature_coefficients.png" alt="x0_dummy feature coefficients (n/a)"><p class="cc-label">feature_coefficients.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">x1_two_stage_huber</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1_two_stage_huber/predicted_vs_observed.png" alt="x1_two_stage_huber predicted vs observed"><p class="cc-label">predicted_vs_observed.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1_two_stage_huber/residual_distribution.png" alt="x1_two_stage_huber residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1_two_stage_huber/calibration_bins.png" alt="x1_two_stage_huber calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1_two_stage_huber/feature_coefficients.png" alt="x1_two_stage_huber feature coefficients (regression head)"><p class="cc-label">feature_coefficients.png</p></div>
+  </div>
+</div>
+
+<h2>10. Rung-0 result</h2>
+<div class="verdict-box"><p><strong><code>x1_two_stage_huber</code> clears Rung 0</strong> against
+  the <code>x0_dummy</code> floor: consistent, large-margin direction across CV and held-out test
+  on RMSE, MAE, R&sup2;, and Spearman; a statistically significant 5/5-fold paired test; and a real
+  jump off the zero-skill floor (R&sup2; -0.0002 -&gt; +0.1514). The one place <code>x0</code>
+  edges <code>x1</code> (zero-row MAE) is reported plainly in section 4, not smoothed over, and
+  does not change the overall verdict given the much larger gain on the majority nonzero-row
+  slice.</p></div>
+<p>The architecture decision (section 1) is the load-bearing result of this document: the zero
+  mass is real, structural, and meaningfully predictable from locked features that are
+  legitimately available to a model (not from the excluded possession-flag columns that
+  mechanically cause it), which is the evidence basis for every later rung on this leg to build on
+  the same two-stage shape rather than reopening the question each time.</p>
+<p><strong>No model ladder is built in this document</strong> &mdash; this is Rung 0 only,
+  mirroring the binary and continuous legs' own Prompt 36/49/54/59 discipline. Passive-xT's own
+  Rung 0 (a separate, later prompt) has not been started here.</p>
+
+</div>
+</div>
+<footer>
+  <p>Generated by <code>scripts/models/train_active_xt_baseline.py</code>. Markdown source:
+    <code>reports/modeling/active_xt/ACTIVE_XT_BASELINE_SUMMARY.md</code>.</p>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+  <figure>
+    <img id="lightboxImg" src="" alt="">
+    <figcaption id="lightboxCaption"></figcaption>
+  </figure>
+</div>
+<script>
+(function () {
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightboxImg');
+  var lightboxCaption = document.getElementById('lightboxCaption');
+  function openLightbox(img) {
+    lightboxImg.src = img.currentSrc || img.src;
+    lightboxImg.alt = img.alt;
+    var variant = img.closest('.variant-block');
+    var title = variant ? variant.querySelector('.variant-title').textContent : '';
+    lightboxCaption.textContent = title ? (title + ' — ' + img.alt) : img.alt;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    lightboxImg.src = '';
+  }
+  document.querySelectorAll('.chart-card img').forEach(function (img) {
+    img.addEventListener('click', function () { openLightbox(img); });
+  });
+  lightbox.addEventListener('click', function (e) { if (e.target === lightbox) closeLightbox(); });
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLightbox(); });
+})();
+</script>
+</body>
+</html>
