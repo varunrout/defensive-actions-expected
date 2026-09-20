@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Numeric x Numeric Interaction Analysis (xT delta, passive)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.test-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.test-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.test-title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 24px; margin: 0 0 6px; }
+.test-subnote { color: var(--text-muted); font-size: 13px; margin: 0 0 24px; }
+.qchart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
+.qchart-card h4 { font-family: "Archivo", sans-serif; font-size: 14.5px; margin: 0 0 4px; }
+.qchart-card .qc-note { color: var(--text-muted); font-size: 12px; margin: 0 0 16px; }
+.qbar-row { display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 0 4px; }
+.qbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.qbar-val { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.qbar-fill { width: 100%; max-width: 56px; background: var(--neg); border-radius: 4px 4px 0 0; min-height: 2px; }
+.qbar-label { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; text-align: center; line-height: 1.3; }
+.qbar-n { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); }
+.stratum-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 700px) { .stratum-grid { grid-template-columns: 1fr; } }
+.stratum-card { background: var(--plane); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.stratum-card h5 { font-family: "JetBrains Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--accent); margin: 0 0 4px; }
+.stratum-delta { font-size: 11.5px; color: var(--text-muted); margin: 0 0 12px; }
+.stratum-delta b { color: var(--text-primary); }
+.qbar-row.small { height: 90px; gap: 8px; }
+.qbar-row.small .qbar-fill { max-width: 40px; }
+.verdict-banner { border-radius: 10px; padding: 16px 20px; margin: 8px 0 28px; font-size: 14px; }
+.verdict-banner.v-no { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); }
+.verdict-banner.v-yes { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); }
+.verdict-banner.v-partially { background: rgba(42,120,214,0.10); border: 1px solid rgba(42,120,214,0.3); }
+.verdict-banner b { color: var(--text-primary); }
+.caveat-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 20px 24px; margin-top: 32px; }
+.caveat-box h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.caveat-box ul { margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary); }
+.caveat-box li { margin-bottom: 4px; }
+
+.numfeat-list { display: flex; flex-direction: column; gap: 12px; }
+.numfeat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+.numfeat-card.is-dropped { border-left: 4px solid var(--amber); }
+.numfeat-card.is-locked { border-left: 4px solid var(--good); }
+.numfeat-card.is-unreliable { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.numfeat-card.is-inconsistent { box-shadow: inset 0 0 0 1px rgba(227,73,72,0.4); }
+.numfeat-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-bottom: 6px;
+}
+.numfeat-rank { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-muted); }
+.numfeat-name { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 15.5px; color: var(--text-primary); }
+.nf-badge {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.nf-badge.locked { background: var(--good-wash); color: var(--good); }
+.nf-badge.dropped { background: var(--amber-wash); color: var(--amber); }
+.nf-badge.type { background: var(--plane); color: var(--text-secondary); }
+.nf-badge.unreliable { background: rgba(227,73,72,0.14); color: var(--pos); }
+.nf-badge.inconsistent { background: rgba(227,73,72,0.14); color: var(--pos); }
+.numfeat-stats {
+  display: flex; flex-wrap: wrap; gap: 14px 22px;
+  font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.numfeat-stats b { color: var(--text-primary); }
+.numfeat-reason, .numfeat-note { font-size: 12.5px; color: var(--text-secondary); margin: 4px 0; }
+.numfeat-note { color: var(--amber); }
+.numfeat-card summary {
+  cursor: pointer;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--neg);
+  margin-top: 6px;
+  outline: none;
+}
+.numfeat-card summary::-webkit-details-marker { color: var(--neg); }
+.numbin-rows { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+.numbin-row {
+  display: grid; grid-template-columns: 1fr 3fr auto; align-items: center; gap: 10px;
+  font-size: 11.5px; color: var(--text-secondary);
+}
+.numbin-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.numbin-track { position: relative; height: 9px; background: var(--gridline); border-radius: 4px; }
+.numbin-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; background: var(--neg); }
+.numbin-refline { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber); }
+.numbin-val { font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 600; color: var(--text-primary); text-align: right; }
+.numfeat-consistency {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-size: 12.5px; color: var(--text-secondary);
+}
+.numfeat-consistency .cverdict { font-weight: 700; }
+.numfeat-consistency .cverdict.ok { color: var(--good); }
+.numfeat-consistency .cverdict.bad { color: var(--pos); }
+.numsplit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+@media (max-width: 700px) { .numsplit-grid { grid-template-columns: 1fr; } }
+.numsplit-card { background: var(--plane); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.numsplit-card h5 { font-family: "JetBrains Mono", monospace; font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); margin: 0 0 6px; }
+
+.dataset-block { margin-top: 56px; padding-top: 36px; border-top: 2px solid var(--border); }
+.dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.dataset-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  margin: 0 0 4px;
+}
+.dataset-substat { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 12.5px; margin: 0 0 18px; }
+.method-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 16px 0 40px;
+}
+@media (max-width: 980px) { .method-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .method-strip { grid-template-columns: 1fr; } }
+.method-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.method-card .m-name {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: block;
+}
+.method-card p { margin: 0; font-size: 12.5px; color: var(--text-secondary); }
+.tier-section { margin: 12px 0 44px; }
+.tier-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+.tier-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.tier-dot.drop { background: var(--pos); }
+.tier-dot.collapse { background: var(--amber); }
+.tier-dot.review { background: var(--neg); }
+.tier-dot.distinct { background: var(--good); }
+.tier-note { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; }
+.corr-ledger { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.corr-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 160px 76px 96px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.corr-row:last-child { border-bottom: none; }
+.corr-row:hover { background: var(--plane); }
+@media (max-width: 760px) {
+  .corr-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 14px; }
+}
+.corr-pair { color: var(--text-primary); font-weight: 600; }
+.corr-pair .arrow { color: var(--text-muted); font-weight: 400; margin: 0 4px; }
+.corr-method {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.corr-mag-track { position: relative; height: 8px; background: var(--gridline); border-radius: 4px; }
+.corr-mag-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; }
+.corr-mag-fill.drop { background: var(--pos); }
+.corr-mag-fill.collapse { background: var(--amber); }
+.corr-mag-fill.review { background: var(--neg); }
+.corr-mag-fill.distinct { background: var(--good); }
+.corr-value { font-family: "JetBrains Mono", monospace; font-weight: 600; text-align: right; }
+.verdict-chip {
+  justify-self: end;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verdict-chip.drop { background: rgba(227,73,72,0.14); color: var(--pos); }
+.verdict-chip.collapse { background: var(--amber-wash); color: var(--amber); }
+.verdict-chip.review { background: rgba(42,120,214,0.12); color: var(--neg); }
+.verdict-chip.distinct { background: var(--good-wash); color: var(--good); }
+.closing-note {
+  margin-top: 24px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.closing-note b { color: var(--text-primary); }
+
+.rule-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+.rule-banner b { color: var(--text-primary); }
+.framework-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 40px; }
+@media (max-width: 760px) { .framework-grid { grid-template-columns: 1fr; } }
+.framework-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.framework-card .f-type {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: block;
+}
+.framework-card h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.framework-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0 0 10px; }
+.framework-card .example {
+  font-size: 12.5px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+}
+.framework-card .example b { color: var(--text-primary); }
+
+.hcall-panel {
+  background: var(--amber-wash);
+  border: 1px solid rgba(237,161,0,0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 20px 0 40px;
+}
+.hcall-panel > .hp-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.hcall-panel > .hp-note { font-size: 13px; color: var(--text-secondary); margin: 0 0 16px; }
+.hcall-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.hcall-item:last-child { margin-bottom: 0; }
+.hcall-item .hp-pair { font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.hcall-item .hp-reason { color: var(--text-secondary); }
+
+.table-scroll { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+.evidence-ledger { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 12.5px; border: none; border-radius: 0; }
+.evidence-ledger th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.evidence-ledger td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); background: var(--surface); }
+.evidence-ledger tr:last-child td { border-bottom: none; }
+.evidence-ledger td:first-child { color: var(--text-primary); font-weight: 600; }
+
+.path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+@media (max-width: 760px) { .path-grid { grid-template-columns: 1fr; } }
+.path-card { border-radius: 10px; padding: 16px 18px; border: 1px solid var(--border); }
+.path-card.do-now { background: var(--good-wash); border-color: rgba(47,158,91,0.35); }
+.path-card.defer { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.path-card .p-label {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+.path-card.do-now .p-label { color: var(--good); }
+.path-card.defer .p-label { color: var(--amber); }
+.path-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
+.recommendation {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--good);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+.recommendation b { color: var(--text-primary); }
+
+.hm-table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+.hm-table th { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); padding: 6px 8px; text-align: center; }
+.hm-cell { text-align: center; padding: 10px 8px; border: 1px solid var(--border); font-size: 12px; border-radius: 4px; }
+.hm-cell.hm-empty { background: var(--plane); color: var(--text-muted); }
+.hm-n { font-size: 10px; color: var(--text-muted); }
+.hm-key { font-size: 11px; color: var(--text-muted); margin: 4px 0 0; }
+.sr-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 8px 0 20px; }
+.sr-table th { text-align: left; color: var(--text-muted); padding: 5px 8px; }
+.sr-table td { padding: 5px 8px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">FEATURE INTERACTION ANALYSIS -- XT DELTA &amp;middot; PASSIVE LEG</p>
+  <h1 class="title">Numeric x Numeric Interaction Analysis (xT delta, passive)</h1>
+  <p class="dek">The same ACTIVE pairs and the same 4x4 quartile-grid method as the binary and xG versions, with an unconditional and a non-zero-delta classification for each. Only the minimum-marginal-delta threshold needed adapting -- the substitutive/additive cutoffs are ratios, and carry over unchanged. Active-binary leg only.</p>
+  <div class="statbar"><div class="stat"><b>5</b><span>pairs tested</span></div><div class="stat"><b>3</b><span>interactive unconditionally</span></div><div class="stat"><b>5</b><span>pairs where both panels agree</span></div><div class="stat"><b>1</b><span>with sign-flipping stratum deltas</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+
+<div class="rule-banner"><b>Scope.</b> The xg portal&#x27;s FEATURE_INTERACTION_ANALYSIS covers BOTH legs in ONE file -- confirmed by reading it: its thresholds.min_marginal_delta_by_dataset block carries an entry per leg, and its 10 pairs are the 5 active plus the 5 passive entries of generate_feature_interaction_analysis.PAIRS. That one-file convention is NOT mirrored here, and the reason is stated rather than left implicit: this portal&#x27;s FEATURE_INTERACTION_ANALYSIS.json is Prompt 67&#x27;s ACTIVE-ONLY output and merging a passive section into it would mean editing active-leg report content that this pass leaves frozen. The same imported PAIRS list is filtered to its 5 PASSIVE pairs -- a scope selection, not a re-selection. The pairs are NOT re-ranked for this target: keeping the same pairs is what makes the three targets&#x27; results comparable.</div>
+<div class="finding"><span class="tag">candidate selection</span><p><b>same ACTIVE pairs as the binary and xG files</b> &mdash; Same PASSIVE pairs as reports/analysis/shot_target/FEATURE_INTERACTION_ANALYSIS.json and the xg mirror -- see generate_feature_interaction_analysis.py's module docstring for the full ranking derivation and football rationale per pair. All five involve this leg's own screening, option and engagement columns, which have no active counterpart, so none of them could have been run on the active half of this portal. Computed here against target_xt_delta_passive for direct comparability, with a non-zero-delta panel in place of the xg version's shot-conditional one.</p></div>
+<div class="finding"><span class="tag">thresholds -- what was and was not adapted</span><p><b>stated explicitly</b> &mdash; The substitutive / additive classification cutoffs are RATIOS of one delta to another, so they are scale-free AND sign-free and are carried over completely unchanged -- re-checked for this leg rather than assumed, and the check is what makes it safe to leave them alone despite an excess kurtosis of ~35. MIN_CELL_N_FOR_DELTA (20) is a row count and is likewise untouchable by tail weight. The one absolute-magnitude threshold, min_marginal_delta, is RECOMPUTED FROM THIS LEG&#x27;S OWN STANDARD DEVIATION and not transferred from the active leg: this leg&#x27;s value is 0.002736 against active v2&#x27;s 0.004929, a 1.8x difference that would have mattered, because min_marginal_delta is the cutoff below which a pair is called &#x27;inconclusive&#x27;. Using active&#x27;s larger margin here would have pushed genuinely classifiable pairs into &#x27;inconclusive&#x27; and made this leg look less structured than it is. The classification test uses |marginal delta|, so a large NEGATIVE marginal delta is as classifiable as a large positive one -- which matters more on this leg than anywhere else in the portal, since its marginal deltas run negative far more often than active&#x27;s.</p></div>
+<div class="rule-banner" style="margin-top:16px;"><b>Reading the grids.</b>
+ADAPTATION 3, unchanged in method and re-measured on the passive leg. Sign carries the football meaning: POSITIVE target_xt_delta_passive = xT fell across the event (threat reduced, good for the defence), NEGATIVE = xT rose. On this leg the two directions are almost exactly balanced -- 36.4% positive vs 37.2% negative -- but the target is strongly LEFT-skewed (skew -2.6036), far more so than active v2&#x27;s -0.306, so the negative tail is much longer than the positive one even though the counts match. Two-directional framing therefore matters more here than anywhere else in this portal. Rankings are by |magnitude| across BOTH directions, and every table also reports the negative/positive/zero share behind its mean.</div>
+<h2 class="test-title" style="margin-top:32px;">Summary -- interactive pairs first (unconditional)</h2>
+
+<div class="qchart-card" style="overflow-x:auto;">
+<table class="sr-table">
+<thead><tr><th>feature A</th><th>feature B</th><th>unconditional</th><th>non-zero delta</th>
+<th>stratum deltas change sign</th></tr></thead>
+<tbody><tr><td><code>top_option_2_threat_score</code></td><td><code>top_option_2_distance_from_ball</code></td><td><span class="verdict-banner v-yes" style="display:inline-block;padding:2px 10px;margin:0;font-size:11px;">interactive</span></td><td><span class="verdict-banner v-yes" style="display:inline-block;padding:2px 10px;margin:0;font-size:11px;">interactive</span></td><td>no</td></tr><tr><td><code>lane_screening_score_option_2</code></td><td><code>engagement_distance_to_carrier</code></td><td><span class="verdict-banner v-yes" style="display:inline-block;padding:2px 10px;margin:0;font-size:11px;">interactive</span></td><td><span class="verdict-banner v-yes" style="display:inline-block;padding:2px 10px;margin:0;font-size:11px;">interactive</span></td><td>no</td></tr><tr><td><code>marking_tightness</code></td><td><code>engagement_distance_to_carrier</code></td><td><span class="verdict-banner v-yes" style="display:inline-block;padding:2px 10px;margin:0;font-size:11px;">interactive</span></td><td><span class="verdict-banner v-yes" style="display:inline-block;padding:2px 10px;margin:0;font-size:11px;">interactive</span></td><td>no</td></tr><tr><td><code>lane_screening_score_option_1</code></td><td><code>marking_tightness</code></td><td><span class="verdict-banner v-no" style="display:inline-block;padding:2px 10px;margin:0;font-size:11px;">additive</span></td><td><span class="verdict-banner v-no" style="display:inline-block;padding:2px 10px;margin:0;font-size:11px;">additive</span></td><td>no</td></tr><tr><td><code>overload_score</code></td><td><code>attacking_goal_centrality</code></td><td><span class="verdict-banner v-partially" style="display:inline-block;padding:2px 10px;margin:0;font-size:11px;">inconclusive</span></td><td><span class="verdict-banner v-partially" style="display:inline-block;padding:2px 10px;margin:0;font-size:11px;">inconclusive</span></td><td>yes</td></tr></tbody></table>
+</div>
+
+<div class="test-block">
+  <h2 class="test-title">top_option_2_threat_score &times; top_option_2_distance_from_ball
+  <span style="font-weight:400;font-size:15px;color:var(--text-muted);">(active, xT delta)</span></h2>
+  <div class="finding"><span class="tag">football rationale</span><p><b>top_option_2_threat_score x top_option_2_distance_from_ball</b> &mdash; The threat-score model for a passing option plausibly weights proximity to the ball heavily -- a closer option is easier to find and more immediately dangerous. Does option 2's threat score add positional-danger information beyond what its raw distance from the ball already says?</p></div>
+  
+  
+  <div class="verdict-banner v-yes"><b>Unconditional: INTERACTIVE</b><br>Magnitude ratio (4.03) exceeds 2.0 -- A&#x27;s effect meaningfully depends on B&#x27;s level.</div>
+  <div class="verdict-banner v-yes"><b>Given a non-zero delta: INTERACTIVE</b><br>Magnitude ratio (4.02) exceeds 2.0 -- A&#x27;s effect meaningfully depends on B&#x27;s level.</div>
+  
+  <p class="test-subnote">n=1,588,420 rows unconditional, 1,168,674 with a
+  non-zero delta. Marginal A delta: 0.01598748 unconditional,
+  0.02160736 conditional.</p>
+  <h4>Unconditional 4&times;4 grid (mean target_xt_delta_passive)</h4>
+  <table class="hm-table"><thead><tr><th></th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr></thead><tbody><tr><th>Q1</th><td class="hm-cell" style="background:rgba(227,73,72,0.66);"><b>-0.014588</b><br><span class="hm-n">n=139,793</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.20);"><b>-0.003311</b><br><span class="hm-n">n=76,674</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.15);"><b>+0.002156</b><br><span class="hm-n">n=83,448</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.44);"><b>+0.009298</b><br><span class="hm-n">n=97,194</span></td></tr><tr><th>Q2</th><td class="hm-cell" style="background:rgba(227,73,72,0.54);"><b>-0.011669</b><br><span class="hm-n">n=111,099</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.22);"><b>-0.003892</b><br><span class="hm-n">n=91,514</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.06);"><b>+0.000082</b><br><span class="hm-n">n=93,103</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.34);"><b>+0.006743</b><br><span class="hm-n">n=101,390</span></td></tr><tr><th>Q3</th><td class="hm-cell" style="background:rgba(227,73,72,0.48);"><b>-0.010103</b><br><span class="hm-n">n=88,533</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.21);"><b>-0.003687</b><br><span class="hm-n">n=100,067</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.09);"><b>-0.000802</b><br><span class="hm-n">n=104,007</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.14);"><b>+0.002053</b><br><span class="hm-n">n=104,496</span></td></tr><tr><th>Q4</th><td class="hm-cell" style="background:rgba(227,73,72,0.33);"><b>-0.006641</b><br><span class="hm-n">n=57,684</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.18);"><b>-0.002817</b><br><span class="hm-n">n=128,850</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.10);"><b>-0.000857</b><br><span class="hm-n">n=116,543</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.09);"><b>-0.000707</b><br><span class="hm-n">n=94,025</span></td></tr></tbody></table><p class="hm-key">Green = positive mean delta (xT fell, threat reduced). Red = negative (xT rose). Intensity is |value| relative to the strongest cell in this grid.</p>
+  <h4 style="margin-top:16px;">Non-zero-delta 4&times;4 grid</h4>
+  <table class="hm-table"><thead><tr><th></th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr></thead><tbody><tr><th>Q1</th><td class="hm-cell" style="background:rgba(227,73,72,0.66);"><b>-0.019663</b><br><span class="hm-n">n=103,710</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.19);"><b>-0.004408</b><br><span class="hm-n">n=57,602</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.15);"><b>+0.002876</b><br><span class="hm-n">n=62,540</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.44);"><b>+0.012338</b><br><span class="hm-n">n=73,247</span></td></tr><tr><th>Q2</th><td class="hm-cell" style="background:rgba(227,73,72,0.54);"><b>-0.015875</b><br><span class="hm-n">n=81,666</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.22);"><b>-0.005214</b><br><span class="hm-n">n=68,318</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.06);"><b>+0.000112</b><br><span class="hm-n">n=68,336</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.34);"><b>+0.009029</b><br><span class="hm-n">n=75,725</span></td></tr><tr><th>Q3</th><td class="hm-cell" style="background:rgba(227,73,72,0.48);"><b>-0.013740</b><br><span class="hm-n">n=65,098</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.21);"><b>-0.005077</b><br><span class="hm-n">n=72,667</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.09);"><b>-0.001108</b><br><span class="hm-n">n=75,237</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.15);"><b>+0.002788</b><br><span class="hm-n">n=76,961</span></td></tr><tr><th>Q4</th><td class="hm-cell" style="background:rgba(227,73,72,0.33);"><b>-0.008922</b><br><span class="hm-n">n=42,937</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.18);"><b>-0.003941</b><br><span class="hm-n">n=92,103</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.10);"><b>-0.001196</b><br><span class="hm-n">n=83,534</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.09);"><b>-0.000964</b><br><span class="hm-n">n=68,993</span></td></tr></tbody></table><p class="hm-key">Green = positive mean delta (xT fell, threat reduced). Red = negative (xT rose). Intensity is |value| relative to the strongest cell in this grid.</p>
+  <h4 style="margin-top:20px;">top_option_2_threat_score's unconditional gradient by top_option_2_distance_from_ball stratum</h4>
+  <table class="sr-table"><thead><tr><th>B stratum</th><th>A delta within stratum</th><th>A bins compared</th><th>n</th></tr></thead><tbody><tr><td>Q1</td><td>0.02388611</td><td>Q1 &rarr; Q4</td><td>397,109</td></tr><tr><td>Q2</td><td>0.01841255</td><td>Q1 &rarr; Q4</td><td>397,106</td></tr><tr><td>Q3</td><td>0.01215648</td><td>Q1 &rarr; Q4</td><td>397,103</td></tr><tr><td>Q4</td><td>0.00593356</td><td>Q1 &rarr; Q4</td><td>397,102</td></tr></tbody></table>
+  <h4>top_option_2_threat_score's non-zero-delta gradient by top_option_2_distance_from_ball stratum</h4>
+  <table class="sr-table"><thead><tr><th>B stratum</th><th>A delta within stratum</th><th>A bins compared</th><th>n</th></tr></thead><tbody><tr><td>Q1</td><td>0.03200146</td><td>Q1 &rarr; Q4</td><td>297,099</td></tr><tr><td>Q2</td><td>0.02490369</td><td>Q1 &rarr; Q4</td><td>294,045</td></tr><tr><td>Q3</td><td>0.01652821</td><td>Q1 &rarr; Q4</td><td>289,963</td></tr><tr><td>Q4</td><td>0.00795778</td><td>Q1 &rarr; Q4</td><td>287,567</td></tr></tbody></table>
+</div>
+<div class="test-block">
+  <h2 class="test-title">lane_screening_score_option_2 &times; engagement_distance_to_carrier
+  <span style="font-weight:400;font-size:15px;color:var(--text-muted);">(active, xT delta)</span></h2>
+  <div class="finding"><span class="tag">football rationale</span><p><b>lane_screening_score_option_2 x engagement_distance_to_carrier</b> &mdash; A defender tightly engaging the ball-carrier is, almost by geometry, closer to more passing lanes. Is screening credit for option 2 mostly a byproduct of how tightly the defender is already engaging the carrier, rather than a deliberate lane-blocking position?</p></div>
+  
+  
+  <div class="verdict-banner v-yes"><b>Unconditional: INTERACTIVE</b><br>Magnitude ratio (6.37) exceeds 2.0 -- A&#x27;s effect meaningfully depends on B&#x27;s level.</div>
+  <div class="verdict-banner v-yes"><b>Given a non-zero delta: INTERACTIVE</b><br>Magnitude ratio (8.49) exceeds 2.0 -- A&#x27;s effect meaningfully depends on B&#x27;s level.</div>
+  
+  <p class="test-subnote">n=1,588,420 rows unconditional, 1,168,674 with a
+  non-zero delta. Marginal A delta: -0.00466514 unconditional,
+  -0.00612333 conditional.</p>
+  <h4>Unconditional 4&times;4 grid (mean target_xt_delta_passive)</h4>
+  <table class="hm-table"><thead><tr><th></th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr></thead><tbody><tr><th>Q1</th><td class="hm-cell hm-empty">n/a</td><td class="hm-cell hm-empty">n/a</td><td class="hm-cell" style="background:rgba(227,73,72,0.37);"><b>-0.003694</b><br><span class="hm-n">n=155,862</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.47);"><b>-0.004833</b><br><span class="hm-n">n=241,243</span></td></tr><tr><th>Q2</th><td class="hm-cell hm-empty">n/a</td><td class="hm-cell" style="background:rgba(227,73,72,0.23);"><b>-0.002030</b><br><span class="hm-n">n=201,174</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.32);"><b>-0.003014</b><br><span class="hm-n">n=122,469</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.45);"><b>-0.004544</b><br><span class="hm-n">n=73,462</span></td></tr><tr><th>Q3</th><td class="hm-cell" style="background:rgba(227,73,72,0.14);"><b>-0.000923</b><br><span class="hm-n">n=165,528</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.19);"><b>-0.001563</b><br><span class="hm-n">n=117,700</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.30);"><b>-0.002843</b><br><span class="hm-n">n=66,357</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.45);"><b>-0.004608</b><br><span class="hm-n">n=47,520</span></td></tr><tr><th>Q4</th><td class="hm-cell" style="background:rgba(67,160,71,0.07);"><b>+0.000172</b><br><span class="hm-n">n=231,577</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.28);"><b>-0.002549</b><br><span class="hm-n">n=78,231</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.40);"><b>-0.004034</b><br><span class="hm-n">n=52,417</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.66);"><b>-0.007081</b><br><span class="hm-n">n=34,880</span></td></tr></tbody></table><p class="hm-key">Green = positive mean delta (xT fell, threat reduced). Red = negative (xT rose). Intensity is |value| relative to the strongest cell in this grid.</p>
+  <h4 style="margin-top:16px;">Non-zero-delta 4&times;4 grid</h4>
+  <table class="hm-table"><thead><tr><th></th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr></thead><tbody><tr><th>Q1</th><td class="hm-cell hm-empty">n/a</td><td class="hm-cell hm-empty">n/a</td><td class="hm-cell" style="background:rgba(227,73,72,0.37);"><b>-0.005035</b><br><span class="hm-n">n=114,339</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.44);"><b>-0.006211</b><br><span class="hm-n">n=187,713</span></td></tr><tr><th>Q2</th><td class="hm-cell hm-empty">n/a</td><td class="hm-cell" style="background:rgba(227,73,72,0.23);"><b>-0.002742</b><br><span class="hm-n">n=148,953</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.31);"><b>-0.004113</b><br><span class="hm-n">n=89,753</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.44);"><b>-0.006199</b><br><span class="hm-n">n=53,843</span></td></tr><tr><th>Q3</th><td class="hm-cell" style="background:rgba(227,73,72,0.14);"><b>-0.001265</b><br><span class="hm-n">n=120,806</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.19);"><b>-0.002167</b><br><span class="hm-n">n=84,919</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.30);"><b>-0.003923</b><br><span class="hm-n">n=48,082</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.45);"><b>-0.006323</b><br><span class="hm-n">n=34,634</span></td></tr><tr><th>Q4</th><td class="hm-cell" style="background:rgba(67,160,71,0.07);"><b>+0.000240</b><br><span class="hm-n">n=165,562</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.28);"><b>-0.003519</b><br><span class="hm-n">n=56,680</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.40);"><b>-0.005562</b><br><span class="hm-n">n=38,020</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.66);"><b>-0.009735</b><br><span class="hm-n">n=25,370</span></td></tr></tbody></table><p class="hm-key">Green = positive mean delta (xT fell, threat reduced). Red = negative (xT rose). Intensity is |value| relative to the strongest cell in this grid.</p>
+  <h4 style="margin-top:20px;">lane_screening_score_option_2's unconditional gradient by engagement_distance_to_carrier stratum</h4>
+  <table class="sr-table"><thead><tr><th>B stratum</th><th>A delta within stratum</th><th>A bins compared</th><th>n</th></tr></thead><tbody><tr><td>Q1</td><td>-0.00113879</td><td>Q3 &rarr; Q4</td><td>397,105</td></tr><tr><td>Q2</td><td>-0.00251336</td><td>Q2 &rarr; Q4</td><td>397,105</td></tr><tr><td>Q3</td><td>-0.00368505</td><td>Q1 &rarr; Q4</td><td>397,105</td></tr><tr><td>Q4</td><td>-0.00725247</td><td>Q1 &rarr; Q4</td><td>397,105</td></tr></tbody></table>
+  <h4>lane_screening_score_option_2's non-zero-delta gradient by engagement_distance_to_carrier stratum</h4>
+  <table class="sr-table"><thead><tr><th>B stratum</th><th>A delta within stratum</th><th>A bins compared</th><th>n</th></tr></thead><tbody><tr><td>Q1</td><td>-0.00117546</td><td>Q3 &rarr; Q4</td><td>302,052</td></tr><tr><td>Q2</td><td>-0.00345716</td><td>Q2 &rarr; Q4</td><td>292,549</td></tr><tr><td>Q3</td><td>-0.00505783</td><td>Q1 &rarr; Q4</td><td>288,441</td></tr><tr><td>Q4</td><td>-0.00997518</td><td>Q1 &rarr; Q4</td><td>285,632</td></tr></tbody></table>
+</div>
+<div class="test-block">
+  <h2 class="test-title">marking_tightness &times; engagement_distance_to_carrier
+  <span style="font-weight:400;font-size:15px;color:var(--text-muted);">(active, xT delta)</span></h2>
+  <div class="finding"><span class="tag">football rationale</span><p><b>marking_tightness x engagement_distance_to_carrier</b> &mdash; Both are distance measurements from a defender to a football-relevant point (nearest attacker vs the ball-carrier specifically) -- plausibly the same underlying 'how close is this defender to the action' phenomenon described twice, not two independent defensive behaviours.</p></div>
+  
+  
+  <div class="verdict-banner v-yes"><b>Unconditional: INTERACTIVE</b><br>Magnitude ratio (3.25) exceeds 2.0 -- A&#x27;s effect meaningfully depends on B&#x27;s level.</div>
+  <div class="verdict-banner v-yes"><b>Given a non-zero delta: INTERACTIVE</b><br>Magnitude ratio (3.08) exceeds 2.0 -- A&#x27;s effect meaningfully depends on B&#x27;s level.</div>
+  
+  <p class="test-subnote">n=1,590,321 rows unconditional, 1,170,202 with a
+  non-zero delta. Marginal A delta: 0.0030099 unconditional,
+  0.00412852 conditional.</p>
+  <h4>Unconditional 4&times;4 grid (mean target_xt_delta_passive)</h4>
+  <table class="hm-table"><thead><tr><th></th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr></thead><tbody><tr><th>Q1</th><td class="hm-cell" style="background:rgba(227,73,72,0.62);"><b>-0.005435</b><br><span class="hm-n">n=97,439</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.53);"><b>-0.004537</b><br><span class="hm-n">n=97,721</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.47);"><b>-0.004035</b><br><span class="hm-n">n=102,247</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.44);"><b>-0.003677</b><br><span class="hm-n">n=100,174</span></td></tr><tr><th>Q2</th><td class="hm-cell" style="background:rgba(227,73,72,0.48);"><b>-0.004054</b><br><span class="hm-n">n=111,722</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.33);"><b>-0.002672</b><br><span class="hm-n">n=115,900</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.28);"><b>-0.002120</b><br><span class="hm-n">n=99,310</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.28);"><b>-0.002101</b><br><span class="hm-n">n=70,648</span></td></tr><tr><th>Q3</th><td class="hm-cell" style="background:rgba(227,73,72,0.41);"><b>-0.003445</b><br><span class="hm-n">n=101,228</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.23);"><b>-0.001618</b><br><span class="hm-n">n=101,475</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.19);"><b>-0.001230</b><br><span class="hm-n">n=102,048</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.18);"><b>-0.001183</b><br><span class="hm-n">n=92,829</span></td></tr><tr><th>Q4</th><td class="hm-cell" style="background:rgba(227,73,72,0.66);"><b>-0.005845</b><br><span class="hm-n">n=87,192</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.16);"><b>-0.000997</b><br><span class="hm-n">n=82,485</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.07);"><b>-0.000131</b><br><span class="hm-n">n=93,974</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.07);"><b>-0.000130</b><br><span class="hm-n">n=133,929</span></td></tr></tbody></table><p class="hm-key">Green = positive mean delta (xT fell, threat reduced). Red = negative (xT rose). Intensity is |value| relative to the strongest cell in this grid.</p>
+  <h4 style="margin-top:16px;">Non-zero-delta 4&times;4 grid</h4>
+  <table class="hm-table"><thead><tr><th></th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr></thead><tbody><tr><th>Q1</th><td class="hm-cell" style="background:rgba(227,73,72,0.60);"><b>-0.007295</b><br><span class="hm-n">n=72,587</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.51);"><b>-0.006017</b><br><span class="hm-n">n=73,687</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.45);"><b>-0.005259</b><br><span class="hm-n">n=78,435</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.41);"><b>-0.004737</b><br><span class="hm-n">n=77,751</span></td></tr><tr><th>Q2</th><td class="hm-cell" style="background:rgba(227,73,72,0.47);"><b>-0.005509</b><br><span class="hm-n">n=82,211</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.33);"><b>-0.003631</b><br><span class="hm-n">n=85,275</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.27);"><b>-0.002877</b><br><span class="hm-n">n=73,179</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.27);"><b>-0.002841</b><br><span class="hm-n">n=52,263</span></td></tr><tr><th>Q3</th><td class="hm-cell" style="background:rgba(227,73,72,0.41);"><b>-0.004739</b><br><span class="hm-n">n=73,576</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.23);"><b>-0.002245</b><br><span class="hm-n">n=73,140</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.19);"><b>-0.001704</b><br><span class="hm-n">n=73,634</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.18);"><b>-0.001604</b><br><span class="hm-n">n=68,455</span></td></tr><tr><th>Q4</th><td class="hm-cell" style="background:rgba(227,73,72,0.66);"><b>-0.008046</b><br><span class="hm-n">n=63,338</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.16);"><b>-0.001397</b><br><span class="hm-n">n=58,850</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.07);"><b>-0.000183</b><br><span class="hm-n">n=67,067</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.07);"><b>-0.000180</b><br><span class="hm-n">n=96,754</span></td></tr></tbody></table><p class="hm-key">Green = positive mean delta (xT fell, threat reduced). Red = negative (xT rose). Intensity is |value| relative to the strongest cell in this grid.</p>
+  <h4 style="margin-top:20px;">marking_tightness's unconditional gradient by engagement_distance_to_carrier stratum</h4>
+  <table class="sr-table"><thead><tr><th>B stratum</th><th>A delta within stratum</th><th>A bins compared</th><th>n</th></tr></thead><tbody><tr><td>Q1</td><td>0.0017576</td><td>Q1 &rarr; Q4</td><td>397,581</td></tr><tr><td>Q2</td><td>0.00195245</td><td>Q1 &rarr; Q4</td><td>397,580</td></tr><tr><td>Q3</td><td>0.00226153</td><td>Q1 &rarr; Q4</td><td>397,580</td></tr><tr><td>Q4</td><td>0.00571446</td><td>Q1 &rarr; Q4</td><td>397,580</td></tr></tbody></table>
+  <h4>marking_tightness's non-zero-delta gradient by engagement_distance_to_carrier stratum</h4>
+  <table class="sr-table"><thead><tr><th>B stratum</th><th>A delta within stratum</th><th>A bins compared</th><th>n</th></tr></thead><tbody><tr><td>Q1</td><td>0.00255784</td><td>Q1 &rarr; Q4</td><td>302,460</td></tr><tr><td>Q2</td><td>0.00266843</td><td>Q1 &rarr; Q4</td><td>292,928</td></tr><tr><td>Q3</td><td>0.00313487</td><td>Q1 &rarr; Q4</td><td>288,805</td></tr><tr><td>Q4</td><td>0.00786561</td><td>Q1 &rarr; Q4</td><td>286,009</td></tr></tbody></table>
+</div>
+<div class="test-block">
+  <h2 class="test-title">overload_score &times; attacking_goal_centrality
+  <span style="font-weight:400;font-size:15px;color:var(--text-muted);">(active, xT delta)</span></h2>
+  <div class="finding"><span class="tag">football rationale</span><p><b>overload_score x attacking_goal_centrality</b> &mdash; Central zones near goal draw more covering defenders by default (it's the most dangerous area to leave open). Does defensive overload just track how central the action is, rather than reflecting a genuine tactical over-commitment of numbers?</p></div>
+  
+  
+<div class="finding flag" style="margin:12px 0;">
+<span class="tag">within-stratum deltas change sign</span>
+<p>Feature A's gradient points one way in some strata of B and the opposite way in others -- on this target that
+means A's effect <b>reverses direction</b> (threat-reducing at some levels of B, threat-increasing at others),
+not merely that it crosses a base rate. This distinction cannot arise on the xG target, whose binned means are
+non-negative by construction.</p>
+</div>
+  <div class="verdict-banner v-partially"><b>Unconditional: INCONCLUSIVE</b><br>Pooled marginal delta (+0.002316) is below the 0.002736 minimum to classify confidently. Note the |absolute value| test: on this target a large NEGATIVE marginal delta is just as classifiable as a large positive one.</div>
+  <div class="verdict-banner v-partially"><b>Given a non-zero delta: INCONCLUSIVE</b><br>Pooled marginal delta (+0.003174) is below the 0.003187 minimum to classify confidently. Note the |absolute value| test: on this target a large NEGATIVE marginal delta is just as classifiable as a large positive one.</div>
+  
+  <p class="test-subnote">n=1,590,600 rows unconditional, 1,170,431 with a
+  non-zero delta. Marginal A delta: 0.0023161 unconditional,
+  0.00317446 conditional.</p>
+  <h4>Unconditional 4&times;4 grid (mean target_xt_delta_passive)</h4>
+  <table class="hm-table"><thead><tr><th></th><th>0</th><th>1</th><th>2</th><th>3</th></tr></thead><tbody><tr><th>Q1</th><td class="hm-cell" style="background:rgba(227,73,72,0.14);"><b>-0.000918</b><br><span class="hm-n">n=281,061</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.25);"><b>-0.002149</b><br><span class="hm-n">n=66,031</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.32);"><b>-0.002970</b><br><span class="hm-n">n=31,764</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.39);"><b>-0.003712</b><br><span class="hm-n">n=18,794</span></td></tr><tr><th>Q2</th><td class="hm-cell" style="background:rgba(227,73,72,0.18);"><b>-0.001317</b><br><span class="hm-n">n=295,454</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.24);"><b>-0.002059</b><br><span class="hm-n">n=62,885</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.32);"><b>-0.002942</b><br><span class="hm-n">n=25,991</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.34);"><b>-0.003113</b><br><span class="hm-n">n=13,321</span></td></tr><tr><th>Q3</th><td class="hm-cell" style="background:rgba(227,73,72,0.33);"><b>-0.003088</b><br><span class="hm-n">n=306,659</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.32);"><b>-0.002953</b><br><span class="hm-n">n=57,747</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.06);"><b>+0.000044</b><br><span class="hm-n">n=22,498</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.25);"><b>+0.002094</b><br><span class="hm-n">n=10,745</span></td></tr><tr><th>Q4</th><td class="hm-cell" style="background:rgba(227,73,72,0.57);"><b>-0.005738</b><br><span class="hm-n">n=319,447</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.41);"><b>-0.003929</b><br><span class="hm-n">n=50,498</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.11);"><b>+0.000604</b><br><span class="hm-n">n=18,689</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.66);"><b>+0.006772</b><br><span class="hm-n">n=9,016</span></td></tr></tbody></table><p class="hm-key">Green = positive mean delta (xT fell, threat reduced). Red = negative (xT rose). Intensity is |value| relative to the strongest cell in this grid.</p>
+  <h4 style="margin-top:16px;">Non-zero-delta 4&times;4 grid</h4>
+  <table class="hm-table"><thead><tr><th></th><th>0</th><th>1</th><th>2</th><th>3</th></tr></thead><tbody><tr><th>Q1</th><td class="hm-cell" style="background:rgba(227,73,72,0.14);"><b>-0.001249</b><br><span class="hm-n">n=206,659</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.26);"><b>-0.003025</b><br><span class="hm-n">n=46,909</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.33);"><b>-0.003946</b><br><span class="hm-n">n=23,905</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.37);"><b>-0.004653</b><br><span class="hm-n">n=14,991</span></td></tr><tr><th>Q2</th><td class="hm-cell" style="background:rgba(227,73,72,0.18);"><b>-0.001789</b><br><span class="hm-n">n=217,497</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.25);"><b>-0.002885</b><br><span class="hm-n">n=44,878</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.33);"><b>-0.004049</b><br><span class="hm-n">n=18,886</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.33);"><b>-0.003983</b><br><span class="hm-n">n=10,411</span></td></tr><tr><th>Q3</th><td class="hm-cell" style="background:rgba(227,73,72,0.34);"><b>-0.004181</b><br><span class="hm-n">n=226,491</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.34);"><b>-0.004112</b><br><span class="hm-n">n=41,475</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.06);"><b>+0.000062</b><br><span class="hm-n">n=15,924</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.25);"><b>+0.002743</b><br><span class="hm-n">n=8,201</span></td></tr><tr><th>Q4</th><td class="hm-cell" style="background:rgba(227,73,72,0.58);"><b>-0.007715</b><br><span class="hm-n">n=237,554</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.43);"><b>-0.005444</b><br><span class="hm-n">n=36,445</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.12);"><b>+0.000846</b><br><span class="hm-n">n=13,340</span></td><td class="hm-cell" style="background:rgba(67,160,71,0.66);"><b>+0.008894</b><br><span class="hm-n">n=6,865</span></td></tr></tbody></table><p class="hm-key">Green = positive mean delta (xT fell, threat reduced). Red = negative (xT rose). Intensity is |value| relative to the strongest cell in this grid.</p>
+  <h4 style="margin-top:20px;">overload_score's unconditional gradient by attacking_goal_centrality stratum</h4>
+  <table class="sr-table"><thead><tr><th>B stratum</th><th>A delta within stratum</th><th>A bins compared</th><th>n</th></tr></thead><tbody><tr><td>Q1</td><td>-0.00279347</td><td>0 &rarr; 3</td><td>397,650</td></tr><tr><td>Q2</td><td>-0.00179592</td><td>0 &rarr; 3</td><td>397,651</td></tr><tr><td>Q3</td><td>0.0051817</td><td>0 &rarr; 3</td><td>397,649</td></tr><tr><td>Q4</td><td>0.01250924</td><td>0 &rarr; 3</td><td>397,650</td></tr></tbody></table>
+  <h4>overload_score's non-zero-delta gradient by attacking_goal_centrality stratum</h4>
+  <table class="sr-table"><thead><tr><th>B stratum</th><th>A delta within stratum</th><th>A bins compared</th><th>n</th></tr></thead><tbody><tr><td>Q1</td><td>-0.00340447</td><td>0 &rarr; 3</td><td>292,464</td></tr><tr><td>Q2</td><td>-0.002194</td><td>0 &rarr; 3</td><td>291,672</td></tr><tr><td>Q3</td><td>0.00692419</td><td>0 &rarr; 3</td><td>292,091</td></tr><tr><td>Q4</td><td>0.01660894</td><td>0 &rarr; 3</td><td>294,204</td></tr></tbody></table>
+</div>
+<div class="test-block">
+  <h2 class="test-title">lane_screening_score_option_1 &times; marking_tightness
+  <span style="font-weight:400;font-size:15px;color:var(--text-muted);">(active, xT delta)</span></h2>
+  <div class="finding"><span class="tag">football rationale</span><p><b>lane_screening_score_option_1 x marking_tightness</b> &mdash; Both come from the same defender-slot row and could both just be capturing 'this defender is positioned well' in general. Does lane-screening credit for the top option add independent blocking-position signal, or is it mostly redundant with how tightly the defender is already marking?</p></div>
+  
+  
+  <div class="verdict-banner v-no"><b>Unconditional: ADDITIVE</b><br>Every B-stratum delta shares the marginal delta&#x27;s sign and the max/min magnitude ratio (1.35) is within the 2.0 threshold -- A&#x27;s effect holds at roughly constant strength regardless of B&#x27;s level.</div>
+  <div class="verdict-banner v-no"><b>Given a non-zero delta: ADDITIVE</b><br>Every B-stratum delta shares the marginal delta&#x27;s sign and the max/min magnitude ratio (1.39) is within the 2.0 threshold -- A&#x27;s effect holds at roughly constant strength regardless of B&#x27;s level.</div>
+  
+  <p class="test-subnote">n=1,590,321 rows unconditional, 1,170,202 with a
+  non-zero delta. Marginal A delta: -0.00477193 unconditional,
+  -0.00627382 conditional.</p>
+  <h4>Unconditional 4&times;4 grid (mean target_xt_delta_passive)</h4>
+  <table class="hm-table"><thead><tr><th></th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr></thead><tbody><tr><th>Q1</th><td class="hm-cell" style="background:rgba(227,73,72,0.21);"><b>-0.001520</b><br><span class="hm-n">n=91,065</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.55);"><b>-0.004876</b><br><span class="hm-n">n=106,985</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.66);"><b>-0.005990</b><br><span class="hm-n">n=107,382</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.64);"><b>-0.005832</b><br><span class="hm-n">n=92,149</span></td></tr><tr><th>Q2</th><td class="hm-cell" style="background:rgba(67,160,71,0.09);"><b>+0.000318</b><br><span class="hm-n">n=89,862</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.23);"><b>-0.001706</b><br><span class="hm-n">n=106,207</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.38);"><b>-0.003235</b><br><span class="hm-n">n=102,055</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.58);"><b>-0.005195</b><br><span class="hm-n">n=99,457</span></td></tr><tr><th>Q3</th><td class="hm-cell" style="background:rgba(67,160,71,0.13);"><b>+0.000718</b><br><span class="hm-n">n=96,980</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.16);"><b>-0.000985</b><br><span class="hm-n">n=98,629</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.34);"><b>-0.002764</b><br><span class="hm-n">n=95,609</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.50);"><b>-0.004411</b><br><span class="hm-n">n=106,361</span></td></tr><tr><th>Q4</th><td class="hm-cell" style="background:rgba(67,160,71,0.09);"><b>+0.000316</b><br><span class="hm-n">n=119,674</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.16);"><b>-0.001045</b><br><span class="hm-n">n=85,759</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.29);"><b>-0.002334</b><br><span class="hm-n">n=92,534</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.44);"><b>-0.003779</b><br><span class="hm-n">n=99,613</span></td></tr></tbody></table><p class="hm-key">Green = positive mean delta (xT fell, threat reduced). Red = negative (xT rose). Intensity is |value| relative to the strongest cell in this grid.</p>
+  <h4 style="margin-top:16px;">Non-zero-delta 4&times;4 grid</h4>
+  <table class="hm-table"><thead><tr><th></th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr></thead><tbody><tr><th>Q1</th><td class="hm-cell" style="background:rgba(227,73,72,0.22);"><b>-0.002120</b><br><span class="hm-n">n=65,308</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.55);"><b>-0.006645</b><br><span class="hm-n">n=78,508</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.66);"><b>-0.008112</b><br><span class="hm-n">n=79,296</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.64);"><b>-0.007833</b><br><span class="hm-n">n=68,600</span></td></tr><tr><th>Q2</th><td class="hm-cell" style="background:rgba(67,160,71,0.09);"><b>+0.000445</b><br><span class="hm-n">n=64,150</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.23);"><b>-0.002344</b><br><span class="hm-n">n=77,281</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.39);"><b>-0.004420</b><br><span class="hm-n">n=74,704</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.57);"><b>-0.006906</b><br><span class="hm-n">n=74,817</span></td></tr><tr><th>Q3</th><td class="hm-cell" style="background:rgba(67,160,71,0.13);"><b>+0.001003</b><br><span class="hm-n">n=69,422</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.16);"><b>-0.001349</b><br><span class="hm-n">n=72,032</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.34);"><b>-0.003796</b><br><span class="hm-n">n=69,606</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.49);"><b>-0.005774</b><br><span class="hm-n">n=81,255</span></td></tr><tr><th>Q4</th><td class="hm-cell" style="background:rgba(67,160,71,0.09);"><b>+0.000436</b><br><span class="hm-n">n=86,723</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.16);"><b>-0.001415</b><br><span class="hm-n">n=63,283</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.30);"><b>-0.003199</b><br><span class="hm-n">n=67,508</span></td><td class="hm-cell" style="background:rgba(227,73,72,0.42);"><b>-0.004844</b><br><span class="hm-n">n=77,709</span></td></tr></tbody></table><p class="hm-key">Green = positive mean delta (xT fell, threat reduced). Red = negative (xT rose). Intensity is |value| relative to the strongest cell in this grid.</p>
+  <h4 style="margin-top:20px;">lane_screening_score_option_1's unconditional gradient by marking_tightness stratum</h4>
+  <table class="sr-table"><thead><tr><th>B stratum</th><th>A delta within stratum</th><th>A bins compared</th><th>n</th></tr></thead><tbody><tr><td>Q1</td><td>-0.00431129</td><td>Q1 &rarr; Q4</td><td>397,581</td></tr><tr><td>Q2</td><td>-0.00551281</td><td>Q1 &rarr; Q4</td><td>397,581</td></tr><tr><td>Q3</td><td>-0.00512932</td><td>Q1 &rarr; Q4</td><td>397,579</td></tr><tr><td>Q4</td><td>-0.00409477</td><td>Q1 &rarr; Q4</td><td>397,580</td></tr></tbody></table>
+  <h4>lane_screening_score_option_1's non-zero-delta gradient by marking_tightness stratum</h4>
+  <table class="sr-table"><thead><tr><th>B stratum</th><th>A delta within stratum</th><th>A bins compared</th><th>n</th></tr></thead><tbody><tr><td>Q1</td><td>-0.00571356</td><td>Q1 &rarr; Q4</td><td>291,712</td></tr><tr><td>Q2</td><td>-0.00735111</td><td>Q1 &rarr; Q4</td><td>290,952</td></tr><tr><td>Q3</td><td>-0.00677736</td><td>Q1 &rarr; Q4</td><td>292,315</td></tr><tr><td>Q4</td><td>-0.00527999</td><td>Q1 &rarr; Q4</td><td>295,223</td></tr></tbody></table>
+</div>
+
+</div>
+</div>
+</body>
+</html>

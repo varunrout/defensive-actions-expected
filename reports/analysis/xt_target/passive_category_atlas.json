@@ -1,0 +1,717 @@
+{
+  "dataset": "passive",
+  "leg": "passive (this portal also covers the active-binary leg -- see active_category_atlas.json)",
+  "target": "target_xt_delta_passive",
+  "target_source": "outputs/prototypes/passive_xt_delta.parquet (198,354 unique-event rows, left-joined READ-ONLY onto data/features/passive_defense.parquet's 1,593,181 defender-slot rows by event_id)",
+  "supersedes": "nothing. Unlike the active-binary leg, this leg has no v1 pass to supersede -- Prompt 68 implemented the corrected possession-outcome xt_after directly. See prompt_68_no_v1_detour.",
+  "n_rows": 1593181,
+  "n_unique_events": 198354,
+  "n_rows_nonzero": 1170431,
+  "base_xt": -0.002674073270996731,
+  "base_xt_nonzero": -0.003634029639378485,
+  "target_scale": {
+    "target": "target_xt_delta_passive",
+    "n_rows": 1593181,
+    "n_defined": 1590600,
+    "n_nan": 2581,
+    "mean": -0.00267407,
+    "std": 0.0367479,
+    "skew": -2.6036,
+    "excess_kurtosis": 34.8444,
+    "pct_zero": 26.416,
+    "pct_negative": 37.2,
+    "pct_positive": 36.384,
+    "xg_mean_same_rows": 0.00599126,
+    "xg_std_same_rows": 0.04023084,
+    "xg_flat_margin_absolute": 0.00299563,
+    "xg_flat_margin_as_fraction_of_xg_std": 0.074461,
+    "flat_margin": 0.00273629,
+    "range_trigger": 0.00547257,
+    "near_identical_threshold": 0.00273629,
+    "distinct_signal_threshold": 0.00820886,
+    "n_nonzero": 1170431,
+    "mean_nonzero": -0.00363403,
+    "std_nonzero": 0.04279834,
+    "flat_margin_nonzero": 0.00318681,
+    "scale_note": "ADAPTATION 1, RE-EXAMINED FOR THE PASSIVE LEG. Prompt 65 translated the xg suite's mean-multiple threshold convention onto the xT target via xg's own standard-deviation fraction, because the xT target's mean is near zero and a mean-multiple threshold would be an arbitrary sliver. That justification holds on this leg in its ORIGINAL form: target_xt_delta_passive's mean is -0.002674, NEGATIVE as v1's was and unlike active v2's positive mean, so '0.5 x the overall mean' would flip the sign of every threshold. At -0.002674 against a std of 0.036748 the mean is only 7.3% of one standard deviation. Mechanically: xg's own flat_margin (0.5 x mean xg = 0.002996 on these same rows) re-expressed as a fraction of xg's own std (0.040231) gives 0.074461, applied to target_xt_delta_passive's std (0.036748) to give 0.002736. Every number is computed at runtime from the real parquet -- nothing is copied from the active leg. See `threshold_transfer_warning` in this same block. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged and are unaffected.",
+    "conditional_panel_note": "ADAPTATION 2, unchanged in method and re-measured on the passive leg. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta_passive has no shot column standing behind it; its structural-zero analogue is the 26.4% of rows with an EXACTLY zero delta -- the next same-possession event landed in the same 8x12 xT grid cell as the snapshot itself, which on this leg is very common because most on-ball events are short passes and carries. That share is LARGER than active v2's 20.2%, so the panel matters more here, not less. The conditional panel throughout this half of the portal is 'given a non-zero delta' (target_xt_delta_passive != 0), never 'given a shot'.",
+    "direction_note": "ADAPTATION 3, unchanged in method and re-measured on the passive leg. Sign carries the football meaning: POSITIVE target_xt_delta_passive = xT fell across the event (threat reduced, good for the defence), NEGATIVE = xT rose. On this leg the two directions are almost exactly balanced -- 36.4% positive vs 37.2% negative -- but the target is strongly LEFT-skewed (skew -2.6036), far more so than active v2's -0.306, so the negative tail is much longer than the positive one even though the counts match. Two-directional framing therefore matters more here than anywhere else in this portal. Rankings are by |magnitude| across BOTH directions, and every table also reports the negative/positive/zero share behind its mean.",
+    "log_transform_note": "NOT an adaptation, re-checked rather than inherited: the xg_target report suite never log-transforms its target anywhere, on either leg, and neither did the active xT suite. The log1p framing in this project belongs to the modelling legs, not to this report suite. This leg's excess kurtosis of ~31 makes a transform more tempting than anywhere else in the portal -- and it is still NOT applied here, because doing so would silently break comparability with the passive xg portal and with this portal's own active half. Recorded as an open question for the modelling legs, not resolved by an EDA suite.",
+    "leg": "passive",
+    "target_version": "passive (possession-outcome definition from the first pass)",
+    "target_source": "outputs/prototypes/passive_xt_delta.parquet (198,354 unique-event rows, left-joined READ-ONLY onto data/features/passive_defense.parquet's 1,593,181 defender-slot rows by event_id)",
+    "supersedes": "nothing. Unlike the active-binary leg, this leg has no v1 pass to supersede -- Prompt 68 implemented the corrected possession-outcome xt_after directly. See prompt_68_no_v1_detour.",
+    "row_grain_note": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+    "grain_comparison": {
+      "this_suite_grain": "defender-slot (one row per visible defender per on-ball event)",
+      "prompt_68_grain": "unique event_id",
+      "prompt_68_unique_event": {
+        "mean": -0.00181,
+        "std": 0.03828,
+        "skew": -1.779,
+        "excess_kurtosis": 31.02,
+        "pct_zero": 26.3,
+        "pct_negative": 36.9,
+        "pct_positive": 36.9,
+        "n_defined": 198009
+      },
+      "this_run_defender_slot": {
+        "mean": -0.00267407,
+        "std": 0.0367479,
+        "skew": -2.6036,
+        "excess_kurtosis": 34.8444,
+        "pct_zero": 26.416,
+        "pct_negative": 37.2,
+        "pct_positive": 36.384,
+        "n_defined": 1590600
+      },
+      "note": "These are the SAME target measured at two grains, not a discrepancy to reconcile. Prompt 68 reported the unique-event distribution because that is the grain the target is computed at. Every report in this suite measures it at the defender-slot grain, because that is the grain the features live at and the grain a model on this leg would train on. The row-level distribution is MORE extreme on every shape statistic -- measured on this run, skew -2.6036 against Prompt 68's -1.779 and excess kurtosis 34.8444 against 31.02 -- and the mechanism is understood rather than guessed at: events with more visible defender slots contribute more rows, so the row-level distribution is the event-level one re-weighted by visible-defender count, and the extreme shot-xG-tail events are exactly the crowded, well-observed ones that carry the most slots. The directional shares barely move (26.4% zero / 37.2% negative / 36.4% positive here against 26.3 / 36.9 / 36.9 there), which is the reassuring part: the re-weighting lengthens the tails without changing which way the target points. Wherever this suite cites a Prompt 68 figure it is labelled as the unique-event figure."
+    },
+    "robust_scale": {
+      "iqr": 0.00359064,
+      "mad": 0.00180901,
+      "robust_std_1_4826_mad": 0.00268204,
+      "robust_flat_margin": 0.00019971,
+      "flat_margin_over_mad": 1.5126,
+      "flat_margin_over_iqr": 0.7621,
+      "pct_rows_inside_flat_margin": 62.12,
+      "mean_as_fraction_of_std": -0.0728,
+      "active_v2_comparison": {
+        "flat_margin_over_mad": 1.28,
+        "flat_margin_over_iqr": 0.56,
+        "pct_rows_inside_flat_margin": 53.4,
+        "excess_kurtosis": 18.3289,
+        "note": "Prompt 67's measured figures for target_xt_delta_v2 on the active leg, quoted here so the passive numbers beside them can be read as a comparison rather than in isolation. v1's own figures, for the longer arc, were 0.53 x MAD and 35.4% of rows at excess kurtosis 8.85."
+      }
+    },
+    "correlation_with_old_target": {
+      "pair": "target_xt_delta_passive vs target_future_xg_10s",
+      "pearson_r": -0.0736,
+      "n": 1590600,
+      "pearson_r_vs_shot_target": -0.0651,
+      "n_vs_shot_target": 1590600,
+      "prompt_68_reported_r_vs_xg": -0.0715,
+      "prompt_68_reported_r_vs_shot": -0.0629,
+      "active_v2_pearson_r_vs_xg": -0.1082,
+      "note": "Measured on this run at the defender-slot grain: r=-0.0736 against target_future_xg_10s and r=-0.0651 against target_future_shot_10s. Prompt 68 reported -0.0715 and -0.0629 respectively at the unique-event grain; the two grains can differ slightly because events with more visible defender slots are weighted more heavily at row level. Both are correctly signed -- more threat denied goes with less future attacking output -- and both are WEAKER than the active leg's own -0.1082 against the same xg target. That difference is real and is reported rather than smoothed over. Recorded HERE specifically because Adaptation 1 borrows target_future_xg_10s's own standard-deviation fraction to set every threshold in this suite, so wherever a report cites an xg-derived threshold, this is how the targets actually relate on the same rows. Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.3): correlation with the two OLD passive targets is correctly signed but numerically WEAKER than the active leg's own improvement -- Pearson r = -0.0629 against target_future_shot_10s and -0.0715 against target_future_xg_10s, against active v2's -0.108. More threat denied is still associated with less future attacking output, which is the sensible direction, but the relationship is looser on this leg. Stated plainly rather than talked up. A plausible reason, recorded by Prompt 68 and not chased here: a passive snapshot is one defender's off-ball positioning at an arbitrary point in a live attack, one step further removed from the moment-to-moment outcome than an active defensive ACTION is."
+    },
+    "threshold_transfer_warning": "THIS THRESHOLD DOES NOT TRANSFER CLEANLY, AND ON THIS LEG IT TRANSFERS WORSE THAN ON ACTIVE -- recomputed on the real passive parquet rather than inherited from active's numbers, and reported rather than forced to fit. Prompt 65 tuned the translated flat_margin against a target with excess kurtosis 8.85, where the margin was 0.53 x the MAD and spanned 35.4% of rows -- a genuinely narrow 'too small to matter' band. Prompt 67 found that on target_xt_delta_v2 (excess kurtosis 18.33) the same std-derived margin had grown to 1.28 x the MAD and 53.4% of rows, because the shot-xG injection inflates std while the bulk tightens. This leg is heavier-tailed again (excess kurtosis 34.8444, IQR 0.003591, MAD 0.001809), so the same mechanism applies more strongly: the translated margin is 0.002736, which is 1.51 x the MAD, 0.76 x the IQR, and spans 62.1% of all rows. A flat band covering this much of the data is not doing its job. A NAIVE TRANSFER OF ACTIVE'S OWN ABSOLUTE MARGIN (0.004929) WOULD HAVE BEEN WORSE STILL, since this leg's std is smaller (0.038 vs 0.058) while its bulk is tighter again -- the margin is therefore recomputed from this leg's own std, not copied. The literal translated margin is KEPT as the headline number so the active and passive halves of this portal stay like-for-like and the xg suite's convention is still the one being followed, but the MAD-derived robust alternative (0.000200) is published beside it on every run and every shape classification in this half of the portal should be read with this inflation in mind.",
+    "n_unique_events": 198354
+  },
+  "active_only_possession_flags_absent_here": {
+    "columns": [
+      "action_changed_possession",
+      "action_ended_possession",
+      "action_won_possession"
+    ],
+    "verified_absent_on_this_run": true,
+    "note": "The active Flag Ledger carries an off-pool section on these three columns because they trigger xt_after = 0 in the active target's construction. None of them exists in passive_defense.parquet -- asserted against the live schema on this run rather than assumed -- so this leg has no construction-input flag on or off its candidate list. Reported as a real structural difference between the legs, not as a missing section."
+  },
+  "prompt_68_cross_references": {
+    "shared_target_row_grain": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+    "distribution_shape": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.2): target_xt_delta_passive is MORE heavy-tailed than the active leg's own already-heavy-tailed v2 target -- skew -1.779 and excess kurtosis 31.02, against active v2's -0.306 and 18.33 -- with a small, slightly NEGATIVE mean (-0.00181, against active's positive +0.00338), 26.3% exactly zero, 36.9% negative and 36.9% positive. The negative mean is a real, sensible difference in what is being measured rather than a discrepancy: active-binary rows are defensive ACTIONS, which on average should deny threat, while passive rows are snapshots at an arbitrary on-ball event during a live attacking phase, where there is no inherent reason attacking possession should lose value from one touch to the next. The heavier tail comes from the same mechanism as active's -- real shot_statsbomb_xg values injected as xt_after for the 863 events whose next event is a Shot, against the 96-cell xT grid's own maximum of 0.2575 -- but is relatively more concentrated here because possession-ending events are only 0.82% of this leg's event population. This target is not close to the old zero-inflated, positively-skewed shape either, and is if anything a harder distribution to work with than active v2's.",
+    "possession_ending_collapse": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.1): on the possession-ending subset (action_ended_possession == True, n=1,619 unique events), target_xt_delta_passive collapses EXACTLY onto xt_before's own distribution, mean +0.02452, confirmed identical with np.allclose. This is the same logically-REQUIRED property Prompt 66 confirmed for the active leg: xt_after is forced to 0.0 for exactly these rows, so the delta is xt_before by construction -- '100% of the threat that existed a moment ago is denied'. It collapses to a real, row-by-row varying distribution rather than to an uninformative constant zero, which is what the old target_future_shot_10s did on these same rows. Smaller than active's own +0.0305/+0.0307 for an understood reason: this leg's on-ball events are far more often mid-buildup passes and carries than active's defensive actions, so the average denied threat at the moment a possession happens to end is lower. Any report showing this slice must present the identity as construction, not as discovery.",
+    "correlation_with_old_targets": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.3): correlation with the two OLD passive targets is correctly signed but numerically WEAKER than the active leg's own improvement -- Pearson r = -0.0629 against target_future_shot_10s and -0.0715 against target_future_xg_10s, against active v2's -0.108. More threat denied is still associated with less future attacking output, which is the sensible direction, but the relationship is looser on this leg. Stated plainly rather than talked up. A plausible reason, recorded by Prompt 68 and not chased here: a passive snapshot is one defender's off-ball positioning at an arbitrary point in a live attack, one step further removed from the moment-to-moment outcome than an active defensive ACTION is.",
+    "no_v1_detour": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md preamble and section 0): this leg has NO v1/v2 supersession to carry, and that is a property of the data rather than good luck. Active's v1 mistake was using the defensive action's own recorded location (action_x/action_y) as xt_after. passive_defense.parquet's ball_x/ball_y is already the ball's location at the on-ball event the snapshot is anchored to -- confirmed identical to events_with_targets.parquet's own ball_x/ball_y at the same event_id to floating-point exactness -- which is the correct 'before' state by the exact reasoning Prompt 66 established. The corrected possession-outcome xt_after was therefore implemented directly, on the first pass. Nothing in this half of the portal supersedes an earlier passive pass, because there isn't one."
+  },
+  "columns": {
+    "defender_functional_role": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "unclassified",
+          "n": 1023,
+          "xt_sum": 8.469807249999999,
+          "mean_xt": 0.00827938147605083,
+          "pct_negative": 28.54,
+          "pct_positive": 43.7,
+          "pct_zero": 27.76
+        },
+        {
+          "category": "wide_cover",
+          "n": 168608,
+          "xt_sum": -12.208287353599996,
+          "mean_xt": -7.240633513000567e-05,
+          "pct_negative": 34.0,
+          "pct_positive": 39.14,
+          "pct_zero": 26.85
+        },
+        {
+          "category": "central_screen",
+          "n": 212665,
+          "xt_sum": -283.2407165168,
+          "mean_xt": -0.001331863336782263,
+          "pct_negative": 35.97,
+          "pct_positive": 37.67,
+          "pct_zero": 26.37
+        },
+        {
+          "category": "advanced_wide",
+          "n": 155107,
+          "xt_sum": -459.4566538028,
+          "mean_xt": -0.0029621916083916264,
+          "pct_negative": 39.37,
+          "pct_positive": 34.81,
+          "pct_zero": 25.83
+        },
+        {
+          "category": "mid_block",
+          "n": 837005,
+          "xt_sum": -2639.4726358435,
+          "mean_xt": -0.0031534729611453934,
+          "pct_negative": 37.63,
+          "pct_positive": 35.91,
+          "pct_zero": 26.46
+        },
+        {
+          "category": "last_line",
+          "n": 216192,
+          "xt_sum": -867.4724585807,
+          "mean_xt": -0.004012509522002202,
+          "pct_negative": 37.72,
+          "pct_positive": 35.9,
+          "pct_zero": 26.38
+        }
+      ],
+      "categories_given_nonzero_delta": [
+        {
+          "category": "unclassified",
+          "n": 739,
+          "xt_sum": 8.469807249999999,
+          "mean_xt": 0.011461173545331528,
+          "pct_negative": 39.51,
+          "pct_positive": 60.49,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "wide_cover",
+          "n": 123331,
+          "xt_sum": -12.208287353599996,
+          "mean_xt": -9.898798642352689e-05,
+          "pct_negative": 46.48,
+          "pct_positive": 53.52,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "central_screen",
+          "n": 156592,
+          "xt_sum": -283.2407165168,
+          "mean_xt": -0.0018087815247062428,
+          "pct_negative": 48.85,
+          "pct_positive": 51.15,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "advanced_wide",
+          "n": 115049,
+          "xt_sum": -459.4566538028,
+          "mean_xt": -0.003993573640820868,
+          "pct_negative": 53.08,
+          "pct_positive": 46.92,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "mid_block",
+          "n": 615556,
+          "xt_sum": -2639.4726358435,
+          "mean_xt": -0.004287948839493888,
+          "pct_negative": 51.17,
+          "pct_positive": 48.83,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "last_line",
+          "n": 159164,
+          "xt_sum": -867.4724585807,
+          "mean_xt": -0.005450180056926818,
+          "pct_negative": 51.23,
+          "pct_positive": 48.77,
+          "pct_zero": 0.0
+        }
+      ]
+    },
+    "defender_zone": {
+      "status": "dropped",
+      "reason": "Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box",
+      "categories": [
+        {
+          "category": "attacking_third_center",
+          "n": 257814,
+          "xt_sum": 1453.5756364233998,
+          "mean_xt": 0.005638078756093152,
+          "pct_negative": 28.77,
+          "pct_positive": 46.78,
+          "pct_zero": 24.44
+        },
+        {
+          "category": "attacking_third_left_flank",
+          "n": 41355,
+          "xt_sum": 97.5822076084,
+          "mean_xt": 0.002359622962360053,
+          "pct_negative": 27.46,
+          "pct_positive": 47.16,
+          "pct_zero": 25.38
+        },
+        {
+          "category": "attacking_third_right_flank",
+          "n": 44015,
+          "xt_sum": 83.354676794,
+          "mean_xt": 0.001893778866159264,
+          "pct_negative": 28.25,
+          "pct_positive": 46.04,
+          "pct_zero": 25.71
+        },
+        {
+          "category": "middle_third_center",
+          "n": 509914,
+          "xt_sum": -61.2110350164,
+          "mean_xt": -0.00012004187964323396,
+          "pct_negative": 33.9,
+          "pct_positive": 38.95,
+          "pct_zero": 27.16
+        },
+        {
+          "category": "middle_third_right_flank",
+          "n": 109952,
+          "xt_sum": -60.7131094426,
+          "mean_xt": -0.0005521783091039726,
+          "pct_negative": 37.97,
+          "pct_positive": 35.73,
+          "pct_zero": 26.3
+        },
+        {
+          "category": "middle_third_left_flank",
+          "n": 105014,
+          "xt_sum": -68.21788007439999,
+          "mean_xt": -0.0006496074816157844,
+          "pct_negative": 37.69,
+          "pct_positive": 36.08,
+          "pct_zero": 26.23
+        },
+        {
+          "category": "defensive_third_right_flank",
+          "n": 60840,
+          "xt_sum": -315.6897580302,
+          "mean_xt": -0.005188852038629191,
+          "pct_negative": 47.99,
+          "pct_positive": 24.35,
+          "pct_zero": 27.65
+        },
+        {
+          "category": "defensive_third_left_flank",
+          "n": 58716,
+          "xt_sum": -330.1641117501,
+          "mean_xt": -0.005623068869645412,
+          "pct_negative": 48.32,
+          "pct_positive": 24.22,
+          "pct_zero": 27.46
+        },
+        {
+          "category": "defensive_third_center",
+          "n": 402980,
+          "xt_sum": -5051.897571359499,
+          "mean_xt": -0.012536348134794529,
+          "pct_negative": 45.17,
+          "pct_positive": 28.17,
+          "pct_zero": 26.66
+        }
+      ],
+      "categories_given_nonzero_delta": [
+        {
+          "category": "attacking_third_center",
+          "n": 194794,
+          "xt_sum": 1453.5756364233998,
+          "mean_xt": 0.007462117089968889,
+          "pct_negative": 38.08,
+          "pct_positive": 61.92,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "attacking_third_left_flank",
+          "n": 30860,
+          "xt_sum": 97.5822076084,
+          "mean_xt": 0.003162093571237848,
+          "pct_negative": 36.8,
+          "pct_positive": 63.2,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "attacking_third_right_flank",
+          "n": 32700,
+          "xt_sum": 83.354676794,
+          "mean_xt": 0.0025490726848318044,
+          "pct_negative": 38.02,
+          "pct_positive": 61.98,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "middle_third_center",
+          "n": 371426,
+          "xt_sum": -61.21103501639998,
+          "mean_xt": -0.00016480008135240931,
+          "pct_negative": 46.53,
+          "pct_positive": 53.47,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "middle_third_right_flank",
+          "n": 81039,
+          "xt_sum": -60.713109442599986,
+          "mean_xt": -0.0007491838428731844,
+          "pct_negative": 51.52,
+          "pct_positive": 48.48,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "middle_third_left_flank",
+          "n": 77469,
+          "xt_sum": -68.2178800744,
+          "mean_xt": -0.0008805829438149453,
+          "pct_negative": 51.09,
+          "pct_positive": 48.91,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "defensive_third_right_flank",
+          "n": 44016,
+          "xt_sum": -315.6897580302,
+          "mean_xt": -0.007172159170079062,
+          "pct_negative": 66.34,
+          "pct_positive": 33.66,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "defensive_third_left_flank",
+          "n": 42592,
+          "xt_sum": -330.1641117501,
+          "mean_xt": -0.007751786996386645,
+          "pct_negative": 66.61,
+          "pct_positive": 33.39,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "defensive_third_center",
+          "n": 295535,
+          "xt_sum": -5051.8975713595,
+          "mean_xt": -0.017094075393301978,
+          "pct_negative": 61.59,
+          "pct_positive": 38.41,
+          "pct_zero": 0.0
+        }
+      ]
+    },
+    "on_ball_event_type": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "Dribble",
+          "n": 21429,
+          "xt_sum": 33.17980858,
+          "mean_xt": 0.0015483600998646694,
+          "pct_negative": 18.52,
+          "pct_positive": 28.69,
+          "pct_zero": 52.79
+        },
+        {
+          "category": "Carry",
+          "n": 713760,
+          "xt_sum": -216.15590803740002,
+          "mean_xt": -0.00030284116234784804,
+          "pct_negative": 25.53,
+          "pct_positive": 25.04,
+          "pct_zero": 49.44
+        },
+        {
+          "category": "Pass",
+          "n": 830924,
+          "xt_sum": -2432.52072568,
+          "mean_xt": -0.002927488826511209,
+          "pct_negative": 47.23,
+          "pct_positive": 46.04,
+          "pct_zero": 6.73
+        },
+        {
+          "category": "Shot",
+          "n": 24487,
+          "xt_sum": -1637.88411971,
+          "mean_xt": -0.0668879045905991,
+          "pct_negative": 53.64,
+          "pct_positive": 46.06,
+          "pct_zero": 0.3
+        }
+      ],
+      "categories_given_nonzero_delta": [
+        {
+          "category": "Dribble",
+          "n": 10117,
+          "xt_sum": 33.17980858,
+          "mean_xt": 0.0032796094276959574,
+          "pct_negative": 39.22,
+          "pct_positive": 60.78,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Carry",
+          "n": 360910,
+          "xt_sum": -216.15590803740002,
+          "mean_xt": -0.0005989191433803442,
+          "pct_negative": 50.48,
+          "pct_positive": 49.52,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Pass",
+          "n": 774990,
+          "xt_sum": -2432.5207256799995,
+          "mean_xt": -0.0031387769205796197,
+          "pct_negative": 50.63,
+          "pct_positive": 49.37,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Shot",
+          "n": 24414,
+          "xt_sum": -1637.88411971,
+          "mean_xt": -0.06708790528835915,
+          "pct_negative": 53.81,
+          "pct_positive": 46.19,
+          "pct_zero": 0.0
+        }
+      ]
+    },
+    "period": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "3",
+          "n": 23640,
+          "xt_sum": -46.9851226693,
+          "mean_xt": -0.0019875263396489,
+          "pct_negative": 37.36,
+          "pct_positive": 35.28,
+          "pct_zero": 27.36
+        },
+        {
+          "category": "1",
+          "n": 801000,
+          "xt_sum": -1862.0656185098997,
+          "mean_xt": -0.002324676177914981,
+          "pct_negative": 36.82,
+          "pct_positive": 36.12,
+          "pct_zero": 27.06
+        },
+        {
+          "category": "2",
+          "n": 746278,
+          "xt_sum": -2223.6589969152,
+          "mean_xt": -0.0029796657504511724,
+          "pct_negative": 37.57,
+          "pct_positive": 36.7,
+          "pct_zero": 25.73
+        },
+        {
+          "category": "4",
+          "n": 19630,
+          "xt_sum": -117.168839173,
+          "mean_xt": -0.005968865979266429,
+          "pct_negative": 38.49,
+          "pct_positive": 36.45,
+          "pct_zero": 25.06
+        },
+        {
+          "category": "5",
+          "n": 52,
+          "xt_sum": -3.5023675799999996,
+          "mean_xt": -0.06735322269230769,
+          "pct_negative": 48.08,
+          "pct_positive": 51.92,
+          "pct_zero": 0.0
+        }
+      ],
+      "categories_given_nonzero_delta": [
+        {
+          "category": "3",
+          "n": 17173,
+          "xt_sum": -46.9851226693,
+          "mean_xt": -0.0027359880433995222,
+          "pct_negative": 51.44,
+          "pct_positive": 48.56,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "1",
+          "n": 584253,
+          "xt_sum": -1862.0656185098999,
+          "mean_xt": -0.0031870878172810405,
+          "pct_negative": 50.48,
+          "pct_positive": 49.52,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "2",
+          "n": 554242,
+          "xt_sum": -2223.6589969152,
+          "mean_xt": -0.004012072338283999,
+          "pct_negative": 50.58,
+          "pct_positive": 49.42,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "4",
+          "n": 14711,
+          "xt_sum": -117.168839173,
+          "mean_xt": -0.007964709344911971,
+          "pct_negative": 51.36,
+          "pct_positive": 48.64,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "5",
+          "n": 52,
+          "xt_sum": -3.5023675799999996,
+          "mean_xt": -0.06735322269230769,
+          "pct_negative": 48.08,
+          "pct_positive": 51.92,
+          "pct_zero": 0.0
+        }
+      ]
+    },
+    "phase_label": {
+      "status": "locked",
+      "reason": null,
+      "categories": [
+        {
+          "category": "box_defence",
+          "n": 103303,
+          "xt_sum": 1536.5542685527,
+          "mean_xt": 0.014874246329271174,
+          "pct_negative": 20.55,
+          "pct_positive": 56.03,
+          "pct_zero": 23.43
+        },
+        {
+          "category": "counterpress_after_loss",
+          "n": 225108,
+          "xt_sum": 168.905090199,
+          "mean_xt": 0.0007503291317900741,
+          "pct_negative": 38.41,
+          "pct_positive": 37.55,
+          "pct_zero": 24.04
+        },
+        {
+          "category": "transition_defence",
+          "n": 139581,
+          "xt_sum": -82.4516973072,
+          "mean_xt": -0.0005907086015088014,
+          "pct_negative": 36.83,
+          "pct_positive": 38.71,
+          "pct_zero": 24.46
+        },
+        {
+          "category": "settled_mid_block_proxy",
+          "n": 490885,
+          "xt_sum": -436.6009773218,
+          "mean_xt": -0.0008894160084781567,
+          "pct_negative": 33.36,
+          "pct_positive": 38.99,
+          "pct_zero": 27.65
+        },
+        {
+          "category": "settled_low_block_proxy",
+          "n": 217689,
+          "xt_sum": -269.6422206704,
+          "mean_xt": -0.0012386579968229905,
+          "pct_negative": 27.39,
+          "pct_positive": 45.37,
+          "pct_zero": 27.24
+        },
+        {
+          "category": "wide_defending_proxy",
+          "n": 216601,
+          "xt_sum": -359.232992033,
+          "mean_xt": -0.0016585010781713842,
+          "pct_negative": 43.47,
+          "pct_positive": 26.88,
+          "pct_zero": 29.65
+        },
+        {
+          "category": "high_press_proxy",
+          "n": 197433,
+          "xt_sum": -4810.9124162667,
+          "mean_xt": -0.02436731658976311,
+          "pct_negative": 58.28,
+          "pct_positive": 17.17,
+          "pct_zero": 24.55
+        }
+      ],
+      "categories_given_nonzero_delta": [
+        {
+          "category": "box_defence",
+          "n": 79102,
+          "xt_sum": 1536.5542685526998,
+          "mean_xt": 0.01942497368654016,
+          "pct_negative": 26.83,
+          "pct_positive": 73.17,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "counterpress_after_loss",
+          "n": 170985,
+          "xt_sum": 168.905090199,
+          "mean_xt": 0.0009878357177471708,
+          "pct_negative": 50.57,
+          "pct_positive": 49.43,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "transition_defence",
+          "n": 105443,
+          "xt_sum": -82.45169730719999,
+          "mean_xt": -0.0007819551540377265,
+          "pct_negative": 48.76,
+          "pct_positive": 51.24,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "settled_mid_block_proxy",
+          "n": 355173,
+          "xt_sum": -436.6009773218,
+          "mean_xt": -0.0012292628587246214,
+          "pct_negative": 46.11,
+          "pct_positive": 53.89,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "settled_low_block_proxy",
+          "n": 158380,
+          "xt_sum": -269.6422206704,
+          "mean_xt": -0.0017025017089935598,
+          "pct_negative": 37.64,
+          "pct_positive": 62.36,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "wide_defending_proxy",
+          "n": 152375,
+          "xt_sum": -359.23299203299996,
+          "mean_xt": -0.0023575586023494664,
+          "pct_negative": 61.8,
+          "pct_positive": 38.2,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "high_press_proxy",
+          "n": 148973,
+          "xt_sum": -4810.912416266699,
+          "mean_xt": -0.03229385470029267,
+          "pct_negative": 77.24,
+          "pct_positive": 22.76,
+          "pct_zero": 0.0
+        }
+      ]
+    }
+  }
+}

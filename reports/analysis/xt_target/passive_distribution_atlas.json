@@ -1,0 +1,112 @@
+{
+  "dataset": "passive",
+  "leg": "passive (this portal also covers the active-binary leg)",
+  "target": "target_xt_delta_passive",
+  "n_rows": 1593181,
+  "n_unique_events": 198354,
+  "target_distribution": {
+    "target": "target_xt_delta_passive",
+    "n_rows": 1593181,
+    "n_defined": 1590600,
+    "n_nan": 2581,
+    "mean": -0.00267407,
+    "std": 0.0367479,
+    "skew": -2.6036,
+    "excess_kurtosis": 34.8444,
+    "pct_zero": 26.416,
+    "pct_negative": 37.2,
+    "pct_positive": 36.384,
+    "xg_mean_same_rows": 0.00599126,
+    "xg_std_same_rows": 0.04023084,
+    "xg_flat_margin_absolute": 0.00299563,
+    "xg_flat_margin_as_fraction_of_xg_std": 0.074461,
+    "flat_margin": 0.00273629,
+    "range_trigger": 0.00547257,
+    "near_identical_threshold": 0.00273629,
+    "distinct_signal_threshold": 0.00820886,
+    "n_nonzero": 1170431,
+    "mean_nonzero": -0.00363403,
+    "std_nonzero": 0.04279834,
+    "flat_margin_nonzero": 0.00318681,
+    "scale_note": "ADAPTATION 1, RE-EXAMINED FOR THE PASSIVE LEG. Prompt 65 translated the xg suite's mean-multiple threshold convention onto the xT target via xg's own standard-deviation fraction, because the xT target's mean is near zero and a mean-multiple threshold would be an arbitrary sliver. That justification holds on this leg in its ORIGINAL form: target_xt_delta_passive's mean is -0.002674, NEGATIVE as v1's was and unlike active v2's positive mean, so '0.5 x the overall mean' would flip the sign of every threshold. At -0.002674 against a std of 0.036748 the mean is only 7.3% of one standard deviation. Mechanically: xg's own flat_margin (0.5 x mean xg = 0.002996 on these same rows) re-expressed as a fraction of xg's own std (0.040231) gives 0.074461, applied to target_xt_delta_passive's std (0.036748) to give 0.002736. Every number is computed at runtime from the real parquet -- nothing is copied from the active leg. See `threshold_transfer_warning` in this same block. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged and are unaffected.",
+    "conditional_panel_note": "ADAPTATION 2, unchanged in method and re-measured on the passive leg. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta_passive has no shot column standing behind it; its structural-zero analogue is the 26.4% of rows with an EXACTLY zero delta -- the next same-possession event landed in the same 8x12 xT grid cell as the snapshot itself, which on this leg is very common because most on-ball events are short passes and carries. That share is LARGER than active v2's 20.2%, so the panel matters more here, not less. The conditional panel throughout this half of the portal is 'given a non-zero delta' (target_xt_delta_passive != 0), never 'given a shot'.",
+    "direction_note": "ADAPTATION 3, unchanged in method and re-measured on the passive leg. Sign carries the football meaning: POSITIVE target_xt_delta_passive = xT fell across the event (threat reduced, good for the defence), NEGATIVE = xT rose. On this leg the two directions are almost exactly balanced -- 36.4% positive vs 37.2% negative -- but the target is strongly LEFT-skewed (skew -2.6036), far more so than active v2's -0.306, so the negative tail is much longer than the positive one even though the counts match. Two-directional framing therefore matters more here than anywhere else in this portal. Rankings are by |magnitude| across BOTH directions, and every table also reports the negative/positive/zero share behind its mean.",
+    "log_transform_note": "NOT an adaptation, re-checked rather than inherited: the xg_target report suite never log-transforms its target anywhere, on either leg, and neither did the active xT suite. The log1p framing in this project belongs to the modelling legs, not to this report suite. This leg's excess kurtosis of ~31 makes a transform more tempting than anywhere else in the portal -- and it is still NOT applied here, because doing so would silently break comparability with the passive xg portal and with this portal's own active half. Recorded as an open question for the modelling legs, not resolved by an EDA suite.",
+    "leg": "passive",
+    "target_version": "passive (possession-outcome definition from the first pass)",
+    "target_source": "outputs/prototypes/passive_xt_delta.parquet (198,354 unique-event rows, left-joined READ-ONLY onto data/features/passive_defense.parquet's 1,593,181 defender-slot rows by event_id)",
+    "supersedes": "nothing. Unlike the active-binary leg, this leg has no v1 pass to supersede -- Prompt 68 implemented the corrected possession-outcome xt_after directly. See prompt_68_no_v1_detour.",
+    "row_grain_note": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+    "grain_comparison": {
+      "this_suite_grain": "defender-slot (one row per visible defender per on-ball event)",
+      "prompt_68_grain": "unique event_id",
+      "prompt_68_unique_event": {
+        "mean": -0.00181,
+        "std": 0.03828,
+        "skew": -1.779,
+        "excess_kurtosis": 31.02,
+        "pct_zero": 26.3,
+        "pct_negative": 36.9,
+        "pct_positive": 36.9,
+        "n_defined": 198009
+      },
+      "this_run_defender_slot": {
+        "mean": -0.00267407,
+        "std": 0.0367479,
+        "skew": -2.6036,
+        "excess_kurtosis": 34.8444,
+        "pct_zero": 26.416,
+        "pct_negative": 37.2,
+        "pct_positive": 36.384,
+        "n_defined": 1590600
+      },
+      "note": "These are the SAME target measured at two grains, not a discrepancy to reconcile. Prompt 68 reported the unique-event distribution because that is the grain the target is computed at. Every report in this suite measures it at the defender-slot grain, because that is the grain the features live at and the grain a model on this leg would train on. The row-level distribution is MORE extreme on every shape statistic -- measured on this run, skew -2.6036 against Prompt 68's -1.779 and excess kurtosis 34.8444 against 31.02 -- and the mechanism is understood rather than guessed at: events with more visible defender slots contribute more rows, so the row-level distribution is the event-level one re-weighted by visible-defender count, and the extreme shot-xG-tail events are exactly the crowded, well-observed ones that carry the most slots. The directional shares barely move (26.4% zero / 37.2% negative / 36.4% positive here against 26.3 / 36.9 / 36.9 there), which is the reassuring part: the re-weighting lengthens the tails without changing which way the target points. Wherever this suite cites a Prompt 68 figure it is labelled as the unique-event figure."
+    },
+    "robust_scale": {
+      "iqr": 0.00359064,
+      "mad": 0.00180901,
+      "robust_std_1_4826_mad": 0.00268204,
+      "robust_flat_margin": 0.00019971,
+      "flat_margin_over_mad": 1.5126,
+      "flat_margin_over_iqr": 0.7621,
+      "pct_rows_inside_flat_margin": 62.12,
+      "mean_as_fraction_of_std": -0.0728,
+      "active_v2_comparison": {
+        "flat_margin_over_mad": 1.28,
+        "flat_margin_over_iqr": 0.56,
+        "pct_rows_inside_flat_margin": 53.4,
+        "excess_kurtosis": 18.3289,
+        "note": "Prompt 67's measured figures for target_xt_delta_v2 on the active leg, quoted here so the passive numbers beside them can be read as a comparison rather than in isolation. v1's own figures, for the longer arc, were 0.53 x MAD and 35.4% of rows at excess kurtosis 8.85."
+      }
+    },
+    "correlation_with_old_target": {
+      "pair": "target_xt_delta_passive vs target_future_xg_10s",
+      "pearson_r": -0.0736,
+      "n": 1590600,
+      "pearson_r_vs_shot_target": -0.0651,
+      "n_vs_shot_target": 1590600,
+      "prompt_68_reported_r_vs_xg": -0.0715,
+      "prompt_68_reported_r_vs_shot": -0.0629,
+      "active_v2_pearson_r_vs_xg": -0.1082,
+      "note": "Measured on this run at the defender-slot grain: r=-0.0736 against target_future_xg_10s and r=-0.0651 against target_future_shot_10s. Prompt 68 reported -0.0715 and -0.0629 respectively at the unique-event grain; the two grains can differ slightly because events with more visible defender slots are weighted more heavily at row level. Both are correctly signed -- more threat denied goes with less future attacking output -- and both are WEAKER than the active leg's own -0.1082 against the same xg target. That difference is real and is reported rather than smoothed over. Recorded HERE specifically because Adaptation 1 borrows target_future_xg_10s's own standard-deviation fraction to set every threshold in this suite, so wherever a report cites an xg-derived threshold, this is how the targets actually relate on the same rows. Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.3): correlation with the two OLD passive targets is correctly signed but numerically WEAKER than the active leg's own improvement -- Pearson r = -0.0629 against target_future_shot_10s and -0.0715 against target_future_xg_10s, against active v2's -0.108. More threat denied is still associated with less future attacking output, which is the sensible direction, but the relationship is looser on this leg. Stated plainly rather than talked up. A plausible reason, recorded by Prompt 68 and not chased here: a passive snapshot is one defender's off-ball positioning at an arbitrary point in a live attack, one step further removed from the moment-to-moment outcome than an active defensive ACTION is."
+    },
+    "threshold_transfer_warning": "THIS THRESHOLD DOES NOT TRANSFER CLEANLY, AND ON THIS LEG IT TRANSFERS WORSE THAN ON ACTIVE -- recomputed on the real passive parquet rather than inherited from active's numbers, and reported rather than forced to fit. Prompt 65 tuned the translated flat_margin against a target with excess kurtosis 8.85, where the margin was 0.53 x the MAD and spanned 35.4% of rows -- a genuinely narrow 'too small to matter' band. Prompt 67 found that on target_xt_delta_v2 (excess kurtosis 18.33) the same std-derived margin had grown to 1.28 x the MAD and 53.4% of rows, because the shot-xG injection inflates std while the bulk tightens. This leg is heavier-tailed again (excess kurtosis 34.8444, IQR 0.003591, MAD 0.001809), so the same mechanism applies more strongly: the translated margin is 0.002736, which is 1.51 x the MAD, 0.76 x the IQR, and spans 62.1% of all rows. A flat band covering this much of the data is not doing its job. A NAIVE TRANSFER OF ACTIVE'S OWN ABSOLUTE MARGIN (0.004929) WOULD HAVE BEEN WORSE STILL, since this leg's std is smaller (0.038 vs 0.058) while its bulk is tighter again -- the margin is therefore recomputed from this leg's own std, not copied. The literal translated margin is KEPT as the headline number so the active and passive halves of this portal stay like-for-like and the xg suite's convention is still the one being followed, but the MAD-derived robust alternative (0.000200) is published beside it on every run and every shape classification in this half of the portal should be read with this inflation in mind."
+  },
+  "target_histogram": {
+    "n_bins": 61,
+    "symmetric_cap_abs_p99": 0.2466264,
+    "n_rows_inside_cap": 1575477,
+    "n_rows_clipped": 15123
+  },
+  "feature_cards_are_target_independent": "continuous_distribution / discrete_distribution never reference a target column -- the feature cards in the HTML are reproduced from the same functions the passive xg portal's atlas uses, unchanged.",
+  "two_variant_convention_check": "CONFIRMED by listing the directories rather than assumed: reports/analysis/shot_target/ ships passive_distribution_atlas.html AND passive_distribution_atlas_reconstructed.html, so the two-variant convention does apply to the passive leg. reports/analysis/xg_target/ ships only the single passive_distribution_atlas.html, which is an artefact of the stale filename branch in generate_distribution_atlas_reconstructed.py that Prompt 65 already recorded for the active side -- not a decision that the passive leg gets one variant. Both are written here, matching this portal's own active half.",
+  "prompt_68_cross_references": {
+    "distribution_shape": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.2): target_xt_delta_passive is MORE heavy-tailed than the active leg's own already-heavy-tailed v2 target -- skew -1.779 and excess kurtosis 31.02, against active v2's -0.306 and 18.33 -- with a small, slightly NEGATIVE mean (-0.00181, against active's positive +0.00338), 26.3% exactly zero, 36.9% negative and 36.9% positive. The negative mean is a real, sensible difference in what is being measured rather than a discrepancy: active-binary rows are defensive ACTIONS, which on average should deny threat, while passive rows are snapshots at an arbitrary on-ball event during a live attacking phase, where there is no inherent reason attacking possession should lose value from one touch to the next. The heavier tail comes from the same mechanism as active's -- real shot_statsbomb_xg values injected as xt_after for the 863 events whose next event is a Shot, against the 96-cell xT grid's own maximum of 0.2575 -- but is relatively more concentrated here because possession-ending events are only 0.82% of this leg's event population. This target is not close to the old zero-inflated, positively-skewed shape either, and is if anything a harder distribution to work with than active v2's.",
+    "shared_target_row_grain": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+    "no_v1_detour": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md preamble and section 0): this leg has NO v1/v2 supersession to carry, and that is a property of the data rather than good luck. Active's v1 mistake was using the defensive action's own recorded location (action_x/action_y) as xt_after. passive_defense.parquet's ball_x/ball_y is already the ball's location at the on-ball event the snapshot is anchored to -- confirmed identical to events_with_targets.parquet's own ball_x/ball_y at the same event_id to floating-point exactness -- which is the correct 'before' state by the exact reasoning Prompt 66 established. The corrected possession-outcome xt_after was therefore implemented directly, on the first pass. Nothing in this half of the portal supersedes an earlier passive pass, because there isn't one."
+  },
+  "variants": {
+    "passive_distribution_atlas.html": "locked PASSIVE candidate list (28 numerical columns)",
+    "passive_distribution_atlas_reconstructed.html": "reconstructed pre-drop pool (34 numerical columns)"
+  }
+}

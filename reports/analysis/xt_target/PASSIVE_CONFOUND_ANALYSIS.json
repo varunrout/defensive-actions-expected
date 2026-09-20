@@ -1,0 +1,1708 @@
+{
+  "dataset": "passive",
+  "leg": "passive (this portal also covers the active-binary leg -- see CONFOUND_ANALYSIS.json)",
+  "parquet_path": "data/features/passive_defense.parquet",
+  "n_rows": 1593181,
+  "n_unique_events": 198354,
+  "target_col": "target_xt_delta_passive",
+  "target_scale": {
+    "target": "target_xt_delta_passive",
+    "n_rows": 1593181,
+    "n_defined": 1590600,
+    "n_nan": 2581,
+    "mean": -0.00267407,
+    "std": 0.0367479,
+    "skew": -2.6036,
+    "excess_kurtosis": 34.8444,
+    "pct_zero": 26.416,
+    "pct_negative": 37.2,
+    "pct_positive": 36.384,
+    "xg_mean_same_rows": 0.00599126,
+    "xg_std_same_rows": 0.04023084,
+    "xg_flat_margin_absolute": 0.00299563,
+    "xg_flat_margin_as_fraction_of_xg_std": 0.074461,
+    "flat_margin": 0.00273629,
+    "range_trigger": 0.00547257,
+    "near_identical_threshold": 0.00273629,
+    "distinct_signal_threshold": 0.00820886,
+    "n_nonzero": 1170431,
+    "mean_nonzero": -0.00363403,
+    "std_nonzero": 0.04279834,
+    "flat_margin_nonzero": 0.00318681,
+    "scale_note": "ADAPTATION 1, RE-EXAMINED FOR THE PASSIVE LEG. Prompt 65 translated the xg suite's mean-multiple threshold convention onto the xT target via xg's own standard-deviation fraction, because the xT target's mean is near zero and a mean-multiple threshold would be an arbitrary sliver. That justification holds on this leg in its ORIGINAL form: target_xt_delta_passive's mean is -0.002674, NEGATIVE as v1's was and unlike active v2's positive mean, so '0.5 x the overall mean' would flip the sign of every threshold. At -0.002674 against a std of 0.036748 the mean is only 7.3% of one standard deviation. Mechanically: xg's own flat_margin (0.5 x mean xg = 0.002996 on these same rows) re-expressed as a fraction of xg's own std (0.040231) gives 0.074461, applied to target_xt_delta_passive's std (0.036748) to give 0.002736. Every number is computed at runtime from the real parquet -- nothing is copied from the active leg. See `threshold_transfer_warning` in this same block. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged and are unaffected.",
+    "conditional_panel_note": "ADAPTATION 2, unchanged in method and re-measured on the passive leg. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta_passive has no shot column standing behind it; its structural-zero analogue is the 26.4% of rows with an EXACTLY zero delta -- the next same-possession event landed in the same 8x12 xT grid cell as the snapshot itself, which on this leg is very common because most on-ball events are short passes and carries. That share is LARGER than active v2's 20.2%, so the panel matters more here, not less. The conditional panel throughout this half of the portal is 'given a non-zero delta' (target_xt_delta_passive != 0), never 'given a shot'.",
+    "direction_note": "ADAPTATION 3, unchanged in method and re-measured on the passive leg. Sign carries the football meaning: POSITIVE target_xt_delta_passive = xT fell across the event (threat reduced, good for the defence), NEGATIVE = xT rose. On this leg the two directions are almost exactly balanced -- 36.4% positive vs 37.2% negative -- but the target is strongly LEFT-skewed (skew -2.6036), far more so than active v2's -0.306, so the negative tail is much longer than the positive one even though the counts match. Two-directional framing therefore matters more here than anywhere else in this portal. Rankings are by |magnitude| across BOTH directions, and every table also reports the negative/positive/zero share behind its mean.",
+    "log_transform_note": "NOT an adaptation, re-checked rather than inherited: the xg_target report suite never log-transforms its target anywhere, on either leg, and neither did the active xT suite. The log1p framing in this project belongs to the modelling legs, not to this report suite. This leg's excess kurtosis of ~31 makes a transform more tempting than anywhere else in the portal -- and it is still NOT applied here, because doing so would silently break comparability with the passive xg portal and with this portal's own active half. Recorded as an open question for the modelling legs, not resolved by an EDA suite.",
+    "leg": "passive",
+    "target_version": "passive (possession-outcome definition from the first pass)",
+    "target_source": "outputs/prototypes/passive_xt_delta.parquet (198,354 unique-event rows, left-joined READ-ONLY onto data/features/passive_defense.parquet's 1,593,181 defender-slot rows by event_id)",
+    "supersedes": "nothing. Unlike the active-binary leg, this leg has no v1 pass to supersede -- Prompt 68 implemented the corrected possession-outcome xt_after directly. See prompt_68_no_v1_detour.",
+    "row_grain_note": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+    "grain_comparison": {
+      "this_suite_grain": "defender-slot (one row per visible defender per on-ball event)",
+      "prompt_68_grain": "unique event_id",
+      "prompt_68_unique_event": {
+        "mean": -0.00181,
+        "std": 0.03828,
+        "skew": -1.779,
+        "excess_kurtosis": 31.02,
+        "pct_zero": 26.3,
+        "pct_negative": 36.9,
+        "pct_positive": 36.9,
+        "n_defined": 198009
+      },
+      "this_run_defender_slot": {
+        "mean": -0.00267407,
+        "std": 0.0367479,
+        "skew": -2.6036,
+        "excess_kurtosis": 34.8444,
+        "pct_zero": 26.416,
+        "pct_negative": 37.2,
+        "pct_positive": 36.384,
+        "n_defined": 1590600
+      },
+      "note": "These are the SAME target measured at two grains, not a discrepancy to reconcile. Prompt 68 reported the unique-event distribution because that is the grain the target is computed at. Every report in this suite measures it at the defender-slot grain, because that is the grain the features live at and the grain a model on this leg would train on. The row-level distribution is MORE extreme on every shape statistic -- measured on this run, skew -2.6036 against Prompt 68's -1.779 and excess kurtosis 34.8444 against 31.02 -- and the mechanism is understood rather than guessed at: events with more visible defender slots contribute more rows, so the row-level distribution is the event-level one re-weighted by visible-defender count, and the extreme shot-xG-tail events are exactly the crowded, well-observed ones that carry the most slots. The directional shares barely move (26.4% zero / 37.2% negative / 36.4% positive here against 26.3 / 36.9 / 36.9 there), which is the reassuring part: the re-weighting lengthens the tails without changing which way the target points. Wherever this suite cites a Prompt 68 figure it is labelled as the unique-event figure."
+    },
+    "robust_scale": {
+      "iqr": 0.00359064,
+      "mad": 0.00180901,
+      "robust_std_1_4826_mad": 0.00268204,
+      "robust_flat_margin": 0.00019971,
+      "flat_margin_over_mad": 1.5126,
+      "flat_margin_over_iqr": 0.7621,
+      "pct_rows_inside_flat_margin": 62.12,
+      "mean_as_fraction_of_std": -0.0728,
+      "active_v2_comparison": {
+        "flat_margin_over_mad": 1.28,
+        "flat_margin_over_iqr": 0.56,
+        "pct_rows_inside_flat_margin": 53.4,
+        "excess_kurtosis": 18.3289,
+        "note": "Prompt 67's measured figures for target_xt_delta_v2 on the active leg, quoted here so the passive numbers beside them can be read as a comparison rather than in isolation. v1's own figures, for the longer arc, were 0.53 x MAD and 35.4% of rows at excess kurtosis 8.85."
+      }
+    },
+    "correlation_with_old_target": {
+      "pair": "target_xt_delta_passive vs target_future_xg_10s",
+      "pearson_r": -0.0736,
+      "n": 1590600,
+      "pearson_r_vs_shot_target": -0.0651,
+      "n_vs_shot_target": 1590600,
+      "prompt_68_reported_r_vs_xg": -0.0715,
+      "prompt_68_reported_r_vs_shot": -0.0629,
+      "active_v2_pearson_r_vs_xg": -0.1082,
+      "note": "Measured on this run at the defender-slot grain: r=-0.0736 against target_future_xg_10s and r=-0.0651 against target_future_shot_10s. Prompt 68 reported -0.0715 and -0.0629 respectively at the unique-event grain; the two grains can differ slightly because events with more visible defender slots are weighted more heavily at row level. Both are correctly signed -- more threat denied goes with less future attacking output -- and both are WEAKER than the active leg's own -0.1082 against the same xg target. That difference is real and is reported rather than smoothed over. Recorded HERE specifically because Adaptation 1 borrows target_future_xg_10s's own standard-deviation fraction to set every threshold in this suite, so wherever a report cites an xg-derived threshold, this is how the targets actually relate on the same rows. Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.3): correlation with the two OLD passive targets is correctly signed but numerically WEAKER than the active leg's own improvement -- Pearson r = -0.0629 against target_future_shot_10s and -0.0715 against target_future_xg_10s, against active v2's -0.108. More threat denied is still associated with less future attacking output, which is the sensible direction, but the relationship is looser on this leg. Stated plainly rather than talked up. A plausible reason, recorded by Prompt 68 and not chased here: a passive snapshot is one defender's off-ball positioning at an arbitrary point in a live attack, one step further removed from the moment-to-moment outcome than an active defensive ACTION is."
+    },
+    "threshold_transfer_warning": "THIS THRESHOLD DOES NOT TRANSFER CLEANLY, AND ON THIS LEG IT TRANSFERS WORSE THAN ON ACTIVE -- recomputed on the real passive parquet rather than inherited from active's numbers, and reported rather than forced to fit. Prompt 65 tuned the translated flat_margin against a target with excess kurtosis 8.85, where the margin was 0.53 x the MAD and spanned 35.4% of rows -- a genuinely narrow 'too small to matter' band. Prompt 67 found that on target_xt_delta_v2 (excess kurtosis 18.33) the same std-derived margin had grown to 1.28 x the MAD and 53.4% of rows, because the shot-xG injection inflates std while the bulk tightens. This leg is heavier-tailed again (excess kurtosis 34.8444, IQR 0.003591, MAD 0.001809), so the same mechanism applies more strongly: the translated margin is 0.002736, which is 1.51 x the MAD, 0.76 x the IQR, and spans 62.1% of all rows. A flat band covering this much of the data is not doing its job. A NAIVE TRANSFER OF ACTIVE'S OWN ABSOLUTE MARGIN (0.004929) WOULD HAVE BEEN WORSE STILL, since this leg's std is smaller (0.038 vs 0.058) while its bulk is tighter again -- the margin is therefore recomputed from this leg's own std, not copied. The literal translated margin is KEPT as the headline number so the active and passive halves of this portal stay like-for-like and the xg suite's convention is still the one being followed, but the MAD-derived robust alternative (0.000200) is published beside it on every run and every shape classification in this half of the portal should be read with this inflation in mind."
+  },
+  "step_0_scope_note": "CONFIRMED BY READING THE SOURCE, and it points the OPPOSITE way from most scope notes in this portal: reports/analysis/xg_target/CONFOUND_ANALYSIS.json carries \"dataset\": \"passive\" and all 5 of its tests are passive-dataset tests on passive-only columns (marking_tightness, zone_defensive_value, lane_screening_score_option_1, top_option_1_threat_score, has_option_2/3, defender_x). Confound testing in this project is an established PASSIVE methodology; it is the ACTIVE leg that has exactly one test anywhere in the repo, which is why the active half of this portal had to invent two of its own. All five established tests mirror here with no substitution and no invention -- this report contains no new test.",
+  "methodology": "Same quartile/boolean-stratification method as the binary and xg confound analyses. _verdict() is imported from generate_confound_analysis and reused BYTE-FOR-BYTE through generate_confound_analysis_xt.run_test_xt -- it compares only the SIGN of first-to-last deltas across strata, never a magnitude threshold, so it is target-scale-agnostic. That property was RE-CHECKED rather than assumed for this leg and is exactly why this report needed no threshold recomputation despite an excess kurtosis of ~35, the heaviest tail anywhere in this portal: a sign comparison cannot be distorted by tail weight. QCUT_N=4 unchanged. Only the table builders differ from the xg version: mean target_xt_delta_passive instead of mean xG, with the negative/zero/positive shares added (Adaptation 3). Each test carries a 'given_nonzero_delta' sub-object in place of the xg version's 'given_shot' -- this target's structural-zero analogue (Adaptation 2), and on this leg that zero mass is 26.4% of rows, larger than active's 20.2%.",
+  "threshold_note": "NO THRESHOLD IN THIS REPORT NEEDED PASSIVE-SPECIFIC RECOMPUTATION, and that is a checked result rather than an omission. The only tunable quantities here are QCUT_N (a count) and _verdict()'s sign comparison (sign-free of magnitude). Neither can be distorted by this leg's heavier tails. The reports in this portal that DID need the flat_margin recomputed are the Numerical Target Atlas, the Tournament Stability Check, both Slice Stratifications and the Feature Interaction Analysis -- every one of which uses classify_shape() or an absolute marginal-delta cutoff.",
+  "row_grain_note": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+  "prompt_68_cross_references": {
+    "shared_target_row_grain": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+    "distribution_shape": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.2): target_xt_delta_passive is MORE heavy-tailed than the active leg's own already-heavy-tailed v2 target -- skew -1.779 and excess kurtosis 31.02, against active v2's -0.306 and 18.33 -- with a small, slightly NEGATIVE mean (-0.00181, against active's positive +0.00338), 26.3% exactly zero, 36.9% negative and 36.9% positive. The negative mean is a real, sensible difference in what is being measured rather than a discrepancy: active-binary rows are defensive ACTIONS, which on average should deny threat, while passive rows are snapshots at an arbitrary on-ball event during a live attacking phase, where there is no inherent reason attacking possession should lose value from one touch to the next. The heavier tail comes from the same mechanism as active's -- real shot_statsbomb_xg values injected as xt_after for the 863 events whose next event is a Shot, against the 96-cell xT grid's own maximum of 0.2575 -- but is relatively more concentrated here because possession-ending events are only 0.82% of this leg's event population. This target is not close to the old zero-inflated, positively-skewed shape either, and is if anything a harder distribution to work with than active v2's.",
+    "correlation_with_old_targets": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.3): correlation with the two OLD passive targets is correctly signed but numerically WEAKER than the active leg's own improvement -- Pearson r = -0.0629 against target_future_shot_10s and -0.0715 against target_future_xg_10s, against active v2's -0.108. More threat denied is still associated with less future attacking output, which is the sensible direction, but the relationship is looser on this leg. Stated plainly rather than talked up. A plausible reason, recorded by Prompt 68 and not chased here: a passive snapshot is one defender's off-ball positioning at an arbitrary point in a live attack, one step further removed from the moment-to-moment outcome than an active defensive ACTION is.",
+    "no_v1_detour": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md preamble and section 0): this leg has NO v1/v2 supersession to carry, and that is a property of the data rather than good luck. Active's v1 mistake was using the defensive action's own recorded location (action_x/action_y) as xt_after. passive_defense.parquet's ball_x/ball_y is already the ball's location at the on-ball event the snapshot is anchored to -- confirmed identical to events_with_targets.parquet's own ball_x/ball_y at the same event_id to floating-point exactness -- which is the correct 'before' state by the exact reasoning Prompt 66 established. The corrected possession-outcome xt_after was therefore implemented directly, on the first pass. Nothing in this half of the portal supersedes an earlier passive pass, because there isn't one."
+  },
+  "tests": [
+    {
+      "name": "marking_tightness_vs_zone_defensive_value",
+      "title": "Marking tightness reversal",
+      "marginal_column": "marking_tightness",
+      "confound_column": "zone_defensive_value",
+      "marginal_type": "numeric",
+      "confound_type": "numeric",
+      "proposed_confound_reason": "tight marking only happens because the zone's already dangerous",
+      "provenance": "LITERAL MIRROR -- same marginal column, same confound column, same quartile/boolean labels, same _verdict() function, run against target_xt_delta_passive instead of the xg target. Nothing about this test was re-selected or re-ranked for this target: keeping the established specification is what makes the passive xg, binary and xT verdicts comparable cell by cell. Source: generate_confound_analysis.TEST_1, mirrored into the xg portal by generate_confound_analysis_xg.py",
+      "n_rows_used": 1590600,
+      "marginal_table": [
+        {
+          "bin": "Q1 tightest",
+          "n": 397581,
+          "rate": -0.0046299,
+          "pct_zero": 26.63,
+          "pct_negative": 38.14,
+          "pct_positive": 35.23
+        },
+        {
+          "bin": "Q2",
+          "n": 397581,
+          "rate": -0.00251378,
+          "pct_zero": 26.82,
+          "pct_negative": 36.84,
+          "pct_positive": 36.34
+        },
+        {
+          "bin": "Q3",
+          "n": 397579,
+          "rate": -0.0019138,
+          "pct_zero": 26.48,
+          "pct_negative": 36.75,
+          "pct_positive": 36.78
+        },
+        {
+          "bin": "Q4 loosest",
+          "n": 397580,
+          "rate": -0.00162,
+          "pct_zero": 25.75,
+          "pct_negative": 37.07,
+          "pct_positive": 37.18
+        }
+      ],
+      "stratified_table": [
+        {
+          "stratum": "Z1 calmest",
+          "bins": [
+            {
+              "bin": "Q1 tightest",
+              "n": 111248,
+              "rate": 0.00384814,
+              "pct_zero": 24.68,
+              "pct_negative": 28.11,
+              "pct_positive": 47.21
+            },
+            {
+              "bin": "Q2",
+              "n": 98618,
+              "rate": 0.00423727,
+              "pct_zero": 25.34,
+              "pct_negative": 29.09,
+              "pct_positive": 45.57
+            },
+            {
+              "bin": "Q3",
+              "n": 92477,
+              "rate": 0.00439983,
+              "pct_zero": 25.05,
+              "pct_negative": 29.66,
+              "pct_positive": 45.29
+            },
+            {
+              "bin": "Q4 loosest",
+              "n": 95190,
+              "rate": 0.00447104,
+              "pct_zero": 24.32,
+              "pct_negative": 29.49,
+              "pct_positive": 46.19
+            }
+          ],
+          "first_to_last_delta_pp": 0.0006229
+        },
+        {
+          "stratum": "Z2",
+          "bins": [
+            {
+              "bin": "Q1 tightest",
+              "n": 79098,
+              "rate": -0.00015238,
+              "pct_zero": 27.65,
+              "pct_negative": 35.07,
+              "pct_positive": 37.27
+            },
+            {
+              "bin": "Q2",
+              "n": 97342,
+              "rate": 1.109e-05,
+              "pct_zero": 26.6,
+              "pct_negative": 34.49,
+              "pct_positive": 38.92
+            },
+            {
+              "bin": "Q3",
+              "n": 108841,
+              "rate": -2.408e-05,
+              "pct_zero": 26.35,
+              "pct_negative": 34.38,
+              "pct_positive": 39.27
+            },
+            {
+              "bin": "Q4 loosest",
+              "n": 112354,
+              "rate": 0.00016041,
+              "pct_zero": 25.84,
+              "pct_negative": 34.24,
+              "pct_positive": 39.92
+            }
+          ],
+          "first_to_last_delta_pp": 0.00031279
+        },
+        {
+          "stratum": "Z3",
+          "bins": [
+            {
+              "bin": "Q1 tightest",
+              "n": 79075,
+              "rate": -0.00141541,
+              "pct_zero": 29.02,
+              "pct_negative": 38.89,
+              "pct_positive": 32.09
+            },
+            {
+              "bin": "Q2",
+              "n": 99919,
+              "rate": -0.00119059,
+              "pct_zero": 28.17,
+              "pct_negative": 37.71,
+              "pct_positive": 34.13
+            },
+            {
+              "bin": "Q3",
+              "n": 110504,
+              "rate": -0.00126549,
+              "pct_zero": 27.55,
+              "pct_negative": 37.71,
+              "pct_positive": 34.74
+            },
+            {
+              "bin": "Q4 loosest",
+              "n": 108119,
+              "rate": -0.00182283,
+              "pct_zero": 26.62,
+              "pct_negative": 39.62,
+              "pct_positive": 33.77
+            }
+          ],
+          "first_to_last_delta_pp": -0.00040742
+        },
+        {
+          "stratum": "Z4 most dangerous",
+          "bins": [
+            {
+              "bin": "Q1 tightest",
+              "n": 128160,
+              "rate": -0.01673596,
+              "pct_zero": 26.21,
+              "pct_negative": 48.27,
+              "pct_positive": 25.52
+            },
+            {
+              "bin": "Q2",
+              "n": 101702,
+              "rate": -0.01277673,
+              "pct_zero": 27.14,
+              "pct_negative": 45.75,
+              "pct_positive": 27.11
+            },
+            {
+              "bin": "Q3",
+              "n": 85757,
+              "rate": -0.01195593,
+              "pct_zero": 26.8,
+              "pct_negative": 46.15,
+              "pct_positive": 27.06
+            },
+            {
+              "bin": "Q4 loosest",
+              "n": 81917,
+              "rate": -0.01087221,
+              "pct_zero": 26.12,
+              "pct_negative": 46.42,
+              "pct_positive": 27.46
+            }
+          ],
+          "first_to_last_delta_pp": 0.00586375
+        }
+      ],
+      "verdict": {
+        "verdict": "partially",
+        "verdict_meaning": "The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.",
+        "n_strata_reversal_survives": 3,
+        "n_strata_total": 4
+      },
+      "reliability_note": "ROW-GRAIN NOTE, applying to every n in this test. The target is one value per event_id repeated across that event's visible defender slots, so a stratum's n is a row count, not a count of independent observations. The confound and marginal columns DO vary within an event (they are per-defender-slot measurements), so the stratification itself is meaningful -- what is inflated is only the apparent precision of each cell's mean. No verdict here uses a p-value; _verdict() compares signs only.",
+      "prompt_64_link": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+      "is_new_test": false,
+      "given_nonzero_delta": {
+        "name": "marking_tightness_vs_zone_defensive_value",
+        "title": "Marking tightness reversal",
+        "marginal_column": "marking_tightness",
+        "confound_column": "zone_defensive_value",
+        "marginal_type": "numeric",
+        "confound_type": "numeric",
+        "proposed_confound_reason": "tight marking only happens because the zone's already dangerous",
+        "provenance": "LITERAL MIRROR -- same marginal column, same confound column, same quartile/boolean labels, same _verdict() function, run against target_xt_delta_passive instead of the xg target. Nothing about this test was re-selected or re-ranked for this target: keeping the established specification is what makes the passive xg, binary and xT verdicts comparable cell by cell. Source: generate_confound_analysis.TEST_1, mirrored into the xg portal by generate_confound_analysis_xg.py",
+        "n_rows_used": 1170431,
+        "marginal_table": [
+          {
+            "bin": "Q1 tightest",
+            "n": 292551,
+            "rate": -0.00630664,
+            "pct_zero": 0.0,
+            "pct_negative": 51.98,
+            "pct_positive": 48.02
+          },
+          {
+            "bin": "Q2",
+            "n": 292550,
+            "rate": -0.00343173,
+            "pct_zero": 0.0,
+            "pct_negative": 50.34,
+            "pct_positive": 49.66
+          },
+          {
+            "bin": "Q3",
+            "n": 292550,
+            "rate": -0.00259223,
+            "pct_zero": 0.0,
+            "pct_negative": 49.98,
+            "pct_positive": 50.02
+          },
+          {
+            "bin": "Q4 loosest",
+            "n": 292551,
+            "rate": -0.00218025,
+            "pct_zero": 0.0,
+            "pct_negative": 49.92,
+            "pct_positive": 50.08
+          }
+        ],
+        "stratified_table": [
+          {
+            "stratum": "Z1 calmest",
+            "bins": [
+              {
+                "bin": "Q1 tightest",
+                "n": 82845,
+                "rate": 0.0051713,
+                "pct_zero": 0.0,
+                "pct_negative": 37.23,
+                "pct_positive": 62.77
+              },
+              {
+                "bin": "Q2",
+                "n": 72411,
+                "rate": 0.00574543,
+                "pct_zero": 0.0,
+                "pct_negative": 38.89,
+                "pct_positive": 61.11
+              },
+              {
+                "bin": "Q3",
+                "n": 67718,
+                "rate": 0.00598233,
+                "pct_zero": 0.0,
+                "pct_negative": 39.44,
+                "pct_positive": 60.56
+              },
+              {
+                "bin": "Q4 loosest",
+                "n": 69545,
+                "rate": 0.00602901,
+                "pct_zero": 0.0,
+                "pct_negative": 38.83,
+                "pct_positive": 61.17
+              }
+            ],
+            "first_to_last_delta_pp": 0.00085771
+          },
+          {
+            "stratum": "Z2",
+            "bins": [
+              {
+                "bin": "Q1 tightest",
+                "n": 57477,
+                "rate": -0.00016821,
+                "pct_zero": 0.0,
+                "pct_negative": 48.3,
+                "pct_positive": 51.7
+              },
+              {
+                "bin": "Q2",
+                "n": 72037,
+                "rate": 4.651e-05,
+                "pct_zero": 0.0,
+                "pct_negative": 46.86,
+                "pct_positive": 53.14
+              },
+              {
+                "bin": "Q3",
+                "n": 80219,
+                "rate": 9.07e-06,
+                "pct_zero": 0.0,
+                "pct_negative": 46.56,
+                "pct_positive": 53.44
+              },
+              {
+                "bin": "Q4 loosest",
+                "n": 82862,
+                "rate": 0.00029003,
+                "pct_zero": 0.0,
+                "pct_negative": 45.99,
+                "pct_positive": 54.01
+              }
+            ],
+            "first_to_last_delta_pp": 0.00045824
+          },
+          {
+            "stratum": "Z3",
+            "bins": [
+              {
+                "bin": "Q1 tightest",
+                "n": 57324,
+                "rate": -0.00196152,
+                "pct_zero": 0.0,
+                "pct_negative": 54.75,
+                "pct_positive": 45.25
+              },
+              {
+                "bin": "Q2",
+                "n": 73516,
+                "rate": -0.00161755,
+                "pct_zero": 0.0,
+                "pct_negative": 52.43,
+                "pct_positive": 47.57
+              },
+              {
+                "bin": "Q3",
+                "n": 81753,
+                "rate": -0.00172641,
+                "pct_zero": 0.0,
+                "pct_negative": 52.05,
+                "pct_positive": 47.95
+              },
+              {
+                "bin": "Q4 loosest",
+                "n": 79989,
+                "rate": -0.00245673,
+                "pct_zero": 0.0,
+                "pct_negative": 53.93,
+                "pct_positive": 46.07
+              }
+            ],
+            "first_to_last_delta_pp": -0.00049521
+          },
+          {
+            "stratum": "Z4 most dangerous",
+            "bins": [
+              {
+                "bin": "Q1 tightest",
+                "n": 94905,
+                "rate": -0.02266814,
+                "pct_zero": 0.0,
+                "pct_negative": 65.4,
+                "pct_positive": 34.6
+              },
+              {
+                "bin": "Q2",
+                "n": 74586,
+                "rate": -0.01748882,
+                "pct_zero": 0.0,
+                "pct_negative": 62.74,
+                "pct_positive": 37.26
+              },
+              {
+                "bin": "Q3",
+                "n": 62860,
+                "rate": -0.01627515,
+                "pct_zero": 0.0,
+                "pct_negative": 63.01,
+                "pct_positive": 36.99
+              },
+              {
+                "bin": "Q4 loosest",
+                "n": 60155,
+                "rate": -0.01470604,
+                "pct_zero": 0.0,
+                "pct_negative": 62.84,
+                "pct_positive": 37.16
+              }
+            ],
+            "first_to_last_delta_pp": 0.0079621
+          }
+        ],
+        "verdict": {
+          "verdict": "partially",
+          "verdict_meaning": "The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.",
+          "n_strata_reversal_survives": 3,
+          "n_strata_total": 4
+        },
+        "reliability_note": "ROW-GRAIN NOTE, applying to every n in this test. The target is one value per event_id repeated across that event's visible defender slots, so a stratum's n is a row count, not a count of independent observations. The confound and marginal columns DO vary within an event (they are per-defender-slot measurements), so the stratification itself is meaningful -- what is inflated is only the apparent precision of each cell's mean. No verdict here uses a p-value; _verdict() compares signs only.",
+        "prompt_64_link": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+        "is_new_test": false
+      }
+    },
+    {
+      "name": "lane_screening_vs_top_option_1_threat_score",
+      "title": "Lane screening reversal",
+      "marginal_column": "lane_screening_score_option_1",
+      "confound_column": "top_option_1_threat_score",
+      "marginal_type": "numeric",
+      "confound_type": "numeric",
+      "proposed_confound_reason": "a threatening top option only exists when danger is already high",
+      "provenance": "LITERAL MIRROR -- same marginal column, same confound column, same quartile/boolean labels, same _verdict() function, run against target_xt_delta_passive instead of the xg target. Nothing about this test was re-selected or re-ranked for this target: keeping the established specification is what makes the passive xg, binary and xT verdicts comparable cell by cell. Source: generate_confound_analysis.TEST_2, mirrored into the xg portal by generate_confound_analysis_xg.py",
+      "n_rows_used": 1590600,
+      "marginal_table": [
+        {
+          "bin": "Q1 least",
+          "n": 397581,
+          "rate": -5.98e-06,
+          "pct_zero": 28.16,
+          "pct_negative": 34.06,
+          "pct_positive": 37.77
+        },
+        {
+          "bin": "Q2",
+          "n": 397580,
+          "rate": -0.00223746,
+          "pct_zero": 26.78,
+          "pct_negative": 36.58,
+          "pct_positive": 36.64
+        },
+        {
+          "bin": "Q3",
+          "n": 397580,
+          "rate": -0.00365613,
+          "pct_zero": 26.78,
+          "pct_negative": 37.98,
+          "pct_positive": 35.24
+        },
+        {
+          "bin": "Q4 most screened",
+          "n": 397580,
+          "rate": -0.00477791,
+          "pct_zero": 23.94,
+          "pct_negative": 40.18,
+          "pct_positive": 35.88
+        }
+      ],
+      "stratified_table": [
+        {
+          "stratum": "T1 low",
+          "bins": [
+            {
+              "bin": "Q1 least",
+              "n": 72582,
+              "rate": -0.00667076,
+              "pct_zero": 26.14,
+              "pct_negative": 45.83,
+              "pct_positive": 28.03
+            },
+            {
+              "bin": "Q2",
+              "n": 95237,
+              "rate": -0.01100685,
+              "pct_zero": 25.55,
+              "pct_negative": 47.62,
+              "pct_positive": 26.83
+            },
+            {
+              "bin": "Q3",
+              "n": 109297,
+              "rate": -0.01518069,
+              "pct_zero": 25.63,
+              "pct_negative": 49.26,
+              "pct_positive": 25.1
+            },
+            {
+              "bin": "Q4 most screened",
+              "n": 120470,
+              "rate": -0.01829195,
+              "pct_zero": 23.56,
+              "pct_negative": 51.85,
+              "pct_positive": 24.59
+            }
+          ],
+          "first_to_last_delta_pp": -0.01162119
+        },
+        {
+          "stratum": "T2",
+          "bins": [
+            {
+              "bin": "Q1 least",
+              "n": 105641,
+              "rate": -0.00114185,
+              "pct_zero": 29.29,
+              "pct_negative": 37.38,
+              "pct_positive": 33.33
+            },
+            {
+              "bin": "Q2",
+              "n": 104911,
+              "rate": -0.00144698,
+              "pct_zero": 27.9,
+              "pct_negative": 38.53,
+              "pct_positive": 33.57
+            },
+            {
+              "bin": "Q3",
+              "n": 96555,
+              "rate": -0.00176879,
+              "pct_zero": 28.17,
+              "pct_negative": 39.55,
+              "pct_positive": 32.28
+            },
+            {
+              "bin": "Q4 most screened",
+              "n": 90477,
+              "rate": -0.00211279,
+              "pct_zero": 25.16,
+              "pct_negative": 42.06,
+              "pct_positive": 32.78
+            }
+          ],
+          "first_to_last_delta_pp": -0.00097094
+        },
+        {
+          "stratum": "T3",
+          "bins": [
+            {
+              "bin": "Q1 least",
+              "n": 109553,
+              "rate": -4.754e-05,
+              "pct_zero": 29.23,
+              "pct_negative": 32.59,
+              "pct_positive": 38.18
+            },
+            {
+              "bin": "Q2",
+              "n": 100983,
+              "rate": -0.00039699,
+              "pct_zero": 27.62,
+              "pct_negative": 34.0,
+              "pct_positive": 38.39
+            },
+            {
+              "bin": "Q3",
+              "n": 95996,
+              "rate": -6.378e-05,
+              "pct_zero": 27.69,
+              "pct_negative": 34.62,
+              "pct_positive": 37.69
+            },
+            {
+              "bin": "Q4 most screened",
+              "n": 91045,
+              "rate": -5.081e-05,
+              "pct_zero": 24.71,
+              "pct_negative": 36.11,
+              "pct_positive": 39.18
+            }
+          ],
+          "first_to_last_delta_pp": -3.27e-06
+        },
+        {
+          "stratum": "T4 high",
+          "bins": [
+            {
+              "bin": "Q1 least",
+              "n": 109805,
+              "rate": 0.00553375,
+              "pct_zero": 27.36,
+              "pct_negative": 24.56,
+              "pct_positive": 48.08
+            },
+            {
+              "bin": "Q2",
+              "n": 96449,
+              "rate": 0.00363489,
+              "pct_zero": 25.91,
+              "pct_negative": 26.26,
+              "pct_positive": 47.84
+            },
+            {
+              "bin": "Q3",
+              "n": 95732,
+              "rate": 0.00399559,
+              "pct_zero": 25.77,
+              "pct_negative": 26.87,
+              "pct_positive": 47.36
+            },
+            {
+              "bin": "Q4 most screened",
+              "n": 95588,
+              "rate": 0.00522884,
+              "pct_zero": 22.56,
+              "pct_negative": 27.56,
+              "pct_positive": 49.88
+            }
+          ],
+          "first_to_last_delta_pp": -0.00030491
+        }
+      ],
+      "verdict": {
+        "verdict": "no",
+        "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
+        "n_strata_reversal_survives": 4,
+        "n_strata_total": 4
+      },
+      "reliability_note": "ROW-GRAIN NOTE, applying to every n in this test. The target is one value per event_id repeated across that event's visible defender slots, so a stratum's n is a row count, not a count of independent observations. The confound and marginal columns DO vary within an event (they are per-defender-slot measurements), so the stratification itself is meaningful -- what is inflated is only the apparent precision of each cell's mean. No verdict here uses a p-value; _verdict() compares signs only.",
+      "prompt_64_link": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+      "is_new_test": false,
+      "given_nonzero_delta": {
+        "name": "lane_screening_vs_top_option_1_threat_score",
+        "title": "Lane screening reversal",
+        "marginal_column": "lane_screening_score_option_1",
+        "confound_column": "top_option_1_threat_score",
+        "marginal_type": "numeric",
+        "confound_type": "numeric",
+        "proposed_confound_reason": "a threatening top option only exists when danger is already high",
+        "provenance": "LITERAL MIRROR -- same marginal column, same confound column, same quartile/boolean labels, same _verdict() function, run against target_xt_delta_passive instead of the xg target. Nothing about this test was re-selected or re-ranked for this target: keeping the established specification is what makes the passive xg, binary and xT verdicts comparable cell by cell. Source: generate_confound_analysis.TEST_2, mirrored into the xg portal by generate_confound_analysis_xg.py",
+        "n_rows_used": 1170431,
+        "marginal_table": [
+          {
+            "bin": "Q1 least",
+            "n": 292551,
+            "rate": -5.673e-05,
+            "pct_zero": 0.0,
+            "pct_negative": 47.46,
+            "pct_positive": 52.54
+          },
+          {
+            "bin": "Q2",
+            "n": 292550,
+            "rate": -0.00310631,
+            "pct_zero": 0.0,
+            "pct_negative": 50.02,
+            "pct_positive": 49.98
+          },
+          {
+            "bin": "Q3",
+            "n": 292550,
+            "rate": -0.0050512,
+            "pct_zero": 0.0,
+            "pct_negative": 51.93,
+            "pct_positive": 48.07
+          },
+          {
+            "bin": "Q4 most screened",
+            "n": 292551,
+            "rate": -0.00629662,
+            "pct_zero": 0.0,
+            "pct_negative": 52.81,
+            "pct_positive": 47.19
+          }
+        ],
+        "stratified_table": [
+          {
+            "stratum": "T1 low",
+            "bins": [
+              {
+                "bin": "Q1 least",
+                "n": 53905,
+                "rate": -0.00927173,
+                "pct_zero": 0.0,
+                "pct_negative": 62.17,
+                "pct_positive": 37.83
+              },
+              {
+                "bin": "Q2",
+                "n": 70262,
+                "rate": -0.01514634,
+                "pct_zero": 0.0,
+                "pct_negative": 64.07,
+                "pct_positive": 35.93
+              },
+              {
+                "bin": "Q3",
+                "n": 80497,
+                "rate": -0.02079886,
+                "pct_zero": 0.0,
+                "pct_negative": 66.48,
+                "pct_positive": 33.52
+              },
+              {
+                "bin": "Q4 most screened",
+                "n": 87892,
+                "rate": -0.02428354,
+                "pct_zero": 0.0,
+                "pct_negative": 67.99,
+                "pct_positive": 32.01
+              }
+            ],
+            "first_to_last_delta_pp": -0.01501181
+          },
+          {
+            "stratum": "T2",
+            "bins": [
+              {
+                "bin": "Q1 least",
+                "n": 77743,
+                "rate": -0.00163104,
+                "pct_zero": 0.0,
+                "pct_negative": 52.93,
+                "pct_positive": 47.07
+              },
+              {
+                "bin": "Q2",
+                "n": 77153,
+                "rate": -0.00206063,
+                "pct_zero": 0.0,
+                "pct_negative": 53.63,
+                "pct_positive": 46.37
+              },
+              {
+                "bin": "Q3",
+                "n": 71012,
+                "rate": -0.0025145,
+                "pct_zero": 0.0,
+                "pct_negative": 55.13,
+                "pct_positive": 44.87
+              },
+              {
+                "bin": "Q4 most screened",
+                "n": 66637,
+                "rate": -0.0028874,
+                "pct_zero": 0.0,
+                "pct_negative": 56.2,
+                "pct_positive": 43.8
+              }
+            ],
+            "first_to_last_delta_pp": -0.00125636
+          },
+          {
+            "stratum": "T3",
+            "bins": [
+              {
+                "bin": "Q1 least",
+                "n": 80378,
+                "rate": -6.302e-05,
+                "pct_zero": 0.0,
+                "pct_negative": 45.98,
+                "pct_positive": 54.02
+              },
+              {
+                "bin": "Q2",
+                "n": 74414,
+                "rate": -0.00053029,
+                "pct_zero": 0.0,
+                "pct_negative": 46.99,
+                "pct_positive": 53.01
+              },
+              {
+                "bin": "Q3",
+                "n": 70589,
+                "rate": -9.781e-05,
+                "pct_zero": 0.0,
+                "pct_negative": 47.83,
+                "pct_positive": 52.17
+              },
+              {
+                "bin": "Q4 most screened",
+                "n": 67172,
+                "rate": -7.894e-05,
+                "pct_zero": 0.0,
+                "pct_negative": 47.99,
+                "pct_positive": 52.01
+              }
+            ],
+            "first_to_last_delta_pp": -1.592e-05
+          },
+          {
+            "stratum": "T4 high",
+            "bins": [
+              {
+                "bin": "Q1 least",
+                "n": 80525,
+                "rate": 0.00763819,
+                "pct_zero": 0.0,
+                "pct_negative": 33.8,
+                "pct_positive": 66.2
+              },
+              {
+                "bin": "Q2",
+                "n": 70721,
+                "rate": 0.00500425,
+                "pct_zero": 0.0,
+                "pct_negative": 35.31,
+                "pct_positive": 64.69
+              },
+              {
+                "bin": "Q3",
+                "n": 70452,
+                "rate": 0.00542185,
+                "pct_zero": 0.0,
+                "pct_negative": 36.16,
+                "pct_positive": 63.84
+              },
+              {
+                "bin": "Q4 most screened",
+                "n": 70850,
+                "rate": 0.00691543,
+                "pct_zero": 0.0,
+                "pct_negative": 35.37,
+                "pct_positive": 64.63
+              }
+            ],
+            "first_to_last_delta_pp": -0.00072276
+          }
+        ],
+        "verdict": {
+          "verdict": "no",
+          "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
+          "n_strata_reversal_survives": 4,
+          "n_strata_total": 4
+        },
+        "reliability_note": "ROW-GRAIN NOTE, applying to every n in this test. The target is one value per event_id repeated across that event's visible defender slots, so a stratum's n is a row count, not a count of independent observations. The confound and marginal columns DO vary within an event (they are per-defender-slot measurements), so the stratification itself is meaningful -- what is inflated is only the apparent precision of each cell's mean. No verdict here uses a p-value; _verdict() compares signs only.",
+        "prompt_64_link": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+        "is_new_test": false
+      }
+    },
+    {
+      "name": "has_option_2_vs_top_option_1_threat_score",
+      "title": "has_option_2 shot-rate gap vs top_option_1_threat_score",
+      "marginal_column": "has_option_2",
+      "confound_column": "top_option_1_threat_score",
+      "marginal_type": "boolean",
+      "confound_type": "numeric",
+      "proposed_confound_reason": "a defender only 'has' a second ranked option worth recording when the primary threat is itself significant (more players committed forward = more danger already) -- the option-count effect might just be a proxy for how threatening the possession already is, not a defensive-shape signal in its own right",
+      "provenance": "LITERAL MIRROR -- same marginal column, same confound column, same quartile/boolean labels, same _verdict() function, run against target_xt_delta_passive instead of the xg target. Nothing about this test was re-selected or re-ranked for this target: keeping the established specification is what makes the passive xg, binary and xT verdicts comparable cell by cell. Source: generate_confound_analysis_part_d.TEST_1, mirrored into the xg portal by generate_confound_analysis_part_d_xg.py",
+      "n_rows_used": 1590600,
+      "marginal_table": [
+        {
+          "bin": "False (no 2nd option)",
+          "n": 2180,
+          "rate": -0.01735803,
+          "pct_zero": 19.4,
+          "pct_negative": 44.36,
+          "pct_positive": 36.24
+        },
+        {
+          "bin": "True (has 2nd option)",
+          "n": 1588420,
+          "rate": -0.00265392,
+          "pct_zero": 26.43,
+          "pct_negative": 37.19,
+          "pct_positive": 36.38
+        }
+      ],
+      "stratified_table": [
+        {
+          "stratum": "T1 low",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 1360,
+              "rate": -0.03316525,
+              "pct_zero": 20.37,
+              "pct_negative": 51.99,
+              "pct_positive": 27.65
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 396226,
+              "rate": -0.01350282,
+              "pct_zero": 25.1,
+              "pct_negative": 49.01,
+              "pct_positive": 25.89
+            }
+          ],
+          "first_to_last_delta_pp": 0.01966243
+        },
+        {
+          "stratum": "T2",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 224,
+              "rate": 0.01195367,
+              "pct_zero": 10.27,
+              "pct_negative": 35.27,
+              "pct_positive": 54.46
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 397360,
+              "rate": -0.00160321,
+              "pct_zero": 27.72,
+              "pct_negative": 39.28,
+              "pct_positive": 33.0
+            }
+          ],
+          "first_to_last_delta_pp": -0.01355688
+        },
+        {
+          "stratum": "T3",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 129,
+              "rate": 0.03765361,
+              "pct_zero": 27.91,
+              "pct_negative": 21.71,
+              "pct_positive": 50.39
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 397448,
+              "rate": -0.00015324,
+              "pct_zero": 27.41,
+              "pct_negative": 34.25,
+              "pct_positive": 38.34
+            }
+          ],
+          "first_to_last_delta_pp": -0.03780685
+        },
+        {
+          "stratum": "T4 high",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 188,
+              "rate": 0.04230228,
+              "pct_zero": 19.68,
+              "pct_negative": 18.62,
+              "pct_positive": 61.7
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 397386,
+              "rate": 0.00461159,
+              "pct_zero": 25.47,
+              "pct_negative": 26.25,
+              "pct_positive": 48.27
+            }
+          ],
+          "first_to_last_delta_pp": -0.03769069
+        }
+      ],
+      "verdict": {
+        "verdict": "partially",
+        "verdict_meaning": "The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.",
+        "n_strata_reversal_survives": 1,
+        "n_strata_total": 4
+      },
+      "reliability_note": "ROW-GRAIN NOTE, applying to every n in this test. The target is one value per event_id repeated across that event's visible defender slots, so a stratum's n is a row count, not a count of independent observations. The confound and marginal columns DO vary within an event (they are per-defender-slot measurements), so the stratification itself is meaningful -- what is inflated is only the apparent precision of each cell's mean. No verdict here uses a p-value; _verdict() compares signs only.",
+      "prompt_64_link": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+      "is_new_test": false,
+      "given_nonzero_delta": {
+        "name": "has_option_2_vs_top_option_1_threat_score",
+        "title": "has_option_2 shot-rate gap vs top_option_1_threat_score",
+        "marginal_column": "has_option_2",
+        "confound_column": "top_option_1_threat_score",
+        "marginal_type": "boolean",
+        "confound_type": "numeric",
+        "proposed_confound_reason": "a defender only 'has' a second ranked option worth recording when the primary threat is itself significant (more players committed forward = more danger already) -- the option-count effect might just be a proxy for how threatening the possession already is, not a defensive-shape signal in its own right",
+        "provenance": "LITERAL MIRROR -- same marginal column, same confound column, same quartile/boolean labels, same _verdict() function, run against target_xt_delta_passive instead of the xg target. Nothing about this test was re-selected or re-ranked for this target: keeping the established specification is what makes the passive xg, binary and xT verdicts comparable cell by cell. Source: generate_confound_analysis_part_d.TEST_1, mirrored into the xg portal by generate_confound_analysis_part_d_xg.py",
+        "n_rows_used": 1170431,
+        "marginal_table": [
+          {
+            "bin": "False (no 2nd option)",
+            "n": 1757,
+            "rate": -0.021537,
+            "pct_zero": 0.0,
+            "pct_negative": 55.04,
+            "pct_positive": 44.96
+          },
+          {
+            "bin": "True (has 2nd option)",
+            "n": 1168674,
+            "rate": -0.00360711,
+            "pct_zero": 0.0,
+            "pct_negative": 50.55,
+            "pct_positive": 49.45
+          }
+        ],
+        "stratified_table": [
+          {
+            "stratum": "T1 low",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 1071,
+                "rate": -0.04225777,
+                "pct_zero": 0.0,
+                "pct_negative": 65.55,
+                "pct_positive": 34.45
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 291485,
+                "rate": -0.01827649,
+                "pct_zero": 0.0,
+                "pct_negative": 65.56,
+                "pct_positive": 34.44
+              }
+            ],
+            "first_to_last_delta_pp": 0.02398128
+          },
+          {
+            "stratum": "T2",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 213,
+                "rate": 0.01329085,
+                "pct_zero": 0.0,
+                "pct_negative": 39.44,
+                "pct_positive": 60.56
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 292332,
+                "rate": -0.00225628,
+                "pct_zero": 0.0,
+                "pct_negative": 54.4,
+                "pct_positive": 45.6
+              }
+            ],
+            "first_to_last_delta_pp": -0.01554713
+          },
+          {
+            "stratum": "T3",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 93,
+                "rate": 0.05222921,
+                "pct_zero": 0.0,
+                "pct_negative": 30.11,
+                "pct_positive": 69.89
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 292460,
+                "rate": -0.0002106,
+                "pct_zero": 0.0,
+                "pct_negative": 47.15,
+                "pct_positive": 52.85
+              }
+            ],
+            "first_to_last_delta_pp": -0.05243981
+          },
+          {
+            "stratum": "T4 high",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 151,
+                "rate": 0.05266773,
+                "pct_zero": 0.0,
+                "pct_negative": 23.18,
+                "pct_positive": 76.82
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 292397,
+                "rate": 0.00626873,
+                "pct_zero": 0.0,
+                "pct_negative": 35.12,
+                "pct_positive": 64.88
+              }
+            ],
+            "first_to_last_delta_pp": -0.046399
+          }
+        ],
+        "verdict": {
+          "verdict": "partially",
+          "verdict_meaning": "The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.",
+          "n_strata_reversal_survives": 1,
+          "n_strata_total": 4
+        },
+        "reliability_note": "ROW-GRAIN NOTE, applying to every n in this test. The target is one value per event_id repeated across that event's visible defender slots, so a stratum's n is a row count, not a count of independent observations. The confound and marginal columns DO vary within an event (they are per-defender-slot measurements), so the stratification itself is meaningful -- what is inflated is only the apparent precision of each cell's mean. No verdict here uses a p-value; _verdict() compares signs only.",
+        "prompt_64_link": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+        "is_new_test": false
+      }
+    },
+    {
+      "name": "has_option_3_vs_top_option_1_threat_score",
+      "title": "has_option_3 shot-rate gap vs top_option_1_threat_score",
+      "marginal_column": "has_option_3",
+      "confound_column": "top_option_1_threat_score",
+      "marginal_type": "boolean",
+      "confound_type": "numeric",
+      "proposed_confound_reason": "same hypothesis as has_option_2, extended to the third option",
+      "provenance": "LITERAL MIRROR -- same marginal column, same confound column, same quartile/boolean labels, same _verdict() function, run against target_xt_delta_passive instead of the xg target. Nothing about this test was re-selected or re-ranked for this target: keeping the established specification is what makes the passive xg, binary and xT verdicts comparable cell by cell. Source: generate_confound_analysis_part_d.TEST_2, mirrored into the xg portal by generate_confound_analysis_part_d_xg.py",
+      "n_rows_used": 1590600,
+      "marginal_table": [
+        {
+          "bin": "False (no 3rd option)",
+          "n": 11388,
+          "rate": -0.01463073,
+          "pct_zero": 19.98,
+          "pct_negative": 45.65,
+          "pct_positive": 34.37
+        },
+        {
+          "bin": "True (has 3rd option)",
+          "n": 1579212,
+          "rate": -0.00258785,
+          "pct_zero": 26.46,
+          "pct_negative": 37.14,
+          "pct_positive": 36.4
+        }
+      ],
+      "stratified_table": [
+        {
+          "stratum": "T1 low",
+          "bins": [
+            {
+              "bin": "False (no 3rd option)",
+              "n": 6764,
+              "rate": -0.02895694,
+              "pct_zero": 19.96,
+              "pct_negative": 55.12,
+              "pct_positive": 24.93
+            },
+            {
+              "bin": "True (has 3rd option)",
+              "n": 390822,
+              "rate": -0.01330377,
+              "pct_zero": 25.17,
+              "pct_negative": 48.92,
+              "pct_positive": 25.91
+            }
+          ],
+          "first_to_last_delta_pp": 0.01565317
+        },
+        {
+          "stratum": "T2",
+          "bins": [
+            {
+              "bin": "False (no 3rd option)",
+              "n": 1427,
+              "rate": 0.00019943,
+              "pct_zero": 18.36,
+              "pct_negative": 37.84,
+              "pct_positive": 43.8
+            },
+            {
+              "bin": "True (has 3rd option)",
+              "n": 396157,
+              "rate": -0.00160204,
+              "pct_zero": 27.74,
+              "pct_negative": 39.28,
+              "pct_positive": 32.98
+            }
+          ],
+          "first_to_last_delta_pp": -0.00180147
+        },
+        {
+          "stratum": "T3",
+          "bins": [
+            {
+              "bin": "False (no 3rd option)",
+              "n": 1124,
+              "rate": 0.01209579,
+              "pct_zero": 21.09,
+              "pct_negative": 32.83,
+              "pct_positive": 46.09
+            },
+            {
+              "bin": "True (has 3rd option)",
+              "n": 396453,
+              "rate": -0.00017566,
+              "pct_zero": 27.43,
+              "pct_negative": 34.25,
+              "pct_positive": 38.32
+            }
+          ],
+          "first_to_last_delta_pp": -0.01227145
+        },
+        {
+          "stratum": "T4 high",
+          "bins": [
+            {
+              "bin": "False (no 3rd option)",
+              "n": 1794,
+              "rate": 0.01315122,
+              "pct_zero": 20.96,
+              "pct_negative": 24.75,
+              "pct_positive": 54.29
+            },
+            {
+              "bin": "True (has 3rd option)",
+              "n": 395780,
+              "rate": 0.00459079,
+              "pct_zero": 25.49,
+              "pct_negative": 26.26,
+              "pct_positive": 48.25
+            }
+          ],
+          "first_to_last_delta_pp": -0.00856043
+        }
+      ],
+      "verdict": {
+        "verdict": "partially",
+        "verdict_meaning": "The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.",
+        "n_strata_reversal_survives": 1,
+        "n_strata_total": 4
+      },
+      "reliability_note": "ROW-GRAIN NOTE, applying to every n in this test. The target is one value per event_id repeated across that event's visible defender slots, so a stratum's n is a row count, not a count of independent observations. The confound and marginal columns DO vary within an event (they are per-defender-slot measurements), so the stratification itself is meaningful -- what is inflated is only the apparent precision of each cell's mean. No verdict here uses a p-value; _verdict() compares signs only.",
+      "prompt_64_link": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+      "is_new_test": false,
+      "given_nonzero_delta": {
+        "name": "has_option_3_vs_top_option_1_threat_score",
+        "title": "has_option_3 shot-rate gap vs top_option_1_threat_score",
+        "marginal_column": "has_option_3",
+        "confound_column": "top_option_1_threat_score",
+        "marginal_type": "boolean",
+        "confound_type": "numeric",
+        "proposed_confound_reason": "same hypothesis as has_option_2, extended to the third option",
+        "provenance": "LITERAL MIRROR -- same marginal column, same confound column, same quartile/boolean labels, same _verdict() function, run against target_xt_delta_passive instead of the xg target. Nothing about this test was re-selected or re-ranked for this target: keeping the established specification is what makes the passive xg, binary and xT verdicts comparable cell by cell. Source: generate_confound_analysis_part_d.TEST_2, mirrored into the xg portal by generate_confound_analysis_part_d_xg.py",
+        "n_rows_used": 1170431,
+        "marginal_table": [
+          {
+            "bin": "False (no 3rd option)",
+            "n": 9113,
+            "rate": -0.01828319,
+            "pct_zero": 0.0,
+            "pct_negative": 57.05,
+            "pct_positive": 42.95
+          },
+          {
+            "bin": "True (has 3rd option)",
+            "n": 1161318,
+            "rate": -0.00351908,
+            "pct_zero": 0.0,
+            "pct_negative": 50.5,
+            "pct_positive": 49.5
+          }
+        ],
+        "stratified_table": [
+          {
+            "stratum": "T1 low",
+            "bins": [
+              {
+                "bin": "False (no 3rd option)",
+                "n": 5402,
+                "rate": -0.0362862,
+                "pct_zero": 0.0,
+                "pct_negative": 68.92,
+                "pct_positive": 31.08
+              },
+              {
+                "bin": "True (has 3rd option)",
+                "n": 287154,
+                "rate": -0.01802713,
+                "pct_zero": 0.0,
+                "pct_negative": 65.5,
+                "pct_positive": 34.5
+              }
+            ],
+            "first_to_last_delta_pp": 0.01825907
+          },
+          {
+            "stratum": "T2",
+            "bins": [
+              {
+                "bin": "False (no 3rd option)",
+                "n": 1172,
+                "rate": 0.00040166,
+                "pct_zero": 0.0,
+                "pct_negative": 46.08,
+                "pct_positive": 53.92
+              },
+              {
+                "bin": "True (has 3rd option)",
+                "n": 291373,
+                "rate": -0.00225561,
+                "pct_zero": 0.0,
+                "pct_negative": 54.43,
+                "pct_positive": 45.57
+              }
+            ],
+            "first_to_last_delta_pp": -0.00265727
+          },
+          {
+            "stratum": "T3",
+            "bins": [
+              {
+                "bin": "False (no 3rd option)",
+                "n": 909,
+                "rate": 0.01297185,
+                "pct_zero": 0.0,
+                "pct_negative": 43.01,
+                "pct_positive": 56.99
+              },
+              {
+                "bin": "True (has 3rd option)",
+                "n": 291644,
+                "rate": -0.00023496,
+                "pct_zero": 0.0,
+                "pct_negative": 47.16,
+                "pct_positive": 52.84
+              }
+            ],
+            "first_to_last_delta_pp": -0.01320681
+          },
+          {
+            "stratum": "T4 high",
+            "bins": [
+              {
+                "bin": "False (no 3rd option)",
+                "n": 1401,
+                "rate": 0.01810472,
+                "pct_zero": 0.0,
+                "pct_negative": 30.48,
+                "pct_positive": 69.52
+              },
+              {
+                "bin": "True (has 3rd option)",
+                "n": 291147,
+                "rate": 0.00623584,
+                "pct_zero": 0.0,
+                "pct_negative": 35.14,
+                "pct_positive": 64.86
+              }
+            ],
+            "first_to_last_delta_pp": -0.01186888
+          }
+        ],
+        "verdict": {
+          "verdict": "partially",
+          "verdict_meaning": "The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.",
+          "n_strata_reversal_survives": 1,
+          "n_strata_total": 4
+        },
+        "reliability_note": "ROW-GRAIN NOTE, applying to every n in this test. The target is one value per event_id repeated across that event's visible defender slots, so a stratum's n is a row count, not a count of independent observations. The confound and marginal columns DO vary within an event (they are per-defender-slot measurements), so the stratification itself is meaningful -- what is inflated is only the apparent precision of each cell's mean. No verdict here uses a p-value; _verdict() compares signs only.",
+        "prompt_64_link": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+        "is_new_test": false
+      }
+    },
+    {
+      "name": "has_option_2_vs_defender_x",
+      "title": "has_option_2 shot-rate gap vs defender_x",
+      "marginal_column": "has_option_2",
+      "confound_column": "defender_x",
+      "marginal_type": "boolean",
+      "confound_type": "numeric",
+      "proposed_confound_reason": "fewer options might just mean the attack is closer to goal, not that the defending team's structure is doing anything. Confound feature is defender_x, not zone_defensive_value: zone_defensive_value is dropped in feature_config.py (REDUNDANCY_DROPPED_PASSIVE, r=-1.0 vs distance_to_defending_goal), and distance_to_defending_goal is ALSO dropped (Cluster 4, defender-position) -- defender_x is the actually-kept, model-facing sibling, same correction prompt 25 already made for this exact substitution.",
+      "provenance": "LITERAL MIRROR -- same marginal column, same confound column, same quartile/boolean labels, same _verdict() function, run against target_xt_delta_passive instead of the xg target. Nothing about this test was re-selected or re-ranked for this target: keeping the established specification is what makes the passive xg, binary and xT verdicts comparable cell by cell. Source: generate_confound_analysis_part_d.TEST_3, mirrored into the xg portal by generate_confound_analysis_part_d_xg.py",
+      "n_rows_used": 1590600,
+      "marginal_table": [
+        {
+          "bin": "False (no 2nd option)",
+          "n": 2180,
+          "rate": -0.01735803,
+          "pct_zero": 19.4,
+          "pct_negative": 44.36,
+          "pct_positive": 36.24
+        },
+        {
+          "bin": "True (has 2nd option)",
+          "n": 1588420,
+          "rate": -0.00265392,
+          "pct_zero": 26.43,
+          "pct_negative": 37.19,
+          "pct_positive": 36.38
+        }
+      ],
+      "stratified_table": [
+        {
+          "stratum": "D1",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 902,
+              "rate": -0.06111044,
+              "pct_zero": 17.18,
+              "pct_negative": 66.41,
+              "pct_positive": 16.41
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 396748,
+              "rate": -0.01350375,
+              "pct_zero": 26.53,
+              "pct_negative": 47.73,
+              "pct_positive": 25.74
+            }
+          ],
+          "first_to_last_delta_pp": 0.04760669
+        },
+        {
+          "stratum": "D2",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 233,
+              "rate": -0.01338231,
+              "pct_zero": 21.89,
+              "pct_negative": 43.78,
+              "pct_positive": 34.33
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 397417,
+              "rate": -0.00139414,
+              "pct_zero": 27.71,
+              "pct_negative": 38.14,
+              "pct_positive": 34.15
+            }
+          ],
+          "first_to_last_delta_pp": 0.01198817
+        },
+        {
+          "stratum": "D3",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 166,
+              "rate": -0.00599688,
+              "pct_zero": 21.08,
+              "pct_negative": 33.13,
+              "pct_positive": 45.78
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 397484,
+              "rate": 3.642e-05,
+              "pct_zero": 26.57,
+              "pct_negative": 33.9,
+              "pct_positive": 39.54
+            }
+          ],
+          "first_to_last_delta_pp": 0.0060333
+        },
+        {
+          "stratum": "D4",
+          "bins": [
+            {
+              "bin": "False (no 2nd option)",
+              "n": 879,
+              "rate": 0.02433978,
+              "pct_zero": 20.71,
+              "pct_negative": 24.0,
+              "pct_positive": 55.29
+            },
+            {
+              "bin": "True (has 2nd option)",
+              "n": 396771,
+              "rate": 0.00423827,
+              "pct_zero": 24.89,
+              "pct_negative": 29.0,
+              "pct_positive": 46.11
+            }
+          ],
+          "first_to_last_delta_pp": -0.02010151
+        }
+      ],
+      "verdict": {
+        "verdict": "partially",
+        "verdict_meaning": "The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.",
+        "n_strata_reversal_survives": 3,
+        "n_strata_total": 4
+      },
+      "reliability_note": "ROW-GRAIN NOTE, applying to every n in this test. The target is one value per event_id repeated across that event's visible defender slots, so a stratum's n is a row count, not a count of independent observations. The confound and marginal columns DO vary within an event (they are per-defender-slot measurements), so the stratification itself is meaningful -- what is inflated is only the apparent precision of each cell's mean. No verdict here uses a p-value; _verdict() compares signs only.",
+      "prompt_64_link": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+      "is_new_test": false,
+      "given_nonzero_delta": {
+        "name": "has_option_2_vs_defender_x",
+        "title": "has_option_2 shot-rate gap vs defender_x",
+        "marginal_column": "has_option_2",
+        "confound_column": "defender_x",
+        "marginal_type": "boolean",
+        "confound_type": "numeric",
+        "proposed_confound_reason": "fewer options might just mean the attack is closer to goal, not that the defending team's structure is doing anything. Confound feature is defender_x, not zone_defensive_value: zone_defensive_value is dropped in feature_config.py (REDUNDANCY_DROPPED_PASSIVE, r=-1.0 vs distance_to_defending_goal), and distance_to_defending_goal is ALSO dropped (Cluster 4, defender-position) -- defender_x is the actually-kept, model-facing sibling, same correction prompt 25 already made for this exact substitution.",
+        "provenance": "LITERAL MIRROR -- same marginal column, same confound column, same quartile/boolean labels, same _verdict() function, run against target_xt_delta_passive instead of the xg target. Nothing about this test was re-selected or re-ranked for this target: keeping the established specification is what makes the passive xg, binary and xT verdicts comparable cell by cell. Source: generate_confound_analysis_part_d.TEST_3, mirrored into the xg portal by generate_confound_analysis_part_d_xg.py",
+        "n_rows_used": 1170431,
+        "marginal_table": [
+          {
+            "bin": "False (no 2nd option)",
+            "n": 1757,
+            "rate": -0.021537,
+            "pct_zero": 0.0,
+            "pct_negative": 55.04,
+            "pct_positive": 44.96
+          },
+          {
+            "bin": "True (has 2nd option)",
+            "n": 1168674,
+            "rate": -0.00360711,
+            "pct_zero": 0.0,
+            "pct_negative": 50.55,
+            "pct_positive": 49.45
+          }
+        ],
+        "stratified_table": [
+          {
+            "stratum": "D1",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 747,
+                "rate": -0.07379065,
+                "pct_zero": 0.0,
+                "pct_negative": 80.19,
+                "pct_positive": 19.81
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 291861,
+                "rate": -0.01836175,
+                "pct_zero": 0.0,
+                "pct_negative": 64.96,
+                "pct_positive": 35.04
+              }
+            ],
+            "first_to_last_delta_pp": 0.0554289
+          },
+          {
+            "stratum": "D2",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 184,
+                "rate": -0.016931,
+                "pct_zero": 0.0,
+                "pct_negative": 55.43,
+                "pct_positive": 44.57
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 292424,
+                "rate": -0.001904,
+                "pct_zero": 0.0,
+                "pct_negative": 52.7,
+                "pct_positive": 47.3
+              }
+            ],
+            "first_to_last_delta_pp": 0.015027
+          },
+          {
+            "stratum": "D3",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 130,
+                "rate": -0.00782849,
+                "pct_zero": 0.0,
+                "pct_negative": 43.08,
+                "pct_positive": 56.92
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 292477,
+                "rate": 8.981e-05,
+                "pct_zero": 0.0,
+                "pct_negative": 46.04,
+                "pct_positive": 53.96
+              }
+            ],
+            "first_to_last_delta_pp": 0.0079183
+          },
+          {
+            "stratum": "D4",
+            "bins": [
+              {
+                "bin": "False (no 2nd option)",
+                "n": 696,
+                "rate": 0.0307674,
+                "pct_zero": 0.0,
+                "pct_negative": 30.17,
+                "pct_positive": 69.83
+              },
+              {
+                "bin": "True (has 2nd option)",
+                "n": 291912,
+                "rate": 0.00573477,
+                "pct_zero": 0.0,
+                "pct_negative": 38.5,
+                "pct_positive": 61.5
+              }
+            ],
+            "first_to_last_delta_pp": -0.02503263
+          }
+        ],
+        "verdict": {
+          "verdict": "partially",
+          "verdict_meaning": "The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.",
+          "n_strata_reversal_survives": 3,
+          "n_strata_total": 4
+        },
+        "reliability_note": "ROW-GRAIN NOTE, applying to every n in this test. The target is one value per event_id repeated across that event's visible defender slots, so a stratum's n is a row count, not a count of independent observations. The confound and marginal columns DO vary within an event (they are per-defender-slot measurements), so the stratification itself is meaningful -- what is inflated is only the apparent precision of each cell's mean. No verdict here uses a p-value; _verdict() compares signs only.",
+        "prompt_64_link": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+        "is_new_test": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,529 @@
+{
+  "dataset": "passive",
+  "leg": "passive (this portal also covers the active-binary leg -- see LEAKAGE_AUDIT.json)",
+  "parquet_path": "data/features/passive_defense.parquet",
+  "target_parquet_path": "outputs/prototypes/passive_xt_delta.parquet",
+  "n_rows": 1593181,
+  "n_unique_events": 198354,
+  "target_col": "target_xt_delta_passive",
+  "target_scale": {
+    "target": "target_xt_delta_passive",
+    "n_rows": 1593181,
+    "n_defined": 1590600,
+    "n_nan": 2581,
+    "mean": -0.00267407,
+    "std": 0.0367479,
+    "skew": -2.6036,
+    "excess_kurtosis": 34.8444,
+    "pct_zero": 26.416,
+    "pct_negative": 37.2,
+    "pct_positive": 36.384,
+    "xg_mean_same_rows": 0.00599126,
+    "xg_std_same_rows": 0.04023084,
+    "xg_flat_margin_absolute": 0.00299563,
+    "xg_flat_margin_as_fraction_of_xg_std": 0.074461,
+    "flat_margin": 0.00273629,
+    "range_trigger": 0.00547257,
+    "near_identical_threshold": 0.00273629,
+    "distinct_signal_threshold": 0.00820886,
+    "n_nonzero": 1170431,
+    "mean_nonzero": -0.00363403,
+    "std_nonzero": 0.04279834,
+    "flat_margin_nonzero": 0.00318681,
+    "scale_note": "ADAPTATION 1, RE-EXAMINED FOR THE PASSIVE LEG. Prompt 65 translated the xg suite's mean-multiple threshold convention onto the xT target via xg's own standard-deviation fraction, because the xT target's mean is near zero and a mean-multiple threshold would be an arbitrary sliver. That justification holds on this leg in its ORIGINAL form: target_xt_delta_passive's mean is -0.002674, NEGATIVE as v1's was and unlike active v2's positive mean, so '0.5 x the overall mean' would flip the sign of every threshold. At -0.002674 against a std of 0.036748 the mean is only 7.3% of one standard deviation. Mechanically: xg's own flat_margin (0.5 x mean xg = 0.002996 on these same rows) re-expressed as a fraction of xg's own std (0.040231) gives 0.074461, applied to target_xt_delta_passive's std (0.036748) to give 0.002736. Every number is computed at runtime from the real parquet -- nothing is copied from the active leg. See `threshold_transfer_warning` in this same block. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged and are unaffected.",
+    "conditional_panel_note": "ADAPTATION 2, unchanged in method and re-measured on the passive leg. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta_passive has no shot column standing behind it; its structural-zero analogue is the 26.4% of rows with an EXACTLY zero delta -- the next same-possession event landed in the same 8x12 xT grid cell as the snapshot itself, which on this leg is very common because most on-ball events are short passes and carries. That share is LARGER than active v2's 20.2%, so the panel matters more here, not less. The conditional panel throughout this half of the portal is 'given a non-zero delta' (target_xt_delta_passive != 0), never 'given a shot'.",
+    "direction_note": "ADAPTATION 3, unchanged in method and re-measured on the passive leg. Sign carries the football meaning: POSITIVE target_xt_delta_passive = xT fell across the event (threat reduced, good for the defence), NEGATIVE = xT rose. On this leg the two directions are almost exactly balanced -- 36.4% positive vs 37.2% negative -- but the target is strongly LEFT-skewed (skew -2.6036), far more so than active v2's -0.306, so the negative tail is much longer than the positive one even though the counts match. Two-directional framing therefore matters more here than anywhere else in this portal. Rankings are by |magnitude| across BOTH directions, and every table also reports the negative/positive/zero share behind its mean.",
+    "log_transform_note": "NOT an adaptation, re-checked rather than inherited: the xg_target report suite never log-transforms its target anywhere, on either leg, and neither did the active xT suite. The log1p framing in this project belongs to the modelling legs, not to this report suite. This leg's excess kurtosis of ~31 makes a transform more tempting than anywhere else in the portal -- and it is still NOT applied here, because doing so would silently break comparability with the passive xg portal and with this portal's own active half. Recorded as an open question for the modelling legs, not resolved by an EDA suite.",
+    "leg": "passive",
+    "target_version": "passive (possession-outcome definition from the first pass)",
+    "target_source": "outputs/prototypes/passive_xt_delta.parquet (198,354 unique-event rows, left-joined READ-ONLY onto data/features/passive_defense.parquet's 1,593,181 defender-slot rows by event_id)",
+    "supersedes": "nothing. Unlike the active-binary leg, this leg has no v1 pass to supersede -- Prompt 68 implemented the corrected possession-outcome xt_after directly. See prompt_68_no_v1_detour.",
+    "row_grain_note": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+    "grain_comparison": {
+      "this_suite_grain": "defender-slot (one row per visible defender per on-ball event)",
+      "prompt_68_grain": "unique event_id",
+      "prompt_68_unique_event": {
+        "mean": -0.00181,
+        "std": 0.03828,
+        "skew": -1.779,
+        "excess_kurtosis": 31.02,
+        "pct_zero": 26.3,
+        "pct_negative": 36.9,
+        "pct_positive": 36.9,
+        "n_defined": 198009
+      },
+      "this_run_defender_slot": {
+        "mean": -0.00267407,
+        "std": 0.0367479,
+        "skew": -2.6036,
+        "excess_kurtosis": 34.8444,
+        "pct_zero": 26.416,
+        "pct_negative": 37.2,
+        "pct_positive": 36.384,
+        "n_defined": 1590600
+      },
+      "note": "These are the SAME target measured at two grains, not a discrepancy to reconcile. Prompt 68 reported the unique-event distribution because that is the grain the target is computed at. Every report in this suite measures it at the defender-slot grain, because that is the grain the features live at and the grain a model on this leg would train on. The row-level distribution is MORE extreme on every shape statistic -- measured on this run, skew -2.6036 against Prompt 68's -1.779 and excess kurtosis 34.8444 against 31.02 -- and the mechanism is understood rather than guessed at: events with more visible defender slots contribute more rows, so the row-level distribution is the event-level one re-weighted by visible-defender count, and the extreme shot-xG-tail events are exactly the crowded, well-observed ones that carry the most slots. The directional shares barely move (26.4% zero / 37.2% negative / 36.4% positive here against 26.3 / 36.9 / 36.9 there), which is the reassuring part: the re-weighting lengthens the tails without changing which way the target points. Wherever this suite cites a Prompt 68 figure it is labelled as the unique-event figure."
+    },
+    "robust_scale": {
+      "iqr": 0.00359064,
+      "mad": 0.00180901,
+      "robust_std_1_4826_mad": 0.00268204,
+      "robust_flat_margin": 0.00019971,
+      "flat_margin_over_mad": 1.5126,
+      "flat_margin_over_iqr": 0.7621,
+      "pct_rows_inside_flat_margin": 62.12,
+      "mean_as_fraction_of_std": -0.0728,
+      "active_v2_comparison": {
+        "flat_margin_over_mad": 1.28,
+        "flat_margin_over_iqr": 0.56,
+        "pct_rows_inside_flat_margin": 53.4,
+        "excess_kurtosis": 18.3289,
+        "note": "Prompt 67's measured figures for target_xt_delta_v2 on the active leg, quoted here so the passive numbers beside them can be read as a comparison rather than in isolation. v1's own figures, for the longer arc, were 0.53 x MAD and 35.4% of rows at excess kurtosis 8.85."
+      }
+    },
+    "correlation_with_old_target": {
+      "pair": "target_xt_delta_passive vs target_future_xg_10s",
+      "pearson_r": -0.0736,
+      "n": 1590600,
+      "pearson_r_vs_shot_target": -0.0651,
+      "n_vs_shot_target": 1590600,
+      "prompt_68_reported_r_vs_xg": -0.0715,
+      "prompt_68_reported_r_vs_shot": -0.0629,
+      "active_v2_pearson_r_vs_xg": -0.1082,
+      "note": "Measured on this run at the defender-slot grain: r=-0.0736 against target_future_xg_10s and r=-0.0651 against target_future_shot_10s. Prompt 68 reported -0.0715 and -0.0629 respectively at the unique-event grain; the two grains can differ slightly because events with more visible defender slots are weighted more heavily at row level. Both are correctly signed -- more threat denied goes with less future attacking output -- and both are WEAKER than the active leg's own -0.1082 against the same xg target. That difference is real and is reported rather than smoothed over. Recorded HERE specifically because Adaptation 1 borrows target_future_xg_10s's own standard-deviation fraction to set every threshold in this suite, so wherever a report cites an xg-derived threshold, this is how the targets actually relate on the same rows. Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.3): correlation with the two OLD passive targets is correctly signed but numerically WEAKER than the active leg's own improvement -- Pearson r = -0.0629 against target_future_shot_10s and -0.0715 against target_future_xg_10s, against active v2's -0.108. More threat denied is still associated with less future attacking output, which is the sensible direction, but the relationship is looser on this leg. Stated plainly rather than talked up. A plausible reason, recorded by Prompt 68 and not chased here: a passive snapshot is one defender's off-ball positioning at an arbitrary point in a live attack, one step further removed from the moment-to-moment outcome than an active defensive ACTION is."
+    },
+    "threshold_transfer_warning": "THIS THRESHOLD DOES NOT TRANSFER CLEANLY, AND ON THIS LEG IT TRANSFERS WORSE THAN ON ACTIVE -- recomputed on the real passive parquet rather than inherited from active's numbers, and reported rather than forced to fit. Prompt 65 tuned the translated flat_margin against a target with excess kurtosis 8.85, where the margin was 0.53 x the MAD and spanned 35.4% of rows -- a genuinely narrow 'too small to matter' band. Prompt 67 found that on target_xt_delta_v2 (excess kurtosis 18.33) the same std-derived margin had grown to 1.28 x the MAD and 53.4% of rows, because the shot-xG injection inflates std while the bulk tightens. This leg is heavier-tailed again (excess kurtosis 34.8444, IQR 0.003591, MAD 0.001809), so the same mechanism applies more strongly: the translated margin is 0.002736, which is 1.51 x the MAD, 0.76 x the IQR, and spans 62.1% of all rows. A flat band covering this much of the data is not doing its job. A NAIVE TRANSFER OF ACTIVE'S OWN ABSOLUTE MARGIN (0.004929) WOULD HAVE BEEN WORSE STILL, since this leg's std is smaller (0.038 vs 0.058) while its bulk is tighter again -- the margin is therefore recomputed from this leg's own std, not copied. The literal translated margin is KEPT as the headline number so the active and passive halves of this portal stay like-for-like and the xg suite's convention is still the one being followed, but the MAD-derived robust alternative (0.000200) is published beside it on every run and every shape classification in this half of the portal should be read with this inflation in mind."
+  },
+  "step_0_scope_note": "CONFIRMED BY READING THE SOURCE, and it points the OPPOSITE way from every other scope note in this portal: reports/analysis/xg_target/LEAKAGE_AUDIT.json carries \"dataset\": \"passive\" and its Parts B/C/D test three passive-only columns; reports/analysis/shot_target/LEAKAGE_AUDIT.json is the same. The established leakage-audit methodology in this project IS the passive one, and it is the ACTIVE leg that has no native counterpart -- which is exactly the scope gap Prompt 65 recorded and substituted its Parts B'/C'/D' for. This report therefore needs no substitution at all: Parts A/B/C/D are literal mirrors of the passive xg audit's own parts, same columns, same questions. Part E' is new.",
+  "methodology": "Part A (target- and dataset-independent schema/naming scan) imported unchanged from generate_leakage_audit.part_a. Parts B/C/D use generate_leakage_audit_xt._split_stats -- the xg audit's own groupby-mean + Welch's t-test, with this target's negative/zero/positive shares added (Prompt 65's Adaptation 3), because an effect on this target can sit entirely in its 26.4% exactly-zero mass and a mean-difference test alone would report nothing. Part E' is a construction-coupling check with no counterpart anywhere in this project, added because this leg's xt_before term is a deterministic grid lookup at two LOCKED features.",
+  "p_value_caveat": "ROW-GRAIN CAVEAT ON EVERY P-VALUE IN THIS REPORT, stated once and applying throughout. target_xt_delta_passive is computed once per event_id and left-joined onto every visible defender-slot row of that event (mean ~8.03 rows per event), exactly as target_future_shot_10s and target_future_xg_10s already are on this leg. Welch's t-test assumes independent observations; these rows are not independent within an event, so the nominal n is roughly eight times the effective one and every p-value below is correspondingly optimistic. The existing passive xg audit states the row grain but carries no such caveat -- checked directly in reports/analysis/xg_target/LEAKAGE_AUDIT.json, not assumed -- so this is an addition rather than a mirrored convention. No verdict in this report is gated on a p-value: every one turns on an effect size, a share, or a structural argument about how a column is constructed.",
+  "no_v1_supersession": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md preamble and section 0): this leg has NO v1/v2 supersession to carry, and that is a property of the data rather than good luck. Active's v1 mistake was using the defensive action's own recorded location (action_x/action_y) as xt_after. passive_defense.parquet's ball_x/ball_y is already the ball's location at the on-ball event the snapshot is anchored to -- confirmed identical to events_with_targets.parquet's own ball_x/ball_y at the same event_id to floating-point exactness -- which is the correct 'before' state by the exact reasoning Prompt 66 established. The corrected possession-outcome xt_after was therefore implemented directly, on the first pass. Nothing in this half of the portal supersedes an earlier passive pass, because there isn't one.",
+  "part_a_known_leaky_scan": {
+    "known_leaky_columns": {
+      "target_future_shot_10s": {
+        "in_candidate_list": false,
+        "verdict": "excluded"
+      },
+      "target_future_xg_10s": {
+        "in_candidate_list": false,
+        "verdict": "excluded"
+      },
+      "screened_option_was_avoided": {
+        "in_candidate_list": false,
+        "verdict": "excluded"
+      }
+    },
+    "all_leakage_suggestive_column_names": [
+      "has_screened_outcome",
+      "screened_option_was_avoided",
+      "target_future_shot_10s",
+      "target_future_xg_10s",
+      "xt_after"
+    ],
+    "n_columns_scanned_total": 78,
+    "unexpected_leaky_columns_in_candidate_list": [],
+    "verdict": "clean"
+  },
+  "part_b_screened_option_was_avoided": {
+    "column": "screened_option_was_avoided",
+    "target_col": "target_xt_delta_passive",
+    "by_value": {
+      "True": {
+        "n": 1551798,
+        "mean_xt": -0.00262408,
+        "std_xt": 0.03658474,
+        "pct_zero": 26.89,
+        "pct_negative": 36.97,
+        "pct_positive": 36.14
+      },
+      "False": {
+        "n": 38523,
+        "mean_xt": -0.00449398,
+        "std_xt": 0.04171317,
+        "pct_zero": 7.47,
+        "pct_negative": 46.34,
+        "pct_positive": 46.19
+      }
+    },
+    "delta": 0.0018699,
+    "t_stat": 8.715626001300139,
+    "p_value": 3.000420964623933e-18,
+    "zero_share_gap_pp": -19.42,
+    "mirrors": "Part B of the passive xg audit (generate_leakage_audit_xg.part_b_xg), same column",
+    "method": "groupby mean target + Welch's t-test, the xg audit's own method, with this target's negative/zero/positive shares added (Adaptation 3)",
+    "verdict": "kept-excluded-conceptually; empirical result is informational only",
+    "explanation": "screened_option_was_avoided is excluded from the candidate list on conceptual/structural grounds regardless of any empirical result, and this audit does not change that. Measured against target_xt_delta_passive on this run: True n=1,551,798 mean -0.002624 (26.9% exactly zero), False n=38,523 mean -0.004494 (7.5% exactly zero), delta +0.001870, zero-share gap -19.4pp. The xg audit recorded a near-flat difference here and read it as confirming low leakage risk for this specific pair; the same reading applies or does not on this target's own numbers above, and the exclusion holds either way because it was never empirical."
+  },
+  "part_c_has_screened_outcome": {
+    "column": "has_screened_outcome",
+    "target_col": "target_xt_delta_passive",
+    "by_value": {
+      "True": {
+        "n": 1590321,
+        "mean_xt": -0.00266937,
+        "std_xt": 0.03671854,
+        "pct_zero": 26.42,
+        "pct_negative": 37.2,
+        "pct_positive": 36.38
+      },
+      "False": {
+        "n": 279,
+        "mean_xt": -0.02947504,
+        "std_xt": 0.11388687,
+        "pct_zero": 17.92,
+        "pct_negative": 42.29,
+        "pct_positive": 39.78
+      }
+    },
+    "delta": 0.02680567,
+    "t_stat": 3.9314347695486926,
+    "p_value": 0.00010666494311161114,
+    "zero_share_gap_pp": -8.5,
+    "mirrors": "Part C of the passive xg audit (generate_leakage_audit_xg.part_c_xg), same column",
+    "method": "groupby mean target + Welch's t-test, the xg audit's own method, with this target's negative/zero/positive shares added (Adaptation 3)",
+    "feature_config_exclusion_reason": "Leakage exclusion (not a correlation-tier verdict): censoring-mechanism proxy for target_future_shot_10s's own 10s window being truncated at end-of-period/match, not defensive signal -- chi2=136.5, p=1.54e-31 vs target_future_shot_10s (0.50% shot rate when False [n=2,581] vs 5.97% when True); see reports/analysis/shot_target/LEAKAGE_AUDIT.json",
+    "verdict": "excluded -- censoring-mechanism proxy; the STRUCTURAL exclusion holds and does not depend on this target",
+    "explanation": "has_screened_outcome is False only when screened_option_was_avoided could not be computed -- end of period or match, no next event to compare against. feature_config.py excludes it as a censoring-mechanism proxy for target_future_shot_10s's own 10-second window being truncated (chi2=136.5, p=1.54e-31, a ~11.9x shot-rate gap). The binary audit measured it at ~12x, the xg audit at only 1.3x and barely significant. Against target_xt_delta_passive on this run: False n=279 mean -0.029475 versus True n=1,590,321 mean -0.002669, delta +0.026806, and the exactly-zero share differs by -8.5pp (17.9% when False vs 26.4% when True). READ THE ZERO-SHARE GAP, NOT ONLY THE MEAN: this target's effects can sit entirely in its 26.4% exactly-zero mass, which is exactly the caveat Prompt 65 recorded as its Caveat 2 for the active leg and which applies to a LARGER share of rows here than there (26.4% vs 20.2%). CRUCIALLY, the exclusion does not rest on any of these numbers: the censoring mechanism is a property of how the column is constructed, not of which target it is measured against, so it holds identically whatever this target says. Do not cite this target's figure as independent evidence for the exclusion -- it is the same structural argument, measured a third time."
+  },
+  "part_d_has_option_2_3": {
+    "has_option_2": {
+      "column": "has_option_2",
+      "target_col": "target_xt_delta_passive",
+      "by_value": {
+        "True": {
+          "n": 1588420,
+          "mean_xt": -0.00265392,
+          "std_xt": 0.03661404,
+          "pct_zero": 26.43,
+          "pct_negative": 37.19,
+          "pct_positive": 36.38
+        },
+        "False": {
+          "n": 2180,
+          "mean_xt": -0.01735803,
+          "std_xt": 0.09106718,
+          "pct_zero": 19.4,
+          "pct_negative": 44.36,
+          "pct_positive": 36.24
+        }
+      },
+      "delta": 0.01470411,
+      "t_stat": 7.538015113080101,
+      "p_value": 6.954886883495894e-14,
+      "zero_share_gap_pp": -7.03,
+      "mirrors": "Part D of the passive xg audit (generate_leakage_audit_xg.part_d_xg), same column has_option_2",
+      "method": "groupby mean target + Welch's t-test with direction shares (Adaptation 3)",
+      "in_candidate_list": true,
+      "verdict": "flagged-for-follow-up -- kept as a candidate feature, same disposition as the xg audit",
+      "explanation": "has_option_2 describes the CURRENT freeze frame (whether a second/third passing option was identifiable at all), not whether the forward window was computable, so it is not a censoring proxy and stays in the candidate list. Against target_xt_delta_passive on this run: False n=2,180 mean -0.017358, True n=1,588,420 mean -0.002654, delta +0.014704, zero-share gap -7.0pp. The binary and xg audits both found False rows carrying MORE danger than True rows and flagged the pair for confound testing rather than exclusion; this portal's own passive Confound report runs exactly that test against this target. The direction shares are the part to read on this target: a difference in mean can be produced either by a shift in which way the threat moves or by a shift in how many rows move at all, and only the shares distinguish those."
+    },
+    "has_option_3": {
+      "column": "has_option_3",
+      "target_col": "target_xt_delta_passive",
+      "by_value": {
+        "True": {
+          "n": 1579212,
+          "mean_xt": -0.00258785,
+          "std_xt": 0.03620366,
+          "pct_zero": 26.46,
+          "pct_negative": 37.14,
+          "pct_positive": 36.4
+        },
+        "False": {
+          "n": 11388,
+          "mean_xt": -0.01463073,
+          "std_xt": 0.08193122,
+          "pct_zero": 19.98,
+          "pct_negative": 45.65,
+          "pct_positive": 34.37
+        }
+      },
+      "delta": 0.01204288,
+      "t_stat": 15.674691368407668,
+      "p_value": 8.380579048320496e-55,
+      "zero_share_gap_pp": -6.48,
+      "mirrors": "Part D of the passive xg audit (generate_leakage_audit_xg.part_d_xg), same column has_option_3",
+      "method": "groupby mean target + Welch's t-test with direction shares (Adaptation 3)",
+      "in_candidate_list": true,
+      "verdict": "flagged-for-follow-up -- kept as a candidate feature, same disposition as the xg audit",
+      "explanation": "has_option_3 describes the CURRENT freeze frame (whether a second/third passing option was identifiable at all), not whether the forward window was computable, so it is not a censoring proxy and stays in the candidate list. Against target_xt_delta_passive on this run: False n=11,388 mean -0.014631, True n=1,579,212 mean -0.002588, delta +0.012043, zero-share gap -6.5pp. The binary and xg audits both found False rows carrying MORE danger than True rows and flagged the pair for confound testing rather than exclusion; this portal's own passive Confound report runs exactly that test against this target. The direction shares are the part to read on this target: a difference in mean can be produced either by a shift in which way the threat moves or by a shift in how many rows move at all, and only the shares distinguish those."
+    }
+  },
+  "part_e_prime_construction_coupling": {
+    "is_new_part": true,
+    "method": "Pearson r of every locked numerical PASSIVE feature against xt_after, xt_before and the delta itself. The same plain instrument Prompt 65 used for the active leg's Part D', applied here for the first time -- there is no established audit to mirror, on either leg or any target, and it is labelled as new rather than presented as established.",
+    "why_this_part_exists": "target_xt_delta_passive = xt_before - xt_after, and on THIS leg xt_before = xT(ball_x, ball_y) at the snapshot itself -- a deterministic 8x12 grid lookup at two columns that are both in PASSIVE['continuous'] and therefore both LOCKED CANDIDATE FEATURES. That is a structurally different situation from the active leg, where xt_before is a lookup at the PREVIOUS event's location (not a column in the active feature table at all) and where Prompt 66 removed the xt_after coupling entirely. Here, one of the target's two terms is a pure function of two locked features, so it must be measured rather than assumed harmless.",
+    "xt_before_source_columns": {
+      "ball_x": {
+        "in_candidate_list": true,
+        "r_vs_xt_before": 0.5199,
+        "r_vs_xt_after": 0.0985,
+        "r_vs_target": 0.2521
+      },
+      "ball_y": {
+        "in_candidate_list": true,
+        "r_vs_xt_before": -0.0037,
+        "r_vs_xt_after": -0.0061,
+        "r_vs_target": 0.0031
+      }
+    },
+    "locked_feature_correlations": [
+      {
+        "feature": "ball_x",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": true,
+        "r_vs_xt_after": 0.0985,
+        "r_vs_xt_before": 0.5199,
+        "r_vs_target": 0.2521
+      },
+      {
+        "feature": "defender_x",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.075,
+        "r_vs_xt_before": 0.3953,
+        "r_vs_target": 0.1916
+      },
+      {
+        "feature": "top_option_3_threat_score",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0712,
+        "r_vs_xt_before": 0.3839,
+        "r_vs_target": 0.1888
+      },
+      {
+        "feature": "top_option_2_threat_score",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0965,
+        "r_vs_xt_before": 0.3997,
+        "r_vs_target": 0.175
+      },
+      {
+        "feature": "top_option_1_threat_score",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0967,
+        "r_vs_xt_before": 0.2875,
+        "r_vs_target": 0.1007
+      },
+      {
+        "feature": "angle_to_attacking_goal",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0646,
+        "r_vs_xt_before": 0.2408,
+        "r_vs_target": 0.0993
+      },
+      {
+        "feature": "top_option_1_dx",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": -0.0571,
+        "r_vs_xt_before": -0.2277,
+        "r_vs_target": -0.0977
+      },
+      {
+        "feature": "top_option_2_dx",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": -0.0312,
+        "r_vs_xt_before": -0.1875,
+        "r_vs_target": -0.0951
+      },
+      {
+        "feature": "top_option_3_dx",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": -0.0321,
+        "r_vs_xt_before": -0.1764,
+        "r_vs_target": -0.0873
+      },
+      {
+        "feature": "lane_screening_score_option_3",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0573,
+        "r_vs_xt_before": 0.0185,
+        "r_vs_target": -0.0404
+      },
+      {
+        "feature": "lane_screening_score_option_2",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0528,
+        "r_vs_xt_before": 0.0201,
+        "r_vs_target": -0.0353
+      },
+      {
+        "feature": "engagement_distance_to_carrier",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": -0.0385,
+        "r_vs_xt_before": -0.003,
+        "r_vs_target": 0.0334
+      },
+      {
+        "feature": "attacking_goal_centrality",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0685,
+        "r_vs_xt_before": 0.045,
+        "r_vs_target": -0.0333
+      },
+      {
+        "feature": "lane_screening_score_option_1",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0395,
+        "r_vs_xt_before": 0.0068,
+        "r_vs_target": -0.0318
+      },
+      {
+        "feature": "marking_tightness",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": -0.0283,
+        "r_vs_xt_before": 0.0019,
+        "r_vs_target": 0.0273
+      },
+      {
+        "feature": "top_option_3_distance_from_ball",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": -0.0441,
+        "r_vs_xt_before": -0.0224,
+        "r_vs_target": 0.0257
+      },
+      {
+        "feature": "defender_slot_index",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": -0.0113,
+        "r_vs_xt_before": -0.0521,
+        "r_vs_target": -0.0239
+      },
+      {
+        "feature": "top_option_1_distance_from_ball",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": -0.0708,
+        "r_vs_xt_before": -0.1299,
+        "r_vs_target": -0.0206
+      },
+      {
+        "feature": "overload_score",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0075,
+        "r_vs_xt_before": 0.0293,
+        "r_vs_target": 0.0124
+      },
+      {
+        "feature": "top_option_2_distance_from_ball",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": -0.0594,
+        "r_vs_xt_before": -0.073,
+        "r_vs_target": 0.0064
+      },
+      {
+        "feature": "top_option_3_dy",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0058,
+        "r_vs_xt_before": 0.0017,
+        "r_vs_target": -0.0042
+      },
+      {
+        "feature": "ball_y",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": true,
+        "r_vs_xt_after": -0.0061,
+        "r_vs_xt_before": -0.0037,
+        "r_vs_target": 0.0031
+      },
+      {
+        "feature": "top_option_1_angle_from_ball",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0027,
+        "r_vs_xt_before": 0.0074,
+        "r_vs_target": 0.0024
+      },
+      {
+        "feature": "top_option_2_dy",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0036,
+        "r_vs_xt_before": 0.0026,
+        "r_vs_target": -0.0016
+      },
+      {
+        "feature": "defender_y",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": -0.0028,
+        "r_vs_xt_before": -0.0025,
+        "r_vs_target": 0.0009
+      },
+      {
+        "feature": "top_option_1_dy",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.003,
+        "r_vs_xt_before": 0.0029,
+        "r_vs_target": -0.0008
+      },
+      {
+        "feature": "top_option_3_angle_from_ball",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0005,
+        "r_vs_xt_before": -0.0005,
+        "r_vs_target": -0.0008
+      },
+      {
+        "feature": "top_option_2_angle_from_ball",
+        "in_candidate_list": true,
+        "is_an_xt_before_source_column": false,
+        "r_vs_xt_after": 0.0014,
+        "r_vs_xt_before": 0.0024,
+        "r_vs_target": 0.0003
+      }
+    ],
+    "strongest_vs_target": {
+      "feature": "ball_x",
+      "in_candidate_list": true,
+      "is_an_xt_before_source_column": true,
+      "r_vs_xt_after": 0.0985,
+      "r_vs_xt_before": 0.5199,
+      "r_vs_target": 0.2521
+    },
+    "strongest_vs_xt_before": {
+      "feature": "ball_x",
+      "in_candidate_list": true,
+      "is_an_xt_before_source_column": true,
+      "r_vs_xt_after": 0.0985,
+      "r_vs_xt_before": 0.5199,
+      "r_vs_target": 0.2521
+    },
+    "active_leg_comparison": {
+      "active_v1_strongest_r_vs_target": 0.5551,
+      "active_v1_strongest_feature": "distance_to_attacking_box",
+      "active_v2_strongest_r_vs_target": 0.1431,
+      "active_v2_strongest_feature": "distance_to_attacking_box",
+      "note": "Prompt 65 recorded construction coupling as the single most important caveat the v1 active portal carried (strongest locked feature r=+0.5551 against the target); Prompt 67 measured it falling 74% to +0.1431 under the corrected xt_after and called the caveat substantially retired. Those numbers are quoted for scale only -- the mechanism on this leg is a different one and the active figures do not transfer."
+    },
+    "verdict": "real but BOUNDED, and bounded by subtraction rather than by exclusion",
+    "explanation": "Measured on this run: the strongest locked-feature correlation with xt_before is ball_x at r=+0.5199, which is exactly what a grid lookup at ball_x/ball_y should produce and is NOT itself a finding about leakage -- it is the definition of the term. The question that matters is what survives the SUBTRACTION: the strongest locked-feature correlation with the DELTA is ball_x at r=+0.2521. The delta is a difference of two grid values at two nearby locations, so most of the location information cancels, and that cancellation is visible in the gap between those two columns in the table. NO FEATURE IS DROPPED OR PROPOSED FOR DROPPING ON THIS EVIDENCE, and feature_config.py is unchanged by this report. What is recorded is a reading instruction: on this leg, unlike the corrected active leg, a location-derived feature's relationship to this target should be read with the knowledge that it shares a definitional term with half of it. That is the same caveat Prompt 65 attached to the active v1 Numerical Target Atlas, arriving here through a different mechanism and at a different magnitude.",
+    "not_a_modelling_recommendation": "Out of scope for an EDA suite and explicitly not decided here: whether a model on this leg should use ball_x/ball_y at all when predicting this target, and whether xt_before should be offered as a feature in its own right rather than left implicit. Both are modelling-ladder questions. No model artefact was touched."
+  },
+  "prompt_68_cross_references": {
+    "shared_target_row_grain": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+    "distribution_shape": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.2): target_xt_delta_passive is MORE heavy-tailed than the active leg's own already-heavy-tailed v2 target -- skew -1.779 and excess kurtosis 31.02, against active v2's -0.306 and 18.33 -- with a small, slightly NEGATIVE mean (-0.00181, against active's positive +0.00338), 26.3% exactly zero, 36.9% negative and 36.9% positive. The negative mean is a real, sensible difference in what is being measured rather than a discrepancy: active-binary rows are defensive ACTIONS, which on average should deny threat, while passive rows are snapshots at an arbitrary on-ball event during a live attacking phase, where there is no inherent reason attacking possession should lose value from one touch to the next. The heavier tail comes from the same mechanism as active's -- real shot_statsbomb_xg values injected as xt_after for the 863 events whose next event is a Shot, against the 96-cell xT grid's own maximum of 0.2575 -- but is relatively more concentrated here because possession-ending events are only 0.82% of this leg's event population. This target is not close to the old zero-inflated, positively-skewed shape either, and is if anything a harder distribution to work with than active v2's.",
+    "possession_ending_collapse": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.1): on the possession-ending subset (action_ended_possession == True, n=1,619 unique events), target_xt_delta_passive collapses EXACTLY onto xt_before's own distribution, mean +0.02452, confirmed identical with np.allclose. This is the same logically-REQUIRED property Prompt 66 confirmed for the active leg: xt_after is forced to 0.0 for exactly these rows, so the delta is xt_before by construction -- '100% of the threat that existed a moment ago is denied'. It collapses to a real, row-by-row varying distribution rather than to an uninformative constant zero, which is what the old target_future_shot_10s did on these same rows. Smaller than active's own +0.0305/+0.0307 for an understood reason: this leg's on-ball events are far more often mid-buildup passes and carries than active's defensive actions, so the average denied threat at the moment a possession happens to end is lower. Any report showing this slice must present the identity as construction, not as discovery.",
+    "correlation_with_old_targets": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.3): correlation with the two OLD passive targets is correctly signed but numerically WEAKER than the active leg's own improvement -- Pearson r = -0.0629 against target_future_shot_10s and -0.0715 against target_future_xg_10s, against active v2's -0.108. More threat denied is still associated with less future attacking output, which is the sensible direction, but the relationship is looser on this leg. Stated plainly rather than talked up. A plausible reason, recorded by Prompt 68 and not chased here: a passive snapshot is one defender's off-ball positioning at an arbitrary point in a live attack, one step further removed from the moment-to-moment outcome than an active defensive ACTION is."
+  }
+}

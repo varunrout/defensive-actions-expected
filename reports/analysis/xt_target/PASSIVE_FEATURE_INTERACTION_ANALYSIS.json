@@ -1,0 +1,1464 @@
+{
+  "dataset": "passive",
+  "leg": "passive (this portal also covers the active-binary leg -- see FEATURE_INTERACTION_ANALYSIS.json)",
+  "target": "target_xt_delta_passive",
+  "target_scale": {
+    "target": "target_xt_delta_passive",
+    "n_rows": 1593181,
+    "n_defined": 1590600,
+    "n_nan": 2581,
+    "mean": -0.00267407,
+    "std": 0.0367479,
+    "skew": -2.6036,
+    "excess_kurtosis": 34.8444,
+    "pct_zero": 26.416,
+    "pct_negative": 37.2,
+    "pct_positive": 36.384,
+    "xg_mean_same_rows": 0.00599126,
+    "xg_std_same_rows": 0.04023084,
+    "xg_flat_margin_absolute": 0.00299563,
+    "xg_flat_margin_as_fraction_of_xg_std": 0.074461,
+    "flat_margin": 0.00273629,
+    "range_trigger": 0.00547257,
+    "near_identical_threshold": 0.00273629,
+    "distinct_signal_threshold": 0.00820886,
+    "n_nonzero": 1170431,
+    "mean_nonzero": -0.00363403,
+    "std_nonzero": 0.04279834,
+    "flat_margin_nonzero": 0.00318681,
+    "scale_note": "ADAPTATION 1, RE-EXAMINED FOR THE PASSIVE LEG. Prompt 65 translated the xg suite's mean-multiple threshold convention onto the xT target via xg's own standard-deviation fraction, because the xT target's mean is near zero and a mean-multiple threshold would be an arbitrary sliver. That justification holds on this leg in its ORIGINAL form: target_xt_delta_passive's mean is -0.002674, NEGATIVE as v1's was and unlike active v2's positive mean, so '0.5 x the overall mean' would flip the sign of every threshold. At -0.002674 against a std of 0.036748 the mean is only 7.3% of one standard deviation. Mechanically: xg's own flat_margin (0.5 x mean xg = 0.002996 on these same rows) re-expressed as a fraction of xg's own std (0.040231) gives 0.074461, applied to target_xt_delta_passive's std (0.036748) to give 0.002736. Every number is computed at runtime from the real parquet -- nothing is copied from the active leg. See `threshold_transfer_warning` in this same block. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged and are unaffected.",
+    "conditional_panel_note": "ADAPTATION 2, unchanged in method and re-measured on the passive leg. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta_passive has no shot column standing behind it; its structural-zero analogue is the 26.4% of rows with an EXACTLY zero delta -- the next same-possession event landed in the same 8x12 xT grid cell as the snapshot itself, which on this leg is very common because most on-ball events are short passes and carries. That share is LARGER than active v2's 20.2%, so the panel matters more here, not less. The conditional panel throughout this half of the portal is 'given a non-zero delta' (target_xt_delta_passive != 0), never 'given a shot'.",
+    "direction_note": "ADAPTATION 3, unchanged in method and re-measured on the passive leg. Sign carries the football meaning: POSITIVE target_xt_delta_passive = xT fell across the event (threat reduced, good for the defence), NEGATIVE = xT rose. On this leg the two directions are almost exactly balanced -- 36.4% positive vs 37.2% negative -- but the target is strongly LEFT-skewed (skew -2.6036), far more so than active v2's -0.306, so the negative tail is much longer than the positive one even though the counts match. Two-directional framing therefore matters more here than anywhere else in this portal. Rankings are by |magnitude| across BOTH directions, and every table also reports the negative/positive/zero share behind its mean.",
+    "log_transform_note": "NOT an adaptation, re-checked rather than inherited: the xg_target report suite never log-transforms its target anywhere, on either leg, and neither did the active xT suite. The log1p framing in this project belongs to the modelling legs, not to this report suite. This leg's excess kurtosis of ~31 makes a transform more tempting than anywhere else in the portal -- and it is still NOT applied here, because doing so would silently break comparability with the passive xg portal and with this portal's own active half. Recorded as an open question for the modelling legs, not resolved by an EDA suite.",
+    "leg": "passive",
+    "target_version": "passive (possession-outcome definition from the first pass)",
+    "target_source": "outputs/prototypes/passive_xt_delta.parquet (198,354 unique-event rows, left-joined READ-ONLY onto data/features/passive_defense.parquet's 1,593,181 defender-slot rows by event_id)",
+    "supersedes": "nothing. Unlike the active-binary leg, this leg has no v1 pass to supersede -- Prompt 68 implemented the corrected possession-outcome xt_after directly. See prompt_68_no_v1_detour.",
+    "row_grain_note": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+    "grain_comparison": {
+      "this_suite_grain": "defender-slot (one row per visible defender per on-ball event)",
+      "prompt_68_grain": "unique event_id",
+      "prompt_68_unique_event": {
+        "mean": -0.00181,
+        "std": 0.03828,
+        "skew": -1.779,
+        "excess_kurtosis": 31.02,
+        "pct_zero": 26.3,
+        "pct_negative": 36.9,
+        "pct_positive": 36.9,
+        "n_defined": 198009
+      },
+      "this_run_defender_slot": {
+        "mean": -0.00267407,
+        "std": 0.0367479,
+        "skew": -2.6036,
+        "excess_kurtosis": 34.8444,
+        "pct_zero": 26.416,
+        "pct_negative": 37.2,
+        "pct_positive": 36.384,
+        "n_defined": 1590600
+      },
+      "note": "These are the SAME target measured at two grains, not a discrepancy to reconcile. Prompt 68 reported the unique-event distribution because that is the grain the target is computed at. Every report in this suite measures it at the defender-slot grain, because that is the grain the features live at and the grain a model on this leg would train on. The row-level distribution is MORE extreme on every shape statistic -- measured on this run, skew -2.6036 against Prompt 68's -1.779 and excess kurtosis 34.8444 against 31.02 -- and the mechanism is understood rather than guessed at: events with more visible defender slots contribute more rows, so the row-level distribution is the event-level one re-weighted by visible-defender count, and the extreme shot-xG-tail events are exactly the crowded, well-observed ones that carry the most slots. The directional shares barely move (26.4% zero / 37.2% negative / 36.4% positive here against 26.3 / 36.9 / 36.9 there), which is the reassuring part: the re-weighting lengthens the tails without changing which way the target points. Wherever this suite cites a Prompt 68 figure it is labelled as the unique-event figure."
+    },
+    "robust_scale": {
+      "iqr": 0.00359064,
+      "mad": 0.00180901,
+      "robust_std_1_4826_mad": 0.00268204,
+      "robust_flat_margin": 0.00019971,
+      "flat_margin_over_mad": 1.5126,
+      "flat_margin_over_iqr": 0.7621,
+      "pct_rows_inside_flat_margin": 62.12,
+      "mean_as_fraction_of_std": -0.0728,
+      "active_v2_comparison": {
+        "flat_margin_over_mad": 1.28,
+        "flat_margin_over_iqr": 0.56,
+        "pct_rows_inside_flat_margin": 53.4,
+        "excess_kurtosis": 18.3289,
+        "note": "Prompt 67's measured figures for target_xt_delta_v2 on the active leg, quoted here so the passive numbers beside them can be read as a comparison rather than in isolation. v1's own figures, for the longer arc, were 0.53 x MAD and 35.4% of rows at excess kurtosis 8.85."
+      }
+    },
+    "correlation_with_old_target": {
+      "pair": "target_xt_delta_passive vs target_future_xg_10s",
+      "pearson_r": -0.0736,
+      "n": 1590600,
+      "pearson_r_vs_shot_target": -0.0651,
+      "n_vs_shot_target": 1590600,
+      "prompt_68_reported_r_vs_xg": -0.0715,
+      "prompt_68_reported_r_vs_shot": -0.0629,
+      "active_v2_pearson_r_vs_xg": -0.1082,
+      "note": "Measured on this run at the defender-slot grain: r=-0.0736 against target_future_xg_10s and r=-0.0651 against target_future_shot_10s. Prompt 68 reported -0.0715 and -0.0629 respectively at the unique-event grain; the two grains can differ slightly because events with more visible defender slots are weighted more heavily at row level. Both are correctly signed -- more threat denied goes with less future attacking output -- and both are WEAKER than the active leg's own -0.1082 against the same xg target. That difference is real and is reported rather than smoothed over. Recorded HERE specifically because Adaptation 1 borrows target_future_xg_10s's own standard-deviation fraction to set every threshold in this suite, so wherever a report cites an xg-derived threshold, this is how the targets actually relate on the same rows. Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.3): correlation with the two OLD passive targets is correctly signed but numerically WEAKER than the active leg's own improvement -- Pearson r = -0.0629 against target_future_shot_10s and -0.0715 against target_future_xg_10s, against active v2's -0.108. More threat denied is still associated with less future attacking output, which is the sensible direction, but the relationship is looser on this leg. Stated plainly rather than talked up. A plausible reason, recorded by Prompt 68 and not chased here: a passive snapshot is one defender's off-ball positioning at an arbitrary point in a live attack, one step further removed from the moment-to-moment outcome than an active defensive ACTION is."
+    },
+    "threshold_transfer_warning": "THIS THRESHOLD DOES NOT TRANSFER CLEANLY, AND ON THIS LEG IT TRANSFERS WORSE THAN ON ACTIVE -- recomputed on the real passive parquet rather than inherited from active's numbers, and reported rather than forced to fit. Prompt 65 tuned the translated flat_margin against a target with excess kurtosis 8.85, where the margin was 0.53 x the MAD and spanned 35.4% of rows -- a genuinely narrow 'too small to matter' band. Prompt 67 found that on target_xt_delta_v2 (excess kurtosis 18.33) the same std-derived margin had grown to 1.28 x the MAD and 53.4% of rows, because the shot-xG injection inflates std while the bulk tightens. This leg is heavier-tailed again (excess kurtosis 34.8444, IQR 0.003591, MAD 0.001809), so the same mechanism applies more strongly: the translated margin is 0.002736, which is 1.51 x the MAD, 0.76 x the IQR, and spans 62.1% of all rows. A flat band covering this much of the data is not doing its job. A NAIVE TRANSFER OF ACTIVE'S OWN ABSOLUTE MARGIN (0.004929) WOULD HAVE BEEN WORSE STILL, since this leg's std is smaller (0.038 vs 0.058) while its bulk is tighter again -- the margin is therefore recomputed from this leg's own std, not copied. The literal translated margin is KEPT as the headline number so the active and passive halves of this portal stay like-for-like and the xg suite's convention is still the one being followed, but the MAD-derived robust alternative (0.000200) is published beside it on every run and every shape classification in this half of the portal should be read with this inflation in mind."
+  },
+  "n_rows": 1593181,
+  "n_unique_events": 198354,
+  "quartile_n": 4,
+  "step_0_scope_note": "The xg portal's FEATURE_INTERACTION_ANALYSIS covers BOTH legs in ONE file -- confirmed by reading it: its thresholds.min_marginal_delta_by_dataset block carries an entry per leg, and its 10 pairs are the 5 active plus the 5 passive entries of generate_feature_interaction_analysis.PAIRS. That one-file convention is NOT mirrored here, and the reason is stated rather than left implicit: this portal's FEATURE_INTERACTION_ANALYSIS.json is Prompt 67's ACTIVE-ONLY output and merging a passive section into it would mean editing active-leg report content that this pass leaves frozen. The same imported PAIRS list is filtered to its 5 PASSIVE pairs -- a scope selection, not a re-selection. The pairs are NOT re-ranked for this target: keeping the same pairs is what makes the three targets' results comparable.",
+  "thresholds": {
+    "substitutive_ratio_max": 0.3,
+    "additive_magnitude_ratio_max": 2.0,
+    "min_cell_n_for_delta": 20,
+    "min_marginal_delta": 0.00273629,
+    "min_marginal_delta_given_nonzero_delta": 0.00318681,
+    "active_v2_min_marginal_delta": 0.004929,
+    "note": "The substitutive / additive classification cutoffs are RATIOS of one delta to another, so they are scale-free AND sign-free and are carried over completely unchanged -- re-checked for this leg rather than assumed, and the check is what makes it safe to leave them alone despite an excess kurtosis of ~35. MIN_CELL_N_FOR_DELTA (20) is a row count and is likewise untouchable by tail weight. The one absolute-magnitude threshold, min_marginal_delta, is RECOMPUTED FROM THIS LEG'S OWN STANDARD DEVIATION and not transferred from the active leg: this leg's value is 0.002736 against active v2's 0.004929, a 1.8x difference that would have mattered, because min_marginal_delta is the cutoff below which a pair is called 'inconclusive'. Using active's larger margin here would have pushed genuinely classifiable pairs into 'inconclusive' and made this leg look less structured than it is. The classification test uses |marginal delta|, so a large NEGATIVE marginal delta is as classifiable as a large positive one -- which matters more on this leg than anywhere else in the portal, since its marginal deltas run negative far more often than active's."
+  },
+  "candidate_selection": "Same PASSIVE pairs as reports/analysis/shot_target/FEATURE_INTERACTION_ANALYSIS.json and the xg mirror -- see generate_feature_interaction_analysis.py's module docstring for the full ranking derivation and football rationale per pair. All five involve this leg's own screening, option and engagement columns, which have no active counterpart, so none of them could have been run on the active half of this portal. Computed here against target_xt_delta_passive for direct comparability, with a non-zero-delta panel in place of the xg version's shot-conditional one.",
+  "row_grain_note": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected.",
+  "n_pairs_total": 5,
+  "n_pairs_where_unconditional_and_conditional_agree": 5,
+  "n_pairs_with_sign_flipping_stratum_deltas": 1,
+  "summary_table": [
+    {
+      "dataset": "passive",
+      "feature_a": "top_option_2_threat_score",
+      "feature_b": "top_option_2_distance_from_ball",
+      "classification": "interactive",
+      "classification_given_nonzero_delta": "interactive",
+      "within_stratum_deltas_change_sign": false
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "lane_screening_score_option_2",
+      "feature_b": "engagement_distance_to_carrier",
+      "classification": "interactive",
+      "classification_given_nonzero_delta": "interactive",
+      "within_stratum_deltas_change_sign": false
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "marking_tightness",
+      "feature_b": "engagement_distance_to_carrier",
+      "classification": "interactive",
+      "classification_given_nonzero_delta": "interactive",
+      "within_stratum_deltas_change_sign": false
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "lane_screening_score_option_1",
+      "feature_b": "marking_tightness",
+      "classification": "additive",
+      "classification_given_nonzero_delta": "additive",
+      "within_stratum_deltas_change_sign": false
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "overload_score",
+      "feature_b": "attacking_goal_centrality",
+      "classification": "inconclusive",
+      "classification_given_nonzero_delta": "inconclusive",
+      "within_stratum_deltas_change_sign": true
+    }
+  ],
+  "prompt_68_cross_references": {
+    "distribution_shape": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md section 2.2): target_xt_delta_passive is MORE heavy-tailed than the active leg's own already-heavy-tailed v2 target -- skew -1.779 and excess kurtosis 31.02, against active v2's -0.306 and 18.33 -- with a small, slightly NEGATIVE mean (-0.00181, against active's positive +0.00338), 26.3% exactly zero, 36.9% negative and 36.9% positive. The negative mean is a real, sensible difference in what is being measured rather than a discrepancy: active-binary rows are defensive ACTIONS, which on average should deny threat, while passive rows are snapshots at an arbitrary on-ball event during a live attacking phase, where there is no inherent reason attacking possession should lose value from one touch to the next. The heavier tail comes from the same mechanism as active's -- real shot_statsbomb_xg values injected as xt_after for the 863 events whose next event is a Shot, against the 96-cell xT grid's own maximum of 0.2575 -- but is relatively more concentrated here because possession-ending events are only 0.82% of this leg's event population. This target is not close to the old zero-inflated, positively-skewed shape either, and is if anything a harder distribution to work with than active v2's.",
+    "shared_target_row_grain": "Prompt 68 finding carried forward (outputs/prototypes/PASSIVE_XT_TARGET_PROTOTYPE.md sections 1 and 2.5): target_xt_delta_passive is computed ONCE PER UNIQUE event_id (198,354 rows) and left-joined onto passive_defense.parquet's 1,593,181 defender-slot rows, so the identical value repeats across every defender row sharing an event_id (mean ~8.03 rows per event). This is a deliberate, pre-existing property of this leg, not something to fix: target_future_shot_10s and target_future_xg_10s already work exactly the same way, checked directly across all 198,354 events with 0 showing more than one distinct value. No per-defender attribution scheme was built and building one is explicitly out of scope, the same call Prompt 68 made. The consequence for this suite is a measurement caveat rather than a defect: rows are not independent within an event, so row-level p-values are computed on an effective sample size far smaller than their nominal n. Effect sizes, shares and ranks are unaffected."
+  },
+  "pairs": [
+    {
+      "dataset": "passive",
+      "feature_a": "top_option_2_threat_score",
+      "feature_b": "top_option_2_distance_from_ball",
+      "football_rationale": "The threat-score model for a passing option plausibly weights proximity to the ball heavily -- a closer option is easier to find and more immediately dangerous. Does option 2's threat score add positional-danger information beyond what its raw distance from the ball already says?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1588420,
+      "n_rows_used_given_nonzero_delta": 1168674,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 139793,
+          "mean_xt": -0.01458789,
+          "n_given_nonzero_delta": 103710,
+          "mean_xt_given_nonzero_delta": -0.01966333
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 76674,
+          "mean_xt": -0.00331148,
+          "n_given_nonzero_delta": 57602,
+          "mean_xt_given_nonzero_delta": -0.00440791
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 83448,
+          "mean_xt": 0.00215576,
+          "n_given_nonzero_delta": 62540,
+          "mean_xt_given_nonzero_delta": 0.00287646
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 97194,
+          "mean_xt": 0.00929822,
+          "n_given_nonzero_delta": 73247,
+          "mean_xt_given_nonzero_delta": 0.01233813
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 111099,
+          "mean_xt": -0.01166917,
+          "n_given_nonzero_delta": 81666,
+          "mean_xt_given_nonzero_delta": -0.01587482
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 91514,
+          "mean_xt": -0.00389229,
+          "n_given_nonzero_delta": 68318,
+          "mean_xt_given_nonzero_delta": -0.00521383
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 93103,
+          "mean_xt": 8.213e-05,
+          "n_given_nonzero_delta": 68336,
+          "mean_xt_given_nonzero_delta": 0.0001119
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 101390,
+          "mean_xt": 0.00674338,
+          "n_given_nonzero_delta": 75725,
+          "mean_xt_given_nonzero_delta": 0.00902887
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 88533,
+          "mean_xt": -0.01010333,
+          "n_given_nonzero_delta": 65098,
+          "mean_xt_given_nonzero_delta": -0.01374049
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 100067,
+          "mean_xt": -0.00368711,
+          "n_given_nonzero_delta": 72667,
+          "mean_xt_given_nonzero_delta": -0.00507738
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 104007,
+          "mean_xt": -0.00080173,
+          "n_given_nonzero_delta": 75237,
+          "mean_xt_given_nonzero_delta": -0.0011083
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 104496,
+          "mean_xt": 0.00205315,
+          "n_given_nonzero_delta": 76961,
+          "mean_xt_given_nonzero_delta": 0.00278772
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 57684,
+          "mean_xt": -0.00664076,
+          "n_given_nonzero_delta": 42937,
+          "mean_xt_given_nonzero_delta": -0.00892157
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 128850,
+          "mean_xt": -0.0028167,
+          "n_given_nonzero_delta": 92103,
+          "mean_xt_given_nonzero_delta": -0.0039405
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 116543,
+          "mean_xt": -0.0008575,
+          "n_given_nonzero_delta": 83534,
+          "mean_xt_given_nonzero_delta": -0.00119634
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 94025,
+          "mean_xt": -0.0007072,
+          "n_given_nonzero_delta": 68993,
+          "mean_xt_given_nonzero_delta": -0.00096379
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": "Q1",
+          "n": 397109,
+          "mean_xt": -0.01161712
+        },
+        {
+          "a_bin": "Q2",
+          "n": 397105,
+          "mean_xt": -0.00337944
+        },
+        {
+          "a_bin": "Q3",
+          "n": 397101,
+          "mean_xt": 1.063e-05
+        },
+        {
+          "a_bin": "Q4",
+          "n": 397105,
+          "mean_xt": 0.00437036
+        }
+      ],
+      "marginal_a_by_quartile_given_nonzero_delta": [
+        {
+          "a_bin": "Q1",
+          "n_given_nonzero_delta": 293411,
+          "mean_xt_given_nonzero_delta": -0.01572286
+        },
+        {
+          "a_bin": "Q2",
+          "n_given_nonzero_delta": 290690,
+          "mean_xt_given_nonzero_delta": -0.00461658
+        },
+        {
+          "a_bin": "Q3",
+          "n_given_nonzero_delta": 289647,
+          "mean_xt_given_nonzero_delta": 1.457e-05
+        },
+        {
+          "a_bin": "Q4",
+          "n_given_nonzero_delta": 294926,
+          "mean_xt_given_nonzero_delta": 0.0058845
+        }
+      ],
+      "marginal_a_delta": 0.01598748,
+      "marginal_a_delta_given_nonzero_delta": 0.02160736,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.02388611,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397109
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 0.01841255,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397106
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.01215648,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397103
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.00593356,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397102
+        }
+      ],
+      "a_gradient_by_b_stratum_given_nonzero_delta": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.03200146,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 297099
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 0.02490369,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 294045
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.01652821,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 289963
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.00795778,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 287567
+        }
+      ],
+      "within_stratum_deltas_change_sign": false,
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (4.03) exceeds 2.0 -- A's effect meaningfully depends on B's level.",
+      "classification_given_nonzero_delta": "interactive",
+      "classification_reason_given_nonzero_delta": "Magnitude ratio (4.02) exceeds 2.0 -- A's effect meaningfully depends on B's level."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "lane_screening_score_option_2",
+      "feature_b": "engagement_distance_to_carrier",
+      "football_rationale": "A defender tightly engaging the ball-carrier is, almost by geometry, closer to more passing lanes. Is screening credit for option 2 mostly a byproduct of how tightly the defender is already engaging the carrier, rather than a deliberate lane-blocking position?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1588420,
+      "n_rows_used_given_nonzero_delta": 1168674,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 0,
+          "mean_xt": null,
+          "n_given_nonzero_delta": 0,
+          "mean_xt_given_nonzero_delta": null
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 0,
+          "mean_xt": null,
+          "n_given_nonzero_delta": 0,
+          "mean_xt_given_nonzero_delta": null
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 155862,
+          "mean_xt": -0.00369399,
+          "n_given_nonzero_delta": 114339,
+          "mean_xt_given_nonzero_delta": -0.00503549
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 241243,
+          "mean_xt": -0.00483278,
+          "n_given_nonzero_delta": 187713,
+          "mean_xt_given_nonzero_delta": -0.00621095
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 0,
+          "mean_xt": null,
+          "n_given_nonzero_delta": 0,
+          "mean_xt_given_nonzero_delta": null
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 201174,
+          "mean_xt": -0.0020302,
+          "n_given_nonzero_delta": 148953,
+          "mean_xt_given_nonzero_delta": -0.00274196
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 122469,
+          "mean_xt": -0.00301406,
+          "n_given_nonzero_delta": 89753,
+          "mean_xt_given_nonzero_delta": -0.00411272
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 73462,
+          "mean_xt": -0.00454356,
+          "n_given_nonzero_delta": 53843,
+          "mean_xt_given_nonzero_delta": -0.00619912
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 165528,
+          "mean_xt": -0.00092337,
+          "n_given_nonzero_delta": 120806,
+          "mean_xt_given_nonzero_delta": -0.00126521
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 117700,
+          "mean_xt": -0.00156347,
+          "n_given_nonzero_delta": 84919,
+          "mean_xt_given_nonzero_delta": -0.00216701
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 66357,
+          "mean_xt": -0.00284261,
+          "n_given_nonzero_delta": 48082,
+          "mean_xt_given_nonzero_delta": -0.00392303
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 47520,
+          "mean_xt": -0.00460842,
+          "n_given_nonzero_delta": 34634,
+          "mean_xt_given_nonzero_delta": -0.00632304
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 231577,
+          "mean_xt": 0.00017175,
+          "n_given_nonzero_delta": 165562,
+          "mean_xt_given_nonzero_delta": 0.00024023
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 78231,
+          "mean_xt": -0.00254929,
+          "n_given_nonzero_delta": 56680,
+          "mean_xt_given_nonzero_delta": -0.00351858
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 52417,
+          "mean_xt": -0.0040342,
+          "n_given_nonzero_delta": 38020,
+          "mean_xt_given_nonzero_delta": -0.00556182
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 34880,
+          "mean_xt": -0.00708072,
+          "n_given_nonzero_delta": 25370,
+          "mean_xt_given_nonzero_delta": -0.00973495
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": "Q1",
+          "n": 397105,
+          "mean_xt": -0.00028474
+        },
+        {
+          "a_bin": "Q2",
+          "n": 397105,
+          "mean_xt": -0.00199413
+        },
+        {
+          "a_bin": "Q3",
+          "n": 397105,
+          "mean_xt": -0.00338694
+        },
+        {
+          "a_bin": "Q4",
+          "n": 397105,
+          "mean_xt": -0.00494988
+        }
+      ],
+      "marginal_a_by_quartile_given_nonzero_delta": [
+        {
+          "a_bin": "Q1",
+          "n_given_nonzero_delta": 286368,
+          "mean_xt_given_nonzero_delta": -0.00039485
+        },
+        {
+          "a_bin": "Q2",
+          "n_given_nonzero_delta": 290552,
+          "mean_xt_given_nonzero_delta": -0.00272542
+        },
+        {
+          "a_bin": "Q3",
+          "n_given_nonzero_delta": 290194,
+          "mean_xt_given_nonzero_delta": -0.00463473
+        },
+        {
+          "a_bin": "Q4",
+          "n_given_nonzero_delta": 301560,
+          "mean_xt_given_nonzero_delta": -0.00651818
+        }
+      ],
+      "marginal_a_delta": -0.00466514,
+      "marginal_a_delta_given_nonzero_delta": -0.00612333,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -0.00113879,
+          "a_bin_compared_low": "Q3",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397105
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.00251336,
+          "a_bin_compared_low": "Q2",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397105
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -0.00368505,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397105
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -0.00725247,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397105
+        }
+      ],
+      "a_gradient_by_b_stratum_given_nonzero_delta": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -0.00117546,
+          "a_bin_compared_low": "Q3",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 302052
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.00345716,
+          "a_bin_compared_low": "Q2",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 292549
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -0.00505783,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 288441
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -0.00997518,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 285632
+        }
+      ],
+      "within_stratum_deltas_change_sign": false,
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (6.37) exceeds 2.0 -- A's effect meaningfully depends on B's level.",
+      "classification_given_nonzero_delta": "interactive",
+      "classification_reason_given_nonzero_delta": "Magnitude ratio (8.49) exceeds 2.0 -- A's effect meaningfully depends on B's level."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "marking_tightness",
+      "feature_b": "engagement_distance_to_carrier",
+      "football_rationale": "Both are distance measurements from a defender to a football-relevant point (nearest attacker vs the ball-carrier specifically) -- plausibly the same underlying 'how close is this defender to the action' phenomenon described twice, not two independent defensive behaviours.",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1590321,
+      "n_rows_used_given_nonzero_delta": 1170202,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 97439,
+          "mean_xt": -0.00543452,
+          "n_given_nonzero_delta": 72587,
+          "mean_xt_given_nonzero_delta": -0.00729516
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 97721,
+          "mean_xt": -0.00453696,
+          "n_given_nonzero_delta": 73687,
+          "mean_xt_given_nonzero_delta": -0.00601675
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 102247,
+          "mean_xt": -0.00403457,
+          "n_given_nonzero_delta": 78435,
+          "mean_xt_given_nonzero_delta": -0.00525942
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 100174,
+          "mean_xt": -0.00367692,
+          "n_given_nonzero_delta": 77751,
+          "mean_xt_given_nonzero_delta": -0.00473732
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 111722,
+          "mean_xt": -0.00405393,
+          "n_given_nonzero_delta": 82211,
+          "mean_xt_given_nonzero_delta": -0.00550916
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 115900,
+          "mean_xt": -0.0026719,
+          "n_given_nonzero_delta": 85275,
+          "mean_xt_given_nonzero_delta": -0.00363147
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 99310,
+          "mean_xt": -0.00212034,
+          "n_given_nonzero_delta": 73179,
+          "mean_xt_given_nonzero_delta": -0.00287747
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 70648,
+          "mean_xt": -0.00210148,
+          "n_given_nonzero_delta": 52263,
+          "mean_xt_given_nonzero_delta": -0.00284073
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 101228,
+          "mean_xt": -0.00344461,
+          "n_given_nonzero_delta": 73576,
+          "mean_xt_given_nonzero_delta": -0.0047392
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 101475,
+          "mean_xt": -0.00161799,
+          "n_given_nonzero_delta": 73140,
+          "mean_xt_given_nonzero_delta": -0.00224481
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 102048,
+          "mean_xt": -0.00122973,
+          "n_given_nonzero_delta": 73634,
+          "mean_xt_given_nonzero_delta": -0.00170426
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 92829,
+          "mean_xt": -0.00118308,
+          "n_given_nonzero_delta": 68455,
+          "mean_xt_given_nonzero_delta": -0.00160433
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 87192,
+          "mean_xt": -0.00584482,
+          "n_given_nonzero_delta": 63338,
+          "mean_xt_given_nonzero_delta": -0.00804606
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 82485,
+          "mean_xt": -0.00099674,
+          "n_given_nonzero_delta": 58850,
+          "mean_xt_given_nonzero_delta": -0.00139705
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 93974,
+          "mean_xt": -0.00013089,
+          "n_given_nonzero_delta": 67067,
+          "mean_xt_given_nonzero_delta": -0.0001834
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 133929,
+          "mean_xt": -0.00013036,
+          "n_given_nonzero_delta": 96754,
+          "mean_xt_given_nonzero_delta": -0.00018045
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": "Q1",
+          "n": 397581,
+          "mean_xt": -0.0046299
+        },
+        {
+          "a_bin": "Q2",
+          "n": 397581,
+          "mean_xt": -0.00251378
+        },
+        {
+          "a_bin": "Q3",
+          "n": 397579,
+          "mean_xt": -0.0019138
+        },
+        {
+          "a_bin": "Q4",
+          "n": 397580,
+          "mean_xt": -0.00162
+        }
+      ],
+      "marginal_a_by_quartile_given_nonzero_delta": [
+        {
+          "a_bin": "Q1",
+          "n_given_nonzero_delta": 291712,
+          "mean_xt_given_nonzero_delta": -0.0063102
+        },
+        {
+          "a_bin": "Q2",
+          "n_given_nonzero_delta": 290952,
+          "mean_xt_given_nonzero_delta": -0.00343504
+        },
+        {
+          "a_bin": "Q3",
+          "n_given_nonzero_delta": 292315,
+          "mean_xt_given_nonzero_delta": -0.00260296
+        },
+        {
+          "a_bin": "Q4",
+          "n_given_nonzero_delta": 295223,
+          "mean_xt_given_nonzero_delta": -0.00218168
+        }
+      ],
+      "marginal_a_delta": 0.0030099,
+      "marginal_a_delta_given_nonzero_delta": 0.00412852,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.0017576,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397581
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 0.00195245,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397580
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.00226153,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397580
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.00571446,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397580
+        }
+      ],
+      "a_gradient_by_b_stratum_given_nonzero_delta": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": 0.00255784,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 302460
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": 0.00266843,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 292928
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.00313487,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 288805
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.00786561,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 286009
+        }
+      ],
+      "within_stratum_deltas_change_sign": false,
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (3.25) exceeds 2.0 -- A's effect meaningfully depends on B's level.",
+      "classification_given_nonzero_delta": "interactive",
+      "classification_reason_given_nonzero_delta": "Magnitude ratio (3.08) exceeds 2.0 -- A's effect meaningfully depends on B's level."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "overload_score",
+      "feature_b": "attacking_goal_centrality",
+      "football_rationale": "Central zones near goal draw more covering defenders by default (it's the most dangerous area to leave open). Does defensive overload just track how central the action is, rather than reflecting a genuine tactical over-commitment of numbers?",
+      "a_labels": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1590600,
+      "n_rows_used_given_nonzero_delta": 1170431,
+      "grid": [
+        {
+          "a_bin": 0,
+          "b_bin": "Q1",
+          "n": 281061,
+          "mean_xt": -0.00091839,
+          "n_given_nonzero_delta": 206659,
+          "mean_xt_given_nonzero_delta": -0.00124903
+        },
+        {
+          "a_bin": 1,
+          "b_bin": "Q1",
+          "n": 66031,
+          "mean_xt": -0.00214904,
+          "n_given_nonzero_delta": 46909,
+          "mean_xt_given_nonzero_delta": -0.00302508
+        },
+        {
+          "a_bin": 2,
+          "b_bin": "Q1",
+          "n": 31764,
+          "mean_xt": -0.00296977,
+          "n_given_nonzero_delta": 23905,
+          "mean_xt_given_nonzero_delta": -0.00394611
+        },
+        {
+          "a_bin": 3,
+          "b_bin": "Q1",
+          "n": 18794,
+          "mean_xt": -0.00371186,
+          "n_given_nonzero_delta": 14991,
+          "mean_xt_given_nonzero_delta": -0.0046535
+        },
+        {
+          "a_bin": 0,
+          "b_bin": "Q2",
+          "n": 295454,
+          "mean_xt": -0.0013166,
+          "n_given_nonzero_delta": 217497,
+          "mean_xt_given_nonzero_delta": -0.00178851
+        },
+        {
+          "a_bin": 1,
+          "b_bin": "Q2",
+          "n": 62885,
+          "mean_xt": -0.00205912,
+          "n_given_nonzero_delta": 44878,
+          "mean_xt_given_nonzero_delta": -0.00288534
+        },
+        {
+          "a_bin": 2,
+          "b_bin": "Q2",
+          "n": 25991,
+          "mean_xt": -0.00294188,
+          "n_given_nonzero_delta": 18886,
+          "mean_xt_given_nonzero_delta": -0.00404863
+        },
+        {
+          "a_bin": 3,
+          "b_bin": "Q2",
+          "n": 13321,
+          "mean_xt": -0.00311252,
+          "n_given_nonzero_delta": 10411,
+          "mean_xt_given_nonzero_delta": -0.00398251
+        },
+        {
+          "a_bin": 0,
+          "b_bin": "Q3",
+          "n": 306659,
+          "mean_xt": -0.00308785,
+          "n_given_nonzero_delta": 226491,
+          "mean_xt_given_nonzero_delta": -0.00418081
+        },
+        {
+          "a_bin": 1,
+          "b_bin": "Q3",
+          "n": 57747,
+          "mean_xt": -0.00295299,
+          "n_given_nonzero_delta": 41475,
+          "mean_xt_given_nonzero_delta": -0.00411155
+        },
+        {
+          "a_bin": 2,
+          "b_bin": "Q3",
+          "n": 22498,
+          "mean_xt": 4.411e-05,
+          "n_given_nonzero_delta": 15924,
+          "mean_xt_given_nonzero_delta": 6.232e-05
+        },
+        {
+          "a_bin": 3,
+          "b_bin": "Q3",
+          "n": 10745,
+          "mean_xt": 0.00209385,
+          "n_given_nonzero_delta": 8201,
+          "mean_xt_given_nonzero_delta": 0.00274338
+        },
+        {
+          "a_bin": 0,
+          "b_bin": "Q4",
+          "n": 319447,
+          "mean_xt": -0.0057375,
+          "n_given_nonzero_delta": 237554,
+          "mean_xt_given_nonzero_delta": -0.00771542
+        },
+        {
+          "a_bin": 1,
+          "b_bin": "Q4",
+          "n": 50498,
+          "mean_xt": -0.00392913,
+          "n_given_nonzero_delta": 36445,
+          "mean_xt_given_nonzero_delta": -0.00544418
+        },
+        {
+          "a_bin": 2,
+          "b_bin": "Q4",
+          "n": 18689,
+          "mean_xt": 0.00060379,
+          "n_given_nonzero_delta": 13340,
+          "mean_xt_given_nonzero_delta": 0.0008459
+        },
+        {
+          "a_bin": 3,
+          "b_bin": "Q4",
+          "n": 9016,
+          "mean_xt": 0.00677174,
+          "n_given_nonzero_delta": 6865,
+          "mean_xt_given_nonzero_delta": 0.00889352
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": 0,
+          "n": 1202621,
+          "mean_xt": -0.00284949
+        },
+        {
+          "a_bin": 1,
+          "n": 237161,
+          "mean_xt": -0.00269999
+        },
+        {
+          "a_bin": 2,
+          "n": 98942,
+          "mean_xt": -0.00160213
+        },
+        {
+          "a_bin": 3,
+          "n": 51876,
+          "mean_xt": -0.00053339
+        }
+      ],
+      "marginal_a_by_quartile_given_nonzero_delta": [
+        {
+          "a_bin": 0,
+          "n_given_nonzero_delta": 888201,
+          "mean_xt_given_nonzero_delta": -0.00385821
+        },
+        {
+          "a_bin": 1,
+          "n_given_nonzero_delta": 169707,
+          "mean_xt_given_nonzero_delta": -0.00377316
+        },
+        {
+          "a_bin": 2,
+          "n_given_nonzero_delta": 72055,
+          "mean_xt_given_nonzero_delta": -0.00219995
+        },
+        {
+          "a_bin": 3,
+          "n_given_nonzero_delta": 40468,
+          "mean_xt_given_nonzero_delta": -0.00068375
+        }
+      ],
+      "marginal_a_delta": 0.0023161,
+      "marginal_a_delta_given_nonzero_delta": 0.00317446,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -0.00279347,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 397650
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.00179592,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 397651
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.0051817,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 397649
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.01250924,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 397650
+        }
+      ],
+      "a_gradient_by_b_stratum_given_nonzero_delta": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -0.00340447,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 292464
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.002194,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 291672
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": 0.00692419,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 292091
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": 0.01660894,
+          "a_bin_compared_low": 0,
+          "a_bin_compared_high": 3,
+          "n_rows": 294204
+        }
+      ],
+      "within_stratum_deltas_change_sign": true,
+      "classification": "inconclusive",
+      "classification_reason": "Pooled marginal delta (+0.002316) is below the 0.002736 minimum to classify confidently. Note the |absolute value| test: on this target a large NEGATIVE marginal delta is just as classifiable as a large positive one.",
+      "classification_given_nonzero_delta": "inconclusive",
+      "classification_reason_given_nonzero_delta": "Pooled marginal delta (+0.003174) is below the 0.003187 minimum to classify confidently. Note the |absolute value| test: on this target a large NEGATIVE marginal delta is just as classifiable as a large positive one."
+    },
+    {
+      "dataset": "passive",
+      "feature_a": "lane_screening_score_option_1",
+      "feature_b": "marking_tightness",
+      "football_rationale": "Both come from the same defender-slot row and could both just be capturing 'this defender is positioned well' in general. Does lane-screening credit for the top option add independent blocking-position signal, or is it mostly redundant with how tightly the defender is already marking?",
+      "a_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "b_labels": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "n_rows_used": 1590321,
+      "n_rows_used_given_nonzero_delta": 1170202,
+      "grid": [
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q1",
+          "n": 91065,
+          "mean_xt": -0.00152029,
+          "n_given_nonzero_delta": 65308,
+          "mean_xt_given_nonzero_delta": -0.00211988
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q1",
+          "n": 106985,
+          "mean_xt": -0.00487619,
+          "n_given_nonzero_delta": 78508,
+          "mean_xt_given_nonzero_delta": -0.00664491
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q1",
+          "n": 107382,
+          "mean_xt": -0.00599041,
+          "n_given_nonzero_delta": 79296,
+          "mean_xt_given_nonzero_delta": -0.00811217
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q1",
+          "n": 92149,
+          "mean_xt": -0.00583158,
+          "n_given_nonzero_delta": 68600,
+          "mean_xt_given_nonzero_delta": -0.00783344
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q2",
+          "n": 89862,
+          "mean_xt": 0.00031798,
+          "n_given_nonzero_delta": 64150,
+          "mean_xt_given_nonzero_delta": 0.00044542
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q2",
+          "n": 106207,
+          "mean_xt": -0.00170592,
+          "n_given_nonzero_delta": 77281,
+          "mean_xt_given_nonzero_delta": -0.00234443
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q2",
+          "n": 102055,
+          "mean_xt": -0.00323514,
+          "n_given_nonzero_delta": 74704,
+          "mean_xt_given_nonzero_delta": -0.00441961
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q2",
+          "n": 99457,
+          "mean_xt": -0.00519483,
+          "n_given_nonzero_delta": 74817,
+          "mean_xt_given_nonzero_delta": -0.00690569
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q3",
+          "n": 96980,
+          "mean_xt": 0.00071818,
+          "n_given_nonzero_delta": 69422,
+          "mean_xt_given_nonzero_delta": 0.00100328
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q3",
+          "n": 98629,
+          "mean_xt": -0.00098487,
+          "n_given_nonzero_delta": 72032,
+          "mean_xt_given_nonzero_delta": -0.00134853
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q3",
+          "n": 95609,
+          "mean_xt": -0.00276359,
+          "n_given_nonzero_delta": 69606,
+          "mean_xt_given_nonzero_delta": -0.00379599
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q3",
+          "n": 106361,
+          "mean_xt": -0.00441114,
+          "n_given_nonzero_delta": 81255,
+          "mean_xt_given_nonzero_delta": -0.00577408
+        },
+        {
+          "a_bin": "Q1",
+          "b_bin": "Q4",
+          "n": 119674,
+          "mean_xt": 0.00031622,
+          "n_given_nonzero_delta": 86723,
+          "mean_xt_given_nonzero_delta": 0.00043637
+        },
+        {
+          "a_bin": "Q2",
+          "b_bin": "Q4",
+          "n": 85759,
+          "mean_xt": -0.0010445,
+          "n_given_nonzero_delta": 63283,
+          "mean_xt_given_nonzero_delta": -0.00141547
+        },
+        {
+          "a_bin": "Q3",
+          "b_bin": "Q4",
+          "n": 92534,
+          "mean_xt": -0.00233381,
+          "n_given_nonzero_delta": 67508,
+          "mean_xt_given_nonzero_delta": -0.00319898
+        },
+        {
+          "a_bin": "Q4",
+          "b_bin": "Q4",
+          "n": 99613,
+          "mean_xt": -0.00377855,
+          "n_given_nonzero_delta": 77709,
+          "mean_xt_given_nonzero_delta": -0.00484362
+        }
+      ],
+      "marginal_a_by_quartile": [
+        {
+          "a_bin": "Q1",
+          "n": 397581,
+          "mean_xt": -5.98e-06
+        },
+        {
+          "a_bin": "Q2",
+          "n": 397580,
+          "mean_xt": -0.00223746
+        },
+        {
+          "a_bin": "Q3",
+          "n": 397580,
+          "mean_xt": -0.00365613
+        },
+        {
+          "a_bin": "Q4",
+          "n": 397580,
+          "mean_xt": -0.00477791
+        }
+      ],
+      "marginal_a_by_quartile_given_nonzero_delta": [
+        {
+          "a_bin": "Q1",
+          "n_given_nonzero_delta": 285603,
+          "mean_xt_given_nonzero_delta": -8.33e-06
+        },
+        {
+          "a_bin": "Q2",
+          "n_given_nonzero_delta": 291104,
+          "mean_xt_given_nonzero_delta": -0.00305585
+        },
+        {
+          "a_bin": "Q3",
+          "n_given_nonzero_delta": 291114,
+          "mean_xt_given_nonzero_delta": -0.00499325
+        },
+        {
+          "a_bin": "Q4",
+          "n_given_nonzero_delta": 302381,
+          "mean_xt_given_nonzero_delta": -0.00628215
+        }
+      ],
+      "marginal_a_delta": -0.00477193,
+      "marginal_a_delta_given_nonzero_delta": -0.00627382,
+      "a_gradient_by_b_stratum": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -0.00431129,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397581
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.00551281,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397581
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -0.00512932,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397579
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -0.00409477,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 397580
+        }
+      ],
+      "a_gradient_by_b_stratum_given_nonzero_delta": [
+        {
+          "b_bin": "Q1",
+          "a_delta_within_stratum": -0.00571356,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 291712
+        },
+        {
+          "b_bin": "Q2",
+          "a_delta_within_stratum": -0.00735111,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 290952
+        },
+        {
+          "b_bin": "Q3",
+          "a_delta_within_stratum": -0.00677736,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 292315
+        },
+        {
+          "b_bin": "Q4",
+          "a_delta_within_stratum": -0.00527999,
+          "a_bin_compared_low": "Q1",
+          "a_bin_compared_high": "Q4",
+          "n_rows": 295223
+        }
+      ],
+      "within_stratum_deltas_change_sign": false,
+      "classification": "additive",
+      "classification_reason": "Every B-stratum delta shares the marginal delta's sign and the max/min magnitude ratio (1.35) is within the 2.0 threshold -- A's effect holds at roughly constant strength regardless of B's level.",
+      "classification_given_nonzero_delta": "additive",
+      "classification_reason_given_nonzero_delta": "Every B-stratum delta shares the marginal delta's sign and the max/min magnitude ratio (1.39) is within the 2.0 threshold -- A's effect holds at roughly constant strength regardless of B's level."
+    }
+  ]
+}

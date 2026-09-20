@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Train/Test-Inconsistent Features, Split by Tournament (xT delta, passive)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.test-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.test-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.test-title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 24px; margin: 0 0 6px; }
+.test-subnote { color: var(--text-muted); font-size: 13px; margin: 0 0 24px; }
+.qchart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
+.qchart-card h4 { font-family: "Archivo", sans-serif; font-size: 14.5px; margin: 0 0 4px; }
+.qchart-card .qc-note { color: var(--text-muted); font-size: 12px; margin: 0 0 16px; }
+.qbar-row { display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 0 4px; }
+.qbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.qbar-val { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.qbar-fill { width: 100%; max-width: 56px; background: var(--neg); border-radius: 4px 4px 0 0; min-height: 2px; }
+.qbar-label { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; text-align: center; line-height: 1.3; }
+.qbar-n { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); }
+.stratum-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 700px) { .stratum-grid { grid-template-columns: 1fr; } }
+.stratum-card { background: var(--plane); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.stratum-card h5 { font-family: "JetBrains Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--accent); margin: 0 0 4px; }
+.stratum-delta { font-size: 11.5px; color: var(--text-muted); margin: 0 0 12px; }
+.stratum-delta b { color: var(--text-primary); }
+.qbar-row.small { height: 90px; gap: 8px; }
+.qbar-row.small .qbar-fill { max-width: 40px; }
+.verdict-banner { border-radius: 10px; padding: 16px 20px; margin: 8px 0 28px; font-size: 14px; }
+.verdict-banner.v-no { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); }
+.verdict-banner.v-yes { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); }
+.verdict-banner.v-partially { background: rgba(42,120,214,0.10); border: 1px solid rgba(42,120,214,0.3); }
+.verdict-banner b { color: var(--text-primary); }
+.caveat-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 20px 24px; margin-top: 32px; }
+.caveat-box h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.caveat-box ul { margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary); }
+.caveat-box li { margin-bottom: 4px; }
+
+.numfeat-list { display: flex; flex-direction: column; gap: 12px; }
+.numfeat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+.numfeat-card.is-dropped { border-left: 4px solid var(--amber); }
+.numfeat-card.is-locked { border-left: 4px solid var(--good); }
+.numfeat-card.is-unreliable { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.numfeat-card.is-inconsistent { box-shadow: inset 0 0 0 1px rgba(227,73,72,0.4); }
+.numfeat-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-bottom: 6px;
+}
+.numfeat-rank { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-muted); }
+.numfeat-name { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 15.5px; color: var(--text-primary); }
+.nf-badge {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.nf-badge.locked { background: var(--good-wash); color: var(--good); }
+.nf-badge.dropped { background: var(--amber-wash); color: var(--amber); }
+.nf-badge.type { background: var(--plane); color: var(--text-secondary); }
+.nf-badge.unreliable { background: rgba(227,73,72,0.14); color: var(--pos); }
+.nf-badge.inconsistent { background: rgba(227,73,72,0.14); color: var(--pos); }
+.numfeat-stats {
+  display: flex; flex-wrap: wrap; gap: 14px 22px;
+  font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.numfeat-stats b { color: var(--text-primary); }
+.numfeat-reason, .numfeat-note { font-size: 12.5px; color: var(--text-secondary); margin: 4px 0; }
+.numfeat-note { color: var(--amber); }
+.numfeat-card summary {
+  cursor: pointer;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--neg);
+  margin-top: 6px;
+  outline: none;
+}
+.numfeat-card summary::-webkit-details-marker { color: var(--neg); }
+.numbin-rows { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+.numbin-row {
+  display: grid; grid-template-columns: 1fr 3fr auto; align-items: center; gap: 10px;
+  font-size: 11.5px; color: var(--text-secondary);
+}
+.numbin-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.numbin-track { position: relative; height: 9px; background: var(--gridline); border-radius: 4px; }
+.numbin-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; background: var(--neg); }
+.numbin-refline { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber); }
+.numbin-val { font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 600; color: var(--text-primary); text-align: right; }
+.numfeat-consistency {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-size: 12.5px; color: var(--text-secondary);
+}
+.numfeat-consistency .cverdict { font-weight: 700; }
+.numfeat-consistency .cverdict.ok { color: var(--good); }
+.numfeat-consistency .cverdict.bad { color: var(--pos); }
+.numsplit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+@media (max-width: 700px) { .numsplit-grid { grid-template-columns: 1fr; } }
+.numsplit-card { background: var(--plane); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.numsplit-card h5 { font-family: "JetBrains Mono", monospace; font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); margin: 0 0 6px; }
+
+.xtb-row { display: flex; align-items: stretch; gap: 3px; margin: 10px 0 4px; }
+.xtb-col { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.xtb-track { position: relative; width: 100%; height: 72px; background: var(--plane); border-radius: 3px; }
+.xtb-track .mid { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--text-primary); opacity: 0.35; }
+.xtb-bar { position: absolute; left: 18%; width: 64%; border-radius: 2px; }
+.xtb-bar.pos { bottom: 50%; background: var(--good); }
+.xtb-bar.neg { top: 50%; background: var(--neg); }
+.xtb-n { font-family: "JetBrains Mono", monospace; font-size: 9px; color: var(--text-muted); margin-top: 3px; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">TOURNAMENT STABILITY CHECK -- XT DELTA &amp;middot; PASSIVE LEG</p>
+  <h1 class="title">Train/Test-Inconsistent Features, Split by Tournament (xT delta, passive)</h1>
+  <p class="dek">The 4 PASSIVE features of the shared INVESTIGATE list, the same tournament split (WC2022 vs Euro2024) and the same method as the binary and xG checks, against mean xT delta. flat_margin was recomputed from this leg's own std, not transferred from the active leg, and each verdict is re-checked against a MAD-derived robust margin -- a check neither the xG nor the active xT version carries.</p>
+  <div class="statbar"><div class="stat"><b>4</b><span>features investigated</span></div><div class="stat"><b>0</b><span>genuine tournament-level difference</span></div><div class="stat"><b>0</b><span>diverge from binary verdict</span></div><div class="stat"><b>0</b><span>diverge from xG verdict</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+
+<div class="rule-banner"><b>Scope.</b> The xg portal&#x27;s TOURNAMENT_STABILITY_CHECK covers BOTH legs in ONE file -- confirmed by reading it: its flat_margins_by_dataset block carries an &#x27;active&#x27; and a &#x27;passive&#x27; entry and its feature list mixes the two. That one-file convention is NOT mirrored here, and the reason is stated rather than left implicit: this portal&#x27;s TOURNAMENT_STABILITY_CHECK.json is Prompt 67&#x27;s ACTIVE-ONLY output, and merging a passive section into it would mean editing active-leg report content that this pass deliberately leaves frozen. The passive half is this separate file. Feature selection is the imported INVESTIGATE list filtered to its 4 PASSIVE entries -- the same list the xg version uses for its own passive half, not re-derived from this portal&#x27;s own flagged-inconsistent features, so the same features are compared across all three targets.</div>
+<div class="rule-banner" style="margin-top:16px;"><b>Method.</b> xT-delta counterpart to the xg and binary TOURNAMENT_STABILITY_CHECKs, passive half -- same tournament split, same imported feature list (passive entries), same bin edges computed once on the pooled data and reused for both tournaments, same classify_shape() heuristic. The ONLY threshold change is flat_margin, translated from the xg suite&#x27;s 0.5x-mean-xg convention via xg&#x27;s own standard-deviation fraction applied to THIS leg&#x27;s std. One field has no xg counterpart: zero_crossing_differs_between_tournaments, which asks whether the binned curve changes DIRECTION between tournaments -- impossible to ask of a non-negative target. One field has no counterpart in the ACTIVE xT version either: robust_margin_recheck, added because this leg&#x27;s std-derived margin is wide enough that a shape verdict could rest on it.</div>
+<div class="rule-banner" style="margin-top:16px;"><b>Reading the bars.</b>
+ADAPTATION 3, unchanged in method and re-measured on the passive leg. Sign carries the football meaning: POSITIVE target_xt_delta_passive = xT fell across the event (threat reduced, good for the defence), NEGATIVE = xT rose. On this leg the two directions are almost exactly balanced -- 36.4% positive vs 37.2% negative -- but the target is strongly LEFT-skewed (skew -2.6036), far more so than active v2&#x27;s -0.306, so the negative tail is much longer than the positive one even though the counts match. Two-directional framing therefore matters more here than anywhere else in this portal. Rankings are by |magnitude| across BOTH directions, and every table also reports the negative/positive/zero share behind its mean. Bars diverge from a centre line: green up = xT fell (threat
+reduced), red down = xT rose. flat_margin for the shape classification on this run is
+<code>0.002736</code>.</div>
+<div class="finding"><span class="tag">excluded</span><p><b>nearest_defender_distance</b> &mdash; already-known self-reference bug -- an ACTIVE-dataset column and not part of the passive INVESTIGATE set at all, so nothing is excluded from this half beyond what the imported list already omits. Recorded for symmetry with the active and xg versions.</p></div>
+
+<div class="test-block">
+  <h2 class="test-title">top_option_1_distance_from_ball <span style="font-weight:400;font-size:15px;color:var(--text-muted);">(active, xT delta)</span></h2>
+  <p class="test-subnote">This portal's own atlas finding: shape=<b>no-clear-pattern</b>, Spearman &rho;=-0.0775, train/val shape=<b>no-clear-pattern</b>, test shape=<b>no-clear-pattern</b>, flagged consistent=True.</p>
+  
+<div class="finding" style="margin:12px 0;">
+<span class="tag">agrees with the binary target check</span>
+<p>Both return <b>arbitrary train/test noise</b> for this feature.</p>
+</div>
+<div class="finding" style="margin:12px 0;">
+<span class="tag">agrees with the xG target check</span>
+<p>Both return <b>arbitrary train/test noise</b> for this feature.</p>
+</div>
+  
+  <div class="verdict-banner v-no">
+    <b>Verdict: ARBITRARY TRAIN/TEST NOISE</b> &mdash; Same shape classification (no-clear-pattern) in both WC2022 and Euro2024 -- a genuine tournament-level population difference would be expected to show up here, and it doesn&#x27;t.
+  </div>
+  <div class="numsplit-grid">
+<div class="numsplit-card">
+  <h5>WC2022 (n=840,649 rows, 64 matches)</h5>
+  <p style="font-size:12.5px;color:var(--text-secondary);margin:0 0 4px;">shape: <b>no-clear-pattern</b>
+  &mdash; bin means -0.004233 to +0.000245 (range 0.004477),
+  curve crosses zero</p>
+  <div class="xtb-row"><div class="xtb-col"><div class="xtb-track" title="(0.43, 13.648]: +0.000245 (n=81,506)"><span class="mid"></span><div class="xtb-bar pos" style="height:2.9%"></div></div><span class="xtb-n">81,506</span></div><div class="xtb-col"><div class="xtb-track" title="(13.648, 17.23]: -0.001306 (n=84,091)"><span class="mid"></span><div class="xtb-bar neg" style="height:15.4%"></div></div><span class="xtb-n">84,091</span></div><div class="xtb-col"><div class="xtb-track" title="(17.23, 20.412]: -0.002153 (n=86,417)"><span class="mid"></span><div class="xtb-bar neg" style="height:25.4%"></div></div><span class="xtb-n">86,417</span></div><div class="xtb-col"><div class="xtb-track" title="(20.412, 23.733]: -0.002864 (n=86,954)"><span class="mid"></span><div class="xtb-bar neg" style="height:33.8%"></div></div><span class="xtb-n">86,954</span></div><div class="xtb-col"><div class="xtb-track" title="(23.733, 27.581]: -0.003569 (n=84,699)"><span class="mid"></span><div class="xtb-bar neg" style="height:42.2%"></div></div><span class="xtb-n">84,699</span></div><div class="xtb-col"><div class="xtb-track" title="(27.581, 32.074]: -0.004233 (n=84,889)"><span class="mid"></span><div class="xtb-bar neg" style="height:50.0%"></div></div><span class="xtb-n">84,889</span></div><div class="xtb-col"><div class="xtb-track" title="(32.074, 37.254]: -0.003999 (n=84,278)"><span class="mid"></span><div class="xtb-bar neg" style="height:47.2%"></div></div><span class="xtb-n">84,278</span></div><div class="xtb-col"><div class="xtb-track" title="(37.254, 43.295]: -0.003747 (n=83,616)"><span class="mid"></span><div class="xtb-bar neg" style="height:44.3%"></div></div><span class="xtb-n">83,616</span></div><div class="xtb-col"><div class="xtb-track" title="(43.295, 51.701]: -0.003879 (n=80,269)"><span class="mid"></span><div class="xtb-bar neg" style="height:45.8%"></div></div><span class="xtb-n">80,269</span></div><div class="xtb-col"><div class="xtb-track" title="(51.701, 121.35]: -0.002320 (n=82,346)"><span class="mid"></span><div class="xtb-bar neg" style="height:27.4%"></div></div><span class="xtb-n">82,346</span></div></div>
+</div>
+<div class="numsplit-card">
+  <h5>Euro2024 (n=752,532 rows, 51 matches)</h5>
+  <p style="font-size:12.5px;color:var(--text-secondary);margin:0 0 4px;">shape: <b>no-clear-pattern</b>
+  &mdash; bin means -0.004130 to +0.000859 (range 0.004988),
+  curve crosses zero</p>
+  <div class="xtb-row"><div class="xtb-col"><div class="xtb-track" title="(0.43, 13.648]: +0.000859 (n=77,529)"><span class="mid"></span><div class="xtb-bar pos" style="height:10.4%"></div></div><span class="xtb-n">77,529</span></div><div class="xtb-col"><div class="xtb-track" title="(13.648, 17.23]: -0.001114 (n=74,946)"><span class="mid"></span><div class="xtb-bar neg" style="height:13.5%"></div></div><span class="xtb-n">74,946</span></div><div class="xtb-col"><div class="xtb-track" title="(17.23, 20.412]: -0.001059 (n=72,610)"><span class="mid"></span><div class="xtb-bar neg" style="height:12.8%"></div></div><span class="xtb-n">72,610</span></div><div class="xtb-col"><div class="xtb-track" title="(20.412, 23.733]: -0.003252 (n=72,076)"><span class="mid"></span><div class="xtb-bar neg" style="height:39.4%"></div></div><span class="xtb-n">72,076</span></div><div class="xtb-col"><div class="xtb-track" title="(23.733, 27.581]: -0.003623 (n=74,338)"><span class="mid"></span><div class="xtb-bar neg" style="height:43.9%"></div></div><span class="xtb-n">74,338</span></div><div class="xtb-col"><div class="xtb-track" title="(27.581, 32.074]: -0.004076 (n=74,144)"><span class="mid"></span><div class="xtb-bar neg" style="height:49.4%"></div></div><span class="xtb-n">74,144</span></div><div class="xtb-col"><div class="xtb-track" title="(32.074, 37.254]: -0.003456 (n=74,750)"><span class="mid"></span><div class="xtb-bar neg" style="height:41.8%"></div></div><span class="xtb-n">74,750</span></div><div class="xtb-col"><div class="xtb-track" title="(37.254, 43.295]: -0.004130 (n=75,421)"><span class="mid"></span><div class="xtb-bar neg" style="height:50.0%"></div></div><span class="xtb-n">75,421</span></div><div class="xtb-col"><div class="xtb-track" title="(43.295, 51.701]: -0.002903 (n=78,764)"><span class="mid"></span><div class="xtb-bar neg" style="height:35.2%"></div></div><span class="xtb-n">78,764</span></div><div class="xtb-col"><div class="xtb-track" title="(51.701, 121.35]: -0.002707 (n=76,678)"><span class="mid"></span><div class="xtb-bar neg" style="height:32.8%"></div></div><span class="xtb-n">76,678</span></div></div>
+</div></div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">top_option_3_dx <span style="font-weight:400;font-size:15px;color:var(--text-muted);">(active, xT delta)</span></h2>
+  <p class="test-subnote">This portal's own atlas finding: shape=<b>monotonic decreasing</b>, Spearman &rho;=-0.1386, train/val shape=<b>monotonic decreasing</b>, test shape=<b>monotonic decreasing</b>, flagged consistent=True.</p>
+  
+<div class="finding" style="margin:12px 0;">
+<span class="tag">agrees with the binary target check</span>
+<p>Both return <b>arbitrary train/test noise</b> for this feature.</p>
+</div>
+<div class="finding" style="margin:12px 0;">
+<span class="tag">agrees with the xG target check</span>
+<p>Both return <b>arbitrary train/test noise</b> for this feature.</p>
+</div>
+  
+  <div class="verdict-banner v-no">
+    <b>Verdict: ARBITRARY TRAIN/TEST NOISE</b> &mdash; Same shape classification (monotonic decreasing) in both WC2022 and Euro2024 -- a genuine tournament-level population difference would be expected to show up here, and it doesn&#x27;t.
+  </div>
+  <div class="numsplit-grid">
+<div class="numsplit-card">
+  <h5>WC2022 (n=840,649 rows, 64 matches)</h5>
+  <p style="font-size:12.5px;color:var(--text-secondary);margin:0 0 4px;">shape: <b>monotonic decreasing</b>
+  &mdash; bin means -0.005945 to +0.003902 (range 0.009847),
+  curve crosses zero</p>
+  <div class="xtb-row"><div class="xtb-col"><div class="xtb-track" title="(-111.54, -18.962]: +0.003902 (n=83,044)"><span class="mid"></span><div class="xtb-bar pos" style="height:32.8%"></div></div><span class="xtb-n">83,044</span></div><div class="xtb-col"><div class="xtb-track" title="(-18.962, -13.289]: +0.000480 (n=83,265)"><span class="mid"></span><div class="xtb-bar pos" style="height:4.0%"></div></div><span class="xtb-n">83,265</span></div><div class="xtb-col"><div class="xtb-track" title="(-13.289, -9.067]: -0.000707 (n=84,498)"><span class="mid"></span><div class="xtb-bar neg" style="height:5.9%"></div></div><span class="xtb-n">84,498</span></div><div class="xtb-col"><div class="xtb-track" title="(-9.067, -5.217]: -0.002535 (n=84,898)"><span class="mid"></span><div class="xtb-bar neg" style="height:21.3%"></div></div><span class="xtb-n">84,898</span></div><div class="xtb-col"><div class="xtb-track" title="(-5.217, -1.425]: -0.003446 (n=83,956)"><span class="mid"></span><div class="xtb-bar neg" style="height:29.0%"></div></div><span class="xtb-n">83,956</span></div><div class="xtb-col"><div class="xtb-track" title="(-1.425, 2.46]: -0.003744 (n=83,223)"><span class="mid"></span><div class="xtb-bar neg" style="height:31.5%"></div></div><span class="xtb-n">83,223</span></div><div class="xtb-col"><div class="xtb-track" title="(2.46, 6.499]: -0.005265 (n=84,035)"><span class="mid"></span><div class="xtb-bar neg" style="height:44.3%"></div></div><span class="xtb-n">84,035</span></div><div class="xtb-col"><div class="xtb-track" title="(6.499, 10.718]: -0.005754 (n=84,242)"><span class="mid"></span><div class="xtb-bar neg" style="height:48.4%"></div></div><span class="xtb-n">84,242</span></div><div class="xtb-col"><div class="xtb-track" title="(10.718, 16.644]: -0.005945 (n=83,853)"><span class="mid"></span><div class="xtb-bar neg" style="height:50.0%"></div></div><span class="xtb-n">83,853</span></div><div class="xtb-col"><div class="xtb-track" title="(16.644, 111.815]: -0.004042 (n=76,830)"><span class="mid"></span><div class="xtb-bar neg" style="height:34.0%"></div></div><span class="xtb-n">76,830</span></div></div>
+</div>
+<div class="numsplit-card">
+  <h5>Euro2024 (n=752,532 rows, 51 matches)</h5>
+  <p style="font-size:12.5px;color:var(--text-secondary);margin:0 0 4px;">shape: <b>monotonic decreasing</b>
+  &mdash; bin means -0.005792 to +0.005448 (range 0.011240),
+  curve crosses zero</p>
+  <div class="xtb-row"><div class="xtb-col"><div class="xtb-track" title="(-111.54, -18.962]: +0.005448 (n=74,881)"><span class="mid"></span><div class="xtb-bar pos" style="height:47.0%"></div></div><span class="xtb-n">74,881</span></div><div class="xtb-col"><div class="xtb-track" title="(-18.962, -13.289]: +0.001468 (n=74,660)"><span class="mid"></span><div class="xtb-bar pos" style="height:12.7%"></div></div><span class="xtb-n">74,660</span></div><div class="xtb-col"><div class="xtb-track" title="(-13.289, -9.067]: -0.000365 (n=73,416)"><span class="mid"></span><div class="xtb-bar neg" style="height:3.2%"></div></div><span class="xtb-n">73,416</span></div><div class="xtb-col"><div class="xtb-track" title="(-9.067, -5.217]: -0.002541 (n=73,024)"><span class="mid"></span><div class="xtb-bar neg" style="height:21.9%"></div></div><span class="xtb-n">73,024</span></div><div class="xtb-col"><div class="xtb-track" title="(-5.217, -1.425]: -0.003293 (n=73,982)"><span class="mid"></span><div class="xtb-bar neg" style="height:28.4%"></div></div><span class="xtb-n">73,982</span></div><div class="xtb-col"><div class="xtb-track" title="(-1.425, 2.46]: -0.003411 (n=74,688)"><span class="mid"></span><div class="xtb-bar neg" style="height:29.5%"></div></div><span class="xtb-n">74,688</span></div><div class="xtb-col"><div class="xtb-track" title="(2.46, 6.499]: -0.004970 (n=73,887)"><span class="mid"></span><div class="xtb-bar neg" style="height:42.9%"></div></div><span class="xtb-n">73,887</span></div><div class="xtb-col"><div class="xtb-track" title="(6.499, 10.718]: -0.005770 (n=73,676)"><span class="mid"></span><div class="xtb-bar neg" style="height:49.8%"></div></div><span class="xtb-n">73,676</span></div><div class="xtb-col"><div class="xtb-track" title="(10.718, 16.644]: -0.005792 (n=74,066)"><span class="mid"></span><div class="xtb-bar neg" style="height:50.0%"></div></div><span class="xtb-n">74,066</span></div><div class="xtb-col"><div class="xtb-track" title="(16.644, 111.815]: -0.005232 (n=81,088)"><span class="mid"></span><div class="xtb-bar neg" style="height:45.2%"></div></div><span class="xtb-n">81,088</span></div></div>
+</div></div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">top_option_3_dy <span style="font-weight:400;font-size:15px;color:var(--text-muted);">(active, xT delta)</span></h2>
+  <p class="test-subnote">This portal's own atlas finding: shape=<b>flat</b>, Spearman &rho;=0.0011, train/val shape=<b>None</b>, test shape=<b>None</b>, flagged consistent=None.</p>
+  
+<div class="finding" style="margin:12px 0;">
+<span class="tag">agrees with the binary target check</span>
+<p>Both return <b>arbitrary train/test noise</b> for this feature.</p>
+</div>
+<div class="finding" style="margin:12px 0;">
+<span class="tag">agrees with the xG target check</span>
+<p>Both return <b>arbitrary train/test noise</b> for this feature.</p>
+</div>
+  
+  <div class="verdict-banner v-no">
+    <b>Verdict: ARBITRARY TRAIN/TEST NOISE</b> &mdash; Same shape classification (flat) in both WC2022 and Euro2024 -- a genuine tournament-level population difference would be expected to show up here, and it doesn&#x27;t.
+  </div>
+  <div class="numsplit-grid">
+<div class="numsplit-card">
+  <h5>WC2022 (n=840,649 rows, 64 matches)</h5>
+  <p style="font-size:12.5px;color:var(--text-secondary);margin:0 0 4px;">shape: <b>flat</b>
+  &mdash; bin means -0.004007 to -0.001454 (range 0.002553),
+  curve stays on one side of zero</p>
+  <div class="xtb-row"><div class="xtb-col"><div class="xtb-track" title="(-77.453, -35.115]: -0.002310 (n=85,851)"><span class="mid"></span><div class="xtb-bar neg" style="height:28.8%"></div></div><span class="xtb-n">85,851</span></div><div class="xtb-col"><div class="xtb-track" title="(-35.115, -24.02]: -0.001454 (n=82,986)"><span class="mid"></span><div class="xtb-bar neg" style="height:18.1%"></div></div><span class="xtb-n">82,986</span></div><div class="xtb-col"><div class="xtb-track" title="(-24.02, -16.181]: -0.002035 (n=82,385)"><span class="mid"></span><div class="xtb-bar neg" style="height:25.4%"></div></div><span class="xtb-n">82,385</span></div><div class="xtb-col"><div class="xtb-track" title="(-16.181, -9.286]: -0.003485 (n=82,291)"><span class="mid"></span><div class="xtb-bar neg" style="height:43.5%"></div></div><span class="xtb-n">82,291</span></div><div class="xtb-col"><div class="xtb-track" title="(-9.286, -0.131]: -0.004007 (n=82,892)"><span class="mid"></span><div class="xtb-bar neg" style="height:50.0%"></div></div><span class="xtb-n">82,892</span></div><div class="xtb-col"><div class="xtb-track" title="(-0.131, 9.056]: -0.002312 (n=83,800)"><span class="mid"></span><div class="xtb-bar neg" style="height:28.9%"></div></div><span class="xtb-n">83,800</span></div><div class="xtb-col"><div class="xtb-track" title="(9.056, 15.978]: -0.002972 (n=83,152)"><span class="mid"></span><div class="xtb-bar neg" style="height:37.1%"></div></div><span class="xtb-n">83,152</span></div><div class="xtb-col"><div class="xtb-track" title="(15.978, 23.649]: -0.002845 (n=82,425)"><span class="mid"></span><div class="xtb-bar neg" style="height:35.5%"></div></div><span class="xtb-n">82,425</span></div><div class="xtb-col"><div class="xtb-track" title="(23.649, 34.746]: -0.002642 (n=82,307)"><span class="mid"></span><div class="xtb-bar neg" style="height:33.0%"></div></div><span class="xtb-n">82,307</span></div><div class="xtb-col"><div class="xtb-track" title="(34.746, 78.174]: -0.002980 (n=83,755)"><span class="mid"></span><div class="xtb-bar neg" style="height:37.2%"></div></div><span class="xtb-n">83,755</span></div></div>
+</div>
+<div class="numsplit-card">
+  <h5>Euro2024 (n=752,532 rows, 51 matches)</h5>
+  <p style="font-size:12.5px;color:var(--text-secondary);margin:0 0 4px;">shape: <b>flat</b>
+  &mdash; bin means -0.002940 to -0.001505 (range 0.001435),
+  curve stays on one side of zero</p>
+  <div class="xtb-row"><div class="xtb-col"><div class="xtb-track" title="(-77.453, -35.115]: -0.002466 (n=72,072)"><span class="mid"></span><div class="xtb-bar neg" style="height:41.9%"></div></div><span class="xtb-n">72,072</span></div><div class="xtb-col"><div class="xtb-track" title="(-35.115, -24.02]: -0.001505 (n=74,941)"><span class="mid"></span><div class="xtb-bar neg" style="height:25.6%"></div></div><span class="xtb-n">74,941</span></div><div class="xtb-col"><div class="xtb-track" title="(-24.02, -16.181]: -0.002792 (n=75,533)"><span class="mid"></span><div class="xtb-bar neg" style="height:47.5%"></div></div><span class="xtb-n">75,533</span></div><div class="xtb-col"><div class="xtb-track" title="(-16.181, -9.286]: -0.002516 (n=75,633)"><span class="mid"></span><div class="xtb-bar neg" style="height:42.8%"></div></div><span class="xtb-n">75,633</span></div><div class="xtb-col"><div class="xtb-track" title="(-9.286, -0.131]: -0.002925 (n=75,024)"><span class="mid"></span><div class="xtb-bar neg" style="height:49.7%"></div></div><span class="xtb-n">75,024</span></div><div class="xtb-col"><div class="xtb-track" title="(-0.131, 9.056]: -0.002364 (n=74,127)"><span class="mid"></span><div class="xtb-bar neg" style="height:40.2%"></div></div><span class="xtb-n">74,127</span></div><div class="xtb-col"><div class="xtb-track" title="(9.056, 15.978]: -0.002728 (n=74,764)"><span class="mid"></span><div class="xtb-bar neg" style="height:46.4%"></div></div><span class="xtb-n">74,764</span></div><div class="xtb-col"><div class="xtb-track" title="(15.978, 23.649]: -0.002940 (n=75,502)"><span class="mid"></span><div class="xtb-bar neg" style="height:50.0%"></div></div><span class="xtb-n">75,502</span></div><div class="xtb-col"><div class="xtb-track" title="(23.649, 34.746]: -0.002184 (n=75,608)"><span class="mid"></span><div class="xtb-bar neg" style="height:37.1%"></div></div><span class="xtb-n">75,608</span></div><div class="xtb-col"><div class="xtb-track" title="(34.746, 78.174]: -0.002176 (n=74,164)"><span class="mid"></span><div class="xtb-bar neg" style="height:37.0%"></div></div><span class="xtb-n">74,164</span></div></div>
+</div></div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">angle_to_attacking_goal <span style="font-weight:400;font-size:15px;color:var(--text-muted);">(active, xT delta)</span></h2>
+  <p class="test-subnote">This portal's own atlas finding: shape=<b>monotonic increasing</b>, Spearman &rho;=0.1029, train/val shape=<b>monotonic increasing</b>, test shape=<b>monotonic increasing</b>, flagged consistent=True.</p>
+  
+<div class="finding" style="margin:12px 0;">
+<span class="tag">agrees with the binary target check</span>
+<p>Both return <b>arbitrary train/test noise</b> for this feature.</p>
+</div>
+<div class="finding" style="margin:12px 0;">
+<span class="tag">agrees with the xG target check</span>
+<p>Both return <b>arbitrary train/test noise</b> for this feature.</p>
+</div>
+  
+  <div class="verdict-banner v-no">
+    <b>Verdict: ARBITRARY TRAIN/TEST NOISE</b> &mdash; Same shape classification (monotonic increasing) in both WC2022 and Euro2024 -- a genuine tournament-level population difference would be expected to show up here, and it doesn&#x27;t.
+  </div>
+  <div class="numsplit-grid">
+<div class="numsplit-card">
+  <h5>WC2022 (n=840,649 rows, 64 matches)</h5>
+  <p style="font-size:12.5px;color:var(--text-secondary);margin:0 0 4px;">shape: <b>monotonic increasing</b>
+  &mdash; bin means -0.011189 to +0.003993 (range 0.015182),
+  curve crosses zero</p>
+  <div class="xtb-row"><div class="xtb-col"><div class="xtb-track" title="(-0.000999511, 0.0318]: -0.011189 (n=81,690)"><span class="mid"></span><div class="xtb-bar neg" style="height:50.0%"></div></div><span class="xtb-n">81,690</span></div><div class="xtb-col"><div class="xtb-track" title="(0.0318, 0.068]: -0.008243 (n=82,070)"><span class="mid"></span><div class="xtb-bar neg" style="height:36.8%"></div></div><span class="xtb-n">82,070</span></div><div class="xtb-col"><div class="xtb-track" title="(0.068, 0.108]: -0.005631 (n=83,137)"><span class="mid"></span><div class="xtb-bar neg" style="height:25.2%"></div></div><span class="xtb-n">83,137</span></div><div class="xtb-col"><div class="xtb-track" title="(0.108, 0.152]: -0.003860 (n=83,483)"><span class="mid"></span><div class="xtb-bar neg" style="height:17.3%"></div></div><span class="xtb-n">83,483</span></div><div class="xtb-col"><div class="xtb-track" title="(0.152, 0.2]: -0.002547 (n=84,289)"><span class="mid"></span><div class="xtb-bar neg" style="height:11.4%"></div></div><span class="xtb-n">84,289</span></div><div class="xtb-col"><div class="xtb-track" title="(0.2, 0.253]: -0.001687 (n=84,399)"><span class="mid"></span><div class="xtb-bar neg" style="height:7.5%"></div></div><span class="xtb-n">84,399</span></div><div class="xtb-col"><div class="xtb-track" title="(0.253, 0.315]: -0.000892 (n=85,714)"><span class="mid"></span><div class="xtb-bar neg" style="height:4.0%"></div></div><span class="xtb-n">85,714</span></div><div class="xtb-col"><div class="xtb-track" title="(0.315, 0.399]: +0.000085 (n=85,578)"><span class="mid"></span><div class="xtb-bar pos" style="height:1.5%"></div></div><span class="xtb-n">85,578</span></div><div class="xtb-col"><div class="xtb-track" title="(0.399, 0.549]: +0.001495 (n=84,691)"><span class="mid"></span><div class="xtb-bar pos" style="height:6.7%"></div></div><span class="xtb-n">84,691</span></div><div class="xtb-col"><div class="xtb-track" title="(0.549, 3.141]: +0.003993 (n=84,183)"><span class="mid"></span><div class="xtb-bar pos" style="height:17.8%"></div></div><span class="xtb-n">84,183</span></div></div>
+</div>
+<div class="numsplit-card">
+  <h5>Euro2024 (n=752,532 rows, 51 matches)</h5>
+  <p style="font-size:12.5px;color:var(--text-secondary);margin:0 0 4px;">shape: <b>monotonic increasing</b>
+  &mdash; bin means -0.010194 to +0.003521 (range 0.013715),
+  curve crosses zero</p>
+  <div class="xtb-row"><div class="xtb-col"><div class="xtb-track" title="(-0.000999511, 0.0318]: -0.010194 (n=77,370)"><span class="mid"></span><div class="xtb-bar neg" style="height:50.0%"></div></div><span class="xtb-n">77,370</span></div><div class="xtb-col"><div class="xtb-track" title="(0.0318, 0.068]: -0.007468 (n=76,990)"><span class="mid"></span><div class="xtb-bar neg" style="height:36.6%"></div></div><span class="xtb-n">76,990</span></div><div class="xtb-col"><div class="xtb-track" title="(0.068, 0.108]: -0.005266 (n=75,923)"><span class="mid"></span><div class="xtb-bar neg" style="height:25.8%"></div></div><span class="xtb-n">75,923</span></div><div class="xtb-col"><div class="xtb-track" title="(0.108, 0.152]: -0.003354 (n=75,577)"><span class="mid"></span><div class="xtb-bar neg" style="height:16.4%"></div></div><span class="xtb-n">75,577</span></div><div class="xtb-col"><div class="xtb-track" title="(0.152, 0.2]: -0.002396 (n=74,771)"><span class="mid"></span><div class="xtb-bar neg" style="height:11.8%"></div></div><span class="xtb-n">74,771</span></div><div class="xtb-col"><div class="xtb-track" title="(0.2, 0.253]: -0.001352 (n=74,661)"><span class="mid"></span><div class="xtb-bar neg" style="height:6.6%"></div></div><span class="xtb-n">74,661</span></div><div class="xtb-col"><div class="xtb-track" title="(0.253, 0.315]: -0.000529 (n=73,346)"><span class="mid"></span><div class="xtb-bar neg" style="height:2.6%"></div></div><span class="xtb-n">73,346</span></div><div class="xtb-col"><div class="xtb-track" title="(0.315, 0.399]: +0.000414 (n=73,482)"><span class="mid"></span><div class="xtb-bar pos" style="height:2.0%"></div></div><span class="xtb-n">73,482</span></div><div class="xtb-col"><div class="xtb-track" title="(0.399, 0.549]: +0.001786 (n=74,369)"><span class="mid"></span><div class="xtb-bar pos" style="height:8.8%"></div></div><span class="xtb-n">74,369</span></div><div class="xtb-col"><div class="xtb-track" title="(0.549, 3.141]: +0.003521 (n=74,877)"><span class="mid"></span><div class="xtb-bar pos" style="height:17.3%"></div></div><span class="xtb-n">74,877</span></div></div>
+</div></div>
+</div>
+
+</div>
+</div>
+</body>
+</html>

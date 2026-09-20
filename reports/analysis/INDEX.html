@@ -112,11 +112,16 @@ footer a { color: var(--accent); }
     </a>
     <a class="card" href="xt_target/INDEX.html">
       <p class="card-title">xT-delta target analysis</p>
-      <p class="card-target"><code>target_xt_delta_v2</code></p>
-      <p class="card-desc">Expected-Threat value-delta target (xt_before - xt_after), with Prompt 66's
-        corrected <code>xt_after</code>. Left-skewed, heavy-tailed and can be negative, unlike the
-        other two. <b>Active-binary leg only</b> -- the passive leg is out of scope for this target.
-        Supersedes an earlier pass against <code>target_xt_delta</code> (v1), linked below.</p>
+      <p class="card-target"><code>target_xt_delta_v2</code> (active) &middot;
+        <code>target_xt_delta_passive</code> (passive)</p>
+      <p class="card-desc">Expected-Threat value-delta target (xt_before - xt_after) on the shared
+        possession-outcome <code>xt_after</code> definition. Left-skewed, heavy-tailed and can be
+        negative, unlike the other two. <b>Both legs are covered</b>: the active-binary half uses
+        Prompt 66's corrected <code>xt_after</code> and supersedes an earlier v1 pass (linked below);
+        the passive half uses Prompt 68's <code>target_xt_delta_passive</code>, which got the corrected
+        definition on its first pass and has no superseded version. The passive target is the
+        heavier-tailed of the two and is one value per event, shared across that event's defender
+        slots.</p>
     </a>
   </div>
 
