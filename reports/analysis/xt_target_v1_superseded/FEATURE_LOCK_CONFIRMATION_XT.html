@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Post-Lock Confirmation + Pattern Findings (xT delta)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.dataset-block { margin-top: 56px; padding-top: 36px; border-top: 2px solid var(--border); }
+.dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.dataset-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  margin: 0 0 4px;
+}
+.dataset-substat { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 12.5px; margin: 0 0 18px; }
+.method-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 16px 0 40px;
+}
+@media (max-width: 980px) { .method-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .method-strip { grid-template-columns: 1fr; } }
+.method-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.method-card .m-name {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: block;
+}
+.method-card p { margin: 0; font-size: 12.5px; color: var(--text-secondary); }
+.tier-section { margin: 12px 0 44px; }
+.tier-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+.tier-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.tier-dot.drop { background: var(--pos); }
+.tier-dot.collapse { background: var(--amber); }
+.tier-dot.review { background: var(--neg); }
+.tier-dot.distinct { background: var(--good); }
+.tier-note { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; }
+.corr-ledger { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.corr-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 160px 76px 96px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.corr-row:last-child { border-bottom: none; }
+.corr-row:hover { background: var(--plane); }
+@media (max-width: 760px) {
+  .corr-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 14px; }
+}
+.corr-pair { color: var(--text-primary); font-weight: 600; }
+.corr-pair .arrow { color: var(--text-muted); font-weight: 400; margin: 0 4px; }
+.corr-method {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.corr-mag-track { position: relative; height: 8px; background: var(--gridline); border-radius: 4px; }
+.corr-mag-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; }
+.corr-mag-fill.drop { background: var(--pos); }
+.corr-mag-fill.collapse { background: var(--amber); }
+.corr-mag-fill.review { background: var(--neg); }
+.corr-mag-fill.distinct { background: var(--good); }
+.corr-value { font-family: "JetBrains Mono", monospace; font-weight: 600; text-align: right; }
+.verdict-chip {
+  justify-self: end;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verdict-chip.drop { background: rgba(227,73,72,0.14); color: var(--pos); }
+.verdict-chip.collapse { background: var(--amber-wash); color: var(--amber); }
+.verdict-chip.review { background: rgba(42,120,214,0.12); color: var(--neg); }
+.verdict-chip.distinct { background: var(--good-wash); color: var(--good); }
+.closing-note {
+  margin-top: 24px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.closing-note b { color: var(--text-primary); }
+
+.rule-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+.rule-banner b { color: var(--text-primary); }
+.framework-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 40px; }
+@media (max-width: 760px) { .framework-grid { grid-template-columns: 1fr; } }
+.framework-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.framework-card .f-type {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: block;
+}
+.framework-card h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.framework-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0 0 10px; }
+.framework-card .example {
+  font-size: 12.5px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+}
+.framework-card .example b { color: var(--text-primary); }
+
+.hcall-panel {
+  background: var(--amber-wash);
+  border: 1px solid rgba(237,161,0,0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 20px 0 40px;
+}
+.hcall-panel > .hp-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.hcall-panel > .hp-note { font-size: 13px; color: var(--text-secondary); margin: 0 0 16px; }
+.hcall-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.hcall-item:last-child { margin-bottom: 0; }
+.hcall-item .hp-pair { font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.hcall-item .hp-reason { color: var(--text-secondary); }
+
+.table-scroll { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+.evidence-ledger { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 12.5px; border: none; border-radius: 0; }
+.evidence-ledger th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.evidence-ledger td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); background: var(--surface); }
+.evidence-ledger tr:last-child td { border-bottom: none; }
+.evidence-ledger td:first-child { color: var(--text-primary); font-weight: 600; }
+
+.path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+@media (max-width: 760px) { .path-grid { grid-template-columns: 1fr; } }
+.path-card { border-radius: 10px; padding: 16px 18px; border: 1px solid var(--border); }
+.path-card.do-now { background: var(--good-wash); border-color: rgba(47,158,91,0.35); }
+.path-card.defer { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.path-card .p-label {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+.path-card.do-now .p-label { color: var(--good); }
+.path-card.defer .p-label { color: var(--amber); }
+.path-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
+.recommendation {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--good);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+.recommendation b { color: var(--text-primary); }
+
+.vif-dataset-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.vif-dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.vif-chart { display: flex; flex-direction: column; gap: 6px; position: relative; padding: 8px 0; }
+.vif-row { display: grid; grid-template-columns: 180px 1fr 70px; align-items: center; gap: 10px; font-size: 12px; }
+.vif-label { color: var(--text-primary); font-weight: 600; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vif-track { position: relative; height: 14px; background: var(--gridline); border-radius: 3px; }
+.vif-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 3px; background: var(--neg); }
+.vif-fill.warn { background: var(--amber); }
+.vif-fill.severe { background: var(--pos); }
+.vif-value { font-family: "JetBrains Mono", monospace; font-weight: 700; }
+.vif-threshold { position: absolute; top: -4px; bottom: -4px; width: 1px; background: var(--text-muted); opacity: 0.5; }
+.vif-threshold-label { position: absolute; top: -18px; font-size: 9px; color: var(--text-muted); font-family: "JetBrains Mono", monospace; transform: translateX(-50%); }
+.vif-legend { display: flex; gap: 20px; font-size: 11.5px; color: var(--text-muted); margin: 8px 0 20px; }
+.vif-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.vif-legend .dot { width: 9px; height: 9px; border-radius: 50%; }
+.cond-badge { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 12px; background: var(--plane); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; margin-bottom: 16px; }
+.before-after { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+@media (max-width: 700px) { .before-after { grid-template-columns: 1fr; } }
+.ba-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.ba-card h4 { font-family: "Archivo", sans-serif; font-size: 14px; margin: 0 0 12px; }
+.ba-card.before h4 { color: var(--pos); }
+.ba-card.after h4 { color: var(--good); }
+
+.test-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.test-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.test-title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 24px; margin: 0 0 6px; }
+.test-subnote { color: var(--text-muted); font-size: 13px; margin: 0 0 24px; }
+.qchart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
+.qchart-card h4 { font-family: "Archivo", sans-serif; font-size: 14.5px; margin: 0 0 4px; }
+.qchart-card .qc-note { color: var(--text-muted); font-size: 12px; margin: 0 0 16px; }
+.qbar-row { display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 0 4px; }
+.qbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.qbar-val { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.qbar-fill { width: 100%; max-width: 56px; background: var(--neg); border-radius: 4px 4px 0 0; min-height: 2px; }
+.qbar-label { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; text-align: center; line-height: 1.3; }
+.qbar-n { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); }
+.stratum-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 700px) { .stratum-grid { grid-template-columns: 1fr; } }
+.stratum-card { background: var(--plane); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.stratum-card h5 { font-family: "JetBrains Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--accent); margin: 0 0 4px; }
+.stratum-delta { font-size: 11.5px; color: var(--text-muted); margin: 0 0 12px; }
+.stratum-delta b { color: var(--text-primary); }
+.qbar-row.small { height: 90px; gap: 8px; }
+.qbar-row.small .qbar-fill { max-width: 40px; }
+.verdict-banner { border-radius: 10px; padding: 16px 20px; margin: 8px 0 28px; font-size: 14px; }
+.verdict-banner.v-no { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); }
+.verdict-banner.v-yes { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); }
+.verdict-banner.v-partially { background: rgba(42,120,214,0.10); border: 1px solid rgba(42,120,214,0.3); }
+.verdict-banner b { color: var(--text-primary); }
+.caveat-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 20px 24px; margin-top: 32px; }
+.caveat-box h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.caveat-box ul { margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary); }
+.caveat-box li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">FEATURE LOCK CONFIRMATION -- XT DELTA &amp;middot; ACTIVE-BINARY LEG ONLY</p>
+  <h1 class="title">Post-Lock Confirmation + Pattern Findings (xT delta)</h1>
+  <p class="dek">Correlation/redundancy is target-agnostic and is reused directly rather than re-derived; the leakage side and every pattern finding are rebuilt from this portal's own outputs. Combined into one document, matching the xG portal's own confirmation-plus-findings layout. Active-binary leg only.</p>
+  <div class="statbar"><div class="stat"><b>34</b><span>active features</span></div><div class="stat"><b>0</b><span>tier changes found</span></div><div class="stat"><b>2</b><span>target-specific caveats recorded</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+
+<div class="verdict-banner v-no" style="margin-bottom:28px;">
+<b>LOCKED (xT delta) -- no new tier crossings</b>
+&mdash; The locked ACTIVE feature set (34 features) is confirmed internally consistent for xT-delta work -- same count as the binary and xG confirmations, since feature_config.py is not target-specific and correlation/redundancy is target-agnostic. No feature is added, dropped or re-tiered by this document. Two target-specific caveats are RECORDED, not resolved: construction coupling between location-derived locked features and the target&#x27;s own xt_after term (the single most important caveat this portal carries, with no xG or binary counterpart), and the fact that this target&#x27;s effects can sit in its exactly-zero mass where a mean-difference test will miss them.
+</div>
+
+<h2>Confirmed candidate feature count</h2>
+<p class="section-note">Read directly from feature_config.py's ACTIVE dict, not assumed. Same count as the
+binary and xG confirmations -- feature_config.py is not target-specific.</p>
+<div class="before-after">
+
+<div class="ba-card after">
+  <h4>Active</h4>
+  <p style="font-size:28px; font-family:'Archivo',sans-serif; font-weight:800; margin:4px 0;">34</p>
+  <p style="font-size:12px; color:var(--text-muted); margin:0 0 8px;">expected 34</p>
+  <span class="verdict-chip distinct">CONFIRMED</span>
+</div>
+</div>
+
+<h2 style="margin-top:40px;">Correlation diff vs. the last confirmed run</h2>
+<div class="finding"><span class="tag">correlation diff -- identical by construction</span><p><b>cross-referenced, not re-derived</b> &mdash; IDENTICAL to reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json's active correlation_diff, by construction, not independently re-derived -- correlation clustering (feature vs feature) never references a target column, so re-running it against target_xt_delta would produce the exact same pairs and tiers. Reused directly rather than silently recomputed, so this file's numbers are traceable to that source. Same discipline generate_feature_lock_confirmation_xg.py applies.</p></div>
+<div class="vif-dataset-block">
+  <h2 class="dataset-title">Active</h2>
+  <p class="dataset-substat">25 DROP/COLLAPSE/REVIEW pairs before &rarr; 25 after
+  &middot; 0 added &middot; 0 removed &middot; 0 tier changes</p>
+  <div class="corr-ledger"><div class="corr-row"><span class="corr-pair">
+  No changes -- diff is empty.
+  </span></div></div>
+</div>
+
+
+<h2 style="margin-top:40px;">Leakage confirmation (xT delta)</h2>
+<p class="section-note">Source: <code>reports/analysis/xt_target/LEAKAGE_AUDIT.json</code></p>
+<div class="finding"><span class="tag">scope differs from the xG confirmation</span><p><b>said so, not glossed</b> &mdash; The xg portal&#x27;s lock confirmation folds in that portal&#x27;s LEAKAGE_AUDIT Parts C and D, which are PASSIVE-only checks (has_screened_outcome, has_option_2/3). Neither column exists in the active parquet, so neither can be confirmed here. This portal&#x27;s leakage audit substitutes active-side analogues and adds one new check; those are what is folded in below. Stated plainly rather than presented as the same confirmation.</p></div>
+
+<div class="stratum-card" style="margin-bottom:16px;">
+  <h5>Part A &mdash; schema / naming scan</h5>
+  <p class="stratum-delta">Verdict: <b>clean</b> (method imported unchanged).</p>
+</div>
+
+<div class="stratum-card" style="margin-bottom:16px;">
+  <h5>Part B&prime; &mdash; has_previous_event</h5>
+  <p class="stratum-delta">Exactly-zero share gap <b>+27.3pp</b>; Welch's t-test on the
+  MEAN gives p=0.06454. Verdict: <b>flagged -- real censoring-shaped effect, but on the ZERO SHARE rather than the mean</b>.</p>
+  <p class="stratum-delta">has_previous_event stays a locked candidate feature. The finding is about how this target must be MEASURED (its effects can sit in the zero mass rather than the mean), not about whether the feature belongs in the list. A mean-difference test alone -- the instrument the xg audit uses -- returns p=0.0645 here and would have reported nothing, while the exactly-zero share differs by +27.3pp.</p>
+</div>
+
+<div class="stratum-card" style="margin-bottom:16px;">
+  <h5>Part C&prime; &mdash; the three action_*_possession flags</h5>
+  <ul style="font-size:12.5px;margin:8px 0 8px 18px;"><li><code>action_changed_possession</code>: <b>exclusion justification does NOT transfer to this target -- flagged, not reopened</b></li><li><code>action_ended_possession</code>: <b>exclusion justification does NOT transfer to this target -- flagged, not reopened</b></li><li><code>action_won_possession</code>: <b>exclusion justification does NOT transfer to this target -- flagged, not reopened</b></li></ul>
+  <p class="stratum-delta">These three columns remain EXCLUDED in feature_config.py and this document does not change that. What it records is that their stated exclusion reason -- &#x27;structural zero (0.00% shot rate by target-window definition)&#x27; -- is specific to target_future_shot_10s and does not hold against target_xt_delta, where the same rows carry real row-level variance. Any future decision to model this target seriously would need to revisit that exclusion on its own merits; it is not revisited here.</p>
+</div>
+
+<div class="stratum-card">
+  <h5>Part D&prime; &mdash; construction coupling (new to this target)</h5>
+  <p class="stratum-delta">Strongest: <code>distance_to_attacking_box</code> at r=+0.5551 against the
+  target and r=-0.5123 against <code>xt_after</code>. Verdict: <b>flagged -- construction coupling is real and must be stated when interpreting this atlas</b>.</p>
+  <p class="stratum-delta">No feature is dropped on this evidence, and none is proposed for dropping. The locked set stays as-is. The finding is interpretive: because xt_after is looked up from action_x/action_y, location-derived locked features share a definitional term with half the target, so a strong correlation in the Numerical Target Atlas is partly recovery-by-definition rather than discovered defensive signal. This has no counterpart in the xg or binary confirmations, and is the single most important caveat this portal carries.</p>
+</div>
+
+<div class="verdict-banner v-no" style="margin-top:20px;"><b>The locked ACTIVE feature set is internally unchanged for xT-delta work -- correlation/redundancy is target-agnostic, so nothing about the feature list moves. Two target-specific caveats are recorded rather than resolved: (1) construction coupling between location-derived features and xt_after, and (2) the fact that this target&#x27;s effects can live in its zero mass, which a mean-difference test misses.</b></div>
+
+<h2 style="margin-top:48px;padding-top:24px;border-top:2px solid var(--border);">Pattern-analysis findings (xT delta)</h2>
+<p class="section-note">Every number in this section is read from this portal&#x27;s own JSON outputs, not re-typed by hand and not carried over from the xg or binary portals. Where a finding has an xg or binary counterpart, the comparison is made in the individual report, not restated here.</p>
+
+<h3 style="margin-top:28px;">The target's shape</h3>
+<p class="section-note">mean <b>-0.001316</b>, std <b>0.064986</b>, skew <b>+0.093</b>,
+excess kurtosis <b>8.85</b>, <b>47.0%</b> negative /
+<b>41.7%</b> positive / <b>11.3%</b> exactly zero, on
+56,036 rows with a defined delta (32 NaN, explained in Prompt 64 section 2).</p>
+<div class="finding flag"><span class="tag">carried forward from Prompt 64 -- CONFIRMED</span><p><b>symmetric, negative-capable target</b> &mdash; Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.2): target_xt_delta is roughly symmetric (skew +0.093), heavy-tailed (excess kurtosis 8.85), 47.0% negative / 41.7% positive / 11.3% exactly zero. This is a fundamentally different shape from target_future_xg_10s, which is strictly non-negative, zero-inflated and heavily right-skewed. Any methodology that assumed non-negativity had to be adapted explicitly -- see this module&#x27;s Adaptation 1/2/3 notes, restated in every report.</p></div>
+
+<h3 style="margin-top:28px;">Numerical features vs the target</h3>
+<p class="section-note">Top 5 of the reconstructed ACTIVE pool by |Spearman rho|, read from the atlas&#x27;s own sort order. Ranking is by ABSOLUTE rho in both directions -- on this target a strong negative rho is as much a finding as a strong positive one. 31/31 features' binned
+curves cross zero; 4 feature(s) flagged train/test-inconsistent.</p>
+<table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead><tr style="text-align:left;color:var(--text-muted);"><th style='padding:5px 8px;'>feature</th><th style='padding:5px 8px;'>rho</th><th style='padding:5px 8px;'>shape</th><th style='padding:5px 8px;'>crosses zero</th></tr></thead><tbody><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>distance_to_attacking_box</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>0.8397</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>monotonic increasing</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>True</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>distance_to_defending_box</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.8383</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>monotonic decreasing</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>True</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>distance_to_attacking_goal</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>0.8352</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>monotonic increasing</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>True</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>distance_to_defending_goal</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.8326</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>monotonic decreasing</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>True</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>attacker_centroid_x</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.753</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>monotonic decreasing</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>True</td></tr></tbody></table>
+
+<h3 style="margin-top:28px;">Category Atlas &mdash; the Clearance artefact</h3>
+<div class="finding flag"><span class="tag">carried forward from Prompt 64 -- RESURFACED</span><p><b>Clearance ranks 8 of 8 event_type categories</b> &mdash; Prompt 64&#x27;s Clearance/action_x artefact resurfaces exactly where it was predicted to: Clearance ranks 8 of 8 event_type categories at -0.032482 mean delta over n=4,184 rows (53.1% negative). Prompt 64 measured -0.0315 inside the action_ended_possession slice; this is the same artefact on the full active dataset.</p></div>
+
+<h3 style="margin-top:28px;">Flag Ledger &mdash; top 5 by |lift|</h3>
+<table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead><tr style="text-align:left;color:var(--text-muted);"><th style='padding:5px 8px;'>column</th><th style='padding:5px 8px;'>lift</th><th style='padding:5px 8px;'>mean True</th><th style='padding:5px 8px;'>mean False</th><th style='padding:5px 8px;'>n True</th></tr></thead><tbody><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>is_in_attacking_box</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.11062110240377439</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.10032715970753274</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>0.010293942696241652</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>5881</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>is_in_defending_box</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>0.08742689064993615</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>0.07855821858293742</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.00886867206699873</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>4841</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>is_high_zone</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.06915079462916042</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.05379837024579848</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>0.01535242438336194</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>13507</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>is_deep_zone</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>0.065508209526458</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>0.050820968630005244</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.014687240896452755</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>11438</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>has_visible_defender</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.01655808636736767</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>-0.0013382422884203001</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>0.01521984407894737</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>55960</td></tr></tbody></table>
+<div class="finding flag" style="margin:16px 0;">
+<span class="tag">carried forward from Prompt 64 -- the motivating problem, confirmed fixed (off-pool)</span>
+<p>The three <code>action_*_possession</code> flags are 100% identical zeros against
+<code>target_future_shot_10s</code>. Against this target:</p>
+<ul><li><code>action_changed_possession</code>: True-group mean <b>-0.001211</b> over n=4,656, only 23.5% exactly zero</li><li><code>action_ended_possession</code>: True-group mean <b>-0.001211</b> over n=4,656, only 23.5% exactly zero</li><li><code>action_won_possession</code>: True-group mean <b>-0.003521</b> over n=3,600, only 21.0% exactly zero</li></ul>
+<p>These columns are NOT rows in `columns` above, and that is not an oversight. This ledger is built from the reconstructed pre-drop 51-era pool (feature_config_v1_historical.ACTIVE_V1_HISTORICAL), and all three were already out of the candidate list before that snapshot -- so the ledger&#x27;s own pool construction, mirrored unchanged from generate_reports_xg.py, cannot surface them. Prompt 64&#x27;s motivating finding (they stop being degenerate zeros on this target) would therefore have disappeared on a technicality. The same boolean_xt_lift function used for every pooled row was run on them off-pool instead, and the gap is stated in the rendered report rather than omitted. Observation only -- these columns remain excluded in feature_config.py.</p>
+</div>
+
+<h3 style="margin-top:28px;">Confound (reversal) tests</h3>
+<p class="section-note">CONFIRMED BY READING THE SOURCE: reports/analysis/xg_target/CONFOUND_ANALYSIS.json&#x27;s 5 tests are ALL passive-dataset tests on passive-only columns, produced by generate_confound_analysis_xg.py (2) and generate_confound_analysis_part_d_xg.py (3). Exactly one active-dataset confound test exists anywhere in this repo for any target -- &#x27;defenders_within_10m_vs_box_proximity&#x27; in the binary portal, from generate_confound_analysis_part_a.py; the xg portal never received it. Test 1 below mirrors that test exactly. Test 2 is new and is labelled as new.</p>
+<table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead><tr style="text-align:left;color:var(--text-muted);"><th style='padding:5px 8px;'>test</th><th style='padding:5px 8px;'>unconditional</th><th style='padding:5px 8px;'>non-zero delta</th><th style='padding:5px 8px;'>new test</th></tr></thead><tbody><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_within_10m vs box proximity</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>partially</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>partially</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>False</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>Clearance&#x27;s negative mean delta vs defending-box proximity</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>partially</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>partially</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>True</td></tr></tbody></table>
+
+<h3 style="margin-top:28px;">Tournament stability</h3>
+<p class="section-note">3/6 active features show a genuine tournament-level
+difference rather than arbitrary train/test noise.</p>
+<table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead><tr style="text-align:left;color:var(--text-muted);"><th style='padding:5px 8px;'>feature</th><th style='padding:5px 8px;'>verdict</th></tr></thead><tbody><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_within_10m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>genuine tournament-level difference</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_within_5m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>genuine tournament-level difference</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>events_elapsed_in_possession</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>arbitrary train/test noise</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>local_numerical_balance_5m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>arbitrary train/test noise</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>match_time_seconds</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>arbitrary train/test noise</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>attackers_within_5m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>genuine tournament-level difference</td></tr></tbody></table>
+
+<h3 style="margin-top:28px;">Slice stratification</h3>
+<p class="section-note">V1: 72 cells, 295 unconditional
+genuine divergences, 289 on the non-zero-delta subset,
+20 categories where removing the zero mass flips the conclusion.
+V2: 108 cells, 149 unconditional /
+144 conditional.</p>
+<div class="finding"><span class="tag">archetype-vs-boolean comparison</span><p><b>not reproducible on the active leg</b> &mdash; NOT APPLICABLE -- see archetype_slicer_not_applicable.</p></div>
+
+<h3 style="margin-top:28px;">Numeric x numeric interaction</h3>
+<p class="section-note">5/5 pairs classify the same way unconditionally and on the
+non-zero-delta subset. 4/5 have within-stratum deltas that change SIGN --
+a direction reversal that cannot arise on the xG target.</p>
+<table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead><tr style="text-align:left;color:var(--text-muted);"><th style='padding:5px 8px;'>feature A</th><th style='padding:5px 8px;'>feature B</th><th style='padding:5px 8px;'>classification</th><th style='padding:5px 8px;'>sign flip</th></tr></thead><tbody><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_within_10m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>distance_to_attacking_box</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>interactive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>True</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_between_ball_and_attacking_goal</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>attacker_defender_ratio</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>interactive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>False</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_within_5m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>defenders_within_10m</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>substitutive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>True</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>visible_defender_count</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>attacker_spread</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>inconclusive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>True</td></tr><tr><td style='padding:5px 8px;border-top:1px solid var(--border);'>possession_elapsed_seconds</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>match_time_seconds</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>inconclusive</td><td style='padding:5px 8px;border-top:1px solid var(--border);'>True</td></tr></tbody></table>
+
+<h3 style="margin-top:28px;">Review tier</h3>
+<p class="section-note">57 ACTIVE review pairs, 35 still
+needs_human_call, 1 Type-2 pair(s) resolved on the opposite-sign rule.</p>
+
+<h3 style="margin-top:28px;">Target-independent reports &mdash; linked, not rebuilt</h3>
+<div class="finding"><span class="tag">correlation atlas v1 v2 v3</span><p><b>linked from this portal&#x27;s index</b> &mdash; Not rebuilt. Correlation clustering is feature-vs-feature and never references a target -- re-running it against target_xt_delta would produce byte-identical pairs and tiers. Linked from this portal's index to reports/analysis/xg_target/ as-is.</p></div><div class="finding"><span class="tag">vif</span><p><b>linked from this portal&#x27;s index</b> &mdash; Not rebuilt -- multicollinearity is a property of the feature matrix alone. Linked as-is.</p></div><div class="finding"><span class="tag">slicer redundancy</span><p><b>linked from this portal&#x27;s index</b> &mdash; Not rebuilt -- slicer-vs-slicer redundancy, no target term. Linked as-is.</p></div><div class="finding"><span class="tag">player level validity</span><p><b>linked from this portal&#x27;s index</b> &mdash; Not rebuilt -- row concentration and player overlap, no target term. Linked as-is.</p></div><div class="finding"><span class="tag">player grouped split check</span><p><b>linked from this portal&#x27;s index</b> &mdash; Not rebuilt -- an identity-leakage stress test on the split itself. Linked as-is.</p></div>
+
+
+</div>
+</div>
+</body>
+</html>

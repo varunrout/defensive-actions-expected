@@ -3,41 +3,64 @@
   "leg": "active-binary only (passive leg out of scope for this target)",
   "parquet_path": "data/features/player_defensive_actions.parquet",
   "n_rows": 56068,
-  "target_col": "target_xt_delta",
+  "target_col": "target_xt_delta_v2",
   "target_scale": {
-    "target": "target_xt_delta",
+    "target": "target_xt_delta_v2",
     "n_rows": 56068,
-    "n_defined": 56036,
-    "n_nan": 32,
-    "mean": -0.00131579,
-    "std": 0.06498593,
-    "skew": 0.0933,
-    "excess_kurtosis": 8.846,
-    "pct_zero": 11.309,
-    "pct_negative": 47.002,
-    "pct_positive": 41.689,
+    "n_defined": 55761,
+    "n_nan": 307,
+    "mean": 0.00338135,
+    "std": 0.05838466,
+    "skew": -0.306,
+    "excess_kurtosis": 18.3289,
+    "pct_zero": 20.154,
+    "pct_negative": 35.426,
+    "pct_positive": 44.42,
     "xg_mean_same_rows": 0.00811039,
     "xg_std_same_rows": 0.0480329,
     "xg_flat_margin_absolute": 0.00405519,
     "xg_flat_margin_as_fraction_of_xg_std": 0.084425,
-    "flat_margin": 0.00548646,
-    "range_trigger": 0.01097292,
-    "near_identical_threshold": 0.00548646,
-    "distinct_signal_threshold": 0.01645938,
-    "n_nonzero": 49699,
-    "mean_nonzero": -0.00148356,
-    "std_nonzero": 0.06900304,
-    "flat_margin_nonzero": 0.00582561,
-    "scale_note": "ADAPTATION 1. target_xt_delta is roughly symmetric with a near-zero, NEGATIVE mean (-0.001316), so the xg_target suite's convention of expressing every threshold as a multiple of the overall mean target value is meaningless here (it would flip signs and collapse to nothing). Instead the xg convention is TRANSLATED, not replaced: xg's own flat_margin (0.5 x mean xg = 0.004055 on these same rows) is re-expressed as a fraction of xg's own standard deviation (0.048033), giving 0.084425, and that fraction is applied to target_xt_delta's standard deviation (0.064986). Every number in this calculation is computed at runtime from the real parquet, not carried over from a writeup. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged.",
-    "conditional_panel_note": "ADAPTATION 2. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta has no shot column behind it; its structural-zero analogue is the 11.3% of rows with an EXACTLY zero delta (the action did not cross an xT grid-cell boundary). The conditional panel throughout this suite is therefore 'given a non-zero delta' (target_xt_delta != 0), never 'given a shot'.",
-    "direction_note": "ADAPTATION 3. Sign carries the football meaning: POSITIVE target_xt_delta = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. Rankings are by |magnitude| across BOTH directions, never one-sided 'higher is worse' lift, and every table also reports the negative/positive/zero share behind its mean.",
-    "log_transform_note": "NOT an adaptation: checked directly rather than assumed -- the xg_target report suite never log-transforms its target anywhere (every xg report uses the raw groupby mean of target_future_xg_10s). The log1p framing in this project belongs to the modelling legs, not to this report suite, so there was no log-transform to remove."
+    "flat_margin": 0.00492915,
+    "range_trigger": 0.00985829,
+    "near_identical_threshold": 0.00492915,
+    "distinct_signal_threshold": 0.01478744,
+    "n_nonzero": 44523,
+    "mean_nonzero": 0.00423483,
+    "std_nonzero": 0.06531138,
+    "flat_margin_nonzero": 0.00551394,
+    "scale_note": "ADAPTATION 1, RE-EXAMINED FOR v2. Prompt 65 translated the xg suite's mean-multiple threshold convention onto the xT target via xg's own standard-deviation fraction, because v1's mean was near-zero and NEGATIVE (-0.001316), which would have flipped the sign of every threshold. v2's mean is now POSITIVE (+0.003381), so that literal justification no longer applies -- checked, not assumed. The translation is KEPT anyway, for a reason that does still hold: at +0.003381 against a std of 0.058385 the mean is only 5.8% of one standard deviation, so a mean-multiple threshold would still be an arbitrary sliver, and keeping the same translation is what makes this portal numerically comparable with the v1 portal it supersedes. Mechanically: xg's own flat_margin (0.5 x mean xg = 0.004055 on these same rows) re-expressed as a fraction of xg's own std (0.048033) gives 0.084425, applied to target_xt_delta_v2's std (0.058385) to give 0.004929. Every number is computed at runtime from the real parquet. See `threshold_transfer_warning` in this same block: the std-derived margin is materially less appropriate on v2 than it was on v1, and that is stated rather than hidden. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged and are unaffected.",
+    "conditional_panel_note": "ADAPTATION 2, unchanged in method and re-measured on v2. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta_v2 has no shot column behind it; its structural-zero analogue is the 20.2% of rows with an EXACTLY zero delta. That share nearly doubled from v1's 11.3%, for an understood reason: under v2 a delta is exactly zero whenever the next same-possession event lands in the same xT grid cell as the previous one, which is far more common than v1's 'the action's own location shares a cell with the previous event'. The conditional panel throughout this suite remains 'given a non-zero delta' (target_xt_delta_v2 != 0), never 'given a shot'.",
+    "direction_note": "ADAPTATION 3, unchanged in method and re-measured on v2. Sign carries the football meaning: POSITIVE target_xt_delta_v2 = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. On v2 the balance shifts markedly towards the defence -- 44.4% positive vs 35.4% negative, where v1 was 41.7% / 47.0% -- but the target is NO LONGER close to symmetric (skew -0.306, vs v1's +0.093), so two-directional framing matters more here, not less. Rankings are by |magnitude| across BOTH directions, and every table also reports the negative/positive/zero share behind its mean.",
+    "log_transform_note": "NOT an adaptation, re-checked rather than inherited: the xg_target report suite never log-transforms its target anywhere, and neither did Prompt 65's v1 xT suite. The log1p framing in this project belongs to the modelling legs, not to this report suite. v2's heavier tails make a transform more tempting than it was on v1 -- and it is still NOT applied here, because doing so would silently break comparability with both the xg portal and the v1 xT portal this one supersedes. Recorded as an open question for the modelling legs, not resolved by an EDA suite.",
+    "target_version": "v2",
+    "target_source": "outputs/prototypes/active_binary_xt_delta_v2.parquet (joined read-only by event_id)",
+    "supersedes": "target_xt_delta (v1, outputs/prototypes/active_binary_xt_delta.parquet). The v1 portal built against it is preserved unchanged at reports/analysis/xt_target_v1_superseded/.",
+    "robust_scale": {
+      "iqr": 0.00882901,
+      "mad": 0.00385257,
+      "robust_std_1_4826_mad": 0.00571182,
+      "robust_flat_margin": 0.00048222,
+      "flat_margin_over_mad": 1.2794,
+      "flat_margin_over_iqr": 0.5583,
+      "pct_rows_inside_flat_margin": 53.42,
+      "mean_as_fraction_of_std": 0.0579
+    },
+    "correlation_with_old_target": {
+      "pair": "target_xt_delta_v2 vs target_future_xg_10s",
+      "pearson_r": -0.1082,
+      "n": 55761,
+      "v1_pearson_r": -0.016,
+      "note": "Measured on this run: r=-0.1082 against the old target on these same rows, versus -0.016 for v1. Recorded HERE specifically because Adaptation 1 borrows this very target's standard-deviation fraction to set every threshold in this suite -- so wherever a report cites an xg-derived threshold, this is how the two targets actually relate. Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.4): correlation with the old target_future_xg_10s improves from v1's essentially-zero -0.016 to -0.108 -- still modest, but now an order of magnitude stronger AND correctly signed: more threat denied by a defensive action is associated with less future attacking output in the next 10 seconds. v2 and v1 are themselves moderately correlated at +0.571, which is sensible given they share the identical xt_before term and differ only in xt_after."
+    },
+    "threshold_transfer_warning": "THIS THRESHOLD DOES NOT TRANSFER CLEANLY FROM v1, and that is reported rather than forced to fit. Prompt 65 tuned its translated flat_margin against a target with excess kurtosis 8.85, an IQR of 0.019119 and a MAD of 0.010277; the resulting margin (0.005486) was 0.53 x that MAD and spanned 35.4% of rows -- a genuinely narrow 'too small to matter' band. v2's tails are far heavier (excess kurtosis 18.3289) because Prompt 66 injects real shot xG values up to 0.897 for the 954 rows where a Shot follows the defensive action, while v2's BULK is much tighter (IQR 0.008829, MAD 0.003853). Because the translation is std-derived and std is inflated by exactly those tails, the margin barely moves (0.004929) while the distribution it is meant to describe more than halved: it is now 1.28 x the MAD, 0.56 x the IQR, and spans 53.4% of all rows. A flat band covering the majority of the data is not doing its job. The literal translated margin is KEPT as the headline number so v1-vs-v2 comparisons stay like-for-like and the xg suite's convention is still the one being followed, but the MAD-derived robust alternative (0.000482) is published beside it on every run and every shape classification in this suite should be read with this inflation in mind."
   },
-  "step_0_scope_note": "CONFIRMED BY READING THE SOURCE: reports/analysis/xg_target/CONFOUND_ANALYSIS.json's 5 tests are ALL passive-dataset tests on passive-only columns, produced by generate_confound_analysis_xg.py (2) and generate_confound_analysis_part_d_xg.py (3). Exactly one active-dataset confound test exists anywhere in this repo for any target -- 'defenders_within_10m_vs_box_proximity' in the binary portal, from generate_confound_analysis_part_a.py; the xg portal never received it. Test 1 below mirrors that test exactly. Test 2 is new and is labelled as new.",
-  "methodology": "Same quartile/boolean-stratification method as the binary and xg confound analyses. _verdict() is imported from generate_confound_analysis and reused BYTE-FOR-BYTE -- it compares only the SIGN of first-to-last deltas across strata, never a magnitude threshold, so it is target-scale-agnostic and needed no adaptation (the same reason generate_confound_analysis_xg.py reused it). QCUT_N=4 unchanged. Only the table builders differ: mean target_xt_delta instead of a shot-rate percentage, with the negative/zero/positive shares added. Each test carries a 'given_nonzero_delta' sub-object in place of the xg version's 'given_shot' -- this target's structural-zero analogue (Adaptation 2).",
-  "prompt_64_cross_references": {
-    "clearance_action_x_artefact": "Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.1/3.4): for Clearance events, action_x/action_y -- this target's definition of the post-action location, and therefore of xt_after -- is the location the clearance was taken FROM, not where the ball ends up. Last-ditch clearances are very often taken deep in the defending box, a high-xT cell by construction, so Clearance rows carry a systematically negative delta even though a clearance is a good defensive outcome. Prompt 64 measured this directly at -0.0315 mean delta for Clearance inside the action_ended_possession slice, against +0.0009 to +0.0076 for every other event type there. This is a measurement artefact of the xt_after definition, NOT evidence that clearances are bad defending.",
-    "distribution_shape": "Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.2): target_xt_delta is roughly symmetric (skew +0.093), heavy-tailed (excess kurtosis 8.85), 47.0% negative / 41.7% positive / 11.3% exactly zero. This is a fundamentally different shape from target_future_xg_10s, which is strictly non-negative, zero-inflated and heavily right-skewed. Any methodology that assumed non-negativity had to be adapted explicitly -- see this module's Adaptation 1/2/3 notes, restated in every report."
+  "step_0_scope_note": "CONFIRMED BY READING THE SOURCE, unchanged from the v1 edition: reports/analysis/xg_target/CONFOUND_ANALYSIS.json's 5 tests are ALL passive-dataset tests on passive-only columns. Exactly one active-dataset confound test exists anywhere in this repo for any target -- 'defenders_within_10m_vs_box_proximity' in the binary portal, from generate_confound_analysis_part_a.py; the xg portal never received it. Test 1 mirrors that test exactly.",
+  "v2_rebuild_note": "Test 1's specification is unchanged from the v1 edition. Test 2 keeps v1's columns and method but RESTATES ITS QUESTION: v1 asked whether Clearance's negative mean delta survives conditioning, and under the corrected xt_after that mean is positive, so the v1 question is about nothing. Test 3 is NEW and tests a mechanism Prompt 66 introduced -- whether Clearance's positive mean is itself an artefact of the xt_after = 0 construction rule. The v1 edition is preserved at reports/analysis/xt_target_v1_superseded/CONFOUND_ANALYSIS.html.",
+  "methodology": "Same quartile/boolean-stratification method as the binary and xg confound analyses. _verdict() is imported from generate_confound_analysis and reused BYTE-FOR-BYTE -- it compares only the SIGN of first-to-last deltas across strata, never a magnitude threshold, so it is target-scale-agnostic. That property was re-checked rather than assumed for v2 and is exactly why this report needed no threshold adjustment despite v2's much heavier tails: a sign comparison cannot be distorted by kurtosis. QCUT_N=4 unchanged. Table builders and the 'given_nonzero_delta' sub-object are imported unchanged from the v1 edition's generate_confound_analysis_xt.",
+  "prompt_66_cross_references": {
+    "clearance_reversal": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.2): Prompt 64's Clearance artefact -- Clearance looking like the WORST event type because xt_after was looked up at the clearance's own deep-in-the-box location -- is not merely reduced under the corrected xt_after, it FULLY REVERSES. Clearance moves from 8th of 8 event types (worst) at -0.0325 mean delta under v1 to 1st of 8 (best) at +0.0247 under v2, and in the motivating action_ended_possession slice from -0.0315 to +0.0406. The mechanism is understood, not assumed: possession-ending clearances now get xt_after = 0 by construction, so the dangerous coordinate is never looked up at all. Any v1-era statement that Clearance ranks last, or that clearances carry a systematically negative delta, is superseded and must not be repeated. (Aside recorded by Prompt 66 and not chased here: Block, at -0.0185, is now the lowest-mean event type under v2.)",
+    "distribution_shape": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.3): target_xt_delta_v2's mean flips from v1's slightly negative -0.00132 to a clearly positive +0.00338 -- on average, active defensive actions now genuinely deny threat, the football-sensible direction v1 never achieved. But the shape got HARDER, not easier: skew moves from +0.093 (near-symmetric) to -0.306 (mildly left-skewed) and excess kurtosis from 8.85 to 18.33 (much heavier tails), while the exactly-zero share rises from 11.3% to 20.2% and the negative share falls from 47.0% to 35.4%. The heavier tails are a direct, understood consequence of injecting real shot_statsbomb_xg values (up to 0.897) as xt_after for the 954 rows -- 1.9% of continuing-possession rows -- where a Shot immediately follows the defensive action; the 96-cell xT grid's own maximum cell is only 0.2575, so it could never produce such values. This REINFORCES rather than resolves Prompt 64's open flag that the existing hurdle architecture does not fit this target's shape as-is: v2 is if anything less like that shape than v1 was.",
+    "possession_ending_collapse": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.1): on the two possession-ending slices, target_xt_delta_v2 collapses EXACTLY onto xt_before's own distribution -- action_ended_possession == True (n=4,656) mean +0.03051, action_won_possession == True (n=3,600) mean +0.03066, both confirmed identical to the same slice's xt_before mean with np.allclose. This is logically REQUIRED, not a new degenerate finding: xt_after is forced to 0.0 for exactly these rows, so the delta is xt_before by construction -- '100% of the threat that existed a moment ago is denied'. Unlike the old target_future_shot_10s, which collapsed these same rows to an identical uninformative zero, this collapses to a real, row-by-row varying distribution (mean +0.031, std ~0.050): the actual danger level that was denied. Any report that shows these slices must present the identity as construction, not as discovery."
   },
   "tests": [
     {
@@ -48,40 +71,40 @@
       "marginal_type": "numeric",
       "confound_type": "boolean",
       "proposed_confound_reason": "more nearby defenders correlating with more danger (not less) is opposite naive intuition -- plausibly because defenders converge precisely when the situation is already dangerous (box proximity)",
-      "provenance": "MIRROR of the only active-dataset confound test that exists anywhere in this repo: reports/analysis/shot_target/CONFOUND_ANALYSIS.json's 'defenders_within_10m_vs_box_proximity', added by generate_confound_analysis_part_a.py. The xg portal never received it -- its own CONFOUND_ANALYSIS.json holds 5 passive-only tests. Same marginal column, same quartile labels, same live confound-selection rule, same reliability caveat, run against target_xt_delta.",
-      "n_rows_used": 56036,
+      "provenance": "MIRROR of the only active-dataset confound test that exists anywhere in this repo: reports/analysis/shot_target/CONFOUND_ANALYSIS.json's 'defenders_within_10m_vs_box_proximity', added by generate_confound_analysis_part_a.py. The xg portal never received it. Same marginal column, same quartile labels, same live confound-selection rule, same reliability caveat. This test's SPECIFICATION is unchanged from the v1 edition of this report -- only the target it runs against differs, so the two portals' cells are directly comparable.",
+      "n_rows_used": 55761,
       "marginal_table": [
         {
           "bin": "Q1 fewest",
-          "n": 20190,
-          "rate": 0.00246607,
-          "pct_zero": 8.22,
-          "pct_negative": 47.29,
-          "pct_positive": 44.49
+          "n": 20086,
+          "rate": 0.00310057,
+          "pct_zero": 24.07,
+          "pct_negative": 33.68,
+          "pct_positive": 42.25
         },
         {
           "bin": "Q2",
-          "n": 10523,
-          "rate": -0.00209381,
-          "pct_zero": 13.01,
-          "pct_negative": 47.08,
-          "pct_positive": 39.91
+          "n": 10480,
+          "rate": 0.00192187,
+          "pct_zero": 20.15,
+          "pct_negative": 36.29,
+          "pct_positive": 43.56
         },
         {
           "bin": "Q3",
-          "n": 6295,
-          "rate": -0.00477254,
-          "pct_zero": 13.68,
-          "pct_negative": 47.67,
-          "pct_positive": 38.65
+          "n": 6272,
+          "rate": 0.0017281,
+          "pct_zero": 17.35,
+          "pct_negative": 36.61,
+          "pct_positive": 46.05
         },
         {
           "bin": "Q4 most",
-          "n": 6170,
-          "rate": -0.02136112,
-          "pct_zero": 11.72,
-          "pct_negative": 50.06,
-          "pct_positive": 38.22
+          "n": 6124,
+          "rate": 0.00016487,
+          "pct_zero": 13.91,
+          "pct_negative": 40.45,
+          "pct_positive": 45.64
         }
       ],
       "stratified_table": [
@@ -90,76 +113,76 @@
           "bins": [
             {
               "bin": "Q1 fewest",
-              "n": 19019,
-              "rate": 0.00722843,
-              "pct_zero": 8.54,
-              "pct_negative": 44.43,
-              "pct_positive": 47.03
+              "n": 18925,
+              "rate": 0.00366821,
+              "pct_zero": 24.21,
+              "pct_negative": 33.71,
+              "pct_positive": 42.08
             },
             {
               "bin": "Q2",
-              "n": 9785,
-              "rate": 0.00366239,
-              "pct_zero": 13.47,
-              "pct_negative": 43.86,
-              "pct_positive": 42.67
+              "n": 9748,
+              "rate": 0.0033529,
+              "pct_zero": 20.92,
+              "pct_negative": 35.35,
+              "pct_positive": 43.73
             },
             {
               "bin": "Q3",
-              "n": 5500,
-              "rate": 0.00840368,
-              "pct_zero": 14.62,
-              "pct_negative": 41.55,
-              "pct_positive": 43.84
+              "n": 5482,
+              "rate": 0.00564638,
+              "pct_zero": 18.52,
+              "pct_negative": 34.22,
+              "pct_positive": 47.26
             },
             {
               "bin": "Q4 most",
-              "n": 4148,
-              "rate": 0.03337664,
-              "pct_zero": 12.8,
-              "pct_negative": 31.97,
-              "pct_positive": 55.23
+              "n": 4125,
+              "rate": 0.01554898,
+              "pct_zero": 16.0,
+              "pct_negative": 32.17,
+              "pct_positive": 51.83
             }
           ],
-          "first_to_last_delta_pp": 0.02614821
+          "first_to_last_delta_pp": 0.01188077
         },
         {
           "stratum": "True",
           "bins": [
             {
               "bin": "Q1 fewest",
-              "n": 1171,
-              "rate": -0.07488268,
-              "pct_zero": 2.99,
-              "pct_negative": 93.68,
-              "pct_positive": 3.33
+              "n": 1161,
+              "rate": -0.00615229,
+              "pct_zero": 21.79,
+              "pct_negative": 33.16,
+              "pct_positive": 45.05
             },
             {
               "bin": "Q2",
-              "n": 738,
-              "rate": -0.07841414,
-              "pct_zero": 6.91,
-              "pct_negative": 89.7,
-              "pct_positive": 3.39
+              "n": 732,
+              "rate": -0.01713502,
+              "pct_zero": 9.97,
+              "pct_negative": 48.77,
+              "pct_positive": 41.26
             },
             {
               "bin": "Q3",
-              "n": 795,
-              "rate": -0.09592878,
-              "pct_zero": 7.17,
-              "pct_negative": 90.06,
-              "pct_positive": 2.77
+              "n": 790,
+              "rate": -0.02546176,
+              "pct_zero": 9.24,
+              "pct_negative": 53.16,
+              "pct_positive": 37.59
             },
             {
               "bin": "Q4 most",
-              "n": 2022,
-              "rate": -0.13365203,
-              "pct_zero": 9.5,
-              "pct_negative": 87.19,
-              "pct_positive": 3.31
+              "n": 1999,
+              "rate": -0.03158071,
+              "pct_zero": 9.6,
+              "pct_negative": 57.53,
+              "pct_positive": 32.87
             }
           ],
-          "first_to_last_delta_pp": -0.05876935
+          "first_to_last_delta_pp": -0.02542842
         }
       ],
       "verdict": {
@@ -178,40 +201,40 @@
         "marginal_type": "numeric",
         "confound_type": "boolean",
         "proposed_confound_reason": "more nearby defenders correlating with more danger (not less) is opposite naive intuition -- plausibly because defenders converge precisely when the situation is already dangerous (box proximity)",
-        "provenance": "MIRROR of the only active-dataset confound test that exists anywhere in this repo: reports/analysis/shot_target/CONFOUND_ANALYSIS.json's 'defenders_within_10m_vs_box_proximity', added by generate_confound_analysis_part_a.py. The xg portal never received it -- its own CONFOUND_ANALYSIS.json holds 5 passive-only tests. Same marginal column, same quartile labels, same live confound-selection rule, same reliability caveat, run against target_xt_delta.",
-        "n_rows_used": 49699,
+        "provenance": "MIRROR of the only active-dataset confound test that exists anywhere in this repo: reports/analysis/shot_target/CONFOUND_ANALYSIS.json's 'defenders_within_10m_vs_box_proximity', added by generate_confound_analysis_part_a.py. The xg portal never received it. Same marginal column, same quartile labels, same live confound-selection rule, same reliability caveat. This test's SPECIFICATION is unchanged from the v1 edition of this report -- only the target it runs against differs, so the two portals' cells are directly comparable.",
+        "n_rows_used": 44523,
         "marginal_table": [
           {
             "bin": "Q1 fewest",
-            "n": 18531,
-            "rate": 0.00268685,
+            "n": 15251,
+            "rate": 0.00408354,
             "pct_zero": 0.0,
-            "pct_negative": 51.52,
-            "pct_positive": 48.48
+            "pct_negative": 44.36,
+            "pct_positive": 55.64
           },
           {
             "bin": "Q2",
-            "n": 9154,
-            "rate": -0.00240694,
+            "n": 8368,
+            "rate": 0.00240693,
             "pct_zero": 0.0,
-            "pct_negative": 54.12,
-            "pct_positive": 45.88
+            "pct_negative": 45.45,
+            "pct_positive": 54.55
           },
           {
             "bin": "Q3",
-            "n": 5434,
-            "rate": -0.00552873,
+            "n": 5184,
+            "rate": 0.00209079,
             "pct_zero": 0.0,
-            "pct_negative": 55.23,
-            "pct_positive": 44.77
+            "pct_negative": 44.29,
+            "pct_positive": 55.71
           },
           {
             "bin": "Q4 most",
-            "n": 5447,
-            "rate": -0.02419646,
+            "n": 5272,
+            "rate": 0.00019152,
             "pct_zero": 0.0,
-            "pct_negative": 56.71,
-            "pct_positive": 43.29
+            "pct_negative": 46.98,
+            "pct_positive": 53.02
           }
         ],
         "stratified_table": [
@@ -220,76 +243,76 @@
             "bins": [
               {
                 "bin": "Q1 fewest",
-                "n": 17395,
-                "rate": 0.00790328,
+                "n": 14343,
+                "rate": 0.00484005,
                 "pct_zero": 0.0,
-                "pct_negative": 48.58,
-                "pct_positive": 51.42
+                "pct_negative": 44.48,
+                "pct_positive": 55.52
               },
               {
                 "bin": "Q2",
-                "n": 8467,
-                "rate": 0.00423249,
+                "n": 7709,
+                "rate": 0.00423973,
                 "pct_zero": 0.0,
-                "pct_negative": 50.69,
-                "pct_positive": 49.31
+                "pct_negative": 44.7,
+                "pct_positive": 55.3
               },
               {
                 "bin": "Q3",
-                "n": 4696,
-                "rate": 0.00984247,
+                "n": 4467,
+                "rate": 0.00692936,
                 "pct_zero": 0.0,
-                "pct_negative": 48.66,
-                "pct_positive": 51.34
+                "pct_negative": 42.0,
+                "pct_positive": 58.0
               },
               {
                 "bin": "Q4 most",
-                "n": 3617,
-                "rate": 0.03827656,
+                "n": 3465,
+                "rate": 0.01851068,
                 "pct_zero": 0.0,
-                "pct_negative": 36.66,
-                "pct_positive": 63.34
+                "pct_negative": 38.3,
+                "pct_positive": 61.7
               }
             ],
-            "first_to_last_delta_pp": 0.03037328
+            "first_to_last_delta_pp": 0.01367063
           },
           {
             "stratum": "True",
             "bins": [
               {
                 "bin": "Q1 fewest",
-                "n": 1136,
-                "rate": -0.07718981,
+                "n": 908,
+                "rate": -0.00786653,
                 "pct_zero": 0.0,
-                "pct_negative": 96.57,
-                "pct_positive": 3.43
+                "pct_negative": 42.4,
+                "pct_positive": 57.6
               },
               {
                 "bin": "Q2",
-                "n": 687,
-                "rate": -0.08423528,
+                "n": 659,
+                "rate": -0.01903313,
                 "pct_zero": 0.0,
-                "pct_negative": 96.36,
-                "pct_positive": 3.64
+                "pct_negative": 54.17,
+                "pct_positive": 45.83
               },
               {
                 "bin": "Q3",
-                "n": 738,
-                "rate": -0.10333792,
+                "n": 717,
+                "rate": -0.0280541,
                 "pct_zero": 0.0,
-                "pct_negative": 97.02,
-                "pct_positive": 2.98
+                "pct_negative": 58.58,
+                "pct_positive": 41.42
               },
               {
                 "bin": "Q4 most",
-                "n": 1830,
-                "rate": -0.14767453,
+                "n": 1807,
+                "rate": -0.03493627,
                 "pct_zero": 0.0,
-                "pct_negative": 96.34,
-                "pct_positive": 3.66
+                "pct_negative": 63.64,
+                "pct_positive": 36.36
               }
             ],
-            "first_to_last_delta_pp": -0.07048472
+            "first_to_last_delta_pp": -0.02706974
           }
         ],
         "verdict": {
@@ -304,30 +327,30 @@
     },
     {
       "name": "clearance_vs_defending_box_proximity",
-      "title": "Clearance's negative mean delta vs defending-box proximity",
+      "title": "Clearance's POSITIVE mean delta vs defending-box proximity",
       "marginal_column": "event_type",
       "confound_column": "is_in_defending_box",
       "marginal_type": "category_indicator",
       "confound_type": "boolean",
-      "proposed_confound_reason": "Clearance's strongly negative mean delta is an artefact of WHERE clearances happen (deep in the defending box, a high-xT cell that xt_after scores as the post-action location), not of clearances themselves -- so conditioning on defending-box proximity should flatten it",
-      "provenance": "NEW TEST -- it has no counterpart in the xg or binary portals and is labelled as new rather than presented as an established one. It exists because Prompt 64's Clearance/action_x finding resurfaced in this portal's Category Atlas exactly as predicted (Clearance ranks last of 8 event_type categories), and the confound-testing method is the right established instrument in this suite for asking whether a marginal pattern survives conditioning.",
-      "n_rows_used": 56036,
+      "proposed_confound_reason": "clearances happen overwhelmingly deep in the defending box. Under v1 that location was scored AS xt_after, which is what made Clearance look like the worst event type. Under v2 the location is no longer scored at all, but it still selects WHICH situations become clearances -- so the question is whether Clearance's now-positive mean survives conditioning on where it happens, or whether it is a defending-box effect wearing a Clearance label",
+      "provenance": "RE-FRAMED, not re-pointed. The v1 edition of this report asked whether Clearance's NEGATIVE mean delta survives conditioning on defending-box proximity, and reached a 'partially' verdict. Under the corrected xt_after, Clearance's mean delta is POSITIVE and it ranks 1st of 8 rather than 8th, so the v1 question is no longer about anything that exists in the data. The same two columns and the same method are kept deliberately, so the v1 and v2 portals can be compared cell by cell; only the question the cells are asked has been restated to match the direction the data now runs in.",
+      "n_rows_used": 55761,
       "marginal_table": [
         {
           "bin": "not Clearance",
-          "n": 51852,
-          "rate": 0.00119904,
-          "pct_zero": 11.84,
-          "pct_negative": 46.51,
-          "pct_positive": 41.66
+          "n": 51665,
+          "rate": 0.00169072,
+          "pct_zero": 21.2,
+          "pct_negative": 35.16,
+          "pct_positive": 43.65
         },
         {
           "bin": "Clearance",
-          "n": 4184,
-          "rate": -0.03248186,
-          "pct_zero": 4.76,
-          "pct_negative": 53.15,
-          "pct_positive": 42.09
+          "n": 4096,
+          "rate": 0.02470618,
+          "pct_zero": 6.98,
+          "pct_negative": 38.84,
+          "pct_positive": 54.17
         }
       ],
       "stratified_table": [
@@ -336,80 +359,80 @@
           "bins": [
             {
               "bin": "not Clearance",
-              "n": 48161,
-              "rate": -0.00454933,
-              "pct_zero": 11.73,
-              "pct_negative": 49.48,
-              "pct_positive": 38.78
+              "n": 47998,
+              "rate": 0.00136112,
+              "pct_zero": 21.56,
+              "pct_negative": 35.36,
+              "pct_positive": 43.09
             },
             {
               "bin": "Clearance",
-              "n": 3034,
-              "rate": -0.07743293,
-              "pct_zero": 4.55,
-              "pct_negative": 71.19,
-              "pct_positive": 24.26
+              "n": 2973,
+              "rate": 0.00930714,
+              "pct_zero": 7.7,
+              "pct_negative": 46.05,
+              "pct_positive": 46.25
             }
           ],
-          "first_to_last_delta_pp": -0.0728836
+          "first_to_last_delta_pp": 0.00794602
         },
         {
           "stratum": "True",
           "bins": [
             {
               "bin": "not Clearance",
-              "n": 3691,
-              "rate": 0.07620507,
-              "pct_zero": 13.22,
-              "pct_negative": 7.64,
-              "pct_positive": 79.14
+              "n": 3667,
+              "rate": 0.00600491,
+              "pct_zero": 16.53,
+              "pct_negative": 32.48,
+              "pct_positive": 51.0
             },
             {
               "bin": "Clearance",
-              "n": 1150,
-              "rate": 0.08611081,
-              "pct_zero": 5.3,
-              "pct_negative": 5.57,
-              "pct_positive": 89.13
+              "n": 1123,
+              "rate": 0.06547316,
+              "pct_zero": 5.08,
+              "pct_negative": 19.77,
+              "pct_positive": 75.16
             }
           ],
-          "first_to_last_delta_pp": 0.00990574
+          "first_to_last_delta_pp": 0.05946825
         }
       ],
       "verdict": {
-        "verdict": "partially",
-        "verdict_meaning": "The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.",
-        "n_strata_reversal_survives": 1,
+        "verdict": "no",
+        "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
+        "n_strata_reversal_survives": 2,
         "n_strata_total": 2
       },
-      "prompt_64_link": "Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.1/3.4): for Clearance events, action_x/action_y -- this target's definition of the post-action location, and therefore of xt_after -- is the location the clearance was taken FROM, not where the ball ends up. Last-ditch clearances are very often taken deep in the defending box, a high-xT cell by construction, so Clearance rows carry a systematically negative delta even though a clearance is a good defensive outcome. Prompt 64 measured this directly at -0.0315 mean delta for Clearance inside the action_ended_possession slice, against +0.0009 to +0.0076 for every other event type there. This is a measurement artefact of the xt_after definition, NOT evidence that clearances are bad defending.",
-      "is_new_test": true,
+      "prompt_64_link": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.2): Prompt 64's Clearance artefact -- Clearance looking like the WORST event type because xt_after was looked up at the clearance's own deep-in-the-box location -- is not merely reduced under the corrected xt_after, it FULLY REVERSES. Clearance moves from 8th of 8 event types (worst) at -0.0325 mean delta under v1 to 1st of 8 (best) at +0.0247 under v2, and in the motivating action_ended_possession slice from -0.0315 to +0.0406. The mechanism is understood, not assumed: possession-ending clearances now get xt_after = 0 by construction, so the dangerous coordinate is never looked up at all. Any v1-era statement that Clearance ranks last, or that clearances carry a systematically negative delta, is superseded and must not be repeated. (Aside recorded by Prompt 66 and not chased here: Block, at -0.0185, is now the lowest-mean event type under v2.)",
+      "is_new_test": false,
       "given_nonzero_delta": {
         "name": "clearance_vs_defending_box_proximity",
-        "title": "Clearance's negative mean delta vs defending-box proximity",
+        "title": "Clearance's POSITIVE mean delta vs defending-box proximity",
         "marginal_column": "event_type",
         "confound_column": "is_in_defending_box",
         "marginal_type": "category_indicator",
         "confound_type": "boolean",
-        "proposed_confound_reason": "Clearance's strongly negative mean delta is an artefact of WHERE clearances happen (deep in the defending box, a high-xT cell that xt_after scores as the post-action location), not of clearances themselves -- so conditioning on defending-box proximity should flatten it",
-        "provenance": "NEW TEST -- it has no counterpart in the xg or binary portals and is labelled as new rather than presented as an established one. It exists because Prompt 64's Clearance/action_x finding resurfaced in this portal's Category Atlas exactly as predicted (Clearance ranks last of 8 event_type categories), and the confound-testing method is the right established instrument in this suite for asking whether a marginal pattern survives conditioning.",
-        "n_rows_used": 49699,
+        "proposed_confound_reason": "clearances happen overwhelmingly deep in the defending box. Under v1 that location was scored AS xt_after, which is what made Clearance look like the worst event type. Under v2 the location is no longer scored at all, but it still selects WHICH situations become clearances -- so the question is whether Clearance's now-positive mean survives conditioning on where it happens, or whether it is a defending-box effect wearing a Clearance label",
+        "provenance": "RE-FRAMED, not re-pointed. The v1 edition of this report asked whether Clearance's NEGATIVE mean delta survives conditioning on defending-box proximity, and reached a 'partially' verdict. Under the corrected xt_after, Clearance's mean delta is POSITIVE and it ranks 1st of 8 rather than 8th, so the v1 question is no longer about anything that exists in the data. The same two columns and the same method are kept deliberately, so the v1 and v2 portals can be compared cell by cell; only the question the cells are asked has been restated to match the direction the data now runs in.",
+        "n_rows_used": 44523,
         "marginal_table": [
           {
             "bin": "not Clearance",
-            "n": 45714,
-            "rate": 0.00136004,
+            "n": 40713,
+            "rate": 0.00214553,
             "pct_zero": 0.0,
-            "pct_negative": 52.75,
-            "pct_positive": 47.25
+            "pct_negative": 44.61,
+            "pct_positive": 55.39
           },
           {
             "bin": "Clearance",
-            "n": 3985,
-            "rate": -0.03410391,
+            "n": 3810,
+            "rate": 0.02656076,
             "pct_zero": 0.0,
-            "pct_negative": 55.81,
-            "pct_positive": 44.19
+            "pct_negative": 41.76,
+            "pct_positive": 58.24
           }
         ],
         "stratified_table": [
@@ -418,53 +441,221 @@
             "bins": [
               {
                 "bin": "not Clearance",
-                "n": 42511,
-                "rate": -0.00515396,
+                "n": 37652,
+                "rate": 0.00173513,
                 "pct_zero": 0.0,
-                "pct_negative": 56.06,
-                "pct_positive": 43.94
+                "pct_negative": 45.08,
+                "pct_positive": 54.92
               },
               {
                 "bin": "Clearance",
-                "n": 2896,
-                "rate": -0.08112276,
+                "n": 2744,
+                "rate": 0.01008387,
                 "pct_zero": 0.0,
-                "pct_negative": 74.59,
-                "pct_positive": 25.41
+                "pct_negative": 49.89,
+                "pct_positive": 50.11
               }
             ],
-            "first_to_last_delta_pp": -0.0759688
+            "first_to_last_delta_pp": 0.00834874
           },
           {
             "stratum": "True",
             "bins": [
               {
                 "bin": "not Clearance",
-                "n": 3203,
-                "rate": 0.08781546,
+                "n": 3061,
+                "rate": 0.00719373,
                 "pct_zero": 0.0,
-                "pct_negative": 8.8,
-                "pct_positive": 91.2
+                "pct_negative": 38.91,
+                "pct_positive": 61.09
               },
               {
                 "bin": "Clearance",
-                "n": 1089,
-                "rate": 0.09093428,
+                "n": 1066,
+                "rate": 0.06897407,
                 "pct_zero": 0.0,
-                "pct_negative": 5.88,
-                "pct_positive": 94.12
+                "pct_negative": 20.83,
+                "pct_positive": 79.17
               }
             ],
-            "first_to_last_delta_pp": 0.00311882
+            "first_to_last_delta_pp": 0.06178034
           }
         ],
         "verdict": {
-          "verdict": "partially",
-          "verdict_meaning": "The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.",
-          "n_strata_reversal_survives": 1,
+          "verdict": "no",
+          "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
+          "n_strata_reversal_survives": 2,
           "n_strata_total": 2
         },
-        "prompt_64_link": "Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.1/3.4): for Clearance events, action_x/action_y -- this target's definition of the post-action location, and therefore of xt_after -- is the location the clearance was taken FROM, not where the ball ends up. Last-ditch clearances are very often taken deep in the defending box, a high-xT cell by construction, so Clearance rows carry a systematically negative delta even though a clearance is a good defensive outcome. Prompt 64 measured this directly at -0.0315 mean delta for Clearance inside the action_ended_possession slice, against +0.0009 to +0.0076 for every other event type there. This is a measurement artefact of the xt_after definition, NOT evidence that clearances are bad defending.",
+        "prompt_64_link": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.2): Prompt 64's Clearance artefact -- Clearance looking like the WORST event type because xt_after was looked up at the clearance's own deep-in-the-box location -- is not merely reduced under the corrected xt_after, it FULLY REVERSES. Clearance moves from 8th of 8 event types (worst) at -0.0325 mean delta under v1 to 1st of 8 (best) at +0.0247 under v2, and in the motivating action_ended_possession slice from -0.0315 to +0.0406. The mechanism is understood, not assumed: possession-ending clearances now get xt_after = 0 by construction, so the dangerous coordinate is never looked up at all. Any v1-era statement that Clearance ranks last, or that clearances carry a systematically negative delta, is superseded and must not be repeated. (Aside recorded by Prompt 66 and not chased here: Block, at -0.0185, is now the lowest-mean event type under v2.)",
+        "is_new_test": false
+      }
+    },
+    {
+      "name": "clearance_vs_possession_ending_construction",
+      "title": "Clearance's positive mean delta vs the xt_after = 0 construction rule",
+      "marginal_column": "event_type",
+      "confound_column": "action_ended_possession",
+      "marginal_type": "category_indicator",
+      "confound_type": "boolean",
+      "proposed_confound_reason": "Prompt 66 sets xt_after = 0 for every action that ends its own possession, so those rows' delta is xt_before by construction and is positive wherever xt_before is. Clearances end their possession far more often than the average defensive action. Clearance's newly positive mean could therefore be a CONSTRUCTION effect -- an artefact of the fix -- rather than a football finding. This test asks whether the positive mean survives INSIDE each possession-outcome stratum, where the construction rule is held constant",
+      "provenance": "NEW TEST -- it has no counterpart in the v1 xT portal, the xg portal or the binary portal, and is labelled as new rather than presented as established. It could not have existed under v1, because the mechanism it tests (xt_after forced to 0 by a possession flag) was introduced by Prompt 66. The confound-testing method itself is the established instrument in this suite for asking whether a marginal pattern survives conditioning, so it is applied unchanged rather than replaced.",
+      "n_rows_used": 55761,
+      "marginal_table": [
+        {
+          "bin": "not Clearance",
+          "n": 51665,
+          "rate": 0.00169072,
+          "pct_zero": 21.2,
+          "pct_negative": 35.16,
+          "pct_positive": 43.65
+        },
+        {
+          "bin": "Clearance",
+          "n": 4096,
+          "rate": 0.02470618,
+          "pct_zero": 6.98,
+          "pct_negative": 38.84,
+          "pct_positive": 54.17
+        }
+      ],
+      "stratified_table": [
+        {
+          "stratum": "False",
+          "bins": [
+            {
+              "bin": "not Clearance",
+              "n": 47298,
+              "rate": -0.00090885,
+              "pct_zero": 23.16,
+              "pct_negative": 38.4,
+              "pct_positive": 38.44
+            },
+            {
+              "bin": "Clearance",
+              "n": 3807,
+              "rate": 0.02349808,
+              "pct_zero": 7.51,
+              "pct_negative": 41.79,
+              "pct_positive": 50.7
+            }
+          ],
+          "first_to_last_delta_pp": 0.02440693
+        },
+        {
+          "stratum": "True",
+          "bins": [
+            {
+              "bin": "not Clearance",
+              "n": 4367,
+              "rate": 0.02984604,
+              "pct_zero": 0.0,
+              "pct_negative": 0.0,
+              "pct_positive": 100.0
+            },
+            {
+              "bin": "Clearance",
+              "n": 289,
+              "rate": 0.04062044,
+              "pct_zero": 0.0,
+              "pct_negative": 0.0,
+              "pct_positive": 100.0
+            }
+          ],
+          "first_to_last_delta_pp": 0.0107744
+        }
+      ],
+      "verdict": {
+        "verdict": "no",
+        "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
+        "n_strata_reversal_survives": 2,
+        "n_strata_total": 2
+      },
+      "reliability_note": "Read the True stratum with care: inside action_ended_possession == True every row's delta EQUALS its own xt_before by construction (verified in this portal's Leakage Audit Part C' with np.allclose). That stratum is therefore not an independent measurement of clearing -- it is a measurement of how much threat existed a moment earlier. The informative comparison is the False stratum, where the construction rule does not apply.",
+      "prompt_64_link": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.1): on the two possession-ending slices, target_xt_delta_v2 collapses EXACTLY onto xt_before's own distribution -- action_ended_possession == True (n=4,656) mean +0.03051, action_won_possession == True (n=3,600) mean +0.03066, both confirmed identical to the same slice's xt_before mean with np.allclose. This is logically REQUIRED, not a new degenerate finding: xt_after is forced to 0.0 for exactly these rows, so the delta is xt_before by construction -- '100% of the threat that existed a moment ago is denied'. Unlike the old target_future_shot_10s, which collapsed these same rows to an identical uninformative zero, this collapses to a real, row-by-row varying distribution (mean +0.031, std ~0.050): the actual danger level that was denied. Any report that shows these slices must present the identity as construction, not as discovery.",
+      "is_new_test": true,
+      "given_nonzero_delta": {
+        "name": "clearance_vs_possession_ending_construction",
+        "title": "Clearance's positive mean delta vs the xt_after = 0 construction rule",
+        "marginal_column": "event_type",
+        "confound_column": "action_ended_possession",
+        "marginal_type": "category_indicator",
+        "confound_type": "boolean",
+        "proposed_confound_reason": "Prompt 66 sets xt_after = 0 for every action that ends its own possession, so those rows' delta is xt_before by construction and is positive wherever xt_before is. Clearances end their possession far more often than the average defensive action. Clearance's newly positive mean could therefore be a CONSTRUCTION effect -- an artefact of the fix -- rather than a football finding. This test asks whether the positive mean survives INSIDE each possession-outcome stratum, where the construction rule is held constant",
+        "provenance": "NEW TEST -- it has no counterpart in the v1 xT portal, the xg portal or the binary portal, and is labelled as new rather than presented as established. It could not have existed under v1, because the mechanism it tests (xt_after forced to 0 by a possession flag) was introduced by Prompt 66. The confound-testing method itself is the established instrument in this suite for asking whether a marginal pattern survives conditioning, so it is applied unchanged rather than replaced.",
+        "n_rows_used": 44523,
+        "marginal_table": [
+          {
+            "bin": "not Clearance",
+            "n": 40713,
+            "rate": 0.00214553,
+            "pct_zero": 0.0,
+            "pct_negative": 44.61,
+            "pct_positive": 55.39
+          },
+          {
+            "bin": "Clearance",
+            "n": 3810,
+            "rate": 0.02656076,
+            "pct_zero": 0.0,
+            "pct_negative": 41.76,
+            "pct_positive": 58.24
+          }
+        ],
+        "stratified_table": [
+          {
+            "stratum": "False",
+            "bins": [
+              {
+                "bin": "not Clearance",
+                "n": 36346,
+                "rate": -0.00118271,
+                "pct_zero": 0.0,
+                "pct_negative": 49.97,
+                "pct_positive": 50.03
+              },
+              {
+                "bin": "Clearance",
+                "n": 3521,
+                "rate": 0.02540676,
+                "pct_zero": 0.0,
+                "pct_negative": 45.19,
+                "pct_positive": 54.81
+              }
+            ],
+            "first_to_last_delta_pp": 0.02658947
+          },
+          {
+            "stratum": "True",
+            "bins": [
+              {
+                "bin": "not Clearance",
+                "n": 4367,
+                "rate": 0.02984604,
+                "pct_zero": 0.0,
+                "pct_negative": 0.0,
+                "pct_positive": 100.0
+              },
+              {
+                "bin": "Clearance",
+                "n": 289,
+                "rate": 0.04062044,
+                "pct_zero": 0.0,
+                "pct_negative": 0.0,
+                "pct_positive": 100.0
+              }
+            ],
+            "first_to_last_delta_pp": 0.0107744
+          }
+        ],
+        "verdict": {
+          "verdict": "no",
+          "verdict_meaning": "The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.",
+          "n_strata_reversal_survives": 2,
+          "n_strata_total": 2
+        },
+        "reliability_note": "Read the True stratum with care: inside action_ended_possession == True every row's delta EQUALS its own xt_before by construction (verified in this portal's Leakage Audit Part C' with np.allclose). That stratum is therefore not an independent measurement of clearing -- it is a measurement of how much threat existed a moment earlier. The informative comparison is the False stratum, where the construction rule does not apply.",
+        "prompt_64_link": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.1): on the two possession-ending slices, target_xt_delta_v2 collapses EXACTLY onto xt_before's own distribution -- action_ended_possession == True (n=4,656) mean +0.03051, action_won_possession == True (n=3,600) mean +0.03066, both confirmed identical to the same slice's xt_before mean with np.allclose. This is logically REQUIRED, not a new degenerate finding: xt_after is forced to 0.0 for exactly these rows, so the delta is xt_before by construction -- '100% of the threat that existed a moment ago is denied'. Unlike the old target_future_shot_10s, which collapsed these same rows to an identical uninformative zero, this collapses to a real, row-by-row varying distribution (mean +0.031, std ~0.050): the actual danger level that was denied. Any report that shows these slices must present the identity as construction, not as discovery.",
         "is_new_test": true
       }
     }

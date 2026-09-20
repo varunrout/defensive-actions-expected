@@ -1,0 +1,352 @@
+{
+  "leg": "active-binary only (passive leg out of scope for this target)",
+  "target": "target_xt_delta",
+  "confirmed_counts": {
+    "active": 34,
+    "active_expected": 34,
+    "active_matches_expected": true
+  },
+  "changes_since_last_full_run": [
+    {
+      "change": "defender_functional_role bucket fix",
+      "detail": "4 categories -> 5: added advanced_wide (the previously-missing deep x wide quadrant), renamed the residual n>=2 fallback from unclassified to mid_block. unclassified now reserved exclusively for n<2.",
+      "feature_count_impact": "none (category-count change on an existing categorical column, not a column add/drop)"
+    },
+    {
+      "change": "V2 methodology-gap fixes",
+      "detail": "Added a categorical REVIEW band to correlation.py's tiering and Type 5/Type 6 review resolution logic. V1 pipeline (correlation.py, generate_review_analysis.py) reverted to its pre-V2 state after a scoping correction; V2 lives in separate _v2-suffixed modules.",
+      "feature_count_impact": "none (V1 candidate lists untouched; V2 is a parallel analysis track)"
+    },
+    {
+      "change": "VIF drop",
+      "detail": "local_numerical_balance_5m/10m dropped from the active candidate list -- near-exact linear combination of attackers_within_Nm - defenders_within_Nm (already kept), invisible to pairwise correlation, caught by VIF (condition number ~1.36e15 pre-drop, unbounded VIF for 6 columns).",
+      "feature_count_impact": "active: 36 -> 34"
+    },
+    {
+      "change": "Leakage drop",
+      "detail": "has_screened_outcome dropped from the passive candidate list -- censoring-mechanism proxy for target_future_shot_10s's own 10s window being truncated at end-of-period/match (chi2=136.5, p=1.54e-31), not defensive signal.",
+      "feature_count_impact": "passive: 39 -> 38"
+    },
+    {
+      "change": "Football sanity check",
+      "detail": "Validation-only pass (recomputation checks against stored values). No feature-list or pipeline changes.",
+      "feature_count_impact": "none"
+    },
+    {
+      "change": "Passive archetype clustering",
+      "detail": "New analysis module (src/dax/analysis/passive_archetypes.py) clustering within each defender_functional_role bucket. Does not touch feature_config.py's candidate lists.",
+      "feature_count_impact": "none"
+    },
+    {
+      "change": "Canonical match-grouped split",
+      "detail": "Frozen TEST/CV match assignment for model training. Does not touch feature_config.py's candidate lists.",
+      "feature_count_impact": "none"
+    }
+  ],
+  "correlation_diff": {
+    "active": {
+      "n_pairs_before": 25,
+      "n_pairs_after": 25,
+      "n_added": 0,
+      "n_removed": 0,
+      "n_tier_changed": 0,
+      "added_pairs": [],
+      "removed_pairs": [],
+      "tier_changed_pairs": [],
+      "newly_risky_pairs": []
+    }
+  },
+  "correlation_diff_note": "IDENTICAL to reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json's active correlation_diff, by construction, not independently re-derived -- correlation clustering (feature vs feature) never references a target column, so re-running it against target_xt_delta would produce the exact same pairs and tiers. Reused directly rather than silently recomputed, so this file's numbers are traceable to that source. Same discipline generate_feature_lock_confirmation_xg.py applies.",
+  "diff_is_empty": true,
+  "any_newly_risky_pairs_found": false,
+  "leakage_confirmation_xt": {
+    "source": "reports/analysis/xt_target/LEAKAGE_AUDIT.json",
+    "scope_difference_from_xg": "The xg portal's lock confirmation folds in that portal's LEAKAGE_AUDIT Parts C and D, which are PASSIVE-only checks (has_screened_outcome, has_option_2/3). Neither column exists in the active parquet, so neither can be confirmed here. This portal's leakage audit substitutes active-side analogues and adds one new check; those are what is folded in below. Stated plainly rather than presented as the same confirmation.",
+    "part_a_verdict": "clean",
+    "part_b_prime_has_previous_event": {
+      "zero_share_gap_pp": 27.28,
+      "p_value_on_the_mean": 0.06453952902719132,
+      "verdict": "flagged -- real censoring-shaped effect, but on the ZERO SHARE rather than the mean",
+      "implication_for_the_lock": "has_previous_event stays a locked candidate feature. The finding is about how this target must be MEASURED (its effects can sit in the zero mass rather than the mean), not about whether the feature belongs in the list. A mean-difference test alone -- the instrument the xg audit uses -- returns p=0.0645 here and would have reported nothing, while the exactly-zero share differs by +27.3pp."
+    },
+    "part_c_prime_action_possession_flags": {
+      "columns": [
+        "action_changed_possession",
+        "action_ended_possession",
+        "action_won_possession"
+      ],
+      "verdicts": {
+        "action_changed_possession": "exclusion justification does NOT transfer to this target -- flagged, not reopened",
+        "action_ended_possession": "exclusion justification does NOT transfer to this target -- flagged, not reopened",
+        "action_won_possession": "exclusion justification does NOT transfer to this target -- flagged, not reopened"
+      },
+      "implication_for_the_lock": "These three columns remain EXCLUDED in feature_config.py and this document does not change that. What it records is that their stated exclusion reason -- 'structural zero (0.00% shot rate by target-window definition)' -- is specific to target_future_shot_10s and does not hold against target_xt_delta, where the same rows carry real row-level variance. Any future decision to model this target seriously would need to revisit that exclusion on its own merits; it is not revisited here."
+    },
+    "part_d_prime_construction_coupling": {
+      "strongest": {
+        "feature": "distance_to_attacking_box",
+        "r_vs_xt_after": -0.5123,
+        "r_vs_xt_before": 0.2647,
+        "r_vs_target": 0.5551
+      },
+      "verdict": "flagged -- construction coupling is real and must be stated when interpreting this atlas",
+      "implication_for_the_lock": "No feature is dropped on this evidence, and none is proposed for dropping. The locked set stays as-is. The finding is interpretive: because xt_after is looked up from action_x/action_y, location-derived locked features share a definitional term with half the target, so a strong correlation in the Numerical Target Atlas is partly recovery-by-definition rather than discovered defensive signal. This has no counterpart in the xg or binary confirmations, and is the single most important caveat this portal carries."
+    },
+    "verdict": "The locked ACTIVE feature set is internally unchanged for xT-delta work -- correlation/redundancy is target-agnostic, so nothing about the feature list moves. Two target-specific caveats are recorded rather than resolved: (1) construction coupling between location-derived features and xt_after, and (2) the fact that this target's effects can live in its zero mass, which a mean-difference test misses."
+  },
+  "pattern_analysis_findings": {
+    "source_note": "Every number in this section is read from this portal's own JSON outputs, not re-typed by hand and not carried over from the xg or binary portals. Where a finding has an xg or binary counterpart, the comparison is made in the individual report, not restated here.",
+    "target_shape": {
+      "target": "target_xt_delta",
+      "n_rows": 56068,
+      "n_defined": 56036,
+      "n_nan": 32,
+      "mean": -0.00131579,
+      "std": 0.06498593,
+      "skew": 0.0933,
+      "excess_kurtosis": 8.846,
+      "pct_zero": 11.309,
+      "pct_negative": 47.002,
+      "pct_positive": 41.689,
+      "xg_mean_same_rows": 0.00811039,
+      "xg_std_same_rows": 0.0480329,
+      "xg_flat_margin_absolute": 0.00405519,
+      "xg_flat_margin_as_fraction_of_xg_std": 0.084425,
+      "flat_margin": 0.00548646,
+      "range_trigger": 0.01097292,
+      "near_identical_threshold": 0.00548646,
+      "distinct_signal_threshold": 0.01645938,
+      "n_nonzero": 49699,
+      "mean_nonzero": -0.00148356,
+      "std_nonzero": 0.06900304,
+      "flat_margin_nonzero": 0.00582561,
+      "scale_note": "ADAPTATION 1. target_xt_delta is roughly symmetric with a near-zero, NEGATIVE mean (-0.001316), so the xg_target suite's convention of expressing every threshold as a multiple of the overall mean target value is meaningless here (it would flip signs and collapse to nothing). Instead the xg convention is TRANSLATED, not replaced: xg's own flat_margin (0.5 x mean xg = 0.004055 on these same rows) is re-expressed as a fraction of xg's own standard deviation (0.048033), giving 0.084425, and that fraction is applied to target_xt_delta's standard deviation (0.064986). Every number in this calculation is computed at runtime from the real parquet, not carried over from a writeup. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged.",
+      "conditional_panel_note": "ADAPTATION 2. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta has no shot column behind it; its structural-zero analogue is the 11.3% of rows with an EXACTLY zero delta (the action did not cross an xT grid-cell boundary). The conditional panel throughout this suite is therefore 'given a non-zero delta' (target_xt_delta != 0), never 'given a shot'.",
+      "direction_note": "ADAPTATION 3. Sign carries the football meaning: POSITIVE target_xt_delta = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. Rankings are by |magnitude| across BOTH directions, never one-sided 'higher is worse' lift, and every table also reports the negative/positive/zero share behind its mean.",
+      "log_transform_note": "NOT an adaptation: checked directly rather than assumed -- the xg_target report suite never log-transforms its target anywhere (every xg report uses the raw groupby mean of target_future_xg_10s). The log1p framing in this project belongs to the modelling legs, not to this report suite, so there was no log-transform to remove."
+    },
+    "numerical_vs_target_rankings": {
+      "active_top": [
+        {
+          "feature": "distance_to_attacking_box",
+          "spearman_rho": 0.8397,
+          "shape": "monotonic increasing",
+          "binned_curve_crosses_zero": true
+        },
+        {
+          "feature": "distance_to_defending_box",
+          "spearman_rho": -0.8383,
+          "shape": "monotonic decreasing",
+          "binned_curve_crosses_zero": true
+        },
+        {
+          "feature": "distance_to_attacking_goal",
+          "spearman_rho": 0.8352,
+          "shape": "monotonic increasing",
+          "binned_curve_crosses_zero": true
+        },
+        {
+          "feature": "distance_to_defending_goal",
+          "spearman_rho": -0.8326,
+          "shape": "monotonic decreasing",
+          "binned_curve_crosses_zero": true
+        },
+        {
+          "feature": "attacker_centroid_x",
+          "spearman_rho": -0.753,
+          "shape": "monotonic decreasing",
+          "binned_curve_crosses_zero": true
+        }
+      ],
+      "n_curves_crossing_zero": 31,
+      "n_features": 31,
+      "n_train_test_inconsistent": 4,
+      "note": "Top 5 of the reconstructed ACTIVE pool by |Spearman rho|, read from the atlas's own sort order. Ranking is by ABSOLUTE rho in both directions -- on this target a strong negative rho is as much a finding as a strong positive one."
+    },
+    "category_atlas": {
+      "clearance_rank": "8 of 8 event_type categories",
+      "clearance_mean_xt": -0.03248185542543021,
+      "clearance_n": 4184,
+      "clearance_pct_negative": 53.15,
+      "finding": "Prompt 64's Clearance/action_x artefact resurfaces exactly where it was predicted to: Clearance ranks 8 of 8 event_type categories at -0.032482 mean delta over n=4,184 rows (53.1% negative). Prompt 64 measured -0.0315 inside the action_ended_possession slice; this is the same artefact on the full active dataset."
+    },
+    "flag_ledger": {
+      "top_by_abs_lift": [
+        {
+          "column": "is_in_attacking_box",
+          "lift": -0.11062110240377439,
+          "mean_xt_true": -0.10032715970753274,
+          "mean_xt_false": 0.010293942696241652,
+          "n_true": 5881
+        },
+        {
+          "column": "is_in_defending_box",
+          "lift": 0.08742689064993615,
+          "mean_xt_true": 0.07855821858293742,
+          "mean_xt_false": -0.00886867206699873,
+          "n_true": 4841
+        },
+        {
+          "column": "is_high_zone",
+          "lift": -0.06915079462916042,
+          "mean_xt_true": -0.05379837024579848,
+          "mean_xt_false": 0.01535242438336194,
+          "n_true": 13507
+        },
+        {
+          "column": "is_deep_zone",
+          "lift": 0.065508209526458,
+          "mean_xt_true": 0.050820968630005244,
+          "mean_xt_false": -0.014687240896452755,
+          "n_true": 11438
+        },
+        {
+          "column": "has_visible_defender",
+          "lift": -0.01655808636736767,
+          "mean_xt_true": -0.0013382422884203001,
+          "mean_xt_false": 0.01521984407894737,
+          "n_true": 55960
+        }
+      ],
+      "possession_flags_no_longer_degenerate": {
+        "action_changed_possession": {
+          "mean_xt_true": -0.0012112507560137458,
+          "n_true": 4656,
+          "pct_zero_true": 23.52,
+          "lift": 0.00011400706395511373
+        },
+        "action_ended_possession": {
+          "mean_xt_true": -0.0012112507560137458,
+          "n_true": 4656,
+          "pct_zero_true": 23.52,
+          "lift": 0.00011400706395511373
+        },
+        "action_won_possession": {
+          "mean_xt_true": -0.003521255025,
+          "n_true": 3600,
+          "pct_zero_true": 21.0,
+          "lift": -0.0023568868004977496
+        }
+      },
+      "possession_flags_off_pool_note": "These columns are NOT rows in `columns` above, and that is not an oversight. This ledger is built from the reconstructed pre-drop 51-era pool (feature_config_v1_historical.ACTIVE_V1_HISTORICAL), and all three were already out of the candidate list before that snapshot -- so the ledger's own pool construction, mirrored unchanged from generate_reports_xg.py, cannot surface them. Prompt 64's motivating finding (they stop being degenerate zeros on this target) would therefore have disappeared on a technicality. The same boolean_xt_lift function used for every pooled row was run on them off-pool instead, and the gap is stated in the rendered report rather than omitted. Observation only -- these columns remain excluded in feature_config.py."
+    },
+    "confound_tests": {
+      "n_tests": 2,
+      "tests": [
+        {
+          "name": "defenders_within_10m_vs_box_proximity",
+          "title": "defenders_within_10m vs box proximity",
+          "verdict": "partially",
+          "verdict_given_nonzero_delta": "partially",
+          "is_new_test": false
+        },
+        {
+          "name": "clearance_vs_defending_box_proximity",
+          "title": "Clearance's negative mean delta vs defending-box proximity",
+          "verdict": "partially",
+          "verdict_given_nonzero_delta": "partially",
+          "is_new_test": true
+        }
+      ],
+      "note": "CONFIRMED BY READING THE SOURCE: reports/analysis/xg_target/CONFOUND_ANALYSIS.json's 5 tests are ALL passive-dataset tests on passive-only columns, produced by generate_confound_analysis_xg.py (2) and generate_confound_analysis_part_d_xg.py (3). Exactly one active-dataset confound test exists anywhere in this repo for any target -- 'defenders_within_10m_vs_box_proximity' in the binary portal, from generate_confound_analysis_part_a.py; the xg portal never received it. Test 1 below mirrors that test exactly. Test 2 is new and is labelled as new."
+    },
+    "tournament_stability": {
+      "n_features": 6,
+      "features": [
+        {
+          "feature": "defenders_within_10m",
+          "verdict": "genuine tournament-level difference"
+        },
+        {
+          "feature": "defenders_within_5m",
+          "verdict": "genuine tournament-level difference"
+        },
+        {
+          "feature": "events_elapsed_in_possession",
+          "verdict": "arbitrary train/test noise"
+        },
+        {
+          "feature": "local_numerical_balance_5m",
+          "verdict": "arbitrary train/test noise"
+        },
+        {
+          "feature": "match_time_seconds",
+          "verdict": "arbitrary train/test noise"
+        },
+        {
+          "feature": "attackers_within_5m",
+          "verdict": "genuine tournament-level difference"
+        }
+      ],
+      "n_genuine": 3
+    },
+    "slice_stratification": {
+      "v1": {
+        "n_cells": 72,
+        "n_genuine_divergences": 295,
+        "n_genuine_divergences_given_nonzero_delta": 289,
+        "n_conditioning_disagreements": 20
+      },
+      "v2": {
+        "n_cells": 108,
+        "n_genuine_divergences": 149,
+        "n_genuine_divergences_given_nonzero_delta": 144,
+        "archetype_comparison": "NOT APPLICABLE -- see archetype_slicer_not_applicable."
+      }
+    },
+    "numeric_interaction": {
+      "n_pairs": 5,
+      "n_agree": 5,
+      "n_sign_flipping": 4,
+      "pairs": [
+        {
+          "feature_a": "defenders_within_10m",
+          "feature_b": "distance_to_attacking_box",
+          "classification": "interactive",
+          "within_stratum_deltas_change_sign": true
+        },
+        {
+          "feature_a": "defenders_between_ball_and_attacking_goal",
+          "feature_b": "attacker_defender_ratio",
+          "classification": "interactive",
+          "within_stratum_deltas_change_sign": false
+        },
+        {
+          "feature_a": "defenders_within_5m",
+          "feature_b": "defenders_within_10m",
+          "classification": "substitutive",
+          "within_stratum_deltas_change_sign": true
+        },
+        {
+          "feature_a": "visible_defender_count",
+          "feature_b": "attacker_spread",
+          "classification": "inconclusive",
+          "within_stratum_deltas_change_sign": true
+        },
+        {
+          "feature_a": "possession_elapsed_seconds",
+          "feature_b": "match_time_seconds",
+          "classification": "inconclusive",
+          "within_stratum_deltas_change_sign": true
+        }
+      ]
+    },
+    "review_tier": {
+      "n_review_pairs": 57,
+      "n_needs_human_call": 35,
+      "n_type2_opposite_sign": 1
+    },
+    "cross_referenced_target_independent_sections": {
+      "correlation_atlas_v1_v2_v3": "Not rebuilt. Correlation clustering is feature-vs-feature and never references a target -- re-running it against target_xt_delta would produce byte-identical pairs and tiers. Linked from this portal's index to reports/analysis/xg_target/ as-is.",
+      "vif": "Not rebuilt -- multicollinearity is a property of the feature matrix alone. Linked as-is.",
+      "slicer_redundancy": "Not rebuilt -- slicer-vs-slicer redundancy, no target term. Linked as-is.",
+      "player_level_validity": "Not rebuilt -- row concentration and player overlap, no target term. Linked as-is.",
+      "player_grouped_split_check": "Not rebuilt -- an identity-leakage stress test on the split itself. Linked as-is."
+    }
+  },
+  "prompt_64_cross_references": {
+    "clearance_action_x_artefact": "Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.1/3.4): for Clearance events, action_x/action_y -- this target's definition of the post-action location, and therefore of xt_after -- is the location the clearance was taken FROM, not where the ball ends up. Last-ditch clearances are very often taken deep in the defending box, a high-xT cell by construction, so Clearance rows carry a systematically negative delta even though a clearance is a good defensive outcome. Prompt 64 measured this directly at -0.0315 mean delta for Clearance inside the action_ended_possession slice, against +0.0009 to +0.0076 for every other event type there. This is a measurement artefact of the xt_after definition, NOT evidence that clearances are bad defending.",
+    "distribution_shape": "Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.2): target_xt_delta is roughly symmetric (skew +0.093), heavy-tailed (excess kurtosis 8.85), 47.0% negative / 41.7% positive / 11.3% exactly zero. This is a fundamentally different shape from target_future_xg_10s, which is strictly non-negative, zero-inflated and heavily right-skewed. Any methodology that assumed non-negativity had to be adapted explicitly -- see this module's Adaptation 1/2/3 notes, restated in every report."
+  },
+  "verdict": "The locked ACTIVE feature set (34 features) is confirmed internally consistent for xT-delta work -- same count as the binary and xG confirmations, since feature_config.py is not target-specific and correlation/redundancy is target-agnostic. No feature is added, dropped or re-tiered by this document. Two target-specific caveats are RECORDED, not resolved: construction coupling between location-derived locked features and the target's own xt_after term (the single most important caveat this portal carries, with no xG or binary counterpart), and the fact that this target's effects can sit in its exactly-zero mass where a mean-difference test will miss them."
+}

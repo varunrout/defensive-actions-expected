@@ -575,22 +575,22 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <p class="eyebrow">CONFOUND ANALYSIS -- XT DELTA &amp;middot; ACTIVE-BINARY LEG ONLY</p>
   <h1 class="title">Active Dataset Confound (Reversal) Testing (xT delta)</h1>
   <p class="dek">One test mirrored from the only active confound test that exists in this repo, one new test motivated by Prompt 64's Clearance/action_x finding. The verdict function is reused byte-for-byte (sign-only, already target-scale-agnostic); each test carries a non-zero-delta panel in place of the xg version's shot-conditional one. Active-binary leg only.</p>
-  <div class="statbar"><div class="stat"><b>56,068</b><span>rows (active)</span></div><div class="stat"><b>2</b><span>tests</span></div><div class="stat"><b>1</b><span>mirrored / 1 new</span></div><div class="stat"><b>1</b><span>diverge from binary-target verdict</span></div></div>
+  <div class="statbar"><div class="stat"><b>56,068</b><span>rows (active)</span></div><div class="stat"><b>3</b><span>tests</span></div><div class="stat"><b>1</b><span>mirrored / 1 new</span></div><div class="stat"><b>1</b><span>diverge from binary-target verdict</span></div></div>
 </div></div>
 <div class="wrap">
 <div class="article">
 
-<div class="rule-banner"><b>Scope, confirmed by reading the source.</b> CONFIRMED BY READING THE SOURCE: reports/analysis/xg_target/CONFOUND_ANALYSIS.json&#x27;s 5 tests are ALL passive-dataset tests on passive-only columns, produced by generate_confound_analysis_xg.py (2) and generate_confound_analysis_part_d_xg.py (3). Exactly one active-dataset confound test exists anywhere in this repo for any target -- &#x27;defenders_within_10m_vs_box_proximity&#x27; in the binary portal, from generate_confound_analysis_part_a.py; the xg portal never received it. Test 1 below mirrors that test exactly. Test 2 is new and is labelled as new.</div>
+<div class="rule-banner"><b>Scope, confirmed by reading the source.</b> CONFIRMED BY READING THE SOURCE, unchanged from the v1 edition: reports/analysis/xg_target/CONFOUND_ANALYSIS.json&#x27;s 5 tests are ALL passive-dataset tests on passive-only columns. Exactly one active-dataset confound test exists anywhere in this repo for any target -- &#x27;defenders_within_10m_vs_box_proximity&#x27; in the binary portal, from generate_confound_analysis_part_a.py; the xg portal never received it. Test 1 mirrors that test exactly.</div>
 <div class="rule-banner" style="margin-top:16px;"><b>Method, and what did and did not need adapting.</b>
-Same quartile/boolean-stratification method as the binary and xg confound analyses. _verdict() is imported from generate_confound_analysis and reused BYTE-FOR-BYTE -- it compares only the SIGN of first-to-last deltas across strata, never a magnitude threshold, so it is target-scale-agnostic and needed no adaptation (the same reason generate_confound_analysis_xg.py reused it). QCUT_N=4 unchanged. Only the table builders differ: mean target_xt_delta instead of a shot-rate percentage, with the negative/zero/positive shares added. Each test carries a &#x27;given_nonzero_delta&#x27; sub-object in place of the xg version&#x27;s &#x27;given_shot&#x27; -- this target&#x27;s structural-zero analogue (Adaptation 2).</div>
-<div class="rule-banner" style="margin-top:16px;"><b>Reading the numbers.</b> ADAPTATION 3. Sign carries the football meaning: POSITIVE target_xt_delta = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. Rankings are by |magnitude| across BOTH directions, never one-sided &#x27;higher is worse&#x27; lift, and every table also reports the negative/positive/zero share behind its mean.</div>
+Same quartile/boolean-stratification method as the binary and xg confound analyses. _verdict() is imported from generate_confound_analysis and reused BYTE-FOR-BYTE -- it compares only the SIGN of first-to-last deltas across strata, never a magnitude threshold, so it is target-scale-agnostic. That property was re-checked rather than assumed for v2 and is exactly why this report needed no threshold adjustment despite v2&#x27;s much heavier tails: a sign comparison cannot be distorted by kurtosis. QCUT_N=4 unchanged. Table builders and the &#x27;given_nonzero_delta&#x27; sub-object are imported unchanged from the v1 edition&#x27;s generate_confound_analysis_xt.</div>
+<div class="rule-banner" style="margin-top:16px;"><b>Reading the numbers.</b> ADAPTATION 3, unchanged in method and re-measured on v2. Sign carries the football meaning: POSITIVE target_xt_delta_v2 = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. On v2 the balance shifts markedly towards the defence -- 44.4% positive vs 35.4% negative, where v1 was 41.7% / 47.0% -- but the target is NO LONGER close to symmetric (skew -0.306, vs v1&#x27;s +0.093), so two-directional framing matters more here, not less. Rankings are by |magnitude| across BOTH directions, and every table also reports the negative/positive/zero share behind its mean.</div>
 
 <div class="test-block">
   <h2 class="test-title">defenders_within_10m vs box proximity (xT delta)</h2>
   <p class="test-subnote">Marginal: <code>defenders_within_10m</code> (numeric)
   vs proposed confound: <code>is_in_attacking_box</code> (boolean) --
   more nearby defenders correlating with more danger (not less) is opposite naive intuition -- plausibly because defenders converge precisely when the situation is already dangerous (box proximity)</p>
-  <div class="finding"><span class="tag">provenance</span><p><b>mirrored or new -- said which</b> &mdash; MIRROR of the only active-dataset confound test that exists anywhere in this repo: reports/analysis/shot_target/CONFOUND_ANALYSIS.json&#x27;s &#x27;defenders_within_10m_vs_box_proximity&#x27;, added by generate_confound_analysis_part_a.py. The xg portal never received it -- its own CONFOUND_ANALYSIS.json holds 5 passive-only tests. Same marginal column, same quartile labels, same live confound-selection rule, same reliability caveat, run against target_xt_delta.</p></div>
+  <div class="finding"><span class="tag">provenance</span><p><b>mirrored or new -- said which</b> &mdash; MIRROR of the only active-dataset confound test that exists anywhere in this repo: reports/analysis/shot_target/CONFOUND_ANALYSIS.json&#x27;s &#x27;defenders_within_10m_vs_box_proximity&#x27;, added by generate_confound_analysis_part_a.py. The xg portal never received it. Same marginal column, same quartile labels, same live confound-selection rule, same reliability caveat. This test&#x27;s SPECIFICATION is unchanged from the v1 edition of this report -- only the target it runs against differs, so the two portals&#x27; cells are directly comparable.</p></div>
   <div class="finding"><span class="tag">confound selection</span><p><b>both candidates checked on this run</b> &mdash; Checked both candidates directly on this run: corr(defenders_within_10m, is_in_defending_box)=0.2397, corr(defenders_within_10m, is_in_attacking_box)=0.2825 -- used is_in_attacking_box, the stronger correlation. Same rule the binary-target version applies.</p></div><div class="finding flag"><span class="tag">reliability caveat</span><p><b>read the numbers as pooled-population description</b> &mdash; UNRELIABLE, not a clean finding -- caveat carried forward from the binary-target version and re-checked against this portal&#x27;s own Tournament Stability Check: defenders_within_10m is a GENUINE TOURNAMENT-LEVEL DIFFERENCE, not arbitrary train/test noise. This test runs on the pooled 115-match population, which mixes two populations. Read the numbers below as a description of the pooled data, not as evidence about a single stable phenomenon.</p></div>
   
 <div class="finding flag" style="margin:16px 0;">
@@ -604,104 +604,104 @@ targets genuinely disagree here. Don't assume the binary-target conclusion carri
   (1/2 strata)
   </div>
   <div class="qchart-card">
-    <h4>Marginal mean target_xt_delta by defenders_within_10m</h4>
+    <h4>Marginal mean target_xt_delta_v2 by defenders_within_10m</h4>
     <p class="qc-note">Unconditioned. Bars diverge from the centre line: green up = xT fell (threat reduced),
     red down = xT rose. Hover a bar for its negative/zero/positive row shares.</p>
     <div class="xtq-row">
 <div class="xtq-col">
-  <span class="xtq-val">+0.002466</span>
-  <div class="xtq-track" title="47% neg / 8% zero / 44% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:5.8%"></div></div>
+  <span class="xtq-val">+0.003101</span>
+  <div class="xtq-track" title="34% neg / 24% zero / 42% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
   <span class="xtq-label">Q1 fewest</span>
-  <span class="xtq-n">n=20,190</span>
+  <span class="xtq-n">n=20,086</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.002094</span>
-  <div class="xtq-track" title="47% neg / 13% zero / 40% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:4.9%"></div></div>
+  <span class="xtq-val">+0.001922</span>
+  <div class="xtq-track" title="36% neg / 20% zero / 44% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:31.0%"></div></div>
   <span class="xtq-label">Q2</span>
-  <span class="xtq-n">n=10,523</span>
+  <span class="xtq-n">n=10,480</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.004773</span>
-  <div class="xtq-track" title="48% neg / 14% zero / 39% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:11.2%"></div></div>
+  <span class="xtq-val">+0.001728</span>
+  <div class="xtq-track" title="37% neg / 17% zero / 46% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:27.9%"></div></div>
   <span class="xtq-label">Q3</span>
-  <span class="xtq-n">n=6,295</span>
+  <span class="xtq-n">n=6,272</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.021361</span>
-  <div class="xtq-track" title="50% neg / 12% zero / 38% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-val">+0.000165</span>
+  <div class="xtq-track" title="40% neg / 14% zero / 46% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:2.7%"></div></div>
   <span class="xtq-label">Q4 most</span>
-  <span class="xtq-n">n=6,170</span>
+  <span class="xtq-n">n=6,124</span>
 </div></div>
   </div>
   <div class="stratum-grid">
 <div class="stratum-card">
   <h5>False</h5>
-  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.026148</b></p>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.011881</b></p>
   <div class="xtq-row small">
 <div class="xtq-col">
-  <span class="xtq-val">+0.007228</span>
-  <div class="xtq-track" title="44% neg / 9% zero / 47% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:10.8%"></div></div>
+  <span class="xtq-val">+0.003668</span>
+  <div class="xtq-track" title="34% neg / 24% zero / 42% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:11.8%"></div></div>
   <span class="xtq-label">Q1 fewest</span>
-  <span class="xtq-n">n=19,019</span>
+  <span class="xtq-n">n=18,925</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">+0.003662</span>
-  <div class="xtq-track" title="44% neg / 13% zero / 43% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:5.5%"></div></div>
+  <span class="xtq-val">+0.003353</span>
+  <div class="xtq-track" title="35% neg / 21% zero / 44% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:10.8%"></div></div>
   <span class="xtq-label">Q2</span>
-  <span class="xtq-n">n=9,785</span>
+  <span class="xtq-n">n=9,748</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">+0.008404</span>
-  <div class="xtq-track" title="42% neg / 15% zero / 44% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:12.6%"></div></div>
+  <span class="xtq-val">+0.005646</span>
+  <div class="xtq-track" title="34% neg / 19% zero / 47% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:18.2%"></div></div>
   <span class="xtq-label">Q3</span>
-  <span class="xtq-n">n=5,500</span>
+  <span class="xtq-n">n=5,482</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">+0.033377</span>
-  <div class="xtq-track" title="32% neg / 13% zero / 55% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-val">+0.015549</span>
+  <div class="xtq-track" title="32% neg / 16% zero / 52% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
   <span class="xtq-label">Q4 most</span>
-  <span class="xtq-n">n=4,148</span>
+  <span class="xtq-n">n=4,125</span>
 </div></div>
 </div>
 <div class="stratum-card">
   <h5>True</h5>
-  <p class="stratum-delta">first&rarr;last mean-delta change: <b>-0.058769</b></p>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>-0.025428</b></p>
   <div class="xtq-row small">
 <div class="xtq-col">
-  <span class="xtq-val">-0.074883</span>
-  <div class="xtq-track" title="94% neg / 3% zero / 3% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:28.0%"></div></div>
+  <span class="xtq-val">-0.006152</span>
+  <div class="xtq-track" title="33% neg / 22% zero / 45% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:9.7%"></div></div>
   <span class="xtq-label">Q1 fewest</span>
-  <span class="xtq-n">n=1,171</span>
+  <span class="xtq-n">n=1,161</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.078414</span>
-  <div class="xtq-track" title="90% neg / 7% zero / 3% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:29.3%"></div></div>
+  <span class="xtq-val">-0.017135</span>
+  <div class="xtq-track" title="49% neg / 10% zero / 41% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:27.1%"></div></div>
   <span class="xtq-label">Q2</span>
-  <span class="xtq-n">n=738</span>
+  <span class="xtq-n">n=732</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.095929</span>
-  <div class="xtq-track" title="90% neg / 7% zero / 3% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:35.9%"></div></div>
+  <span class="xtq-val">-0.025462</span>
+  <div class="xtq-track" title="53% neg / 9% zero / 38% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:40.3%"></div></div>
   <span class="xtq-label">Q3</span>
-  <span class="xtq-n">n=795</span>
+  <span class="xtq-n">n=790</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.133652</span>
-  <div class="xtq-track" title="87% neg / 10% zero / 3% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-val">-0.031581</span>
+  <div class="xtq-track" title="58% neg / 10% zero / 33% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
   <span class="xtq-label">Q4 most</span>
-  <span class="xtq-n">n=2,022</span>
+  <span class="xtq-n">n=1,999</span>
 </div></div>
 </div></div>
   
-<h3 style="margin-top:24px;">Given a non-zero delta (n=49,699)</h3>
+<h3 style="margin-top:24px;">Given a non-zero delta (n=44,523)</h3>
 <p class="test-subnote">Same marginal + stratified-by-confound structure, restricted to
-<code>target_xt_delta != 0</code> -- this target's structural-zero analogue of the xg report's
+<code>target_xt_delta_v2 != 0</code> -- this target's structural-zero analogue of the xg report's
 "given a shot happened" panel (Adaptation 2). It asks whether the pattern is about the size of the threat swing
 rather than about whether the action crossed an xT grid-cell boundary at all.</p>
 
 <div class="finding" style="margin:16px 0;">
 <span class="tag">holds once the zero mass is removed</span>
-<p>The pattern survives restricting to rows with a non-zero delta (marginal range 0.026883) -- it is about the
+<p>The pattern survives restricting to rows with a non-zero delta (marginal range 0.003892) -- it is about the
 SIZE and DIRECTION of the threat swing, not merely about which rows registered any swing at all. Same verdict as
 unconditional: <b>partially</b>.</p>
 </div>
@@ -711,217 +711,348 @@ unconditional: <b>partially</b>.</p>
 </div>
 <div class="qchart-card"><h4>Marginal mean delta, non-zero-delta subset</h4><div class="xtq-row">
 <div class="xtq-col">
-  <span class="xtq-val">+0.002687</span>
-  <div class="xtq-track" title="52% neg / 0% zero / 48% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:5.6%"></div></div>
+  <span class="xtq-val">+0.004084</span>
+  <div class="xtq-track" title="44% neg / 0% zero / 56% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
   <span class="xtq-label">Q1 fewest</span>
-  <span class="xtq-n">n=18,531</span>
+  <span class="xtq-n">n=15,251</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.002407</span>
-  <div class="xtq-track" title="54% neg / 0% zero / 46% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:5.0%"></div></div>
+  <span class="xtq-val">+0.002407</span>
+  <div class="xtq-track" title="45% neg / 0% zero / 55% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:29.5%"></div></div>
   <span class="xtq-label">Q2</span>
-  <span class="xtq-n">n=9,154</span>
+  <span class="xtq-n">n=8,368</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.005529</span>
-  <div class="xtq-track" title="55% neg / 0% zero / 45% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:11.4%"></div></div>
+  <span class="xtq-val">+0.002091</span>
+  <div class="xtq-track" title="44% neg / 0% zero / 56% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:25.6%"></div></div>
   <span class="xtq-label">Q3</span>
-  <span class="xtq-n">n=5,434</span>
+  <span class="xtq-n">n=5,184</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.024196</span>
-  <div class="xtq-track" title="57% neg / 0% zero / 43% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-val">+0.000192</span>
+  <div class="xtq-track" title="47% neg / 0% zero / 53% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:2.3%"></div></div>
   <span class="xtq-label">Q4 most</span>
-  <span class="xtq-n">n=5,447</span>
+  <span class="xtq-n">n=5,272</span>
 </div></div></div>
 <div class="stratum-grid">
 <div class="stratum-card">
   <h5>False</h5>
-  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.030373</b></p>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.013671</b></p>
   <div class="xtq-row small">
 <div class="xtq-col">
-  <span class="xtq-val">+0.007903</span>
-  <div class="xtq-track" title="49% neg / 0% zero / 51% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:10.3%"></div></div>
+  <span class="xtq-val">+0.004840</span>
+  <div class="xtq-track" title="44% neg / 0% zero / 56% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:13.1%"></div></div>
   <span class="xtq-label">Q1 fewest</span>
-  <span class="xtq-n">n=17,395</span>
+  <span class="xtq-n">n=14,343</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">+0.004232</span>
-  <div class="xtq-track" title="51% neg / 0% zero / 49% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:5.5%"></div></div>
+  <span class="xtq-val">+0.004240</span>
+  <div class="xtq-track" title="45% neg / 0% zero / 55% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:11.5%"></div></div>
   <span class="xtq-label">Q2</span>
-  <span class="xtq-n">n=8,467</span>
+  <span class="xtq-n">n=7,709</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">+0.009842</span>
-  <div class="xtq-track" title="49% neg / 0% zero / 51% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:12.9%"></div></div>
+  <span class="xtq-val">+0.006929</span>
+  <div class="xtq-track" title="42% neg / 0% zero / 58% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:18.7%"></div></div>
   <span class="xtq-label">Q3</span>
-  <span class="xtq-n">n=4,696</span>
+  <span class="xtq-n">n=4,467</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">+0.038277</span>
-  <div class="xtq-track" title="37% neg / 0% zero / 63% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-val">+0.018511</span>
+  <div class="xtq-track" title="38% neg / 0% zero / 62% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
   <span class="xtq-label">Q4 most</span>
-  <span class="xtq-n">n=3,617</span>
+  <span class="xtq-n">n=3,465</span>
 </div></div>
 </div>
 <div class="stratum-card">
   <h5>True</h5>
-  <p class="stratum-delta">first&rarr;last mean-delta change: <b>-0.070485</b></p>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>-0.027070</b></p>
   <div class="xtq-row small">
 <div class="xtq-col">
-  <span class="xtq-val">-0.077190</span>
-  <div class="xtq-track" title="97% neg / 0% zero / 3% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:26.1%"></div></div>
+  <span class="xtq-val">-0.007867</span>
+  <div class="xtq-track" title="42% neg / 0% zero / 58% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:11.3%"></div></div>
   <span class="xtq-label">Q1 fewest</span>
-  <span class="xtq-n">n=1,136</span>
+  <span class="xtq-n">n=908</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.084235</span>
-  <div class="xtq-track" title="96% neg / 0% zero / 4% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:28.5%"></div></div>
+  <span class="xtq-val">-0.019033</span>
+  <div class="xtq-track" title="54% neg / 0% zero / 46% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:27.2%"></div></div>
   <span class="xtq-label">Q2</span>
-  <span class="xtq-n">n=687</span>
+  <span class="xtq-n">n=659</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.103338</span>
-  <div class="xtq-track" title="97% neg / 0% zero / 3% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:35.0%"></div></div>
+  <span class="xtq-val">-0.028054</span>
+  <div class="xtq-track" title="59% neg / 0% zero / 41% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:40.2%"></div></div>
   <span class="xtq-label">Q3</span>
-  <span class="xtq-n">n=738</span>
+  <span class="xtq-n">n=717</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.147675</span>
-  <div class="xtq-track" title="96% neg / 0% zero / 4% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-val">-0.034936</span>
+  <div class="xtq-track" title="64% neg / 0% zero / 36% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
   <span class="xtq-label">Q4 most</span>
-  <span class="xtq-n">n=1,830</span>
+  <span class="xtq-n">n=1,807</span>
 </div></div>
 </div></div>
 </div>
 <div class="test-block">
-  <h2 class="test-title">Clearance&#x27;s negative mean delta vs defending-box proximity (xT delta)<span class="nf-badge type" style="margin-left:8px;">NEW TEST</span></h2>
+  <h2 class="test-title">Clearance&#x27;s POSITIVE mean delta vs defending-box proximity (xT delta)</h2>
   <p class="test-subnote">Marginal: <code>event_type</code> (category_indicator)
   vs proposed confound: <code>is_in_defending_box</code> (boolean) --
-  Clearance&#x27;s strongly negative mean delta is an artefact of WHERE clearances happen (deep in the defending box, a high-xT cell that xt_after scores as the post-action location), not of clearances themselves -- so conditioning on defending-box proximity should flatten it</p>
-  <div class="finding"><span class="tag">provenance</span><p><b>mirrored or new -- said which</b> &mdash; NEW TEST -- it has no counterpart in the xg or binary portals and is labelled as new rather than presented as an established one. It exists because Prompt 64&#x27;s Clearance/action_x finding resurfaced in this portal&#x27;s Category Atlas exactly as predicted (Clearance ranks last of 8 event_type categories), and the confound-testing method is the right established instrument in this suite for asking whether a marginal pattern survives conditioning.</p></div>
-  <div class="finding flag"><span class="tag">carried forward from Prompt 64</span><p><b>Clearance / action_x artefact</b> &mdash; Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.1/3.4): for Clearance events, action_x/action_y -- this target&#x27;s definition of the post-action location, and therefore of xt_after -- is the location the clearance was taken FROM, not where the ball ends up. Last-ditch clearances are very often taken deep in the defending box, a high-xT cell by construction, so Clearance rows carry a systematically negative delta even though a clearance is a good defensive outcome. Prompt 64 measured this directly at -0.0315 mean delta for Clearance inside the action_ended_possession slice, against +0.0009 to +0.0076 for every other event type there. This is a measurement artefact of the xt_after definition, NOT evidence that clearances are bad defending.</p></div>
+  clearances happen overwhelmingly deep in the defending box. Under v1 that location was scored AS xt_after, which is what made Clearance look like the worst event type. Under v2 the location is no longer scored at all, but it still selects WHICH situations become clearances -- so the question is whether Clearance&#x27;s now-positive mean survives conditioning on where it happens, or whether it is a defending-box effect wearing a Clearance label</p>
+  <div class="finding"><span class="tag">provenance</span><p><b>mirrored or new -- said which</b> &mdash; RE-FRAMED, not re-pointed. The v1 edition of this report asked whether Clearance&#x27;s NEGATIVE mean delta survives conditioning on defending-box proximity, and reached a &#x27;partially&#x27; verdict. Under the corrected xt_after, Clearance&#x27;s mean delta is POSITIVE and it ranks 1st of 8 rather than 8th, so the v1 question is no longer about anything that exists in the data. The same two columns and the same method are kept deliberately, so the v1 and v2 portals can be compared cell by cell; only the question the cells are asked has been restated to match the direction the data now runs in.</p></div>
+  <div class="finding flag"><span class="tag">carried forward from Prompt 64</span><p><b>Clearance / action_x artefact</b> &mdash; Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.2): Prompt 64&#x27;s Clearance artefact -- Clearance looking like the WORST event type because xt_after was looked up at the clearance&#x27;s own deep-in-the-box location -- is not merely reduced under the corrected xt_after, it FULLY REVERSES. Clearance moves from 8th of 8 event types (worst) at -0.0325 mean delta under v1 to 1st of 8 (best) at +0.0247 under v2, and in the motivating action_ended_possession slice from -0.0315 to +0.0406. The mechanism is understood, not assumed: possession-ending clearances now get xt_after = 0 by construction, so the dangerous coordinate is never looked up at all. Any v1-era statement that Clearance ranks last, or that clearances carry a systematically negative delta, is superseded and must not be repeated. (Aside recorded by Prompt 66 and not chased here: Block, at -0.0185, is now the lowest-mean event type under v2.)</p></div>
   
-  <div class="verdict-banner v-partially">
-  <b>Unconditional verdict: PARTIALLY</b> &mdash; The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.
-  (1/2 strata)
+  <div class="verdict-banner v-no">
+  <b>Unconditional verdict: NO</b> &mdash; The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+  (2/2 strata)
   </div>
   <div class="qchart-card">
-    <h4>Marginal mean target_xt_delta by event_type</h4>
+    <h4>Marginal mean target_xt_delta_v2 by event_type</h4>
     <p class="qc-note">Unconditioned. Bars diverge from the centre line: green up = xT fell (threat reduced),
     red down = xT rose. Hover a bar for its negative/zero/positive row shares.</p>
     <div class="xtq-row">
 <div class="xtq-col">
-  <span class="xtq-val">+0.001199</span>
-  <div class="xtq-track" title="47% neg / 12% zero / 42% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:1.8%"></div></div>
+  <span class="xtq-val">+0.001691</span>
+  <div class="xtq-track" title="35% neg / 21% zero / 44% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:3.4%"></div></div>
   <span class="xtq-label">not Clearance</span>
-  <span class="xtq-n">n=51,852</span>
+  <span class="xtq-n">n=51,665</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.032482</span>
-  <div class="xtq-track" title="53% neg / 5% zero / 42% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-val">+0.024706</span>
+  <div class="xtq-track" title="39% neg / 7% zero / 54% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
   <span class="xtq-label">Clearance</span>
-  <span class="xtq-n">n=4,184</span>
+  <span class="xtq-n">n=4,096</span>
 </div></div>
   </div>
   <div class="stratum-grid">
 <div class="stratum-card">
   <h5>False</h5>
-  <p class="stratum-delta">first&rarr;last mean-delta change: <b>-0.072884</b></p>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.007946</b></p>
   <div class="xtq-row small">
 <div class="xtq-col">
-  <span class="xtq-val">-0.004549</span>
-  <div class="xtq-track" title="49% neg / 12% zero / 39% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:2.9%"></div></div>
+  <span class="xtq-val">+0.001361</span>
+  <div class="xtq-track" title="35% neg / 22% zero / 43% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:7.3%"></div></div>
   <span class="xtq-label">not Clearance</span>
-  <span class="xtq-n">n=48,161</span>
+  <span class="xtq-n">n=47,998</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.077433</span>
-  <div class="xtq-track" title="71% neg / 5% zero / 24% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-val">+0.009307</span>
+  <div class="xtq-track" title="46% neg / 8% zero / 46% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
   <span class="xtq-label">Clearance</span>
-  <span class="xtq-n">n=3,034</span>
+  <span class="xtq-n">n=2,973</span>
 </div></div>
 </div>
 <div class="stratum-card">
   <h5>True</h5>
-  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.009906</b></p>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.059468</b></p>
   <div class="xtq-row small">
 <div class="xtq-col">
-  <span class="xtq-val">+0.076205</span>
-  <div class="xtq-track" title="8% neg / 13% zero / 79% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:44.2%"></div></div>
+  <span class="xtq-val">+0.006005</span>
+  <div class="xtq-track" title="32% neg / 17% zero / 51% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:4.6%"></div></div>
   <span class="xtq-label">not Clearance</span>
-  <span class="xtq-n">n=3,691</span>
+  <span class="xtq-n">n=3,667</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">+0.086111</span>
-  <div class="xtq-track" title="6% neg / 5% zero / 89% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-val">+0.065473</span>
+  <div class="xtq-track" title="20% neg / 5% zero / 75% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
   <span class="xtq-label">Clearance</span>
-  <span class="xtq-n">n=1,150</span>
+  <span class="xtq-n">n=1,123</span>
 </div></div>
 </div></div>
   
-<h3 style="margin-top:24px;">Given a non-zero delta (n=49,699)</h3>
+<h3 style="margin-top:24px;">Given a non-zero delta (n=44,523)</h3>
 <p class="test-subnote">Same marginal + stratified-by-confound structure, restricted to
-<code>target_xt_delta != 0</code> -- this target's structural-zero analogue of the xg report's
+<code>target_xt_delta_v2 != 0</code> -- this target's structural-zero analogue of the xg report's
 "given a shot happened" panel (Adaptation 2). It asks whether the pattern is about the size of the threat swing
 rather than about whether the action crossed an xT grid-cell boundary at all.</p>
 
 <div class="finding" style="margin:16px 0;">
 <span class="tag">holds once the zero mass is removed</span>
-<p>The pattern survives restricting to rows with a non-zero delta (marginal range 0.035464) -- it is about the
+<p>The pattern survives restricting to rows with a non-zero delta (marginal range 0.024415) -- it is about the
 SIZE and DIRECTION of the threat swing, not merely about which rows registered any swing at all. Same verdict as
-unconditional: <b>partially</b>.</p>
+unconditional: <b>no</b>.</p>
 </div>
-<div class="verdict-banner v-partially">
-<b>Non-zero-delta verdict: PARTIALLY</b> &mdash; The reversal survives in some strata but flattens or reverses in others -- a mixed result, not a clean confound.
-(1/2 strata)
+<div class="verdict-banner v-no">
+<b>Non-zero-delta verdict: NO</b> &mdash; The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+(2/2 strata)
 </div>
 <div class="qchart-card"><h4>Marginal mean delta, non-zero-delta subset</h4><div class="xtq-row">
 <div class="xtq-col">
-  <span class="xtq-val">+0.001360</span>
-  <div class="xtq-track" title="53% neg / 0% zero / 47% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:2.0%"></div></div>
+  <span class="xtq-val">+0.002146</span>
+  <div class="xtq-track" title="45% neg / 0% zero / 55% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:4.0%"></div></div>
   <span class="xtq-label">not Clearance</span>
-  <span class="xtq-n">n=45,714</span>
+  <span class="xtq-n">n=40,713</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.034104</span>
-  <div class="xtq-track" title="56% neg / 0% zero / 44% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-val">+0.026561</span>
+  <div class="xtq-track" title="42% neg / 0% zero / 58% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
   <span class="xtq-label">Clearance</span>
-  <span class="xtq-n">n=3,985</span>
+  <span class="xtq-n">n=3,810</span>
 </div></div></div>
 <div class="stratum-grid">
 <div class="stratum-card">
   <h5>False</h5>
-  <p class="stratum-delta">first&rarr;last mean-delta change: <b>-0.075969</b></p>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.008349</b></p>
   <div class="xtq-row small">
 <div class="xtq-col">
-  <span class="xtq-val">-0.005154</span>
-  <div class="xtq-track" title="56% neg / 0% zero / 44% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:3.2%"></div></div>
+  <span class="xtq-val">+0.001735</span>
+  <div class="xtq-track" title="45% neg / 0% zero / 55% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:8.6%"></div></div>
   <span class="xtq-label">not Clearance</span>
-  <span class="xtq-n">n=42,511</span>
+  <span class="xtq-n">n=37,652</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">-0.081123</span>
-  <div class="xtq-track" title="75% neg / 0% zero / 25% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:50.0%"></div></div>
+  <span class="xtq-val">+0.010084</span>
+  <div class="xtq-track" title="50% neg / 0% zero / 50% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
   <span class="xtq-label">Clearance</span>
-  <span class="xtq-n">n=2,896</span>
+  <span class="xtq-n">n=2,744</span>
 </div></div>
 </div>
 <div class="stratum-card">
   <h5>True</h5>
-  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.003119</b></p>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.061780</b></p>
   <div class="xtq-row small">
 <div class="xtq-col">
-  <span class="xtq-val">+0.087815</span>
-  <div class="xtq-track" title="9% neg / 0% zero / 91% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:48.3%"></div></div>
+  <span class="xtq-val">+0.007194</span>
+  <div class="xtq-track" title="39% neg / 0% zero / 61% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:5.2%"></div></div>
   <span class="xtq-label">not Clearance</span>
-  <span class="xtq-n">n=3,203</span>
+  <span class="xtq-n">n=3,061</span>
 </div>
 <div class="xtq-col">
-  <span class="xtq-val">+0.090934</span>
-  <div class="xtq-track" title="6% neg / 0% zero / 94% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-val">+0.068974</span>
+  <div class="xtq-track" title="21% neg / 0% zero / 79% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
   <span class="xtq-label">Clearance</span>
-  <span class="xtq-n">n=1,089</span>
+  <span class="xtq-n">n=1,066</span>
+</div></div>
+</div></div>
+</div>
+<div class="test-block">
+  <h2 class="test-title">Clearance&#x27;s positive mean delta vs the xt_after = 0 construction rule (xT delta)<span class="nf-badge type" style="margin-left:8px;">NEW TEST</span></h2>
+  <p class="test-subnote">Marginal: <code>event_type</code> (category_indicator)
+  vs proposed confound: <code>action_ended_possession</code> (boolean) --
+  Prompt 66 sets xt_after = 0 for every action that ends its own possession, so those rows&#x27; delta is xt_before by construction and is positive wherever xt_before is. Clearances end their possession far more often than the average defensive action. Clearance&#x27;s newly positive mean could therefore be a CONSTRUCTION effect -- an artefact of the fix -- rather than a football finding. This test asks whether the positive mean survives INSIDE each possession-outcome stratum, where the construction rule is held constant</p>
+  <div class="finding"><span class="tag">provenance</span><p><b>mirrored or new -- said which</b> &mdash; NEW TEST -- it has no counterpart in the v1 xT portal, the xg portal or the binary portal, and is labelled as new rather than presented as established. It could not have existed under v1, because the mechanism it tests (xt_after forced to 0 by a possession flag) was introduced by Prompt 66. The confound-testing method itself is the established instrument in this suite for asking whether a marginal pattern survives conditioning, so it is applied unchanged rather than replaced.</p></div>
+  <div class="finding flag"><span class="tag">reliability caveat</span><p><b>read the numbers as pooled-population description</b> &mdash; Read the True stratum with care: inside action_ended_possession == True every row&#x27;s delta EQUALS its own xt_before by construction (verified in this portal&#x27;s Leakage Audit Part C&#x27; with np.allclose). That stratum is therefore not an independent measurement of clearing -- it is a measurement of how much threat existed a moment earlier. The informative comparison is the False stratum, where the construction rule does not apply.</p></div><div class="finding flag"><span class="tag">carried forward from Prompt 64</span><p><b>Clearance / action_x artefact</b> &mdash; Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.1): on the two possession-ending slices, target_xt_delta_v2 collapses EXACTLY onto xt_before&#x27;s own distribution -- action_ended_possession == True (n=4,656) mean +0.03051, action_won_possession == True (n=3,600) mean +0.03066, both confirmed identical to the same slice&#x27;s xt_before mean with np.allclose. This is logically REQUIRED, not a new degenerate finding: xt_after is forced to 0.0 for exactly these rows, so the delta is xt_before by construction -- &#x27;100% of the threat that existed a moment ago is denied&#x27;. Unlike the old target_future_shot_10s, which collapsed these same rows to an identical uninformative zero, this collapses to a real, row-by-row varying distribution (mean +0.031, std ~0.050): the actual danger level that was denied. Any report that shows these slices must present the identity as construction, not as discovery.</p></div>
+  
+  <div class="verdict-banner v-no">
+  <b>Unconditional verdict: NO</b> &mdash; The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+  (2/2 strata)
+  </div>
+  <div class="qchart-card">
+    <h4>Marginal mean target_xt_delta_v2 by event_type</h4>
+    <p class="qc-note">Unconditioned. Bars diverge from the centre line: green up = xT fell (threat reduced),
+    red down = xT rose. Hover a bar for its negative/zero/positive row shares.</p>
+    <div class="xtq-row">
+<div class="xtq-col">
+  <span class="xtq-val">+0.001691</span>
+  <div class="xtq-track" title="35% neg / 21% zero / 44% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:3.4%"></div></div>
+  <span class="xtq-label">not Clearance</span>
+  <span class="xtq-n">n=51,665</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.024706</span>
+  <div class="xtq-track" title="39% neg / 7% zero / 54% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-label">Clearance</span>
+  <span class="xtq-n">n=4,096</span>
+</div></div>
+  </div>
+  <div class="stratum-grid">
+<div class="stratum-card">
+  <h5>False</h5>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.024407</b></p>
+  <div class="xtq-row small">
+<div class="xtq-col">
+  <span class="xtq-val">-0.000909</span>
+  <div class="xtq-track" title="38% neg / 23% zero / 38% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:1.9%"></div></div>
+  <span class="xtq-label">not Clearance</span>
+  <span class="xtq-n">n=47,298</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.023498</span>
+  <div class="xtq-track" title="42% neg / 8% zero / 51% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-label">Clearance</span>
+  <span class="xtq-n">n=3,807</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>True</h5>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.010774</b></p>
+  <div class="xtq-row small">
+<div class="xtq-col">
+  <span class="xtq-val">+0.029846</span>
+  <div class="xtq-track" title="0% neg / 0% zero / 100% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:36.7%"></div></div>
+  <span class="xtq-label">not Clearance</span>
+  <span class="xtq-n">n=4,367</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.040620</span>
+  <div class="xtq-track" title="0% neg / 0% zero / 100% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-label">Clearance</span>
+  <span class="xtq-n">n=289</span>
+</div></div>
+</div></div>
+  
+<h3 style="margin-top:24px;">Given a non-zero delta (n=44,523)</h3>
+<p class="test-subnote">Same marginal + stratified-by-confound structure, restricted to
+<code>target_xt_delta_v2 != 0</code> -- this target's structural-zero analogue of the xg report's
+"given a shot happened" panel (Adaptation 2). It asks whether the pattern is about the size of the threat swing
+rather than about whether the action crossed an xT grid-cell boundary at all.</p>
+
+<div class="finding" style="margin:16px 0;">
+<span class="tag">holds once the zero mass is removed</span>
+<p>The pattern survives restricting to rows with a non-zero delta (marginal range 0.024415) -- it is about the
+SIZE and DIRECTION of the threat swing, not merely about which rows registered any swing at all. Same verdict as
+unconditional: <b>no</b>.</p>
+</div>
+<div class="verdict-banner v-no">
+<b>Non-zero-delta verdict: NO</b> &mdash; The reversal survives conditioning in every stratum -- stratifying on the proposed confound does not explain it away.
+(2/2 strata)
+</div>
+<div class="qchart-card"><h4>Marginal mean delta, non-zero-delta subset</h4><div class="xtq-row">
+<div class="xtq-col">
+  <span class="xtq-val">+0.002146</span>
+  <div class="xtq-track" title="45% neg / 0% zero / 55% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:4.0%"></div></div>
+  <span class="xtq-label">not Clearance</span>
+  <span class="xtq-n">n=40,713</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.026561</span>
+  <div class="xtq-track" title="42% neg / 0% zero / 58% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-label">Clearance</span>
+  <span class="xtq-n">n=3,810</span>
+</div></div></div>
+<div class="stratum-grid">
+<div class="stratum-card">
+  <h5>False</h5>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.026589</b></p>
+  <div class="xtq-row small">
+<div class="xtq-col">
+  <span class="xtq-val">-0.001183</span>
+  <div class="xtq-track" title="50% neg / 0% zero / 50% pos"><span class="mid"></span><div class="xtq-bar neg" style="height:2.3%"></div></div>
+  <span class="xtq-label">not Clearance</span>
+  <span class="xtq-n">n=36,346</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.025407</span>
+  <div class="xtq-track" title="45% neg / 0% zero / 55% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-label">Clearance</span>
+  <span class="xtq-n">n=3,521</span>
+</div></div>
+</div>
+<div class="stratum-card">
+  <h5>True</h5>
+  <p class="stratum-delta">first&rarr;last mean-delta change: <b>+0.010774</b></p>
+  <div class="xtq-row small">
+<div class="xtq-col">
+  <span class="xtq-val">+0.029846</span>
+  <div class="xtq-track" title="0% neg / 0% zero / 100% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:36.7%"></div></div>
+  <span class="xtq-label">not Clearance</span>
+  <span class="xtq-n">n=4,367</span>
+</div>
+<div class="xtq-col">
+  <span class="xtq-val">+0.040620</span>
+  <div class="xtq-track" title="0% neg / 0% zero / 100% pos"><span class="mid"></span><div class="xtq-bar pos" style="height:50.0%"></div></div>
+  <span class="xtq-label">Clearance</span>
+  <span class="xtq-n">n=289</span>
 </div></div>
 </div></div>
 </div>

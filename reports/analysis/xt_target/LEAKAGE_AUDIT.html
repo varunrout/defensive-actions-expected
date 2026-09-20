@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Active Dataset Leakage Audit (xT delta)</title>
+<title>Active Dataset Leakage Audit (xT delta v2)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -583,15 +583,16 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 </head>
 <body>
 <div class="masthead"><div class="masthead-inner">
-  <p class="eyebrow">LEAKAGE AUDIT -- XT DELTA &amp;middot; ACTIVE-BINARY LEG ONLY</p>
-  <h1 class="title">Active Dataset Leakage Audit (xT delta)</h1>
-  <p class="dek">Part A's method reused unchanged; the xg audit's Parts B/C/D have no active counterpart and that is said so rather than substituted for silently; Parts B'/C' apply the same method to the active dataset's own analogous columns; Part D' is a new construction-coupling check specific to this target. Active-binary leg only.</p>
-  <div class="statbar"><div class="stat"><b>56,068</b><span>rows (active)</span></div><div class="stat"><b>88</b><span>columns scanned</span></div><div class="stat"><b>3</b><span>xg parts with no active counterpart</span></div><div class="stat"><b>1</b><span>new part (construction coupling)</span></div></div>
+  <p class="eyebrow">LEAKAGE AUDIT -- XT DELTA V2 &amp;middot; ACTIVE-BINARY LEG ONLY</p>
+  <h1 class="title">Active Dataset Leakage Audit (xT delta v2)</h1>
+  <p class="dek">Part A's method reused unchanged; the xg audit's Parts B/C/D have no active counterpart and that is said so rather than substituted for silently; Parts B'/C' apply the same method to the active dataset's own analogous columns. Part D' was REWRITTEN for v2 -- its v1 premise (xt_after looked up from action_x/action_y) is false under the corrected target. Active-binary leg only.</p>
+  <div class="statbar"><div class="stat"><b>56,068</b><span>rows (active)</span></div><div class="stat"><b>88</b><span>columns scanned</span></div><div class="stat"><b>3</b><span>xg parts with no active counterpart</span></div><div class="stat"><b>74%</b><span>construction coupling reduced vs v1</span></div></div>
 </div></div>
 <div class="wrap">
 <div class="article">
 
-<div class="rule-banner"><b>Scope, confirmed by reading the source.</b> CONFIRMED BY READING THE SOURCE, not inferred from filenames: the xg portal&#x27;s LEAKAGE_AUDIT.json/.html are produced by generate_leakage_audit_xg.py / generate_leakage_report_xg.py, and both are PASSIVE-DATASET-ONLY. Their Parts B/C/D test screened_option_was_avoided, has_screened_outcome and has_option_2/3 -- none of which exist in the active parquet. No active-side leakage audit exists in this repo for any target. This prompt is scoped to the active leg, so a literal mirror is impossible. Part A&#x27;s method is reused by direct import (it is dataset- and target-independent). Parts B/C/D are reported as HAVING NO ACTIVE COUNTERPART, and the same method is applied instead to the active dataset&#x27;s own analogous columns (Parts B&#x27; and C&#x27;). Part D&#x27; is new to this target and is labelled as new rather than presented as the established method.</div>
+<div class="rule-banner"><b>This report supersedes a prior pass.</b> Parts A/B&#x27;/C&#x27; are methodological re-points of the v1 edition -- same imports, same tests, prose re-derived on v2&#x27;s numbers. PART D&#x27; WAS REWRITTEN. Its v1 premise (&#x27;xt_after is looked up directly from action_x/action_y, so location-derived locked features share a definitional term with half the target&#x27;) is false under the corrected target, so it was re-measured from scratch rather than restated, and a new v2-specific flag-coupling channel was added. See the v1 edition preserved at reports/analysis/xt_target_v1_superseded/LEAKAGE_AUDIT.html for what it said before.</div>
+<div class="rule-banner"><b>Scope, confirmed by reading the source.</b> SCOPE GAP, unchanged from the v1 edition and restated rather than quietly dropped: the xg portal&#x27;s LEAKAGE_AUDIT is PASSIVE-DATASET-ONLY (its Parts B/C/D test screened_option_was_avoided, has_screened_outcome and has_option_2/3, none of which exist in the active parquet), and no active-side leakage audit exists in this repo for any target. Part A&#x27;s method is reused by direct import; Parts B&#x27;/C&#x27; apply the same method to the active dataset&#x27;s own analogous columns; Part D&#x27; is new to this target family.</div>
 
 <div class="test-block">
   <h2 class="test-title">Part A &mdash; known-leaky columns &amp; full name-pattern scan (ACTIVE)</h2>
@@ -644,57 +645,65 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
 <div class="test-block">
   <h2 class="test-title">Part B&prime; &mdash; <code>has_previous_event</code>, the active censoring proxy</h2>
   <p class="test-subnote">Substitutes for: Part C of the passive xg audit (has_screened_outcome). Method: groupby mean target + Welch&#x27;s t-test -- identical to generate_leakage_audit_xg.part_c_xg.</p>
-  <div class="verdict-banner v-partially"><b>Verdict: FLAGGED -- REAL CENSORING-SHAPED EFFECT, BUT ON THE ZERO SHARE RATHER THAN THE MEAN</b></div>
+  <div class="verdict-banner v-partially"><b>Verdict: FLAGGED -- REAL CENSORING-SHAPED EFFECT, AND ON V2 IT IS VISIBLE IN BOTH THE MEAN AND THE ZERO SHARE</b></div>
   <div class="finding flag" style="margin:16px 0;">
-  <span class="tag">the effect is in the zero mass, not the mean</span>
-  <p>Welch's t-test on the MEAN gives p=6.454e-02 &mdash; not significant at any conventional level.
-  But the exactly-zero share differs by <b>+27.3pp</b>
-  (36.4% when False vs 9.1% when True).
-  <b>The xg audit's method, applied literally, would have missed this.</b> That is itself a finding about
-  methodology transfer: a mean-difference test is the right instrument for a strictly non-negative,
-  zero-inflated target whose signal lives in its centre, and the wrong one for a symmetric target whose
-  structural mass sits exactly at zero.</p>
+  <span class="tag">the zero-mass caveat survives from v1 to v2 intact</span>
+  <p>The exactly-zero share differs by <b>-6.1pp</b>
+  (14.5% when False vs 20.6% when True),
+  alongside a mean difference of -0.016494 (Welch p=1.467e-87). The v1 edition of this report
+  recorded this as its Caveat 2: on v1 the mean test alone returned p=0.0645 and would have reported nothing at
+  all, while the zero share differed by +27.3pp. <b>That caveat is not retired by the v2 correction.</b> A
+  mean-difference test is the right instrument for a strictly non-negative, zero-inflated target whose signal
+  lives in its centre, and the wrong one for a target with 20.6%
+  of one group's mass sitting exactly at zero. v2's exactly-zero share is <i>larger</i> than v1's (20.2% vs
+  11.3% overall), so if anything the instrument matters more here.</p>
   </div>
   <div class="qchart-card">
-    <h4>mean target_xt_delta by <code>has_previous_event</code></h4>
-    <p class="qc-note">Delta +0.001891, Welch's t=1.849, p=6.454e-02. Bars diverge
+    <h4>mean target_xt_delta_v2 by <code>has_previous_event</code></h4>
+    <p class="qc-note">Delta -0.016494, Welch's t=-20.191, p=1.467e-87. Bars diverge
     from zero; green = xT fell (threat reduced), red = xT rose.</p>
     <div style="margin:16px 0;">
 <div style="display:grid; grid-template-columns: 60px 1fr 260px; align-items:center; gap:10px; margin-bottom:8px;">
   <span style="font-family:'JetBrains Mono',monospace; font-weight:700;">True</span>
   <div class="vif-track" style="position:relative;">
     <span style="position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--text-primary);opacity:0.4;"></span>
-    <div class="vif-fill severe" style="width:19.0%; position:absolute; right:50%;"></div>
+    <div class="vif-fill severe" style="width:5.5%; position:absolute; left:50%;"></div>
   </div>
-  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">-0.001163 (n=51,515)
-  &middot; 9.1% zero &middot; 48.1% neg &middot; 42.8% pos</span>
+  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">+0.002045 (n=51,244)
+  &middot; 20.6% zero &middot; 37.3% neg &middot; 42.1% pos</span>
 </div>
 <div style="display:grid; grid-template-columns: 60px 1fr 260px; align-items:center; gap:10px; margin-bottom:8px;">
   <span style="font-family:'JetBrains Mono',monospace; font-weight:700;">False</span>
   <div class="vif-track" style="position:relative;">
     <span style="position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--text-primary);opacity:0.4;"></span>
-    <div class="vif-fill severe" style="width:50.0%; position:absolute; right:50%;"></div>
+    <div class="vif-fill severe" style="width:50.0%; position:absolute; left:50%;"></div>
   </div>
-  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">-0.003054 (n=4,521)
-  &middot; 36.4% zero &middot; 34.4% neg &middot; 29.2% pos</span>
+  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">+0.018539 (n=4,517)
+  &middot; 14.5% zero &middot; 14.4% neg &middot; 71.1% pos</span>
 </div></div>
   </div>
-  <div class="closing-note">has_previous_event=False rows (n=4,521) are the first event of a possession, so there is no in-possession predecessor. Their mean delta (-0.003054) is only modestly different from True&#x27;s (-0.001163, Welch p=6.454e-02) -- but the EXACTLY-ZERO share is 36.4% versus 9.1%, a +27.3pp gap. Reading the mean alone, as the xg audit&#x27;s method does, would have understated this almost entirely: the effect lives in the target&#x27;s zero mass, not its centre. That is a direct consequence of this target&#x27;s shape (Prompt 64: symmetric, 11.3% exact zeros) and is why the zero/negative/positive shares are reported alongside every mean in this suite. Reported as a finding about the target&#x27;s measurement, NOT as a proposal to drop has_previous_event -- it is a locked feature and this audit does not change feature_config.py.</div>
+  <div class="closing-note">has_previous_event=False rows (n=4,517) are the first event of a possession, so there is no in-possession predecessor. Mean delta +0.018539 versus True&#x27;s +0.002045 (Welch p=1.467e-87), and the EXACTLY-ZERO share is 14.5% versus 20.6%, a -6.1pp gap. The v1 edition recorded this as its Caveat 2 -- the effect lived almost entirely in the zero mass, and a mean-difference test alone (the instrument the xg audit reaches for) returned p=0.0645 and would have reported nothing. That caveat still stands on v2 and the zero/negative/positive shares are still reported alongside every mean in this suite. Reported as a finding about how this target must be MEASURED, NOT as a proposal to drop has_previous_event -- it is a locked feature and this audit does not change feature_config.py.</div>
 </div>
 <div class="test-block">
   <h2 class="test-title">Part C&prime; &mdash; the three <code>action_*_possession</code> flags</h2>
   <p class="test-subnote">Substitutes for: Part D of the passive xg audit. Same method.</p>
   <div class="verdict-banner v-partially">
-  <b>Verdict: the "structural zero" exclusion justification does NOT transfer to this target</b> &mdash; flagged
-  as an observation, not reopened. These three columns stay excluded in feature_config.py; this report does not
-  change it.
+  <b>Verdict: the "structural zero" exclusion justification still does NOT transfer &mdash; but on v2 a stronger,
+  different reason to exclude appears.</b> These three columns stay excluded in feature_config.py; this report
+  does not change it.
   </div>
   <div class="finding flag" style="margin:16px 0;">
-  <span class="tag">carried forward from Prompt 64</span>
-  <p>This reproduces Prompt 64's central result on the full active dataset rather than only inside the two
-  slices it examined. Against <code>target_future_shot_10s</code> these rows are 100% identical zeros; against
-  <code>target_xt_delta</code> roughly 77-79% of them are non-zero with real row-level spread. The
-  degenerate-zero collapse the xT target was built to fix is, on this evidence, fixed.</p>
+  <span class="tag">carried forward from Prompt 66 &mdash; CHARACTER CHANGED</span>
+  <p>The v1 edition of this report read these flags as vindication: against
+  <code>target_future_shot_10s</code> they are 100% identical zeros, while against v1's xT target "roughly
+  77-79% of them are non-zero with real spread", so the degenerate-zero collapse the xT target was built to fix
+  looked fixed. <b>That reading does not carry over, and the v1 figure is v1's.</b> Under the corrected target,
+  <code>action_ended_possession</code> is the flag that TRIGGERS <code>xt_after = 0</code>, so its True group's
+  delta equals <code>xt_before</code> by construction &mdash; a deterministic identity, not a measurement.</p>
+  <p style="margin-top:8px;">Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.1): on the two possession-ending slices, target_xt_delta_v2 collapses EXACTLY onto xt_before&#x27;s own distribution -- action_ended_possession == True (n=4,656) mean +0.03051, action_won_possession == True (n=3,600) mean +0.03066, both confirmed identical to the same slice&#x27;s xt_before mean with np.allclose. This is logically REQUIRED, not a new degenerate finding: xt_after is forced to 0.0 for exactly these rows, so the delta is xt_before by construction -- &#x27;100% of the threat that existed a moment ago is denied&#x27;. Unlike the old target_future_shot_10s, which collapsed these same rows to an identical uninformative zero, this collapses to a real, row-by-row varying distribution (mean +0.031, std ~0.050): the actual danger level that was denied. Any report that shows these slices must present the identity as construction, not as discovery.</p>
+  <p style="margin-top:8px;">The practical consequence points the same way as before but for a firmer reason:
+  these columns should stay out of the candidate list. A column that deterministically sets one term of the
+  target is a construction input, and feeding it to a model would be circular.</p>
   </div>
   
 <div class="qchart-card">
@@ -705,21 +714,22 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span style="font-family:'JetBrains Mono',monospace; font-weight:700;">True</span>
   <div class="vif-track" style="position:relative;">
     <span style="position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--text-primary);opacity:0.4;"></span>
-    <div class="vif-fill severe" style="width:45.7%; position:absolute; right:50%;"></div>
+    <div class="vif-fill severe" style="width:50.0%; position:absolute; left:50%;"></div>
   </div>
-  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">-0.001211 (n=4,656)
-  &middot; 23.5% zero &middot; 40.7% neg &middot; 35.8% pos</span>
+  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">+0.030515 (n=4,656)
+  &middot; 0.0% zero &middot; 0.0% neg &middot; 100.0% pos</span>
 </div>
 <div style="display:grid; grid-template-columns: 60px 1fr 260px; align-items:center; gap:10px; margin-bottom:8px;">
   <span style="font-family:'JetBrains Mono',monospace; font-weight:700;">False</span>
   <div class="vif-track" style="position:relative;">
     <span style="position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--text-primary);opacity:0.4;"></span>
-    <div class="vif-fill severe" style="width:50.0%; position:absolute; right:50%;"></div>
+    <div class="vif-fill severe" style="width:1.5%; position:absolute; left:50%;"></div>
   </div>
-  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">-0.001325 (n=51,380)
-  &middot; 10.2% zero &middot; 47.6% neg &middot; 42.2% pos</span>
+  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">+0.000909 (n=51,105)
+  &middot; 22.0% zero &middot; 38.6% neg &middot; 39.4% pos</span>
 </div></div>
-  <p class="qc-note">feature_config.py excludes action_changed_possession because it is a structural zero against target_future_shot_10s (0.00% shot rate by that target&#x27;s own window definition). Against target_xt_delta the True group is not degenerate at all: n=4,656, mean -0.001211, only 23.5% exactly zero, 40.7% negative and 35.8% positive -- real row-level variance. This reproduces Prompt 64&#x27;s central result (the degenerate-zero collapse is what the xT target was built to fix) on the full active dataset rather than only inside the two slices Prompt 64 examined. Reported as an observation, NOT a proposal to unlock the column: changing feature_config.py is outside this report suite&#x27;s remit, and the column would still need its own leakage review before any such change.</p>
+  <p class="qc-note"><b>Construction identity, verified on this run.</b> Every row in this flag's True group has <code>target_xt_delta_v2</code> exactly equal to its own <code>xt_before</code> (mean +0.030515, <code>np.allclose</code>) &mdash; because this flag is the deterministic trigger for <code>xt_after = 0</code>.</p>
+  <p class="qc-note">feature_config.py excludes action_changed_possession because it is a structural zero against target_future_shot_10s (0.00% shot rate by that target&#x27;s own window definition). Against target_xt_delta_v2 the True group is not degenerate: n=4,656, mean +0.030515, 0.0% exactly zero, 0.0% negative and 100.0% positive. CRUCIALLY, and unlike v1: this flag&#x27;s True group collapses onto xt_before EXACTLY (np.allclose, verified on this run), because it is the deterministic trigger for xt_after = 0 in the v2 construction. That makes it a construction input to the target, not a candidate feature -- a far stronger reason to keep it excluded than the target-specific one feature_config.py currently records. Feeding it to a model would be circular. Still an observation, not a change: this suite does not edit feature_config.py.</p>
 </div>
 <div class="qchart-card">
   <h4><code>action_ended_possession</code></h4>
@@ -729,21 +739,22 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span style="font-family:'JetBrains Mono',monospace; font-weight:700;">True</span>
   <div class="vif-track" style="position:relative;">
     <span style="position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--text-primary);opacity:0.4;"></span>
-    <div class="vif-fill severe" style="width:45.7%; position:absolute; right:50%;"></div>
+    <div class="vif-fill severe" style="width:50.0%; position:absolute; left:50%;"></div>
   </div>
-  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">-0.001211 (n=4,656)
-  &middot; 23.5% zero &middot; 40.7% neg &middot; 35.8% pos</span>
+  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">+0.030515 (n=4,656)
+  &middot; 0.0% zero &middot; 0.0% neg &middot; 100.0% pos</span>
 </div>
 <div style="display:grid; grid-template-columns: 60px 1fr 260px; align-items:center; gap:10px; margin-bottom:8px;">
   <span style="font-family:'JetBrains Mono',monospace; font-weight:700;">False</span>
   <div class="vif-track" style="position:relative;">
     <span style="position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--text-primary);opacity:0.4;"></span>
-    <div class="vif-fill severe" style="width:50.0%; position:absolute; right:50%;"></div>
+    <div class="vif-fill severe" style="width:1.5%; position:absolute; left:50%;"></div>
   </div>
-  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">-0.001325 (n=51,380)
-  &middot; 10.2% zero &middot; 47.6% neg &middot; 42.2% pos</span>
+  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">+0.000909 (n=51,105)
+  &middot; 22.0% zero &middot; 38.6% neg &middot; 39.4% pos</span>
 </div></div>
-  <p class="qc-note">feature_config.py excludes action_ended_possession because it is a structural zero against target_future_shot_10s (0.00% shot rate by that target&#x27;s own window definition). Against target_xt_delta the True group is not degenerate at all: n=4,656, mean -0.001211, only 23.5% exactly zero, 40.7% negative and 35.8% positive -- real row-level variance. This reproduces Prompt 64&#x27;s central result (the degenerate-zero collapse is what the xT target was built to fix) on the full active dataset rather than only inside the two slices Prompt 64 examined. Reported as an observation, NOT a proposal to unlock the column: changing feature_config.py is outside this report suite&#x27;s remit, and the column would still need its own leakage review before any such change.</p>
+  <p class="qc-note"><b>Construction identity, verified on this run.</b> Every row in this flag's True group has <code>target_xt_delta_v2</code> exactly equal to its own <code>xt_before</code> (mean +0.030515, <code>np.allclose</code>) &mdash; because this flag is the deterministic trigger for <code>xt_after = 0</code>.</p>
+  <p class="qc-note">feature_config.py excludes action_ended_possession because it is a structural zero against target_future_shot_10s (0.00% shot rate by that target&#x27;s own window definition). Against target_xt_delta_v2 the True group is not degenerate: n=4,656, mean +0.030515, 0.0% exactly zero, 0.0% negative and 100.0% positive. CRUCIALLY, and unlike v1: this flag&#x27;s True group collapses onto xt_before EXACTLY (np.allclose, verified on this run), because it is the deterministic trigger for xt_after = 0 in the v2 construction. That makes it a construction input to the target, not a candidate feature -- a far stronger reason to keep it excluded than the target-specific one feature_config.py currently records. Feeding it to a model would be circular. Still an observation, not a change: this suite does not edit feature_config.py.</p>
 </div>
 <div class="qchart-card">
   <h4><code>action_won_possession</code></h4>
@@ -753,49 +764,71 @@ footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding
   <span style="font-family:'JetBrains Mono',monospace; font-weight:700;">True</span>
   <div class="vif-track" style="position:relative;">
     <span style="position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--text-primary);opacity:0.4;"></span>
-    <div class="vif-fill severe" style="width:50.0%; position:absolute; right:50%;"></div>
+    <div class="vif-fill severe" style="width:50.0%; position:absolute; left:50%;"></div>
   </div>
-  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">-0.003521 (n=3,600)
-  &middot; 21.0% zero &middot; 42.8% neg &middot; 36.2% pos</span>
+  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">+0.030656 (n=3,600)
+  &middot; 0.0% zero &middot; 0.0% neg &middot; 100.0% pos</span>
 </div>
 <div style="display:grid; grid-template-columns: 60px 1fr 260px; align-items:center; gap:10px; margin-bottom:8px;">
   <span style="font-family:'JetBrains Mono',monospace; font-weight:700;">False</span>
   <div class="vif-track" style="position:relative;">
     <span style="position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--text-primary);opacity:0.4;"></span>
-    <div class="vif-fill severe" style="width:16.5%; position:absolute; right:50%;"></div>
+    <div class="vif-fill severe" style="width:2.4%; position:absolute; left:50%;"></div>
   </div>
-  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">-0.001164 (n=52,436)
-  &middot; 10.6% zero &middot; 47.3% neg &middot; 42.1% pos</span>
+  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">+0.001499 (n=52,161)
+  &middot; 21.5% zero &middot; 37.9% neg &middot; 40.6% pos</span>
 </div></div>
-  <p class="qc-note">feature_config.py excludes action_won_possession because it is a structural zero against target_future_shot_10s (0.00% shot rate by that target&#x27;s own window definition). Against target_xt_delta the True group is not degenerate at all: n=3,600, mean -0.003521, only 21.0% exactly zero, 42.8% negative and 36.2% positive -- real row-level variance. This reproduces Prompt 64&#x27;s central result (the degenerate-zero collapse is what the xT target was built to fix) on the full active dataset rather than only inside the two slices Prompt 64 examined. Reported as an observation, NOT a proposal to unlock the column: changing feature_config.py is outside this report suite&#x27;s remit, and the column would still need its own leakage review before any such change.</p>
+  <p class="qc-note"><b>Construction identity, verified on this run.</b> Every row in this flag's True group has <code>target_xt_delta_v2</code> exactly equal to its own <code>xt_before</code> (mean +0.030656, <code>np.allclose</code>) &mdash; because this flag is the deterministic trigger for <code>xt_after = 0</code>.</p>
+  <p class="qc-note">feature_config.py excludes action_won_possession because it is a structural zero against target_future_shot_10s (0.00% shot rate by that target&#x27;s own window definition). Against target_xt_delta_v2 the True group is not degenerate: n=3,600, mean +0.030656, 0.0% exactly zero, 0.0% negative and 100.0% positive. CRUCIALLY, and unlike v1: this flag&#x27;s True group collapses onto xt_before EXACTLY (np.allclose, verified on this run), because it is the deterministic trigger for xt_after = 0 in the v2 construction. That makes it a construction input to the target, not a candidate feature -- a far stronger reason to keep it excluded than the target-specific one feature_config.py currently records. Feeding it to a model would be circular. Still an observation, not a change: this suite does not edit feature_config.py.</p>
 </div>
 </div>
 <div class="test-block">
-  <h2 class="test-title">Part D&prime; &mdash; construction coupling (NEW &mdash; no xg counterpart)</h2>
-  <div class="verdict-banner v-yes"><b>Verdict: FLAGGED -- CONSTRUCTION COUPLING IS REAL AND MUST BE STATED WHEN INTERPRETING THIS ATLAS</b></div>
-  <div class="finding"><span class="tag">method is new, and labelled as new</span><p><b>not presented as the established audit</b> &mdash; NEW for this target -- no xg counterpart exists, and this is labelled as new rather than presented as the established audit method. Pearson r of every locked numerical ACTIVE feature against xt_after, xt_before and the delta itself.</p></div>
-  <p class="test-subnote">target_xt_delta = xt_before - xt_after, and xt_after is looked up directly from action_x/action_y (Prompt 64 section 2). Any feature that is a deterministic function of the action&#x27;s own pitch location therefore shares a definitional term with half the target. target_future_xg_10s, being a forward-looking outcome measured after the action, has no such coupling -- so this risk is specific to the xT target and had to be checked rather than inherited.</p>
+  <h2 class="test-title">Part D&prime; &mdash; construction coupling, RE-MEASURED for v2</h2>
+  <div class="verdict-banner v-yes"><b>Verdict: SUBSTANTIALLY RESOLVED RELATIVE TO V1 -- RESIDUAL COUPLING RUNS THROUGH XT_BEFORE ONLY, AND THE V2 XT_AFTER COUPLING IS CONFINED TO AN ALREADY-EXCLUDED FLAG</b></div>
+  <div class="finding flag"><span class="tag">this part was rewritten, not re-pointed</span><p><b>its v1 premise is false under the corrected target</b> &mdash; The v1 edition of this part existed because target_xt_delta = xt_before - xt_after with xt_after looked up directly from action_x/action_y, so every location-derived locked feature shared a definitional term with half the target. Prompt 66 removed exactly that mechanism: under v2, xt_after is 0.0 when the action ends its own possession, the NEXT same-possession event&#x27;s grid value otherwise, or that event&#x27;s own shot_statsbomb_xg if it is a Shot. The acting row&#x27;s own coordinates are never used. The v1 premise is therefore FALSE under v2 and could not be restated.</p></div>
+  <p class="test-subnote">RE-MEASURED FROM SCRATCH for v2, not carried over. Pearson r of every locked numerical ACTIVE feature against xt_after, xt_before and the delta itself -- the same plain instrument the v1 edition used, applied to a target whose xt_after term is now defined completely differently. The v1 figures are quoted alongside rather than replaced silently.</p>
 
-  <h3 style="margin-top:22px;">The target's own construction columns</h3>
+  <div class="finding flag" style="margin:16px 0;">
+  <span class="tag">v1 &rarr; v2: Prompt 65's most important caveat, substantially retired</span>
+  <p>Strongest locked-feature correlation with the target: <code>distance_to_attacking_box</code> at
+  <b>+0.5551</b> under v1 &rarr; <code>distance_to_attacking_box</code> at
+  <b>+0.1431</b> under v2, a <b>74% reduction</b> in absolute
+  magnitude.</p>
+  <p style="margin-top:8px;">The strongest locked-feature correlation with the target falls from +0.5551 (distance_to_attacking_box, v1) to +0.1431 (distance_to_attacking_box, v2) -- a 74% reduction in absolute magnitude. Prompt 65 recorded location-vs-target construction coupling as the single most important caveat its portal carried, with no xG or binary counterpart. The v2 correction substantially RETIRES that caveat. It is not claimed to be zero -- xt_before is still a grid lookup at the PREVIOUS event&#x27;s location, so a residual location relationship is expected and is visible in the r_vs_xt_before column -- but it is no longer a definitional recovery of half the target from the feature set.</p>
+  </div>
+
+  <h3 style="margin-top:22px;">v1's construction columns &mdash; no longer part of the construction</h3>
+  <p class="test-subnote">Under v1 these two <i>were</i> the <code>xt_after</code> lookup. Under v2 they are not
+  used in the target's construction at all. Both remain out of the candidate list regardless &mdash; confirmed
+  here, not assumed.</p>
   <div class="table-scroll"><table class="evidence-ledger">
   <tr><th>Column</th><th>Candidate status</th><th>r vs xt_after</th><th>Exclusion reason (feature_config.py)</th></tr>
-  <tr><td><code>action_x</code></td><td>excluded</td><td>+0.5492</td><td>verified 100%-duplicate of ball_x as of this pass -- known unresolved data issue</td></tr><tr><td><code>action_y</code></td><td>excluded</td><td>+0.0030</td><td>verified 100%-duplicate of ball_y as of this pass -- known unresolved data issue</td></tr>
+  <tr><td><code>action_x</code></td><td>excluded</td><td>-0.0778</td><td>verified 100%-duplicate of ball_x as of this pass -- known unresolved data issue</td></tr><tr><td><code>action_y</code></td><td>excluded</td><td>-0.0002</td><td>verified 100%-duplicate of ball_y as of this pass -- known unresolved data issue</td></tr>
+  </table></div>
+
+  <h3 style="margin-top:22px;">Where the coupling moved: from a location term to a flag</h3>
+  <p class="test-subnote">NEW channel, specific to v2 and tested because the mechanism moved rather than vanished. xt_after = 0 is triggered deterministically by action_ended_possession, so the construction coupling is now to a FLAG rather than to a location. Measured on this run, that flag correlates +0.1403 with the target and -0.1689 with xt_after. It is already OUT of the ACTIVE candidate list -- confirmed here, not assumed -- so no locked feature carries this coupling. Part C&#x27; covers the same three flags from the exclusion-justification angle.</p>
+  <div class="table-scroll"><table class="evidence-ledger">
+  <tr><th>Column</th><th>Candidate status</th><th>r vs xt_after</th><th>r vs target</th></tr>
+  <tr><td><code>action_ended_possession</code></td><td>excluded</td><td>-0.1689</td><td>+0.1403</td></tr>
   </table></div>
 
   <h3 style="margin-top:22px;">Locked numerical features vs the target's two terms</h3>
   <p class="test-subnote">Ranked by |r vs target|. Strongest: <code>distance_to_attacking_box</code> at
-  <b>+0.5551</b> against the target and <b>-0.5123</b> against
-  <code>xt_after</code> specifically.</p>
+  <b>+0.1431</b> against the target and <b>+0.0919</b> against
+  <code>xt_after</code> specifically. Note how much higher the same feature sits against
+  <code>xt_before</code> (+0.2652) &mdash; that term is unchanged from v1 and is where the
+  residual, expected location relationship now lives.</p>
   <div class="table-scroll"><table class="evidence-ledger">
   <tr><th>Locked feature</th><th>r vs xt_after</th><th>r vs xt_before</th><th>r vs target</th></tr>
-  <tr><td><code>distance_to_attacking_box</code></td><td>-0.5123</td><td>+0.2647</td><td>+0.5551</td></tr><tr><td><code>angle_to_attacking_goal</code></td><td>+0.2494</td><td>-0.1815</td><td>-0.3083</td></tr><tr><td><code>defenders_between_ball_and_attacking_goal</code></td><td>-0.1744</td><td>+0.0143</td><td>+0.1341</td></tr><tr><td><code>defenders_within_10m</code></td><td>+0.3300</td><td>+0.1636</td><td>-0.1279</td></tr><tr><td><code>attackers_within_5m</code></td><td>+0.0902</td><td>-0.0458</td><td>-0.0960</td></tr><tr><td><code>attackers_within_10m</code></td><td>+0.1660</td><td>+0.0434</td><td>-0.0911</td></tr><tr><td><code>defenders_within_5m</code></td><td>+0.2467</td><td>+0.1186</td><td>-0.0890</td></tr><tr><td><code>defender_attacker_gap_x</code></td><td>+0.0795</td><td>-0.0313</td><td>-0.0791</td></tr><tr><td><code>attacking_goal_centrality</code></td><td>+0.3104</td><td>+0.1969</td><td>-0.0778</td></tr><tr><td><code>attacker_spread</code></td><td>-0.2417</td><td>-0.1951</td><td>+0.0304</td></tr><tr><td><code>defender_spread</code></td><td>-0.2872</td><td>-0.2433</td><td>+0.0279</td></tr><tr><td><code>attacker_defender_ratio</code></td><td>-0.0726</td><td>-0.0402</td><td>+0.0225</td></tr><tr><td><code>possession_elapsed_seconds</code></td><td>+0.0304</td><td>+0.0128</td><td>-0.0123</td></tr><tr><td><code>nearest_attacker_distance</code></td><td>+0.1112</td><td>+0.1247</td><td>+0.0113</td></tr><tr><td><code>visible_attacker_count</code></td><td>-0.1041</td><td>-0.0911</td><td>+0.0080</td></tr><tr><td><code>nearest_defender_distance</code></td><td>+0.0807</td><td>+0.0893</td><td>+0.0073</td></tr><tr><td><code>visible_defender_count</code></td><td>+0.0361</td><td>+0.0307</td><td>-0.0034</td></tr><tr><td><code>match_time_seconds</code></td><td>+0.0259</td><td>+0.0245</td><td>-0.0007</td></tr><tr><td><code>defender_attacker_gap_y</code></td><td>-0.0048</td><td>-0.0042</td><td>+0.0004</td></tr>
+  <tr><td><code>distance_to_attacking_box</code></td><td>+0.0919</td><td>+0.2652</td><td>+0.1431</td></tr><tr><td><code>angle_to_attacking_goal</code></td><td>-0.0984</td><td>-0.1814</td><td>-0.0708</td></tr><tr><td><code>attackers_within_5m</code></td><td>+0.0249</td><td>-0.0465</td><td>-0.0568</td></tr><tr><td><code>defender_attacker_gap_x</code></td><td>+0.0388</td><td>-0.0315</td><td>-0.0549</td></tr><tr><td><code>attacker_defender_ratio</code></td><td>+0.0205</td><td>-0.0404</td><td>-0.0481</td></tr><tr><td><code>visible_defender_count</code></td><td>-0.0283</td><td>+0.0311</td><td>+0.0466</td></tr><tr><td><code>defender_spread</code></td><td>-0.1998</td><td>-0.2423</td><td>-0.0424</td></tr><tr><td><code>defenders_within_5m</code></td><td>+0.1672</td><td>+0.1173</td><td>-0.0335</td></tr><tr><td><code>nearest_defender_distance</code></td><td>+0.1388</td><td>+0.0900</td><td>-0.0334</td></tr><tr><td><code>attackers_within_10m</code></td><td>+0.0806</td><td>+0.0423</td><td>-0.0314</td></tr><tr><td><code>defenders_between_ball_and_attacking_goal</code></td><td>+0.0521</td><td>+0.0141</td><td>-0.0284</td></tr><tr><td><code>visible_attacker_count</code></td><td>-0.0618</td><td>-0.0909</td><td>-0.0260</td></tr><tr><td><code>attacker_spread</code></td><td>-0.1775</td><td>-0.1947</td><td>-0.0212</td></tr><tr><td><code>defenders_within_10m</code></td><td>+0.1826</td><td>+0.1622</td><td>-0.0187</td></tr><tr><td><code>possession_elapsed_seconds</code></td><td>+0.0371</td><td>+0.0122</td><td>-0.0184</td></tr><tr><td><code>nearest_attacker_distance</code></td><td>+0.1547</td><td>+0.1254</td><td>-0.0171</td></tr><tr><td><code>attacking_goal_centrality</code></td><td>+0.2256</td><td>+0.1962</td><td>-0.0143</td></tr><tr><td><code>defender_attacker_gap_y</code></td><td>+0.0010</td><td>-0.0036</td><td>-0.0037</td></tr><tr><td><code>match_time_seconds</code></td><td>+0.0211</td><td>+0.0245</td><td>+0.0036</td></tr>
   </table></div>
 
-  <div class="closing-note" style="margin-top:18px;">The construction columns themselves (action_x/action_y) are already OUT of the ACTIVE candidate list, excluded as verified duplicates of ball_x/ball_y -- confirmed directly here, not assumed. But several LOCKED features are still deterministic functions of the same location: the strongest is distance_to_attacking_box at r=+0.5551 against the target and r=-0.5123 against xt_after specifically. This is NOT leakage in the forward-window sense the passive audit deals with -- nothing here is knowable only because of what happens after the action. It is construction coupling: the feature and one term of the target are computed from the same coordinates. A model fed these features will partly recover xt_after by definition, and a strong correlation in the Numerical Target Atlas should be read with that in mind rather than as discovered defensive signal. No feature is dropped on this evidence; it is recorded so the atlas is read correctly.</div>
+  <div class="closing-note" style="margin-top:18px;">No locked numerical feature now exceeds |r| = 0.1431 against the target (distance_to_attacking_box), against +0.5551 in the v1 edition. Reading the Numerical Target Atlas no longer requires the heavy &#x27;this may be recovery-by-definition&#x27; discount the v1 portal attached to every location feature. What remains is ordinary and expected: xt_before is still an xT grid lookup at the previous event&#x27;s location, so features describing where play was happening retain a real, modest relationship with it -- see the r_vs_xt_before column, where the same feature sits materially higher than it does against the delta. No feature is dropped or added on this evidence, and feature_config.py is unchanged.</div>
   <div class="finding flag" style="margin:16px 0;">
-  <span class="tag">carried forward from Prompt 64 -- Clearance / action_x</span>
-  <p>This is the same root cause as Prompt 64&#x27;s Clearance artefact, generalised: because xt_after scores the action&#x27;s OWN location rather than the ball&#x27;s resulting location, every location-derived feature inherits that definitional choice. The Clearance case is the most visible symptom (see the Category Atlas, where Clearance ranks last of 8 event types); this part is the underlying mechanism.</p>
-  <p style="margin-top:8px;">Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.1/3.4): for Clearance events, action_x/action_y -- this target&#x27;s definition of the post-action location, and therefore of xt_after -- is the location the clearance was taken FROM, not where the ball ends up. Last-ditch clearances are very often taken deep in the defending box, a high-xT cell by construction, so Clearance rows carry a systematically negative delta even though a clearance is a good defensive outcome. Prompt 64 measured this directly at -0.0315 mean delta for Clearance inside the action_ended_possession slice, against +0.0009 to +0.0076 for every other event type there. This is a measurement artefact of the xt_after definition, NOT evidence that clearances are bad defending.</p>
+  <span class="tag">carried forward from Prompt 66 &mdash; Clearance reversal, same root cause</span>
+  <p>This part and the Category Atlas&#x27;s Clearance row are the same story from two directions. v1&#x27;s Clearance artefact was the most visible symptom of scoring the action&#x27;s OWN location as xt_after; this part measured the general mechanism behind it. Prompt 66 removed the mechanism, and both move together: Clearance flips from 8th of 8 (-0.0325) to 1st of 8 (+0.0247), and the strongest location coupling falls from +0.5551 to +0.1431.</p>
+  <p style="margin-top:8px;">Prompt 66 supersedes Prompt 64/65&#x27;s construction-coupling premise. Prompt 65&#x27;s Leakage Audit Part D&#x27; was built on &#x27;xt_after is looked up directly from action_x/action_y, so every location-derived locked feature shares a definitional term with half the target&#x27;. Under v2 that is NO LONGER TRUE: xt_after is 0.0 for possession-ending actions, the next event&#x27;s own location otherwise, or the next event&#x27;s shot xG -- the acting row&#x27;s own coordinates are never used. The v1 coupling therefore dissolves and is re-measured from scratch here rather than restated.</p>
   </div>
 </div>
 </div>

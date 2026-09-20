@@ -1,0 +1,1733 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Active Defensive Actions: Category Atlas (xT delta)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.xg-card.locked { border-left: 4px solid var(--good); }
+.xg-card.dropped { border-left: 4px solid var(--amber); }
+.xg-status-badge { font-family: "JetBrains Mono", monospace; font-size: 9.5px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px; font-weight: 700; margin-left: 8px; vertical-align: middle; }
+.xg-status-badge.locked { background: var(--good-wash); color: var(--good); }
+.xg-status-badge.dropped { background: var(--amber-wash); color: var(--amber); }
+.xg-reason { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 2px 0 10px; }
+.xt-dirbar { display: inline-block; width: 110px; height: 7px; border-radius: 3px; overflow: hidden;
+  background: var(--plane); vertical-align: middle; margin-left: 6px; }
+.xt-dirbar i { display: inline-block; height: 100%; }
+.xt-dirbar i.neg { background: var(--neg); }
+.xt-dirbar i.zero { background: var(--text-muted); opacity: 0.45; }
+.xt-dirbar i.pos { background: var(--good); }
+.xt-clearance-note { border-left: 4px solid var(--amber); background: var(--amber-wash); padding: 12px 14px;
+  border-radius: 8px; margin: 14px 0; font-size: 12.5px; line-height: 1.55; }
+.xt-adapt { border-left: 4px solid var(--accent); background: var(--accent-wash); padding: 12px 14px;
+  border-radius: 8px; margin: 14px 0; font-size: 12.5px; line-height: 1.55; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">CATEGORY ATLAS -- XT DELTA &middot; ACTIVE-BINARY LEG ONLY</p>
+  <h1 class="title">Active Defensive Actions: Category Atlas (xT delta)</h1>
+  <p class="dek">Mean target_xt_delta by category, reconstructed pre-drop ACTIVE pool, one row per actual defensive
+  action. Active-binary leg only -- the passive leg is out of scope for this target.</p>
+  <div class="statbar"><div class="stat"><b>56,068</b><span>active rows</span></div><div class="stat"><b>-0.00132</b><span>mean xT delta</span></div><div class="stat"><b>47.0%</b><span>negative</span></div><div class="stat"><b>41.7%</b><span>positive</span></div><div class="stat"><b>9</b><span>categorical columns</span></div><div class="stat"><b>3</b><span>dropped, still shown</span></div></div>
+</div></div>
+<div class="wrap">
+
+<div class="xt-adapt">
+<b>Methodology adapted for a symmetric, sign-carrying target -- stated, not assumed.</b>
+<p style="margin:8px 0 0;">ADAPTATION 1. target_xt_delta is roughly symmetric with a near-zero, NEGATIVE mean (-0.001316), so the xg_target suite&#x27;s convention of expressing every threshold as a multiple of the overall mean target value is meaningless here (it would flip signs and collapse to nothing). Instead the xg convention is TRANSLATED, not replaced: xg&#x27;s own flat_margin (0.5 x mean xg = 0.004055 on these same rows) is re-expressed as a fraction of xg&#x27;s own standard deviation (0.048033), giving 0.084425, and that fraction is applied to target_xt_delta&#x27;s standard deviation (0.064986). Every number in this calculation is computed at runtime from the real parquet, not carried over from a writeup. Scale-free thresholds (|Spearman rho| &gt;= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged.</p>
+<p style="margin:8px 0 0;">ADAPTATION 2. The xg_target suite&#x27;s second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta has no shot column behind it; its structural-zero analogue is the 11.3% of rows with an EXACTLY zero delta (the action did not cross an xT grid-cell boundary). The conditional panel throughout this suite is therefore &#x27;given a non-zero delta&#x27; (target_xt_delta != 0), never &#x27;given a shot&#x27;.</p>
+<p style="margin:8px 0 0;">ADAPTATION 3. Sign carries the football meaning: POSITIVE target_xt_delta = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. Rankings are by |magnitude| across BOTH directions, never one-sided &#x27;higher is worse&#x27; lift, and every table also reports the negative/positive/zero share behind its mean.</p>
+<p style="margin:8px 0 0;">NOT an adaptation: checked directly rather than assumed -- the xg_target report suite never log-transforms its target anywhere (every xg report uses the raw groupby mean of target_future_xg_10s). The log1p framing in this project belongs to the modelling legs, not to this report suite, so there was no log-transform to remove.</p>
+</div><div class="findings"><div class="finding"><span class="tag">pool</span><p><b>9 categorical columns (6 locked + 3 dropped-but-included)</b> &mdash; reconstructed pre-drop 51-era ACTIVE pool, same discipline and same source lists as the xg Category Atlas -- a dropped-but-strong column stands out rather than disappearing.</p></div><div class="finding"><span class="tag">scale</span><p><b>mean target_xt_delta = -0.001316</b> &mdash; roughly symmetric, 47.0% negative / 41.7% positive / 11.3% exactly zero, std 0.06499. Not a rate, not a percentage, and NOT non-negative -- the sign is the football meaning.</p></div><div class="finding"><span class="tag">conditional</span><p><b>mean given a non-zero delta = -0.001484</b> &mdash; each card expands to a panel restricted to rows whose delta is not exactly zero -- this target's structural-zero analogue of the xg suite's shot-conditional panel.</p></div><div class="finding flag"><span class="tag">carried forward from Prompt 64</span><p><b>Clearance / action_x artefact</b> &mdash; expected to resurface on the <code>event_type</code> card, and it does -- cross-referenced inline there with Prompt 64's own measurement.</p></div></div>
+<h2 class="section-title">Category Atlas -- xT delta</h2><p class="section-note">One card per categorical column, reconstructed pre-drop ACTIVE pool. Green border = locked, amber = dropped (still shown, reason inline). Bars diverge from zero: green right = threat reduced, red left = threat increased. Expand a card for the non-zero-delta panel.</p>
+<div class="card xg-card dropped" style="margin-bottom:16px;">
+<h3>action_family <span class="xg-status-badge dropped">DROPPED</span></h3>
+<p class="xg-reason"><b>Why dropped:</b> CORRELATION_ANALYSIS DROP tier: Cramer&#x27;s V=1.0 vs event_type (kept, more granular)</p>
+<p class="subnote">Unconditional -- mean target_xt_delta by category, diverging from zero. Positive (green) = xT fell
+across the action (threat reduced). Negative (red) = xT rose. Dataset mean = -0.001316. The small
+three-colour bar beside each label is that category's negative / exactly-zero / positive row share.</p>
+
+<div class="catbar-row" title="recovery: n=8922, mean=+0.010803, 43.3% neg / 44.9% pos">
+  <div class="catbar-label"><span>recovery</span><span class="n">n=8922</span><span class="xt-dirbar" title="43.3% negative / 11.8% zero / 44.9% positive"><i class="neg" style="width:43.3%"></i><i class="zero" style="width:11.8%"></i><i class="pos" style="width:44.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:32.68%"></div>
+  </div>
+  <span class="rate-val">+0.010803</span>
+</div>
+<div class="catbar-row" title="discipline: n=2642, mean=+0.001017, 35.0% neg / 31.5% pos">
+  <div class="catbar-label"><span>discipline</span><span class="n">n=2642</span><span class="xt-dirbar" title="35.0% negative / 33.5% zero / 31.5% positive"><i class="neg" style="width:35.0%"></i><i class="zero" style="width:33.5%"></i><i class="pos" style="width:31.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:3.08%"></div>
+  </div>
+  <span class="rate-val">+0.001017</span>
+</div>
+<div class="catbar-row" title="pressure: n=27464, mean=+0.000190, 50.0% neg / 43.7% pos">
+  <div class="catbar-label"><span>pressure</span><span class="n">n=27464</span><span class="xt-dirbar" title="50.0% negative / 6.3% zero / 43.7% positive"><i class="neg" style="width:50.0%"></i><i class="zero" style="width:6.3%"></i><i class="pos" style="width:43.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.58%"></div>
+  </div>
+  <span class="rate-val">+0.000190</span>
+</div>
+<div class="catbar-row" title="contest: n=6906, mean=-0.001600, 37.6% neg / 33.2% pos">
+  <div class="catbar-label"><span>contest</span><span class="n">n=6906</span><span class="xt-dirbar" title="37.6% negative / 29.2% zero / 33.2% positive"><i class="neg" style="width:37.6%"></i><i class="zero" style="width:29.2%"></i><i class="pos" style="width:33.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:4.84%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.001600</span>
+</div>
+<div class="catbar-row" title="intervention: n=10102, mean=-0.016529, 51.9% neg / 41.8% pos">
+  <div class="catbar-label"><span>intervention</span><span class="n">n=10102</span><span class="xt-dirbar" title="51.9% negative / 6.3% zero / 41.8% positive"><i class="neg" style="width:51.9%"></i><i class="zero" style="width:6.3%"></i><i class="pos" style="width:41.8%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.016529</span>
+</div>
+
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a non-zero delta (n=49,699) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on <code>target_xt_delta != 0</code> -- the xT analogue of the
+xg suite's "given a shot" panel (Adaptation 2): it strips the rows where the action never crossed an xT grid-cell
+boundary, which are this target's structural-zero mass. Subset mean = -0.001484. Small-sample categories
+flagged, not hidden.</p>
+
+<div class="catbar-row" title="recovery: n=7865, mean=+0.012254, 49.1% neg / 50.9% pos">
+  <div class="catbar-label"><span>recovery</span><span class="n">n=7865</span><span class="xt-dirbar" title="49.1% negative / 0.0% zero / 50.9% positive"><i class="neg" style="width:49.1%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:50.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:34.72%"></div>
+  </div>
+  <span class="rate-val">+0.012254</span>
+</div>
+<div class="catbar-row" title="discipline: n=1757, mean=+0.001530, 52.6% neg / 47.4% pos">
+  <div class="catbar-label"><span>discipline</span><span class="n">n=1757</span><span class="xt-dirbar" title="52.6% negative / 0.0% zero / 47.4% positive"><i class="neg" style="width:52.6%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:47.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:4.33%"></div>
+  </div>
+  <span class="rate-val">+0.001530</span>
+</div>
+<div class="catbar-row" title="pressure: n=25726, mean=+0.000203, 53.3% neg / 46.7% pos">
+  <div class="catbar-label"><span>pressure</span><span class="n">n=25726</span><span class="xt-dirbar" title="53.3% negative / 0.0% zero / 46.7% positive"><i class="neg" style="width:53.3%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.58%"></div>
+  </div>
+  <span class="rate-val">+0.000203</span>
+</div>
+<div class="catbar-row" title="contest: n=4889, mean=-0.002260, 53.1% neg / 46.9% pos">
+  <div class="catbar-label"><span>contest</span><span class="n">n=4889</span><span class="xt-dirbar" title="53.1% negative / 0.0% zero / 46.9% positive"><i class="neg" style="width:53.1%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:6.40%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.002260</span>
+</div>
+<div class="catbar-row" title="intervention: n=9462, mean=-0.017647, 55.4% neg / 44.6% pos">
+  <div class="catbar-label"><span>intervention</span><span class="n">n=9462</span><span class="xt-dirbar" title="55.4% negative / 0.0% zero / 44.6% positive"><i class="neg" style="width:55.4%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:44.6%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.017647</span>
+</div>
+</details>
+</div>
+<div class="card xg-card dropped" style="margin-bottom:16px;">
+<h3>action_zone <span class="xg-status-badge dropped">DROPPED</span></h3>
+<p class="xg-reason"><b>Why dropped:</b> Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal</p>
+<p class="subnote">Unconditional -- mean target_xt_delta by category, diverging from zero. Positive (green) = xT fell
+across the action (threat reduced). Negative (red) = xT rose. Dataset mean = -0.001316. The small
+three-colour bar beside each label is that category's negative / exactly-zero / positive row share.</p>
+
+<div class="catbar-row" title="defensive_third_center: n=9507, mean=+0.053306, 6.8% neg / 81.6% pos">
+  <div class="catbar-label"><span>defensive_third_center</span><span class="n">n=9507</span><span class="xt-dirbar" title="6.8% negative / 11.6% zero / 81.6% positive"><i class="neg" style="width:6.8%"></i><i class="zero" style="width:11.6%"></i><i class="pos" style="width:81.6%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:45.58%"></div>
+  </div>
+  <span class="rate-val">+0.053306</span>
+</div>
+<div class="catbar-row" title="defensive_third_left_flank: n=3457, mean=+0.022932, 3.0% neg / 87.1% pos">
+  <div class="catbar-label"><span>defensive_third_left_flank</span><span class="n">n=3457</span><span class="xt-dirbar" title="3.0% negative / 9.9% zero / 87.1% positive"><i class="neg" style="width:3.0%"></i><i class="zero" style="width:9.9%"></i><i class="pos" style="width:87.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:19.61%"></div>
+  </div>
+  <span class="rate-val">+0.022932</span>
+</div>
+<div class="catbar-row" title="defensive_third_right_flank: n=3191, mean=+0.021689, 3.4% neg / 87.5% pos">
+  <div class="catbar-label"><span>defensive_third_right_flank</span><span class="n">n=3191</span><span class="xt-dirbar" title="3.4% negative / 9.1% zero / 87.5% positive"><i class="neg" style="width:3.4%"></i><i class="zero" style="width:9.1%"></i><i class="pos" style="width:87.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:18.55%"></div>
+  </div>
+  <span class="rate-val">+0.021689</span>
+</div>
+<div class="catbar-row" title="middle_third_center: n=9603, mean=+0.002001, 45.6% neg / 40.1% pos">
+  <div class="catbar-label"><span>middle_third_center</span><span class="n">n=9603</span><span class="xt-dirbar" title="45.6% negative / 14.2% zero / 40.1% positive"><i class="neg" style="width:45.6%"></i><i class="zero" style="width:14.2%"></i><i class="pos" style="width:40.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.71%"></div>
+  </div>
+  <span class="rate-val">+0.002001</span>
+</div>
+<div class="catbar-row" title="middle_third_right_flank: n=5703, mean=+0.001713, 42.4% neg / 43.9% pos">
+  <div class="catbar-label"><span>middle_third_right_flank</span><span class="n">n=5703</span><span class="xt-dirbar" title="42.4% negative / 13.7% zero / 43.9% positive"><i class="neg" style="width:42.4%"></i><i class="zero" style="width:13.7%"></i><i class="pos" style="width:43.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.46%"></div>
+  </div>
+  <span class="rate-val">+0.001713</span>
+</div>
+<div class="catbar-row" title="middle_third_left_flank: n=5849, mean=+0.001536, 43.4% neg / 42.8% pos">
+  <div class="catbar-label"><span>middle_third_left_flank</span><span class="n">n=5849</span><span class="xt-dirbar" title="43.4% negative / 13.8% zero / 42.8% positive"><i class="neg" style="width:43.4%"></i><i class="zero" style="width:13.8%"></i><i class="pos" style="width:42.8%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.31%"></div>
+  </div>
+  <span class="rate-val">+0.001536</span>
+</div>
+<div class="catbar-row" title="attacking_third_right_flank: n=3777, mean=-0.014075, 86.8% neg / 4.9% pos">
+  <div class="catbar-label"><span>attacking_third_right_flank</span><span class="n">n=3777</span><span class="xt-dirbar" title="86.8% negative / 8.3% zero / 4.9% positive"><i class="neg" style="width:86.8%"></i><i class="zero" style="width:8.3%"></i><i class="pos" style="width:4.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:12.04%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.014075</span>
+</div>
+<div class="catbar-row" title="attacking_third_left_flank: n=3647, mean=-0.014514, 86.3% neg / 4.7% pos">
+  <div class="catbar-label"><span>attacking_third_left_flank</span><span class="n">n=3647</span><span class="xt-dirbar" title="86.3% negative / 9.0% zero / 4.7% positive"><i class="neg" style="width:86.3%"></i><i class="zero" style="width:9.0%"></i><i class="pos" style="width:4.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:12.41%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.014514</span>
+</div>
+<div class="catbar-row" title="attacking_third_center: n=11302, mean=-0.058473, 86.0% neg / 5.2% pos">
+  <div class="catbar-label"><span>attacking_third_center</span><span class="n">n=11302</span><span class="xt-dirbar" title="86.0% negative / 8.9% zero / 5.2% positive"><i class="neg" style="width:86.0%"></i><i class="zero" style="width:8.9%"></i><i class="pos" style="width:5.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.058473</span>
+</div>
+
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a non-zero delta (n=49,699) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on <code>target_xt_delta != 0</code> -- the xT analogue of the
+xg suite's "given a shot" panel (Adaptation 2): it strips the rows where the action never crossed an xT grid-cell
+boundary, which are this target's structural-zero mass. Subset mean = -0.001484. Small-sample categories
+flagged, not hidden.</p>
+
+<div class="catbar-row" title="defensive_third_center: n=8405, mean=+0.060295, 7.7% neg / 92.3% pos">
+  <div class="catbar-label"><span>defensive_third_center</span><span class="n">n=8405</span><span class="xt-dirbar" title="7.7% negative / 0.0% zero / 92.3% positive"><i class="neg" style="width:7.7%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:92.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:46.98%"></div>
+  </div>
+  <span class="rate-val">+0.060295</span>
+</div>
+<div class="catbar-row" title="defensive_third_left_flank: n=3115, mean=+0.025450, 3.3% neg / 96.7% pos">
+  <div class="catbar-label"><span>defensive_third_left_flank</span><span class="n">n=3115</span><span class="xt-dirbar" title="3.3% negative / 0.0% zero / 96.7% positive"><i class="neg" style="width:3.3%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:96.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:19.83%"></div>
+  </div>
+  <span class="rate-val">+0.025450</span>
+</div>
+<div class="catbar-row" title="defensive_third_right_flank: n=2900, mean=+0.023865, 3.7% neg / 96.3% pos">
+  <div class="catbar-label"><span>defensive_third_right_flank</span><span class="n">n=2900</span><span class="xt-dirbar" title="3.7% negative / 0.0% zero / 96.3% positive"><i class="neg" style="width:3.7%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:96.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:18.59%"></div>
+  </div>
+  <span class="rate-val">+0.023865</span>
+</div>
+<div class="catbar-row" title="middle_third_center: n=8235, mean=+0.002333, 53.2% neg / 46.8% pos">
+  <div class="catbar-label"><span>middle_third_center</span><span class="n">n=8235</span><span class="xt-dirbar" title="53.2% negative / 0.0% zero / 46.8% positive"><i class="neg" style="width:53.2%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.8%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.82%"></div>
+  </div>
+  <span class="rate-val">+0.002333</span>
+</div>
+<div class="catbar-row" title="middle_third_right_flank: n=4921, mean=+0.001985, 49.2% neg / 50.8% pos">
+  <div class="catbar-label"><span>middle_third_right_flank</span><span class="n">n=4921</span><span class="xt-dirbar" title="49.2% negative / 0.0% zero / 50.8% positive"><i class="neg" style="width:49.2%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:50.8%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.55%"></div>
+  </div>
+  <span class="rate-val">+0.001985</span>
+</div>
+<div class="catbar-row" title="middle_third_left_flank: n=5042, mean=+0.001782, 50.3% neg / 49.7% pos">
+  <div class="catbar-label"><span>middle_third_left_flank</span><span class="n">n=5042</span><span class="xt-dirbar" title="50.3% negative / 0.0% zero / 49.7% positive"><i class="neg" style="width:50.3%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:49.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.39%"></div>
+  </div>
+  <span class="rate-val">+0.001782</span>
+</div>
+<div class="catbar-row" title="attacking_third_right_flank: n=3464, mean=-0.015346, 94.6% neg / 5.4% pos">
+  <div class="catbar-label"><span>attacking_third_right_flank</span><span class="n">n=3464</span><span class="xt-dirbar" title="94.6% negative / 0.0% zero / 5.4% positive"><i class="neg" style="width:94.6%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:5.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:11.96%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.015346</span>
+</div>
+<div class="catbar-row" title="attacking_third_left_flank: n=3319, mean=-0.015949, 94.8% neg / 5.2% pos">
+  <div class="catbar-label"><span>attacking_third_left_flank</span><span class="n">n=3319</span><span class="xt-dirbar" title="94.8% negative / 0.0% zero / 5.2% positive"><i class="neg" style="width:94.8%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:5.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:12.43%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.015949</span>
+</div>
+<div class="catbar-row" title="attacking_third_center: n=10298, mean=-0.064174, 94.3% neg / 5.7% pos">
+  <div class="catbar-label"><span>attacking_third_center</span><span class="n">n=10298</span><span class="xt-dirbar" title="94.3% negative / 0.0% zero / 5.7% positive"><i class="neg" style="width:94.3%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:5.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.064174</span>
+</div>
+</details>
+</div>
+<div class="card xg-card locked" style="margin-bottom:16px;">
+<h3>event_type <span class="xg-status-badge locked">LOCKED</span></h3>
+
+<p class="subnote">Unconditional -- mean target_xt_delta by category, diverging from zero. Positive (green) = xT fell
+across the action (threat reduced). Negative (red) = xT rose. Dataset mean = -0.001316. The small
+three-colour bar beside each label is that category's negative / exactly-zero / positive row share.</p>
+
+<div class="catbar-row" title="Ball Recovery: n=8922, mean=+0.010803, 43.3% neg / 44.9% pos">
+  <div class="catbar-label"><span>Ball Recovery</span><span class="n">n=8922</span><span class="xt-dirbar" title="43.3% negative / 11.8% zero / 44.9% positive"><i class="neg" style="width:43.3%"></i><i class="zero" style="width:11.8%"></i><i class="pos" style="width:44.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:16.63%"></div>
+  </div>
+  <span class="rate-val">+0.010803</span>
+</div>
+<div class="catbar-row" title="50/50: n=478, mean=+0.002828, 41.4% neg / 44.4% pos">
+  <div class="catbar-label"><span>50/50</span><span class="n">n=478</span><span class="xt-dirbar" title="41.4% negative / 14.2% zero / 44.4% positive"><i class="neg" style="width:41.4%"></i><i class="zero" style="width:14.2%"></i><i class="pos" style="width:44.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:4.35%"></div>
+  </div>
+  <span class="rate-val">+0.002828</span>
+</div>
+<div class="catbar-row" title="Foul Committed: n=2642, mean=+0.001017, 35.0% neg / 31.5% pos">
+  <div class="catbar-label"><span>Foul Committed</span><span class="n">n=2642</span><span class="xt-dirbar" title="35.0% negative / 33.5% zero / 31.5% positive"><i class="neg" style="width:35.0%"></i><i class="zero" style="width:33.5%"></i><i class="pos" style="width:31.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.57%"></div>
+  </div>
+  <span class="rate-val">+0.001017</span>
+</div>
+<div class="catbar-row" title="Pressure: n=27464, mean=+0.000190, 50.0% neg / 43.7% pos">
+  <div class="catbar-label"><span>Pressure</span><span class="n">n=27464</span><span class="xt-dirbar" title="50.0% negative / 6.3% zero / 43.7% positive"><i class="neg" style="width:50.0%"></i><i class="zero" style="width:6.3%"></i><i class="pos" style="width:43.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.29%"></div>
+  </div>
+  <span class="rate-val">+0.000190</span>
+</div>
+<div class="catbar-row" title="Duel: n=6428, mean=-0.001929, 37.3% neg / 32.4% pos">
+  <div class="catbar-label"><span>Duel</span><span class="n">n=6428</span><span class="xt-dirbar" title="37.3% negative / 30.3% zero / 32.4% positive"><i class="neg" style="width:37.3%"></i><i class="zero" style="width:30.3%"></i><i class="pos" style="width:32.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:2.97%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.001929</span>
+</div>
+<div class="catbar-row" title="Interception: n=2029, mean=-0.003033, 49.3% neg / 40.1% pos">
+  <div class="catbar-label"><span>Interception</span><span class="n">n=2029</span><span class="xt-dirbar" title="49.3% negative / 10.6% zero / 40.1% positive"><i class="neg" style="width:49.3%"></i><i class="zero" style="width:10.6%"></i><i class="pos" style="width:40.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:4.67%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.003033</span>
+</div>
+<div class="catbar-row" title="Block: n=3889, mean=-0.006408, 51.8% neg / 42.4% pos">
+  <div class="catbar-label"><span>Block</span><span class="n">n=3889</span><span class="xt-dirbar" title="51.8% negative / 5.8% zero / 42.4% positive"><i class="neg" style="width:51.8%"></i><i class="zero" style="width:5.8%"></i><i class="pos" style="width:42.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:9.86%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.006408</span>
+</div>
+<div class="catbar-row" title="Clearance: n=4184, mean=-0.032482, 53.1% neg / 42.1% pos">
+  <div class="catbar-label"><span>Clearance</span><span class="n">n=4184</span><span class="xt-dirbar" title="53.1% negative / 4.8% zero / 42.1% positive"><i class="neg" style="width:53.1%"></i><i class="zero" style="width:4.8%"></i><i class="pos" style="width:42.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.032482</span>
+</div>
+
+<div class="xt-clearance-note">
+<b>Clearance / <code>action_x</code> artefact -- confirmed present in this atlas.</b>
+<code>Clearance</code> ranks 8 of 8 <code>event_type</code> categories here, mean
+<b>-0.032482</b> over n=4,184 rows (53.1% negative,
+42.1% positive). Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.1/3.4): for Clearance events, action_x/action_y -- this target&#x27;s definition of the post-action location, and therefore of xt_after -- is the location the clearance was taken FROM, not where the ball ends up. Last-ditch clearances are very often taken deep in the defending box, a high-xT cell by construction, so Clearance rows carry a systematically negative delta even though a clearance is a good defensive outcome. Prompt 64 measured this directly at -0.0315 mean delta for Clearance inside the action_ended_possession slice, against +0.0009 to +0.0076 for every other event type there. This is a measurement artefact of the xt_after definition, NOT evidence that clearances are bad defending.
+Do not read this row as "clearances are bad defending" -- it is the same measurement artefact Prompt 64
+identified, resurfacing here exactly where it was predicted to.
+</div>
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a non-zero delta (n=49,699) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on <code>target_xt_delta != 0</code> -- the xT analogue of the
+xg suite's "given a shot" panel (Adaptation 2): it strips the rows where the action never crossed an xT grid-cell
+boundary, which are this target's structural-zero mass. Subset mean = -0.001484. Small-sample categories
+flagged, not hidden.</p>
+
+<div class="catbar-row" title="Ball Recovery: n=7865, mean=+0.012254, 49.1% neg / 50.9% pos">
+  <div class="catbar-label"><span>Ball Recovery</span><span class="n">n=7865</span><span class="xt-dirbar" title="49.1% negative / 0.0% zero / 50.9% positive"><i class="neg" style="width:49.1%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:50.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:17.97%"></div>
+  </div>
+  <span class="rate-val">+0.012254</span>
+</div>
+<div class="catbar-row" title="50/50: n=410, mean=+0.003297, 48.3% neg / 51.7% pos">
+  <div class="catbar-label"><span>50/50</span><span class="n">n=410</span><span class="xt-dirbar" title="48.3% negative / 0.0% zero / 51.7% positive"><i class="neg" style="width:48.3%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:51.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:4.83%"></div>
+  </div>
+  <span class="rate-val">+0.003297</span>
+</div>
+<div class="catbar-row" title="Foul Committed: n=1757, mean=+0.001530, 52.6% neg / 47.4% pos">
+  <div class="catbar-label"><span>Foul Committed</span><span class="n">n=1757</span><span class="xt-dirbar" title="52.6% negative / 0.0% zero / 47.4% positive"><i class="neg" style="width:52.6%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:47.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:2.24%"></div>
+  </div>
+  <span class="rate-val">+0.001530</span>
+</div>
+<div class="catbar-row" title="Pressure: n=25726, mean=+0.000203, 53.3% neg / 46.7% pos">
+  <div class="catbar-label"><span>Pressure</span><span class="n">n=25726</span><span class="xt-dirbar" title="53.3% negative / 0.0% zero / 46.7% positive"><i class="neg" style="width:53.3%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.30%"></div>
+  </div>
+  <span class="rate-val">+0.000203</span>
+</div>
+<div class="catbar-row" title="Duel: n=4479, mean=-0.002769, 53.6% neg / 46.4% pos">
+  <div class="catbar-label"><span>Duel</span><span class="n">n=4479</span><span class="xt-dirbar" title="53.6% negative / 0.0% zero / 46.4% positive"><i class="neg" style="width:53.6%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:4.06%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.002769</span>
+</div>
+<div class="catbar-row" title="Interception: n=1815, mean=-0.003390, 55.1% neg / 44.9% pos">
+  <div class="catbar-label"><span>Interception</span><span class="n">n=1815</span><span class="xt-dirbar" title="55.1% negative / 0.0% zero / 44.9% positive"><i class="neg" style="width:55.1%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:44.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:4.97%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.003390</span>
+</div>
+<div class="catbar-row" title="Block: n=3662, mean=-0.006805, 55.0% neg / 45.0% pos">
+  <div class="catbar-label"><span>Block</span><span class="n">n=3662</span><span class="xt-dirbar" title="55.0% negative / 0.0% zero / 45.0% positive"><i class="neg" style="width:55.0%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:45.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:9.98%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.006805</span>
+</div>
+<div class="catbar-row" title="Clearance: n=3985, mean=-0.034104, 55.8% neg / 44.2% pos">
+  <div class="catbar-label"><span>Clearance</span><span class="n">n=3985</span><span class="xt-dirbar" title="55.8% negative / 0.0% zero / 44.2% positive"><i class="neg" style="width:55.8%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:44.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.034104</span>
+</div>
+</details>
+</div>
+<div class="card xg-card locked" style="margin-bottom:16px;">
+<h3>period <span class="xg-status-badge locked">LOCKED</span></h3>
+
+<p class="subnote">Unconditional -- mean target_xt_delta by category, diverging from zero. Positive (green) = xT fell
+across the action (threat reduced). Negative (red) = xT rose. Dataset mean = -0.001316. The small
+three-colour bar beside each label is that category's negative / exactly-zero / positive row share.</p>
+
+<div class="catbar-row" title="3: n=703, mean=+0.002255, 41.5% neg / 46.0% pos">
+  <div class="catbar-label"><span>3</span><span class="n">n=703</span><span class="xt-dirbar" title="41.5% negative / 12.5% zero / 46.0% positive"><i class="neg" style="width:41.5%"></i><i class="zero" style="width:12.5%"></i><i class="pos" style="width:46.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:31.75%"></div>
+  </div>
+  <span class="rate-val">+0.002255</span>
+</div>
+<div class="catbar-row" title="2: n=27888, mean=-0.001132, 47.5% neg / 41.6% pos">
+  <div class="catbar-label"><span>2</span><span class="n">n=27888</span><span class="xt-dirbar" title="47.5% negative / 10.9% zero / 41.6% positive"><i class="neg" style="width:47.5%"></i><i class="zero" style="width:10.9%"></i><i class="pos" style="width:41.6%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:15.94%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.001132</span>
+</div>
+<div class="catbar-row" title="1: n=26662, mean=-0.001536, 46.6% neg / 41.8% pos">
+  <div class="catbar-label"><span>1</span><span class="n">n=26662</span><span class="xt-dirbar" title="46.6% negative / 11.6% zero / 41.8% positive"><i class="neg" style="width:46.6%"></i><i class="zero" style="width:11.6%"></i><i class="pos" style="width:41.8%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:21.63%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.001536</span>
+</div>
+<div class="catbar-row" title="4: n=783, mean=-0.003551, 48.9% neg / 39.5% pos">
+  <div class="catbar-label"><span>4</span><span class="n">n=783</span><span class="xt-dirbar" title="48.9% negative / 11.6% zero / 39.5% positive"><i class="neg" style="width:48.9%"></i><i class="zero" style="width:11.6%"></i><i class="pos" style="width:39.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.003551</span>
+</div>
+
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a non-zero delta (n=49,699) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on <code>target_xt_delta != 0</code> -- the xT analogue of the
+xg suite's "given a shot" panel (Adaptation 2): it strips the rows where the action never crossed an xT grid-cell
+boundary, which are this target's structural-zero mass. Subset mean = -0.001484. Small-sample categories
+flagged, not hidden.</p>
+
+<div class="catbar-row" title="3: n=615, mean=+0.002577, 47.5% neg / 52.5% pos">
+  <div class="catbar-label"><span>3</span><span class="n">n=615</span><span class="xt-dirbar" title="47.5% negative / 0.0% zero / 52.5% positive"><i class="neg" style="width:47.5%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:52.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:32.07%"></div>
+  </div>
+  <span class="rate-val">+0.002577</span>
+</div>
+<div class="catbar-row" title="2: n=24834, mean=-0.001271, 53.3% neg / 46.7% pos">
+  <div class="catbar-label"><span>2</span><span class="n">n=24834</span><span class="xt-dirbar" title="53.3% negative / 0.0% zero / 46.7% positive"><i class="neg" style="width:53.3%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:15.82%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.001271</span>
+</div>
+<div class="catbar-row" title="1: n=23558, mean=-0.001739, 52.7% neg / 47.3% pos">
+  <div class="catbar-label"><span>1</span><span class="n">n=23558</span><span class="xt-dirbar" title="52.7% negative / 0.0% zero / 47.3% positive"><i class="neg" style="width:52.7%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:47.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:21.64%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.001739</span>
+</div>
+<div class="catbar-row" title="4: n=692, mean=-0.004018, 55.4% neg / 44.6% pos">
+  <div class="catbar-label"><span>4</span><span class="n">n=692</span><span class="xt-dirbar" title="55.4% negative / 0.0% zero / 44.6% positive"><i class="neg" style="width:55.4%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:44.6%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.004018</span>
+</div>
+</details>
+</div>
+<div class="card xg-card locked" style="margin-bottom:16px;">
+<h3>phase_label <span class="xg-status-badge locked">LOCKED</span></h3>
+
+<p class="subnote">Unconditional -- mean target_xt_delta by category, diverging from zero. Positive (green) = xT fell
+across the action (threat reduced). Negative (red) = xT rose. Dataset mean = -0.001316. The small
+three-colour bar beside each label is that category's negative / exactly-zero / positive row share.</p>
+
+<div class="catbar-row" title="high_press_proxy: n=9092, mean=+0.053717, 5.8% neg / 84.7% pos">
+  <div class="catbar-label"><span>high_press_proxy</span><span class="n">n=9092</span><span class="xt-dirbar" title="5.8% negative / 9.5% zero / 84.7% positive"><i class="neg" style="width:5.8%"></i><i class="zero" style="width:9.5%"></i><i class="pos" style="width:84.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:40.12%"></div>
+  </div>
+  <span class="rate-val">+0.053717</span>
+</div>
+<div class="catbar-row" title="settled_mid_block_proxy: n=9864, mean=+0.006716, 33.1% neg / 54.8% pos">
+  <div class="catbar-label"><span>settled_mid_block_proxy</span><span class="n">n=9864</span><span class="xt-dirbar" title="33.1% negative / 12.1% zero / 54.8% positive"><i class="neg" style="width:33.1%"></i><i class="zero" style="width:12.1%"></i><i class="pos" style="width:54.8%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:5.02%"></div>
+  </div>
+  <span class="rate-val">+0.006716</span>
+</div>
+<div class="catbar-row" title="wide_defending_proxy: n=5089, mean=+0.004925, 30.3% neg / 58.3% pos">
+  <div class="catbar-label"><span>wide_defending_proxy</span><span class="n">n=5089</span><span class="xt-dirbar" title="30.3% negative / 11.4% zero / 58.3% positive"><i class="neg" style="width:30.3%"></i><i class="zero" style="width:11.4%"></i><i class="pos" style="width:58.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:3.68%"></div>
+  </div>
+  <span class="rate-val">+0.004925</span>
+</div>
+<div class="catbar-row" title="counterpress_after_loss: n=9812, mean=+0.001287, 41.9% neg / 38.7% pos">
+  <div class="catbar-label"><span>counterpress_after_loss</span><span class="n">n=9812</span><span class="xt-dirbar" title="41.9% negative / 19.4% zero / 38.7% positive"><i class="neg" style="width:41.9%"></i><i class="zero" style="width:19.4%"></i><i class="pos" style="width:38.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.96%"></div>
+  </div>
+  <span class="rate-val">+0.001287</span>
+</div>
+<div class="catbar-row" title="transition_defence: n=5695, mean=+0.000963, 44.6% neg / 45.3% pos">
+  <div class="catbar-label"><span>transition_defence</span><span class="n">n=5695</span><span class="xt-dirbar" title="44.6% negative / 10.0% zero / 45.3% positive"><i class="neg" style="width:44.6%"></i><i class="zero" style="width:10.0%"></i><i class="pos" style="width:45.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.72%"></div>
+  </div>
+  <span class="rate-val">+0.000963</span>
+</div>
+<div class="catbar-row" title="settled_low_block_proxy: n=7345, mean=-0.008137, 86.5% neg / 6.2% pos">
+  <div class="catbar-label"><span>settled_low_block_proxy</span><span class="n">n=7345</span><span class="xt-dirbar" title="86.5% negative / 7.3% zero / 6.2% positive"><i class="neg" style="width:86.5%"></i><i class="zero" style="width:7.3%"></i><i class="pos" style="width:6.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:6.08%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.008137</span>
+</div>
+<div class="catbar-row" title="box_defence: n=9139, mean=-0.066942, 87.4% neg / 5.0% pos">
+  <div class="catbar-label"><span>box_defence</span><span class="n">n=9139</span><span class="xt-dirbar" title="87.4% negative / 7.5% zero / 5.0% positive"><i class="neg" style="width:87.4%"></i><i class="zero" style="width:7.5%"></i><i class="pos" style="width:5.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.066942</span>
+</div>
+
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a non-zero delta (n=49,699) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on <code>target_xt_delta != 0</code> -- the xT analogue of the
+xg suite's "given a shot" panel (Adaptation 2): it strips the rows where the action never crossed an xT grid-cell
+boundary, which are this target's structural-zero mass. Subset mean = -0.001484. Small-sample categories
+flagged, not hidden.</p>
+
+<div class="catbar-row" title="high_press_proxy: n=8229, mean=+0.059350, 6.4% neg / 93.6% pos">
+  <div class="catbar-label"><span>high_press_proxy</span><span class="n">n=8229</span><span class="xt-dirbar" title="6.4% negative / 0.0% zero / 93.6% positive"><i class="neg" style="width:6.4%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:93.6%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:40.98%"></div>
+  </div>
+  <span class="rate-val">+0.059350</span>
+</div>
+<div class="catbar-row" title="settled_mid_block_proxy: n=8671, mean=+0.007640, 37.7% neg / 62.3% pos">
+  <div class="catbar-label"><span>settled_mid_block_proxy</span><span class="n">n=8671</span><span class="xt-dirbar" title="37.7% negative / 0.0% zero / 62.3% positive"><i class="neg" style="width:37.7%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:62.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:5.28%"></div>
+  </div>
+  <span class="rate-val">+0.007640</span>
+</div>
+<div class="catbar-row" title="wide_defending_proxy: n=4509, mean=+0.005559, 34.2% neg / 65.8% pos">
+  <div class="catbar-label"><span>wide_defending_proxy</span><span class="n">n=4509</span><span class="xt-dirbar" title="34.2% negative / 0.0% zero / 65.8% positive"><i class="neg" style="width:34.2%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:65.8%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:3.84%"></div>
+  </div>
+  <span class="rate-val">+0.005559</span>
+</div>
+<div class="catbar-row" title="counterpress_after_loss: n=7906, mean=+0.001597, 52.0% neg / 48.0% pos">
+  <div class="catbar-label"><span>counterpress_after_loss</span><span class="n">n=7906</span><span class="xt-dirbar" title="52.0% negative / 0.0% zero / 48.0% positive"><i class="neg" style="width:52.0%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:48.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.10%"></div>
+  </div>
+  <span class="rate-val">+0.001597</span>
+</div>
+<div class="catbar-row" title="transition_defence: n=5123, mean=+0.001070, 49.6% neg / 50.4% pos">
+  <div class="catbar-label"><span>transition_defence</span><span class="n">n=5123</span><span class="xt-dirbar" title="49.6% negative / 0.0% zero / 50.4% positive"><i class="neg" style="width:49.6%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:50.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.74%"></div>
+  </div>
+  <span class="rate-val">+0.001070</span>
+</div>
+<div class="catbar-row" title="settled_low_block_proxy: n=6812, mean=-0.008774, 93.3% neg / 6.7% pos">
+  <div class="catbar-label"><span>settled_low_block_proxy</span><span class="n">n=6812</span><span class="xt-dirbar" title="93.3% negative / 0.0% zero / 6.7% positive"><i class="neg" style="width:93.3%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:6.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:6.06%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.008774</span>
+</div>
+<div class="catbar-row" title="box_defence: n=8449, mean=-0.072409, 94.6% neg / 5.4% pos">
+  <div class="catbar-label"><span>box_defence</span><span class="n">n=8449</span><span class="xt-dirbar" title="94.6% negative / 0.0% zero / 5.4% positive"><i class="neg" style="width:94.6%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:5.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.072409</span>
+</div>
+</details>
+</div>
+<div class="card xg-card locked" style="margin-bottom:16px;">
+<h3>phase_label_prev_event <span class="xg-status-badge locked">LOCKED</span></h3>
+
+<p class="subnote">Unconditional -- mean target_xt_delta by category, diverging from zero. Positive (green) = xT fell
+across the action (threat reduced). Negative (red) = xT rose. Dataset mean = -0.001316. The small
+three-colour bar beside each label is that category's negative / exactly-zero / positive row share.</p>
+
+<div class="catbar-row" title="box_defence: n=6885, mean=+0.071635, 5.4% neg / 86.4% pos">
+  <div class="catbar-label"><span>box_defence</span><span class="n">n=6885</span><span class="xt-dirbar" title="5.4% negative / 8.2% zero / 86.4% positive"><i class="neg" style="width:5.4%"></i><i class="zero" style="width:8.2%"></i><i class="pos" style="width:86.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:50.00%"></div>
+  </div>
+  <span class="rate-val">+0.071635</span>
+</div>
+<div class="catbar-row" title="settled_low_block_proxy: n=5759, mean=+0.009506, 7.6% neg / 85.1% pos">
+  <div class="catbar-label"><span>settled_low_block_proxy</span><span class="n">n=5759</span><span class="xt-dirbar" title="7.6% negative / 7.3% zero / 85.1% positive"><i class="neg" style="width:7.6%"></i><i class="zero" style="width:7.3%"></i><i class="pos" style="width:85.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:6.63%"></div>
+  </div>
+  <span class="rate-val">+0.009506</span>
+</div>
+<div class="catbar-row" title="counterpress_after_loss: n=9914, mean=+0.001173, 45.7% neg / 43.4% pos">
+  <div class="catbar-label"><span>counterpress_after_loss</span><span class="n">n=9914</span><span class="xt-dirbar" title="45.7% negative / 11.0% zero / 43.4% positive"><i class="neg" style="width:45.7%"></i><i class="zero" style="width:11.0%"></i><i class="pos" style="width:43.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.82%"></div>
+  </div>
+  <span class="rate-val">+0.001173</span>
+</div>
+<div class="catbar-row" title="transition_defence: n=5201, mean=+0.000124, 45.3% neg / 44.3% pos">
+  <div class="catbar-label"><span>transition_defence</span><span class="n">n=5201</span><span class="xt-dirbar" title="45.3% negative / 10.4% zero / 44.3% positive"><i class="neg" style="width:45.3%"></i><i class="zero" style="width:10.4%"></i><i class="pos" style="width:44.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.09%"></div>
+  </div>
+  <span class="rate-val">+0.000124</span>
+</div>
+<div class="catbar-row" title="(missing): n=4521, mean=-0.003054, 34.4% neg / 29.2% pos">
+  <div class="catbar-label"><span>(missing)</span><span class="n">n=4521</span><span class="xt-dirbar" title="34.4% negative / 36.4% zero / 29.2% positive"><i class="neg" style="width:34.4%"></i><i class="zero" style="width:36.4%"></i><i class="pos" style="width:29.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:2.13%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.003054</span>
+</div>
+<div class="catbar-row" title="settled_mid_block_proxy: n=8877, mean=-0.004861, 59.7% neg / 29.9% pos">
+  <div class="catbar-label"><span>settled_mid_block_proxy</span><span class="n">n=8877</span><span class="xt-dirbar" title="59.7% negative / 10.4% zero / 29.9% positive"><i class="neg" style="width:59.7%"></i><i class="zero" style="width:10.4%"></i><i class="pos" style="width:29.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.39%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.004861</span>
+</div>
+<div class="catbar-row" title="wide_defending_proxy: n=5180, mean=-0.005141, 63.2% neg / 27.7% pos">
+  <div class="catbar-label"><span>wide_defending_proxy</span><span class="n">n=5180</span><span class="xt-dirbar" title="63.2% negative / 9.1% zero / 27.7% positive"><i class="neg" style="width:63.2%"></i><i class="zero" style="width:9.1%"></i><i class="pos" style="width:27.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.59%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.005141</span>
+</div>
+<div class="catbar-row" title="high_press_proxy: n=9699, mean=-0.056745, 87.8% neg / 5.1% pos">
+  <div class="catbar-label"><span>high_press_proxy</span><span class="n">n=9699</span><span class="xt-dirbar" title="87.8% negative / 7.0% zero / 5.1% positive"><i class="neg" style="width:87.8%"></i><i class="zero" style="width:7.0%"></i><i class="pos" style="width:5.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:39.61%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.056745</span>
+</div>
+
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a non-zero delta (n=49,699) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on <code>target_xt_delta != 0</code> -- the xT analogue of the
+xg suite's "given a shot" panel (Adaptation 2): it strips the rows where the action never crossed an xT grid-cell
+boundary, which are this target's structural-zero mass. Subset mean = -0.001484. Small-sample categories
+flagged, not hidden.</p>
+
+<div class="catbar-row" title="box_defence: n=6317, mean=+0.078077, 5.9% neg / 94.1% pos">
+  <div class="catbar-label"><span>box_defence</span><span class="n">n=6317</span><span class="xt-dirbar" title="5.9% negative / 0.0% zero / 94.1% positive"><i class="neg" style="width:5.9%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:94.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:50.00%"></div>
+  </div>
+  <span class="rate-val">+0.078077</span>
+</div>
+<div class="catbar-row" title="settled_low_block_proxy: n=5340, mean=+0.010251, 8.2% neg / 91.8% pos">
+  <div class="catbar-label"><span>settled_low_block_proxy</span><span class="n">n=5340</span><span class="xt-dirbar" title="8.2% negative / 0.0% zero / 91.8% positive"><i class="neg" style="width:8.2%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:91.8%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:6.56%"></div>
+  </div>
+  <span class="rate-val">+0.010251</span>
+</div>
+<div class="catbar-row" title="counterpress_after_loss: n=8827, mean=+0.001317, 51.3% neg / 48.7% pos">
+  <div class="catbar-label"><span>counterpress_after_loss</span><span class="n">n=8827</span><span class="xt-dirbar" title="51.3% negative / 0.0% zero / 48.7% positive"><i class="neg" style="width:51.3%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:48.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.84%"></div>
+  </div>
+  <span class="rate-val">+0.001317</span>
+</div>
+<div class="catbar-row" title="transition_defence: n=4659, mean=+0.000138, 50.6% neg / 49.4% pos">
+  <div class="catbar-label"><span>transition_defence</span><span class="n">n=4659</span><span class="xt-dirbar" title="50.6% negative / 0.0% zero / 49.4% positive"><i class="neg" style="width:50.6%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:49.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.09%"></div>
+  </div>
+  <span class="rate-val">+0.000138</span>
+</div>
+<div class="catbar-row" title="(missing): n=2876, mean=-0.004801, 54.1% neg / 45.9% pos">
+  <div class="catbar-label"><span>(missing)</span><span class="n">n=2876</span><span class="xt-dirbar" title="54.1% negative / 0.0% zero / 45.9% positive"><i class="neg" style="width:54.1%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:45.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.07%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.004801</span>
+</div>
+<div class="catbar-row" title="settled_mid_block_proxy: n=7954, mean=-0.005425, 66.6% neg / 33.4% pos">
+  <div class="catbar-label"><span>settled_mid_block_proxy</span><span class="n">n=7954</span><span class="xt-dirbar" title="66.6% negative / 0.0% zero / 33.4% positive"><i class="neg" style="width:66.6%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:33.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.47%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.005425</span>
+</div>
+<div class="catbar-row" title="wide_defending_proxy: n=4708, mean=-0.005657, 69.5% neg / 30.5% pos">
+  <div class="catbar-label"><span>wide_defending_proxy</span><span class="n">n=4708</span><span class="xt-dirbar" title="69.5% negative / 0.0% zero / 30.5% positive"><i class="neg" style="width:69.5%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:30.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.62%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.005657</span>
+</div>
+<div class="catbar-row" title="high_press_proxy: n=9018, mean=-0.061030, 94.5% neg / 5.5% pos">
+  <div class="catbar-label"><span>high_press_proxy</span><span class="n">n=9018</span><span class="xt-dirbar" title="94.5% negative / 0.0% zero / 5.5% positive"><i class="neg" style="width:94.5%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:5.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:39.08%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.061030</span>
+</div>
+</details>
+</div>
+<div class="card xg-card locked" style="margin-bottom:16px;">
+<h3>play_pattern <span class="xg-status-badge locked">LOCKED</span></h3>
+
+<p class="subnote">Unconditional -- mean target_xt_delta by category, diverging from zero. Positive (green) = xT fell
+across the action (threat reduced). Negative (red) = xT rose. Dataset mean = -0.001316. The small
+three-colour bar beside each label is that category's negative / exactly-zero / positive row share.</p>
+
+<div class="catbar-row" title="From Counter: n=752, mean=+0.002096, 42.8% neg / 37.2% pos">
+  <div class="catbar-label"><span>From Counter</span><span class="n">n=752</span><span class="xt-dirbar" title="42.8% negative / 19.9% zero / 37.2% positive"><i class="neg" style="width:42.8%"></i><i class="zero" style="width:19.9%"></i><i class="pos" style="width:37.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:13.35%"></div>
+  </div>
+  <span class="rate-val">+0.002096</span>
+</div>
+<div class="catbar-row" title="From Goal Kick: n=4411, mean=+0.001333, 45.6% neg / 43.7% pos">
+  <div class="catbar-label"><span>From Goal Kick</span><span class="n">n=4411</span><span class="xt-dirbar" title="45.6% negative / 10.7% zero / 43.7% positive"><i class="neg" style="width:45.6%"></i><i class="zero" style="width:10.7%"></i><i class="pos" style="width:43.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:8.49%"></div>
+  </div>
+  <span class="rate-val">+0.001333</span>
+</div>
+<div class="catbar-row" title="Regular Play: n=24247, mean=-0.000509, 45.8% neg / 40.4% pos">
+  <div class="catbar-label"><span>Regular Play</span><span class="n">n=24247</span><span class="xt-dirbar" title="45.8% negative / 13.8% zero / 40.4% positive"><i class="neg" style="width:45.8%"></i><i class="zero" style="width:13.8%"></i><i class="pos" style="width:40.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.24%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.000509</span>
+</div>
+<div class="catbar-row" title="From Kick Off: n=1435, mean=-0.000606, 45.9% neg / 44.2% pos">
+  <div class="catbar-label"><span>From Kick Off</span><span class="n">n=1435</span><span class="xt-dirbar" title="45.9% negative / 9.8% zero / 44.2% positive"><i class="neg" style="width:45.9%"></i><i class="zero" style="width:9.8%"></i><i class="pos" style="width:44.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.86%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.000606</span>
+</div>
+<div class="catbar-row" title="From Throw In: n=12338, mean=-0.001746, 48.8% neg / 42.6% pos">
+  <div class="catbar-label"><span>From Throw In</span><span class="n">n=12338</span><span class="xt-dirbar" title="48.8% negative / 8.6% zero / 42.6% positive"><i class="neg" style="width:48.8%"></i><i class="zero" style="width:8.6%"></i><i class="pos" style="width:42.6%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:11.12%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.001746</span>
+</div>
+<div class="catbar-row" title="From Free Kick: n=8089, mean=-0.002172, 48.0% neg / 43.1% pos">
+  <div class="catbar-label"><span>From Free Kick</span><span class="n">n=8089</span><span class="xt-dirbar" title="48.0% negative / 8.8% zero / 43.1% positive"><i class="neg" style="width:48.0%"></i><i class="zero" style="width:8.8%"></i><i class="pos" style="width:43.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:13.83%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.002172</span>
+</div>
+<div class="catbar-row" title="From Keeper: n=1428, mean=-0.002705, 47.7% neg / 44.1% pos">
+  <div class="catbar-label"><span>From Keeper</span><span class="n">n=1428</span><span class="xt-dirbar" title="47.7% negative / 8.2% zero / 44.1% positive"><i class="neg" style="width:47.7%"></i><i class="zero" style="width:8.2%"></i><i class="pos" style="width:44.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:17.23%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.002705</span>
+</div>
+<div class="catbar-row" title="Other: n=248, mean=-0.003047, 45.6% neg / 39.9% pos">
+  <div class="catbar-label"><span>Other</span><span class="n">n=248</span><span class="xt-dirbar" title="45.6% negative / 14.5% zero / 39.9% positive"><i class="neg" style="width:45.6%"></i><i class="zero" style="width:14.5%"></i><i class="pos" style="width:39.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:19.41%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.003047</span>
+</div>
+<div class="catbar-row" title="From Corner: n=3088, mean=-0.007850, 49.7% neg / 40.6% pos">
+  <div class="catbar-label"><span>From Corner</span><span class="n">n=3088</span><span class="xt-dirbar" title="49.7% negative / 9.7% zero / 40.6% positive"><i class="neg" style="width:49.7%"></i><i class="zero" style="width:9.7%"></i><i class="pos" style="width:40.6%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.007850</span>
+</div>
+
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a non-zero delta (n=49,699) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on <code>target_xt_delta != 0</code> -- the xT analogue of the
+xg suite's "given a shot" panel (Adaptation 2): it strips the rows where the action never crossed an xT grid-cell
+boundary, which are this target's structural-zero mass. Subset mean = -0.001484. Small-sample categories
+flagged, not hidden.</p>
+
+<div class="catbar-row" title="From Counter: n=602, mean=+0.002619, 53.5% neg / 46.5% pos">
+  <div class="catbar-label"><span>From Counter</span><span class="n">n=602</span><span class="xt-dirbar" title="53.5% negative / 0.0% zero / 46.5% positive"><i class="neg" style="width:53.5%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:15.06%"></div>
+  </div>
+  <span class="rate-val">+0.002619</span>
+</div>
+<div class="catbar-row" title="From Goal Kick: n=3939, mean=+0.001493, 51.1% neg / 48.9% pos">
+  <div class="catbar-label"><span>From Goal Kick</span><span class="n">n=3939</span><span class="xt-dirbar" title="51.1% negative / 0.0% zero / 48.9% positive"><i class="neg" style="width:51.1%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:48.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:8.59%"></div>
+  </div>
+  <span class="rate-val">+0.001493</span>
+</div>
+<div class="catbar-row" title="Regular Play: n=20899, mean=-0.000591, 53.1% neg / 46.9% pos">
+  <div class="catbar-label"><span>Regular Play</span><span class="n">n=20899</span><span class="xt-dirbar" title="53.1% negative / 0.0% zero / 46.9% positive"><i class="neg" style="width:53.1%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.40%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.000591</span>
+</div>
+<div class="catbar-row" title="From Kick Off: n=1294, mean=-0.000672, 50.9% neg / 49.1% pos">
+  <div class="catbar-label"><span>From Kick Off</span><span class="n">n=1294</span><span class="xt-dirbar" title="50.9% negative / 0.0% zero / 49.1% positive"><i class="neg" style="width:50.9%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:49.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.87%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.000672</span>
+</div>
+<div class="catbar-row" title="From Throw In: n=11280, mean=-0.001910, 53.4% neg / 46.6% pos">
+  <div class="catbar-label"><span>From Throw In</span><span class="n">n=11280</span><span class="xt-dirbar" title="53.4% negative / 0.0% zero / 46.6% positive"><i class="neg" style="width:53.4%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.6%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:10.99%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.001910</span>
+</div>
+<div class="catbar-row" title="From Free Kick: n=7373, mean=-0.002383, 52.7% neg / 47.3% pos">
+  <div class="catbar-label"><span>From Free Kick</span><span class="n">n=7373</span><span class="xt-dirbar" title="52.7% negative / 0.0% zero / 47.3% positive"><i class="neg" style="width:52.7%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:47.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:13.71%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.002383</span>
+</div>
+<div class="catbar-row" title="From Keeper: n=1311, mean=-0.002947, 52.0% neg / 48.0% pos">
+  <div class="catbar-label"><span>From Keeper</span><span class="n">n=1311</span><span class="xt-dirbar" title="52.0% negative / 0.0% zero / 48.0% positive"><i class="neg" style="width:52.0%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:48.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:16.95%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.002947</span>
+</div>
+<div class="catbar-row" title="Other: n=212, mean=-0.003565, 53.3% neg / 46.7% pos">
+  <div class="catbar-label"><span>Other</span><span class="n">n=212</span><span class="xt-dirbar" title="53.3% negative / 0.0% zero / 46.7% positive"><i class="neg" style="width:53.3%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:20.51%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.003565</span>
+</div>
+<div class="catbar-row" title="From Corner: n=2789, mean=-0.008691, 55.1% neg / 44.9% pos">
+  <div class="catbar-label"><span>From Corner</span><span class="n">n=2789</span><span class="xt-dirbar" title="55.1% negative / 0.0% zero / 44.9% positive"><i class="neg" style="width:55.1%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:44.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.008691</span>
+</div>
+</details>
+</div>
+<div class="card xg-card locked" style="margin-bottom:16px;">
+<h3>position <span class="xg-status-badge locked">LOCKED</span></h3>
+
+<p class="subnote">Unconditional -- mean target_xt_delta by category, diverging from zero. Positive (green) = xT fell
+across the action (threat reduced). Negative (red) = xT rose. Dataset mean = -0.001316. The small
+three-colour bar beside each label is that category's negative / exactly-zero / positive row share.</p>
+
+<div class="catbar-row" title="Left Wing: n=2916, mean=+0.007919, 42.3% neg / 45.3% pos">
+  <div class="catbar-label"><span>Left Wing</span><span class="n">n=2916</span><span class="xt-dirbar" title="42.3% negative / 12.3% zero / 45.3% positive"><i class="neg" style="width:42.3%"></i><i class="zero" style="width:12.3%"></i><i class="pos" style="width:45.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:9.02%"></div>
+  </div>
+  <span class="rate-val">+0.007919</span>
+</div>
+<div class="catbar-row" title="Right Attacking Midfield: n=609, mean=+0.006340, 41.0% neg / 48.0% pos">
+  <div class="catbar-label"><span>Right Attacking Midfield</span><span class="n">n=609</span><span class="xt-dirbar" title="41.0% negative / 11.0% zero / 48.0% positive"><i class="neg" style="width:41.0%"></i><i class="zero" style="width:11.0%"></i><i class="pos" style="width:48.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:7.22%"></div>
+  </div>
+  <span class="rate-val">+0.006340</span>
+</div>
+<div class="catbar-row" title="Center Attacking Midfield: n=2350, mean=+0.006122, 46.0% neg / 42.5% pos">
+  <div class="catbar-label"><span>Center Attacking Midfield</span><span class="n">n=2350</span><span class="xt-dirbar" title="46.0% negative / 11.4% zero / 42.5% positive"><i class="neg" style="width:46.0%"></i><i class="zero" style="width:11.4%"></i><i class="pos" style="width:42.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:6.97%"></div>
+  </div>
+  <span class="rate-val">+0.006122</span>
+</div>
+<div class="catbar-row" title="Left Attacking Midfield: n=586, mean=+0.005688, 43.5% neg / 45.9% pos">
+  <div class="catbar-label"><span>Left Attacking Midfield</span><span class="n">n=586</span><span class="xt-dirbar" title="43.5% negative / 10.6% zero / 45.9% positive"><i class="neg" style="width:43.5%"></i><i class="zero" style="width:10.6%"></i><i class="pos" style="width:45.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:6.48%"></div>
+  </div>
+  <span class="rate-val">+0.005688</span>
+</div>
+<div class="catbar-row" title="Right Wing: n=3190, mean=+0.005393, 43.3% neg / 45.0% pos">
+  <div class="catbar-label"><span>Right Wing</span><span class="n">n=3190</span><span class="xt-dirbar" title="43.3% negative / 11.7% zero / 45.0% positive"><i class="neg" style="width:43.3%"></i><i class="zero" style="width:11.7%"></i><i class="pos" style="width:45.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:6.14%"></div>
+  </div>
+  <span class="rate-val">+0.005393</span>
+</div>
+<div class="catbar-row" title="Center Forward: n=4424, mean=+0.002310, 43.7% neg / 41.6% pos">
+  <div class="catbar-label"><span>Center Forward</span><span class="n">n=4424</span><span class="xt-dirbar" title="43.7% negative / 14.7% zero / 41.6% positive"><i class="neg" style="width:43.7%"></i><i class="zero" style="width:14.7%"></i><i class="pos" style="width:41.6%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:2.63%"></div>
+  </div>
+  <span class="rate-val">+0.002310</span>
+</div>
+<div class="catbar-row" title="Left Center Midfield: n=2249, mean=+0.002171, 45.7% neg / 42.8% pos">
+  <div class="catbar-label"><span>Left Center Midfield</span><span class="n">n=2249</span><span class="xt-dirbar" title="45.7% negative / 11.6% zero / 42.8% positive"><i class="neg" style="width:45.7%"></i><i class="zero" style="width:11.6%"></i><i class="pos" style="width:42.8%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:2.47%"></div>
+  </div>
+  <span class="rate-val">+0.002171</span>
+</div>
+<div class="catbar-row" title="Right Defensive Midfield: n=4395, mean=+0.001808, 46.6% neg / 41.4% pos">
+  <div class="catbar-label"><span>Right Defensive Midfield</span><span class="n">n=4395</span><span class="xt-dirbar" title="46.6% negative / 12.1% zero / 41.4% positive"><i class="neg" style="width:46.6%"></i><i class="zero" style="width:12.1%"></i><i class="pos" style="width:41.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:2.06%"></div>
+  </div>
+  <span class="rate-val">+0.001808</span>
+</div>
+<div class="catbar-row" title="Left Back: n=3573, mean=+0.001736, 45.3% neg / 44.6% pos">
+  <div class="catbar-label"><span>Left Back</span><span class="n">n=3573</span><span class="xt-dirbar" title="45.3% negative / 10.1% zero / 44.6% positive"><i class="neg" style="width:45.3%"></i><i class="zero" style="width:10.1%"></i><i class="pos" style="width:44.6%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.98%"></div>
+  </div>
+  <span class="rate-val">+0.001736</span>
+</div>
+<div class="catbar-row" title="Right Midfield: n=1120, mean=+0.001709, 46.9% neg / 40.2% pos">
+  <div class="catbar-label"><span>Right Midfield</span><span class="n">n=1120</span><span class="xt-dirbar" title="46.9% negative / 12.9% zero / 40.2% positive"><i class="neg" style="width:46.9%"></i><i class="zero" style="width:12.9%"></i><i class="pos" style="width:40.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.95%"></div>
+  </div>
+  <span class="rate-val">+0.001709</span>
+</div>
+<div class="catbar-row" title="Right Center Forward: n=1294, mean=+0.001060, 45.6% neg / 40.3% pos">
+  <div class="catbar-label"><span>Right Center Forward</span><span class="n">n=1294</span><span class="xt-dirbar" title="45.6% negative / 14.1% zero / 40.3% positive"><i class="neg" style="width:45.6%"></i><i class="zero" style="width:14.1%"></i><i class="pos" style="width:40.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.21%"></div>
+  </div>
+  <span class="rate-val">+0.001060</span>
+</div>
+<div class="catbar-row" title="Left Defensive Midfield: n=4130, mean=+0.001031, 47.5% neg / 40.6% pos">
+  <div class="catbar-label"><span>Left Defensive Midfield</span><span class="n">n=4130</span><span class="xt-dirbar" title="47.5% negative / 11.8% zero / 40.6% positive"><i class="neg" style="width:47.5%"></i><i class="zero" style="width:11.8%"></i><i class="pos" style="width:40.6%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.17%"></div>
+  </div>
+  <span class="rate-val">+0.001031</span>
+</div>
+<div class="catbar-row" title="Left Midfield: n=1073, mean=+0.000822, 47.8% neg / 39.8% pos">
+  <div class="catbar-label"><span>Left Midfield</span><span class="n">n=1073</span><span class="xt-dirbar" title="47.8% negative / 12.4% zero / 39.8% positive"><i class="neg" style="width:47.8%"></i><i class="zero" style="width:12.4%"></i><i class="pos" style="width:39.8%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.94%"></div>
+  </div>
+  <span class="rate-val">+0.000822</span>
+</div>
+<div class="catbar-row" title="Right Center Midfield: n=2225, mean=+0.000692, 47.7% neg / 40.2% pos">
+  <div class="catbar-label"><span>Right Center Midfield</span><span class="n">n=2225</span><span class="xt-dirbar" title="47.7% negative / 12.0% zero / 40.2% positive"><i class="neg" style="width:47.7%"></i><i class="zero" style="width:12.0%"></i><i class="pos" style="width:40.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.79%"></div>
+  </div>
+  <span class="rate-val">+0.000692</span>
+</div>
+<div class="catbar-row" title="Left Center Forward: n=1349, mean=+0.000576, 47.8% neg / 39.7% pos">
+  <div class="catbar-label"><span>Left Center Forward</span><span class="n">n=1349</span><span class="xt-dirbar" title="47.8% negative / 12.5% zero / 39.7% positive"><i class="neg" style="width:47.8%"></i><i class="zero" style="width:12.5%"></i><i class="pos" style="width:39.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.66%"></div>
+  </div>
+  <span class="rate-val">+0.000576</span>
+</div>
+<div class="catbar-row" title="Right Back: n=3464, mean=+0.000266, 46.2% neg / 43.4% pos">
+  <div class="catbar-label"><span>Right Back</span><span class="n">n=3464</span><span class="xt-dirbar" title="46.2% negative / 10.4% zero / 43.4% positive"><i class="neg" style="width:46.2%"></i><i class="zero" style="width:10.4%"></i><i class="pos" style="width:43.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.30%"></div>
+  </div>
+  <span class="rate-val">+0.000266</span>
+</div>
+<div class="catbar-row" title="Center Defensive Midfield: n=2309, mean=-0.002084, 47.6% neg / 41.2% pos">
+  <div class="catbar-label"><span>Center Defensive Midfield</span><span class="n">n=2309</span><span class="xt-dirbar" title="47.6% negative / 11.1% zero / 41.2% positive"><i class="neg" style="width:47.6%"></i><i class="zero" style="width:11.1%"></i><i class="pos" style="width:41.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:2.37%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.002084</span>
+</div>
+<div class="catbar-row" title="Right Wing Back: n=1676, mean=-0.002954, 51.4% neg / 39.0% pos">
+  <div class="catbar-label"><span>Right Wing Back</span><span class="n">n=1676</span><span class="xt-dirbar" title="51.4% negative / 9.6% zero / 39.0% positive"><i class="neg" style="width:51.4%"></i><i class="zero" style="width:9.6%"></i><i class="pos" style="width:39.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.36%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.002954</span>
+</div>
+<div class="catbar-row" title="Left Wing Back: n=1650, mean=-0.003200, 50.8% neg / 39.6% pos">
+  <div class="catbar-label"><span>Left Wing Back</span><span class="n">n=1650</span><span class="xt-dirbar" title="50.8% negative / 9.6% zero / 39.6% positive"><i class="neg" style="width:50.8%"></i><i class="zero" style="width:9.6%"></i><i class="pos" style="width:39.6%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.64%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.003200</span>
+</div>
+<div class="catbar-row" title="Right Center Back: n=4541, mean=-0.009419, 49.5% neg / 40.4% pos">
+  <div class="catbar-label"><span>Right Center Back</span><span class="n">n=4541</span><span class="xt-dirbar" title="49.5% negative / 10.1% zero / 40.4% positive"><i class="neg" style="width:49.5%"></i><i class="zero" style="width:10.1%"></i><i class="pos" style="width:40.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:10.72%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.009419</span>
+</div>
+<div class="catbar-row" title="Left Center Back: n=4619, mean=-0.011480, 49.5% neg / 41.1% pos">
+  <div class="catbar-label"><span>Left Center Back</span><span class="n">n=4619</span><span class="xt-dirbar" title="49.5% negative / 9.4% zero / 41.1% positive"><i class="neg" style="width:49.5%"></i><i class="zero" style="width:9.4%"></i><i class="pos" style="width:41.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:13.07%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.011480</span>
+</div>
+<div class="catbar-row" title="Center Back: n=1424, mean=-0.019294, 56.7% neg / 35.5% pos">
+  <div class="catbar-label"><span>Center Back</span><span class="n">n=1424</span><span class="xt-dirbar" title="56.7% negative / 7.8% zero / 35.5% positive"><i class="neg" style="width:56.7%"></i><i class="zero" style="width:7.8%"></i><i class="pos" style="width:35.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:21.97%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.019294</span>
+</div>
+<div class="catbar-row" title="Goalkeeper: n=870, mean=-0.043914, 54.5% neg / 36.7% pos">
+  <div class="catbar-label"><span>Goalkeeper</span><span class="n">n=870</span><span class="xt-dirbar" title="54.5% negative / 8.8% zero / 36.7% positive"><i class="neg" style="width:54.5%"></i><i class="zero" style="width:8.8%"></i><i class="pos" style="width:36.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.043914</span>
+</div>
+
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a non-zero delta (n=49,699) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on <code>target_xt_delta != 0</code> -- the xT analogue of the
+xg suite's "given a shot" panel (Adaptation 2): it strips the rows where the action never crossed an xT grid-cell
+boundary, which are this target's structural-zero mass. Subset mean = -0.001484. Small-sample categories
+flagged, not hidden.</p>
+
+<div class="catbar-row" title="Left Wing: n=2556, mean=+0.009034, 48.3% neg / 51.7% pos">
+  <div class="catbar-label"><span>Left Wing</span><span class="n">n=2556</span><span class="xt-dirbar" title="48.3% negative / 0.0% zero / 51.7% positive"><i class="neg" style="width:48.3%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:51.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:9.38%"></div>
+  </div>
+  <span class="rate-val">+0.009034</span>
+</div>
+<div class="catbar-row" title="Right Attacking Midfield: n=542, mean=+0.007124, 46.1% neg / 53.9% pos">
+  <div class="catbar-label"><span>Right Attacking Midfield</span><span class="n">n=542</span><span class="xt-dirbar" title="46.1% negative / 0.0% zero / 53.9% positive"><i class="neg" style="width:46.1%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:53.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:7.39%"></div>
+  </div>
+  <span class="rate-val">+0.007124</span>
+</div>
+<div class="catbar-row" title="Center Attacking Midfield: n=2081, mean=+0.006913, 52.0% neg / 48.0% pos">
+  <div class="catbar-label"><span>Center Attacking Midfield</span><span class="n">n=2081</span><span class="xt-dirbar" title="52.0% negative / 0.0% zero / 48.0% positive"><i class="neg" style="width:52.0%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:48.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:7.17%"></div>
+  </div>
+  <span class="rate-val">+0.006913</span>
+</div>
+<div class="catbar-row" title="Left Attacking Midfield: n=524, mean=+0.006361, 48.7% neg / 51.3% pos">
+  <div class="catbar-label"><span>Left Attacking Midfield</span><span class="n">n=524</span><span class="xt-dirbar" title="48.7% negative / 0.0% zero / 51.3% positive"><i class="neg" style="width:48.7%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:51.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:6.60%"></div>
+  </div>
+  <span class="rate-val">+0.006361</span>
+</div>
+<div class="catbar-row" title="Right Wing: n=2818, mean=+0.006105, 49.0% neg / 51.0% pos">
+  <div class="catbar-label"><span>Right Wing</span><span class="n">n=2818</span><span class="xt-dirbar" title="49.0% negative / 0.0% zero / 51.0% positive"><i class="neg" style="width:49.0%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:51.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:6.34%"></div>
+  </div>
+  <span class="rate-val">+0.006105</span>
+</div>
+<div class="catbar-row" title="Center Forward: n=3773, mean=+0.002708, 51.2% neg / 48.8% pos">
+  <div class="catbar-label"><span>Center Forward</span><span class="n">n=3773</span><span class="xt-dirbar" title="51.2% negative / 0.0% zero / 48.8% positive"><i class="neg" style="width:51.2%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:48.8%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:2.81%"></div>
+  </div>
+  <span class="rate-val">+0.002708</span>
+</div>
+<div class="catbar-row" title="Left Center Midfield: n=1989, mean=+0.002455, 51.6% neg / 48.4% pos">
+  <div class="catbar-label"><span>Left Center Midfield</span><span class="n">n=1989</span><span class="xt-dirbar" title="51.6% negative / 0.0% zero / 48.4% positive"><i class="neg" style="width:51.6%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:48.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:2.55%"></div>
+  </div>
+  <span class="rate-val">+0.002455</span>
+</div>
+<div class="catbar-row" title="Right Defensive Midfield: n=3865, mean=+0.002056, 53.0% neg / 47.0% pos">
+  <div class="catbar-label"><span>Right Defensive Midfield</span><span class="n">n=3865</span><span class="xt-dirbar" title="53.0% negative / 0.0% zero / 47.0% positive"><i class="neg" style="width:53.0%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:47.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:2.13%"></div>
+  </div>
+  <span class="rate-val">+0.002056</span>
+</div>
+<div class="catbar-row" title="Right Midfield: n=975, mean=+0.001963, 53.9% neg / 46.1% pos">
+  <div class="catbar-label"><span>Right Midfield</span><span class="n">n=975</span><span class="xt-dirbar" title="53.9% negative / 0.0% zero / 46.1% positive"><i class="neg" style="width:53.9%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:2.04%"></div>
+  </div>
+  <span class="rate-val">+0.001963</span>
+</div>
+<div class="catbar-row" title="Left Back: n=3212, mean=+0.001932, 50.4% neg / 49.6% pos">
+  <div class="catbar-label"><span>Left Back</span><span class="n">n=3212</span><span class="xt-dirbar" title="50.4% negative / 0.0% zero / 49.6% positive"><i class="neg" style="width:50.4%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:49.6%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:2.00%"></div>
+  </div>
+  <span class="rate-val">+0.001932</span>
+</div>
+<div class="catbar-row" title="Right Center Forward: n=1111, mean=+0.001235, 53.1% neg / 46.9% pos">
+  <div class="catbar-label"><span>Right Center Forward</span><span class="n">n=1111</span><span class="xt-dirbar" title="53.1% negative / 0.0% zero / 46.9% positive"><i class="neg" style="width:53.1%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.28%"></div>
+  </div>
+  <span class="rate-val">+0.001235</span>
+</div>
+<div class="catbar-row" title="Left Defensive Midfield: n=3641, mean=+0.001169, 53.9% neg / 46.1% pos">
+  <div class="catbar-label"><span>Left Defensive Midfield</span><span class="n">n=3641</span><span class="xt-dirbar" title="53.9% negative / 0.0% zero / 46.1% positive"><i class="neg" style="width:53.9%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.21%"></div>
+  </div>
+  <span class="rate-val">+0.001169</span>
+</div>
+<div class="catbar-row" title="Left Midfield: n=940, mean=+0.000938, 54.6% neg / 45.4% pos">
+  <div class="catbar-label"><span>Left Midfield</span><span class="n">n=940</span><span class="xt-dirbar" title="54.6% negative / 0.0% zero / 45.4% positive"><i class="neg" style="width:54.6%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:45.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.97%"></div>
+  </div>
+  <span class="rate-val">+0.000938</span>
+</div>
+<div class="catbar-row" title="Right Center Midfield: n=1957, mean=+0.000787, 54.3% neg / 45.7% pos">
+  <div class="catbar-label"><span>Right Center Midfield</span><span class="n">n=1957</span><span class="xt-dirbar" title="54.3% negative / 0.0% zero / 45.7% positive"><i class="neg" style="width:54.3%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:45.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.82%"></div>
+  </div>
+  <span class="rate-val">+0.000787</span>
+</div>
+<div class="catbar-row" title="Left Center Forward: n=1180, mean=+0.000659, 54.7% neg / 45.3% pos">
+  <div class="catbar-label"><span>Left Center Forward</span><span class="n">n=1180</span><span class="xt-dirbar" title="54.7% negative / 0.0% zero / 45.3% positive"><i class="neg" style="width:54.7%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:45.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.68%"></div>
+  </div>
+  <span class="rate-val">+0.000659</span>
+</div>
+<div class="catbar-row" title="Right Back: n=3103, mean=+0.000297, 51.5% neg / 48.5% pos">
+  <div class="catbar-label"><span>Right Back</span><span class="n">n=3103</span><span class="xt-dirbar" title="51.5% negative / 0.0% zero / 48.5% positive"><i class="neg" style="width:51.5%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:48.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.31%"></div>
+  </div>
+  <span class="rate-val">+0.000297</span>
+</div>
+<div class="catbar-row" title="Center Defensive Midfield: n=2052, mean=-0.002345, 53.6% neg / 46.4% pos">
+  <div class="catbar-label"><span>Center Defensive Midfield</span><span class="n">n=2052</span><span class="xt-dirbar" title="53.6% negative / 0.0% zero / 46.4% positive"><i class="neg" style="width:53.6%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:2.43%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.002345</span>
+</div>
+<div class="catbar-row" title="Right Wing Back: n=1515, mean=-0.003268, 56.8% neg / 43.2% pos">
+  <div class="catbar-label"><span>Right Wing Back</span><span class="n">n=1515</span><span class="xt-dirbar" title="56.8% negative / 0.0% zero / 43.2% positive"><i class="neg" style="width:56.8%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:43.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.39%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.003268</span>
+</div>
+<div class="catbar-row" title="Left Wing Back: n=1491, mean=-0.003542, 56.2% neg / 43.8% pos">
+  <div class="catbar-label"><span>Left Wing Back</span><span class="n">n=1491</span><span class="xt-dirbar" title="56.2% negative / 0.0% zero / 43.8% positive"><i class="neg" style="width:56.2%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:43.8%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:3.68%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.003542</span>
+</div>
+<div class="catbar-row" title="Right Center Back: n=4084, mean=-0.010473, 55.1% neg / 44.9% pos">
+  <div class="catbar-label"><span>Right Center Back</span><span class="n">n=4084</span><span class="xt-dirbar" title="55.1% negative / 0.0% zero / 44.9% positive"><i class="neg" style="width:55.1%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:44.9%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:10.87%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.010473</span>
+</div>
+<div class="catbar-row" title="Left Center Back: n=4184, mean=-0.012674, 54.6% neg / 45.4% pos">
+  <div class="catbar-label"><span>Left Center Back</span><span class="n">n=4184</span><span class="xt-dirbar" title="54.6% negative / 0.0% zero / 45.4% positive"><i class="neg" style="width:54.6%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:45.4%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:13.15%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.012674</span>
+</div>
+<div class="catbar-row" title="Center Back: n=1313, mean=-0.020925, 61.5% neg / 38.5% pos">
+  <div class="catbar-label"><span>Center Back</span><span class="n">n=1313</span><span class="xt-dirbar" title="61.5% negative / 0.0% zero / 38.5% positive"><i class="neg" style="width:61.5%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:38.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:21.72%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.020925</span>
+</div>
+<div class="catbar-row" title="Goalkeeper: n=793, mean=-0.048179, 59.8% neg / 40.2% pos">
+  <div class="catbar-label"><span>Goalkeeper</span><span class="n">n=793</span><span class="xt-dirbar" title="59.8% negative / 0.0% zero / 40.2% positive"><i class="neg" style="width:59.8%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:40.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.048179</span>
+</div>
+</details>
+</div>
+<div class="card xg-card dropped" style="margin-bottom:16px;">
+<h3>position_group <span class="xg-status-badge dropped">DROPPED</span></h3>
+<p class="xg-reason"><b>Why dropped:</b> CORRELATION_ANALYSIS DROP tier: Cramer&#x27;s V=1.0 vs position (kept, more granular)</p>
+<p class="subnote">Unconditional -- mean target_xt_delta by category, diverging from zero. Positive (green) = xT fell
+across the action (threat reduced). Negative (red) = xT rose. Dataset mean = -0.001316. The small
+three-colour bar beside each label is that category's negative / exactly-zero / positive row share.</p>
+
+<div class="catbar-row" title="other: n=6106, mean=+0.006599, 42.8% neg / 45.2% pos">
+  <div class="catbar-label"><span>other</span><span class="n">n=6106</span><span class="xt-dirbar" title="42.8% negative / 12.0% zero / 45.2% positive"><i class="neg" style="width:42.8%"></i><i class="zero" style="width:12.0%"></i><i class="pos" style="width:45.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:7.51%"></div>
+  </div>
+  <span class="rate-val">+0.006599</span>
+</div>
+<div class="catbar-row" title="midfielder: n=10212, mean=+0.003016, 46.2% neg / 42.0% pos">
+  <div class="catbar-label"><span>midfielder</span><span class="n">n=10212</span><span class="xt-dirbar" title="46.2% negative / 11.8% zero / 42.0% positive"><i class="neg" style="width:46.2%"></i><i class="zero" style="width:11.8%"></i><i class="pos" style="width:42.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:3.43%"></div>
+  </div>
+  <span class="rate-val">+0.003016</span>
+</div>
+<div class="catbar-row" title="forward: n=7067, mean=+0.001750, 44.8% neg / 41.0% pos">
+  <div class="catbar-label"><span>forward</span><span class="n">n=7067</span><span class="xt-dirbar" title="44.8% negative / 14.2% zero / 41.0% positive"><i class="neg" style="width:44.8%"></i><i class="zero" style="width:14.2%"></i><i class="pos" style="width:41.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:1.99%"></div>
+  </div>
+  <span class="rate-val">+0.001750</span>
+</div>
+<div class="catbar-row" title="defensive_midfielder: n=10834, mean=+0.000682, 47.2% neg / 41.1% pos">
+  <div class="catbar-label"><span>defensive_midfielder</span><span class="n">n=10834</span><span class="xt-dirbar" title="47.2% negative / 11.8% zero / 41.1% positive"><i class="neg" style="width:47.2%"></i><i class="zero" style="width:11.8%"></i><i class="pos" style="width:41.1%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.78%"></div>
+  </div>
+  <span class="rate-val">+0.000682</span>
+</div>
+<div class="catbar-row" title="fullback_wingback: n=10363, mean=-0.000300, 47.4% neg / 42.5% pos">
+  <div class="catbar-label"><span>fullback_wingback</span><span class="n">n=10363</span><span class="xt-dirbar" title="47.4% negative / 10.1% zero / 42.5% positive"><i class="neg" style="width:47.4%"></i><i class="zero" style="width:10.1%"></i><i class="pos" style="width:42.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.34%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.000300</span>
+</div>
+<div class="catbar-row" title="centre_back: n=10584, mean=-0.011647, 50.5% neg / 40.0% pos">
+  <div class="catbar-label"><span>centre_back</span><span class="n">n=10584</span><span class="xt-dirbar" title="50.5% negative / 9.5% zero / 40.0% positive"><i class="neg" style="width:50.5%"></i><i class="zero" style="width:9.5%"></i><i class="pos" style="width:40.0%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:13.26%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.011647</span>
+</div>
+<div class="catbar-row" title="goalkeeper: n=870, mean=-0.043914, 54.5% neg / 36.7% pos">
+  <div class="catbar-label"><span>goalkeeper</span><span class="n">n=870</span><span class="xt-dirbar" title="54.5% negative / 8.8% zero / 36.7% positive"><i class="neg" style="width:54.5%"></i><i class="zero" style="width:8.8%"></i><i class="pos" style="width:36.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.043914</span>
+</div>
+
+<details style="margin-top:10px;">
+<summary style="cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--neg);">
+  given a non-zero delta (n=49,699) -- click to expand
+</summary>
+<p class="subnote" style="margin-top:8px;">Conditional on <code>target_xt_delta != 0</code> -- the xT analogue of the
+xg suite's "given a shot" panel (Adaptation 2): it strips the rows where the action never crossed an xT grid-cell
+boundary, which are this target's structural-zero mass. Subset mean = -0.001484. Small-sample categories
+flagged, not hidden.</p>
+
+<div class="catbar-row" title="other: n=5374, mean=+0.007498, 48.7% neg / 51.3% pos">
+  <div class="catbar-label"><span>other</span><span class="n">n=5374</span><span class="xt-dirbar" title="48.7% negative / 0.0% zero / 51.3% positive"><i class="neg" style="width:48.7%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:51.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:7.78%"></div>
+  </div>
+  <span class="rate-val">+0.007498</span>
+</div>
+<div class="catbar-row" title="midfielder: n=9008, mean=+0.003419, 52.3% neg / 47.7% pos">
+  <div class="catbar-label"><span>midfielder</span><span class="n">n=9008</span><span class="xt-dirbar" title="52.3% negative / 0.0% zero / 47.7% positive"><i class="neg" style="width:52.3%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:47.7%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:3.55%"></div>
+  </div>
+  <span class="rate-val">+0.003419</span>
+</div>
+<div class="catbar-row" title="forward: n=6064, mean=+0.002040, 52.2% neg / 47.8% pos">
+  <div class="catbar-label"><span>forward</span><span class="n">n=6064</span><span class="xt-dirbar" title="52.2% negative / 0.0% zero / 47.8% positive"><i class="neg" style="width:52.2%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:47.8%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:2.12%"></div>
+  </div>
+  <span class="rate-val">+0.002040</span>
+</div>
+<div class="catbar-row" title="defensive_midfielder: n=9558, mean=+0.000774, 53.5% neg / 46.5% pos">
+  <div class="catbar-label"><span>defensive_midfielder</span><span class="n">n=9558</span><span class="xt-dirbar" title="53.5% negative / 0.0% zero / 46.5% positive"><i class="neg" style="width:53.5%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:46.5%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.00%"></div>
+    <div class="divbar pos" style="width:0.80%"></div>
+  </div>
+  <span class="rate-val">+0.000774</span>
+</div>
+<div class="catbar-row" title="fullback_wingback: n=9321, mean=-0.000333, 52.7% neg / 47.3% pos">
+  <div class="catbar-label"><span>fullback_wingback</span><span class="n">n=9321</span><span class="xt-dirbar" title="52.7% negative / 0.0% zero / 47.3% positive"><i class="neg" style="width:52.7%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:47.3%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:0.35%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.000333</span>
+</div>
+<div class="catbar-row" title="centre_back: n=9581, mean=-0.012867, 55.8% neg / 44.2% pos">
+  <div class="catbar-label"><span>centre_back</span><span class="n">n=9581</span><span class="xt-dirbar" title="55.8% negative / 0.0% zero / 44.2% positive"><i class="neg" style="width:55.8%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:44.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:13.35%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.012867</span>
+</div>
+<div class="catbar-row" title="goalkeeper: n=793, mean=-0.048179, 59.8% neg / 40.2% pos">
+  <div class="catbar-label"><span>goalkeeper</span><span class="n">n=793</span><span class="xt-dirbar" title="59.8% negative / 0.0% zero / 40.2% positive"><i class="neg" style="width:59.8%"></i><i class="zero" style="width:0.0%"></i><i class="pos" style="width:40.2%"></i></span></div>
+  <div class="divaxis"><span class="zero"></span>
+    <div class="divbar neg" style="width:50.00%"></div>
+    <div class="divbar pos" style="width:0.00%"></div>
+  </div>
+  <span class="rate-val">-0.048179</span>
+</div>
+</details>
+</div>
+</div>
+</body>
+</html>

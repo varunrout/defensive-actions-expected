@@ -1,35 +1,56 @@
 {
   "dataset": "active",
   "leg": "active-binary only (passive leg out of scope for this target)",
-  "target": "target_xt_delta",
+  "target": "target_xt_delta_v2",
   "target_scale": {
-    "target": "target_xt_delta",
+    "target": "target_xt_delta_v2",
     "n_rows": 56068,
-    "n_defined": 56036,
-    "n_nan": 32,
-    "mean": -0.00131579,
-    "std": 0.06498593,
-    "skew": 0.0933,
-    "excess_kurtosis": 8.846,
-    "pct_zero": 11.309,
-    "pct_negative": 47.002,
-    "pct_positive": 41.689,
+    "n_defined": 55761,
+    "n_nan": 307,
+    "mean": 0.00338135,
+    "std": 0.05838466,
+    "skew": -0.306,
+    "excess_kurtosis": 18.3289,
+    "pct_zero": 20.154,
+    "pct_negative": 35.426,
+    "pct_positive": 44.42,
     "xg_mean_same_rows": 0.00811039,
     "xg_std_same_rows": 0.0480329,
     "xg_flat_margin_absolute": 0.00405519,
     "xg_flat_margin_as_fraction_of_xg_std": 0.084425,
-    "flat_margin": 0.00548646,
-    "range_trigger": 0.01097292,
-    "near_identical_threshold": 0.00548646,
-    "distinct_signal_threshold": 0.01645938,
-    "n_nonzero": 49699,
-    "mean_nonzero": -0.00148356,
-    "std_nonzero": 0.06900304,
-    "flat_margin_nonzero": 0.00582561,
-    "scale_note": "ADAPTATION 1. target_xt_delta is roughly symmetric with a near-zero, NEGATIVE mean (-0.001316), so the xg_target suite's convention of expressing every threshold as a multiple of the overall mean target value is meaningless here (it would flip signs and collapse to nothing). Instead the xg convention is TRANSLATED, not replaced: xg's own flat_margin (0.5 x mean xg = 0.004055 on these same rows) is re-expressed as a fraction of xg's own standard deviation (0.048033), giving 0.084425, and that fraction is applied to target_xt_delta's standard deviation (0.064986). Every number in this calculation is computed at runtime from the real parquet, not carried over from a writeup. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged.",
-    "conditional_panel_note": "ADAPTATION 2. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta has no shot column behind it; its structural-zero analogue is the 11.3% of rows with an EXACTLY zero delta (the action did not cross an xT grid-cell boundary). The conditional panel throughout this suite is therefore 'given a non-zero delta' (target_xt_delta != 0), never 'given a shot'.",
-    "direction_note": "ADAPTATION 3. Sign carries the football meaning: POSITIVE target_xt_delta = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. Rankings are by |magnitude| across BOTH directions, never one-sided 'higher is worse' lift, and every table also reports the negative/positive/zero share behind its mean.",
-    "log_transform_note": "NOT an adaptation: checked directly rather than assumed -- the xg_target report suite never log-transforms its target anywhere (every xg report uses the raw groupby mean of target_future_xg_10s). The log1p framing in this project belongs to the modelling legs, not to this report suite, so there was no log-transform to remove."
+    "flat_margin": 0.00492915,
+    "range_trigger": 0.00985829,
+    "near_identical_threshold": 0.00492915,
+    "distinct_signal_threshold": 0.01478744,
+    "n_nonzero": 44523,
+    "mean_nonzero": 0.00423483,
+    "std_nonzero": 0.06531138,
+    "flat_margin_nonzero": 0.00551394,
+    "scale_note": "ADAPTATION 1, RE-EXAMINED FOR v2. Prompt 65 translated the xg suite's mean-multiple threshold convention onto the xT target via xg's own standard-deviation fraction, because v1's mean was near-zero and NEGATIVE (-0.001316), which would have flipped the sign of every threshold. v2's mean is now POSITIVE (+0.003381), so that literal justification no longer applies -- checked, not assumed. The translation is KEPT anyway, for a reason that does still hold: at +0.003381 against a std of 0.058385 the mean is only 5.8% of one standard deviation, so a mean-multiple threshold would still be an arbitrary sliver, and keeping the same translation is what makes this portal numerically comparable with the v1 portal it supersedes. Mechanically: xg's own flat_margin (0.5 x mean xg = 0.004055 on these same rows) re-expressed as a fraction of xg's own std (0.048033) gives 0.084425, applied to target_xt_delta_v2's std (0.058385) to give 0.004929. Every number is computed at runtime from the real parquet. See `threshold_transfer_warning` in this same block: the std-derived margin is materially less appropriate on v2 than it was on v1, and that is stated rather than hidden. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged and are unaffected.",
+    "conditional_panel_note": "ADAPTATION 2, unchanged in method and re-measured on v2. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta_v2 has no shot column behind it; its structural-zero analogue is the 20.2% of rows with an EXACTLY zero delta. That share nearly doubled from v1's 11.3%, for an understood reason: under v2 a delta is exactly zero whenever the next same-possession event lands in the same xT grid cell as the previous one, which is far more common than v1's 'the action's own location shares a cell with the previous event'. The conditional panel throughout this suite remains 'given a non-zero delta' (target_xt_delta_v2 != 0), never 'given a shot'.",
+    "direction_note": "ADAPTATION 3, unchanged in method and re-measured on v2. Sign carries the football meaning: POSITIVE target_xt_delta_v2 = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. On v2 the balance shifts markedly towards the defence -- 44.4% positive vs 35.4% negative, where v1 was 41.7% / 47.0% -- but the target is NO LONGER close to symmetric (skew -0.306, vs v1's +0.093), so two-directional framing matters more here, not less. Rankings are by |magnitude| across BOTH directions, and every table also reports the negative/positive/zero share behind its mean.",
+    "log_transform_note": "NOT an adaptation, re-checked rather than inherited: the xg_target report suite never log-transforms its target anywhere, and neither did Prompt 65's v1 xT suite. The log1p framing in this project belongs to the modelling legs, not to this report suite. v2's heavier tails make a transform more tempting than it was on v1 -- and it is still NOT applied here, because doing so would silently break comparability with both the xg portal and the v1 xT portal this one supersedes. Recorded as an open question for the modelling legs, not resolved by an EDA suite.",
+    "target_version": "v2",
+    "target_source": "outputs/prototypes/active_binary_xt_delta_v2.parquet (joined read-only by event_id)",
+    "supersedes": "target_xt_delta (v1, outputs/prototypes/active_binary_xt_delta.parquet). The v1 portal built against it is preserved unchanged at reports/analysis/xt_target_v1_superseded/.",
+    "robust_scale": {
+      "iqr": 0.00882901,
+      "mad": 0.00385257,
+      "robust_std_1_4826_mad": 0.00571182,
+      "robust_flat_margin": 0.00048222,
+      "flat_margin_over_mad": 1.2794,
+      "flat_margin_over_iqr": 0.5583,
+      "pct_rows_inside_flat_margin": 53.42,
+      "mean_as_fraction_of_std": 0.0579
+    },
+    "correlation_with_old_target": {
+      "pair": "target_xt_delta_v2 vs target_future_xg_10s",
+      "pearson_r": -0.1082,
+      "n": 55761,
+      "v1_pearson_r": -0.016,
+      "note": "Measured on this run: r=-0.1082 against the old target on these same rows, versus -0.016 for v1. Recorded HERE specifically because Adaptation 1 borrows this very target's standard-deviation fraction to set every threshold in this suite -- so wherever a report cites an xg-derived threshold, this is how the two targets actually relate. Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.4): correlation with the old target_future_xg_10s improves from v1's essentially-zero -0.016 to -0.108 -- still modest, but now an order of magnitude stronger AND correctly signed: more threat denied by a defensive action is associated with less future attacking output in the next 10 seconds. v2 and v1 are themselves moderately correlated at +0.571, which is sensible given they share the identical xt_before term and differ only in xt_after."
+    },
+    "threshold_transfer_warning": "THIS THRESHOLD DOES NOT TRANSFER CLEANLY FROM v1, and that is reported rather than forced to fit. Prompt 65 tuned its translated flat_margin against a target with excess kurtosis 8.85, an IQR of 0.019119 and a MAD of 0.010277; the resulting margin (0.005486) was 0.53 x that MAD and spanned 35.4% of rows -- a genuinely narrow 'too small to matter' band. v2's tails are far heavier (excess kurtosis 18.3289) because Prompt 66 injects real shot xG values up to 0.897 for the 954 rows where a Shot follows the defensive action, while v2's BULK is much tighter (IQR 0.008829, MAD 0.003853). Because the translation is std-derived and std is inflated by exactly those tails, the margin barely moves (0.004929) while the distribution it is meant to describe more than halved: it is now 1.28 x the MAD, 0.56 x the IQR, and spans 53.4% of all rows. A flat band covering the majority of the data is not doing its job. The literal translated margin is KEPT as the headline number so v1-vs-v2 comparisons stay like-for-like and the xg suite's convention is still the one being followed, but the MAD-derived robust alternative (0.000482) is published beside it on every run and every shape classification in this suite should be read with this inflation in mind."
   },
   "quartile_n": 4,
   "step_0_scope_note": "The xg portal's FEATURE_INTERACTION_ANALYSIS covers all 10 pairs in generate_feature_interaction_analysis.PAIRS (5 active + 5 passive). This prompt is scoped to the active leg, so the same imported list is filtered to its 5 ACTIVE pairs -- a scope reduction, not a re-selection. The pairs are NOT re-ranked for this target: keeping the same pairs is what makes the three targets' results comparable.",
@@ -37,27 +58,19 @@
     "substitutive_ratio_max": 0.3,
     "additive_magnitude_ratio_max": 2.0,
     "min_cell_n_for_delta": 20,
-    "min_marginal_delta": 0.00548646,
-    "min_marginal_delta_given_nonzero_delta": 0.00582561,
+    "min_marginal_delta": 0.00492915,
+    "min_marginal_delta_given_nonzero_delta": 0.00551394,
     "note": "The substitutive / additive classification cutoffs are RATIOS of one delta to another, so they are scale-free AND sign-free and are carried over completely unchanged -- the same reasoning the xg version gives for reusing them from the binary version. The one absolute-magnitude threshold, min_marginal_delta, is adapted: the xg version sets it to 0.5 x the dataset's own mean xg, which is meaningless for a target whose mean is -0.0013. It is translated instead via xg's own standard-deviation fraction, applied to target_xt_delta's standard deviation (unconditional) and to the non-zero-delta subset's standard deviation (conditional panel). The classification test uses |marginal delta|, so a large NEGATIVE marginal delta is as classifiable as a large positive one."
   },
   "candidate_selection": "Same ACTIVE pairs as reports/analysis/shot_target/FEATURE_INTERACTION_ANALYSIS.json and the xg mirror -- see generate_feature_interaction_analysis.py's module docstring for the full ranking derivation and football rationale per pair. Computed here against target_xt_delta for direct comparability, with a non-zero-delta panel in place of the xg version's shot-conditional one.",
   "n_pairs_total": 5,
   "n_pairs_where_unconditional_and_conditional_agree": 5,
-  "n_pairs_with_sign_flipping_stratum_deltas": 4,
+  "n_pairs_with_sign_flipping_stratum_deltas": 2,
   "summary_table": [
     {
       "dataset": "active",
-      "feature_a": "defenders_within_10m",
-      "feature_b": "distance_to_attacking_box",
-      "classification": "interactive",
-      "classification_given_nonzero_delta": "interactive",
-      "within_stratum_deltas_change_sign": true
-    },
-    {
-      "dataset": "active",
-      "feature_a": "defenders_between_ball_and_attacking_goal",
-      "feature_b": "attacker_defender_ratio",
+      "feature_a": "visible_defender_count",
+      "feature_b": "attacker_spread",
       "classification": "interactive",
       "classification_given_nonzero_delta": "interactive",
       "within_stratum_deltas_change_sign": false
@@ -66,29 +79,37 @@
       "dataset": "active",
       "feature_a": "defenders_within_5m",
       "feature_b": "defenders_within_10m",
-      "classification": "substitutive",
-      "classification_given_nonzero_delta": "substitutive",
-      "within_stratum_deltas_change_sign": true
+      "classification": "interactive",
+      "classification_given_nonzero_delta": "interactive",
+      "within_stratum_deltas_change_sign": false
     },
     {
       "dataset": "active",
-      "feature_a": "visible_defender_count",
-      "feature_b": "attacker_spread",
+      "feature_a": "possession_elapsed_seconds",
+      "feature_b": "match_time_seconds",
+      "classification": "additive",
+      "classification_given_nonzero_delta": "additive",
+      "within_stratum_deltas_change_sign": false
+    },
+    {
+      "dataset": "active",
+      "feature_a": "defenders_within_10m",
+      "feature_b": "distance_to_attacking_box",
       "classification": "inconclusive",
       "classification_given_nonzero_delta": "inconclusive",
       "within_stratum_deltas_change_sign": true
     },
     {
       "dataset": "active",
-      "feature_a": "possession_elapsed_seconds",
-      "feature_b": "match_time_seconds",
+      "feature_a": "defenders_between_ball_and_attacking_goal",
+      "feature_b": "attacker_defender_ratio",
       "classification": "inconclusive",
       "classification_given_nonzero_delta": "inconclusive",
       "within_stratum_deltas_change_sign": true
     }
   ],
   "prompt_64_cross_references": {
-    "distribution_shape": "Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.2): target_xt_delta is roughly symmetric (skew +0.093), heavy-tailed (excess kurtosis 8.85), 47.0% negative / 41.7% positive / 11.3% exactly zero. This is a fundamentally different shape from target_future_xg_10s, which is strictly non-negative, zero-inflated and heavily right-skewed. Any methodology that assumed non-negativity had to be adapted explicitly -- see this module's Adaptation 1/2/3 notes, restated in every report."
+    "distribution_shape": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.3): target_xt_delta_v2's mean flips from v1's slightly negative -0.00132 to a clearly positive +0.00338 -- on average, active defensive actions now genuinely deny threat, the football-sensible direction v1 never achieved. But the shape got HARDER, not easier: skew moves from +0.093 (near-symmetric) to -0.306 (mildly left-skewed) and excess kurtosis from 8.85 to 18.33 (much heavier tails), while the exactly-zero share rises from 11.3% to 20.2% and the negative share falls from 47.0% to 35.4%. The heavier tails are a direct, understood consequence of injecting real shot_statsbomb_xg values (up to 0.897) as xt_after for the 954 rows -- 1.9% of continuing-possession rows -- where a Shot immediately follows the defensive action; the 96-cell xT grid's own maximum cell is only 0.2575, so it could never produce such values. This REINFORCES rather than resolves Prompt 64's open flag that the existing hurdle architecture does not fit this target's shape as-is: v2 is if anything less like that shape than v1 was."
   },
   "pairs": [
     {
@@ -108,249 +129,249 @@
         "Q3",
         "Q4"
       ],
-      "n_rows_used": 43178,
-      "n_rows_used_given_nonzero_delta": 38566,
+      "n_rows_used": 42962,
+      "n_rows_used_given_nonzero_delta": 34075,
       "grid": [
         {
           "a_bin": "Q1",
           "b_bin": "Q1",
-          "n": 3739,
-          "mean_xt": -0.03530143,
-          "n_given_nonzero_delta": 3539,
-          "mean_xt_given_nonzero_delta": -0.03729642
+          "n": 3717,
+          "mean_xt": -0.00185675,
+          "n_given_nonzero_delta": 2956,
+          "mean_xt_given_nonzero_delta": -0.00233475
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q1",
-          "n": 2294,
-          "mean_xt": -0.03732485,
-          "n_given_nonzero_delta": 2091,
-          "mean_xt_given_nonzero_delta": -0.04094845
+          "n": 2285,
+          "mean_xt": -0.00785986,
+          "n_given_nonzero_delta": 1936,
+          "mean_xt_given_nonzero_delta": -0.00927674
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q1",
-          "n": 1847,
-          "mean_xt": -0.05187617,
-          "n_given_nonzero_delta": 1682,
-          "mean_xt_given_nonzero_delta": -0.05696509
+          "n": 1842,
+          "mean_xt": -0.01481259,
+          "n_given_nonzero_delta": 1594,
+          "mean_xt_given_nonzero_delta": -0.01711719
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q1",
-          "n": 2920,
-          "mean_xt": -0.09941566,
-          "n_given_nonzero_delta": 2631,
-          "mean_xt_given_nonzero_delta": -0.11033589
+          "n": 2897,
+          "mean_xt": -0.02561719,
+          "n_given_nonzero_delta": 2524,
+          "mean_xt_given_nonzero_delta": -0.02940293
         },
         {
           "a_bin": "Q1",
           "b_bin": "Q2",
-          "n": 6002,
-          "mean_xt": -0.00456197,
-          "n_given_nonzero_delta": 5520,
-          "mean_xt_given_nonzero_delta": -0.00496032
+          "n": 5971,
+          "mean_xt": 0.00199951,
+          "n_given_nonzero_delta": 4500,
+          "mean_xt_given_nonzero_delta": 0.00265312
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q2",
-          "n": 2975,
-          "mean_xt": -0.00570843,
-          "n_given_nonzero_delta": 2599,
-          "mean_xt_given_nonzero_delta": -0.00653428
+          "n": 2966,
+          "mean_xt": 0.00015306,
+          "n_given_nonzero_delta": 2256,
+          "mean_xt_given_nonzero_delta": 0.00020123
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q2",
-          "n": 1378,
-          "mean_xt": -0.00535323,
-          "n_given_nonzero_delta": 1156,
-          "mean_xt_given_nonzero_delta": -0.00638127
+          "n": 1373,
+          "mean_xt": 0.00050381,
+          "n_given_nonzero_delta": 1070,
+          "mean_xt_given_nonzero_delta": 0.00064648
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q2",
-          "n": 456,
-          "mean_xt": -0.00490581,
-          "n_given_nonzero_delta": 388,
-          "mean_xt_given_nonzero_delta": -0.0057656
+          "n": 454,
+          "mean_xt": 0.00052558,
+          "n_given_nonzero_delta": 363,
+          "mean_xt_given_nonzero_delta": 0.00065734
         },
         {
           "a_bin": "Q1",
           "b_bin": "Q3",
-          "n": 6096,
-          "mean_xt": 0.00577071,
-          "n_given_nonzero_delta": 5352,
-          "mean_xt_given_nonzero_delta": 0.00657292
+          "n": 6065,
+          "mean_xt": 0.00315095,
+          "n_given_nonzero_delta": 4436,
+          "mean_xt_given_nonzero_delta": 0.00430805
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q3",
-          "n": 2893,
-          "mean_xt": 0.00401677,
-          "n_given_nonzero_delta": 2413,
-          "mean_xt_given_nonzero_delta": 0.00481579
+          "n": 2877,
+          "mean_xt": 0.00208381,
+          "n_given_nonzero_delta": 2244,
+          "mean_xt_given_nonzero_delta": 0.00267163
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q3",
-          "n": 1322,
-          "mean_xt": 0.00378985,
-          "n_given_nonzero_delta": 1052,
-          "mean_xt_given_nonzero_delta": 0.00476253
+          "n": 1319,
+          "mean_xt": 0.00203646,
+          "n_given_nonzero_delta": 1031,
+          "mean_xt_given_nonzero_delta": 0.00260533
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q3",
-          "n": 461,
-          "mean_xt": 0.00405319,
-          "n_given_nonzero_delta": 360,
-          "mean_xt_given_nonzero_delta": 0.00519034
+          "n": 458,
+          "mean_xt": 0.00302664,
+          "n_given_nonzero_delta": 368,
+          "mean_xt_given_nonzero_delta": 0.00376685
         },
         {
           "a_bin": "Q1",
           "b_bin": "Q4",
-          "n": 4353,
-          "mean_xt": 0.03996892,
-          "n_given_nonzero_delta": 4120,
-          "mean_xt_given_nonzero_delta": 0.0422293
+          "n": 4333,
+          "mean_xt": 0.0087999,
+          "n_given_nonzero_delta": 3359,
+          "mean_xt_given_nonzero_delta": 0.01135158
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q4",
-          "n": 2361,
-          "mean_xt": 0.02920464,
-          "n_given_nonzero_delta": 2051,
-          "mean_xt_given_nonzero_delta": 0.0336188
+          "n": 2352,
+          "mean_xt": 0.01345744,
+          "n_given_nonzero_delta": 1932,
+          "mean_xt_given_nonzero_delta": 0.01638297
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q4",
-          "n": 1748,
-          "mean_xt": 0.03898096,
-          "n_given_nonzero_delta": 1544,
-          "mean_xt_given_nonzero_delta": 0.04413129
+          "n": 1738,
+          "mean_xt": 0.01999174,
+          "n_given_nonzero_delta": 1489,
+          "mean_xt_given_nonzero_delta": 0.02333489
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q4",
-          "n": 2333,
-          "mean_xt": 0.06809437,
-          "n_given_nonzero_delta": 2068,
-          "mean_xt_given_nonzero_delta": 0.0768202
+          "n": 2315,
+          "mean_xt": 0.03179174,
+          "n_given_nonzero_delta": 2017,
+          "mean_xt_given_nonzero_delta": 0.03648878
         }
       ],
       "marginal_a_by_quartile": [
         {
           "a_bin": "Q1",
-          "n": 20190,
-          "mean_xt": 0.00246607
+          "n": 20086,
+          "mean_xt": 0.00310057
         },
         {
           "a_bin": "Q2",
-          "n": 10523,
-          "mean_xt": -0.00209381
+          "n": 10480,
+          "mean_xt": 0.00192187
         },
         {
           "a_bin": "Q3",
-          "n": 6295,
-          "mean_xt": -0.00477254
+          "n": 6272,
+          "mean_xt": 0.0017281
         },
         {
           "a_bin": "Q4",
-          "n": 6170,
-          "mean_xt": -0.02136112
+          "n": 6124,
+          "mean_xt": 0.00016487
         }
       ],
       "marginal_a_by_quartile_given_nonzero_delta": [
         {
           "a_bin": "Q1",
-          "n_given_nonzero_delta": 18531,
-          "mean_xt_given_nonzero_delta": 0.00268685
+          "n_given_nonzero_delta": 15251,
+          "mean_xt_given_nonzero_delta": 0.00408354
         },
         {
           "a_bin": "Q2",
-          "n_given_nonzero_delta": 9154,
-          "mean_xt_given_nonzero_delta": -0.00240694
+          "n_given_nonzero_delta": 8368,
+          "mean_xt_given_nonzero_delta": 0.00240693
         },
         {
           "a_bin": "Q3",
-          "n_given_nonzero_delta": 5434,
-          "mean_xt_given_nonzero_delta": -0.00552873
+          "n_given_nonzero_delta": 5184,
+          "mean_xt_given_nonzero_delta": 0.00209079
         },
         {
           "a_bin": "Q4",
-          "n_given_nonzero_delta": 5447,
-          "mean_xt_given_nonzero_delta": -0.02419646
+          "n_given_nonzero_delta": 5272,
+          "mean_xt_given_nonzero_delta": 0.00019152
         }
       ],
-      "marginal_a_delta": -0.02382719,
-      "marginal_a_delta_given_nonzero_delta": -0.02688331,
+      "marginal_a_delta": -0.0029357,
+      "marginal_a_delta_given_nonzero_delta": -0.00389202,
       "a_gradient_by_b_stratum": [
         {
           "b_bin": "Q1",
-          "a_delta_within_stratum": -0.06411423,
+          "a_delta_within_stratum": -0.02376044,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 10800
+          "n_rows": 10741
         },
         {
           "b_bin": "Q2",
-          "a_delta_within_stratum": -0.00034384,
+          "a_delta_within_stratum": -0.00147393,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 10811
+          "n_rows": 10764
         },
         {
           "b_bin": "Q3",
-          "a_delta_within_stratum": -0.00171752,
+          "a_delta_within_stratum": -0.00012431,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 10772
+          "n_rows": 10719
         },
         {
           "b_bin": "Q4",
-          "a_delta_within_stratum": 0.02812545,
+          "a_delta_within_stratum": 0.02299184,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 10795
+          "n_rows": 10738
         }
       ],
       "a_gradient_by_b_stratum_given_nonzero_delta": [
         {
           "b_bin": "Q1",
-          "a_delta_within_stratum": -0.07303947,
+          "a_delta_within_stratum": -0.02706818,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 9943
+          "n_rows": 9010
         },
         {
           "b_bin": "Q2",
-          "a_delta_within_stratum": -0.00080528,
+          "a_delta_within_stratum": -0.00199578,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 9663
+          "n_rows": 8189
         },
         {
           "b_bin": "Q3",
-          "a_delta_within_stratum": -0.00138258,
+          "a_delta_within_stratum": -0.0005412,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 9177
+          "n_rows": 8079
         },
         {
           "b_bin": "Q4",
-          "a_delta_within_stratum": 0.0345909,
+          "a_delta_within_stratum": 0.0251372,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 9783
+          "n_rows": 8797
         }
       ],
       "within_stratum_deltas_change_sign": true,
-      "classification": "interactive",
-      "classification_reason": "Sign flips across B-strata -- and on this target a sign flip means A's effect reverses DIRECTION (threat-reducing in one stratum, threat-increasing in another), not merely that it crosses a base rate -- A's effect meaningfully depends on B's level.",
-      "classification_given_nonzero_delta": "interactive",
-      "classification_reason_given_nonzero_delta": "Sign flips across B-strata -- and on this target a sign flip means A's effect reverses DIRECTION (threat-reducing in one stratum, threat-increasing in another), not merely that it crosses a base rate -- A's effect meaningfully depends on B's level."
+      "classification": "inconclusive",
+      "classification_reason": "Pooled marginal delta (-0.002936) is below the 0.004929 minimum to classify confidently. Note the |absolute value| test: on this target a large NEGATIVE marginal delta is just as classifiable as a large positive one.",
+      "classification_given_nonzero_delta": "inconclusive",
+      "classification_reason_given_nonzero_delta": "Pooled marginal delta (-0.003892) is below the 0.005514 minimum to classify confidently. Note the |absolute value| test: on this target a large NEGATIVE marginal delta is just as classifiable as a large positive one."
     },
     {
       "dataset": "active",
@@ -369,249 +390,249 @@
         "Q3",
         "Q4"
       ],
-      "n_rows_used": 56005,
-      "n_rows_used_given_nonzero_delta": 49669,
+      "n_rows_used": 55730,
+      "n_rows_used_given_nonzero_delta": 44492,
       "grid": [
         {
           "a_bin": "Q1",
           "b_bin": "Q1",
-          "n": 4117,
-          "mean_xt": -0.00645029,
-          "n_given_nonzero_delta": 3495,
-          "mean_xt_given_nonzero_delta": -0.00759823
+          "n": 4096,
+          "mean_xt": -0.00024433,
+          "n_given_nonzero_delta": 3394,
+          "mean_xt_given_nonzero_delta": -0.00029487
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q1",
-          "n": 4895,
-          "mean_xt": -0.00617899,
-          "n_given_nonzero_delta": 4131,
-          "mean_xt_given_nonzero_delta": -0.00732175
+          "n": 4877,
+          "mean_xt": 0.00113108,
+          "n_given_nonzero_delta": 4111,
+          "mean_xt_given_nonzero_delta": 0.00134184
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q1",
-          "n": 2631,
-          "mean_xt": -0.00397535,
-          "n_given_nonzero_delta": 2327,
-          "mean_xt_given_nonzero_delta": -0.0044947
+          "n": 2618,
+          "mean_xt": 0.00863208,
+          "n_given_nonzero_delta": 2230,
+          "mean_xt_given_nonzero_delta": 0.01013398
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q1",
-          "n": 2359,
-          "mean_xt": 0.00159661,
-          "n_given_nonzero_delta": 2150,
-          "mean_xt_given_nonzero_delta": 0.00175182
+          "n": 2342,
+          "mean_xt": 0.01994268,
+          "n_given_nonzero_delta": 2122,
+          "mean_xt_given_nonzero_delta": 0.02201026
         },
         {
           "a_bin": "Q1",
           "b_bin": "Q2",
-          "n": 3396,
-          "mean_xt": 0.00076369,
-          "n_given_nonzero_delta": 2984,
-          "mean_xt_given_nonzero_delta": 0.00086914
+          "n": 3375,
+          "mean_xt": 0.00202715,
+          "n_given_nonzero_delta": 2638,
+          "mean_xt_given_nonzero_delta": 0.0025935
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q2",
-          "n": 5279,
-          "mean_xt": -0.00171414,
-          "n_given_nonzero_delta": 4590,
-          "mean_xt_given_nonzero_delta": -0.00197145
+          "n": 5261,
+          "mean_xt": 0.00348428,
+          "n_given_nonzero_delta": 4296,
+          "mean_xt_given_nonzero_delta": 0.00426694
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q2",
-          "n": 3241,
-          "mean_xt": -0.00380721,
-          "n_given_nonzero_delta": 2892,
-          "mean_xt_given_nonzero_delta": -0.00426666
+          "n": 3230,
+          "mean_xt": 0.00405575,
+          "n_given_nonzero_delta": 2654,
+          "mean_xt_given_nonzero_delta": 0.00493597
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q2",
-          "n": 2085,
-          "mean_xt": 0.00313949,
-          "n_given_nonzero_delta": 1853,
-          "mean_xt_given_nonzero_delta": 0.00353256
+          "n": 2066,
+          "mean_xt": 0.01256518,
+          "n_given_nonzero_delta": 1793,
+          "mean_xt_given_nonzero_delta": 0.01447834
         },
         {
           "a_bin": "Q1",
           "b_bin": "Q3",
-          "n": 3551,
-          "mean_xt": 0.00183011,
-          "n_given_nonzero_delta": 3232,
-          "mean_xt_given_nonzero_delta": 0.00201075
+          "n": 3534,
+          "mean_xt": 0.00097523,
+          "n_given_nonzero_delta": 2664,
+          "mean_xt_given_nonzero_delta": 0.00129371
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q3",
-          "n": 5100,
-          "mean_xt": -0.00105925,
-          "n_given_nonzero_delta": 4498,
-          "mean_xt_given_nonzero_delta": -0.00120102
+          "n": 5076,
+          "mean_xt": 0.00264147,
+          "n_given_nonzero_delta": 4017,
+          "mean_xt_given_nonzero_delta": 0.00333784
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q3",
-          "n": 3577,
-          "mean_xt": -0.00283655,
-          "n_given_nonzero_delta": 3186,
-          "mean_xt_given_nonzero_delta": -0.00318467
+          "n": 3558,
+          "mean_xt": 0.00228516,
+          "n_given_nonzero_delta": 2779,
+          "mean_xt_given_nonzero_delta": 0.00292572
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q3",
-          "n": 1773,
-          "mean_xt": -0.00074761,
-          "n_given_nonzero_delta": 1602,
-          "mean_xt_given_nonzero_delta": -0.00082741
+          "n": 1764,
+          "mean_xt": 0.00452376,
+          "n_given_nonzero_delta": 1466,
+          "mean_xt_given_nonzero_delta": 0.00544333
         },
         {
           "a_bin": "Q1",
           "b_bin": "Q4",
-          "n": 3676,
-          "mean_xt": 0.00393282,
-          "n_given_nonzero_delta": 3453,
-          "mean_xt_given_nonzero_delta": 0.00418681
+          "n": 3655,
+          "mean_xt": 0.00016951,
+          "n_given_nonzero_delta": 2585,
+          "mean_xt_given_nonzero_delta": 0.00023968
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q4",
-          "n": 4479,
-          "mean_xt": 0.00041878,
-          "n_given_nonzero_delta": 4021,
-          "mean_xt_given_nonzero_delta": 0.00046649
+          "n": 4452,
+          "mean_xt": 0.00184386,
+          "n_given_nonzero_delta": 3373,
+          "mean_xt_given_nonzero_delta": 0.00243369
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q4",
-          "n": 4569,
-          "mean_xt": -0.00055994,
-          "n_given_nonzero_delta": 4118,
-          "mean_xt_given_nonzero_delta": -0.00062127
+          "n": 4554,
+          "mean_xt": 0.0011747,
+          "n_given_nonzero_delta": 3366,
+          "mean_xt_given_nonzero_delta": 0.00158931
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q4",
-          "n": 1277,
-          "mean_xt": -0.00125095,
-          "n_given_nonzero_delta": 1137,
-          "mean_xt_given_nonzero_delta": -0.00140498
+          "n": 1272,
+          "mean_xt": 0.00194485,
+          "n_given_nonzero_delta": 1004,
+          "mean_xt_given_nonzero_delta": 0.00246399
         }
       ],
       "marginal_a_by_quartile": [
         {
           "a_bin": "Q1",
-          "n": 14740,
-          "mean_xt": -0.00020397
+          "n": 14660,
+          "mean_xt": 0.00067577
         },
         {
           "a_bin": "Q2",
-          "n": 19753,
-          "mean_xt": -0.00216785
+          "n": 19666,
+          "mean_xt": 0.00231181
         },
         {
           "a_bin": "Q3",
-          "n": 14018,
-          "mean_xt": -0.00253268
+          "n": 13960,
+          "mean_xt": 0.00352285
         },
         {
           "a_bin": "Q4",
-          "n": 7494,
-          "mean_xt": 0.00098602
+          "n": 7444,
+          "mean_xt": 0.01116593
         }
       ],
       "marginal_a_by_quartile_given_nonzero_delta": [
         {
           "a_bin": "Q1",
-          "n_given_nonzero_delta": 13164,
-          "mean_xt_given_nonzero_delta": -0.00022839
+          "n_given_nonzero_delta": 11281,
+          "mean_xt_given_nonzero_delta": 0.00087819
         },
         {
           "a_bin": "Q2",
-          "n_given_nonzero_delta": 17240,
-          "mean_xt_given_nonzero_delta": -0.00248385
+          "n_given_nonzero_delta": 15797,
+          "mean_xt_given_nonzero_delta": 0.00287802
         },
         {
           "a_bin": "Q3",
-          "n_given_nonzero_delta": 12523,
-          "mean_xt_given_nonzero_delta": -0.00283503
+          "n_given_nonzero_delta": 11029,
+          "mean_xt_given_nonzero_delta": 0.00445906
         },
         {
           "a_bin": "Q4",
-          "n_given_nonzero_delta": 6742,
-          "mean_xt_given_nonzero_delta": 0.00109601
+          "n_given_nonzero_delta": 6385,
+          "mean_xt_given_nonzero_delta": 0.01301789
         }
       ],
-      "marginal_a_delta": 0.00118999,
-      "marginal_a_delta_given_nonzero_delta": 0.0013244,
+      "marginal_a_delta": 0.01049016,
+      "marginal_a_delta_given_nonzero_delta": 0.0121397,
       "a_gradient_by_b_stratum": [
         {
           "b_bin": "Q1",
-          "a_delta_within_stratum": 0.0080469,
+          "a_delta_within_stratum": 0.02018701,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 14002
+          "n_rows": 13933
         },
         {
           "b_bin": "Q2",
-          "a_delta_within_stratum": 0.0023758,
+          "a_delta_within_stratum": 0.01053803,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 14001
+          "n_rows": 13932
         },
         {
           "b_bin": "Q3",
-          "a_delta_within_stratum": -0.00257772,
+          "a_delta_within_stratum": 0.00354853,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 14001
+          "n_rows": 13932
         },
         {
           "b_bin": "Q4",
-          "a_delta_within_stratum": -0.00518377,
+          "a_delta_within_stratum": 0.00177534,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 14001
+          "n_rows": 13933
         }
       ],
       "a_gradient_by_b_stratum_given_nonzero_delta": [
         {
           "b_bin": "Q1",
-          "a_delta_within_stratum": 0.00935005,
+          "a_delta_within_stratum": 0.02230513,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 12103
+          "n_rows": 11857
         },
         {
           "b_bin": "Q2",
-          "a_delta_within_stratum": 0.00266342,
+          "a_delta_within_stratum": 0.01188484,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 12319
+          "n_rows": 11381
         },
         {
           "b_bin": "Q3",
-          "a_delta_within_stratum": -0.00283816,
+          "a_delta_within_stratum": 0.00414962,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 12518
+          "n_rows": 10926
         },
         {
           "b_bin": "Q4",
-          "a_delta_within_stratum": -0.00559179,
+          "a_delta_within_stratum": 0.00222431,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 12729
+          "n_rows": 10328
         }
       ],
-      "within_stratum_deltas_change_sign": true,
-      "classification": "inconclusive",
-      "classification_reason": "Pooled marginal delta (+0.001190) is below the 0.005486 minimum to classify confidently. Note the |absolute value| test: on this target a large NEGATIVE marginal delta is just as classifiable as a large positive one.",
-      "classification_given_nonzero_delta": "inconclusive",
-      "classification_reason_given_nonzero_delta": "Pooled marginal delta (+0.001324) is below the 0.005826 minimum to classify confidently. Note the |absolute value| test: on this target a large NEGATIVE marginal delta is just as classifiable as a large positive one."
+      "within_stratum_deltas_change_sign": false,
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (11.37) exceeds 2.0 -- A's effect meaningfully depends on B's level.",
+      "classification_given_nonzero_delta": "interactive",
+      "classification_reason_given_nonzero_delta": "Magnitude ratio (10.03) exceeds 2.0 -- A's effect meaningfully depends on B's level."
     },
     {
       "dataset": "active",
@@ -635,24 +656,24 @@
         "Q3",
         "Q4"
       ],
-      "n_rows_used": 43178,
-      "n_rows_used_given_nonzero_delta": 38566,
+      "n_rows_used": 42962,
+      "n_rows_used_given_nonzero_delta": 34075,
       "grid": [
         {
           "a_bin": 0.0,
           "b_bin": "Q1",
-          "n": 16432,
-          "mean_xt": 0.00273341,
-          "n_given_nonzero_delta": 15395,
-          "mean_xt_given_nonzero_delta": 0.00291753
+          "n": 16356,
+          "mean_xt": 0.0031675,
+          "n_given_nonzero_delta": 12264,
+          "mean_xt_given_nonzero_delta": 0.00422437
         },
         {
           "a_bin": 1.0,
           "b_bin": "Q1",
-          "n": 3758,
-          "mean_xt": 0.00129711,
-          "n_given_nonzero_delta": 3136,
-          "mean_xt_given_nonzero_delta": 0.00155438
+          "n": 3730,
+          "mean_xt": 0.00280707,
+          "n_given_nonzero_delta": 2987,
+          "mean_xt_given_nonzero_delta": 0.00350531
         },
         {
           "a_bin": 2.0,
@@ -713,26 +734,26 @@
         {
           "a_bin": 0.0,
           "b_bin": "Q2",
-          "n": 5052,
-          "mean_xt": -0.00238468,
-          "n_given_nonzero_delta": 4634,
-          "mean_xt_given_nonzero_delta": -0.00259979
+          "n": 5035,
+          "mean_xt": 0.00200997,
+          "n_given_nonzero_delta": 3955,
+          "mean_xt_given_nonzero_delta": 0.00255884
         },
         {
           "a_bin": 1.0,
           "b_bin": "Q2",
-          "n": 4579,
-          "mean_xt": -0.00194557,
-          "n_given_nonzero_delta": 3793,
-          "mean_xt_given_nonzero_delta": -0.00234873
+          "n": 4560,
+          "mean_xt": 0.00191431,
+          "n_given_nonzero_delta": 3694,
+          "mean_xt_given_nonzero_delta": 0.00236309
         },
         {
           "a_bin": 2.0,
           "b_bin": "Q2",
-          "n": 892,
-          "mean_xt": -0.00120738,
-          "n_given_nonzero_delta": 727,
-          "mean_xt_given_nonzero_delta": -0.00148141
+          "n": 885,
+          "mean_xt": 0.00145961,
+          "n_given_nonzero_delta": 719,
+          "mean_xt_given_nonzero_delta": 0.00179659
         },
         {
           "a_bin": 3.0,
@@ -785,309 +806,309 @@
         {
           "a_bin": 0.0,
           "b_bin": "Q3",
-          "n": 2040,
-          "mean_xt": -0.00629618,
-          "n_given_nonzero_delta": 1877,
-          "mean_xt_given_nonzero_delta": -0.00684294
+          "n": 2034,
+          "mean_xt": 0.00323302,
+          "n_given_nonzero_delta": 1672,
+          "mean_xt_given_nonzero_delta": 0.00393299
         },
         {
           "a_bin": 1.0,
           "b_bin": "Q3",
-          "n": 2902,
-          "mean_xt": -0.00405294,
-          "n_given_nonzero_delta": 2458,
-          "mean_xt_given_nonzero_delta": -0.00478504
+          "n": 2888,
+          "mean_xt": 0.00298926,
+          "n_given_nonzero_delta": 2397,
+          "mean_xt_given_nonzero_delta": 0.00360158
         },
         {
           "a_bin": 2.0,
           "b_bin": "Q3",
-          "n": 1213,
-          "mean_xt": -0.00387538,
-          "n_given_nonzero_delta": 982,
-          "mean_xt_given_nonzero_delta": -0.004787
+          "n": 1211,
+          "mean_xt": -0.00308794,
+          "n_given_nonzero_delta": 1005,
+          "mean_xt_given_nonzero_delta": -0.00372089
         },
         {
           "a_bin": 3.0,
           "b_bin": "Q3",
+          "n": 139,
+          "mean_xt": -0.00453796,
+          "n_given_nonzero_delta": 110,
+          "mean_xt_given_nonzero_delta": -0.00573433
+        },
+        {
+          "a_bin": 4.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "mean_xt": null,
+          "n_given_nonzero_delta": 0,
+          "mean_xt_given_nonzero_delta": null
+        },
+        {
+          "a_bin": 5.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "mean_xt": null,
+          "n_given_nonzero_delta": 0,
+          "mean_xt_given_nonzero_delta": null
+        },
+        {
+          "a_bin": 6.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "mean_xt": null,
+          "n_given_nonzero_delta": 0,
+          "mean_xt_given_nonzero_delta": null
+        },
+        {
+          "a_bin": 7.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "mean_xt": null,
+          "n_given_nonzero_delta": 0,
+          "mean_xt_given_nonzero_delta": null
+        },
+        {
+          "a_bin": 8.0,
+          "b_bin": "Q3",
+          "n": 0,
+          "mean_xt": null,
+          "n_given_nonzero_delta": 0,
+          "mean_xt_given_nonzero_delta": null
+        },
+        {
+          "a_bin": 0.0,
+          "b_bin": "Q4",
+          "n": 853,
+          "mean_xt": 0.00354667,
+          "n_given_nonzero_delta": 698,
+          "mean_xt_given_nonzero_delta": 0.00433425
+        },
+        {
+          "a_bin": 1.0,
+          "b_bin": "Q4",
+          "n": 2012,
+          "mean_xt": 0.00260923,
+          "n_given_nonzero_delta": 1741,
+          "mean_xt_given_nonzero_delta": 0.00301537
+        },
+        {
+          "a_bin": 2.0,
+          "b_bin": "Q4",
+          "n": 1805,
+          "mean_xt": 0.00163235,
+          "n_given_nonzero_delta": 1562,
+          "mean_xt_given_nonzero_delta": 0.0018863
+        },
+        {
+          "a_bin": 3.0,
+          "b_bin": "Q4",
+          "n": 874,
+          "mean_xt": -0.00619135,
+          "n_given_nonzero_delta": 755,
+          "mean_xt_given_nonzero_delta": -0.00716721
+        },
+        {
+          "a_bin": 4.0,
+          "b_bin": "Q4",
+          "n": 377,
+          "mean_xt": -0.0049785,
+          "n_given_nonzero_delta": 328,
+          "mean_xt_given_nonzero_delta": -0.00572224
+        },
+        {
+          "a_bin": 5.0,
+          "b_bin": "Q4",
           "n": 140,
-          "mean_xt": -0.0052606,
-          "n_given_nonzero_delta": 117,
-          "mean_xt_given_nonzero_delta": -0.00629474
-        },
-        {
-          "a_bin": 4.0,
-          "b_bin": "Q3",
-          "n": 0,
-          "mean_xt": null,
-          "n_given_nonzero_delta": 0,
-          "mean_xt_given_nonzero_delta": null
-        },
-        {
-          "a_bin": 5.0,
-          "b_bin": "Q3",
-          "n": 0,
-          "mean_xt": null,
-          "n_given_nonzero_delta": 0,
-          "mean_xt_given_nonzero_delta": null
-        },
-        {
-          "a_bin": 6.0,
-          "b_bin": "Q3",
-          "n": 0,
-          "mean_xt": null,
-          "n_given_nonzero_delta": 0,
-          "mean_xt_given_nonzero_delta": null
-        },
-        {
-          "a_bin": 7.0,
-          "b_bin": "Q3",
-          "n": 0,
-          "mean_xt": null,
-          "n_given_nonzero_delta": 0,
-          "mean_xt_given_nonzero_delta": null
-        },
-        {
-          "a_bin": 8.0,
-          "b_bin": "Q3",
-          "n": 0,
-          "mean_xt": null,
-          "n_given_nonzero_delta": 0,
-          "mean_xt_given_nonzero_delta": null
-        },
-        {
-          "a_bin": 0.0,
-          "b_bin": "Q4",
-          "n": 858,
-          "mean_xt": -0.01701634,
-          "n_given_nonzero_delta": 806,
-          "mean_xt_given_nonzero_delta": -0.01811416
-        },
-        {
-          "a_bin": 1.0,
-          "b_bin": "Q4",
-          "n": 2030,
-          "mean_xt": -0.01925914,
-          "n_given_nonzero_delta": 1811,
-          "mean_xt_given_nonzero_delta": -0.0215881
-        },
-        {
-          "a_bin": 2.0,
-          "b_bin": "Q4",
-          "n": 1814,
-          "mean_xt": -0.01973297,
-          "n_given_nonzero_delta": 1547,
-          "mean_xt_given_nonzero_delta": -0.02313872
-        },
-        {
-          "a_bin": 3.0,
-          "b_bin": "Q4",
-          "n": 883,
-          "mean_xt": -0.02194843,
-          "n_given_nonzero_delta": 759,
-          "mean_xt_given_nonzero_delta": -0.02553421
-        },
-        {
-          "a_bin": 4.0,
-          "b_bin": "Q4",
-          "n": 380,
-          "mean_xt": -0.03082417,
-          "n_given_nonzero_delta": 339,
-          "mean_xt_given_nonzero_delta": -0.03455217
-        },
-        {
-          "a_bin": 5.0,
-          "b_bin": "Q4",
-          "n": 142,
-          "mean_xt": -0.06397737,
-          "n_given_nonzero_delta": 124,
-          "mean_xt_given_nonzero_delta": -0.07326441
+          "mean_xt": -0.01015037,
+          "n_given_nonzero_delta": 129,
+          "mean_xt_given_nonzero_delta": -0.0110159
         },
         {
           "a_bin": 6.0,
           "b_bin": "Q4",
           "n": 55,
-          "mean_xt": -0.0345672,
-          "n_given_nonzero_delta": 53,
-          "mean_xt_given_nonzero_delta": -0.03587163
+          "mean_xt": -0.03884038,
+          "n_given_nonzero_delta": 51,
+          "mean_xt_given_nonzero_delta": -0.04188669
         },
         {
           "a_bin": 7.0,
           "b_bin": "Q4",
           "n": 6,
-          "mean_xt": -0.03779742,
+          "mean_xt": 0.0745827,
           "n_given_nonzero_delta": 6,
-          "mean_xt_given_nonzero_delta": -0.03779742
+          "mean_xt_given_nonzero_delta": 0.0745827
         },
         {
           "a_bin": 8.0,
           "b_bin": "Q4",
           "n": 2,
-          "mean_xt": 0.0,
+          "mean_xt": 0.09305883,
           "n_given_nonzero_delta": 2,
-          "mean_xt_given_nonzero_delta": 0.0
+          "mean_xt_given_nonzero_delta": 0.09305883
         }
       ],
       "marginal_a_by_quartile": [
         {
           "a_bin": 0.0,
-          "n": 24382,
-          "mean_xt": 0.00022245
+          "n": 24278,
+          "mean_xt": 0.00294625
         },
         {
           "a_bin": 1.0,
-          "n": 13269,
-          "mean_xt": -0.00413685
+          "n": 13190,
+          "mean_xt": 0.00250814
         },
         {
           "a_bin": 2.0,
-          "n": 3919,
-          "mean_xt": -0.01060817
+          "n": 3901,
+          "mean_xt": 0.00012783
         },
         {
           "a_bin": 3.0,
-          "n": 1023,
-          "mean_xt": -0.01966466
+          "n": 1013,
+          "mean_xt": -0.00596448
         },
         {
           "a_bin": 4.0,
-          "n": 380,
-          "mean_xt": -0.03082417
+          "n": 377,
+          "mean_xt": -0.0049785
         },
         {
           "a_bin": 5.0,
-          "n": 142,
-          "mean_xt": -0.06397737
+          "n": 140,
+          "mean_xt": -0.01015037
         },
         {
           "a_bin": 6.0,
           "n": 55,
-          "mean_xt": -0.0345672
+          "mean_xt": -0.03884038
         },
         {
           "a_bin": 7.0,
           "n": 6,
-          "mean_xt": -0.03779742
+          "mean_xt": 0.0745827
         },
         {
           "a_bin": 8.0,
           "n": 2,
-          "mean_xt": 0.0
+          "mean_xt": 0.09305883
         }
       ],
       "marginal_a_by_quartile_given_nonzero_delta": [
         {
           "a_bin": 0.0,
-          "n_given_nonzero_delta": 22712,
-          "mean_xt_given_nonzero_delta": 0.00023881
+          "n_given_nonzero_delta": 18589,
+          "mean_xt_given_nonzero_delta": 0.00384793
         },
         {
           "a_bin": 1.0,
-          "n_given_nonzero_delta": 11198,
-          "mean_xt_given_nonzero_delta": -0.00490194
+          "n_given_nonzero_delta": 10819,
+          "mean_xt_given_nonzero_delta": 0.0030578
         },
         {
           "a_bin": 2.0,
-          "n_given_nonzero_delta": 3256,
-          "mean_xt_given_nonzero_delta": -0.01276825
+          "n_given_nonzero_delta": 3286,
+          "mean_xt_given_nonzero_delta": 0.00015175
         },
         {
           "a_bin": 3.0,
-          "n_given_nonzero_delta": 876,
-          "mean_xt_given_nonzero_delta": -0.02296455
+          "n_given_nonzero_delta": 865,
+          "mean_xt_given_nonzero_delta": -0.00698499
         },
         {
           "a_bin": 4.0,
-          "n_given_nonzero_delta": 339,
-          "mean_xt_given_nonzero_delta": -0.03455217
+          "n_given_nonzero_delta": 328,
+          "mean_xt_given_nonzero_delta": -0.00572224
         },
         {
           "a_bin": 5.0,
-          "n_given_nonzero_delta": 124,
-          "mean_xt_given_nonzero_delta": -0.07326441
+          "n_given_nonzero_delta": 129,
+          "mean_xt_given_nonzero_delta": -0.0110159
         },
         {
           "a_bin": 6.0,
-          "n_given_nonzero_delta": 53,
-          "mean_xt_given_nonzero_delta": -0.03587163
+          "n_given_nonzero_delta": 51,
+          "mean_xt_given_nonzero_delta": -0.04188669
         },
         {
           "a_bin": 7.0,
           "n_given_nonzero_delta": 6,
-          "mean_xt_given_nonzero_delta": -0.03779742
+          "mean_xt_given_nonzero_delta": 0.0745827
         },
         {
           "a_bin": 8.0,
           "n_given_nonzero_delta": 2,
-          "mean_xt_given_nonzero_delta": 0.0
+          "mean_xt_given_nonzero_delta": 0.09305883
         }
       ],
-      "marginal_a_delta": -0.03478965,
-      "marginal_a_delta_given_nonzero_delta": -0.03611044,
+      "marginal_a_delta": -0.04178663,
+      "marginal_a_delta_given_nonzero_delta": -0.04573462,
       "a_gradient_by_b_stratum": [
         {
           "b_bin": "Q1",
-          "a_delta_within_stratum": -0.0014363,
+          "a_delta_within_stratum": -0.00036043,
           "a_bin_compared_low": 0.0,
           "a_bin_compared_high": 1.0,
-          "n_rows": 20190
+          "n_rows": 20086
         },
         {
           "b_bin": "Q2",
-          "a_delta_within_stratum": 0.0011773,
+          "a_delta_within_stratum": -0.00055036,
           "a_bin_compared_low": 0.0,
           "a_bin_compared_high": 2.0,
-          "n_rows": 10523
+          "n_rows": 10480
         },
         {
           "b_bin": "Q3",
-          "a_delta_within_stratum": 0.00103558,
+          "a_delta_within_stratum": -0.00777098,
           "a_bin_compared_low": 0.0,
           "a_bin_compared_high": 3.0,
-          "n_rows": 6295
+          "n_rows": 6272
         },
         {
           "b_bin": "Q4",
-          "a_delta_within_stratum": -0.01755086,
+          "a_delta_within_stratum": -0.04238705,
           "a_bin_compared_low": 0.0,
           "a_bin_compared_high": 6.0,
-          "n_rows": 6170
+          "n_rows": 6124
         }
       ],
       "a_gradient_by_b_stratum_given_nonzero_delta": [
         {
           "b_bin": "Q1",
-          "a_delta_within_stratum": -0.00136315,
+          "a_delta_within_stratum": -0.00071906,
           "a_bin_compared_low": 0.0,
           "a_bin_compared_high": 1.0,
-          "n_rows": 18531
+          "n_rows": 15251
         },
         {
           "b_bin": "Q2",
-          "a_delta_within_stratum": 0.00111838,
+          "a_delta_within_stratum": -0.00076225,
           "a_bin_compared_low": 0.0,
           "a_bin_compared_high": 2.0,
-          "n_rows": 9154
+          "n_rows": 8368
         },
         {
           "b_bin": "Q3",
-          "a_delta_within_stratum": 0.0005482,
+          "a_delta_within_stratum": -0.00966732,
           "a_bin_compared_low": 0.0,
           "a_bin_compared_high": 3.0,
-          "n_rows": 5434
+          "n_rows": 5184
         },
         {
           "b_bin": "Q4",
-          "a_delta_within_stratum": -0.01775747,
+          "a_delta_within_stratum": -0.04622094,
           "a_bin_compared_low": 0.0,
           "a_bin_compared_high": 6.0,
-          "n_rows": 5447
+          "n_rows": 5272
         }
       ],
-      "within_stratum_deltas_change_sign": true,
-      "classification": "substitutive",
-      "classification_reason": "Mean |within-B-stratum delta| (0.005300) is 0.15x the pooled marginal delta (-0.034790), below the 0.3 threshold -- A's effect mostly disappears once B is known.",
-      "classification_given_nonzero_delta": "substitutive",
-      "classification_reason_given_nonzero_delta": "Mean |within-B-stratum delta| (0.005197) is 0.14x the pooled marginal delta (-0.036110), below the 0.3 threshold -- A's effect mostly disappears once B is known."
+      "within_stratum_deltas_change_sign": false,
+      "classification": "interactive",
+      "classification_reason": "Magnitude ratio (117.60) exceeds 2.0 -- A's effect meaningfully depends on B's level.",
+      "classification_given_nonzero_delta": "interactive",
+      "classification_reason_given_nonzero_delta": "Magnitude ratio (64.28) exceeds 2.0 -- A's effect meaningfully depends on B's level."
     },
     {
       "dataset": "active",
@@ -1106,249 +1127,249 @@
         "Q3",
         "Q4"
       ],
-      "n_rows_used": 56036,
-      "n_rows_used_given_nonzero_delta": 49699,
+      "n_rows_used": 55761,
+      "n_rows_used_given_nonzero_delta": 44523,
       "grid": [
         {
           "a_bin": "Q1",
           "b_bin": "Q1",
-          "n": 3639,
-          "mean_xt": -0.00351593,
-          "n_given_nonzero_delta": 2909,
-          "mean_xt_given_nonzero_delta": -0.00439824
+          "n": 3616,
+          "mean_xt": 0.00652007,
+          "n_given_nonzero_delta": 2804,
+          "mean_xt_given_nonzero_delta": 0.0084082
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q1",
-          "n": 3366,
-          "mean_xt": 0.00089747,
-          "n_given_nonzero_delta": 3037,
-          "mean_xt_given_nonzero_delta": 0.00099469
+          "n": 3353,
+          "mean_xt": 0.00230027,
+          "n_given_nonzero_delta": 2653,
+          "mean_xt_given_nonzero_delta": 0.0029072
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q1",
-          "n": 3224,
-          "mean_xt": -0.00055124,
-          "n_given_nonzero_delta": 2955,
-          "mean_xt_given_nonzero_delta": -0.00060142
+          "n": 3212,
+          "mean_xt": 0.0022342,
+          "n_given_nonzero_delta": 2515,
+          "mean_xt_given_nonzero_delta": 0.00285338
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q1",
-          "n": 3786,
-          "mean_xt": -0.00293131,
-          "n_given_nonzero_delta": 3445,
-          "mean_xt_given_nonzero_delta": -0.00322146
+          "n": 3762,
+          "mean_xt": 0.00161684,
+          "n_given_nonzero_delta": 2992,
+          "mean_xt_given_nonzero_delta": 0.00203294
         },
         {
           "a_bin": "Q1",
           "b_bin": "Q2",
-          "n": 3630,
-          "mean_xt": -0.00332203,
-          "n_given_nonzero_delta": 2929,
-          "mean_xt_given_nonzero_delta": -0.00411709
+          "n": 3620,
+          "mean_xt": 0.00688186,
+          "n_given_nonzero_delta": 2809,
+          "mean_xt_given_nonzero_delta": 0.00886875
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q2",
-          "n": 3405,
-          "mean_xt": 0.00122905,
-          "n_given_nonzero_delta": 3088,
-          "mean_xt_given_nonzero_delta": 0.00135522
+          "n": 3369,
+          "mean_xt": 0.00261141,
+          "n_given_nonzero_delta": 2674,
+          "mean_xt_given_nonzero_delta": 0.00329015
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q2",
-          "n": 3313,
-          "mean_xt": 0.00032643,
-          "n_given_nonzero_delta": 3038,
-          "mean_xt_given_nonzero_delta": 0.00035598
+          "n": 3299,
+          "mean_xt": 0.00172765,
+          "n_given_nonzero_delta": 2685,
+          "mean_xt_given_nonzero_delta": 0.00212273
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q2",
-          "n": 3665,
-          "mean_xt": -0.00334583,
-          "n_given_nonzero_delta": 3364,
-          "mean_xt_given_nonzero_delta": -0.00364521
+          "n": 3660,
+          "mean_xt": 0.0008865,
+          "n_given_nonzero_delta": 2953,
+          "mean_xt_given_nonzero_delta": 0.00109874
         },
         {
           "a_bin": "Q1",
           "b_bin": "Q3",
-          "n": 3742,
-          "mean_xt": -0.00086967,
-          "n_given_nonzero_delta": 3008,
-          "mean_xt_given_nonzero_delta": -0.00108188
+          "n": 3731,
+          "mean_xt": 0.00808759,
+          "n_given_nonzero_delta": 2912,
+          "mean_xt_given_nonzero_delta": 0.01036222
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q3",
-          "n": 3543,
-          "mean_xt": 0.00231615,
-          "n_given_nonzero_delta": 3239,
-          "mean_xt_given_nonzero_delta": 0.00253353
+          "n": 3535,
+          "mean_xt": 0.00155359,
+          "n_given_nonzero_delta": 2807,
+          "mean_xt_given_nonzero_delta": 0.00195652
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q3",
-          "n": 3474,
-          "mean_xt": -0.00017871,
-          "n_given_nonzero_delta": 3226,
-          "mean_xt_given_nonzero_delta": -0.00019245
+          "n": 3457,
+          "mean_xt": 0.00174135,
+          "n_given_nonzero_delta": 2779,
+          "mean_xt_given_nonzero_delta": 0.0021662
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q3",
-          "n": 3244,
-          "mean_xt": -0.00142612,
-          "n_given_nonzero_delta": 3010,
-          "mean_xt_given_nonzero_delta": -0.00153698
+          "n": 3210,
+          "mean_xt": 0.00334175,
+          "n_given_nonzero_delta": 2594,
+          "mean_xt_given_nonzero_delta": 0.00413532
         },
         {
           "a_bin": "Q1",
           "b_bin": "Q4",
-          "n": 3799,
-          "mean_xt": -0.00340344,
-          "n_given_nonzero_delta": 3104,
-          "mean_xt_given_nonzero_delta": -0.00416548
+          "n": 3795,
+          "mean_xt": 0.00634615,
+          "n_given_nonzero_delta": 3055,
+          "mean_xt_given_nonzero_delta": 0.00788335
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q4",
-          "n": 3602,
-          "mean_xt": 0.00044765,
-          "n_given_nonzero_delta": 3274,
-          "mean_xt_given_nonzero_delta": 0.0004925
+          "n": 3579,
+          "mean_xt": 0.00275118,
+          "n_given_nonzero_delta": 2904,
+          "mean_xt_given_nonzero_delta": 0.00339066
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q4",
-          "n": 3472,
-          "mean_xt": -0.00222796,
-          "n_given_nonzero_delta": 3190,
-          "mean_xt_given_nonzero_delta": -0.00242492
+          "n": 3452,
+          "mean_xt": 0.00210541,
+          "n_given_nonzero_delta": 2830,
+          "mean_xt_given_nonzero_delta": 0.00256815
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q4",
-          "n": 3132,
-          "mean_xt": -0.00404836,
-          "n_given_nonzero_delta": 2883,
-          "mean_xt_given_nonzero_delta": -0.00439801
+          "n": 3111,
+          "mean_xt": 0.00248584,
+          "n_given_nonzero_delta": 2557,
+          "mean_xt_given_nonzero_delta": 0.00302443
         }
       ],
       "marginal_a_by_quartile": [
         {
           "a_bin": "Q1",
-          "n": 14810,
-          "mean_xt": -0.00277093
+          "n": 14762,
+          "mean_xt": 0.00696026
         },
         {
           "a_bin": "Q2",
-          "n": 13916,
-          "mean_xt": 0.00122336
+          "n": 13836,
+          "mean_xt": 0.0023019
         },
         {
           "a_bin": "Q3",
-          "n": 13483,
-          "mean_xt": -0.00067137
+          "n": 13420,
+          "mean_xt": 0.00194959
         },
         {
           "a_bin": "Q4",
-          "n": 13827,
-          "mean_xt": -0.00294107
+          "n": 13743,
+          "mean_xt": 0.00202195
         }
       ],
       "marginal_a_by_quartile_given_nonzero_delta": [
         {
           "a_bin": "Q1",
-          "n_given_nonzero_delta": 11950,
-          "mean_xt_given_nonzero_delta": -0.00343409
+          "n_given_nonzero_delta": 11580,
+          "mean_xt_given_nonzero_delta": 0.00887283
         },
         {
           "a_bin": "Q2",
-          "n_given_nonzero_delta": 12638,
-          "mean_xt_given_nonzero_delta": 0.00134708
+          "n_given_nonzero_delta": 11038,
+          "mean_xt_given_nonzero_delta": 0.0028854
         },
         {
           "a_bin": "Q3",
-          "n_given_nonzero_delta": 12409,
-          "mean_xt_given_nonzero_delta": -0.00072948
+          "n_given_nonzero_delta": 10809,
+          "mean_xt_given_nonzero_delta": 0.00242053
         },
         {
           "a_bin": "Q4",
-          "n_given_nonzero_delta": 12702,
-          "mean_xt_given_nonzero_delta": -0.00320156
+          "n_given_nonzero_delta": 11096,
+          "mean_xt_given_nonzero_delta": 0.00250429
         }
       ],
-      "marginal_a_delta": -0.00017014,
-      "marginal_a_delta_given_nonzero_delta": 0.00023253,
+      "marginal_a_delta": -0.00493831,
+      "marginal_a_delta_given_nonzero_delta": -0.00636854,
       "a_gradient_by_b_stratum": [
         {
           "b_bin": "Q1",
-          "a_delta_within_stratum": 0.00058462,
+          "a_delta_within_stratum": -0.00490323,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 14015
+          "n_rows": 13943
         },
         {
           "b_bin": "Q2",
-          "a_delta_within_stratum": -2.38e-05,
+          "a_delta_within_stratum": -0.00599536,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 14013
+          "n_rows": 13948
         },
         {
           "b_bin": "Q3",
-          "a_delta_within_stratum": -0.00055645,
+          "a_delta_within_stratum": -0.00474584,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 14003
+          "n_rows": 13933
         },
         {
           "b_bin": "Q4",
-          "a_delta_within_stratum": -0.00064492,
+          "a_delta_within_stratum": -0.00386031,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 14005
+          "n_rows": 13937
         }
       ],
       "a_gradient_by_b_stratum_given_nonzero_delta": [
         {
           "b_bin": "Q1",
-          "a_delta_within_stratum": 0.00117678,
+          "a_delta_within_stratum": -0.00637526,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 12346
+          "n_rows": 10964
         },
         {
           "b_bin": "Q2",
-          "a_delta_within_stratum": 0.00047188,
+          "a_delta_within_stratum": -0.00777001,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 12419
+          "n_rows": 11121
         },
         {
           "b_bin": "Q3",
-          "a_delta_within_stratum": -0.0004551,
+          "a_delta_within_stratum": -0.0062269,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 12483
+          "n_rows": 11092
         },
         {
           "b_bin": "Q4",
-          "a_delta_within_stratum": -0.00023253,
+          "a_delta_within_stratum": -0.00485892,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 12451
+          "n_rows": 11346
         }
       ],
-      "within_stratum_deltas_change_sign": true,
-      "classification": "inconclusive",
-      "classification_reason": "Pooled marginal delta (-0.000170) is below the 0.005486 minimum to classify confidently. Note the |absolute value| test: on this target a large NEGATIVE marginal delta is just as classifiable as a large positive one.",
-      "classification_given_nonzero_delta": "inconclusive",
-      "classification_reason_given_nonzero_delta": "Pooled marginal delta (+0.000233) is below the 0.005826 minimum to classify confidently. Note the |absolute value| test: on this target a large NEGATIVE marginal delta is just as classifiable as a large positive one."
+      "within_stratum_deltas_change_sign": false,
+      "classification": "additive",
+      "classification_reason": "Every B-stratum delta shares the marginal delta's sign and the max/min magnitude ratio (1.55) is within the 2.0 threshold -- A's effect holds at roughly constant strength regardless of B's level.",
+      "classification_given_nonzero_delta": "additive",
+      "classification_reason_given_nonzero_delta": "Every B-stratum delta shares the marginal delta's sign and the max/min magnitude ratio (1.60) is within the 2.0 threshold -- A's effect holds at roughly constant strength regardless of B's level."
     },
     {
       "dataset": "active",
@@ -1367,249 +1388,249 @@
         "Q3",
         "Q4"
       ],
-      "n_rows_used": 56036,
-      "n_rows_used_given_nonzero_delta": 49699,
+      "n_rows_used": 55761,
+      "n_rows_used_given_nonzero_delta": 44523,
       "grid": [
         {
           "a_bin": "Q1",
           "b_bin": "Q1",
-          "n": 5158,
-          "mean_xt": -0.01679085,
-          "n_given_nonzero_delta": 4691,
-          "mean_xt_given_nonzero_delta": -0.01846242
+          "n": 5115,
+          "mean_xt": 0.01154633,
+          "n_given_nonzero_delta": 4609,
+          "mean_xt_given_nonzero_delta": 0.01281395
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q1",
-          "n": 4027,
-          "mean_xt": -0.00115283,
-          "n_given_nonzero_delta": 3602,
-          "mean_xt_given_nonzero_delta": -0.00128885
+          "n": 4005,
+          "mean_xt": 0.00540586,
+          "n_given_nonzero_delta": 3466,
+          "mean_xt_given_nonzero_delta": 0.00624653
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q1",
-          "n": 3515,
-          "mean_xt": 0.00846736,
-          "n_given_nonzero_delta": 3149,
-          "mean_xt_given_nonzero_delta": 0.0094515
+          "n": 3486,
+          "mean_xt": 0.00569108,
+          "n_given_nonzero_delta": 3036,
+          "mean_xt_given_nonzero_delta": 0.00653461
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q1",
-          "n": 2679,
-          "mean_xt": 0.01919213,
-          "n_given_nonzero_delta": 2415,
-          "mean_xt_given_nonzero_delta": 0.02129015
+          "n": 2667,
+          "mean_xt": 0.01094005,
+          "n_given_nonzero_delta": 2335,
+          "mean_xt_given_nonzero_delta": 0.01249555
         },
         {
           "a_bin": "Q1",
           "b_bin": "Q2",
-          "n": 3594,
-          "mean_xt": -0.01699658,
-          "n_given_nonzero_delta": 3240,
-          "mean_xt_given_nonzero_delta": -0.01885361
+          "n": 3574,
+          "mean_xt": 0.00431375,
+          "n_given_nonzero_delta": 3016,
+          "mean_xt_given_nonzero_delta": 0.00511185
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q2",
-          "n": 3520,
-          "mean_xt": -0.00588814,
-          "n_given_nonzero_delta": 3152,
-          "mean_xt_given_nonzero_delta": -0.00657559
+          "n": 3508,
+          "mean_xt": 0.00184538,
+          "n_given_nonzero_delta": 2828,
+          "mean_xt_given_nonzero_delta": 0.0022891
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q2",
-          "n": 3120,
-          "mean_xt": -0.00141327,
-          "n_given_nonzero_delta": 2807,
-          "mean_xt_given_nonzero_delta": -0.00157086
+          "n": 3106,
+          "mean_xt": 0.00379702,
+          "n_given_nonzero_delta": 2509,
+          "mean_xt_given_nonzero_delta": 0.00470049
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q2",
-          "n": 2672,
-          "mean_xt": 0.00637757,
-          "n_given_nonzero_delta": 2415,
-          "mean_xt_given_nonzero_delta": 0.00705626
+          "n": 2658,
+          "mean_xt": 0.00699356,
+          "n_given_nonzero_delta": 2159,
+          "mean_xt_given_nonzero_delta": 0.00860995
         },
         {
           "a_bin": "Q1",
           "b_bin": "Q3",
-          "n": 3844,
-          "mean_xt": -0.00486451,
-          "n_given_nonzero_delta": 3371,
-          "mean_xt_given_nonzero_delta": -0.00554707
+          "n": 3831,
+          "mean_xt": 0.00407183,
+          "n_given_nonzero_delta": 3003,
+          "mean_xt_given_nonzero_delta": 0.00519454
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q3",
-          "n": 3716,
-          "mean_xt": -0.00132952,
-          "n_given_nonzero_delta": 3204,
-          "mean_xt_given_nonzero_delta": -0.00154197
+          "n": 3699,
+          "mean_xt": 0.001583,
+          "n_given_nonzero_delta": 2817,
+          "mean_xt_given_nonzero_delta": 0.00207863
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q3",
-          "n": 3169,
-          "mean_xt": -0.00076684,
-          "n_given_nonzero_delta": 2728,
-          "mean_xt_given_nonzero_delta": -0.00089081
+          "n": 3146,
+          "mean_xt": 0.00093532,
+          "n_given_nonzero_delta": 2411,
+          "mean_xt_given_nonzero_delta": 0.00122045
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q3",
-          "n": 3165,
-          "mean_xt": 0.00237969,
-          "n_given_nonzero_delta": 2809,
-          "mean_xt_given_nonzero_delta": 0.00268128
+          "n": 3157,
+          "mean_xt": -0.00121961,
+          "n_given_nonzero_delta": 2354,
+          "mean_xt_given_nonzero_delta": -0.00163565
         },
         {
           "a_bin": "Q1",
           "b_bin": "Q4",
-          "n": 6442,
-          "mean_xt": -0.01114041,
-          "n_given_nonzero_delta": 5722,
-          "mean_xt_given_nonzero_delta": -0.01254221
+          "n": 6425,
+          "mean_xt": 0.00298561,
+          "n_given_nonzero_delta": 4658,
+          "mean_xt_given_nonzero_delta": 0.00411819
         },
         {
           "a_bin": "Q2",
           "b_bin": "Q4",
-          "n": 4303,
-          "mean_xt": 0.01098161,
-          "n_given_nonzero_delta": 3733,
-          "mean_xt_given_nonzero_delta": 0.01265842
+          "n": 4284,
+          "mean_xt": 0.00056429,
+          "n_given_nonzero_delta": 3082,
+          "mean_xt_given_nonzero_delta": 0.00078437
         },
         {
           "a_bin": "Q3",
           "b_bin": "Q4",
-          "n": 2457,
-          "mean_xt": 0.01409613,
-          "n_given_nonzero_delta": 2148,
-          "mean_xt_given_nonzero_delta": 0.01612393
+          "n": 2447,
+          "mean_xt": -0.00579805,
+          "n_given_nonzero_delta": 1764,
+          "mean_xt_given_nonzero_delta": -0.00804299
         },
         {
           "a_bin": "Q4",
           "b_bin": "Q4",
-          "n": 655,
-          "mean_xt": 0.02127755,
-          "n_given_nonzero_delta": 513,
-          "mean_xt_given_nonzero_delta": 0.02716724
+          "n": 653,
+          "mean_xt": -0.03278864,
+          "n_given_nonzero_delta": 476,
+          "mean_xt_given_nonzero_delta": -0.04498105
         }
       ],
       "marginal_a_by_quartile": [
         {
           "a_bin": "Q1",
-          "n": 19038,
-          "mean_xt": -0.01250964
+          "n": 18945,
+          "mean_xt": 0.00576714
         },
         {
           "a_bin": "Q2",
-          "n": 15566,
-          "mean_xt": 0.00108857
+          "n": 15496,
+          "mean_xt": 0.0023488
         },
         {
           "a_bin": "Q3",
-          "n": 12261,
-          "mean_xt": 0.00469435
+          "n": 12185,
+          "mean_xt": 0.00167315
         },
         {
           "a_bin": "Q4",
-          "n": 9171,
-          "mean_xt": 0.00980538
+          "n": 9135,
+          "mean_xt": 0.00246357
         }
       ],
       "marginal_a_by_quartile_given_nonzero_delta": [
         {
           "a_bin": "Q1",
-          "n_given_nonzero_delta": 17024,
-          "mean_xt_given_nonzero_delta": -0.01398958
+          "n_given_nonzero_delta": 15286,
+          "mean_xt_given_nonzero_delta": 0.00714762
         },
         {
           "a_bin": "Q2",
-          "n_given_nonzero_delta": 13691,
-          "mean_xt_given_nonzero_delta": 0.00123765
+          "n_given_nonzero_delta": 12193,
+          "mean_xt_given_nonzero_delta": 0.00298507
         },
         {
           "a_bin": "Q3",
-          "n_given_nonzero_delta": 10832,
-          "mean_xt_given_nonzero_delta": 0.00531365
+          "n_given_nonzero_delta": 9720,
+          "mean_xt_given_nonzero_delta": 0.00209746
         },
         {
           "a_bin": "Q4",
-          "n_given_nonzero_delta": 8152,
-          "mean_xt_given_nonzero_delta": 0.01103105
+          "n_given_nonzero_delta": 7324,
+          "mean_xt_given_nonzero_delta": 0.00307273
         }
       ],
-      "marginal_a_delta": 0.02231502,
-      "marginal_a_delta_given_nonzero_delta": 0.02502063,
+      "marginal_a_delta": -0.00330357,
+      "marginal_a_delta_given_nonzero_delta": -0.00407489,
       "a_gradient_by_b_stratum": [
         {
           "b_bin": "Q1",
-          "a_delta_within_stratum": 0.03598298,
+          "a_delta_within_stratum": -0.00060628,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 15379
+          "n_rows": 15273
         },
         {
           "b_bin": "Q2",
-          "a_delta_within_stratum": 0.02337415,
+          "a_delta_within_stratum": 0.00267981,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 12906
+          "n_rows": 12846
         },
         {
           "b_bin": "Q3",
-          "a_delta_within_stratum": 0.0072442,
+          "a_delta_within_stratum": -0.00529144,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 13894
+          "n_rows": 13833
         },
         {
           "b_bin": "Q4",
-          "a_delta_within_stratum": 0.03241796,
+          "a_delta_within_stratum": -0.03577425,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 13857
+          "n_rows": 13809
         }
       ],
       "a_gradient_by_b_stratum_given_nonzero_delta": [
         {
           "b_bin": "Q1",
-          "a_delta_within_stratum": 0.03975257,
+          "a_delta_within_stratum": -0.0003184,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 13857
+          "n_rows": 13446
         },
         {
           "b_bin": "Q2",
-          "a_delta_within_stratum": 0.02590987,
+          "a_delta_within_stratum": 0.0034981,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 11614
+          "n_rows": 10512
         },
         {
           "b_bin": "Q3",
-          "a_delta_within_stratum": 0.00822835,
+          "a_delta_within_stratum": -0.00683019,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 12112
+          "n_rows": 10585
         },
         {
           "b_bin": "Q4",
-          "a_delta_within_stratum": 0.03970945,
+          "a_delta_within_stratum": -0.04909924,
           "a_bin_compared_low": "Q1",
           "a_bin_compared_high": "Q4",
-          "n_rows": 12116
+          "n_rows": 9980
         }
       ],
-      "within_stratum_deltas_change_sign": false,
-      "classification": "interactive",
-      "classification_reason": "Magnitude ratio (4.97) exceeds 2.0 -- A's effect meaningfully depends on B's level.",
-      "classification_given_nonzero_delta": "interactive",
-      "classification_reason_given_nonzero_delta": "Magnitude ratio (4.83) exceeds 2.0 -- A's effect meaningfully depends on B's level."
+      "within_stratum_deltas_change_sign": true,
+      "classification": "inconclusive",
+      "classification_reason": "Pooled marginal delta (-0.003304) is below the 0.004929 minimum to classify confidently. Note the |absolute value| test: on this target a large NEGATIVE marginal delta is just as classifiable as a large positive one.",
+      "classification_given_nonzero_delta": "inconclusive",
+      "classification_reason_given_nonzero_delta": "Pooled marginal delta (-0.004075) is below the 0.005514 minimum to classify confidently. Note the |absolute value| test: on this target a large NEGATIVE marginal delta is just as classifiable as a large positive one."
     }
   ]
 }

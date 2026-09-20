@@ -1,44 +1,67 @@
 {
   "dataset": "active",
   "leg": "active-binary only (passive leg out of scope for this target)",
-  "target": "target_xt_delta",
-  "target_source": "outputs/prototypes/active_binary_xt_delta.parquet (joined read-only by event_id)",
+  "target": "target_xt_delta_v2",
+  "target_source": "outputs/prototypes/active_binary_xt_delta_v2.parquet (joined read-only by event_id)",
+  "supersedes": "target_xt_delta (v1, outputs/prototypes/active_binary_xt_delta.parquet). The v1 portal built against it is preserved unchanged at reports/analysis/xt_target_v1_superseded/.",
   "n_rows": 56068,
-  "n_rows_nonzero": 49699,
-  "base_xt": -0.0013157850365836247,
-  "base_xt_nonzero": -0.0014835576230910078,
+  "n_rows_nonzero": 44523,
+  "base_xt": 0.0033813513864959376,
+  "base_xt_nonzero": 0.004234834459995957,
   "target_scale": {
-    "target": "target_xt_delta",
+    "target": "target_xt_delta_v2",
     "n_rows": 56068,
-    "n_defined": 56036,
-    "n_nan": 32,
-    "mean": -0.00131579,
-    "std": 0.06498593,
-    "skew": 0.0933,
-    "excess_kurtosis": 8.846,
-    "pct_zero": 11.309,
-    "pct_negative": 47.002,
-    "pct_positive": 41.689,
+    "n_defined": 55761,
+    "n_nan": 307,
+    "mean": 0.00338135,
+    "std": 0.05838466,
+    "skew": -0.306,
+    "excess_kurtosis": 18.3289,
+    "pct_zero": 20.154,
+    "pct_negative": 35.426,
+    "pct_positive": 44.42,
     "xg_mean_same_rows": 0.00811039,
     "xg_std_same_rows": 0.0480329,
     "xg_flat_margin_absolute": 0.00405519,
     "xg_flat_margin_as_fraction_of_xg_std": 0.084425,
-    "flat_margin": 0.00548646,
-    "range_trigger": 0.01097292,
-    "near_identical_threshold": 0.00548646,
-    "distinct_signal_threshold": 0.01645938,
-    "n_nonzero": 49699,
-    "mean_nonzero": -0.00148356,
-    "std_nonzero": 0.06900304,
-    "flat_margin_nonzero": 0.00582561,
-    "scale_note": "ADAPTATION 1. target_xt_delta is roughly symmetric with a near-zero, NEGATIVE mean (-0.001316), so the xg_target suite's convention of expressing every threshold as a multiple of the overall mean target value is meaningless here (it would flip signs and collapse to nothing). Instead the xg convention is TRANSLATED, not replaced: xg's own flat_margin (0.5 x mean xg = 0.004055 on these same rows) is re-expressed as a fraction of xg's own standard deviation (0.048033), giving 0.084425, and that fraction is applied to target_xt_delta's standard deviation (0.064986). Every number in this calculation is computed at runtime from the real parquet, not carried over from a writeup. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged.",
-    "conditional_panel_note": "ADAPTATION 2. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta has no shot column behind it; its structural-zero analogue is the 11.3% of rows with an EXACTLY zero delta (the action did not cross an xT grid-cell boundary). The conditional panel throughout this suite is therefore 'given a non-zero delta' (target_xt_delta != 0), never 'given a shot'.",
-    "direction_note": "ADAPTATION 3. Sign carries the football meaning: POSITIVE target_xt_delta = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. Rankings are by |magnitude| across BOTH directions, never one-sided 'higher is worse' lift, and every table also reports the negative/positive/zero share behind its mean.",
-    "log_transform_note": "NOT an adaptation: checked directly rather than assumed -- the xg_target report suite never log-transforms its target anywhere (every xg report uses the raw groupby mean of target_future_xg_10s). The log1p framing in this project belongs to the modelling legs, not to this report suite, so there was no log-transform to remove."
+    "flat_margin": 0.00492915,
+    "range_trigger": 0.00985829,
+    "near_identical_threshold": 0.00492915,
+    "distinct_signal_threshold": 0.01478744,
+    "n_nonzero": 44523,
+    "mean_nonzero": 0.00423483,
+    "std_nonzero": 0.06531138,
+    "flat_margin_nonzero": 0.00551394,
+    "scale_note": "ADAPTATION 1, RE-EXAMINED FOR v2. Prompt 65 translated the xg suite's mean-multiple threshold convention onto the xT target via xg's own standard-deviation fraction, because v1's mean was near-zero and NEGATIVE (-0.001316), which would have flipped the sign of every threshold. v2's mean is now POSITIVE (+0.003381), so that literal justification no longer applies -- checked, not assumed. The translation is KEPT anyway, for a reason that does still hold: at +0.003381 against a std of 0.058385 the mean is only 5.8% of one standard deviation, so a mean-multiple threshold would still be an arbitrary sliver, and keeping the same translation is what makes this portal numerically comparable with the v1 portal it supersedes. Mechanically: xg's own flat_margin (0.5 x mean xg = 0.004055 on these same rows) re-expressed as a fraction of xg's own std (0.048033) gives 0.084425, applied to target_xt_delta_v2's std (0.058385) to give 0.004929. Every number is computed at runtime from the real parquet. See `threshold_transfer_warning` in this same block: the std-derived margin is materially less appropriate on v2 than it was on v1, and that is stated rather than hidden. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged and are unaffected.",
+    "conditional_panel_note": "ADAPTATION 2, unchanged in method and re-measured on v2. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta_v2 has no shot column behind it; its structural-zero analogue is the 20.2% of rows with an EXACTLY zero delta. That share nearly doubled from v1's 11.3%, for an understood reason: under v2 a delta is exactly zero whenever the next same-possession event lands in the same xT grid cell as the previous one, which is far more common than v1's 'the action's own location shares a cell with the previous event'. The conditional panel throughout this suite remains 'given a non-zero delta' (target_xt_delta_v2 != 0), never 'given a shot'.",
+    "direction_note": "ADAPTATION 3, unchanged in method and re-measured on v2. Sign carries the football meaning: POSITIVE target_xt_delta_v2 = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. On v2 the balance shifts markedly towards the defence -- 44.4% positive vs 35.4% negative, where v1 was 41.7% / 47.0% -- but the target is NO LONGER close to symmetric (skew -0.306, vs v1's +0.093), so two-directional framing matters more here, not less. Rankings are by |magnitude| across BOTH directions, and every table also reports the negative/positive/zero share behind its mean.",
+    "log_transform_note": "NOT an adaptation, re-checked rather than inherited: the xg_target report suite never log-transforms its target anywhere, and neither did Prompt 65's v1 xT suite. The log1p framing in this project belongs to the modelling legs, not to this report suite. v2's heavier tails make a transform more tempting than it was on v1 -- and it is still NOT applied here, because doing so would silently break comparability with both the xg portal and the v1 xT portal this one supersedes. Recorded as an open question for the modelling legs, not resolved by an EDA suite.",
+    "target_version": "v2",
+    "target_source": "outputs/prototypes/active_binary_xt_delta_v2.parquet (joined read-only by event_id)",
+    "supersedes": "target_xt_delta (v1, outputs/prototypes/active_binary_xt_delta.parquet). The v1 portal built against it is preserved unchanged at reports/analysis/xt_target_v1_superseded/.",
+    "robust_scale": {
+      "iqr": 0.00882901,
+      "mad": 0.00385257,
+      "robust_std_1_4826_mad": 0.00571182,
+      "robust_flat_margin": 0.00048222,
+      "flat_margin_over_mad": 1.2794,
+      "flat_margin_over_iqr": 0.5583,
+      "pct_rows_inside_flat_margin": 53.42,
+      "mean_as_fraction_of_std": 0.0579
+    },
+    "correlation_with_old_target": {
+      "pair": "target_xt_delta_v2 vs target_future_xg_10s",
+      "pearson_r": -0.1082,
+      "n": 55761,
+      "v1_pearson_r": -0.016,
+      "note": "Measured on this run: r=-0.1082 against the old target on these same rows, versus -0.016 for v1. Recorded HERE specifically because Adaptation 1 borrows this very target's standard-deviation fraction to set every threshold in this suite -- so wherever a report cites an xg-derived threshold, this is how the two targets actually relate. Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.4): correlation with the old target_future_xg_10s improves from v1's essentially-zero -0.016 to -0.108 -- still modest, but now an order of magnitude stronger AND correctly signed: more threat denied by a defensive action is associated with less future attacking output in the next 10 seconds. v2 and v1 are themselves moderately correlated at +0.571, which is sensible given they share the identical xt_before term and differ only in xt_after."
+    },
+    "threshold_transfer_warning": "THIS THRESHOLD DOES NOT TRANSFER CLEANLY FROM v1, and that is reported rather than forced to fit. Prompt 65 tuned its translated flat_margin against a target with excess kurtosis 8.85, an IQR of 0.019119 and a MAD of 0.010277; the resulting margin (0.005486) was 0.53 x that MAD and spanned 35.4% of rows -- a genuinely narrow 'too small to matter' band. v2's tails are far heavier (excess kurtosis 18.3289) because Prompt 66 injects real shot xG values up to 0.897 for the 954 rows where a Shot follows the defensive action, while v2's BULK is much tighter (IQR 0.008829, MAD 0.003853). Because the translation is std-derived and std is inflated by exactly those tails, the margin barely moves (0.004929) while the distribution it is meant to describe more than halved: it is now 1.28 x the MAD, 0.56 x the IQR, and spans 53.4% of all rows. A flat band covering the majority of the data is not doing its job. The literal translated margin is KEPT as the headline number so v1-vs-v2 comparisons stay like-for-like and the xg suite's convention is still the one being followed, but the MAD-derived robust alternative (0.000482) is published beside it on every run and every shape classification in this suite should be read with this inflation in mind."
   },
-  "prompt_64_cross_references": {
-    "clearance_action_x_artefact": "Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.1/3.4): for Clearance events, action_x/action_y -- this target's definition of the post-action location, and therefore of xt_after -- is the location the clearance was taken FROM, not where the ball ends up. Last-ditch clearances are very often taken deep in the defending box, a high-xT cell by construction, so Clearance rows carry a systematically negative delta even though a clearance is a good defensive outcome. Prompt 64 measured this directly at -0.0315 mean delta for Clearance inside the action_ended_possession slice, against +0.0009 to +0.0076 for every other event type there. This is a measurement artefact of the xt_after definition, NOT evidence that clearances are bad defending.",
-    "distribution_shape": "Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.2): target_xt_delta is roughly symmetric (skew +0.093), heavy-tailed (excess kurtosis 8.85), 47.0% negative / 41.7% positive / 11.3% exactly zero. This is a fundamentally different shape from target_future_xg_10s, which is strictly non-negative, zero-inflated and heavily right-skewed. Any methodology that assumed non-negativity had to be adapted explicitly -- see this module's Adaptation 1/2/3 notes, restated in every report."
+  "prompt_66_cross_references": {
+    "clearance_reversal": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.2): Prompt 64's Clearance artefact -- Clearance looking like the WORST event type because xt_after was looked up at the clearance's own deep-in-the-box location -- is not merely reduced under the corrected xt_after, it FULLY REVERSES. Clearance moves from 8th of 8 event types (worst) at -0.0325 mean delta under v1 to 1st of 8 (best) at +0.0247 under v2, and in the motivating action_ended_possession slice from -0.0315 to +0.0406. The mechanism is understood, not assumed: possession-ending clearances now get xt_after = 0 by construction, so the dangerous coordinate is never looked up at all. Any v1-era statement that Clearance ranks last, or that clearances carry a systematically negative delta, is superseded and must not be repeated. (Aside recorded by Prompt 66 and not chased here: Block, at -0.0185, is now the lowest-mean event type under v2.)",
+    "distribution_shape": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.3): target_xt_delta_v2's mean flips from v1's slightly negative -0.00132 to a clearly positive +0.00338 -- on average, active defensive actions now genuinely deny threat, the football-sensible direction v1 never achieved. But the shape got HARDER, not easier: skew moves from +0.093 (near-symmetric) to -0.306 (mildly left-skewed) and excess kurtosis from 8.85 to 18.33 (much heavier tails), while the exactly-zero share rises from 11.3% to 20.2% and the negative share falls from 47.0% to 35.4%. The heavier tails are a direct, understood consequence of injecting real shot_statsbomb_xg values (up to 0.897) as xt_after for the 954 rows -- 1.9% of continuing-possession rows -- where a Shot immediately follows the defensive action; the 96-cell xT grid's own maximum cell is only 0.2575, so it could never produce such values. This REINFORCES rather than resolves Prompt 64's open flag that the existing hurdle architecture does not fit this target's shape as-is: v2 is if anything less like that shape than v1 was.",
+    "possession_ending_collapse": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.1): on the two possession-ending slices, target_xt_delta_v2 collapses EXACTLY onto xt_before's own distribution -- action_ended_possession == True (n=4,656) mean +0.03051, action_won_possession == True (n=3,600) mean +0.03066, both confirmed identical to the same slice's xt_before mean with np.allclose. This is logically REQUIRED, not a new degenerate finding: xt_after is forced to 0.0 for exactly these rows, so the delta is xt_before by construction -- '100% of the threat that existed a moment ago is denied'. Unlike the old target_future_shot_10s, which collapsed these same rows to an identical uninformative zero, this collapses to a real, row-by-row varying distribution (mean +0.031, std ~0.050): the actual danger level that was denied. Any report that shows these slices must present the identity as construction, not as discovery."
   },
   "columns": {
     "action_family": {
@@ -47,94 +70,94 @@
       "categories": [
         {
           "category": "recovery",
-          "n": 8922,
-          "xt_sum": 96.38149839,
-          "mean_xt": 0.010802678591123067,
-          "pct_negative": 43.28,
-          "pct_positive": 44.88,
-          "pct_zero": 11.85
-        },
-        {
-          "category": "discipline",
-          "n": 2642,
-          "xt_sum": 2.68791677,
-          "mean_xt": 0.0010173795495836489,
-          "pct_negative": 35.01,
-          "pct_positive": 31.49,
-          "pct_zero": 33.5
-        },
-        {
-          "category": "pressure",
-          "n": 27464,
-          "xt_sum": 5.224658920000001,
-          "mean_xt": 0.00019023663413923688,
-          "pct_negative": 49.95,
-          "pct_positive": 43.73,
-          "pct_zero": 6.33
-        },
-        {
-          "category": "contest",
-          "n": 6906,
-          "xt_sum": -11.048264529999997,
-          "mean_xt": -0.0015998066217781635,
-          "pct_negative": 37.6,
-          "pct_positive": 33.19,
-          "pct_zero": 29.21
+          "n": 8892,
+          "xt_sum": 161.5910682817,
+          "mean_xt": 0.018172634759525415,
+          "pct_negative": 31.84,
+          "pct_positive": 62.46,
+          "pct_zero": 5.7
         },
         {
           "category": "intervention",
-          "n": 10102,
-          "xt_sum": -166.97713986,
-          "mean_xt": -0.016529116992674717,
-          "pct_negative": 51.85,
-          "pct_positive": 41.81,
-          "pct_zero": 6.34
+          "n": 9935,
+          "xt_sum": 38.971808407,
+          "mean_xt": 0.003922678249320584,
+          "pct_negative": 36.8,
+          "pct_positive": 53.86,
+          "pct_zero": 9.34
+        },
+        {
+          "category": "pressure",
+          "n": 27446,
+          "xt_sum": 3.5071843017,
+          "mean_xt": 0.00012778489767907892,
+          "pct_negative": 36.23,
+          "pct_positive": 36.99,
+          "pct_zero": 26.78
+        },
+        {
+          "category": "contest",
+          "n": 6857,
+          "xt_sum": -9.836274443999997,
+          "mean_xt": -0.0014344865748869764,
+          "pct_negative": 35.57,
+          "pct_positive": 39.36,
+          "pct_zero": 25.07
+        },
+        {
+          "category": "discipline",
+          "n": 2631,
+          "xt_sum": -5.686251884000001,
+          "mean_xt": -0.0021612511911820605,
+          "pct_negative": 33.6,
+          "pct_positive": 38.46,
+          "pct_zero": 27.94
         }
       ],
       "categories_given_nonzero_delta": [
         {
           "category": "recovery",
-          "n": 7865,
-          "xt_sum": 96.38149838999999,
-          "mean_xt": 0.01225448167705022,
-          "pct_negative": 49.09,
-          "pct_positive": 50.91,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "discipline",
-          "n": 1757,
-          "xt_sum": 2.6879167699999993,
-          "mean_xt": 0.0015298331075697207,
-          "pct_negative": 52.65,
-          "pct_positive": 47.35,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "pressure",
-          "n": 25726,
-          "xt_sum": 5.224658919999998,
-          "mean_xt": 0.00020308866205395311,
-          "pct_negative": 53.32,
-          "pct_positive": 46.68,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "contest",
-          "n": 4889,
-          "xt_sum": -11.04826453,
-          "mean_xt": -0.002259820930660667,
-          "pct_negative": 53.12,
-          "pct_positive": 46.88,
+          "n": 8385,
+          "xt_sum": 161.5910682817,
+          "mean_xt": 0.019271445233357186,
+          "pct_negative": 33.76,
+          "pct_positive": 66.24,
           "pct_zero": 0.0
         },
         {
           "category": "intervention",
-          "n": 9462,
-          "xt_sum": -166.97713986,
-          "mean_xt": -0.017647129556119214,
-          "pct_negative": 55.36,
-          "pct_positive": 44.64,
+          "n": 9007,
+          "xt_sum": 38.971808407,
+          "mean_xt": 0.004326835617519707,
+          "pct_negative": 40.59,
+          "pct_positive": 59.41,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "pressure",
+          "n": 20097,
+          "xt_sum": 3.5071843017000006,
+          "mean_xt": 0.00017451282786983135,
+          "pct_negative": 49.48,
+          "pct_positive": 50.52,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "contest",
+          "n": 5138,
+          "xt_sum": -9.836274444,
+          "mean_xt": -0.0019144169801479176,
+          "pct_negative": 47.47,
+          "pct_positive": 52.53,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "discipline",
+          "n": 1896,
+          "xt_sum": -5.686251884,
+          "mean_xt": -0.0029990779978902953,
+          "pct_negative": 46.62,
+          "pct_positive": 53.38,
           "pct_zero": 0.0
         }
       ]
@@ -145,166 +168,166 @@
       "categories": [
         {
           "category": "defensive_third_center",
-          "n": 9507,
-          "xt_sum": 506.77756561999996,
-          "mean_xt": 0.05330572900178815,
-          "pct_negative": 6.77,
-          "pct_positive": 81.63,
-          "pct_zero": 11.59
+          "n": 9448,
+          "xt_sum": 161.0585596483,
+          "mean_xt": 0.017046841622385688,
+          "pct_negative": 29.46,
+          "pct_positive": 54.12,
+          "pct_zero": 16.43
         },
         {
           "category": "defensive_third_left_flank",
-          "n": 3457,
-          "xt_sum": 79.27626663,
-          "mean_xt": 0.022932099111946772,
-          "pct_negative": 3.01,
-          "pct_positive": 87.1,
-          "pct_zero": 9.89
+          "n": 3437,
+          "xt_sum": 35.982466475,
+          "mean_xt": 0.010469149396275823,
+          "pct_negative": 29.97,
+          "pct_positive": 49.93,
+          "pct_zero": 20.1
         },
         {
           "category": "defensive_third_right_flank",
-          "n": 3191,
-          "xt_sum": 69.20816861,
-          "mean_xt": 0.021688551742400503,
-          "pct_negative": 3.38,
-          "pct_positive": 87.5,
-          "pct_zero": 9.12
+          "n": 3169,
+          "xt_sum": 28.849644855999998,
+          "mean_xt": 0.00910370617103187,
+          "pct_negative": 29.66,
+          "pct_positive": 49.16,
+          "pct_zero": 21.17
         },
         {
           "category": "middle_third_center",
-          "n": 9603,
-          "xt_sum": 19.21250465,
-          "mean_xt": 0.0020006773560345727,
-          "pct_negative": 45.64,
-          "pct_positive": 40.11,
-          "pct_zero": 14.25
+          "n": 9588,
+          "xt_sum": 30.5141883163,
+          "mean_xt": 0.0031825394572695034,
+          "pct_negative": 34.95,
+          "pct_positive": 42.61,
+          "pct_zero": 22.44
         },
         {
           "category": "middle_third_right_flank",
-          "n": 5703,
-          "xt_sum": 9.768704099999999,
-          "mean_xt": 0.001712906207259337,
-          "pct_negative": 42.43,
-          "pct_positive": 43.85,
-          "pct_zero": 13.71
+          "n": 5676,
+          "xt_sum": 15.45831153,
+          "mean_xt": 0.0027234516437632133,
+          "pct_negative": 32.73,
+          "pct_positive": 43.13,
+          "pct_zero": 24.14
         },
         {
           "category": "middle_third_left_flank",
-          "n": 5849,
-          "xt_sum": 8.986760579999999,
-          "mean_xt": 0.0015364610326551544,
-          "pct_negative": 43.39,
-          "pct_positive": 42.81,
-          "pct_zero": 13.8
+          "n": 5827,
+          "xt_sum": 14.686313575,
+          "mean_xt": 0.0025203901793375665,
+          "pct_negative": 33.21,
+          "pct_positive": 41.34,
+          "pct_zero": 25.45
         },
         {
           "category": "attacking_third_right_flank",
-          "n": 3777,
-          "xt_sum": -53.16012350999999,
-          "mean_xt": -0.014074695131056391,
-          "pct_negative": 86.79,
-          "pct_positive": 4.92,
-          "pct_zero": 8.29
+          "n": 3751,
+          "xt_sum": 4.4683191120000005,
+          "mean_xt": 0.0011912341007731273,
+          "pct_negative": 38.31,
+          "pct_positive": 40.71,
+          "pct_zero": 20.98
         },
         {
           "category": "attacking_third_left_flank",
-          "n": 3647,
-          "xt_sum": -52.934075809999996,
-          "mean_xt": -0.014514416180422264,
-          "pct_negative": 86.32,
-          "pct_positive": 4.69,
-          "pct_zero": 8.99
+          "n": 3625,
+          "xt_sum": 3.1984012600000007,
+          "mean_xt": 0.0008823175889655174,
+          "pct_negative": 37.74,
+          "pct_positive": 41.13,
+          "pct_zero": 21.13
         },
         {
           "category": "attacking_third_center",
-          "n": 11302,
-          "xt_sum": -660.86710118,
-          "mean_xt": -0.058473464977880016,
-          "pct_negative": 85.96,
-          "pct_positive": 5.16,
-          "pct_zero": 8.88
+          "n": 11240,
+          "xt_sum": -105.6686701102,
+          "mean_xt": -0.009401127234003558,
+          "pct_negative": 44.95,
+          "pct_positive": 39.34,
+          "pct_zero": 15.71
         }
       ],
       "categories_given_nonzero_delta": [
         {
           "category": "defensive_third_center",
-          "n": 8405,
-          "xt_sum": 506.7775656199999,
-          "mean_xt": 0.06029477282807851,
-          "pct_negative": 7.66,
-          "pct_positive": 92.34,
+          "n": 7896,
+          "xt_sum": 161.0585596483,
+          "mean_xt": 0.020397487290818136,
+          "pct_negative": 35.25,
+          "pct_positive": 64.75,
           "pct_zero": 0.0
         },
         {
           "category": "defensive_third_left_flank",
-          "n": 3115,
-          "xt_sum": 79.27626663,
-          "mean_xt": 0.025449844825040126,
-          "pct_negative": 3.34,
-          "pct_positive": 96.66,
+          "n": 2746,
+          "xt_sum": 35.982466475,
+          "mean_xt": 0.013103593035324108,
+          "pct_negative": 37.51,
+          "pct_positive": 62.49,
           "pct_zero": 0.0
         },
         {
           "category": "defensive_third_right_flank",
-          "n": 2900,
-          "xt_sum": 69.20816861,
-          "mean_xt": 0.02386488572758621,
-          "pct_negative": 3.72,
-          "pct_positive": 96.28,
+          "n": 2498,
+          "xt_sum": 28.849644855999998,
+          "mean_xt": 0.01154909722017614,
+          "pct_negative": 37.63,
+          "pct_positive": 62.37,
           "pct_zero": 0.0
         },
         {
           "category": "middle_third_center",
-          "n": 8235,
-          "xt_sum": 19.21250465,
-          "mean_xt": 0.0023330303157255614,
-          "pct_negative": 53.22,
-          "pct_positive": 46.78,
+          "n": 7436,
+          "xt_sum": 30.5141883163,
+          "mean_xt": 0.004103575620804196,
+          "pct_negative": 45.06,
+          "pct_positive": 54.94,
           "pct_zero": 0.0
         },
         {
           "category": "middle_third_right_flank",
-          "n": 4921,
-          "xt_sum": 9.768704099999999,
-          "mean_xt": 0.001985105486689697,
-          "pct_negative": 49.18,
-          "pct_positive": 50.82,
+          "n": 4306,
+          "xt_sum": 15.45831153,
+          "mean_xt": 0.003589946941477009,
+          "pct_negative": 43.15,
+          "pct_positive": 56.85,
           "pct_zero": 0.0
         },
         {
           "category": "middle_third_left_flank",
-          "n": 5042,
-          "xt_sum": 8.986760579999999,
-          "mean_xt": 0.0017823801229670763,
-          "pct_negative": 50.34,
-          "pct_positive": 49.66,
+          "n": 4344,
+          "xt_sum": 14.686313575,
+          "mean_xt": 0.0033808272502302023,
+          "pct_negative": 44.54,
+          "pct_positive": 55.46,
           "pct_zero": 0.0
         },
         {
           "category": "attacking_third_right_flank",
-          "n": 3464,
-          "xt_sum": -53.16012351,
-          "mean_xt": -0.015346455978637413,
-          "pct_negative": 94.63,
-          "pct_positive": 5.37,
+          "n": 2964,
+          "xt_sum": 4.468319112,
+          "mean_xt": 0.0015075300647773278,
+          "pct_negative": 48.48,
+          "pct_positive": 51.52,
           "pct_zero": 0.0
         },
         {
           "category": "attacking_third_left_flank",
-          "n": 3319,
-          "xt_sum": -52.934075809999996,
-          "mean_xt": -0.015948802594154866,
-          "pct_negative": 94.85,
-          "pct_positive": 5.15,
+          "n": 2859,
+          "xt_sum": 3.1984012600000002,
+          "mean_xt": 0.0011187132773697098,
+          "pct_negative": 47.85,
+          "pct_positive": 52.15,
           "pct_zero": 0.0
         },
         {
           "category": "attacking_third_center",
-          "n": 10298,
-          "xt_sum": -660.86710118,
-          "mean_xt": -0.0641743155156341,
-          "pct_negative": 94.34,
-          "pct_positive": 5.66,
+          "n": 9474,
+          "xt_sum": -105.6686701102,
+          "mean_xt": -0.011153543393519105,
+          "pct_negative": 53.32,
+          "pct_positive": 46.68,
           "pct_zero": 0.0
         }
       ]
@@ -314,149 +337,149 @@
       "reason": null,
       "categories": [
         {
+          "category": "Clearance",
+          "n": 4096,
+          "xt_sum": 101.1964958,
+          "mean_xt": 0.024706175732421874,
+          "pct_negative": 38.84,
+          "pct_positive": 54.17,
+          "pct_zero": 6.98
+        },
+        {
           "category": "Ball Recovery",
-          "n": 8922,
-          "xt_sum": 96.38149839,
-          "mean_xt": 0.010802678591123067,
-          "pct_negative": 43.28,
-          "pct_positive": 44.88,
-          "pct_zero": 11.85
+          "n": 8892,
+          "xt_sum": 161.5910682817,
+          "mean_xt": 0.018172634759525415,
+          "pct_negative": 31.84,
+          "pct_positive": 62.46,
+          "pct_zero": 5.7
         },
         {
           "category": "50/50",
-          "n": 478,
-          "xt_sum": 1.35194226,
-          "mean_xt": 0.002828331087866109,
-          "pct_negative": 41.42,
-          "pct_positive": 44.35,
-          "pct_zero": 14.23
-        },
-        {
-          "category": "Foul Committed",
-          "n": 2642,
-          "xt_sum": 2.68791677,
-          "mean_xt": 0.0010173795495836489,
+          "n": 477,
+          "xt_sum": 2.14236205,
+          "mean_xt": 0.004491325052410901,
           "pct_negative": 35.01,
-          "pct_positive": 31.49,
-          "pct_zero": 33.5
-        },
-        {
-          "category": "Pressure",
-          "n": 27464,
-          "xt_sum": 5.224658920000001,
-          "mean_xt": 0.00019023663413923688,
-          "pct_negative": 49.95,
-          "pct_positive": 43.73,
-          "pct_zero": 6.33
-        },
-        {
-          "category": "Duel",
-          "n": 6428,
-          "xt_sum": -12.400206790000002,
-          "mean_xt": -0.0019290925311138771,
-          "pct_negative": 37.32,
-          "pct_positive": 32.36,
-          "pct_zero": 30.32
+          "pct_positive": 45.7,
+          "pct_zero": 19.29
         },
         {
           "category": "Interception",
-          "n": 2029,
-          "xt_sum": -6.153290059999999,
-          "mean_xt": -0.0030326712962050265,
-          "pct_negative": 49.33,
-          "pct_positive": 40.12,
-          "pct_zero": 10.55
+          "n": 2004,
+          "xt_sum": 8.763101370000001,
+          "mean_xt": 0.0043728050748503,
+          "pct_negative": 31.34,
+          "pct_positive": 59.53,
+          "pct_zero": 9.13
+        },
+        {
+          "category": "Pressure",
+          "n": 27446,
+          "xt_sum": 3.5071843017,
+          "mean_xt": 0.00012778489767907892,
+          "pct_negative": 36.23,
+          "pct_positive": 36.99,
+          "pct_zero": 26.78
+        },
+        {
+          "category": "Duel",
+          "n": 6380,
+          "xt_sum": -11.978636494,
+          "mean_xt": -0.0018775292310344827,
+          "pct_negative": 35.61,
+          "pct_positive": 38.89,
+          "pct_zero": 25.5
+        },
+        {
+          "category": "Foul Committed",
+          "n": 2631,
+          "xt_sum": -5.686251884000001,
+          "mean_xt": -0.0021612511911820605,
+          "pct_negative": 33.6,
+          "pct_positive": 38.46,
+          "pct_zero": 27.94
         },
         {
           "category": "Block",
-          "n": 3889,
-          "xt_sum": -24.9197667,
-          "mean_xt": -0.006407756929802006,
-          "pct_negative": 51.76,
-          "pct_positive": 42.4,
-          "pct_zero": 5.84
-        },
-        {
-          "category": "Clearance",
-          "n": 4184,
-          "xt_sum": -135.90408309999998,
-          "mean_xt": -0.03248185542543021,
-          "pct_negative": 53.15,
-          "pct_positive": 42.09,
-          "pct_zero": 4.76
+          "n": 3835,
+          "xt_sum": -70.987788763,
+          "mean_xt": -0.01851050554445893,
+          "pct_negative": 37.47,
+          "pct_positive": 50.56,
+          "pct_zero": 11.97
         }
       ],
       "categories_given_nonzero_delta": [
         {
+          "category": "Clearance",
+          "n": 3810,
+          "xt_sum": 101.1964958,
+          "mean_xt": 0.026560760052493436,
+          "pct_negative": 41.76,
+          "pct_positive": 58.24,
+          "pct_zero": 0.0
+        },
+        {
           "category": "Ball Recovery",
-          "n": 7865,
-          "xt_sum": 96.38149838999999,
-          "mean_xt": 0.01225448167705022,
-          "pct_negative": 49.09,
-          "pct_positive": 50.91,
+          "n": 8385,
+          "xt_sum": 161.5910682817,
+          "mean_xt": 0.019271445233357186,
+          "pct_negative": 33.76,
+          "pct_positive": 66.24,
           "pct_zero": 0.0
         },
         {
           "category": "50/50",
-          "n": 410,
-          "xt_sum": 1.35194226,
-          "mean_xt": 0.0032974201463414634,
-          "pct_negative": 48.29,
-          "pct_positive": 51.71,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Foul Committed",
-          "n": 1757,
-          "xt_sum": 2.6879167699999993,
-          "mean_xt": 0.0015298331075697207,
-          "pct_negative": 52.65,
-          "pct_positive": 47.35,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Pressure",
-          "n": 25726,
-          "xt_sum": 5.224658919999998,
-          "mean_xt": 0.00020308866205395311,
-          "pct_negative": 53.32,
-          "pct_positive": 46.68,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Duel",
-          "n": 4479,
-          "xt_sum": -12.40020679,
-          "mean_xt": -0.0027685212748381335,
-          "pct_negative": 53.56,
-          "pct_positive": 46.44,
+          "n": 385,
+          "xt_sum": 2.14236205,
+          "mean_xt": 0.005564576753246753,
+          "pct_negative": 43.38,
+          "pct_positive": 56.62,
           "pct_zero": 0.0
         },
         {
           "category": "Interception",
-          "n": 1815,
-          "xt_sum": -6.15329006,
-          "mean_xt": -0.0033902424573002752,
-          "pct_negative": 55.15,
-          "pct_positive": 44.85,
+          "n": 1821,
+          "xt_sum": 8.763101370000001,
+          "mean_xt": 0.004812246771004943,
+          "pct_negative": 34.49,
+          "pct_positive": 65.51,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Pressure",
+          "n": 20097,
+          "xt_sum": 3.5071843017000006,
+          "mean_xt": 0.00017451282786983135,
+          "pct_negative": 49.48,
+          "pct_positive": 50.52,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Duel",
+          "n": 4753,
+          "xt_sum": -11.978636494,
+          "mean_xt": -0.002520226487271197,
+          "pct_negative": 47.8,
+          "pct_positive": 52.2,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Foul Committed",
+          "n": 1896,
+          "xt_sum": -5.686251884,
+          "mean_xt": -0.0029990779978902953,
+          "pct_negative": 46.62,
+          "pct_positive": 53.38,
           "pct_zero": 0.0
         },
         {
           "category": "Block",
-          "n": 3662,
-          "xt_sum": -24.919766699999997,
-          "mean_xt": -0.006804960868377934,
-          "pct_negative": 54.97,
-          "pct_positive": 45.03,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Clearance",
-          "n": 3985,
-          "xt_sum": -135.9040831,
-          "mean_xt": -0.0341039104391468,
-          "pct_negative": 55.81,
-          "pct_positive": 44.19,
+          "n": 3376,
+          "xt_sum": -70.987788763,
+          "mean_xt": -0.0210271886146327,
+          "pct_negative": 42.57,
+          "pct_positive": 57.43,
           "pct_zero": 0.0
         }
       ]
@@ -467,76 +490,76 @@
       "categories": [
         {
           "category": "3",
-          "n": 703,
-          "xt_sum": 1.58508389,
-          "mean_xt": 0.0022547423755334283,
-          "pct_negative": 41.54,
-          "pct_positive": 45.95,
-          "pct_zero": 12.52
+          "n": 698,
+          "xt_sum": 3.202878404,
+          "mean_xt": 0.0045886510085959885,
+          "pct_negative": 33.09,
+          "pct_positive": 48.42,
+          "pct_zero": 18.48
         },
         {
           "category": "2",
-          "n": 27888,
-          "xt_sum": -31.570347739999995,
-          "mean_xt": -0.0011320405816121627,
-          "pct_negative": 47.47,
-          "pct_positive": 41.58,
-          "pct_zero": 10.95
+          "n": 27686,
+          "xt_sum": 96.40064395510001,
+          "mean_xt": 0.003481927470746948,
+          "pct_negative": 36.07,
+          "pct_positive": 44.17,
+          "pct_zero": 19.77
         },
         {
           "category": "1",
-          "n": 26662,
-          "xt_sum": -40.965653950000004,
-          "mean_xt": -0.0015364809072837748,
-          "pct_negative": 46.6,
-          "pct_positive": 41.76,
-          "pct_zero": 11.64
+          "n": 26601,
+          "xt_sum": 86.8240119343,
+          "mean_xt": 0.0032639378946017067,
+          "pct_negative": 34.79,
+          "pct_positive": 44.53,
+          "pct_zero": 20.68
         },
         {
           "category": "4",
-          "n": 783,
-          "xt_sum": -2.78041251,
-          "mean_xt": -0.0035509738314176247,
-          "pct_negative": 48.91,
-          "pct_positive": 39.46,
-          "pct_zero": 11.62
+          "n": 776,
+          "xt_sum": 2.120000369,
+          "mean_xt": 0.002731959238402062,
+          "pct_negative": 36.47,
+          "pct_positive": 46.01,
+          "pct_zero": 17.53
         }
       ],
       "categories_given_nonzero_delta": [
         {
           "category": "3",
-          "n": 615,
-          "xt_sum": 1.5850838899999997,
-          "mean_xt": 0.0025773721788617883,
-          "pct_negative": 47.48,
-          "pct_positive": 52.52,
+          "n": 569,
+          "xt_sum": 3.202878404,
+          "mean_xt": 0.005628960288224956,
+          "pct_negative": 40.6,
+          "pct_positive": 59.4,
           "pct_zero": 0.0
         },
         {
           "category": "2",
-          "n": 24834,
-          "xt_sum": -31.570347739999995,
-          "mean_xt": -0.0012712550430860916,
-          "pct_negative": 53.31,
-          "pct_positive": 46.69,
+          "n": 22213,
+          "xt_sum": 96.4006439551,
+          "mean_xt": 0.004339830007432584,
+          "pct_negative": 44.95,
+          "pct_positive": 55.05,
           "pct_zero": 0.0
         },
         {
           "category": "1",
-          "n": 23558,
-          "xt_sum": -40.96565395,
-          "mean_xt": -0.0017389274959673994,
-          "pct_negative": 52.74,
-          "pct_positive": 47.26,
+          "n": 21101,
+          "xt_sum": 86.8240119343,
+          "mean_xt": 0.004114687073328278,
+          "pct_negative": 43.86,
+          "pct_positive": 56.14,
           "pct_zero": 0.0
         },
         {
           "category": "4",
-          "n": 692,
-          "xt_sum": -2.7804125099999997,
-          "mean_xt": -0.00401793715317919,
-          "pct_negative": 55.35,
-          "pct_positive": 44.65,
+          "n": 640,
+          "xt_sum": 2.120000369,
+          "mean_xt": 0.0033125005765625,
+          "pct_negative": 44.22,
+          "pct_positive": 55.78,
           "pct_zero": 0.0
         }
       ]
@@ -547,130 +570,130 @@
       "categories": [
         {
           "category": "high_press_proxy",
-          "n": 9092,
-          "xt_sum": 488.39321398999994,
-          "mean_xt": 0.05371680752199735,
-          "pct_negative": 5.82,
-          "pct_positive": 84.69,
-          "pct_zero": 9.49
+          "n": 9029,
+          "xt_sum": 182.838538376,
+          "mean_xt": 0.02025014269310001,
+          "pct_negative": 29.08,
+          "pct_positive": 56.67,
+          "pct_zero": 14.24
         },
         {
           "category": "settled_mid_block_proxy",
-          "n": 9864,
-          "xt_sum": 66.24585175,
-          "mean_xt": 0.00671592171025953,
-          "pct_negative": 33.13,
-          "pct_positive": 54.77,
-          "pct_zero": 12.09
+          "n": 9839,
+          "xt_sum": 59.261993894,
+          "mean_xt": 0.006023172466104279,
+          "pct_negative": 31.86,
+          "pct_positive": 48.05,
+          "pct_zero": 20.08
         },
         {
           "category": "wide_defending_proxy",
-          "n": 5089,
-          "xt_sum": 25.065459410000003,
-          "mean_xt": 0.004925419416388289,
-          "pct_negative": 30.34,
-          "pct_positive": 58.26,
-          "pct_zero": 11.4
-        },
-        {
-          "category": "counterpress_after_loss",
-          "n": 9812,
-          "xt_sum": 12.629042000000002,
-          "mean_xt": 0.0012871017121891563,
-          "pct_negative": 41.92,
-          "pct_positive": 38.66,
-          "pct_zero": 19.43
-        },
-        {
-          "category": "transition_defence",
-          "n": 5695,
-          "xt_sum": 5.481492289999999,
-          "mean_xt": 0.0009625096207199296,
-          "pct_negative": 44.64,
-          "pct_positive": 45.32,
-          "pct_zero": 10.04
+          "n": 5064,
+          "xt_sum": 19.874672656999998,
+          "mean_xt": 0.003924698391982622,
+          "pct_negative": 30.15,
+          "pct_positive": 44.39,
+          "pct_zero": 25.45
         },
         {
           "category": "settled_low_block_proxy",
-          "n": 7345,
-          "xt_sum": -59.76533267,
-          "mean_xt": -0.008136873066031313,
-          "pct_negative": 86.49,
-          "pct_positive": 6.25,
-          "pct_zero": 7.26
+          "n": 7326,
+          "xt_sum": 10.718801878099999,
+          "mean_xt": 0.0014631179194785693,
+          "pct_negative": 38.67,
+          "pct_positive": 40.91,
+          "pct_zero": 20.42
+        },
+        {
+          "category": "counterpress_after_loss",
+          "n": 9781,
+          "xt_sum": 3.920938698299999,
+          "mean_xt": 0.0004008729882731826,
+          "pct_negative": 35.24,
+          "pct_positive": 36.12,
+          "pct_zero": 28.64
+        },
+        {
+          "category": "transition_defence",
+          "n": 5661,
+          "xt_sum": -0.9210001469999998,
+          "mean_xt": -0.00016269212983571803,
+          "pct_negative": 36.67,
+          "pct_positive": 42.36,
+          "pct_zero": 20.97
         },
         {
           "category": "box_defence",
-          "n": 9139,
-          "xt_sum": -611.78105708,
-          "mean_xt": -0.06694179418754787,
-          "pct_negative": 87.42,
-          "pct_positive": 5.03,
-          "pct_zero": 7.55
+          "n": 9061,
+          "xt_sum": -87.146410694,
+          "mean_xt": -0.009617747565831586,
+          "pct_negative": 45.36,
+          "pct_positive": 41.36,
+          "pct_zero": 13.28
         }
       ],
       "categories_given_nonzero_delta": [
         {
           "category": "high_press_proxy",
-          "n": 8229,
-          "xt_sum": 488.39321398999994,
-          "mean_xt": 0.059350250819054554,
-          "pct_negative": 6.43,
-          "pct_positive": 93.57,
+          "n": 7743,
+          "xt_sum": 182.83853837599997,
+          "mean_xt": 0.02361339769804985,
+          "pct_negative": 33.91,
+          "pct_positive": 66.09,
           "pct_zero": 0.0
         },
         {
           "category": "settled_mid_block_proxy",
-          "n": 8671,
-          "xt_sum": 66.24585174999999,
-          "mean_xt": 0.0076399321589205385,
-          "pct_negative": 37.69,
-          "pct_positive": 62.31,
+          "n": 7863,
+          "xt_sum": 59.261993894,
+          "mean_xt": 0.007536817231845351,
+          "pct_negative": 39.87,
+          "pct_positive": 60.13,
           "pct_zero": 0.0
         },
         {
           "category": "wide_defending_proxy",
-          "n": 4509,
-          "xt_sum": 25.06545941,
-          "mean_xt": 0.0055589841228653805,
-          "pct_negative": 34.24,
-          "pct_positive": 65.76,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "counterpress_after_loss",
-          "n": 7906,
-          "xt_sum": 12.629041999999998,
-          "mean_xt": 0.0015973996964330885,
-          "pct_negative": 52.02,
-          "pct_positive": 47.98,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "transition_defence",
-          "n": 5123,
-          "xt_sum": 5.48149229,
-          "mean_xt": 0.001069977023228577,
-          "pct_negative": 49.62,
-          "pct_positive": 50.38,
+          "n": 3775,
+          "xt_sum": 19.874672657,
+          "mean_xt": 0.005264813948874173,
+          "pct_negative": 40.45,
+          "pct_positive": 59.55,
           "pct_zero": 0.0
         },
         {
           "category": "settled_low_block_proxy",
-          "n": 6812,
-          "xt_sum": -59.76533266999999,
-          "mean_xt": -0.008773536798297121,
-          "pct_negative": 93.26,
-          "pct_positive": 6.74,
+          "n": 5830,
+          "xt_sum": 10.718801878099999,
+          "mean_xt": 0.0018385594988164665,
+          "pct_negative": 48.59,
+          "pct_positive": 51.41,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "counterpress_after_loss",
+          "n": 6980,
+          "xt_sum": 3.920938698300001,
+          "mean_xt": 0.0005617390685243555,
+          "pct_negative": 49.38,
+          "pct_positive": 50.62,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "transition_defence",
+          "n": 4474,
+          "xt_sum": -0.9210001470000004,
+          "mean_xt": -0.00020585609007599473,
+          "pct_negative": 46.4,
+          "pct_positive": 53.6,
           "pct_zero": 0.0
         },
         {
           "category": "box_defence",
-          "n": 8449,
-          "xt_sum": -611.78105708,
-          "mean_xt": -0.07240869417445851,
-          "pct_negative": 94.56,
-          "pct_positive": 5.44,
+          "n": 7858,
+          "xt_sum": -87.146410694,
+          "mean_xt": -0.01109015152634258,
+          "pct_negative": 52.3,
+          "pct_positive": 47.7,
           "pct_zero": 0.0
         }
       ]
@@ -681,148 +704,148 @@
       "categories": [
         {
           "category": "box_defence",
-          "n": 6885,
-          "xt_sum": 493.21018243,
-          "mean_xt": 0.07163546585766158,
-          "pct_negative": 5.39,
-          "pct_positive": 86.36,
-          "pct_zero": 8.25
-        },
-        {
-          "category": "settled_low_block_proxy",
-          "n": 5759,
-          "xt_sum": 54.74266617999999,
-          "mean_xt": 0.009505585375933321,
-          "pct_negative": 7.59,
-          "pct_positive": 85.14,
-          "pct_zero": 7.28
-        },
-        {
-          "category": "counterpress_after_loss",
-          "n": 9914,
-          "xt_sum": 11.62812546,
-          "mean_xt": 0.0011728994815412548,
-          "pct_negative": 45.66,
-          "pct_positive": 43.37,
-          "pct_zero": 10.96
-        },
-        {
-          "category": "transition_defence",
-          "n": 5201,
-          "xt_sum": 0.6448767800000004,
-          "mean_xt": 0.00012399092097673531,
-          "pct_negative": 45.3,
-          "pct_positive": 44.28,
-          "pct_zero": 10.42
+          "n": 6828,
+          "xt_sum": 401.2911014872,
+          "mean_xt": 0.05877139740585823,
+          "pct_negative": 12.29,
+          "pct_positive": 73.14,
+          "pct_zero": 14.57
         },
         {
           "category": "(missing)",
-          "n": 4521,
-          "xt_sum": -13.80725581,
-          "mean_xt": -0.0030540269431541694,
-          "pct_negative": 34.4,
-          "pct_positive": 29.22,
-          "pct_zero": 36.39
+          "n": 4517,
+          "xt_sum": 83.741888747,
+          "mean_xt": 0.018539271363072835,
+          "pct_negative": 14.39,
+          "pct_positive": 71.09,
+          "pct_zero": 14.52
         },
         {
-          "category": "settled_mid_block_proxy",
-          "n": 8877,
-          "xt_sum": -43.15017544,
-          "mean_xt": -0.004860896185648304,
-          "pct_negative": 59.68,
-          "pct_positive": 29.92,
-          "pct_zero": 10.4
+          "category": "settled_low_block_proxy",
+          "n": 5734,
+          "xt_sum": 21.088726139499997,
+          "mean_xt": 0.003677838531478897,
+          "pct_negative": 19.86,
+          "pct_positive": 59.75,
+          "pct_zero": 20.39
+        },
+        {
+          "category": "counterpress_after_loss",
+          "n": 9875,
+          "xt_sum": 2.3062125133,
+          "mean_xt": 0.0002335405076759494,
+          "pct_negative": 36.6,
+          "pct_positive": 38.79,
+          "pct_zero": 24.61
+        },
+        {
+          "category": "transition_defence",
+          "n": 5174,
+          "xt_sum": 0.5025649900000007,
+          "mean_xt": 9.713277734827999e-05,
+          "pct_negative": 36.01,
+          "pct_positive": 42.42,
+          "pct_zero": 21.57
         },
         {
           "category": "wide_defending_proxy",
-          "n": 5180,
-          "xt_sum": -26.6310145,
-          "mean_xt": -0.005141122490347491,
-          "pct_negative": 63.2,
-          "pct_positive": 27.68,
-          "pct_zero": 9.11
+          "n": 5151,
+          "xt_sum": -7.136209729,
+          "mean_xt": -0.0013854027817899438,
+          "pct_negative": 41.47,
+          "pct_positive": 31.86,
+          "pct_zero": 26.67
+        },
+        {
+          "category": "settled_mid_block_proxy",
+          "n": 8861,
+          "xt_sum": -18.8278320797,
+          "mean_xt": -0.0021247976616296125,
+          "pct_negative": 39.17,
+          "pct_positive": 38.17,
+          "pct_zero": 22.66
         },
         {
           "category": "high_press_proxy",
-          "n": 9699,
-          "xt_sum": -550.36873541,
-          "mean_xt": -0.05674489487679142,
-          "pct_negative": 87.84,
-          "pct_positive": 5.13,
-          "pct_zero": 7.02
+          "n": 9621,
+          "xt_sum": -294.41891740589995,
+          "mean_xt": -0.030601696019738066,
+          "pct_negative": 62.8,
+          "pct_positive": 21.71,
+          "pct_zero": 15.49
         }
       ],
       "categories_given_nonzero_delta": [
         {
           "category": "box_defence",
-          "n": 6317,
-          "xt_sum": 493.21018243,
-          "mean_xt": 0.07807664752730727,
-          "pct_negative": 5.87,
-          "pct_positive": 94.13,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "settled_low_block_proxy",
-          "n": 5340,
-          "xt_sum": 54.74266617999999,
-          "mean_xt": 0.010251435614232208,
-          "pct_negative": 8.18,
-          "pct_positive": 91.82,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "counterpress_after_loss",
-          "n": 8827,
-          "xt_sum": 11.62812546,
-          "mean_xt": 0.0013173360666137986,
-          "pct_negative": 51.29,
-          "pct_positive": 48.71,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "transition_defence",
-          "n": 4659,
-          "xt_sum": 0.6448767799999993,
-          "mean_xt": 0.00013841527795664289,
-          "pct_negative": 50.57,
-          "pct_positive": 49.43,
+          "n": 5833,
+          "xt_sum": 401.29110148719997,
+          "mean_xt": 0.06879669149446253,
+          "pct_negative": 14.38,
+          "pct_positive": 85.62,
           "pct_zero": 0.0
         },
         {
           "category": "(missing)",
-          "n": 2876,
-          "xt_sum": -13.807255809999997,
-          "mean_xt": -0.004800853897774686,
-          "pct_negative": 54.07,
-          "pct_positive": 45.93,
+          "n": 3861,
+          "xt_sum": 83.741888747,
+          "mean_xt": 0.021689170874643875,
+          "pct_negative": 16.84,
+          "pct_positive": 83.16,
           "pct_zero": 0.0
         },
         {
-          "category": "settled_mid_block_proxy",
-          "n": 7954,
-          "xt_sum": -43.15017544,
-          "mean_xt": -0.005424965481518732,
-          "pct_negative": 66.61,
-          "pct_positive": 33.39,
+          "category": "settled_low_block_proxy",
+          "n": 4565,
+          "xt_sum": 21.088726139499997,
+          "mean_xt": 0.0046196552331872935,
+          "pct_negative": 24.95,
+          "pct_positive": 75.05,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "counterpress_after_loss",
+          "n": 7445,
+          "xt_sum": 2.3062125133,
+          "mean_xt": 0.0003097666236803224,
+          "pct_negative": 48.54,
+          "pct_positive": 51.46,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "transition_defence",
+          "n": 4058,
+          "xt_sum": 0.5025649900000013,
+          "mean_xt": 0.00012384548792508657,
+          "pct_negative": 45.91,
+          "pct_positive": 54.09,
           "pct_zero": 0.0
         },
         {
           "category": "wide_defending_proxy",
-          "n": 4708,
-          "xt_sum": -26.6310145,
-          "mean_xt": -0.005656545135938828,
-          "pct_negative": 69.54,
-          "pct_positive": 30.46,
+          "n": 3777,
+          "xt_sum": -7.136209729,
+          "mean_xt": -0.0018893856841408524,
+          "pct_negative": 56.55,
+          "pct_positive": 43.45,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "settled_mid_block_proxy",
+          "n": 6853,
+          "xt_sum": -18.827832079699995,
+          "mean_xt": -0.00274738539029622,
+          "pct_negative": 50.65,
+          "pct_positive": 49.35,
           "pct_zero": 0.0
         },
         {
           "category": "high_press_proxy",
-          "n": 9018,
-          "xt_sum": -550.36873541,
-          "mean_xt": -0.06103002166888445,
-          "pct_negative": 94.48,
-          "pct_positive": 5.52,
+          "n": 8131,
+          "xt_sum": -294.4189174059,
+          "mean_xt": -0.036209435174750955,
+          "pct_negative": 74.31,
+          "pct_positive": 25.69,
           "pct_zero": 0.0
         }
       ]
@@ -832,167 +855,167 @@
       "reason": null,
       "categories": [
         {
-          "category": "From Counter",
-          "n": 752,
-          "xt_sum": 1.5763942000000002,
-          "mean_xt": 0.0020962688829787236,
-          "pct_negative": 42.82,
-          "pct_positive": 37.23,
-          "pct_zero": 19.95
-        },
-        {
-          "category": "From Goal Kick",
-          "n": 4411,
-          "xt_sum": 5.87940864,
-          "mean_xt": 0.001332896993878939,
-          "pct_negative": 45.61,
-          "pct_positive": 43.69,
-          "pct_zero": 10.7
+          "category": "From Corner",
+          "n": 3063,
+          "xt_sum": 39.1157799104,
+          "mean_xt": 0.012770414596931113,
+          "pct_negative": 42.9,
+          "pct_positive": 45.64,
+          "pct_zero": 11.46
         },
         {
           "category": "Regular Play",
-          "n": 24247,
-          "xt_sum": -12.34497091,
-          "mean_xt": -0.0005091339510042479,
-          "pct_negative": 45.79,
-          "pct_positive": 40.4,
-          "pct_zero": 13.81
+          "n": 24125,
+          "xt_sum": 97.763811834,
+          "mean_xt": 0.004052385982756476,
+          "pct_negative": 32.6,
+          "pct_positive": 46.5,
+          "pct_zero": 20.91
         },
         {
-          "category": "From Kick Off",
-          "n": 1435,
-          "xt_sum": -0.8694584600000002,
-          "mean_xt": -0.0006058943972125436,
-          "pct_negative": 45.92,
-          "pct_positive": 44.25,
-          "pct_zero": 9.83
+          "category": "From Goal Kick",
+          "n": 4392,
+          "xt_sum": 13.559989384000001,
+          "mean_xt": 0.003087429276867031,
+          "pct_negative": 36.59,
+          "pct_positive": 43.44,
+          "pct_zero": 19.97
         },
         {
           "category": "From Throw In",
-          "n": 12338,
-          "xt_sum": -21.54470123,
-          "mean_xt": -0.0017462069403468958,
-          "pct_negative": 48.84,
-          "pct_positive": 42.58,
-          "pct_zero": 8.58
+          "n": 12287,
+          "xt_sum": 23.073378294,
+          "mean_xt": 0.0018778691539024987,
+          "pct_negative": 36.86,
+          "pct_positive": 41.78,
+          "pct_zero": 21.36
         },
         {
           "category": "From Free Kick",
-          "n": 8089,
-          "xt_sum": -17.569211770000003,
-          "mean_xt": -0.0021719881035974784,
-          "pct_negative": 48.04,
-          "pct_positive": 43.11,
-          "pct_zero": 8.85
+          "n": 8051,
+          "xt_sum": 12.307527209699998,
+          "mean_xt": 0.0015286954676065083,
+          "pct_negative": 38.13,
+          "pct_positive": 43.04,
+          "pct_zero": 18.83
         },
         {
           "category": "From Keeper",
+          "n": 1416,
+          "xt_sum": 2.024781647,
+          "mean_xt": 0.0014299305416666669,
+          "pct_negative": 36.72,
+          "pct_positive": 41.38,
+          "pct_zero": 21.89
+        },
+        {
+          "category": "From Counter",
+          "n": 752,
+          "xt_sum": 1.0550364952999995,
+          "mean_xt": 0.0014029740628989356,
+          "pct_negative": 34.57,
+          "pct_positive": 47.61,
+          "pct_zero": 17.82
+        },
+        {
+          "category": "From Kick Off",
           "n": 1428,
-          "xt_sum": -3.86342097,
-          "mean_xt": -0.002705476869747899,
-          "pct_negative": 47.69,
-          "pct_positive": 44.12,
-          "pct_zero": 8.19
+          "xt_sum": 0.9051842679999997,
+          "mean_xt": 0.0006338825406162463,
+          "pct_negative": 34.31,
+          "pct_positive": 42.72,
+          "pct_zero": 22.97
         },
         {
           "category": "Other",
-          "n": 248,
-          "xt_sum": -0.7557527,
-          "mean_xt": -0.003047389919354839,
-          "pct_negative": 45.56,
-          "pct_positive": 39.92,
-          "pct_zero": 14.52
-        },
-        {
-          "category": "From Corner",
-          "n": 3088,
-          "xt_sum": -24.239617109999998,
-          "mean_xt": -0.00784961693976684,
-          "pct_negative": 49.74,
-          "pct_positive": 40.58,
-          "pct_zero": 9.68
+          "n": 247,
+          "xt_sum": -1.2579543800000001,
+          "mean_xt": -0.005092932712550608,
+          "pct_negative": 40.49,
+          "pct_positive": 37.65,
+          "pct_zero": 21.86
         }
       ],
       "categories_given_nonzero_delta": [
         {
-          "category": "From Counter",
-          "n": 602,
-          "xt_sum": 1.5763942000000002,
-          "mean_xt": 0.002618595016611296,
-          "pct_negative": 53.49,
-          "pct_positive": 46.51,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "From Goal Kick",
-          "n": 3939,
-          "xt_sum": 5.87940864,
-          "mean_xt": 0.0014926145316070069,
-          "pct_negative": 51.08,
-          "pct_positive": 48.92,
+          "category": "From Corner",
+          "n": 2712,
+          "xt_sum": 39.11577991039999,
+          "mean_xt": 0.014423222680825956,
+          "pct_negative": 48.45,
+          "pct_positive": 51.55,
           "pct_zero": 0.0
         },
         {
           "category": "Regular Play",
-          "n": 20899,
-          "xt_sum": -12.34497091,
-          "mean_xt": -0.0005906967275946217,
-          "pct_negative": 53.13,
-          "pct_positive": 46.87,
+          "n": 19081,
+          "xt_sum": 97.763811834,
+          "mean_xt": 0.005123620975525391,
+          "pct_negative": 41.21,
+          "pct_positive": 58.79,
           "pct_zero": 0.0
         },
         {
-          "category": "From Kick Off",
-          "n": 1294,
-          "xt_sum": -0.8694584600000004,
-          "mean_xt": -0.0006719153477588875,
-          "pct_negative": 50.93,
-          "pct_positive": 49.07,
+          "category": "From Goal Kick",
+          "n": 3515,
+          "xt_sum": 13.559989384000001,
+          "mean_xt": 0.0038577494691322905,
+          "pct_negative": 45.72,
+          "pct_positive": 54.28,
           "pct_zero": 0.0
         },
         {
           "category": "From Throw In",
-          "n": 11280,
-          "xt_sum": -21.54470123,
-          "mean_xt": -0.0019099912437943263,
-          "pct_negative": 53.42,
-          "pct_positive": 46.58,
+          "n": 9663,
+          "xt_sum": 23.073378294,
+          "mean_xt": 0.002387806922694815,
+          "pct_negative": 46.87,
+          "pct_positive": 53.13,
           "pct_zero": 0.0
         },
         {
           "category": "From Free Kick",
-          "n": 7373,
-          "xt_sum": -17.56921177,
-          "mean_xt": -0.002382912216194222,
-          "pct_negative": 52.71,
-          "pct_positive": 47.29,
+          "n": 6535,
+          "xt_sum": 12.307527209700002,
+          "mean_xt": 0.0018833247451721501,
+          "pct_negative": 46.98,
+          "pct_positive": 53.02,
           "pct_zero": 0.0
         },
         {
           "category": "From Keeper",
-          "n": 1311,
-          "xt_sum": -3.86342097,
-          "mean_xt": -0.0029469267505720822,
-          "pct_negative": 51.95,
-          "pct_positive": 48.05,
+          "n": 1106,
+          "xt_sum": 2.0247816469999997,
+          "mean_xt": 0.001830724816455696,
+          "pct_negative": 47.02,
+          "pct_positive": 52.98,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "From Counter",
+          "n": 618,
+          "xt_sum": 1.0550364953000004,
+          "mean_xt": 0.0017071787949838194,
+          "pct_negative": 42.07,
+          "pct_positive": 57.93,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "From Kick Off",
+          "n": 1100,
+          "xt_sum": 0.9051842679999997,
+          "mean_xt": 0.0008228947890909088,
+          "pct_negative": 44.55,
+          "pct_positive": 55.45,
           "pct_zero": 0.0
         },
         {
           "category": "Other",
-          "n": 212,
-          "xt_sum": -0.7557527,
-          "mean_xt": -0.0035648712264150944,
-          "pct_negative": 53.3,
-          "pct_positive": 46.7,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "From Corner",
-          "n": 2789,
-          "xt_sum": -24.239617109999994,
-          "mean_xt": -0.008691149913947649,
-          "pct_negative": 55.07,
-          "pct_positive": 44.93,
+          "n": 193,
+          "xt_sum": -1.25795438,
+          "mean_xt": -0.006517898341968912,
+          "pct_negative": 51.81,
+          "pct_positive": 48.19,
           "pct_zero": 0.0
         }
       ]
@@ -1002,419 +1025,419 @@
       "reason": null,
       "categories": [
         {
+          "category": "Goalkeeper",
+          "n": 855,
+          "xt_sum": 8.109272395000001,
+          "mean_xt": 0.009484529116959066,
+          "pct_negative": 21.4,
+          "pct_positive": 75.79,
+          "pct_zero": 2.81
+        },
+        {
           "category": "Left Wing",
-          "n": 2916,
-          "xt_sum": 23.09207364,
-          "mean_xt": 0.007919092469135802,
-          "pct_negative": 42.32,
-          "pct_positive": 45.34,
-          "pct_zero": 12.35
-        },
-        {
-          "category": "Right Attacking Midfield",
-          "n": 609,
-          "xt_sum": 3.86134341,
-          "mean_xt": 0.006340465369458128,
-          "pct_negative": 41.05,
-          "pct_positive": 47.95,
-          "pct_zero": 11.0
-        },
-        {
-          "category": "Center Attacking Midfield",
-          "n": 2350,
-          "xt_sum": 14.386287589999998,
-          "mean_xt": 0.006121824506382978,
-          "pct_negative": 46.04,
-          "pct_positive": 42.51,
-          "pct_zero": 11.45
-        },
-        {
-          "category": "Left Attacking Midfield",
-          "n": 586,
-          "xt_sum": 3.33337765,
-          "mean_xt": 0.00568835776450512,
-          "pct_negative": 43.52,
-          "pct_positive": 45.9,
-          "pct_zero": 10.58
-        },
-        {
-          "category": "Right Wing",
-          "n": 3190,
-          "xt_sum": 17.20279047,
-          "mean_xt": 0.005392724285266458,
-          "pct_negative": 43.29,
-          "pct_positive": 45.05,
-          "pct_zero": 11.66
-        },
-        {
-          "category": "Center Forward",
-          "n": 4424,
-          "xt_sum": 10.2191373,
-          "mean_xt": 0.0023099315777576853,
-          "pct_negative": 43.69,
-          "pct_positive": 41.59,
-          "pct_zero": 14.72
-        },
-        {
-          "category": "Left Center Midfield",
-          "n": 2249,
-          "xt_sum": 4.882531719999999,
-          "mean_xt": 0.0021709789773232545,
-          "pct_negative": 45.66,
-          "pct_positive": 42.77,
-          "pct_zero": 11.56
-        },
-        {
-          "category": "Right Defensive Midfield",
-          "n": 4395,
-          "xt_sum": 7.947688019999999,
-          "mean_xt": 0.0018083476723549487,
-          "pct_negative": 46.58,
-          "pct_positive": 41.37,
-          "pct_zero": 12.06
+          "n": 2904,
+          "xt_sum": 21.6579324164,
+          "mean_xt": 0.007457965708126723,
+          "pct_negative": 34.13,
+          "pct_positive": 43.6,
+          "pct_zero": 22.28
         },
         {
           "category": "Left Back",
-          "n": 3573,
-          "xt_sum": 6.204067,
-          "mean_xt": 0.0017363747551077527,
-          "pct_negative": 45.28,
-          "pct_positive": 44.61,
-          "pct_zero": 10.1
+          "n": 3549,
+          "xt_sum": 26.0476872315,
+          "mean_xt": 0.007339444133981403,
+          "pct_negative": 33.08,
+          "pct_positive": 46.07,
+          "pct_zero": 20.85
         },
         {
           "category": "Right Midfield",
-          "n": 1120,
-          "xt_sum": 1.9139546200000006,
-          "mean_xt": 0.0017088880535714292,
-          "pct_negative": 46.88,
-          "pct_positive": 40.18,
-          "pct_zero": 12.95
-        },
-        {
-          "category": "Right Center Forward",
-          "n": 1294,
-          "xt_sum": 1.3717956800000004,
-          "mean_xt": 0.001060120309119011,
-          "pct_negative": 45.6,
-          "pct_positive": 40.26,
-          "pct_zero": 14.14
-        },
-        {
-          "category": "Left Defensive Midfield",
-          "n": 4130,
-          "xt_sum": 4.25767904,
-          "mean_xt": 0.0010309150217917677,
-          "pct_negative": 47.51,
-          "pct_positive": 40.65,
-          "pct_zero": 11.84
-        },
-        {
-          "category": "Left Midfield",
-          "n": 1073,
-          "xt_sum": 0.8815960999999999,
-          "mean_xt": 0.0008216179869524696,
-          "pct_negative": 47.81,
-          "pct_positive": 39.79,
-          "pct_zero": 12.4
-        },
-        {
-          "category": "Right Center Midfield",
-          "n": 2225,
-          "xt_sum": 1.54008375,
-          "mean_xt": 0.0006921724719101123,
-          "pct_negative": 47.73,
-          "pct_positive": 40.22,
-          "pct_zero": 12.04
-        },
-        {
-          "category": "Left Center Forward",
-          "n": 1349,
-          "xt_sum": 0.7770664900000004,
-          "mean_xt": 0.0005760314974054858,
-          "pct_negative": 47.81,
-          "pct_positive": 39.66,
-          "pct_zero": 12.53
+          "n": 1117,
+          "xt_sum": 6.784444171999999,
+          "mean_xt": 0.006073808569382273,
+          "pct_negative": 36.35,
+          "pct_positive": 44.49,
+          "pct_zero": 19.16
         },
         {
           "category": "Right Back",
-          "n": 3464,
-          "xt_sum": 0.9209512000000002,
-          "mean_xt": 0.00026586351039260977,
-          "pct_negative": 46.16,
-          "pct_positive": 43.42,
-          "pct_zero": 10.42
+          "n": 3441,
+          "xt_sum": 16.9017111561,
+          "mean_xt": 0.0049118602604184824,
+          "pct_negative": 35.6,
+          "pct_positive": 46.5,
+          "pct_zero": 17.9
         },
         {
-          "category": "Center Defensive Midfield",
-          "n": 2309,
-          "xt_sum": -4.81192587,
-          "mean_xt": -0.0020839869510610653,
-          "pct_negative": 47.64,
-          "pct_positive": 41.23,
-          "pct_zero": 11.13
-        },
-        {
-          "category": "Right Wing Back",
-          "n": 1676,
-          "xt_sum": -4.951335929999999,
-          "mean_xt": -0.0029542577147971356,
-          "pct_negative": 51.37,
-          "pct_positive": 39.02,
-          "pct_zero": 9.61
+          "category": "Right Defensive Midfield",
+          "n": 4384,
+          "xt_sum": 20.3682497084,
+          "mean_xt": 0.004646042360492701,
+          "pct_negative": 36.15,
+          "pct_positive": 42.52,
+          "pct_zero": 21.33
         },
         {
           "category": "Left Wing Back",
-          "n": 1650,
-          "xt_sum": -5.28064528,
-          "mean_xt": -0.003200391078787879,
-          "pct_negative": 50.79,
-          "pct_positive": 39.58,
-          "pct_zero": 9.64
+          "n": 1632,
+          "xt_sum": 7.526396292599999,
+          "mean_xt": 0.004611762434191176,
+          "pct_negative": 36.64,
+          "pct_positive": 42.34,
+          "pct_zero": 21.02
+        },
+        {
+          "category": "Center Attacking Midfield",
+          "n": 2345,
+          "xt_sum": 10.760772850699999,
+          "mean_xt": 0.004588815714584221,
+          "pct_negative": 33.9,
+          "pct_positive": 41.54,
+          "pct_zero": 24.56
+        },
+        {
+          "category": "Right Wing",
+          "n": 3180,
+          "xt_sum": 13.851129023999999,
+          "mean_xt": 0.004355700950943396,
+          "pct_negative": 33.62,
+          "pct_positive": 42.14,
+          "pct_zero": 24.25
+        },
+        {
+          "category": "Left Defensive Midfield",
+          "n": 4119,
+          "xt_sum": 17.581268395,
+          "mean_xt": 0.004268334157562515,
+          "pct_negative": 35.74,
+          "pct_positive": 43.09,
+          "pct_zero": 21.17
+        },
+        {
+          "category": "Left Midfield",
+          "n": 1069,
+          "xt_sum": 4.462228087,
+          "mean_xt": 0.004174207752104771,
+          "pct_negative": 37.7,
+          "pct_positive": 40.04,
+          "pct_zero": 22.26
+        },
+        {
+          "category": "Left Attacking Midfield",
+          "n": 582,
+          "xt_sum": 2.0177354430000003,
+          "mean_xt": 0.003466899386597939,
+          "pct_negative": 40.21,
+          "pct_positive": 40.21,
+          "pct_zero": 19.59
+        },
+        {
+          "category": "Right Attacking Midfield",
+          "n": 607,
+          "xt_sum": 1.891464407,
+          "mean_xt": 0.003116086337726524,
+          "pct_negative": 33.44,
+          "pct_positive": 41.02,
+          "pct_zero": 25.54
+        },
+        {
+          "category": "Left Center Midfield",
+          "n": 2237,
+          "xt_sum": 6.536152638000001,
+          "mean_xt": 0.0029218384613321417,
+          "pct_negative": 35.23,
+          "pct_positive": 41.48,
+          "pct_zero": 23.29
+        },
+        {
+          "category": "Right Wing Back",
+          "n": 1667,
+          "xt_sum": 4.225822186,
+          "mean_xt": 0.0025349863143371326,
+          "pct_negative": 35.57,
+          "pct_positive": 45.47,
+          "pct_zero": 18.96
+        },
+        {
+          "category": "Right Center Midfield",
+          "n": 2214,
+          "xt_sum": 5.042502140699999,
+          "mean_xt": 0.00227755290907859,
+          "pct_negative": 34.78,
+          "pct_positive": 41.96,
+          "pct_zero": 23.26
+        },
+        {
+          "category": "Center Defensive Midfield",
+          "n": 2304,
+          "xt_sum": 5.070593549,
+          "mean_xt": 0.0022007784500868055,
+          "pct_negative": 35.33,
+          "pct_positive": 44.1,
+          "pct_zero": 20.57
+        },
+        {
+          "category": "Right Center Forward",
+          "n": 1290,
+          "xt_sum": 1.7399750169999997,
+          "mean_xt": 0.0013488178426356587,
+          "pct_negative": 35.5,
+          "pct_positive": 42.4,
+          "pct_zero": 22.09
+        },
+        {
+          "category": "Left Center Forward",
+          "n": 1344,
+          "xt_sum": 1.6422204830000002,
+          "mean_xt": 0.001221890240327381,
+          "pct_negative": 34.6,
+          "pct_positive": 41.82,
+          "pct_zero": 23.59
         },
         {
           "category": "Right Center Back",
-          "n": 4541,
-          "xt_sum": -42.77319971,
-          "mean_xt": -0.009419334884386699,
-          "pct_negative": 49.53,
-          "pct_positive": 40.41,
-          "pct_zero": 10.06
+          "n": 4516,
+          "xt_sum": 5.387879151,
+          "mean_xt": 0.0011930644709920283,
+          "pct_negative": 38.22,
+          "pct_positive": 46.99,
+          "pct_zero": 14.79
+        },
+        {
+          "category": "Center Forward",
+          "n": 4413,
+          "xt_sum": 2.4760054169999997,
+          "mean_xt": 0.0005610707946974847,
+          "pct_negative": 35.1,
+          "pct_positive": 41.58,
+          "pct_zero": 23.32
         },
         {
           "category": "Left Center Back",
-          "n": 4619,
-          "xt_sum": -53.026768669999996,
-          "mean_xt": -0.011480140435159124,
-          "pct_negative": 49.49,
-          "pct_positive": 41.09,
-          "pct_zero": 9.42
+          "n": 4583,
+          "xt_sum": -0.43818803500000136,
+          "mean_xt": -9.561161575387331e-05,
+          "pct_negative": 37.81,
+          "pct_positive": 47.57,
+          "pct_zero": 14.62
         },
         {
           "category": "Center Back",
-          "n": 1424,
-          "xt_sum": -27.47429975,
-          "mean_xt": -0.0192937498244382,
-          "pct_negative": 56.67,
-          "pct_positive": 35.53,
-          "pct_zero": 7.79
-        },
-        {
-          "category": "Goalkeeper",
-          "n": 870,
-          "xt_sum": -38.205578779999996,
-          "mean_xt": -0.04391445836781609,
-          "pct_negative": 54.48,
-          "pct_positive": 36.67,
-          "pct_zero": 8.85
+          "n": 1409,
+          "xt_sum": -1.0957194629999996,
+          "mean_xt": -0.0007776575322924056,
+          "pct_negative": 36.91,
+          "pct_positive": 49.04,
+          "pct_zero": 14.05
         }
       ],
       "categories_given_nonzero_delta": [
         {
+          "category": "Goalkeeper",
+          "n": 831,
+          "xt_sum": 8.109272395000001,
+          "mean_xt": 0.0097584505354994,
+          "pct_negative": 22.02,
+          "pct_positive": 77.98,
+          "pct_zero": 0.0
+        },
+        {
           "category": "Left Wing",
-          "n": 2556,
-          "xt_sum": 23.092073640000002,
-          "mean_xt": 0.009034457605633804,
-          "pct_negative": 48.28,
-          "pct_positive": 51.72,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Right Attacking Midfield",
-          "n": 542,
-          "xt_sum": 3.86134341,
-          "mean_xt": 0.007124249833948339,
-          "pct_negative": 46.13,
-          "pct_positive": 53.87,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Center Attacking Midfield",
-          "n": 2081,
-          "xt_sum": 14.386287590000002,
-          "mean_xt": 0.006913160783277272,
-          "pct_negative": 51.99,
-          "pct_positive": 48.01,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Left Attacking Midfield",
-          "n": 524,
-          "xt_sum": 3.33337765,
-          "mean_xt": 0.006361407729007634,
-          "pct_negative": 48.66,
-          "pct_positive": 51.34,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Right Wing",
-          "n": 2818,
-          "xt_sum": 17.20279047,
-          "mean_xt": 0.006104609819020582,
-          "pct_negative": 49.01,
-          "pct_positive": 50.99,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Center Forward",
-          "n": 3773,
-          "xt_sum": 10.2191373,
-          "mean_xt": 0.0027084912006360984,
-          "pct_negative": 51.23,
-          "pct_positive": 48.77,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Left Center Midfield",
-          "n": 1989,
-          "xt_sum": 4.882531719999999,
-          "mean_xt": 0.0024547670789341375,
-          "pct_negative": 51.63,
-          "pct_positive": 48.37,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Right Defensive Midfield",
-          "n": 3865,
-          "xt_sum": 7.947688019999999,
-          "mean_xt": 0.0020563229029754203,
-          "pct_negative": 52.96,
-          "pct_positive": 47.04,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Right Midfield",
-          "n": 975,
-          "xt_sum": 1.9139546200000002,
-          "mean_xt": 0.0019630303794871797,
-          "pct_negative": 53.85,
-          "pct_positive": 46.15,
+          "n": 2257,
+          "xt_sum": 21.6579324164,
+          "mean_xt": 0.009595893848648649,
+          "pct_negative": 43.91,
+          "pct_positive": 56.09,
           "pct_zero": 0.0
         },
         {
           "category": "Left Back",
-          "n": 3212,
-          "xt_sum": 6.204066999999999,
-          "mean_xt": 0.0019315277085927768,
-          "pct_negative": 50.37,
-          "pct_positive": 49.63,
+          "n": 2809,
+          "xt_sum": 26.0476872315,
+          "mean_xt": 0.00927293956265575,
+          "pct_negative": 41.79,
+          "pct_positive": 58.21,
           "pct_zero": 0.0
         },
         {
-          "category": "Right Center Forward",
-          "n": 1111,
-          "xt_sum": 1.3717956799999997,
-          "mean_xt": 0.0012347395859585956,
-          "pct_negative": 53.11,
-          "pct_positive": 46.89,
+          "category": "Right Midfield",
+          "n": 903,
+          "xt_sum": 6.784444172000001,
+          "mean_xt": 0.007513227211517166,
+          "pct_negative": 44.96,
+          "pct_positive": 55.04,
           "pct_zero": 0.0
         },
         {
-          "category": "Left Defensive Midfield",
-          "n": 3641,
-          "xt_sum": 4.25767904,
-          "mean_xt": 0.0011693707882449876,
-          "pct_negative": 53.89,
-          "pct_positive": 46.11,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Left Midfield",
-          "n": 940,
-          "xt_sum": 0.8815960999999995,
-          "mean_xt": 0.0009378681914893613,
-          "pct_negative": 54.57,
-          "pct_positive": 45.43,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Right Center Midfield",
-          "n": 1957,
-          "xt_sum": 1.54008375,
-          "mean_xt": 0.0007869615482881962,
-          "pct_negative": 54.27,
-          "pct_positive": 45.73,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Left Center Forward",
-          "n": 1180,
-          "xt_sum": 0.7770664899999997,
-          "mean_xt": 0.0006585309237288133,
-          "pct_negative": 54.66,
-          "pct_positive": 45.34,
+          "category": "Center Attacking Midfield",
+          "n": 1769,
+          "xt_sum": 10.7607728507,
+          "mean_xt": 0.006082969389881289,
+          "pct_negative": 44.94,
+          "pct_positive": 55.06,
           "pct_zero": 0.0
         },
         {
           "category": "Right Back",
-          "n": 3103,
-          "xt_sum": 0.9209512000000002,
-          "mean_xt": 0.00029679381243957466,
-          "pct_negative": 51.53,
-          "pct_positive": 48.47,
+          "n": 2825,
+          "xt_sum": 16.9017111561,
+          "mean_xt": 0.005982906603929203,
+          "pct_negative": 43.36,
+          "pct_positive": 56.64,
           "pct_zero": 0.0
         },
         {
-          "category": "Center Defensive Midfield",
-          "n": 2052,
-          "xt_sum": -4.81192587,
-          "mean_xt": -0.0023449931140350874,
-          "pct_negative": 53.61,
-          "pct_positive": 46.39,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Right Wing Back",
-          "n": 1515,
-          "xt_sum": -4.951335929999999,
-          "mean_xt": -0.0032682085346534646,
-          "pct_negative": 56.83,
-          "pct_positive": 43.17,
+          "category": "Right Defensive Midfield",
+          "n": 3449,
+          "xt_sum": 20.368249708399997,
+          "mean_xt": 0.005905552249463612,
+          "pct_negative": 45.96,
+          "pct_positive": 54.04,
           "pct_zero": 0.0
         },
         {
           "category": "Left Wing Back",
-          "n": 1491,
-          "xt_sum": -5.28064528,
-          "mean_xt": -0.0035416802682763245,
-          "pct_negative": 56.2,
-          "pct_positive": 43.8,
+          "n": 1289,
+          "xt_sum": 7.5263962926,
+          "mean_xt": 0.005838942042358418,
+          "pct_negative": 46.39,
+          "pct_positive": 53.61,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Right Wing",
+          "n": 2409,
+          "xt_sum": 13.851129023999999,
+          "mean_xt": 0.005749742226650062,
+          "pct_negative": 44.38,
+          "pct_positive": 55.62,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Left Defensive Midfield",
+          "n": 3247,
+          "xt_sum": 17.581268395,
+          "mean_xt": 0.005414619154604249,
+          "pct_negative": 45.33,
+          "pct_positive": 54.67,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Left Midfield",
+          "n": 831,
+          "xt_sum": 4.462228086999999,
+          "mean_xt": 0.0053697088892900105,
+          "pct_negative": 48.5,
+          "pct_positive": 51.5,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Left Attacking Midfield",
+          "n": 468,
+          "xt_sum": 2.0177354429999994,
+          "mean_xt": 0.004311400519230768,
+          "pct_negative": 50.0,
+          "pct_positive": 50.0,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Right Attacking Midfield",
+          "n": 452,
+          "xt_sum": 1.891464407,
+          "mean_xt": 0.004184655767699115,
+          "pct_negative": 44.91,
+          "pct_positive": 55.09,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Left Center Midfield",
+          "n": 1716,
+          "xt_sum": 6.536152638000002,
+          "mean_xt": 0.0038089467587412596,
+          "pct_negative": 45.92,
+          "pct_positive": 54.08,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Right Wing Back",
+          "n": 1351,
+          "xt_sum": 4.225822186,
+          "mean_xt": 0.003127921677276092,
+          "pct_negative": 43.89,
+          "pct_positive": 56.11,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Right Center Midfield",
+          "n": 1699,
+          "xt_sum": 5.0425021407,
+          "mean_xt": 0.0029679235672160093,
+          "pct_negative": 45.32,
+          "pct_positive": 54.68,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Center Defensive Midfield",
+          "n": 1830,
+          "xt_sum": 5.070593549,
+          "mean_xt": 0.0027708161469945356,
+          "pct_negative": 44.48,
+          "pct_positive": 55.52,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Right Center Forward",
+          "n": 1005,
+          "xt_sum": 1.7399750170000006,
+          "mean_xt": 0.0017313184248756225,
+          "pct_negative": 45.57,
+          "pct_positive": 54.43,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Left Center Forward",
+          "n": 1027,
+          "xt_sum": 1.6422204829999996,
+          "mean_xt": 0.0015990462346640697,
+          "pct_negative": 45.28,
+          "pct_positive": 54.72,
           "pct_zero": 0.0
         },
         {
           "category": "Right Center Back",
-          "n": 4084,
-          "xt_sum": -42.77319971,
-          "mean_xt": -0.010473359380509304,
-          "pct_negative": 55.07,
-          "pct_positive": 44.93,
+          "n": 3848,
+          "xt_sum": 5.387879151,
+          "mean_xt": 0.0014001764945426195,
+          "pct_negative": 44.85,
+          "pct_positive": 55.15,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "Center Forward",
+          "n": 3384,
+          "xt_sum": 2.4760054169999988,
+          "mean_xt": 0.0007316800877659571,
+          "pct_negative": 45.77,
+          "pct_positive": 54.23,
           "pct_zero": 0.0
         },
         {
           "category": "Left Center Back",
-          "n": 4184,
-          "xt_sum": -53.02676867,
-          "mean_xt": -0.012673701880975144,
-          "pct_negative": 54.64,
-          "pct_positive": 45.36,
+          "n": 3913,
+          "xt_sum": -0.4381880349999998,
+          "mean_xt": -0.00011198263097367744,
+          "pct_negative": 44.29,
+          "pct_positive": 55.71,
           "pct_zero": 0.0
         },
         {
           "category": "Center Back",
-          "n": 1313,
-          "xt_sum": -27.47429975,
-          "mean_xt": -0.02092482844630617,
-          "pct_negative": 61.46,
-          "pct_positive": 38.54,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "Goalkeeper",
-          "n": 793,
-          "xt_sum": -38.205578779999996,
-          "mean_xt": -0.04817853566204287,
-          "pct_negative": 59.77,
-          "pct_positive": 40.23,
+          "n": 1211,
+          "xt_sum": -1.0957194630000004,
+          "mean_xt": -0.00090480550206441,
+          "pct_negative": 42.94,
+          "pct_positive": 57.06,
           "pct_zero": 0.0
         }
       ]
@@ -1424,131 +1447,131 @@
       "reason": "CORRELATION_ANALYSIS DROP tier: Cramer's V=1.0 vs position (kept, more granular)",
       "categories": [
         {
+          "category": "goalkeeper",
+          "n": 855,
+          "xt_sum": 8.109272395000001,
+          "mean_xt": 0.009484529116959066,
+          "pct_negative": 21.4,
+          "pct_positive": 75.79,
+          "pct_zero": 2.81
+        },
+        {
           "category": "other",
-          "n": 6106,
-          "xt_sum": 40.29486411,
-          "mean_xt": 0.006599224387487717,
-          "pct_negative": 42.83,
-          "pct_positive": 45.19,
-          "pct_zero": 11.99
-        },
-        {
-          "category": "midfielder",
-          "n": 10212,
-          "xt_sum": 30.79917484,
-          "mean_xt": 0.0030159787348217784,
-          "pct_negative": 46.16,
-          "pct_positive": 42.05,
-          "pct_zero": 11.79
-        },
-        {
-          "category": "forward",
-          "n": 7067,
-          "xt_sum": 12.367999469999999,
-          "mean_xt": 0.0017501060520730154,
-          "pct_negative": 44.83,
-          "pct_positive": 40.98,
-          "pct_zero": 14.19
-        },
-        {
-          "category": "defensive_midfielder",
-          "n": 10834,
-          "xt_sum": 7.39344119,
-          "mean_xt": 0.0006824294988000739,
-          "pct_negative": 47.16,
-          "pct_positive": 41.07,
-          "pct_zero": 11.78
+          "n": 6084,
+          "xt_sum": 35.5090614404,
+          "mean_xt": 0.005836466377449046,
+          "pct_negative": 33.86,
+          "pct_positive": 42.83,
+          "pct_zero": 23.31
         },
         {
           "category": "fullback_wingback",
-          "n": 10363,
-          "xt_sum": -3.1069630099999994,
-          "mean_xt": -0.00029981308597896354,
-          "pct_negative": 47.44,
-          "pct_positive": 42.51,
-          "pct_zero": 10.06
+          "n": 10289,
+          "xt_sum": 54.7016168662,
+          "mean_xt": 0.0053165144198853145,
+          "pct_negative": 34.89,
+          "pct_positive": 45.52,
+          "pct_zero": 19.58
+        },
+        {
+          "category": "defensive_midfielder",
+          "n": 10807,
+          "xt_sum": 43.0201116524,
+          "mean_xt": 0.003980763546997316,
+          "pct_negative": 35.82,
+          "pct_positive": 43.07,
+          "pct_zero": 21.11
+        },
+        {
+          "category": "midfielder",
+          "n": 10171,
+          "xt_sum": 37.4952997384,
+          "mean_xt": 0.0036864909781142464,
+          "pct_negative": 35.38,
+          "pct_positive": 41.68,
+          "pct_zero": 22.94
+        },
+        {
+          "category": "forward",
+          "n": 7047,
+          "xt_sum": 5.858200917000001,
+          "mean_xt": 0.0008313042311621969,
+          "pct_negative": 35.08,
+          "pct_positive": 41.78,
+          "pct_zero": 23.14
         },
         {
           "category": "centre_back",
-          "n": 10584,
-          "xt_sum": -123.27426813,
-          "mean_xt": -0.011647228659297052,
-          "pct_negative": 50.47,
-          "pct_positive": 40.05,
-          "pct_zero": 9.48
-        },
-        {
-          "category": "goalkeeper",
-          "n": 870,
-          "xt_sum": -38.205578779999996,
-          "mean_xt": -0.04391445836781609,
-          "pct_negative": 54.48,
-          "pct_positive": 36.67,
-          "pct_zero": 8.85
+          "n": 10508,
+          "xt_sum": 3.853971652999998,
+          "mean_xt": 0.00036676547896840483,
+          "pct_negative": 37.87,
+          "pct_positive": 47.52,
+          "pct_zero": 14.62
         }
       ],
       "categories_given_nonzero_delta": [
         {
+          "category": "goalkeeper",
+          "n": 831,
+          "xt_sum": 8.109272395000001,
+          "mean_xt": 0.0097584505354994,
+          "pct_negative": 22.02,
+          "pct_positive": 77.98,
+          "pct_zero": 0.0
+        },
+        {
           "category": "other",
-          "n": 5374,
-          "xt_sum": 40.29486411,
-          "mean_xt": 0.0074981139021213245,
-          "pct_negative": 48.66,
-          "pct_positive": 51.34,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "midfielder",
-          "n": 9008,
-          "xt_sum": 30.79917484,
-          "mean_xt": 0.003419091345470693,
-          "pct_negative": 52.33,
-          "pct_positive": 47.67,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "forward",
-          "n": 6064,
-          "xt_sum": 12.36799947,
-          "mean_xt": 0.0020395777490105544,
-          "pct_negative": 52.24,
-          "pct_positive": 47.76,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "defensive_midfielder",
-          "n": 9558,
-          "xt_sum": 7.393441189999998,
-          "mean_xt": 0.0007735343366813139,
-          "pct_negative": 53.45,
-          "pct_positive": 46.55,
+          "n": 4666,
+          "xt_sum": 35.509061440400004,
+          "mean_xt": 0.007610171761765967,
+          "pct_negative": 44.15,
+          "pct_positive": 55.85,
           "pct_zero": 0.0
         },
         {
           "category": "fullback_wingback",
-          "n": 9321,
-          "xt_sum": -3.1069630099999985,
-          "mean_xt": -0.0003333293648750132,
-          "pct_negative": 52.74,
-          "pct_positive": 47.26,
+          "n": 8274,
+          "xt_sum": 54.7016168662,
+          "mean_xt": 0.006611266239569737,
+          "pct_negative": 43.39,
+          "pct_positive": 56.61,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "defensive_midfielder",
+          "n": 8526,
+          "xt_sum": 43.020111652400004,
+          "mean_xt": 0.005045755530424584,
+          "pct_negative": 45.4,
+          "pct_positive": 54.6,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "midfielder",
+          "n": 7838,
+          "xt_sum": 37.49529973839999,
+          "mean_xt": 0.004783784095228374,
+          "pct_negative": 45.92,
+          "pct_positive": 54.08,
+          "pct_zero": 0.0
+        },
+        {
+          "category": "forward",
+          "n": 5416,
+          "xt_sum": 5.858200916999999,
+          "mean_xt": 0.0010816471412481534,
+          "pct_negative": 45.64,
+          "pct_positive": 54.36,
           "pct_zero": 0.0
         },
         {
           "category": "centre_back",
-          "n": 9581,
-          "xt_sum": -123.27426813,
-          "mean_xt": -0.01286653461329715,
-          "pct_negative": 55.76,
-          "pct_positive": 44.24,
-          "pct_zero": 0.0
-        },
-        {
-          "category": "goalkeeper",
-          "n": 793,
-          "xt_sum": -38.205578779999996,
-          "mean_xt": -0.04817853566204287,
-          "pct_negative": 59.77,
-          "pct_positive": 40.23,
+          "n": 8972,
+          "xt_sum": 3.853971652999995,
+          "mean_xt": 0.00042955546734284387,
+          "pct_negative": 44.35,
+          "pct_positive": 55.65,
           "pct_zero": 0.0
         }
       ]

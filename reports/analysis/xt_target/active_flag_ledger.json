@@ -1,44 +1,67 @@
 {
   "dataset": "active",
   "leg": "active-binary only (passive leg out of scope for this target)",
-  "target": "target_xt_delta",
-  "target_source": "outputs/prototypes/active_binary_xt_delta.parquet (joined read-only by event_id)",
+  "target": "target_xt_delta_v2",
+  "target_source": "outputs/prototypes/active_binary_xt_delta_v2.parquet (joined read-only by event_id)",
+  "supersedes": "target_xt_delta (v1, outputs/prototypes/active_binary_xt_delta.parquet). The v1 portal built against it is preserved unchanged at reports/analysis/xt_target_v1_superseded/.",
   "n_rows": 56068,
-  "n_rows_nonzero": 49699,
-  "base_xt": -0.0013157850365836247,
-  "base_xt_nonzero": -0.0014835576230910078,
+  "n_rows_nonzero": 44523,
+  "base_xt": 0.0033813513864959376,
+  "base_xt_nonzero": 0.004234834459995957,
   "target_scale": {
-    "target": "target_xt_delta",
+    "target": "target_xt_delta_v2",
     "n_rows": 56068,
-    "n_defined": 56036,
-    "n_nan": 32,
-    "mean": -0.00131579,
-    "std": 0.06498593,
-    "skew": 0.0933,
-    "excess_kurtosis": 8.846,
-    "pct_zero": 11.309,
-    "pct_negative": 47.002,
-    "pct_positive": 41.689,
+    "n_defined": 55761,
+    "n_nan": 307,
+    "mean": 0.00338135,
+    "std": 0.05838466,
+    "skew": -0.306,
+    "excess_kurtosis": 18.3289,
+    "pct_zero": 20.154,
+    "pct_negative": 35.426,
+    "pct_positive": 44.42,
     "xg_mean_same_rows": 0.00811039,
     "xg_std_same_rows": 0.0480329,
     "xg_flat_margin_absolute": 0.00405519,
     "xg_flat_margin_as_fraction_of_xg_std": 0.084425,
-    "flat_margin": 0.00548646,
-    "range_trigger": 0.01097292,
-    "near_identical_threshold": 0.00548646,
-    "distinct_signal_threshold": 0.01645938,
-    "n_nonzero": 49699,
-    "mean_nonzero": -0.00148356,
-    "std_nonzero": 0.06900304,
-    "flat_margin_nonzero": 0.00582561,
-    "scale_note": "ADAPTATION 1. target_xt_delta is roughly symmetric with a near-zero, NEGATIVE mean (-0.001316), so the xg_target suite's convention of expressing every threshold as a multiple of the overall mean target value is meaningless here (it would flip signs and collapse to nothing). Instead the xg convention is TRANSLATED, not replaced: xg's own flat_margin (0.5 x mean xg = 0.004055 on these same rows) is re-expressed as a fraction of xg's own standard deviation (0.048033), giving 0.084425, and that fraction is applied to target_xt_delta's standard deviation (0.064986). Every number in this calculation is computed at runtime from the real parquet, not carried over from a writeup. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged.",
-    "conditional_panel_note": "ADAPTATION 2. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta has no shot column behind it; its structural-zero analogue is the 11.3% of rows with an EXACTLY zero delta (the action did not cross an xT grid-cell boundary). The conditional panel throughout this suite is therefore 'given a non-zero delta' (target_xt_delta != 0), never 'given a shot'.",
-    "direction_note": "ADAPTATION 3. Sign carries the football meaning: POSITIVE target_xt_delta = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. Rankings are by |magnitude| across BOTH directions, never one-sided 'higher is worse' lift, and every table also reports the negative/positive/zero share behind its mean.",
-    "log_transform_note": "NOT an adaptation: checked directly rather than assumed -- the xg_target report suite never log-transforms its target anywhere (every xg report uses the raw groupby mean of target_future_xg_10s). The log1p framing in this project belongs to the modelling legs, not to this report suite, so there was no log-transform to remove."
+    "flat_margin": 0.00492915,
+    "range_trigger": 0.00985829,
+    "near_identical_threshold": 0.00492915,
+    "distinct_signal_threshold": 0.01478744,
+    "n_nonzero": 44523,
+    "mean_nonzero": 0.00423483,
+    "std_nonzero": 0.06531138,
+    "flat_margin_nonzero": 0.00551394,
+    "scale_note": "ADAPTATION 1, RE-EXAMINED FOR v2. Prompt 65 translated the xg suite's mean-multiple threshold convention onto the xT target via xg's own standard-deviation fraction, because v1's mean was near-zero and NEGATIVE (-0.001316), which would have flipped the sign of every threshold. v2's mean is now POSITIVE (+0.003381), so that literal justification no longer applies -- checked, not assumed. The translation is KEPT anyway, for a reason that does still hold: at +0.003381 against a std of 0.058385 the mean is only 5.8% of one standard deviation, so a mean-multiple threshold would still be an arbitrary sliver, and keeping the same translation is what makes this portal numerically comparable with the v1 portal it supersedes. Mechanically: xg's own flat_margin (0.5 x mean xg = 0.004055 on these same rows) re-expressed as a fraction of xg's own std (0.048033) gives 0.084425, applied to target_xt_delta_v2's std (0.058385) to give 0.004929. Every number is computed at runtime from the real parquet. See `threshold_transfer_warning` in this same block: the std-derived margin is materially less appropriate on v2 than it was on v1, and that is stated rather than hidden. Scale-free thresholds (|Spearman rho| >= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged and are unaffected.",
+    "conditional_panel_note": "ADAPTATION 2, unchanged in method and re-measured on v2. The xg_target suite's second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta_v2 has no shot column behind it; its structural-zero analogue is the 20.2% of rows with an EXACTLY zero delta. That share nearly doubled from v1's 11.3%, for an understood reason: under v2 a delta is exactly zero whenever the next same-possession event lands in the same xT grid cell as the previous one, which is far more common than v1's 'the action's own location shares a cell with the previous event'. The conditional panel throughout this suite remains 'given a non-zero delta' (target_xt_delta_v2 != 0), never 'given a shot'.",
+    "direction_note": "ADAPTATION 3, unchanged in method and re-measured on v2. Sign carries the football meaning: POSITIVE target_xt_delta_v2 = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. On v2 the balance shifts markedly towards the defence -- 44.4% positive vs 35.4% negative, where v1 was 41.7% / 47.0% -- but the target is NO LONGER close to symmetric (skew -0.306, vs v1's +0.093), so two-directional framing matters more here, not less. Rankings are by |magnitude| across BOTH directions, and every table also reports the negative/positive/zero share behind its mean.",
+    "log_transform_note": "NOT an adaptation, re-checked rather than inherited: the xg_target report suite never log-transforms its target anywhere, and neither did Prompt 65's v1 xT suite. The log1p framing in this project belongs to the modelling legs, not to this report suite. v2's heavier tails make a transform more tempting than it was on v1 -- and it is still NOT applied here, because doing so would silently break comparability with both the xg portal and the v1 xT portal this one supersedes. Recorded as an open question for the modelling legs, not resolved by an EDA suite.",
+    "target_version": "v2",
+    "target_source": "outputs/prototypes/active_binary_xt_delta_v2.parquet (joined read-only by event_id)",
+    "supersedes": "target_xt_delta (v1, outputs/prototypes/active_binary_xt_delta.parquet). The v1 portal built against it is preserved unchanged at reports/analysis/xt_target_v1_superseded/.",
+    "robust_scale": {
+      "iqr": 0.00882901,
+      "mad": 0.00385257,
+      "robust_std_1_4826_mad": 0.00571182,
+      "robust_flat_margin": 0.00048222,
+      "flat_margin_over_mad": 1.2794,
+      "flat_margin_over_iqr": 0.5583,
+      "pct_rows_inside_flat_margin": 53.42,
+      "mean_as_fraction_of_std": 0.0579
+    },
+    "correlation_with_old_target": {
+      "pair": "target_xt_delta_v2 vs target_future_xg_10s",
+      "pearson_r": -0.1082,
+      "n": 55761,
+      "v1_pearson_r": -0.016,
+      "note": "Measured on this run: r=-0.1082 against the old target on these same rows, versus -0.016 for v1. Recorded HERE specifically because Adaptation 1 borrows this very target's standard-deviation fraction to set every threshold in this suite -- so wherever a report cites an xg-derived threshold, this is how the two targets actually relate. Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.4): correlation with the old target_future_xg_10s improves from v1's essentially-zero -0.016 to -0.108 -- still modest, but now an order of magnitude stronger AND correctly signed: more threat denied by a defensive action is associated with less future attacking output in the next 10 seconds. v2 and v1 are themselves moderately correlated at +0.571, which is sensible given they share the identical xt_before term and differ only in xt_after."
+    },
+    "threshold_transfer_warning": "THIS THRESHOLD DOES NOT TRANSFER CLEANLY FROM v1, and that is reported rather than forced to fit. Prompt 65 tuned its translated flat_margin against a target with excess kurtosis 8.85, an IQR of 0.019119 and a MAD of 0.010277; the resulting margin (0.005486) was 0.53 x that MAD and spanned 35.4% of rows -- a genuinely narrow 'too small to matter' band. v2's tails are far heavier (excess kurtosis 18.3289) because Prompt 66 injects real shot xG values up to 0.897 for the 954 rows where a Shot follows the defensive action, while v2's BULK is much tighter (IQR 0.008829, MAD 0.003853). Because the translation is std-derived and std is inflated by exactly those tails, the margin barely moves (0.004929) while the distribution it is meant to describe more than halved: it is now 1.28 x the MAD, 0.56 x the IQR, and spans 53.4% of all rows. A flat band covering the majority of the data is not doing its job. The literal translated margin is KEPT as the headline number so v1-vs-v2 comparisons stay like-for-like and the xg suite's convention is still the one being followed, but the MAD-derived robust alternative (0.000482) is published beside it on every run and every shape classification in this suite should be read with this inflation in mind."
   },
-  "prompt_64_cross_references": {
-    "clearance_action_x_artefact": "Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.1/3.4): for Clearance events, action_x/action_y -- this target's definition of the post-action location, and therefore of xt_after -- is the location the clearance was taken FROM, not where the ball ends up. Last-ditch clearances are very often taken deep in the defending box, a high-xT cell by construction, so Clearance rows carry a systematically negative delta even though a clearance is a good defensive outcome. Prompt 64 measured this directly at -0.0315 mean delta for Clearance inside the action_ended_possession slice, against +0.0009 to +0.0076 for every other event type there. This is a measurement artefact of the xt_after definition, NOT evidence that clearances are bad defending.",
-    "distribution_shape": "Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.2): target_xt_delta is roughly symmetric (skew +0.093), heavy-tailed (excess kurtosis 8.85), 47.0% negative / 41.7% positive / 11.3% exactly zero. This is a fundamentally different shape from target_future_xg_10s, which is strictly non-negative, zero-inflated and heavily right-skewed. Any methodology that assumed non-negativity had to be adapted explicitly -- see this module's Adaptation 1/2/3 notes, restated in every report."
+  "prompt_66_cross_references": {
+    "clearance_reversal": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.2): Prompt 64's Clearance artefact -- Clearance looking like the WORST event type because xt_after was looked up at the clearance's own deep-in-the-box location -- is not merely reduced under the corrected xt_after, it FULLY REVERSES. Clearance moves from 8th of 8 event types (worst) at -0.0325 mean delta under v1 to 1st of 8 (best) at +0.0247 under v2, and in the motivating action_ended_possession slice from -0.0315 to +0.0406. The mechanism is understood, not assumed: possession-ending clearances now get xt_after = 0 by construction, so the dangerous coordinate is never looked up at all. Any v1-era statement that Clearance ranks last, or that clearances carry a systematically negative delta, is superseded and must not be repeated. (Aside recorded by Prompt 66 and not chased here: Block, at -0.0185, is now the lowest-mean event type under v2.)",
+    "distribution_shape": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.3): target_xt_delta_v2's mean flips from v1's slightly negative -0.00132 to a clearly positive +0.00338 -- on average, active defensive actions now genuinely deny threat, the football-sensible direction v1 never achieved. But the shape got HARDER, not easier: skew moves from +0.093 (near-symmetric) to -0.306 (mildly left-skewed) and excess kurtosis from 8.85 to 18.33 (much heavier tails), while the exactly-zero share rises from 11.3% to 20.2% and the negative share falls from 47.0% to 35.4%. The heavier tails are a direct, understood consequence of injecting real shot_statsbomb_xg values (up to 0.897) as xt_after for the 954 rows -- 1.9% of continuing-possession rows -- where a Shot immediately follows the defensive action; the 96-cell xT grid's own maximum cell is only 0.2575, so it could never produce such values. This REINFORCES rather than resolves Prompt 64's open flag that the existing hurdle architecture does not fit this target's shape as-is: v2 is if anything less like that shape than v1 was.",
+    "possession_ending_collapse": "Prompt 66 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE_V2.md section 2.1): on the two possession-ending slices, target_xt_delta_v2 collapses EXACTLY onto xt_before's own distribution -- action_ended_possession == True (n=4,656) mean +0.03051, action_won_possession == True (n=3,600) mean +0.03066, both confirmed identical to the same slice's xt_before mean with np.allclose. This is logically REQUIRED, not a new degenerate finding: xt_after is forced to 0.0 for exactly these rows, so the delta is xt_before by construction -- '100% of the threat that existed a moment ago is denied'. Unlike the old target_future_shot_10s, which collapsed these same rows to an identical uninformative zero, this collapses to a real, row-by-row varying distribution (mean +0.031, std ~0.050): the actual danger level that was denied. Any report that shows these slices must present the identity as construction, not as discovery."
   },
   "columns": {
     "action_retained_defensive_team_control": {
@@ -46,41 +69,41 @@
       "reason": null,
       "lift_stats": {
         "column": "action_retained_defensive_team_control",
-        "mean_xt_true": -0.0049929265790208364,
-        "mean_xt_false": 0.007393746307784791,
-        "lift": -0.012386672886805627,
-        "pct_true": 70.31372688985653,
-        "n_true": 39401,
-        "n_false": 16635,
+        "mean_xt_true": -0.00023478274143564614,
+        "mean_xt_false": 0.011921680459118586,
+        "lift": -0.012156463200554232,
+        "pct_true": 70.25340291601657,
+        "n_true": 39174,
+        "n_false": 16587,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 50.83,
-          "pct_positive": 42.22,
-          "pct_zero": 6.95
+          "pct_negative": 37.89,
+          "pct_positive": 37.93,
+          "pct_zero": 24.19
         },
         "false_direction": {
-          "pct_negative": 37.94,
-          "pct_positive": 40.42,
-          "pct_zero": 21.64
+          "pct_negative": 29.61,
+          "pct_positive": 59.76,
+          "pct_zero": 10.63
         }
       },
       "lift_stats_given_nonzero_delta": {
         "column": "action_retained_defensive_team_control",
-        "mean_xt_true": -0.005365652960397119,
-        "mean_xt_false": 0.009435747589566551,
-        "lift": -0.014801400549963671,
-        "pct_true": 73.77210809070604,
-        "n_true": 36664,
-        "n_false": 13035,
+        "mean_xt_true": -0.0003096864915653726,
+        "mean_xt_false": 0.013339511182906098,
+        "lift": -0.01364919767447147,
+        "pct_true": 66.70484917907599,
+        "n_true": 29699,
+        "n_false": 14824,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 54.62,
-          "pct_positive": 45.38,
+          "pct_negative": 49.97,
+          "pct_positive": 50.03,
           "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 48.42,
-          "pct_positive": 51.58,
+          "pct_negative": 33.14,
+          "pct_positive": 66.86,
           "pct_zero": 0.0
         }
       }
@@ -90,41 +113,41 @@
       "reason": null,
       "lift_stats": {
         "column": "action_was_under_opponent_possession",
-        "mean_xt_true": -0.0048697197327969115,
-        "mean_xt_false": 0.010408246100498657,
-        "lift": -0.015277965833295569,
-        "pct_true": 76.73816832036547,
-        "n_true": 43001,
-        "n_false": 13035,
+        "mean_xt_true": 0.0023650985817786504,
+        "mean_xt_false": 0.006728482938738739,
+        "lift": -0.004363384356960088,
+        "pct_true": 76.7095281648464,
+        "n_true": 42774,
+        "n_false": 12987,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 50.16,
-          "pct_positive": 41.72,
-          "pct_zero": 8.12
+          "pct_negative": 34.7,
+          "pct_positive": 43.15,
+          "pct_zero": 22.15
         },
         "false_direction": {
-          "pct_negative": 36.59,
-          "pct_positive": 41.6,
-          "pct_zero": 21.82
+          "pct_negative": 37.82,
+          "pct_positive": 48.6,
+          "pct_zero": 13.58
         }
       },
       "lift_stats_given_nonzero_delta": {
         "column": "action_was_under_opponent_possession",
-        "mean_xt_true": -0.005300263699250784,
-        "mean_xt_false": 0.013312872919242469,
-        "lift": -0.018613136618493252,
-        "pct_true": 79.494557234552,
-        "n_true": 39508,
-        "n_false": 10191,
+        "mean_xt_true": 0.003038071015255713,
+        "mean_xt_false": 0.007785353521507483,
+        "lift": -0.00474728250625177,
+        "pct_true": 74.79055768928419,
+        "n_true": 33299,
+        "n_false": 11224,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 54.59,
-          "pct_positive": 45.41,
+          "pct_negative": 44.57,
+          "pct_positive": 55.43,
           "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 46.8,
-          "pct_positive": 53.2,
+          "pct_negative": 43.76,
+          "pct_positive": 56.24,
           "pct_zero": 0.0
         }
       }
@@ -134,41 +157,41 @@
       "reason": null,
       "lift_stats": {
         "column": "counterpress",
-        "mean_xt_true": 0.0015243572747151567,
-        "mean_xt_false": -0.0018370006688913762,
-        "lift": 0.003361357943606533,
-        "pct_true": 15.506103219358982,
-        "n_true": 8689,
-        "n_false": 47347,
+        "mean_xt_true": 0.0001900054736173652,
+        "mean_xt_false": 0.003968193147673036,
+        "lift": -0.003778187674055671,
+        "pct_true": 15.53236132780976,
+        "n_true": 8661,
+        "n_false": 47100,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 41.18,
-          "pct_positive": 41.07,
-          "pct_zero": 17.75
+          "pct_negative": 33.59,
+          "pct_positive": 37.76,
+          "pct_zero": 28.66
         },
         "false_direction": {
-          "pct_negative": 48.07,
-          "pct_positive": 41.8,
-          "pct_zero": 10.13
+          "pct_negative": 35.76,
+          "pct_positive": 45.65,
+          "pct_zero": 18.59
         }
       },
       "lift_stats_given_nonzero_delta": {
         "column": "counterpress",
-        "mean_xt_true": 0.001853244768434308,
-        "mean_xt_false": -0.0020440042928652003,
-        "lift": 0.003897249061299508,
-        "pct_true": 14.380571037646634,
-        "n_true": 7147,
-        "n_false": 42552,
+        "mean_xt_true": 0.00026632746512380645,
+        "mean_xt_false": 0.004874345327962654,
+        "lift": -0.004608017862838848,
+        "pct_true": 13.878220245715697,
+        "n_true": 6179,
+        "n_false": 38344,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 50.06,
-          "pct_positive": 49.94,
+          "pct_negative": 47.08,
+          "pct_positive": 52.92,
           "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 53.49,
-          "pct_positive": 46.51,
+          "pct_negative": 43.93,
+          "pct_positive": 56.07,
           "pct_zero": 0.0
         }
       }
@@ -178,41 +201,41 @@
       "reason": null,
       "lift_stats": {
         "column": "has_previous_event",
-        "mean_xt_true": -0.0011632354556925166,
-        "mean_xt_false": -0.0030540269431541694,
-        "lift": 0.0018907914874616528,
-        "pct_true": 91.93197230351917,
-        "n_true": 51515,
-        "n_false": 4521,
+        "mean_xt_true": 0.002045227654269768,
+        "mean_xt_false": 0.018539271363072835,
+        "lift": -0.016494043708803068,
+        "pct_true": 91.89935618084324,
+        "n_true": 51244,
+        "n_false": 4517,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 48.11,
-          "pct_positive": 42.78,
-          "pct_zero": 9.11
+          "pct_negative": 37.28,
+          "pct_positive": 42.07,
+          "pct_zero": 20.65
         },
         "false_direction": {
-          "pct_negative": 34.4,
-          "pct_positive": 29.22,
-          "pct_zero": 36.39
+          "pct_negative": 14.39,
+          "pct_positive": 71.09,
+          "pct_zero": 14.52
         }
       },
       "lift_stats_given_nonzero_delta": {
         "column": "has_previous_event",
-        "mean_xt_true": -0.001279799980778677,
-        "mean_xt_false": -0.004800853897774686,
-        "lift": 0.003521053916996009,
-        "pct_true": 94.21316324272118,
-        "n_true": 46823,
-        "n_false": 2876,
+        "mean_xt_true": 0.0025774837911416064,
+        "mean_xt_false": 0.021689170874643875,
+        "lift": -0.01911168708350227,
+        "pct_true": 91.3280776228017,
+        "n_true": 40662,
+        "n_false": 3861,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 52.93,
-          "pct_positive": 47.07,
+          "pct_negative": 46.98,
+          "pct_positive": 53.02,
           "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 54.07,
-          "pct_positive": 45.93,
+          "pct_negative": 16.84,
+          "pct_positive": 83.16,
           "pct_zero": 0.0
         }
       }
@@ -222,41 +245,41 @@
       "reason": null,
       "lift_stats": {
         "column": "has_visible_attacker",
-        "mean_xt_true": -0.0013202728968842068,
-        "mean_xt_false": 0.006792041290322583,
-        "lift": -0.00811231418720679,
-        "pct_true": 99.94467842101507,
-        "n_true": 56005,
+        "mean_xt_true": 0.0033674699438794183,
+        "mean_xt_false": 0.028336602903225806,
+        "lift": -0.02496913295934639,
+        "pct_true": 99.94440558813508,
+        "n_true": 55730,
         "n_false": 31,
         "small_n": true,
         "true_direction": {
-          "pct_negative": 47.0,
-          "pct_positive": 41.69,
-          "pct_zero": 11.31
+          "pct_negative": 35.44,
+          "pct_positive": 44.4,
+          "pct_zero": 20.17
         },
         "false_direction": {
-          "pct_negative": 48.39,
-          "pct_positive": 48.39,
-          "pct_zero": 3.23
+          "pct_negative": 19.35,
+          "pct_positive": 80.65,
+          "pct_zero": 0.0
         }
       },
       "lift_stats_given_nonzero_delta": {
         "column": "has_visible_attacker",
-        "mean_xt_true": -0.0014886928182568603,
-        "mean_xt_false": 0.007018442666666666,
-        "lift": -0.008507135484923526,
-        "pct_true": 99.93963661240669,
-        "n_true": 49669,
-        "n_false": 30,
+        "mean_xt_true": 0.004218041445032815,
+        "mean_xt_false": 0.028336602903225806,
+        "lift": -0.02411856145819299,
+        "pct_true": 99.93037306560653,
+        "n_true": 44492,
+        "n_false": 31,
         "small_n": true,
         "true_direction": {
-          "pct_negative": 53.0,
-          "pct_positive": 47.0,
+          "pct_negative": 44.39,
+          "pct_positive": 55.61,
           "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 50.0,
-          "pct_positive": 50.0,
+          "pct_negative": 19.35,
+          "pct_positive": 80.65,
           "pct_zero": 0.0
         }
       }
@@ -266,41 +289,41 @@
       "reason": null,
       "lift_stats": {
         "column": "has_visible_defender",
-        "mean_xt_true": -0.0013382422884203001,
-        "mean_xt_false": 0.01521984407894737,
-        "lift": -0.01655808636736767,
-        "pct_true": 99.8643729031337,
-        "n_true": 55960,
+        "mean_xt_true": 0.003367642292222322,
+        "mean_xt_false": 0.013425968684210527,
+        "lift": -0.010058326391988205,
+        "pct_true": 99.8637040225247,
+        "n_true": 55685,
         "n_false": 76,
         "small_n": true,
         "true_direction": {
-          "pct_negative": 47.01,
-          "pct_positive": 41.67,
-          "pct_zero": 11.32
+          "pct_negative": 35.43,
+          "pct_positive": 44.41,
+          "pct_zero": 20.16
         },
         "false_direction": {
-          "pct_negative": 42.11,
-          "pct_positive": 57.89,
-          "pct_zero": 0.0
+          "pct_negative": 31.58,
+          "pct_positive": 51.32,
+          "pct_zero": 17.11
         }
       },
       "lift_stats_given_nonzero_delta": {
         "column": "has_visible_defender",
-        "mean_xt_true": -0.001509139682405336,
-        "mean_xt_false": 0.01521984407894737,
-        "lift": -0.016728983761352706,
-        "pct_true": 99.84707941809694,
-        "n_true": 49623,
-        "n_false": 76,
+        "mean_xt_true": 0.004217884863751687,
+        "mean_xt_false": 0.016196406666666666,
+        "lift": -0.01197852180291498,
+        "pct_true": 99.85850010107136,
+        "n_true": 44460,
+        "n_false": 63,
         "small_n": true,
         "true_direction": {
-          "pct_negative": 53.01,
-          "pct_positive": 46.99,
+          "pct_negative": 44.38,
+          "pct_positive": 55.62,
           "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 42.11,
-          "pct_positive": 57.89,
+          "pct_negative": 38.1,
+          "pct_positive": 61.9,
           "pct_zero": 0.0
         }
       }
@@ -310,41 +333,41 @@
       "reason": "Type 1 REVIEW resolution: point-biserial r=0.854 vs attacking_goal_centrality (kept)",
       "lift_stats": {
         "column": "is_central_lane",
-        "mean_xt_true": -0.006246996695148503,
-        "mean_xt_false": 0.0024718174435995333,
-        "lift": -0.008718814138748036,
-        "pct_true": 43.44171603968877,
-        "n_true": 24343,
-        "n_false": 31693,
+        "mean_xt_true": 0.0023580051986256136,
+        "mean_xt_false": 0.004167684469900419,
+        "lift": -0.0018096792712748058,
+        "pct_true": 43.45151629274942,
+        "n_true": 24229,
+        "n_false": 31532,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 48.26,
-          "pct_positive": 39.92,
-          "pct_zero": 11.82
+          "pct_negative": 36.98,
+          "pct_positive": 44.63,
+          "pct_zero": 18.39
         },
         "false_direction": {
-          "pct_negative": 46.04,
-          "pct_positive": 43.05,
-          "pct_zero": 10.91
+          "pct_negative": 34.23,
+          "pct_positive": 44.26,
+          "pct_zero": 21.51
         }
       },
       "lift_stats_given_nonzero_delta": {
         "column": "is_central_lane",
-        "mean_xt_true": -0.007084586095970183,
-        "mean_xt_false": 0.00277464440886874,
-        "lift": -0.009859230504838922,
-        "pct_true": 43.19000382301455,
-        "n_true": 21465,
-        "n_false": 28234,
+        "mean_xt_true": 0.002889400088883831,
+        "mean_xt_false": 0.005309714210298988,
+        "lift": -0.0024203141214151572,
+        "pct_true": 44.410753992318575,
+        "n_true": 19773,
+        "n_false": 24750,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 54.73,
-          "pct_positive": 45.27,
+          "pct_negative": 45.31,
+          "pct_positive": 54.69,
           "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 51.68,
-          "pct_positive": 48.32,
+          "pct_negative": 43.61,
+          "pct_positive": 56.39,
           "pct_zero": 0.0
         }
       }
@@ -354,41 +377,41 @@
       "reason": "Type 2 REVIEW resolution: near-total subset of is_in_defending_box (kept, higher lift +12.04pp vs +7.22pp)",
       "lift_stats": {
         "column": "is_deep_zone",
-        "mean_xt_true": 0.050820968630005244,
-        "mean_xt_false": -0.014687240896452755,
-        "lift": 0.065508209526458,
-        "pct_true": 20.411878078378184,
-        "n_true": 11438,
-        "n_false": 44598,
+        "mean_xt_true": 0.016529481440355667,
+        "mean_xt_false": 1.7772960258546858e-05,
+        "lift": 0.01651170848009712,
+        "pct_true": 20.370868528182783,
+        "n_true": 11359,
+        "n_false": 44402,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 5.22,
-          "pct_positive": 84.3,
-          "pct_zero": 10.48
+          "pct_negative": 29.72,
+          "pct_positive": 53.47,
+          "pct_zero": 16.81
         },
         "false_direction": {
-          "pct_negative": 57.72,
-          "pct_positive": 30.76,
-          "pct_zero": 11.52
+          "pct_negative": 36.89,
+          "pct_positive": 42.1,
+          "pct_zero": 21.01
         }
       },
       "lift_stats_given_nonzero_delta": {
         "column": "is_deep_zone",
-        "mean_xt_true": 0.05677216907803496,
-        "mean_xt_false": -0.01659963430055753,
-        "lift": 0.07337180337859249,
-        "pct_true": 20.602024185597294,
-        "n_true": 10239,
-        "n_false": 39460,
+        "mean_xt_true": 0.019868611606455026,
+        "mean_xt_false": 2.2500355869187056e-05,
+        "lift": 0.01984611125058584,
+        "pct_true": 21.224984839296543,
+        "n_true": 9450,
+        "n_false": 35073,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 5.83,
-          "pct_positive": 94.17,
+          "pct_negative": 35.72,
+          "pct_positive": 64.28,
           "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 65.23,
-          "pct_positive": 34.77,
+          "pct_negative": 46.7,
+          "pct_positive": 53.3,
           "pct_zero": 0.0
         }
       }
@@ -398,41 +421,41 @@
       "reason": "Type 2 REVIEW resolution: near-total subset of is_in_attacking_box (kept, higher lift +11.99pp vs +7.22pp)",
       "lift_stats": {
         "column": "is_high_zone",
-        "mean_xt_true": -0.05379837024579848,
-        "mean_xt_false": 0.01535242438336194,
-        "lift": -0.06915079462916042,
-        "pct_true": 24.104147333856808,
-        "n_true": 13507,
-        "n_false": 42529,
+        "mean_xt_true": -0.007903328542289633,
+        "mean_xt_false": 0.0069569831313598144,
+        "lift": -0.014860311673649446,
+        "pct_true": 24.06162012876383,
+        "n_true": 13417,
+        "n_false": 42344,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 86.66,
-          "pct_positive": 4.66,
-          "pct_zero": 8.68
+          "pct_negative": 43.27,
+          "pct_positive": 40.42,
+          "pct_zero": 16.32
         },
         "false_direction": {
-          "pct_negative": 34.41,
-          "pct_positive": 53.45,
-          "pct_zero": 12.14
+          "pct_negative": 32.94,
+          "pct_positive": 45.69,
+          "pct_zero": 21.37
         }
       },
       "lift_stats_given_nonzero_delta": {
         "column": "is_high_zone",
-        "mean_xt_true": -0.058909978671260646,
-        "mean_xt_false": 0.01747466161545873,
-        "lift": -0.07638464028671937,
-        "pct_true": 24.81941286545001,
-        "n_true": 12335,
-        "n_false": 37364,
+        "mean_xt_true": -0.009444153816521198,
+        "mean_xt_false": 0.008847769746637634,
+        "lift": -0.018291923563158834,
+        "pct_true": 25.218426431282708,
+        "n_true": 11228,
+        "n_false": 33295,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 94.89,
-          "pct_positive": 5.11,
+          "pct_negative": 51.7,
+          "pct_positive": 48.3,
           "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 39.16,
-          "pct_positive": 60.84,
+          "pct_negative": 41.9,
+          "pct_positive": 58.1,
           "pct_zero": 0.0
         }
       }
@@ -442,41 +465,41 @@
       "reason": null,
       "lift_stats": {
         "column": "is_in_attacking_box",
-        "mean_xt_true": -0.10032715970753274,
-        "mean_xt_false": 0.010293942696241652,
-        "lift": -0.11062110240377439,
-        "pct_true": 10.495038903561996,
-        "n_true": 5881,
-        "n_false": 50155,
+        "mean_xt_true": -0.016033734303259006,
+        "mean_xt_false": 0.005648278737665979,
+        "lift": -0.021682013040924986,
+        "pct_true": 10.45533616685497,
+        "n_true": 5830,
+        "n_false": 49931,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 87.81,
-          "pct_positive": 3.76,
-          "pct_zero": 8.43
+          "pct_negative": 47.41,
+          "pct_positive": 40.03,
+          "pct_zero": 12.56
         },
         "false_direction": {
-          "pct_negative": 42.22,
-          "pct_positive": 46.14,
-          "pct_zero": 11.65
+          "pct_negative": 34.03,
+          "pct_positive": 44.93,
+          "pct_zero": 21.04
         }
       },
       "lift_stats_given_nonzero_delta": {
         "column": "is_in_attacking_box",
-        "mean_xt_true": -0.10956806429712164,
-        "mean_xt_false": 0.011650780699778852,
-        "lift": -0.1212188449969005,
-        "pct_true": 10.835228072999458,
-        "n_true": 5385,
-        "n_false": 44314,
+        "mean_xt_true": -0.01833594958571989,
+        "mean_xt_false": 0.007153435780606213,
+        "lift": -0.025489385366326105,
+        "pct_true": 11.450261662511512,
+        "n_true": 5098,
+        "n_false": 39425,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 95.9,
-          "pct_positive": 4.1,
+          "pct_negative": 54.22,
+          "pct_positive": 45.78,
           "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 47.78,
-          "pct_positive": 52.22,
+          "pct_negative": 43.09,
+          "pct_positive": 56.91,
           "pct_zero": 0.0
         }
       }
@@ -486,41 +509,41 @@
       "reason": null,
       "lift_stats": {
         "column": "is_in_defending_box",
-        "mean_xt_true": 0.07855821858293742,
-        "mean_xt_false": -0.00886867206699873,
-        "lift": 0.08742689064993615,
-        "pct_true": 8.639089156970519,
-        "n_true": 4841,
-        "n_false": 51195,
+        "mean_xt_true": 0.019947050864509396,
+        "mean_xt_false": 0.0018245896886739518,
+        "lift": 0.018122461175835443,
+        "pct_true": 8.59023331719302,
+        "n_true": 4790,
+        "n_false": 50971,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 7.15,
-          "pct_positive": 81.51,
-          "pct_zero": 11.34
+          "pct_negative": 29.5,
+          "pct_positive": 56.66,
+          "pct_zero": 13.84
         },
         "false_direction": {
-          "pct_negative": 50.77,
-          "pct_positive": 37.92,
-          "pct_zero": 11.31
+          "pct_negative": 35.98,
+          "pct_positive": 43.27,
+          "pct_zero": 20.75
         }
       },
       "lift_stats_given_nonzero_delta": {
         "column": "is_in_defending_box",
-        "mean_xt_true": 0.08860678848089469,
-        "mean_xt_false": -0.009999155779285132,
-        "lift": 0.09860594426017982,
-        "pct_true": 8.635988651683132,
-        "n_true": 4292,
-        "n_false": 45407,
+        "mean_xt_true": 0.02315153226096438,
+        "mean_xt_false": 0.0023022368804188533,
+        "lift": 0.02084929538054553,
+        "pct_true": 9.26936639489702,
+        "n_true": 4127,
+        "n_false": 40396,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 8.06,
-          "pct_positive": 91.94,
+          "pct_negative": 34.24,
+          "pct_positive": 65.76,
           "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 57.24,
-          "pct_positive": 42.76,
+          "pct_negative": 45.4,
+          "pct_positive": 54.6,
           "pct_zero": 0.0
         }
       }
@@ -530,41 +553,41 @@
       "reason": "Type 1 REVIEW resolution: point-biserial r=-0.785 vs attacking_goal_centrality (kept)",
       "lift_stats": {
         "column": "is_wide_lane",
-        "mean_xt_true": 0.0020788007016632015,
-        "mean_xt_false": -0.0026013244441984054,
-        "lift": 0.004680125145861607,
-        "pct_true": 27.468056249553857,
-        "n_true": 15392,
-        "n_false": 40644,
+        "mean_xt_true": 0.003478974826763418,
+        "mean_xt_false": 0.0033444458466142745,
+        "lift": 0.00013452898014914335,
+        "pct_true": 27.433152203152737,
+        "n_true": 15297,
+        "n_false": 40464,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 44.87,
-          "pct_positive": 43.82,
-          "pct_zero": 11.31
+          "pct_negative": 32.4,
+          "pct_positive": 42.04,
+          "pct_zero": 25.56
         },
         "false_direction": {
-          "pct_negative": 47.81,
-          "pct_positive": 40.88,
-          "pct_zero": 11.31
+          "pct_negative": 36.57,
+          "pct_positive": 45.32,
+          "pct_zero": 18.11
         }
       },
       "lift_stats_given_nonzero_delta": {
         "column": "is_wide_lane",
-        "mean_xt_true": 0.002343923551388177,
-        "mean_xt_false": -0.002932984651298269,
-        "lift": 0.005276908202686446,
-        "pct_true": 27.467353467876617,
-        "n_true": 13651,
-        "n_false": 36048,
+        "mean_xt_true": 0.004673564408975147,
+        "mean_xt_false": 0.004084067381017624,
+        "lift": 0.000589497027957523,
+        "pct_true": 25.575545223816903,
+        "n_true": 11387,
+        "n_false": 33136,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 50.59,
-          "pct_positive": 49.41,
+          "pct_negative": 43.52,
+          "pct_positive": 56.48,
           "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 53.91,
-          "pct_positive": 46.09,
+          "pct_negative": 44.66,
+          "pct_positive": 55.34,
           "pct_zero": 0.0
         }
       }
@@ -574,108 +597,117 @@
       "reason": null,
       "lift_stats": {
         "column": "phase_changed_since_prev_event",
-        "mean_xt_true": -0.003851269156076541,
-        "mean_xt_false": 0.0011074907252547816,
-        "lift": -0.004958759881331322,
-        "pct_true": 48.86858448140481,
-        "n_true": 27384,
-        "n_false": 28652,
+        "mean_xt_true": 0.0022948160611641925,
+        "mean_xt_false": 0.004417002347052436,
+        "lift": -0.0021221862858882435,
+        "pct_true": 48.80113340865479,
+        "n_true": 27212,
+        "n_false": 28549,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 53.62,
-          "pct_positive": 44.87,
-          "pct_zero": 1.51
+          "pct_negative": 37.53,
+          "pct_positive": 44.23,
+          "pct_zero": 18.23
         },
         "false_direction": {
-          "pct_negative": 40.67,
-          "pct_positive": 38.65,
-          "pct_zero": 20.68
+          "pct_negative": 33.42,
+          "pct_positive": 44.6,
+          "pct_zero": 21.99
         }
       },
       "lift_stats_given_nonzero_delta": {
         "column": "phase_changed_since_prev_event",
-        "mean_xt_true": -0.0039102426521078195,
-        "mean_xt_false": 0.0013961555904611054,
-        "lift": -0.005306398242568925,
-        "pct_true": 54.268697559307036,
-        "n_true": 26971,
-        "n_false": 22728,
+        "mean_xt_true": 0.002806459694233967,
+        "mean_xt_false": 0.0056618624284303165,
+        "lift": -0.0028554027341963495,
+        "pct_true": 49.97641668351189,
+        "n_true": 22251,
+        "n_false": 22272,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 54.44,
-          "pct_positive": 45.56,
+          "pct_negative": 45.9,
+          "pct_positive": 54.1,
           "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 51.28,
-          "pct_positive": 48.72,
+          "pct_negative": 42.83,
+          "pct_positive": 57.17,
           "pct_zero": 0.0
         }
       }
     }
   },
   "off_pool_possession_flags": {
-    "note": "These columns are NOT rows in `columns` above, and that is not an oversight. This ledger is built from the reconstructed pre-drop 51-era pool (feature_config_v1_historical.ACTIVE_V1_HISTORICAL), and all three were already out of the candidate list before that snapshot -- so the ledger's own pool construction, mirrored unchanged from generate_reports_xg.py, cannot surface them. Prompt 64's motivating finding (they stop being degenerate zeros on this target) would therefore have disappeared on a technicality. The same boolean_xt_lift function used for every pooled row was run on them off-pool instead, and the gap is stated in the rendered report rather than omitted. Observation only -- these columns remain excluded in feature_config.py.",
+    "note": "These columns are NOT rows in `columns` above, and that is not an oversight -- the ledger is built from the reconstructed pre-drop 51-era pool and all three were already out of the candidate list before that snapshot. Same structural gap as the v1 edition of this report. What differs on v2: action_ended_possession is the flag that TRIGGERS xt_after = 0, so its True group's delta equals xt_before exactly by construction (verified with np.allclose on this run, see `collapses_to_xt_before`). That is Prompt 66 section 2.1's result, and it is a construction identity rather than a measurement. Observation only -- these columns remain excluded in feature_config.py, and on v2 the case for keeping them excluded is stronger, not weaker.",
     "lifts": {
       "action_changed_possession": {
         "column": "action_changed_possession",
-        "mean_xt_true": -0.0012112507560137458,
-        "mean_xt_false": -0.0013252578199688596,
-        "lift": 0.00011400706395511373,
-        "pct_true": 8.30894425012492,
+        "mean_xt_true": 0.030514814424398632,
+        "mean_xt_false": 0.00090931530579004,
+        "lift": 0.029605499118608592,
+        "pct_true": 8.349921988486576,
         "n_true": 4656,
-        "n_false": 51380,
+        "n_false": 51105,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 40.7,
-          "pct_positive": 35.78,
-          "pct_zero": 23.52
+          "pct_negative": 0.0,
+          "pct_positive": 100.0,
+          "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 47.57,
-          "pct_positive": 42.22,
-          "pct_zero": 10.2
-        }
+          "pct_negative": 38.65,
+          "pct_positive": 39.36,
+          "pct_zero": 21.99
+        },
+        "xt_before_mean_same_slice": 0.03051481,
+        "collapses_to_xt_before": true,
+        "collapse_note": "target == xt_before exactly for every row in this slice (np.allclose, checked on this run): xt_after is forced to 0.0 by construction for possession-ending actions. Construction identity, not a discovered effect."
       },
       "action_ended_possession": {
         "column": "action_ended_possession",
-        "mean_xt_true": -0.0012112507560137458,
-        "mean_xt_false": -0.0013252578199688596,
-        "lift": 0.00011400706395511373,
-        "pct_true": 8.30894425012492,
+        "mean_xt_true": 0.030514814424398632,
+        "mean_xt_false": 0.00090931530579004,
+        "lift": 0.029605499118608592,
+        "pct_true": 8.349921988486576,
         "n_true": 4656,
-        "n_false": 51380,
+        "n_false": 51105,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 40.7,
-          "pct_positive": 35.78,
-          "pct_zero": 23.52
+          "pct_negative": 0.0,
+          "pct_positive": 100.0,
+          "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 47.57,
-          "pct_positive": 42.22,
-          "pct_zero": 10.2
-        }
+          "pct_negative": 38.65,
+          "pct_positive": 39.36,
+          "pct_zero": 21.99
+        },
+        "xt_before_mean_same_slice": 0.03051481,
+        "collapses_to_xt_before": true,
+        "collapse_note": "target == xt_before exactly for every row in this slice (np.allclose, checked on this run): xt_after is forced to 0.0 by construction for possession-ending actions. Construction identity, not a discovered effect."
       },
       "action_won_possession": {
         "column": "action_won_possession",
-        "mean_xt_true": -0.003521255025,
-        "mean_xt_false": -0.0011643682245022502,
-        "lift": -0.0023568868004977496,
-        "pct_true": 6.424441430508959,
+        "mean_xt_true": 0.03065614051388889,
+        "mean_xt_false": 0.001498925036184122,
+        "lift": 0.02915721547770477,
+        "pct_true": 6.456125248829828,
         "n_true": 3600,
-        "n_false": 52436,
+        "n_false": 52161,
         "small_n": false,
         "true_direction": {
-          "pct_negative": 42.83,
-          "pct_positive": 36.17,
-          "pct_zero": 21.0
+          "pct_negative": 0.0,
+          "pct_positive": 100.0,
+          "pct_zero": 0.0
         },
         "false_direction": {
-          "pct_negative": 47.29,
-          "pct_positive": 42.07,
-          "pct_zero": 10.64
-        }
+          "pct_negative": 37.87,
+          "pct_positive": 40.58,
+          "pct_zero": 21.54
+        },
+        "xt_before_mean_same_slice": 0.03065614,
+        "collapses_to_xt_before": true,
+        "collapse_note": "target == xt_before exactly for every row in this slice (np.allclose, checked on this run): xt_after is forced to 0.0 by construction for possession-ending actions. Construction identity, not a discovered effect."
       }
     }
   }

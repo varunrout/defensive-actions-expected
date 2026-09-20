@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>xT-Delta Target -- Master Findings (Active-Binary Leg)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --plane: #eceee8;
+  --surface: #ffffff;
+  --text-primary: #10151c;
+  --text-secondary: #4c525b;
+  --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09);
+  --gridline: #e2e4de;
+  --accent: #e34948;
+  --pos: #e34948;
+  --neg: #2a78d6;
+  --amber: #eda100;
+  --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b;
+  --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --plane: #090c10;
+    --surface: #161b22;
+    --text-primary: #f3f5f7;
+    --text-secondary: #b6bdc7;
+    --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09);
+    --gridline: #232a34;
+    --accent: #e66767;
+    --pos: #e66767;
+    --neg: #3987e5;
+    --amber: #c98500;
+    --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78;
+    --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --plane: #090c10;
+  --surface: #161b22;
+  --text-primary: #f3f5f7;
+  --text-secondary: #b6bdc7;
+  --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09);
+  --gridline: #232a34;
+  --accent: #e66767;
+  --pos: #e66767;
+  --neg: #3987e5;
+  --amber: #c98500;
+  --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78;
+  --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Public Sans", -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 24px 32px;
+}
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+h1.title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+.dek {
+  color: var(--text-secondary);
+  max-width: 64ch;
+  margin: 0 0 24px;
+  font-size: 15.5px;
+}
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b {
+  display: block;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.stat span {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+h2.section-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  margin: 48px 0 4px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-note { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) { .findings { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.finding.flag { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(42,120,214,0.12);
+  color: var(--neg);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.finding.flag .tag { background: rgba(237,161,0,0.18); color: var(--amber); }
+.finding p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-size: 15.5px;
+  margin: 0 0 4px;
+}
+.card .subnote { color: var(--text-muted); font-size: 12px; margin: 0 0 14px; }
+.catbar-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 10px; }
+.catbar-label {
+  display: flex; justify-content: space-between; font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.catbar-label .n { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+.catbar-track {
+  position: relative; height: 10px; background: var(--gridline);
+  border-radius: 5px; overflow: visible;
+}
+.catbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px; background: var(--neg); }
+.catbar-refline {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber);
+}
+.rate-val { font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-primary); }
+.ledger { display: flex; flex-direction: column; gap: 2px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 200px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ledger-row:hover { background: var(--surface); }
+@media (max-width: 760px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+.ledger-label { font-size: 13.5px; }
+.ledger-label .pct { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 11.5px; display: block; }
+.divaxis { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; }
+.divaxis .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border); }
+.divbar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.divbar.pos { background: var(--pos); left: 50%; }
+.divbar.neg { background: var(--neg); right: 50%; }
+.ledger-figs { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+.ledger-figs .lift { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.small-n-badge {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--amber);
+  border: 1px solid var(--amber); border-radius: 4px; padding: 1px 5px; margin-left: 6px;
+}
+.hist { display: flex; align-items: flex-end; gap: 1.5px; height: 64px; margin-bottom: 10px; }
+.hist .bin { flex: 1; background: var(--neg); border-radius: 2px 2px 0 0; min-height: 1px; }
+.hist .bin.tail { background: var(--amber); }
+.stat-row {
+  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px; color: var(--text-secondary); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 8px;
+}
+.stat-row div b { display: block; color: var(--text-primary); font-size: 13px; }
+.extreme-note { font-size: 11.5px; color: var(--amber); margin-top: 8px; }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+footer ul { color: var(--text-muted); font-size: 12px; max-width: 780px; padding-left: 18px; margin: 0 0 8px; }
+
+.article { max-width: 860px; }
+.article > p:first-child {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 44px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.article h2:first-of-type { margin-top: 0; }
+.article h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 30px 0 4px;
+  color: var(--accent);
+}
+.article h4 {
+  font-family: "Public Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin: 22px 0 8px;
+}
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article em { color: var(--text-secondary); }
+.article code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--neg);
+}
+.article ul, .article ol {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+.article li { margin-bottom: 6px; }
+.article li > p { margin: 0; display: inline; }
+.article hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 22px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.article th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.article td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.article td code, .article th code { font-weight: 400; }
+
+.dataset-block { margin-top: 56px; padding-top: 36px; border-top: 2px solid var(--border); }
+.dataset-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.dataset-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  margin: 0 0 4px;
+}
+.dataset-substat { color: var(--text-muted); font-family: "JetBrains Mono", monospace; font-size: 12.5px; margin: 0 0 18px; }
+.method-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 16px 0 40px;
+}
+@media (max-width: 980px) { .method-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .method-strip { grid-template-columns: 1fr; } }
+.method-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.method-card .m-name {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: block;
+}
+.method-card p { margin: 0; font-size: 12.5px; color: var(--text-secondary); }
+.tier-section { margin: 12px 0 44px; }
+.tier-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+.tier-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.tier-dot.drop { background: var(--pos); }
+.tier-dot.collapse { background: var(--amber); }
+.tier-dot.review { background: var(--neg); }
+.tier-dot.distinct { background: var(--good); }
+.tier-note { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; }
+.corr-ledger { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.corr-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 160px 76px 96px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.corr-row:last-child { border-bottom: none; }
+.corr-row:hover { background: var(--plane); }
+@media (max-width: 760px) {
+  .corr-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 14px; }
+}
+.corr-pair { color: var(--text-primary); font-weight: 600; }
+.corr-pair .arrow { color: var(--text-muted); font-weight: 400; margin: 0 4px; }
+.corr-method {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.corr-mag-track { position: relative; height: 8px; background: var(--gridline); border-radius: 4px; }
+.corr-mag-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; }
+.corr-mag-fill.drop { background: var(--pos); }
+.corr-mag-fill.collapse { background: var(--amber); }
+.corr-mag-fill.review { background: var(--neg); }
+.corr-mag-fill.distinct { background: var(--good); }
+.corr-value { font-family: "JetBrains Mono", monospace; font-weight: 600; text-align: right; }
+.verdict-chip {
+  justify-self: end;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verdict-chip.drop { background: rgba(227,73,72,0.14); color: var(--pos); }
+.verdict-chip.collapse { background: var(--amber-wash); color: var(--amber); }
+.verdict-chip.review { background: rgba(42,120,214,0.12); color: var(--neg); }
+.verdict-chip.distinct { background: var(--good-wash); color: var(--good); }
+.closing-note {
+  margin-top: 24px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.closing-note b { color: var(--text-primary); }
+
+.rule-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+.rule-banner b { color: var(--text-primary); }
+.framework-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 40px; }
+@media (max-width: 760px) { .framework-grid { grid-template-columns: 1fr; } }
+.framework-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.framework-card .f-type {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: block;
+}
+.framework-card h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.framework-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0 0 10px; }
+.framework-card .example {
+  font-size: 12.5px;
+  background: var(--plane);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+}
+.framework-card .example b { color: var(--text-primary); }
+
+.hcall-panel {
+  background: var(--amber-wash);
+  border: 1px solid rgba(237,161,0,0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 20px 0 40px;
+}
+.hcall-panel > .hp-title {
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.hcall-panel > .hp-note { font-size: 13px; color: var(--text-secondary); margin: 0 0 16px; }
+.hcall-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.hcall-item:last-child { margin-bottom: 0; }
+.hcall-item .hp-pair { font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.hcall-item .hp-reason { color: var(--text-secondary); }
+
+.table-scroll { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+.evidence-ledger { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 12.5px; border: none; border-radius: 0; }
+.evidence-ledger th {
+  text-align: left;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--plane);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.evidence-ledger td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); background: var(--surface); }
+.evidence-ledger tr:last-child td { border-bottom: none; }
+.evidence-ledger td:first-child { color: var(--text-primary); font-weight: 600; }
+
+.path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+@media (max-width: 760px) { .path-grid { grid-template-columns: 1fr; } }
+.path-card { border-radius: 10px; padding: 16px 18px; border: 1px solid var(--border); }
+.path-card.do-now { background: var(--good-wash); border-color: rgba(47,158,91,0.35); }
+.path-card.defer { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.path-card .p-label {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+.path-card.do-now .p-label { color: var(--good); }
+.path-card.defer .p-label { color: var(--amber); }
+.path-card p { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
+.recommendation {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--good);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+.recommendation b { color: var(--text-primary); }
+
+.test-block { margin-top: 48px; padding-top: 36px; border-top: 2px solid var(--border); }
+.test-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.test-title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 24px; margin: 0 0 6px; }
+.test-subnote { color: var(--text-muted); font-size: 13px; margin: 0 0 24px; }
+.qchart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
+.qchart-card h4 { font-family: "Archivo", sans-serif; font-size: 14.5px; margin: 0 0 4px; }
+.qchart-card .qc-note { color: var(--text-muted); font-size: 12px; margin: 0 0 16px; }
+.qbar-row { display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 0 4px; }
+.qbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.qbar-val { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.qbar-fill { width: 100%; max-width: 56px; background: var(--neg); border-radius: 4px 4px 0 0; min-height: 2px; }
+.qbar-label { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; text-align: center; line-height: 1.3; }
+.qbar-n { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); }
+.stratum-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 700px) { .stratum-grid { grid-template-columns: 1fr; } }
+.stratum-card { background: var(--plane); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.stratum-card h5 { font-family: "JetBrains Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--accent); margin: 0 0 4px; }
+.stratum-delta { font-size: 11.5px; color: var(--text-muted); margin: 0 0 12px; }
+.stratum-delta b { color: var(--text-primary); }
+.qbar-row.small { height: 90px; gap: 8px; }
+.qbar-row.small .qbar-fill { max-width: 40px; }
+.verdict-banner { border-radius: 10px; padding: 16px 20px; margin: 8px 0 28px; font-size: 14px; }
+.verdict-banner.v-no { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); }
+.verdict-banner.v-yes { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); }
+.verdict-banner.v-partially { background: rgba(42,120,214,0.10); border: 1px solid rgba(42,120,214,0.3); }
+.verdict-banner b { color: var(--text-primary); }
+.caveat-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 20px 24px; margin-top: 32px; }
+.caveat-box h3 { font-family: "Archivo", sans-serif; font-size: 16px; margin: 0 0 8px; }
+.caveat-box ul { margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary); }
+.caveat-box li { margin-bottom: 4px; }
+
+.numfeat-list { display: flex; flex-direction: column; gap: 12px; }
+.numfeat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+.numfeat-card.is-dropped { border-left: 4px solid var(--amber); }
+.numfeat-card.is-locked { border-left: 4px solid var(--good); }
+.numfeat-card.is-unreliable { background: var(--amber-wash); border-color: rgba(237,161,0,0.35); }
+.numfeat-card.is-inconsistent { box-shadow: inset 0 0 0 1px rgba(227,73,72,0.4); }
+.numfeat-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-bottom: 6px;
+}
+.numfeat-rank { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-muted); }
+.numfeat-name { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 15.5px; color: var(--text-primary); }
+.nf-badge {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.nf-badge.locked { background: var(--good-wash); color: var(--good); }
+.nf-badge.dropped { background: var(--amber-wash); color: var(--amber); }
+.nf-badge.type { background: var(--plane); color: var(--text-secondary); }
+.nf-badge.unreliable { background: rgba(227,73,72,0.14); color: var(--pos); }
+.nf-badge.inconsistent { background: rgba(227,73,72,0.14); color: var(--pos); }
+.numfeat-stats {
+  display: flex; flex-wrap: wrap; gap: 14px 22px;
+  font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.numfeat-stats b { color: var(--text-primary); }
+.numfeat-reason, .numfeat-note { font-size: 12.5px; color: var(--text-secondary); margin: 4px 0; }
+.numfeat-note { color: var(--amber); }
+.numfeat-card summary {
+  cursor: pointer;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--neg);
+  margin-top: 6px;
+  outline: none;
+}
+.numfeat-card summary::-webkit-details-marker { color: var(--neg); }
+.numbin-rows { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+.numbin-row {
+  display: grid; grid-template-columns: 1fr 3fr auto; align-items: center; gap: 10px;
+  font-size: 11.5px; color: var(--text-secondary);
+}
+.numbin-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.numbin-track { position: relative; height: 9px; background: var(--gridline); border-radius: 4px; }
+.numbin-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; background: var(--neg); }
+.numbin-refline { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--amber); }
+.numbin-val { font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 600; color: var(--text-primary); text-align: right; }
+.numfeat-consistency {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-size: 12.5px; color: var(--text-secondary);
+}
+.numfeat-consistency .cverdict { font-weight: 700; }
+.numfeat-consistency .cverdict.ok { color: var(--good); }
+.numfeat-consistency .cverdict.bad { color: var(--pos); }
+.numsplit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+@media (max-width: 700px) { .numsplit-grid { grid-template-columns: 1fr; } }
+.numsplit-card { background: var(--plane); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.numsplit-card h5 { font-family: "JetBrains Mono", monospace; font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); margin: 0 0 6px; }
+
+.mf-section-title { margin-top:48px; padding-top:24px; border-top:2px solid var(--border); }
+.mf-p { color: var(--text-secondary); font-size: 14px; line-height:1.6; margin: 10px 0; }
+.mf-ul { padding-left:22px; }
+.mf-ul li { color: var(--text-secondary); font-size: 13.5px; line-height:1.6; margin-bottom:10px; }
+.mf-h3 { font-family:"Archivo",sans-serif; font-size:16px; margin-top:24px; }
+.mf-table-wrap { overflow-x:auto; margin:12px 0; }
+.mf-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+.mf-table th { text-align:left; color:var(--text-muted); padding:6px 10px; border-bottom:1px solid var(--border); }
+.mf-table td { padding:6px 10px; border-top:1px solid var(--border); color:var(--text-secondary); vertical-align:top; }
+
+.deviation-box { border-left: 4px solid var(--amber, #d98324); background: var(--amber-wash, rgba(217,131,36,0.08));
+  padding: 14px 16px; border-radius: 8px; margin: 0 0 22px; font-size: 13px; line-height: 1.6; }
+.deviation-box p { margin: 0; }
+</style>
+</head>
+<body>
+<div class="masthead"><div class="masthead-inner">
+  <p class="eyebrow">MASTER FINDINGS -- XT DELTA &amp;middot; ACTIVE-BINARY LEG ONLY</p>
+  <h1 class="title">xT-Delta Target -- Master Findings (Active-Binary Leg)</h1>
+  <p class="dek">The entry point for this portal: which xg_target script produced each report and how that was confirmed, what target_xt_delta is, exactly what methodology had to change because of its shape, every finding, and what is deliberately left open. Active-binary leg only.</p>
+  <div class="statbar"><div class="stat"><b>34</b><span>active features</span></div><div class="stat"><b>13</b><span>reports rebuilt</span></div><div class="stat"><b>5</b><span>reports linked, not rebuilt</span></div><div class="stat"><b>47%</b><span>target rows negative</span></div></div>
+</div></div>
+<div class="wrap">
+<div class="article">
+<div class="deviation-box">
+<p><strong>Superseded (Prompt 67).</strong> This portal was built against <code>target_xt_delta</code> (v1),
+  whose <code>xt_after</code> term was <code>xT(action_x, action_y)</code> &mdash; the defensive action's own
+  recorded location. Prompt 66 found that definition wrong (for a Clearance it scores where the ball <em>was</em>
+  when cleared, not where it ended up) and replaced it with a possession-outcome definition. The consequences are
+  not marginal: Clearance moves from 8th of 8 event types (-0.0325) to 1st of 8 (+0.0247), and this portal's
+  single most important recorded caveat &mdash; construction coupling between location-derived features and
+  <code>xt_after</code> &mdash; is roughly 74% weaker under the correction. See the rebuilt portal at
+  <a href="../xt_target/INDEX.html">reports/analysis/xt_target/</a>
+  (<a href="../xt_target/MASTER_FINDINGS.html">Master Findings</a>).
+  <strong>Every report in this directory is kept exactly as-is, not deleted or rewritten</strong> &mdash; they
+  remain the accurate historical record of what Prompt 65 actually measured against v1 at the time.</p>
+</div>
+
+<div class="finding flag" style="margin-bottom:20px;"><span class="tag">scope</span><p><b>This portal covers the ACTIVE-BINARY leg only.</b> The passive leg is explicitly out of scope for this target and no passive-side xT-delta report exists. Nothing in this document, or in this portal, covers it.</p></div>
+<div class="finding" style="margin-bottom:28px;"><span class="tag">bottom line up front</span><p><code>target_xt_delta</code> is a roughly symmetric, heavy-tailed, sign-carrying target (47.0% negative, 41.7% positive, 11.3% exactly zero, skew +0.093) -- structurally unlike either target this project has analysed before. The xg_target report suite's methodology transfers, but only after three explicit adaptations, each stated in every report it touches. Both of Prompt 64's carried-forward findings resurfaced exactly where expected: the Clearance/<code>action_x</code> artefact in the Category Atlas (Clearance ranks last of 8 event types) and again as a new confound test and a new leakage-audit part, and the symmetric/negative-capable distribution shape in the Distribution Atlas. No feature was added, dropped or re-tiered, no model artefact was touched, and the five target-independent reports were linked rather than rebuilt.</p></div>
+<h2 class="mf-section-title" id="s1">1. Step 0 -- confirmed generation methodology, report by report</h2>
+<p class="mf-p"><b>This section is a required deliverable, not scratch notes.</b> For each target-dependent report type below, the specific script that actually produced the corresponding file in <code>reports/analysis/xg_target/</code> was identified and confirmed by READING ITS LOGIC and checking it against the file on disk -- column names, thresholds, JSON key sets, chart types -- not guessed from a filename.</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Report</th><th>Confirmed xg generator(s)</th><th>Confirmation status</th><th>New xT sibling</th><th>How it was confirmed / what differs</th></tr></thead><tbody><tr><td>Active -- Category Atlas</td><td>`src/eda/generate_reports_xg.py`</td><td>CONFIRMED from source</td><td>`src/eda/generate_reports_xt.py`</td><td>Reads `feature_config_v1_historical.ACTIVE_V1_HISTORICAL` for the reconstructed pre-drop pool, tags each column locked/dropped with the reason from `ACTIVE['excluded']`, emits the `catbar-*` markup and the `categories` / `categories_given_shot` JSON key pair that the file on disk actually has.</td></tr><tr><td>Active -- Flag Ledger</td><td>`src/eda/generate_reports_xg.py` (same script)</td><td>CONFIRMED from source</td><td>`src/eda/generate_reports_xt.py`</td><td>Same script emits both; `boolean_xg_lift` from `compute_stats_xg.py` produces the exact `lift`/`pct_true`/`small_n` key set in `active_flag_ledger.json`, ranked by `abs(lift)`, `SMALL_N_THRESHOLD=500`.</td></tr><tr><td>Active -- Distribution Atlas (+ reconstructed variant)</td><td>`src/eda/generate_distribution_atlas_reconstructed.py`</td><td>CONFIRMED from source, with a stale-path artefact found</td><td>`src/eda/generate_distribution_atlas_xt.py`</td><td>Target-INDEPENDENT by construction (`compute_stats.continuous_distribution` / `discrete_distribution` never reference a target). Its filename branch tests `out_dir.name == "eda_xg"`, which no longer matches the current directory name `xg_target` -- so the file on disk is `active_distribution_atlas.html` while a re-run today would write `..._reconstructed.html`. Noted, NOT fixed there (that script stays untouched so the xg portal remains reproducible).</td></tr><tr><td>Active -- Numerical Target Atlas</td><td>`generate_numerical_xg_target_analysis.py` (compute) + `generate_numerical_xg_target_reports.py` (render)</td><td>CONFIRMED from source</td><td>`generate_numerical_xt_target_analysis.py` + `_reports.py`</td><td>Compute step imports `build_pool`, `classify_shape`, `N_QUANTILE_BINS=10`, `DISCRETE_CARDINALITY_THRESHOLD=15`, `RHO_THRESHOLD=0.05` and `load_canonical_split`; the render step imports `NUM_TARGET_CSS`. Both key sets match the JSON/HTML on disk exactly.</td></tr><tr><td>Review Methodology</td><td>`generate_review_analysis_xg.py` + `generate_review_report_xg.py`</td><td>CONFIRMED from source</td><td>`generate_review_analysis_xt.py` + `generate_review_report_xt.py`</td><td>Reads `shot_target/CORRELATION_ANALYSIS_V1_HISTORICAL.json`; Types 1/3/4 imported unchanged from `generate_review_analysis`; only Type 2 uses target evidence. `TYPE1_R_THRESHOLD`, `TYPE2_SUBSET_CONTAINMENT`, `NEAR_IDENTICAL_RATIO=0.5`, `DISTINCT_SIGNAL_RATIO=1.5` all carried over.</td></tr><tr><td>Leakage Audit</td><td>`generate_leakage_audit_xg.py` + `generate_leakage_report_xg.py`</td><td>CONFIRMED from source -- but PASSIVE-ONLY</td><td>`generate_leakage_audit_xt.py` + `generate_leakage_report_xt.py`</td><td>Parts B/C/D test `screened_option_was_avoided`, `has_screened_outcome`, `has_option_2/3` -- none exist in the active parquet, and NO active-side leakage audit exists anywhere in this repo for any target. Part A reused by import. Parts B'/C' apply the same method to active analogues; Part D' is new and labelled new.</td></tr><tr><td>Confound (Reversal) Testing</td><td>`generate_confound_analysis_xg.py` (2 tests) + `generate_confound_analysis_part_d_xg.py` (3 more) + `generate_confound_report_xg.py`</td><td>CONFIRMED from source -- but all 5 are PASSIVE</td><td>`generate_confound_analysis_xt.py` + `generate_confound_report_xt.py`</td><td>Exactly ONE active confound test exists project-wide: `defenders_within_10m_vs_box_proximity`, from `generate_confound_analysis_part_a.py`, in the BINARY portal only -- the xg mirror never received it (its own docstring says so). Test 1 mirrors it exactly. `_verdict()` reused byte-for-byte; `QCUT_N=4` unchanged.</td></tr><tr><td>Tournament Stability Check</td><td>`generate_tournament_stability_check_xg.py` + `generate_tournament_stability_report_xg.py`</td><td>CONFIRMED from source</td><td>`generate_tournament_stability_check_xt.py` + `_report_xt.py`</td><td>Imports `INVESTIGATE` (10 features, 6 active) and `load_match_tournament_map`; bin edges computed once on pooled data and reused across tournaments; `nearest_defender_distance` excluded for the known self-reference bug. All carried over; the 4 passive features are dropped as out of scope.</td></tr><tr><td>Slice Stratification V1</td><td>`generate_slice_stratification_xg.py` + `generate_slice_stratification_xg_expand.py` (Part A: 104 cells, Part B: conditional retrofit) + `generate_slice_stratification_report_xg.py`</td><td>CONFIRMED from source</td><td>`generate_slice_stratification_xt.py` + `generate_slice_stratification_report_xt.py`</td><td>`FEATURE_SLICER_PLAN`, `build_plan()`, `SMALL_N_THRESHOLD=1000` and `STRUCTURAL_CAUTION_CATEGORIES` all imported unchanged. The xg portal needs three scripts for historical reasons; this portal has no such history, so the same cells are built in one pass -- the same simplification the xg V2 script itself makes.</td></tr><tr><td>Slice Stratification V2</td><td>`generate_slice_stratification_v2_xg.py` + `generate_slice_stratification_v2_report_xg.py`</td><td>CONFIRMED from source</td><td>`generate_slice_stratification_v2_xt.py` + `generate_slice_stratification_report_xt.py`</td><td>`ACTIVE_FEATURES`, `ACTIVE_BOOLEAN_SLICERS`, `ARCHETYPE_SLICER` imported unchanged. The archetype slicer is a passive column, so the active half is the boolean-slicer half only and V2's closing archetype-vs-boolean comparison is NOT reproducible -- reported as not applicable.</td></tr><tr><td>Feature Interaction Analysis</td><td>`generate_feature_interaction_analysis_xg.py` + `generate_feature_interaction_report_xg.py`</td><td>CONFIRMED from source</td><td>`generate_feature_interaction_analysis_xt.py` + `_report_xt.py`</td><td>`PAIRS`, `Q=4` and `_bin_labeled` imported unchanged; pairs NOT re-ranked for this target, so the three targets stay comparable. `SUBSTITUTIVE_RATIO_MAX=0.3`, `ADDITIVE_MAGNITUDE_RATIO_MAX=2.0`, `MIN_CELL_N_FOR_DELTA=20` carried over -- they are ratios, so scale- and sign-free.</td></tr><tr><td>Feature Lock Confirmation + Pattern Findings</td><td>`generate_feature_lock_confirmation_xg.py` + `generate_feature_lock_pattern_findings.py` (appends the findings section) + `generate_feature_lock_report_xg.py`</td><td>CONFIRMED from source</td><td>`generate_feature_lock_confirmation_xt.py` + `generate_feature_lock_report_xt.py`</td><td>The xg portal's HTML carries BOTH the confirmation and the pattern findings in one document, so both are produced here in one file too. `correlation_diff` is read directly from the binary confirmation and labelled identical-by-construction -- the same discipline the xg script applies.</td></tr><tr><td>Master Findings (this document)</td><td>`src/eda/generate_master_findings.py` (the binary portal's; the xg portal has none of its own)</td><td>CONFIRMED from source</td><td>`src/eda/generate_master_findings_xt.py`</td><td>The xg portal's INDEX links out to the binary portal's MASTER_FINDINGS rather than having one. This portal gets its own. The binary generator's block model (`p`/`ul`/`table`/`note`/`h3` -> `render_blocks_md`/`render_blocks_html`) is imported and reused, so the .md and .html cannot drift.</td></tr></tbody></table></div>
+<h3 class="mf-h3">Where a methodology could NOT be confirmed from a surviving script</h3>
+<p class="mf-p">Every one of the thirteen report types above traces to a surviving, readable generator script. <b>There is no report in this suite whose methodology had to be hand-reproduced from a prompt file because the script was lost.</b> That is the honest answer, and it is stated rather than padded.</p>
+<p class="mf-p">Three genuine gaps were found, and none of them is a missing script -- they are all SCOPE gaps, reported in the individual reports as well as here:</p>
+<ul class='mf-ul'><li><b>Leakage Audit.</b> The xg (and binary) leakage audits are passive-dataset-only. No active-side leakage audit exists anywhere in this repo, for any target. Part A's method was reused by direct import; the xg audit's Parts B/C/D are reported as HAVING NO ACTIVE COUNTERPART, and substitute parts B'/C' apply the same method to the active dataset's own analogous columns. Part D' is new and is labelled as new inside the report itself.</li><li><b>Confound Testing.</b> All five tests in the xg portal are passive. Exactly one active confound test exists project-wide, in the binary portal only -- <code>defenders_within_10m_vs_box_proximity</code> -- and the xg portal never received it. Test 1 mirrors it exactly; Test 2 is new and labelled new.</li><li><b>Slice Stratification V2.</b> Its archetype slicer is a passive column, so V2's closing archetype-vs-boolean-slicer comparison cannot be reproduced on the active leg. Reported as not applicable rather than replaced with a different comparison that would read like the same conclusion.</li></ul>
+<h3 class="mf-h3">One place where a carried-forward finding does NOT surface through the mirrored methodology</h3>
+<p class="mf-p">Mirroring a methodology faithfully means inheriting its blind spots too. Where a report's own methodology fails to surface one of Prompt 64's findings even though a reader would expect it to, that omission is itself recorded here rather than quietly patched over. One such case was found.</p>
+<p class="mf-p"><b>The Flag Ledger does not show the three <code>action_*_possession</code> flags at all.</b> Prompt 64's motivating result is that those three stop being degenerate zeros on this target, so the Flag Ledger is exactly where a reader would expect it to appear. It does not, and the reason is pool construction, not a failed finding: the ledger is built from the reconstructed pre-drop 51-era pool (<code>feature_config_v1_historical.ACTIVE_V1_HISTORICAL</code>), and all three were already out of the candidate list before that snapshot was taken -- only <code>action_was_under_opponent_possession</code> survived into it. The pool-construction logic is mirrored unchanged from <code>generate_reports_xg.py</code>, so it structurally cannot show them.</p>
+<p class="mf-p">Rather than let the finding disappear on that technicality, the same <code>boolean_xt_lift</code> function the ledger uses for every pooled row was run on the three columns OFF-POOL. The numbers and the gap are both stated in the rendered Flag Ledger, kept under a separate <code>off_pool_possession_flags</code> key in its JSON so they are never mistaken for pooled rows, and the flags are also covered properly in the Leakage Audit's Part C'. The numbers are in section 4.</p>
+<h3 class="mf-h3">One stale-path artefact found in an existing script, reported not fixed</h3>
+<p class="mf-p"><code>generate_distribution_atlas_reconstructed.py</code> chooses its output filename with <code>out_dir.name == "eda_xg"</code>. The directory has since been renamed to <code>xg_target</code>, so that branch no longer matches: the file on disk is <code>active_distribution_atlas.html</code>, but a re-run today would write <code>active_distribution_atlas_reconstructed.html</code>. Left untouched deliberately -- editing it would change what the xg portal regenerates, and no existing <code>_xg</code> script was modified in this work.</p>
+<h3 class="mf-h3">Closeout document: folded in, not separate</h3>
+<p class="mf-p"><code>reports/analysis/shot_target/</code> carries a separate <code>PATTERN_ANALYSIS_CLOSEOUT.{md,html}</code> alongside its MASTER_FINDINGS. A separate closeout is <b>not</b> produced for this portal: that document exists to close out a multi-prompt pattern-analysis campaign spanning two targets and both datasets, whereas this portal is a single-pass, single-leg suite whose entire findings set fits in section 4 below without crowding anything out. Duplicating it would create two documents that could drift apart for no reader benefit.</p>
+<div class="finding flag" style="margin:10px 0;"><span class="tag">scope</span><p><b>This portal covers the ACTIVE-BINARY LEG ONLY.</b> The passive leg is explicitly out of scope and no passive-side xT-delta report exists. Where a report's xg counterpart covers both datasets, only the active half is reproduced, and that is stated in the report.</p></div>
+<h2 class="mf-section-title" id="s2">2. The target: what target_xt_delta is and what shape it has</h2>
+<p class="mf-p"><code>target_xt_delta</code> = <code>xt_before - xt_after</code>, an Expected-Threat value-delta computed in Prompt 64 for the active-binary leg, to replace the structurally flawed <code>target_future_shot_10s</code>/<code>target_future_xg_10s</code> pair on that leg. It lives in <code>outputs/prototypes/active_binary_xt_delta.parquet</code> (56,068 rows, row-aligned to the locked <code>player_defensive_actions.parquet</code> by <code>event_id</code>). Every report in this portal JOINS the two in memory and never writes either back.</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Statistic</th><th>Value</th><th>Meaning</th></tr></thead><tbody><tr><td>rows</td><td>56,068</td><td>the full active-binary leg</td></tr><tr><td>defined</td><td>56,036</td><td>32 NaN, explained in Prompt 64 section 2 (preceding event has no location)</td></tr><tr><td>mean</td><td>-0.001316</td><td>near zero, and NEGATIVE</td></tr><tr><td>std</td><td>0.064986</td><td>the scale-setting statistic this portal uses in place of the mean</td></tr><tr><td>skew</td><td>+0.093</td><td>essentially symmetric</td></tr><tr><td>excess kurtosis</td><td>8.85</td><td>heavy-tailed -- most mass near zero, a few large swings</td></tr><tr><td>share exactly zero</td><td>11.31%</td><td>the action did not cross an xT grid-cell boundary</td></tr><tr><td>share negative</td><td>47.00%</td><td>xT ROSE across the action</td></tr><tr><td>share positive</td><td>41.69%</td><td>xT FELL across the action (threat reduced)</td></tr></tbody></table></div>
+<div class="finding flag" style="margin:10px 0;"><span class="tag">carried forward from Prompt 64 -- confirmed independently</span><p>Prompt 64 finding carried forward (outputs/prototypes/XT_TARGET_PROTOTYPE.md section 3.2): target_xt_delta is roughly symmetric (skew +0.093), heavy-tailed (excess kurtosis 8.85), 47.0% negative / 41.7% positive / 11.3% exactly zero. This is a fundamentally different shape from target_future_xg_10s, which is strictly non-negative, zero-inflated and heavily right-skewed. Any methodology that assumed non-negativity had to be adapted explicitly -- see this module&#x27;s Adaptation 1/2/3 notes, restated in every report. Every figure in the table above was recomputed on this run and matches Prompt 64's.</p></div>
+<h2 class="mf-section-title" id="s3">3. What methodology was adapted, and exactly why</h2>
+<p class="mf-p">The xg_target suite's methodology assumes a strictly non-negative, zero-inflated, right-skewed target throughout. Three things had to change, and one thing that might have been expected to change did not. All four are stated in every report that they touch, not just here.</p>
+<h3 class="mf-h3">Adaptation 1 -- the scale-setting statistic</h3>
+<p class="mf-p">ADAPTATION 1. target_xt_delta is roughly symmetric with a near-zero, NEGATIVE mean (-0.001316), so the xg_target suite&#x27;s convention of expressing every threshold as a multiple of the overall mean target value is meaningless here (it would flip signs and collapse to nothing). Instead the xg convention is TRANSLATED, not replaced: xg&#x27;s own flat_margin (0.5 x mean xg = 0.004055 on these same rows) is re-expressed as a fraction of xg&#x27;s own standard deviation (0.048033), giving 0.084425, and that fraction is applied to target_xt_delta&#x27;s standard deviation (0.064986). Every number in this calculation is computed at runtime from the real parquet, not carried over from a writeup. Scale-free thresholds (|Spearman rho| &gt;= 0.05, small-n row counts, the substitutive/additive ratio cutoffs) are carried over completely unchanged.</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Quantity</th><th>Value on this run</th></tr></thead><tbody><tr><td>xg flat margin on the same rows (0.5 x mean xg)</td><td>0.004055</td></tr><tr><td>as a fraction of xg's own std</td><td>0.084425</td></tr><tr><td>translated flat margin for xT delta</td><td>0.005486</td></tr><tr><td>translated consistency range trigger</td><td>0.010973</td></tr><tr><td>translated review near-identical threshold</td><td>0.005486</td></tr><tr><td>translated review distinct-signal threshold</td><td>0.016459</td></tr><tr><td>flat margin on the non-zero-delta subset</td><td>0.005826</td></tr></tbody></table></div>
+<p class="mf-p">Scale-free thresholds were carried over <b>completely unchanged</b>: |Spearman rho| &ge; 0.05, small-n row counts (500 and 1000), the substitutive (0.3) and additive (2.0) ratio cutoffs, <code>MIN_CELL_N_FOR_DELTA=20</code>, <code>QCUT_N=4</code>, 10 quantile deciles, and the discrete-cardinality cutoff of 15.</p>
+<h3 class="mf-h3">Adaptation 2 -- the conditional panel</h3>
+<p class="mf-p">ADAPTATION 2. The xg_target suite&#x27;s second panel conditions on target_future_shot_10s == 1 to strip the structural zero mass. target_xt_delta has no shot column behind it; its structural-zero analogue is the 11.3% of rows with an EXACTLY zero delta (the action did not cross an xT grid-cell boundary). The conditional panel throughout this suite is therefore &#x27;given a non-zero delta&#x27; (target_xt_delta != 0), never &#x27;given a shot&#x27;.</p>
+<p class="mf-p">One knock-on rename: the slice-stratification reports' <code>occurrence_vs_quality</code> field encodes an xg-specific distinction that simply does not exist for this target. It is renamed <code>zero_mass_vs_magnitude</code> (values: zero-mass-driven / magnitude-driven / inconclusive) rather than reused under a name that would be actively misleading.</p>
+<h3 class="mf-h3">Adaptation 3 -- two-directional framing</h3>
+<p class="mf-p">ADAPTATION 3. Sign carries the football meaning: POSITIVE target_xt_delta = xT fell across the action (threat reduced, good for the defence), NEGATIVE = xT rose. Rankings are by |magnitude| across BOTH directions, never one-sided &#x27;higher is worse&#x27; lift, and every table also reports the negative/positive/zero share behind its mean.</p>
+<p class="mf-p">Concretely this changes four things: every bar chart in the portal diverges from a zero baseline instead of filling from the left (a left-anchored fill renders every negative value as zero width); every sparkline carries a dashed zero line; the interaction heatmaps use a diverging green/red ramp instead of a single-hue alpha ramp; and several reports record a new field with no xg counterpart -- whether a binned curve CROSSES zero, and whether within-stratum deltas change SIGN. Neither question can be asked of a non-negative target at all.</p>
+<h3 class="mf-h3">Not an adaptation -- log-transforms</h3>
+<p class="mf-p">NOT an adaptation: checked directly rather than assumed -- the xg_target report suite never log-transforms its target anywhere (every xg report uses the raw groupby mean of target_future_xg_10s). The log1p framing in this project belongs to the modelling legs, not to this report suite, so there was no log-transform to remove.</p>
+<h2 class="mf-section-title" id="s4">4. Findings</h2>
+<h3 class="mf-h3">Prompt 64&#x27;s two carried-forward findings -- where they resurfaced</h3>
+<div class="finding flag" style="margin:10px 0;"><span class="tag">Clearance / action_x artefact -- RESURFACED, in the Category Atlas and the Confound report</span><p>Prompt 64&#x27;s Clearance/action_x artefact resurfaces exactly where it was predicted to: Clearance ranks 8 of 8 event_type categories at -0.032482 mean delta over n=4,184 rows (53.1% negative). Prompt 64 measured -0.0315 inside the action_ended_possession slice; this is the same artefact on the full active dataset.</p></div>
+<p class="mf-p">It also drives a NEW confound test in this portal (<code>clearance_vs_defending_box_proximity</code>), which asks whether Clearance's negative mean delta survives conditioning on defending-box proximity. The verdict is <b>partially</b> -- it survives in one stratum and not the other, so the artefact is neither purely a deep-box location effect nor independent of location. And Part D' of the Leakage Audit identifies the underlying mechanism: because <code>xt_after</code> is looked up from <code>action_x</code>/<code>action_y</code>, EVERY location-derived feature inherits the same definitional choice, with <code>distance_to_attacking_box</code> the strongest at r=+0.5551 against the target.</p>
+<div class="finding flag" style="margin:10px 0;"><span class="tag">distribution shape -- CONFIRMED, in the Distribution Atlas</span><p>The Distribution Atlas adds a target-shape section the xg portal's atlas has no equivalent of (that atlas covers feature shapes only and is target-independent). Skew, kurtosis and the negative/positive/zero shares all reproduce Prompt 64's figures. The histogram there is clipped SYMMETRICALLY at the 99th percentile of |delta|; the atlas's usual min-to-p99 convention would have silently discarded this target's entire negative tail.</p></div>
+<h3 class="mf-h3">The motivating problem, confirmed fixed on the full dataset (measured off-pool)</h3>
+<p class="mf-p">The three <code>action_*_possession</code> flags are 100% identical zeros against <code>target_future_shot_10s</code> -- which is the stated reason feature_config.py excludes them. Against this target, on the full active dataset rather than only the two slices Prompt 64 examined:</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Flag</th><th>n (True)</th><th>mean delta (True)</th><th>% exactly zero (True)</th><th>lift</th></tr></thead><tbody><tr><td>`action_changed_possession`</td><td>4,656</td><td>-0.001211</td><td>23.5%</td><td>+0.000114</td></tr><tr><td>`action_ended_possession`</td><td>4,656</td><td>-0.001211</td><td>23.5%</td><td>+0.000114</td></tr><tr><td>`action_won_possession`</td><td>3,600</td><td>-0.003521</td><td>21.0%</td><td>-0.002357</td></tr></tbody></table></div>
+<div class="finding flag" style="margin:10px 0;"><span class="tag">measured off-pool -- see section 1</span><p>These three are not rows in the Flag Ledger, because they predate the reconstructed pre-drop pool the ledger is built from. The same lift function was run on them off-pool so the finding is not lost to a pool-construction technicality. The Leakage Audit's Part C' covers them properly.</p></div>
+<p class="mf-p"><b>These columns stay excluded in feature_config.py and nothing in this portal changes that.</b> The finding is that their stated exclusion reason is target-specific and does not transfer; acting on it would be a separate decision requiring its own leakage review.</p>
+<h3 class="mf-h3">Numerical features vs the target</h3>
+<p class="mf-p">31/31 features' binned curves cross zero -- almost all of them separate threat-reducing from threat-increasing actions rather than only varying in magnitude. 4 feature(s) are flagged train/test-inconsistent.</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Feature</th><th>Spearman rho</th><th>Shape</th><th>Curve crosses zero</th></tr></thead><tbody><tr><td>`distance_to_attacking_box`</td><td>0.8397</td><td>monotonic increasing</td><td>True</td></tr><tr><td>`distance_to_defending_box`</td><td>-0.8383</td><td>monotonic decreasing</td><td>True</td></tr><tr><td>`distance_to_attacking_goal`</td><td>0.8352</td><td>monotonic increasing</td><td>True</td></tr><tr><td>`distance_to_defending_goal`</td><td>-0.8326</td><td>monotonic decreasing</td><td>True</td></tr><tr><td>`attacker_centroid_x`</td><td>-0.753</td><td>monotonic decreasing</td><td>True</td></tr></tbody></table></div>
+<h3 class="mf-h3">Flag Ledger -- top 5 by |lift|, both directions</h3>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Flag</th><th>lift</th><th>mean True</th><th>mean False</th><th>n True</th></tr></thead><tbody><tr><td>`is_in_attacking_box`</td><td>-0.110621</td><td>-0.100327</td><td>+0.010294</td><td>5,881</td></tr><tr><td>`is_in_defending_box`</td><td>+0.087427</td><td>+0.078558</td><td>-0.008869</td><td>4,841</td></tr><tr><td>`is_high_zone`</td><td>-0.069151</td><td>-0.053798</td><td>+0.015352</td><td>13,507</td></tr><tr><td>`is_deep_zone`</td><td>+0.065508</td><td>+0.050821</td><td>-0.014687</td><td>11,438</td></tr><tr><td>`has_visible_defender`</td><td>-0.016558</td><td>-0.001338</td><td>+0.015220</td><td>55,960</td></tr></tbody></table></div>
+<h3 class="mf-h3">Confound (reversal) tests</h3>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Test</th><th>Unconditional</th><th>Given a non-zero delta</th><th>New test</th></tr></thead><tbody><tr><td>defenders_within_10m vs box proximity</td><td>partially</td><td>partially</td><td>no</td></tr><tr><td>Clearance's negative mean delta vs defending-box proximity</td><td>partially</td><td>partially</td><td>yes</td></tr></tbody></table></div>
+<h3 class="mf-h3">Tournament stability</h3>
+<p class="mf-p">3/6 active features show a genuine tournament-level difference rather than arbitrary train/test noise.</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Feature</th><th>Verdict</th></tr></thead><tbody><tr><td>`defenders_within_10m`</td><td>genuine tournament-level difference</td></tr><tr><td>`defenders_within_5m`</td><td>genuine tournament-level difference</td></tr><tr><td>`events_elapsed_in_possession`</td><td>arbitrary train/test noise</td></tr><tr><td>`local_numerical_balance_5m`</td><td>arbitrary train/test noise</td></tr><tr><td>`match_time_seconds`</td><td>arbitrary train/test noise</td></tr><tr><td>`attackers_within_5m`</td><td>genuine tournament-level difference</td></tr></tbody></table></div>
+<h3 class="mf-h3">Slice stratification</h3>
+<p class="mf-p">V1: 72 cells, 295 genuine divergences unconditionally and 289 once the zero mass is removed, with 20 categories where that removal flips the conclusion. V2: 108 cells, 149 / 144.</p>
+<h3 class="mf-h3">Numeric x numeric interaction</h3>
+<p class="mf-p">5/5 pairs classify the same way unconditionally and on the non-zero-delta subset. 4/5 have within-stratum deltas that change SIGN -- feature A's effect reverses direction across levels of feature B. That is a distinct finding from 'interactive' and cannot arise on the xG target at all.</p>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Feature A</th><th>Feature B</th><th>Classification</th><th>Stratum deltas change sign</th></tr></thead><tbody><tr><td>`defenders_within_10m`</td><td>`distance_to_attacking_box`</td><td>interactive</td><td>yes</td></tr><tr><td>`defenders_between_ball_and_attacking_goal`</td><td>`attacker_defender_ratio`</td><td>interactive</td><td>no</td></tr><tr><td>`defenders_within_5m`</td><td>`defenders_within_10m`</td><td>substitutive</td><td>yes</td></tr><tr><td>`visible_defender_count`</td><td>`attacker_spread`</td><td>inconclusive</td><td>yes</td></tr><tr><td>`possession_elapsed_seconds`</td><td>`match_time_seconds`</td><td>inconclusive</td><td>yes</td></tr></tbody></table></div>
+<h3 class="mf-h3">Review tier</h3>
+<p class="mf-p">57 ACTIVE review pairs; 35 remain needs_human_call (dominated, as on every target, by continuous-continuous pairs no rule covers); 1 Type-2 pair(s) resolve on the opposite-sign rule, which carries more weight here than on xg -- a sign disagreement means the two flags disagree about the DIRECTION of the threat swing, not merely about being above or below a base rate.</p>
+<h2 class="mf-section-title" id="s5">5. Caveats recorded, and open questions this portal does not answer</h2>
+<p class="mf-p">Two caveats are <b>recorded, not resolved</b>. Neither is a reason to change the locked feature set, and this portal changes nothing in <code>feature_config.py</code>.</p>
+<h3 class="mf-h3">Caveat 1 -- construction coupling (the most important one, no xG or binary counterpart)</h3>
+<p class="mf-p">No feature is dropped on this evidence, and none is proposed for dropping. The locked set stays as-is. The finding is interpretive: because xt_after is looked up from action_x/action_y, location-derived locked features share a definitional term with half the target, so a strong correlation in the Numerical Target Atlas is partly recovery-by-definition rather than discovered defensive signal. This has no counterpart in the xg or binary confirmations, and is the single most important caveat this portal carries.</p>
+<h3 class="mf-h3">Caveat 2 -- this target&#x27;s effects can sit in its zero mass</h3>
+<p class="mf-p">has_previous_event stays a locked candidate feature. The finding is about how this target must be MEASURED (its effects can sit in the zero mass rather than the mean), not about whether the feature belongs in the list. A mean-difference test alone -- the instrument the xg audit uses -- returns p=0.0645 here and would have reported nothing, while the exactly-zero share differs by +27.3pp.</p>
+<div class="finding flag" style="margin:10px 0;"><span class="tag">methodological warning for anyone extending this suite</span><p>Caveat 2 is the one most likely to bite a future report. The instrument the xg suite reaches for first -- a difference of means -- is the right one for a strictly non-negative target whose signal lives in its centre, and the wrong one for a symmetric target with 11.3% of its mass at exactly zero. Every table in this portal therefore reports the negative / zero / positive shares alongside its mean.</p></div>
+<h3 class="mf-h3">Open questions this portal does NOT answer</h3>
+<ul class='mf-ul'><li>Whether <code>action_x</code>/<code>action_y</code> is the right definition of <code>xt_after</code> at all. Prompt 64 flagged that a clearance's RESULTING ball location would be more football-accurate; this portal quantifies the consequences of the current definition but does not change it.</li><li>Whether the three <code>action_*_possession</code> flags should be unlocked now that their stated exclusion reason no longer holds. That needs its own leakage review.</li><li>What model architecture suits a roughly symmetric, heavy-tailed, sign-carrying target. Prompt 64 flagged that the existing hurdle architecture (P(shot) x E[xg|shot]) does not apply as-is. This is an EDA portal and takes no position; no model artefact was touched.</li><li>The passive leg, entirely. Out of scope for this work.</li></ul>
+<h2 class="mf-section-title" id="s6">6. Document map</h2>
+<h3 class="mf-h3">Built here (target-dependent -- rebuilt against target_xt_delta)</h3>
+<div class="mf-table-wrap"><table class="mf-table"><thead><tr><th>Report</th><th>Files</th></tr></thead><tbody><tr><td>Active -- Category Atlas</td><td>`active_category_atlas.html` / `.json`</td></tr><tr><td>Active -- Flag Ledger</td><td>`active_flag_ledger.html` / `.json`</td></tr><tr><td>Active -- Distribution Atlas</td><td>`active_distribution_atlas.html`, `active_distribution_atlas_reconstructed.html`, `active_distribution_atlas.json`</td></tr><tr><td>Active -- Numerical Target Atlas</td><td>`active_numerical_target_atlas.html` / `.json`</td></tr><tr><td>Review Methodology</td><td>`REVIEW_METHODOLOGY.html`, `REVIEW_ANALYSIS.json`</td></tr><tr><td>Leakage Audit</td><td>`LEAKAGE_AUDIT.html` / `.json`</td></tr><tr><td>Confound (Reversal) Testing</td><td>`CONFOUND_ANALYSIS.html` / `.json`</td></tr><tr><td>Tournament Stability Check</td><td>`TOURNAMENT_STABILITY_CHECK.html` / `.json`</td></tr><tr><td>Slice Stratification V1</td><td>`SLICE_STRATIFICATION.html` / `.json`</td></tr><tr><td>Slice Stratification V2</td><td>`SLICE_STRATIFICATION_V2.html` / `.json`</td></tr><tr><td>Feature Interaction Analysis</td><td>`FEATURE_INTERACTION_ANALYSIS.html` / `.json`</td></tr><tr><td>Feature Lock Confirmation + Pattern Findings</td><td>`FEATURE_LOCK_CONFIRMATION_XT.html` / `.json`</td></tr><tr><td>Master Findings (this document)</td><td>`MASTER_FINDINGS.md` / `.html`</td></tr><tr><td>Portal index</td><td>`INDEX.html`</td></tr></tbody></table></div>
+<h3 class="mf-h3">Linked, NOT rebuilt (target-independent -- properties of the features, not of the target)</h3>
+<p class="mf-p">These five are properties of the 32 locked ACTIVE features and are unaffected by which target the features are measured against. The portal index links out to the existing files in <code>../xg_target/</code> rather than duplicating them.</p>
+<ul class='mf-ul'><li>Correlation Atlas V1 / V2 / V3 -- correlation clustering is feature-vs-feature and never references a target column; re-running it here would produce byte-identical pairs and tiers.</li><li>VIF Analysis -- multicollinearity is a property of the feature matrix alone.</li><li>Slicer Redundancy Check -- slicer-vs-slicer, no target term.</li><li>Player-Level Validity Check -- row concentration and train/test player overlap, no target term.</li><li>Player-Grouped Split Check -- an identity-leakage stress test on the split itself.</li></ul>
+<h3 class="mf-h3">New generator scripts (all added as siblings; no existing script was modified)</h3>
+<p class="mf-p">Every script below is new. Nothing under <code>src/eda/</code> that already existed was edited, so the <code>xg_target</code> and <code>shot_target</code> portals remain exactly reproducible from their own unmodified generators.</p>
+<ul class='mf-ul'><li>`src/eda/xt_common.py` -- the loader, the three adaptations, and the xT statistics functions</li><li>`src/eda/generate_reports_xt.py`</li><li>`src/eda/generate_distribution_atlas_xt.py`</li><li>`src/eda/generate_numerical_xt_target_analysis.py` + `generate_numerical_xt_target_reports.py`</li><li>`src/eda/generate_review_analysis_xt.py` + `generate_review_report_xt.py`</li><li>`src/eda/generate_leakage_audit_xt.py` + `generate_leakage_report_xt.py`</li><li>`src/eda/generate_confound_analysis_xt.py` + `generate_confound_report_xt.py`</li><li>`src/eda/generate_tournament_stability_check_xt.py` + `generate_tournament_stability_report_xt.py`</li><li>`src/eda/generate_slice_stratification_xt.py` + `generate_slice_stratification_v2_xt.py` + `generate_slice_stratification_report_xt.py`</li><li>`src/eda/generate_feature_interaction_analysis_xt.py` + `generate_feature_interaction_report_xt.py`</li><li>`src/eda/generate_feature_lock_confirmation_xt.py` + `generate_feature_lock_report_xt.py`</li><li>`src/eda/generate_master_findings_xt.py` + `generate_eda_portal_xt.py`</li></ul>
+</div>
+</div>
+</body>
+</html>
