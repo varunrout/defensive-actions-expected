@@ -76,6 +76,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import train_active_binary_baseline as ab  # noqa: E402
 import train_active_xt_baseline as xb  # noqa: E402
+from dax.models.diagnostics import _ACCENT, _new_axes, _save_fixed, ensure_dir  # noqa: E402
 from dax.models.evaluation import classification_metrics  # noqa: E402
 from dax.models.splits import canonical_grouped_folds, canonical_test_mask, load_canonical_split  # noqa: E402
 
@@ -418,6 +419,25 @@ def main() -> None:
     joblib.dump(extra["reg"], xb.REG_DIR / f"{VARIANT}_regressor.joblib")
 
     xb.save_xt_regression_charts(xb.REG_CHARTS_DIR / VARIANT, y_true, pred, calib_rows, None)
+    # save_xt_regression_charts writes its own "no features (dummy variant)" placeholder
+    # for feature_coefficients.png when coef_table is None (x1c has no linear coefficient
+    # table -- it's two random forests) -- overwrite it with a real Gini-importance bar
+    # chart, same pattern train_c1d_random_forest.py uses for its own random-forest rung.
+    # Regression head specifically (not the classifier), matching every other variant's
+    # feature_coefficients.png convention on this leg (x0/x1/x1b all chart the regression
+    # head); classifier importances remain fully reported in x1c_random_forest.json's own
+    # clf_feature_importances_gini field, just not charted here (one chart slot).
+    reg_gini = sorted(
+        zip(extra["reg_feature_names"], extra["reg"].feature_importances_),
+        key=lambda r: r[1], reverse=True,
+    )[:15]
+    chart_dir = ensure_dir(xb.REG_CHARTS_DIR / VARIANT)
+    fig, ax = _new_axes()
+    ax.barh([name for name, _ in reg_gini][::-1], [val for _, val in reg_gini][::-1], color=_ACCENT)
+    ax.set_xlabel("Gini importance")
+    ax.set_title("Top 15 feature importance (Gini) -- regression head")
+    _save_fixed(fig, chart_dir / "feature_coefficients.png")
+
     print(f"  [held-out] {VARIANT}: rmse={held_out_row['rmse']:.5f} mae={held_out_row['mae']:.5f} "
           f"r2={held_out_row['r2']:.5f} spearman={held_out_row['spearman']:.4f} "
           f"zero_mae={held_out_row['zero_target_mae']:.5f} nonzero_mae={held_out_row['nonzero_target_mae']:.5f}")
