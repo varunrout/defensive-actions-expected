@@ -249,6 +249,15 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   into Rung 2 below. A valid, reportable Rung-1 outcome, not a failure to fix before moving on:
   the Step-0 evidence was real, it just was not the right kind of fix for a loss-function-driven
   calibration limitation.</p>
+<div class="variant-block">
+  <p class="variant-title">x1b_quadratic <span style="font-weight:400;color:var(--text-muted);font-size:12px;">(rung 1)</span></p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1b_quadratic/predicted_vs_observed.png" alt="x1b_quadratic predicted vs observed"><p class="cc-label">predicted_vs_observed.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1b_quadratic/residual_distribution.png" alt="x1b_quadratic residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1b_quadratic/calibration_bins.png" alt="x1b_quadratic calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1b_quadratic/feature_coefficients.png" alt="x1b_quadratic feature coefficients (including quadratic/interaction terms)"><p class="cc-label">feature_coefficients.png</p></div>
+  </div>
+</div>
 
 <h2>3. Rung 2 -- x1c_random_forest (prompt 73)</h2>
 <p><code>x1b_quadratic</code> (Rung 1) established that the tail-calibration problem is a
@@ -430,6 +439,15 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   Rung-0 baseline it was measured against, and <code>x1b_quadratic</code> remains documented as
   the Rung-1 rung that didn't clear its own bar. No further rung (gradient boosting or otherwise)
   is built in this prompt.</p>
+<div class="variant-block">
+  <p class="variant-title">x1c_random_forest <span style="font-weight:400;color:var(--text-muted);font-size:12px;">(rung 2, standing baseline)</span></p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1c_random_forest/predicted_vs_observed.png" alt="x1c_random_forest predicted vs observed"><p class="cc-label">predicted_vs_observed.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1c_random_forest/residual_distribution.png" alt="x1c_random_forest residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1c_random_forest/calibration_bins.png" alt="x1c_random_forest calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1c_random_forest/feature_coefficients.png" alt="x1c_random_forest feature importance chart"><p class="cc-label">feature_coefficients.png</p></div>
+  </div>
+</div>
 
 </div>
 </div>
