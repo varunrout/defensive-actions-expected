@@ -105,12 +105,14 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <div class="wrap">
 <div class="article">
 
-<div class="deviation-box"><p><strong>Status update (Prompt 73):</strong> <code>x1_two_stage_huber</code>
+<div class="deviation-box"><p><strong>Status update (Prompt 75):</strong> <code>x1_two_stage_huber</code>
   (Rung 0, this document) is no longer the active reference model for this leg &mdash;
-  <code>x1c_random_forest</code> was promoted in its place. See the promotion decision in
-  <a href="ACTIVE_XT_MODEL_LADDER.html" target="viewer">ACTIVE_XT_MODEL_LADDER.html</a> section 3.7.
-  <code>x1_two_stage_huber</code> remains documented below as the Rung 0 baseline it was measured
-  against.</p></div>
+  <code>x1c_random_forest</code> cleared its own Rung-2 ladder gate (Prompt 73) and has now also
+  cleared a full promotion audit (tournament-stratified check, error-slice comparison,
+  feature-shape sanity check, re-run combined-pipeline readout). See the full promotion decision
+  in <a href="ACTIVE_XT_MODEL_LADDER.html" target="viewer">ACTIVE_XT_MODEL_LADDER.html</a>
+  section 5. <code>x1_two_stage_huber</code> remains documented below as the Rung 0 baseline it
+  was measured against.</p></div>
 
 <p><em>Prompt scope: active-binary leg only. Passive-xT's own Rung 0 is a separate, later prompt.
   This document does not build past Rung 0 &mdash; no gradient boosting, no promotion decision, no

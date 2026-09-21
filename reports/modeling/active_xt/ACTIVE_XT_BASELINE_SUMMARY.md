@@ -1,8 +1,10 @@
 # Active-xT Baseline Summary (x0-x1)
 
-> **Status update (Prompt 73):** `x1_two_stage_huber` (Rung 0, this document) is no longer the
-> active reference model for this leg -- `x1c_random_forest` was promoted in its place. See the
-> promotion decision in [`ACTIVE_XT_MODEL_LADDER.md`](ACTIVE_XT_MODEL_LADDER.md) section 3.7.
+> **Status update (Prompt 75):** `x1_two_stage_huber` (Rung 0, this document) is no longer the
+> active reference model for this leg -- `x1c_random_forest` cleared its own Rung-2 ladder gate
+> (Prompt 73) and has now also cleared a full promotion audit (tournament-stratified check,
+> error-slice comparison, feature-shape sanity check, re-run combined-pipeline readout). See the
+> full promotion decision in [`ACTIVE_XT_MODEL_LADDER.md`](ACTIVE_XT_MODEL_LADDER.md) section 5.
 > `x1_two_stage_huber` remains documented below as the Rung 0 baseline it was measured against.
 
 Target: `target_xt_delta_v2` (active-binary leg, Prompts 64/66/67, fully EDA'd and locked against

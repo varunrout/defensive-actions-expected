@@ -106,13 +106,13 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <div class="wrap">
 <div class="article">
 
-<div class="verdict-box"><p><strong>Status update (Prompt 74):</strong> <code>x1c_random_forest</code>
-  (Rung 2) remains the leg's standing baseline. <code>x1d_gradient_boosting</code> (Rung 3) was
-  built and shows a small, statistically significant edge on RMSE/MAE/R&sup2; &mdash; but a real,
-  measurable <em>regression</em> on rank correlation and the tail-calibration gap this ladder has
-  tracked since Rung 0. See section 4.8 for the full, mixed-result promotion call.
-  <code>x1b_quadratic</code> (Rung 1) did not clear its own gate and remains documented as the
-  rung that didn't win.</p></div>
+<div class="verdict-box"><p><strong>Status update (Prompt 75):</strong> <code>x1c_random_forest</code>
+  (Rung 2) has cleared a full promotion audit and is now the leg's documented reference model,
+  superseding <code>x1_two_stage_huber</code>. See section 5 for the full promotion decision.
+  <code>x1d_gradient_boosting</code> (Rung 3) remains documented as a genuine mixed result against
+  <code>x1c</code> (small RMSE win, real calibration regression) that did not win its own
+  rung-level gate (section 4.8). <code>x1b_quadratic</code> (Rung 1) did not clear its own gate
+  either and remains documented as the rung that didn't win.</p></div>
 
 <p><em>Split out of <code>ACTIVE_XT_BASELINE_SUMMARY.md</code> (prompt 73, once a second rung
   &mdash; Rung 2, <code>x1c_random_forest</code> &mdash; existed beyond Rung 0) so the locked
@@ -642,12 +642,127 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   </div>
 </div>
 
+<h2>5. Promotion decision: x1c_random_forest (prompt 75)</h2>
+<p><code>x1c_random_forest</code>'s Rung-2 ladder gate (section 3.7) answered "is this rung's
+  change real?" &mdash; 5/5 CV folds, p=0.00006. This section answers the deeper question every
+  prior promotion decision on this project has asked (Prompts 43/46/52/58): should
+  <code>x1c_random_forest</code> now replace <code>x1_two_stage_huber</code> as the leg's
+  <em>documented reference model</em>? Four checks, run via
+  <code>scripts/models/validate_x1c_promotion.py</code> (train+val CV-OOF predictions for items
+  1-3, the held-out test set read once more, predict-only, for item 4).</p>
+<p><strong>Step 1 (re)confirmation</strong>:
+  <code>outputs/models/regression/x1c_random_forest.json</code> has both <code>clf_params</code>
+  and <code>reg_params</code> populated &mdash; <code>x1c_random_forest</code> replaced
+  <strong>both</strong> of <code>x1</code>'s stages (Prompt 73's own Step-1 decision), so item 4
+  below is <code>x1c</code>'s own classifier x regressor product, not a mixed composite with any
+  <code>x1</code> stage.</p>
+
+<h3>5.1 Tournament-stratified check (tournament_stratified_x1c.json)</h3>
+<p>Tournament composition reconfirmed directly, not assumed to match the other legs or the
+  EDA-side <code>xt_target/TOURNAMENT_STABILITY_CHECK.html</code>: still exactly FIFA World Cup
+  2022 (24,199 rows) and UEFA Euro 2024 (20,967 rows) in train+val &mdash; both large, no
+  thin-slice caveat needed. <code>x1c_random_forest</code> beats <code>x1_two_stage_huber</code>
+  on <strong>both</strong> tournaments, by almost exactly the same margin:</p>
+<table>
+<tr><th>Tournament</th><th>Rows</th><th>x1 RMSE</th><th>x1c RMSE</th><th>x1 R&sup2;</th><th>x1c R&sup2;</th></tr>
+<tr><td>FIFA World Cup 2022</td><td>24,199</td><td>0.05233</td><td>0.04243</td><td>0.1488</td><td>0.4405</td></tr>
+<tr><td>UEFA Euro 2024</td><td>20,967</td><td>0.05575</td><td>0.04462</td><td>0.1539</td><td>0.4578</td></tr>
+</table>
+<p>R&sup2; improvement is +0.2917 (WC2022) and +0.3039 (Euro2024) &mdash; within 0.012 of each
+  other. <strong>Not reliant on one tournament</strong>, the first criterion this promotion
+  decision requires.</p>
+
+<h3>5.2 Error-slice comparison (error_analysis_x1c.json)</h3>
+<p><code>phase_label</code> x <code>position</code>, MAE on the signed
+  <code>target_xt_delta_v2</code> scale, train+val CV-OOF. <strong>Of the 30 slices with &ge;30
+  rows: 24 improve, 6 are about the same (|MAE diff| &lt; 0.001), zero regress.</strong> 22 of 23
+  <code>position</code> slices improve (the exception, <code>Goalkeeper</code>, is "about the
+  same" &mdash; 0.05080 -&gt; 0.05070); 2 of 7 <code>phase_label</code> slices improve outright
+  (<code>box_defence</code>, <code>high_press_proxy</code>), the other 5 are "about the same"
+  (e.g. <code>counterpress_after_loss</code>: 0.00984 -&gt; 0.01031, a genuinely negligible
+  +0.00047 move in <code>x1</code>'s favor, well inside noise). No new weak spot is introduced
+  anywhere <code>x1c</code> has enough rows to be judged &mdash; a cleaner result than
+  <code>c1d</code>'s own promotion audit found on the active-continuous leg (2 thin slices flagged
+  there; every slice here clears the row-count bar).</p>
+
+<h3>5.3 Feature-shape sanity check (feature_shape_sanity_x1c.json)</h3>
+<p>Top 8 features by <code>x1c</code>'s Gini importance, <strong>aggregated back from one-hot
+  columns to the 32 locked ACTIVE features</strong> first (the raw per-one-hot-column ranking
+  would have put multiple dummy levels of <code>phase_label_prev_event</code> in the "top 8", not
+  8 genuinely different features): 2 categorical (<code>phase_label_prev_event</code>,
+  <code>event_type</code>), 5 numeric, 1 boolean
+  (<code>action_retained_defensive_team_control</code>). Every category and every 10-quantile
+  numeric bin clears 30 rows (zero thin bins/categories across all 8 features, ~4,500-4,600
+  rows/bin for the numeric ones). Marginal shapes, cross-checked against
+  <code>reports/analysis/xt_target/</code>'s own atlases:</p>
+<ul>
+<li><code>distance_to_attacking_box</code>: clean 9-of-9 monotonic increase (-0.0089 -&gt;
+  +0.0190) &mdash; matches the atlas's own accelerating-monotonic finding (r=0.157, Prompt 71's
+  own Rung-1 evidence) exactly.</li>
+<li><code>angle_to_attacking_goal</code>: clean monotonic decrease (+0.0119 -&gt; -0.0031)
+  &mdash; matches the atlas's own direction (r=-0.079).</li>
+<li><code>attacking_goal_centrality</code>, <code>nearest_attacker_distance</code>,
+  <code>defender_spread</code>: smooth, non-monotonic but not jagged (no thin-bin artefacts)
+  &mdash; a mild peak-then-taper or decay-then-plateau shape in each case, plausible football
+  patterns, not noise.</li>
+<li>Categorical/boolean features (<code>phase_label_prev_event</code>, <code>event_type</code>,
+  <code>action_retained_defensive_team_control</code>): no category or level looks like an
+  outlier driven by a small n &mdash; every one of the 18 category/level rows across the 3
+  features clears 500+ rows.</li>
+</ul>
+<p><strong>Mostly football-sensible, not dominated by thin-bin noise</strong> &mdash; the third
+  criterion holds.</p>
+
+<h3>5.4 Full two-stage pipeline re-run (full_pipeline_readout_x1c.json) -- the decisive check</h3>
+<p><code>x1c_random_forest_classifier.joblib</code> and
+  <code>x1c_random_forest_regressor.joblib</code> (both reused via
+  <code>.predict_proba</code>/<code>.predict</code> only, never refit) combined on the held-out
+  test set (10,595 rows), compared against <code>x1_two_stage_huber</code>'s own already-recorded
+  held-out row (Prompt 70, reused directly, not rescored):</p>
+<table>
+<tr><th></th><th>RMSE</th><th>MAE</th><th>R&sup2;</th><th>Spearman</th></tr>
+<tr><td><code>x1_two_stage_huber</code> (Prompt 70, on record)</td><td>0.05309</td><td>0.02059</td><td>0.15194</td><td>0.5180</td></tr>
+<tr><td><strong><code>x1c_random_forest</code> (this re-run)</strong></td><td><strong>0.04277</strong></td><td><strong>0.01779</strong></td><td><strong>0.44947</strong></td><td><strong>0.5947</strong></td></tr>
+<tr><td>Change</td><td>-0.01031</td><td>-0.00281</td><td><strong>+0.29753</strong></td><td>+0.07666</td></tr>
+</table>
+<div class="verdict-box"><p>The re-run reproduces <code>x1c</code>'s own Rung-2 held-out numbers
+  exactly (Prompt 73's CSV row: rmse=0.042771, r2=0.449469, spearman=0.594659) &mdash; confirms
+  the regression-only gate's win translates fully into the combined pipeline, with <strong>no
+  shrinkage</strong> the way <code>c1d</code>'s own promotion audit found for the
+  active-continuous leg's hurdle pipeline (where P(shot) dominated the product and diluted the
+  regression-only gain). Here there is no dominating external factor to dilute through &mdash;
+  both stages are this leg's own tuned models, and the full combined R&sup2; improvement (+0.298)
+  is, if anything, the single largest effect size reported anywhere in this leg's ladder so far.
+  <strong>This is not a case where items 1-3 looked decisive but the end-to-end number
+  disappointed</strong> &mdash; the fourth criterion holds as strongly as the first three.</p></div>
+
+<h3>5.5 Decision: promoted</h3>
+<div class="verdict-box"><p><strong>All four criteria are met, cleanly, not marginally:</strong></p>
+<ol>
+<li>Beats <code>x1</code> on both tournament slices, with near-identical effect size on each (5.1).</li>
+<li>Net improvement on every trustworthy error slice, zero regressions (5.2).</li>
+<li>Feature-shape checks are football-sensible, zero thin bins across all 8 top features (5.3).</li>
+<li>The re-run combined-pipeline readout shows a real, undiluted improvement &mdash; the decisive
+  check (5.4).</li>
+</ol>
+<p><strong>x1c_random_forest is now the reference model for the active-xT leg, superseding
+  x1_two_stage_huber (Prompt 70); x1_two_stage_huber remains documented as the Rung 0 baseline it
+  was measured against, and x1b_quadratic/x1d_gradient_boosting remain documented as rungs that
+  didn't clear the bar against their respective comparisons.</strong></p></div>
+<p><strong>What changes downstream</strong>: nothing outside this leg. No other leg, report, or
+  pipeline currently consumes <code>target_xt_delta_v2</code> predictions &mdash; this promotion
+  changes this leg's own documented reference only, the same scope every prior promotion decision
+  on this project has had before a cross-leg consumer existed (e.g. <code>c1d</code>'s own
+  promotion changed only the active-continuous leg's hurdle-pipeline component, not anything
+  upstream of it).</p>
+
 </div>
 </div>
 <footer>
   <p>Generated by <code>scripts/models/train_x1b_quadratic.py</code>,
-    <code>scripts/models/train_x1c_random_forest.py</code>, and
-    <code>scripts/models/train_x1d_gradient_boosting.py</code>. Markdown source:
+    <code>scripts/models/train_x1c_random_forest.py</code>,
+    <code>scripts/models/train_x1d_gradient_boosting.py</code>, and
+    <code>scripts/models/validate_x1c_promotion.py</code>. Markdown source:
     <code>reports/modeling/active_xt/ACTIVE_XT_MODEL_LADDER.md</code>. Rung 0 baseline:
     <a href="ACTIVE_XT_BASELINE_SUMMARY.html" target="viewer">ACTIVE_XT_BASELINE_SUMMARY.html</a>.</p>
 </footer>
