@@ -90,25 +90,29 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   <div class="masthead-inner">
     <p class="eyebrow">DAX &middot; Modelling &middot; Active leg &middot; xT delta</p>
     <h1 class="title">Active-xT Model Ladder</h1>
-    <p class="dek">Rungs 1-2 of the active-xT leg, built on top of the locked Rung 0 baseline
+    <p class="dek">Rungs 1-3 of the active-xT leg, built on top of the locked Rung 0 baseline
       (<code>x1_two_stage_huber</code>): quadratic/interaction terms (<code>x1b</code>, did not
-      clear the bar) and random forest (<code>x1c</code>, cleared it decisively and is now the
-      standing baseline).</p>
+      clear the bar), random forest (<code>x1c</code>, cleared it decisively and is the standing
+      baseline), and gradient boosting (<code>x1d</code>, a genuine mixed result -- small RMSE
+      win, real calibration regression -- that does not win).</p>
     <div class="statbar">
       <div class="stat"><b>x1b</b><span>Rung 1: did not clear x1 (tail gap unchanged)</span></div>
       <div class="stat"><b>x1c &gt; x1</b><span>Rung 2: p=0.00006, R&sup2; 0.15 -&gt; 0.45</span></div>
-      <div class="stat"><b>10-35x</b><span>tail-calibration gap reduction, x1c vs x1</span></div>
-      <div class="stat"><b>Promoted</b><span>x1c_random_forest is the new standing baseline</span></div>
+      <div class="stat"><b>x1d vs x1c</b><span>Rung 3: mixed -- RMSE better, calibration worse</span></div>
+      <div class="stat"><b>x1c standing</b><span>x1c_random_forest remains the baseline</span></div>
     </div>
   </div>
 </div>
 <div class="wrap">
 <div class="article">
 
-<div class="verdict-box"><p><strong>Status update (Prompt 73):</strong> <code>x1c_random_forest</code>
-  (Rung 2) has cleared this rung's ladder gate against <code>x1_two_stage_huber</code> and is
-  promoted to the leg's new standing baseline. See section 3.7 below. <code>x1b_quadratic</code>
-  (Rung 1) did not clear its own gate and remains documented as the rung that didn't win.</p></div>
+<div class="verdict-box"><p><strong>Status update (Prompt 74):</strong> <code>x1c_random_forest</code>
+  (Rung 2) remains the leg's standing baseline. <code>x1d_gradient_boosting</code> (Rung 3) was
+  built and shows a small, statistically significant edge on RMSE/MAE/R&sup2; &mdash; but a real,
+  measurable <em>regression</em> on rank correlation and the tail-calibration gap this ladder has
+  tracked since Rung 0. See section 4.8 for the full, mixed-result promotion call.
+  <code>x1b_quadratic</code> (Rung 1) did not clear its own gate and remains documented as the
+  rung that didn't win.</p></div>
 
 <p><em>Split out of <code>ACTIVE_XT_BASELINE_SUMMARY.md</code> (prompt 73, once a second rung
   &mdash; Rung 2, <code>x1c_random_forest</code> &mdash; existed beyond Rung 0) so the locked
@@ -449,11 +453,201 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   </div>
 </div>
 
+<h2>4. Rung 3 -- x1d_gradient_boosting (prompt 74)</h2>
+<p><code>x1c_random_forest</code> (Rung 2) is this leg's first real win. That result is the
+  reason to test gradient boosting directly, mirroring the active-binary leg's own Rung 4
+  (<code>v1e_gradient_boosting</code>, prompt 45) and the active-continuous leg's own Rung 3
+  (<code>c1e_gradient_boosting</code>, prompt 57) &mdash; a different tree-ensemble method worth
+  checking once one tree method already found real structure, not assumed to help just because
+  RF did.</p>
+
+<h3>4.1 Step 1 -- confirm x1c's actual architecture before deciding what x1d replaces</h3>
+<p>Checked directly against <code>outputs/models/regression/x1c_random_forest.json</code> and
+  this document's own section 3.1/3.7 before assuming anything: <code>x1c_random_forest</code>
+  replaced <strong>both</strong> of <code>x1</code>'s surfaces with RandomForest &mdash;
+  <code>RandomForestClassifier</code> for P(nonzero) and <code>RandomForestRegressor</code> for
+  E[delta|nonzero], each independently tuned (the JSON's <code>clf_params</code> and
+  <code>reg_params</code> fields are both populated). Section 3.1's own reasoning for why (both
+  surfaces are this leg's own models, built together, with no asymmetric evidence favoring one
+  over the other) has not been contradicted by anything since Rung 2.</p>
+<div class="verdict-box"><p><strong>Decision: x1d replaces both stages with gradient boosting
+  too</strong> &mdash; <code>LGBMClassifier</code> for P(nonzero), <code>LGBMRegressor</code> for
+  E[delta|nonzero], mirroring <code>x1c</code>'s own two-independent-models composition, gated
+  against <code>x1c</code> specifically (not the older linear rungs) per this prompt's own
+  instruction.</p></div>
+
+<h3>4.2 Library and grid, sized for this leg's real row counts</h3>
+<p><strong>LightGBM</strong>, matching both <code>v1e_gradient_boosting</code> (active-binary)
+  and <code>c1e_gradient_boosting</code> (active-continuous) &mdash; confirmed available in this
+  environment (version 4.7.0), kept consistent rather than introducing XGBoost as a second
+  boosting library for no reason.</p>
+<p>Row counts confirmed directly from this leg's own join (not assumed to match either precedent
+  leg): classifier trains on 45,166 trainval rows (~36k/fold in 5-fold CV); regressor trains on
+  36,121 nonzero-only trainval rows (~29k/fold). This sits between <code>c1e</code>'s tiny sample
+  (~2,880 rows/fold, trimmed grid) and <code>v1e</code>'s full active-binary scale (~36,000
+  rows/fold) &mdash; close enough to <code>v1e</code>'s own scale to reuse its
+  <code>NUM_LEAVES_GRID=[15,31,63]</code> unchanged, but <code>MIN_CHILD_SAMPLES_GRID</code> is
+  kept at <code>[20,50,150]</code> to stay internally consistent with <code>x1c</code>'s own
+  already-established <code>MIN_SAMPLES_LEAF_GRID</code> for this exact leg at this exact row
+  scale (Prompt 73's own reasoning), rather than reusing <code>v1e</code>'s
+  <code>[10,30,100]</code> by default. <code>LEARNING_RATE_GRID=[0.01,0.05,0.1]</code> unchanged
+  from both precedents. <code>n_estimators</code> is never grid-searched directly &mdash; chosen
+  per fit via early stopping (cap 2,000 rounds, 50-round patience) on a match-grouped validation
+  carve-out of that fit's own training rows, exactly <code>v1e</code>/<code>c1e</code>'s own
+  fitting procedure. 27 combinations x 5 folds = 135 fits per stage, 270 total.</p>
+
+<h3>4.3 Hyperparameter grids and CV-internal overfitting diagnostic</h3>
+<p><strong>Classifier grid</strong> (chosen by OOF ROC-AUC; full 27-row grid in
+  <code>outputs/models/validation/x1d_classifier_tuning.json</code>) &mdash; best and worst-gap
+  rows:</p>
+<table>
+<tr><th>learning_rate</th><th>num_leaves</th><th>min_child_samples</th><th>OOF ROC-AUC</th><th>Train ROC-AUC</th><th>Train &minus; OOF gap</th><th>best_iteration</th></tr>
+<tr><td><strong>0.05</strong></td><td><strong>15</strong></td><td><strong>50</strong></td><td><strong>0.7766</strong></td><td>0.8523</td><td>0.0758</td><td>477</td></tr>
+<tr><td>0.01</td><td>15</td><td>20</td><td>0.7717</td><td>0.8222</td><td>0.0505 (smallest gap)</td><td>1355</td></tr>
+<tr><td>0.05</td><td>63</td><td>50</td><td>0.7735</td><td>0.8891</td><td>0.1156 (largest gap)</td><td>170</td></tr>
+</table>
+<p>The chosen config's gap (0.0758) is smaller than <code>x1c</code>'s own classifier gap
+  (0.1140) &mdash; gradient boosting's early stopping is doing real work constraining this stage,
+  more so than RF's grid search did at Rung 2.</p>
+<p><strong>Regressor grid</strong> (chosen by OOF RMSE; full 27-row grid in
+  <code>outputs/models/validation/x1d_regressor_tuning.json</code>) &mdash; best and worst-gap
+  rows:</p>
+<table>
+<tr><th>learning_rate</th><th>num_leaves</th><th>min_child_samples</th><th>OOF RMSE</th><th>OOF R&sup2;</th><th>Train R&sup2;</th><th>Train &minus; OOF gap</th><th>best_iteration</th></tr>
+<tr><td><strong>0.01</strong></td><td><strong>63</strong></td><td><strong>20</strong></td><td><strong>0.04696</strong></td><td><strong>0.4853</strong></td><td>0.6540</td><td>0.1687</td><td>531</td></tr>
+<tr><td>0.01</td><td>15</td><td>150</td><td>0.04791</td><td>0.4641</td><td>0.5337</td><td>0.0696 (smallest gap)</td><td>1380</td></tr>
+<tr><td>0.1</td><td>63</td><td>20</td><td>0.04708</td><td>0.4825</td><td>0.6700</td><td>0.1874 (largest gap)</td><td>64</td></tr>
+</table>
+<div class="deviation-box"><p><strong>Reported plainly, not hidden</strong>: the regressor's
+  chosen config has a <em>larger</em> train-minus-OOF gap (0.1687) than <code>x1c</code>'s own
+  regressor gap (0.1029) &mdash; gradient boosting's sequential, error-correcting structure is
+  fitting the training folds more readily here than RF's independent-tree averaging did, the same
+  pattern <code>c1e</code>'s own docstring flagged on the active-continuous leg. The selection
+  rule used throughout this leg &mdash; pick by OOF score, not training-fold fit &mdash; still
+  applies and still defends itself on its own terms: the smallest-gap config (0.0696) has a
+  meaningfully worse OOF RMSE (0.04791 vs 0.04696), so constraining further would trade away real
+  signal to chase a smaller gap. This is reported as a genuine leg-level pattern to watch, not
+  dismissed.</p></div>
+
+<h3>4.4 x1d_gradient_boosting vs x1c_random_forest -- ranking (CV and held-out)</h3>
+<table>
+<tr><th>Variant</th><th>RMSE (CV)</th><th>RMSE (held-out)</th><th>R&sup2; (CV)</th><th>R&sup2; (held-out)</th><th>Spearman (held-out)</th></tr>
+<tr><td><code>x1c_random_forest</code></td><td>0.04346</td><td>0.04277</td><td>0.4491</td><td>0.4495</td><td><strong>0.5947</strong></td></tr>
+<tr><td><code>x1d_gradient_boosting</code></td><td><strong>0.04285</strong></td><td><strong>0.04205</strong></td><td><strong>0.4647</strong></td><td><strong>0.4680</strong></td><td>0.5692</td></tr>
+</table>
+<p><code>x1d</code> beats <code>x1c</code> on RMSE (CV -1.4%, held-out -1.7%) and R&sup2; (+0.016
+  CV, +0.018 held-out) &mdash; real, but a fraction of the size of <code>x1c</code>'s own edge
+  over <code>x1</code> at Rung 2 (RMSE -19.5%, R&sup2; nearly tripled). <strong>Spearman rank
+  correlation moves the other way</strong>: 0.5947 -&gt; 0.5692, a real drop (-0.0255), consistent
+  on both CV (0.5935 -&gt; 0.5641) and held-out.</p>
+<table>
+<tr><th>Variant</th><th>Zero-row MAE</th><th>Nonzero-row MAE</th></tr>
+<tr><td><code>x1c_random_forest</code></td><td>0.00678</td><td>0.02066</td></tr>
+<tr><td><code>x1d_gradient_boosting</code></td><td><strong>0.00587</strong></td><td><strong>0.02060</strong></td></tr>
+</table>
+<p>Both MAE slices also favor <code>x1d</code> &mdash; lower on every accuracy metric measured in
+  absolute-error terms. The pattern across sections 4.4-4.5 is consistent:
+  <strong>magnitude-accuracy metrics (RMSE, MAE, R&sup2;) favor <code>x1d</code>; shape/rank/tail
+  metrics (Spearman, calibration) favor <code>x1c</code>.</strong></p>
+
+<h3>4.5 Paired significance test, x1d vs x1c</h3>
+<p>Per-fold RMSE, compared against the <strong>current best (<code>x1c_random_forest</code>), not
+  the older linear rungs</strong>: <code>x1d</code> beats <code>x1c</code> in <strong>5 of 5
+  folds</strong>, mean diff <strong>-0.00061</strong>. Paired t-test t=-6.39,
+  <strong>p=0.0031</strong> &mdash; statistically significant, but the effect size is roughly
+  <strong>one-seventeenth</strong> the size of <code>x1c</code>'s own edge over <code>x1</code>
+  (mean diff -0.01054 at Rung 2). Wilcoxon p=0.0625, the same 5-fold floor seen throughout this
+  project.</p>
+
+<h3>4.6 Calibration -- does x1d hold onto x1c's tail-calibration win?</h3>
+<table>
+<tr><th>Bin</th><th>x1 gap (Rung 0)</th><th>x1b gap (Rung 1)</th><th>x1c gap (Rung 2)</th><th>x1d gap (this rung)</th></tr>
+<tr><td>0 (most negative predicted)</td><td>+0.02074</td><td>+0.02113</td><td><strong>+0.00194</strong></td><td>+0.00369</td></tr>
+<tr><td>1</td><td>+0.00038</td><td>-0.00019</td><td>+0.00065</td><td>+0.00094</td></tr>
+<tr><td>2</td><td>+0.00009</td><td>-0.00019</td><td>-0.00004</td><td>+0.00004</td></tr>
+<tr><td>3</td><td>+0.00059</td><td>+0.00081</td><td>+0.00026</td><td>-0.00067</td></tr>
+<tr><td>4 (most positive predicted)</td><td>-0.01713</td><td>-0.01725</td><td><strong>-0.00049</strong></td><td>-0.00233</td></tr>
+</table>
+<div class="fail-box"><p><strong>No &mdash; x1d gives back a real share of x1c's own
+  tail-calibration win, though it stays far ahead of the pre-RF rungs.</strong> Bin 0's gap
+  widens from +0.00194 (<code>x1c</code>) to +0.00369 (<code>x1d</code>) &mdash; roughly
+  <strong>1.9x larger</strong>. Bin 4's gap widens from -0.00049 to -0.00233 &mdash; roughly
+  <strong>4.8x larger</strong>. Both remain a fraction of <code>x1</code>/<code>x1b</code>'s own
+  gaps, so gradient boosting has not undone Rung 2's headline finding entirely &mdash; but it has
+  not matched or improved on it either, which is the actual question this section exists to
+  answer.</p></div>
+
+<h3>4.7 Feature importance: cross-check against x1c</h3>
+<p>Top 15 by gain importance and by fold-held-out permutation importance (regression head,
+  <code>outputs/models/regression/x1d_gradient_boosting.json</code>):</p>
+<table>
+<tr><th>Rank</th><th>Gain importance</th><th>Permutation importance (fold held-out)</th></tr>
+<tr><td>1</td><td><code>distance_to_attacking_box</code> (4031.0)</td><td><code>phase_label_prev_event_box_defence</code> (0.001482)</td></tr>
+<tr><td>2</td><td><code>attacking_goal_centrality</code> (2845.0)</td><td><code>distance_to_attacking_box</code> (0.000776)</td></tr>
+<tr><td>3</td><td><code>nearest_attacker_distance</code> (2802.0)</td><td><code>event_type_Block</code> (0.000417)</td></tr>
+<tr><td>4</td><td><code>defender_spread</code> (2283.0)</td><td><code>attacking_goal_centrality</code> (0.000388)</td></tr>
+<tr><td>5</td><td><code>angle_to_attacking_goal</code> (2193.0)</td><td><code>action_retained_defensive_team_control</code> (0.000240)</td></tr>
+<tr><td>6</td><td><code>defender_attacker_gap_x</code> (1707.0)</td><td><code>phase_label_prev_event_high_press_proxy</code> (0.000230)</td></tr>
+<tr><td>7</td><td><code>attacker_spread</code> (1469.0)</td><td><code>event_type_Pressure</code> (0.000218)</td></tr>
+<tr><td>8</td><td><code>attacker_defender_ratio</code> (1378.0)</td><td><code>event_type_Ball Recovery</code> (0.000211)</td></tr>
+<tr><td>9</td><td><code>possession_elapsed_seconds</code> (1306.0)</td><td><code>nearest_attacker_distance</code> (0.000167)</td></tr>
+<tr><td>10</td><td><code>match_time_seconds</code> (1204.0)</td><td><code>defender_spread</code> (0.000140)</td></tr>
+</table>
+<p><strong>Strong agreement with x1c's own permutation-importance ranking (section 3.6)</strong>:
+  <code>phase_label_prev_event_box_defence</code> is #1 by permutation importance on
+  <em>both</em> models, <code>distance_to_attacking_box</code> is #2 on both,
+  <code>attacking_goal_centrality</code> and <code>defender_spread</code> appear in both top-10s.
+  Two independently-trained tree-ensemble methods (bagged vs. boosted) converging on the same top
+  features is stronger evidence than either alone that these are real drivers, not an artefact of
+  one model family's own inductive bias.</p>
+
+<h3>4.8 Promotion call: a genuine mixed result, not a clean win either direction</h3>
+<p><strong>x1d_gradient_boosting does not clearly replace x1c_random_forest as the standing
+  baseline</strong>, and the reverse is also not a clean call &mdash; this is reported as the
+  genuinely mixed result it is, per this prompt's own explicit instruction not to frame a small
+  edge as a win while ignoring a real cost elsewhere.</p>
+<p><strong>In x1d's favor</strong>: a statistically significant (p=0.0031), 5-of-5-fold-consistent
+  improvement on RMSE, and a real (if modest) gain on R&sup2;, MAE, and both zero-/nonzero-row MAE
+  slices. The classifier stage in isolation is also meaningfully better (held-out ROC-AUC 0.778
+  vs <code>x1c</code>'s 0.762), and feature importance agrees strongly with <code>x1c</code>'s
+  own ranking, adding confidence that both models are finding the same real signal, not different
+  noise.</p>
+<p><strong>Against x1d</strong>: Spearman rank correlation drops measurably (-0.0255 held-out,
+  consistent on CV), and &mdash; the specific diagnostic this whole ladder has tracked since Rung
+  0 &mdash; the tail-calibration gap <code>x1c</code> closed by 10-35x widens back out by roughly
+  2-5x. The effect size of <code>x1d</code>'s own RMSE win (mean diff -0.00061) is about
+  one-seventeenth the size of <code>x1c</code>'s own edge over <code>x1</code> (mean diff
+  -0.01054) &mdash; a real signal, but a small one, set against a real cost on two different
+  diagnostics this leg has specifically prioritized.</p>
+<div class="verdict-box"><p><strong>This document's own standing evaluation philosophy (section
+  1) is the deciding factor</strong>: "an aggregate metric improving without [the
+  tail-calibration] gap closing would be an incomplete answer, not a full one." Here the
+  aggregate metric improves <em>and</em> the tail-calibration gap widens &mdash; the harder case
+  that principle was written to cover, not a hypothetical. Weighing a small, real RMSE win
+  against a real regression on the two diagnostics (rank correlation, tail calibration) this leg
+  has consistently treated as first-class evidence:
+  <strong>x1c_random_forest remains the leg's standing baseline.</strong>
+  x1d_gradient_boosting is documented in full above as a legitimate, closely-contested rung that
+  does not win, the same honest-mixed-result discipline <code>c1e_gradient_boosting</code>
+  modeled on the active-continuous leg when it also failed to clear its own leg's random-forest
+  bar. No promotion audit is run for either candidate in this prompt.</p></div>
+
+<div class="variant-block">
+  <p class="variant-title">x1d_gradient_boosting <span style="font-weight:400;color:var(--text-muted);font-size:12px;">(rung 3, does not clear x1c)</span></p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1d_gradient_boosting/predicted_vs_observed.png" alt="x1d_gradient_boosting predicted vs observed"><p class="cc-label">predicted_vs_observed.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1d_gradient_boosting/residual_distribution.png" alt="x1d_gradient_boosting residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1d_gradient_boosting/calibration_bins.png" alt="x1d_gradient_boosting calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/x1d_gradient_boosting/feature_coefficients.png" alt="x1d_gradient_boosting feature importance (gain, top 15, regression head)"><p class="cc-label">feature_coefficients.png (gain feature importance, regression head)</p></div>
+  </div>
+</div>
+
 </div>
 </div>
 <footer>
-  <p>Generated by <code>scripts/models/train_x1b_quadratic.py</code> and
-    <code>scripts/models/train_x1c_random_forest.py</code>. Markdown source:
+  <p>Generated by <code>scripts/models/train_x1b_quadratic.py</code>,
+    <code>scripts/models/train_x1c_random_forest.py</code>, and
+    <code>scripts/models/train_x1d_gradient_boosting.py</code>. Markdown source:
     <code>reports/modeling/active_xt/ACTIVE_XT_MODEL_LADDER.md</code>. Rung 0 baseline:
     <a href="ACTIVE_XT_BASELINE_SUMMARY.html" target="viewer">ACTIVE_XT_BASELINE_SUMMARY.html</a>.</p>
 </footer>
