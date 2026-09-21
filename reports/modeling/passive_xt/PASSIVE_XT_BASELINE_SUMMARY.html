@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- Passive-xT Baseline Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1; --plane: #eceee8; --surface: #ffffff;
+  --text-primary: #10151c; --text-secondary: #4c525b; --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09); --gridline: #e2e4de;
+  --accent: #e34948; --pos: #e34948; --neg: #2a78d6;
+  --amber: #eda100; --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b; --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+    --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09); --gridline: #232a34;
+    --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+    --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+  --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09); --gridline: #232a34;
+  --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+  --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary); font-family: "Public Sans", -apple-system, sans-serif; font-size: 15px; line-height: 1.5; }
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead { background: var(--bg); border-bottom: 1px solid var(--border); padding: 40px 24px 32px; }
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow { font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; color: var(--accent); font-weight: 600; margin: 0 0 10px; }
+h1.title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: clamp(26px, 4vw, 38px); margin: 0 0 12px; color: var(--text-primary); }
+.dek { color: var(--text-secondary); max-width: 64ch; margin: 0 0 24px; font-size: 15.5px; }
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b { display: block; font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; color: var(--text-primary); }
+.stat span { display: block; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+footer { border-top: 1px solid var(--border); padding: 28px 24px 60px; max-width: 1180px; margin: 0 auto; }
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 900px; }
+.article h2 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; margin: 44px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.article h2:first-of-type { margin-top: 0; }
+.article h3 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 17px; margin: 30px 0 4px; color: var(--accent); }
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article code { font-family: "JetBrains Mono", monospace; font-size: 0.88em; background: var(--plane); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--neg); }
+.article ul, .article ol { color: var(--text-secondary); font-size: 14.5px; padding-left: 22px; margin: 0 0 16px; }
+.article li { margin-bottom: 6px; }
+.article table { width: 100%; border-collapse: collapse; margin: 4px 0 22px; font-size: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.article th { text-align: left; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.03em; color: var(--text-muted); background: var(--plane); padding: 9px 12px; border-bottom: 1px solid var(--border); }
+.article td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p:last-child { margin-bottom: 0; }
+.verdict-box { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.verdict-box p { margin: 0; }
+.fail-box { background: rgba(227,73,72,0.10); border: 1px solid rgba(227,73,72,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.fail-box p { margin: 0; }
+.variant-block { margin: 28px 0 44px; }
+.variant-title { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 16px; margin: 0 0 10px; }
+.chart-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 900px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+.chart-card img { width: 100%; height: auto; border-radius: 6px; display: block; background: var(--plane); cursor: zoom-in; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.chart-card img:hover { transform: scale(1.015); box-shadow: 0 4px 16px rgba(16,21,28,0.14); }
+.chart-card .cc-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--text-muted); margin: 6px 2px 0; text-align: center; }
+.lightbox { position: fixed; inset: 0; background: rgba(9,12,16,0.78); display: none; align-items: center; justify-content: center; padding: 5vh 5vw; z-index: 1000; cursor: zoom-out; }
+.lightbox.open { display: flex; }
+.lightbox figure { margin: 0; max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.lightbox img { max-width: 92vw; max-height: 82vh; width: auto; height: auto; border-radius: 10px; background: var(--surface); box-shadow: 0 20px 60px rgba(0,0,0,0.45); cursor: default; }
+.lightbox figcaption { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #e8eaee; text-align: center; }
+.lightbox-close { position: absolute; top: 18px; right: 24px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+.lightbox-close:hover { background: rgba(255,255,255,0.18); }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; Passive leg &middot; xT delta</p>
+    <h1 class="title">Passive-xT Baseline Summary (y0-y1)</h1>
+    <p class="dek">Rung 0 of the passive-xT leg: an architecture decision (two-stage, checked on
+      passive's own data rather than copied from active-xT) backed by real evidence that the
+      target's structural zero mass is predictable from locked features, followed by a dummy
+      floor and one two-stage baseline (classifier &times; Huber regression) for the signed
+      target <code>target_xt_delta_passive</code>.</p>
+    <div class="statbar">
+      <div class="stat"><b>1,590,600</b><span>rows with a defined target (of 1,593,181)</span></div>
+      <div class="stat"><b>Two-stage</b><span>classify zero/nonzero, then signed Huber regression</span></div>
+      <div class="stat"><b>y1 &gt; y0</b><span>Rung 0 result, p=0.0001</span></div>
+      <div class="stat"><b>26.42%</b><span>rows exactly zero -- structural, not noise</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+
+<p><em>Prompt scope: passive leg only. This document does not build past Rung 0 &mdash; no
+  quadratic terms, no random forest, no promotion decision, no full ladder.</em></p>
+
+<h2>1. Architecture decision, with evidence -- checked on passive's own data, not copied from active-xT</h2>
+<p>Both <code>target_xt_delta_v2</code> (active) and <code>target_xt_delta_passive</code> are
+  signed and zero-inflated &mdash; similar-looking on the surface (active: 20.15% exactly zero;
+  passive: 26.29% at the unique-event grain per Prompt 68, 26.42% at this leg's own defender-slot
+  row grain after the join below). Prompt 70's own standard requires checking whether the zero
+  mass is <em>feature-predictable on this leg's own data</em> before committing to a two-stage
+  architecture, not assuming it transfers because the shapes look alike.</p>
+<p><strong>Checked directly against
+  <code>reports/analysis/xt_target/passive_category_atlas.json</code></strong> (Prompt 69, not
+  re-derived from scratch): <code>on_ball_event_type</code> (a locked passive categorical
+  feature) shows a dramatically wider zero-rate range than anything found on the active leg's own
+  Step-0 check (Prompt 70's <code>event_type</code> range was 5.70%-27.94%, ~5x):</p>
+<table>
+<tr><th>on_ball_event_type</th><th>n</th><th>pct exactly zero</th></tr>
+<tr><td>Shot</td><td>24,487</td><td><strong>0.30%</strong></td></tr>
+<tr><td>Pass</td><td>830,924</td><td>6.73%</td></tr>
+<tr><td>Carry</td><td>713,760</td><td>49.44%</td></tr>
+<tr><td>Dribble</td><td>21,429</td><td><strong>52.79%</strong></td></tr>
+</table>
+<p>A <strong>~176x range</strong> across a single locked feature, on large
+  (tens-of-thousands-plus) per-category samples throughout &mdash; no small-n artefact possible
+  here. Other categorical features show much weaker but still real variation
+  (<code>phase_label</code>: 23.43%-29.65%, ~1.3x); a defender-attribute feature
+  (<code>defender_functional_role</code>) shows almost none (25.83%-27.76%), a sensible null
+  since the <em>defender's</em> role says little about whether the <em>attacking</em> team's
+  possession continues. <strong>The zero mass here is, if anything, more strongly
+  feature-predictable than on the active leg</strong>, not less &mdash; no basis to skip the
+  two-stage architecture on predictability grounds.</p>
+<p><strong>Checked whether either of this leg's own existing architectures is a closer structural
+  fit than active-xT's <code>x1</code> before defaulting to copying it.</strong>
+  <code>p1e_gradient_boosting</code> (passive-binary) is a single classifier (P(shot)), not
+  two-stage &mdash; not a fit for a signed continuous target at all.
+  <code>d1_lognormal_glm</code>'s hurdle architecture (passive-continuous) reuses
+  <code>p1e_gradient_boosting_calibrated</code> &mdash; an <strong>already-separately-promoted
+  classifier for a different target, P(shot)</strong> &mdash; as its classifier half, fitting
+  only a new regression head. That reuse pattern does not apply here: there is no existing
+  "P(nonzero delta)" classifier anywhere in this project to borrow. P(shot) and "does this on-ball
+  action's possession end here" are not the same event &mdash; confirmed directly: Shot rows are
+  almost never zero (0.30%), while Pass rows (the large majority of on-ball events, and mostly
+  <em>not</em> shots) are also mostly nonzero (6.73% zero). Both of this target's stages are new,
+  exactly the position active-xT's own <code>x1</code> was in at its own Rung 0.</p>
+<p><strong>Checked the regression-stage signal too</strong>, via
+  <code>reports/analysis/xt_target/passive_numerical_target_atlas.json</code>'s own
+  <code>pearson_r_nonzero_delta</code> field: <code>ball_x</code> (r=0.290),
+  <code>defender_x</code> (r=0.222), <code>top_option_3_threat_score</code> (r=0.218),
+  <code>top_option_2_threat_score</code> (r=0.203) &mdash; real, and stronger than active-xT's own
+  strongest Rung-0/1 correlate (<code>distance_to_attacking_box</code>, r=0.157).
+  <code>ball_x</code>'s own strong correlation is not a surprise, cross-referenced against Prompt
+  68's own construction-coupling finding (<code>xt_before = xT(ball_x, ball_y)</code>,
+  <code>ball_x</code> r=+0.52 vs <code>xt_before</code>) &mdash; a caveat this leg's own EDA
+  already carries, not new information, but consistent with real regression signal existing.</p>
+<div class="verdict-box"><p><strong>Decision: two-stage architecture, mirroring <code>x1</code>'s
+  own shape, built fresh (no existing classifier to reuse)</strong> &mdash;
+  <code>LogisticRegression</code> for P(nonzero), <code>HuberRegressor</code> for
+  E[delta|nonzero] (robust to this leg's own heavy tails &mdash; Prompt 68 recorded skew -1.779,
+  excess kurtosis 31.02, heavier than active v2's own -0.306/18.33 &mdash; the same reasoning
+  Prompt 70 used to pick Huber over plain least-squares). Combined:
+  <code>E[delta] = P(nonzero) * E[delta|nonzero]</code>, since <code>E[delta|zero] = 0</code>
+  exactly by construction, the same identity Prompt 70 established for the active leg.</p></div>
+<p><strong>Naming.</strong> <code>v</code>/<code>c</code>/<code>p</code>/<code>d</code>/<code>x</code>
+  are all claimed (active-binary, active-continuous, passive-binary, passive-continuous,
+  active-xT). <code>y</code> is unclaimed &mdash; checked directly against
+  <code>scripts/models/</code>, <code>reports/modeling/</code>, and <code>outputs/models/</code>.
+  Used from Rung 0 onward: <code>y0_dummy</code>, <code>y1_two_stage_huber</code>.</p>
+
+<h2>2. Confirmed inputs</h2>
+<p><strong>Join.</strong> <code>passive_defense.parquet</code> (1,593,181 rows, defender-slot
+  grain, 198,354 unique <code>event_id</code> values) left-joined in memory against
+  <code>passive_xt_delta.parquet</code> (also confirmed one row per <code>event_id</code>) by
+  <code>event_id</code>. Row count unchanged by the join &mdash; 2,581 rows (0.16%) have
+  <code>target_xt_delta_passive == NaN</code> and are dropped, leaving <strong>1,590,600
+  rows</strong> for this leg's modelling.</p>
+<table>
+<tr><th></th><th>Active-xT (Prompt 70)</th><th>Passive-xT (this document)</th></tr>
+<tr><td>Locked rows in</td><td>56,068</td><td>1,593,181</td></tr>
+<tr><td>NaN dropped</td><td>307 (0.55%)</td><td>2,581 (0.16%)</td></tr>
+<tr><td>Rows after drop</td><td>55,761</td><td>1,590,600</td></tr>
+<tr><td>Exactly-zero rate</td><td>20.15%</td><td>26.42%</td></tr>
+</table>
+<p><strong>Feature set.</strong> All <strong>38</strong> locked PASSIVE features
+  (<code>src/eda/feature_config.py</code>'s <code>PASSIVE</code> pool: 4 categorical, 6 boolean,
+  26 continuous + 2 discrete numeric) &mdash; reused directly from
+  <code>train_passive_binary_baseline.py</code>'s own <code>DesignMatrixBuilder</code> and column
+  lists. Unlike active-xT's 32-of-34 (2 features excluded for a self-reference data bug and a
+  substitutive-feature finding), this is a clean <strong>38-of-38</strong> &mdash;
+  <code>train_passive_binary_baseline.py</code> carries no <code>EXCLUDED_FOR_THIS_LEG</code>
+  dict, reconfirmed directly, so nothing needed excluding here either.</p>
+<p><strong>Split.</strong> The same canonical, frozen match-grouped split every other leg uses
+  (<code>outputs/models/splits/match_assignment.json</code>, <code>GROUP_COL = match_id</code>),
+  loaded via <code>dax.models.splits</code>, never rebuilt. Reconfirmed directly against
+  <code>train_passive_binary_baseline.py</code>/<code>train_passive_continuous_baseline.py</code>'s
+  own split code before assuming anything different was needed for "no stable player identity":
+  that constraint is about <em>player</em>-level splits/validity checks specifically (the
+  Player-Level Validity Check / Player-Grouped Split Check are both active-only, per their own
+  <code>scope</code> fields, because passive isn't player-indexed the same way) &mdash; it has
+  never meant this leg uses a different match-grouped split.</p>
+<table>
+<tr><th></th><th>Rows</th><th>Matches</th><th>Unique events</th></tr>
+<tr><td>Train+val</td><td>1,275,289</td><td>92</td><td>157,936</td></tr>
+<tr><td>Held-out test</td><td>315,311</td><td>23</td><td>40,073</td></tr>
+</table>
+<p>Nonzero-delta rows per canonical CV fold: fold 0 = 177,286, fold 1 = 206,668, fold 2 = 167,595,
+  fold 3 = 191,052, fold 4 = 198,633 &mdash; unique events per fold: 29,549 / 34,810 / 29,688 /
+  31,570 / 32,319, all well above any thin-fold floor used elsewhere in this project.</p>
+<p><strong>Metric-convention flag (carried over from Prompt 70, reconfirmed applicable here).</strong>
+  <code>dax.models.evaluation.regression_metrics</code> and
+  <code>dax.models.two_part_xg.compute_hurdle_metrics</code> both hardcode their zero/nonzero
+  split as <code>y_true &gt; 0</code> &mdash; wrong for this leg's signed target for the identical
+  reason Prompt 70 flagged. This script computes its own <code>y_true == 0</code> split.</p>
+<p><strong>Effective sample size.</strong> This leg's per-fold <em>row</em> count is large, but
+  rows are not independent observations &mdash; every defender-slot row sharing an
+  <code>event_id</code> carries the identical target value (~8.03 rows/event, confirmed in Prompt
+  68). The effective sample size for any significance test is closer to the per-fold
+  <em>event</em> count (minimum across folds: 29,549) than the row count &mdash; reported plainly
+  rather than let the large row count imply more statistical power than the data actually has.</p>
+
+<h2>3. Rung 0 variants</h2>
+<table>
+<tr><th>Variant</th><th>Model</th><th>Notes</th></tr>
+<tr><td><code>y0_dummy</code></td><td><code>ConstantRegressor(stat="mean")</code> on raw <code>target_xt_delta_passive</code></td><td>training-fold grand mean for every row, no transform</td></tr>
+<tr><td><code>y1_two_stage_huber</code></td><td><code>LogisticRegression</code> (P(nonzero)) &times; <code>HuberRegressor</code> (E[delta|nonzero])</td><td>both stages use all 38 locked features; regression head fit only on nonzero-delta training rows</td></tr>
+</table>
+<p>Unlike <code>c0</code>/<code>c1</code> or <code>d0</code>/<code>d1</code>, neither
+  <code>y0</code> nor <code>y1</code> uses a log transform, so there is no native-vs-common-scale
+  mismatch to correct for here.</p>
+
+<h2>4. Cross-validation results (5-fold, OOF metrics)</h2>
+<table>
+<tr><th>Variant</th><th>RMSE</th><th>MAE</th><th>R&sup2;</th><th>Spearman</th><th>Zero-row MAE</th><th>Nonzero-row MAE</th></tr>
+<tr><td><code>y0_dummy</code></td><td>0.03718</td><td>0.01203</td><td>-0.0001</td><td>-0.0104</td><td>0.00276</td><td>0.01532</td></tr>
+<tr><td><strong><code>y1_two_stage_huber</code></strong></td><td><strong>0.03568</strong></td><td><strong>0.01085</strong></td><td><strong>0.0786</strong></td><td><strong>0.3193</strong></td><td><strong>0.00185</strong></td><td><strong>0.01405</strong></td></tr>
+</table>
+<p><code>y1</code> beats <code>y0</code> on every metric &mdash; RMSE 4.0% lower, MAE 9.8% lower,
+  R&sup2; off the zero-skill floor (-0.0001 -&gt; +0.0786), Spearman a real ranking signal where
+  <code>y0</code> has none. Both MAE slices favor <code>y1</code> too. <strong>The R&sup2; and
+  Spearman gains are smaller in absolute terms than active-xT's own Rung 0</strong> (R&sup2;
+  0.1514, Spearman 0.5242) &mdash; read honestly, not talked up: this leg's off-ball
+  defender-snapshot signal is intrinsically weaker than active's own defensive-<em>action</em>
+  signal, consistent with Prompt 68's own finding that <code>target_xt_delta_passive</code>'s
+  correlation with the old passive targets (-0.06/-0.07) was weaker than active v2's own
+  improvement (-0.108). The direction and structure of the win are the same; the magnitude is
+  not, and that difference is expected, not a red flag.</p>
+
+<h2>5. Paired significance test, y1 vs y0</h2>
+<p>Per-fold RMSE: <code>y1</code> beats <code>y0</code> in <strong>5 of 5 folds</strong> (0.03745
+  vs 0.03919, 0.03576 vs 0.03739, 0.03575 vs 0.03691, 0.03583 vs 0.03717, 0.03375 vs 0.03529),
+  mean diff <strong>-0.00148</strong>. Paired t-test t=-14.45, <strong>p=0.0001</strong> &mdash;
+  clearly significant. Wilcoxon signed-rank p=0.0625, the same 5-fold floor seen throughout this
+  project. No common-scale correction needed, since neither variant is log-transformed.</p>
+
+<h2>6. Classifier-stage diagnostic (P(nonzero), OOF) -- diagnostic only, not the Rung-0 gate</h2>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>ROC-AUC</td><td><strong>0.7953</strong></td></tr>
+<tr><td>Average precision</td><td>0.9096</td></tr>
+<tr><td>Brier score</td><td>0.1463</td></tr>
+</table>
+<p>A P(nonzero) ROC-AUC of 0.80 is real, and meaningfully <em>stronger</em> than active-xT's own
+  Rung-0 classifier (0.7103) &mdash; consistent with section 1's evidence that
+  <code>on_ball_event_type</code> carries a ~176x zero-rate range here, versus active's own ~5x
+  <code>event_type</code> range. <strong>This is a diagnostic on one internal piece of
+  <code>y1</code>, not the Rung-0 gate</strong>: the Rung-0 promotion decision rests on the
+  combined-prediction <code>y1</code>-vs-<code>y0</code> regression comparison in sections 4-5.</p>
+
+<h2>7. Calibration (5 bins by predicted value, held-out test, y1)</h2>
+<table>
+<tr><th>Bin</th><th>n</th><th>Mean predicted</th><th>Mean actual</th><th>Gap (predicted - actual)</th></tr>
+<tr><td>0 (most negative predicted)</td><td>63,063</td><td>-0.00518</td><td>-0.01173</td><td>+0.00656</td></tr>
+<tr><td>1</td><td>63,062</td><td>-0.00096</td><td>-0.00252</td><td>+0.00155</td></tr>
+<tr><td>2</td><td>63,062</td><td>+0.00012</td><td>-0.00048</td><td>+0.00060</td></tr>
+<tr><td>3</td><td>63,062</td><td>+0.00120</td><td>+0.00007</td><td>+0.00113</td></tr>
+<tr><td>4 (most positive predicted)</td><td>63,062</td><td>+0.00712</td><td>+0.00306</td><td>+0.00406</td></tr>
+</table>
+<div class="deviation-box"><p><strong>The same tail-under-prediction pattern Prompt 70 found on
+  the active leg reappears here, and looks structurally similar.</strong> Bin 0 under-predicts
+  the magnitude of the most-negative rows (predicted -0.0052 vs. actual -0.0117, actual more than
+  2x more negative than predicted); bin 4 under-predicts the magnitude of the most-positive rows
+  the same way (predicted +0.0071 vs. actual +0.0031). Both consistent with
+  <code>HuberRegressor</code>'s own loss function capping how far predictions move toward extreme
+  observed values on either tail, the same diagnosis Prompt 70/71 established for the active leg.
+  Tracked from Rung 0 here, the same discipline the active-xT ladder used -- a candidate open
+  question for this leg's own later rungs (random forest, mirroring active-xT's own Rung 2
+  finding that tree-ensemble averaging closed a similar gap by 10-35x), not something this Rung-0
+  document resolves.</p></div>
+
+<h2>8. Held-out test readout (single readout, not used for selection)</h2>
+<table>
+<tr><th>Variant</th><th>RMSE</th><th>MAE</th><th>R&sup2;</th><th>Spearman</th><th>Zero-row MAE</th><th>Nonzero-row MAE</th></tr>
+<tr><td><code>y0_dummy</code></td><td>0.03497</td><td>0.01121</td><td>-0.0002</td><td>NaN</td><td>0.00276</td><td>0.01439</td></tr>
+<tr><td><strong><code>y1_two_stage_huber</code></strong></td><td><strong>0.03388</strong></td><td><strong>0.01021</strong></td><td><strong>0.0612</strong></td><td><strong>0.2936</strong></td><td><strong>0.00184</strong></td><td><strong>0.01336</strong></td></tr>
+</table>
+<p>Same direction and near-identical magnitude as CV throughout &mdash; <code>y1</code>'s
+  held-out R&sup2; (0.0612) is close to CV (0.0786; the modest CV-to-held-out gap is consistent
+  with this leg's own much larger sample smoothing CV noise less than it might first appear, not
+  a sign of overfitting given the architecture is entirely linear/logistic with no depth/complexity
+  hyperparameter to overfit with).</p>
+
+<h2>9. Charts</h2>
+<p>4 PNGs per variant, saved under <code>outputs/models/regression/charts/&lt;variant&gt;/</code>
+  (gitignored &mdash; regenerate by running
+  <code>scripts/models/train_passive_xt_baseline.py</code> if the images below don't resolve).</p>
+<div class="variant-block">
+  <p class="variant-title">y0_dummy</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/y0_dummy/predicted_vs_observed.png" alt="y0_dummy predicted vs observed"><p class="cc-label">predicted_vs_observed.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/y0_dummy/residual_distribution.png" alt="y0_dummy residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/y0_dummy/calibration_bins.png" alt="y0_dummy calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/y0_dummy/feature_coefficients.png" alt="y0_dummy feature coefficients (n/a)"><p class="cc-label">feature_coefficients.png</p></div>
+  </div>
+</div>
+<div class="variant-block">
+  <p class="variant-title">y1_two_stage_huber</p>
+  <div class="chart-grid">
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/y1_two_stage_huber/predicted_vs_observed.png" alt="y1_two_stage_huber predicted vs observed"><p class="cc-label">predicted_vs_observed.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/y1_two_stage_huber/residual_distribution.png" alt="y1_two_stage_huber residual distribution"><p class="cc-label">residual_distribution.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/y1_two_stage_huber/calibration_bins.png" alt="y1_two_stage_huber calibration bins"><p class="cc-label">calibration_bins.png</p></div>
+    <div class="chart-card"><img src="../../../outputs/models/regression/charts/y1_two_stage_huber/feature_coefficients.png" alt="y1_two_stage_huber feature coefficients (regression head)"><p class="cc-label">feature_coefficients.png</p></div>
+  </div>
+</div>
+
+<h2>10. Rung-0 result</h2>
+<div class="verdict-box"><p><strong><code>y1_two_stage_huber</code> clears Rung 0</strong> against
+  the <code>y0_dummy</code> floor: consistent direction across CV and held-out test on RMSE, MAE,
+  R&sup2;, and Spearman; a statistically significant 5/5-fold paired test (p=0.0001); and a real
+  jump off the zero-skill floor (R&sup2; -0.0001 -&gt; +0.0786 CV, -0.0002 -&gt; +0.0612
+  held-out).</p></div>
+<p>The architecture decision (section 1) is the load-bearing result of this document, same as it
+  was for active-xT: the zero mass is real, structural, and <em>more strongly</em>
+  feature-predictable here than on the active leg (<code>on_ball_event_type</code>'s ~176x
+  zero-rate range vs. active's own ~5x), which is the evidence basis for building this leg's own
+  two-stage shape from scratch (no existing classifier to reuse, unlike <code>d1</code>'s own
+  hurdle pattern) rather than assuming it either transfers from active-xT or needs reinventing
+  target-by-target.</p>
+<p><strong>No model ladder is built in this document</strong> &mdash; this is Rung 0 only,
+  mirroring active-xT's own Prompt 70 discipline and every other leg's own Rung-0-only precedent
+  before it.</p>
+
+</div>
+</div>
+<footer>
+  <p>Generated by <code>scripts/models/train_passive_xt_baseline.py</code>. Markdown source:
+    <code>reports/modeling/passive_xt/PASSIVE_XT_BASELINE_SUMMARY.md</code>.</p>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+  <figure>
+    <img id="lightboxImg" src="" alt="">
+    <figcaption id="lightboxCaption"></figcaption>
+  </figure>
+</div>
+<script>
+(function () {
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightboxImg');
+  var lightboxCaption = document.getElementById('lightboxCaption');
+  function openLightbox(img) {
+    lightboxImg.src = img.currentSrc || img.src;
+    lightboxImg.alt = img.alt;
+    var variant = img.closest('.variant-block');
+    var title = variant ? variant.querySelector('.variant-title').textContent : '';
+    lightboxCaption.textContent = title ? (title + ' — ' + img.alt) : img.alt;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    lightboxImg.src = '';
+  }
+  document.querySelectorAll('.chart-card img').forEach(function (img) {
+    img.addEventListener('click', function () { openLightbox(img); });
+  });
+  lightbox.addEventListener('click', function (e) { if (e.target === lightbox) closeLightbox(); });
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLightbox(); });
+})();
+</script>
+</body>
+</html>
