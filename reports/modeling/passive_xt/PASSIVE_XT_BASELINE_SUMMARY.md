@@ -1,5 +1,10 @@
 # Passive-xT Baseline Summary (y0-y1)
 
+> **Status update (Prompt 78):** `y1_two_stage_huber` (Rung 0, this document) is no longer the
+> active reference model for this leg -- `y1c_random_forest` was promoted in its place. See the
+> promotion decision in [`PASSIVE_XT_MODEL_LADDER.md`](PASSIVE_XT_MODEL_LADDER.md) section 3.7.
+> `y1_two_stage_huber` remains documented below as the Rung 0 baseline it was measured against.
+
 Target: `target_xt_delta_passive` (Prompt 68, fully EDA'd via the extended `xt_target` portal,
 Prompt 69, and locked against the 38 locked PASSIVE features per
 `reports/analysis/xt_target/PASSIVE_FEATURE_LOCK_CONFIRMATION_XT.json`). Dataset:
@@ -232,130 +237,11 @@ needs reinventing target-by-target.
 **No model ladder is built in this document** -- this is Rung 0 only, mirroring active-xT's own
 Prompt 70 discipline and every other leg's own Rung-0-only precedent before it.
 
-*(Prompt 77 note: Rung 1 is appended directly below as section 11, not split into a separate
-ladder document -- see the split note at the top of that section.)*
-
-*Split note: per the confirmed project convention (verified against `active_continuous`'s and
-`active_xt`'s own git history), Rung 0 and Rung 1 stay together in this document; the split into
-a separate `PASSIVE_XT_MODEL_LADDER.md` happens only once a second rung (Rung 2) exists.*
-
-## 11. Rung 1: `y1b_quadratic` (prompt 77)
-
-### 11.1 Task 0 -- what this rung is actually testing
-
-Active-xT's own Rung 1 (Prompt 71) was motivated by a **symmetric** tail-under-prediction pattern
-in `x1`'s Rung-0 calibration table (both extreme bins' `|predicted|` smaller than `|actual|`).
-Checked `y1_two_stage_huber`'s own Rung-0 calibration table directly before assuming the same
-motivation carries over -- **it does not show that pattern**. Section 7 above has been corrected
-(this rung's own grounding work caught the error): `predicted > actual` in **all 5 bins**, not
-just the tails -- a single, systematic **positive bias** across the whole distribution, confirmed
-independently by the held-out `prediction_bias` field (+0.00278, larger in magnitude than the
-true mean itself). **This rung checks whether quadratic/interaction terms reduce that systematic
-positive bias** -- not whether they close a "tail gap" the way active-xT's Rung 1 did, since
-passive's own Rung 0 does not show that pattern.
-
-### 11.2 Step 0 -- which stage(s) get expanded terms, decided from passive's own data
-
-Active-xT's own Rung 1 expanded **both** stages because the same candidate numeric features
-showed real curvature in both the zero-rate (Stage A's target) and the nonzero-delta magnitude
-(Stage B's target). Checked the identical cross-check here, not assumed to transfer: the
-regression-stage quadratic candidates (below) show real, large-sample nonzero-delta-magnitude
-curvature, but their own zero-rate curvature
-(`passive_numerical_target_atlas.json`'s unconditional `bins` panel) is much weaker:
-
-| Feature | Zero-rate range (10 bins) | Ratio |
-|---|---|---|
-| `ball_x` | 22.77% - 28.33% | ~1.25x |
-| `top_option_3_threat_score` | 24.88% - 27.72% | ~1.11x |
-| `angle_to_attacking_goal` | 24.7% - 27.09% | ~1.10x |
-
-...nowhere near the ~176x range `on_ball_event_type` (a **categorical** feature, Prompt 76's own
-Step-0 evidence) showed for the classifier stage. The classifier's own real predictive signal on
-this leg comes from categorical structure that quadratic/interaction terms (numeric-only by
-construction) cannot add anything to.
-
-**Decision: expand the regression stage only.** A genuine departure from active-xT's own Step-0
-answer (which expanded both stages), reached here because passive's own evidence pattern is
-different, not because this rung defaulted to a different answer for its own sake.
-
-### 11.3 Feature-set construction
-
-**Quadratic (3 features)**: top locked PASSIVE numeric features by `pearson_r_nonzero_delta` are
-`ball_x` (0.290), `defender_x` (0.222), `top_option_3_threat_score` (0.218),
-`top_option_2_threat_score` (0.203) -- all confirmed real (non-thin, ~116-117k rows/bin). But
-`defender_x` correlates r=0.81 with `ball_x`, and `top_option_2_threat_score` correlates r=0.87
-with `top_option_3_threat_score` (checked directly against the real data) -- keeping both of
-either pair would pad the list with near-duplicate curvature information. Kept the stronger of
-each redundant pair plus one more-independent (r=0.35-0.47 with the other two), weaker-but-real
-candidate:
-`QUADRATIC_FEATURES_Y1B = ["ball_x", "top_option_3_threat_score", "angle_to_attacking_goal"]`
-
-**Interaction (3 pairs)**: reused directly from
-`reports/analysis/xt_target/PASSIVE_FEATURE_INTERACTION_ANALYSIS.json` (Prompt 69's own
-passive-specific findings, not re-discovered from scratch). All 3 of its `interactive` pairs are
-used directly -- unlike active-xT's own `x1b`, no pair needed dropping for an excluded feature,
-since all involved features are locked PASSIVE modelling features:
-`("top_option_2_threat_score", "top_option_2_distance_from_ball")`,
-`("lane_screening_score_option_2", "engagement_distance_to_carrier")`,
-`("marking_tightness", "engagement_distance_to_carrier")`.
-
-Both are appended only to the regression head's design matrix (44 columns total: 38 locked + 3
-quadratic + 3 interaction); the classifier stage is byte-for-byte unchanged from `y1`.
-
-### 11.4 Cross-validation results (5-fold, OOF metrics)
-
-| Variant | RMSE | MAE | R² | Spearman | Prediction bias |
-|---|---|---|---|---|---|
-| `y1_two_stage_huber` | 0.035684 | 0.010853 | 0.0786 | **0.3193** | 0.003106 |
-| `y1b_quadratic` | **0.035612** | **0.010837** | **0.0823** | 0.3169 | **0.003291** |
-
-Movement is real but tiny in the accuracy columns: RMSE improves by 0.00007 (0.2% relative), R²
-improves by 0.0037, MAE is flat, and Spearman is marginally worse. **Prediction bias -- the
-quantity this rung actually exists to move -- gets worse, not better** (0.003106 -> 0.003291).
-
-### 11.5 Paired significance test, `y1b` vs `y1`
-
-Per-fold RMSE (`outputs/models/validation/significance_y1_vs_y1b_quadratic.json`): `y1b` beats
-`y1` in 5 of 5 folds, small and consistent enough to produce a significant paired t-test (t=-9.67,
-**p=0.0006**) despite a practically negligible effect size -- mean diff -0.00007, roughly 20x
-smaller than Rung 0's own `y1`-vs-`y0` mean diff (-0.00148). Wilcoxon p=0.0625, the same 5-fold
-floor seen throughout this project. **A significant p-value here is not read as "clears the
-bar"** -- see section 11.7.
-
-### 11.6 Calibration -- does `y1b` reduce the systematic positive bias?
-
-| Bin | `y1` gap (Rung 0) | `y1b` gap (this rung) | Change |
-|---|---|---|---|
-| 0 (most negative predicted) | +0.00656 | **+0.00499** | improves |
-| 1 | +0.00155 | +0.00284 | **worse** |
-| 2 | +0.00060 | +0.00091 | worse |
-| 3 | +0.00113 | +0.00116 | flat |
-| 4 (most positive predicted) | +0.00406 | **+0.00501** | **worse** |
-
-**No -- the systematic positive bias does not shrink; if anything it is slightly worse.** Only
-bin 0 improves; bins 1, 2, and 4 all move in the wrong direction (bin 1 nearly doubles), and bin 3
-is flat. The held-out `prediction_bias` field confirms this at the aggregate level too: +0.00278
-(`y1`) -> +0.00298 (`y1b`), worse. Stated plainly, per this project's own standing discipline of
-not letting a better-looking aggregate metric stand in for the rung's actual motivating question:
-**this rung's real target (the systematic positive bias identified in section 11.1) is not
-improved by adding curvature to the regression head.**
-
-### 11.7 Promotion call
-
-**`y1b_quadratic` does not clear the bar to replace `y1` as the standing baseline.** The
-aggregate metrics move in `y1b`'s favor by an amount too small to matter operationally (RMSE
-0.2% lower), and the one thing this rung actually exists to move -- the systematic prediction
-bias -- gets worse, not better, on both the bin-level calibration table and the aggregate
-`prediction_bias` metric. A statistically significant paired test (section 11.5) is not treated
-as sufficient on its own, the same discipline `x1b_quadratic` established on the active leg.
-
-**`y1_two_stage_huber` remains the standing baseline.** A valid, reportable Rung-1 outcome, not a
-failure to fix before moving on: the Step-0 evidence was real (the candidate features do show
-genuine curvature in the regression stage's own target quantity), and testing that evidence
-properly required actually fitting the expanded model rather than assuming curvature terms would
-reduce a bias that, on inspection, is not a curvature-shaped problem in the first place --
-`HuberRegressor`'s own systematic offset is a location/scale property of its fit, not something
-additional nonlinear terms in the same linear-in-parameters model are positioned to correct. This
-mirrors active-xT's own Rung 1 finding (a different model-family change, not more features on the
-same model, closed its own calibration gap) -- a candidate hypothesis for this leg's own next
-rung, not something this document resolves.
+*Split note (prompt 78): this document previously appended Rung 1 (`y1b_quadratic`, prompt 77)
+directly below this section, on the stated basis that the split would happen "once a second rung
+is built." That threshold is now crossed (Rung 2, `y1c_random_forest`, prompt 78) -- Rungs 1 and 2
+have moved to [`PASSIVE_XT_MODEL_LADDER.md`](PASSIVE_XT_MODEL_LADDER.md), mirroring `active_xt`'s
+own split point. This document is Rung-0-only from here on. **Status:
+`y1c_random_forest` (Rung 2) has since been promoted to standing baseline, superseding
+`y1_two_stage_huber`** -- see [`PASSIVE_XT_MODEL_LADDER.md`](PASSIVE_XT_MODEL_LADDER.md) section
+3.7. `y1_two_stage_huber` remains documented above as the Rung 0 baseline it was measured against.*

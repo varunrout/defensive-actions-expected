@@ -106,6 +106,13 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <div class="wrap">
 <div class="article">
 
+<div class="deviation-box"><p><strong>Status update (Prompt 78):</strong> <code>y1_two_stage_huber</code>
+  (Rung 0, this document) is no longer the active reference model for this leg &mdash;
+  <code>y1c_random_forest</code> was promoted in its place. See the promotion decision in
+  <a href="PASSIVE_XT_MODEL_LADDER.html" target="viewer">PASSIVE_XT_MODEL_LADDER.html</a> section
+  3.7. <code>y1_two_stage_huber</code> remains documented below as the Rung 0 baseline it was
+  measured against.</p></div>
+
 <p><em>Prompt scope: passive leg only. This document does not build past Rung 0 &mdash; no
   quadratic terms, no random forest, no promotion decision, no full ladder.</em></p>
 
@@ -350,136 +357,23 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   mirroring active-xT's own Prompt 70 discipline and every other leg's own Rung-0-only precedent
   before it.</p>
 
-<p><em>Split note: per the confirmed project convention (verified against
-  <code>active_continuous</code>'s and <code>active_xt</code>'s own git history), Rung 0 and Rung
-  1 stay together in this document; the split into a separate
-  <code>PASSIVE_XT_MODEL_LADDER.md</code> happens only once a second rung (Rung 2) exists.</em></p>
+<p><em>Split note (prompt 78): this document previously appended Rung 1 (<code>y1b_quadratic</code>,
+  prompt 77) directly below this section, on the stated basis that the split would happen "once a
+  second rung is built." That threshold is now crossed (Rung 2, <code>y1c_random_forest</code>,
+  prompt 78) &mdash; Rungs 1 and 2 have moved to
+  <a href="PASSIVE_XT_MODEL_LADDER.html" target="viewer">PASSIVE_XT_MODEL_LADDER.html</a>,
+  mirroring <code>active_xt</code>'s own split point. This document is Rung-0-only from here on.
+  <strong>Status: <code>y1c_random_forest</code> (Rung 2) has since been promoted to standing
+  baseline, superseding <code>y1_two_stage_huber</code></strong> &mdash; see
+  <a href="PASSIVE_XT_MODEL_LADDER.html" target="viewer">PASSIVE_XT_MODEL_LADDER.html</a> section
+  3.7. <code>y1_two_stage_huber</code> remains documented above as the Rung 0 baseline it was
+  measured against.</em></p>
 
-<h2>11. Rung 1: y1b_quadratic (prompt 77)</h2>
-<h3>11.1 Task 0 -- what this rung is actually testing</h3>
-<p>Active-xT's own Rung 1 (Prompt 71) was motivated by a <strong>symmetric</strong>
-  tail-under-prediction pattern in <code>x1</code>'s Rung-0 calibration table. Checked
-  <code>y1_two_stage_huber</code>'s own Rung-0 calibration table directly before assuming the
-  same motivation carries over &mdash; <strong>it does not show that pattern</strong>. Section 7
-  above has been corrected (this rung's own grounding work caught the error):
-  <code>predicted &gt; actual</code> in <strong>all 5 bins</strong>, not just the tails &mdash; a
-  single, systematic <strong>positive bias</strong> across the whole distribution, confirmed
-  independently by the held-out <code>prediction_bias</code> field (+0.00278, larger in magnitude
-  than the true mean itself). <strong>This rung checks whether quadratic/interaction terms reduce
-  that systematic positive bias</strong> &mdash; not whether they close a "tail gap" the way
-  active-xT's Rung 1 did.</p>
-
-<h3>11.2 Step 0 -- which stage(s) get expanded terms, decided from passive's own data</h3>
-<p>Active-xT's own Rung 1 expanded <strong>both</strong> stages because the same candidate
-  numeric features showed real curvature in both the zero-rate (Stage A) and the nonzero-delta
-  magnitude (Stage B). Checked the identical cross-check here: the regression-stage quadratic
-  candidates show real nonzero-delta-magnitude curvature, but their own zero-rate curvature is
-  much weaker:</p>
-<table>
-<tr><th>Feature</th><th>Zero-rate range (10 bins)</th><th>Ratio</th></tr>
-<tr><td><code>ball_x</code></td><td>22.77% - 28.33%</td><td>~1.25x</td></tr>
-<tr><td><code>top_option_3_threat_score</code></td><td>24.88% - 27.72%</td><td>~1.11x</td></tr>
-<tr><td><code>angle_to_attacking_goal</code></td><td>24.7% - 27.09%</td><td>~1.10x</td></tr>
-</table>
-<p>...nowhere near the ~176x range <code>on_ball_event_type</code> (a <strong>categorical</strong>
-  feature, Prompt 76's own Step-0 evidence) showed for the classifier stage. The classifier's own
-  real predictive signal on this leg comes from categorical structure that quadratic/interaction
-  terms (numeric-only by construction) cannot add anything to.</p>
-<div class="verdict-box"><p><strong>Decision: expand the regression stage only.</strong> A
-  genuine departure from active-xT's own Step-0 answer, reached here because passive's own
-  evidence pattern is different, not because this rung defaulted to a different answer for its
-  own sake.</p></div>
-
-<h3>11.3 Feature-set construction</h3>
-<p><strong>Quadratic (3 features)</strong>: top locked PASSIVE numeric features by
-  <code>pearson_r_nonzero_delta</code> are <code>ball_x</code> (0.290), <code>defender_x</code>
-  (0.222), <code>top_option_3_threat_score</code> (0.218),
-  <code>top_option_2_threat_score</code> (0.203) &mdash; but <code>defender_x</code> correlates
-  r=0.81 with <code>ball_x</code>, and <code>top_option_2_threat_score</code> correlates r=0.87
-  with <code>top_option_3_threat_score</code> (checked directly), so keeping both of either pair
-  would pad the list with near-duplicate curvature information. Kept the stronger of each
-  redundant pair plus one more-independent, weaker-but-real candidate:
-  <code>QUADRATIC_FEATURES_Y1B = ["ball_x", "top_option_3_threat_score", "angle_to_attacking_goal"]</code></p>
-<p><strong>Interaction (3 pairs)</strong>: reused directly from
-  <code>reports/analysis/xt_target/PASSIVE_FEATURE_INTERACTION_ANALYSIS.json</code> (Prompt 69's
-  own passive-specific findings). All 3 of its <code>interactive</code> pairs are used directly
-  &mdash; unlike active-xT's own <code>x1b</code>, no pair needed dropping for an excluded
-  feature: <code>top_option_2_threat_score x top_option_2_distance_from_ball</code>,
-  <code>lane_screening_score_option_2 x engagement_distance_to_carrier</code>,
-  <code>marking_tightness x engagement_distance_to_carrier</code>.</p>
-<p>Both are appended only to the regression head's design matrix (44 columns total: 38 locked + 3
-  quadratic + 3 interaction); the classifier stage is byte-for-byte unchanged from <code>y1</code>.</p>
-
-<h3>11.4 Cross-validation results (5-fold, OOF metrics)</h3>
-<table>
-<tr><th>Variant</th><th>RMSE</th><th>MAE</th><th>R&sup2;</th><th>Spearman</th><th>Prediction bias</th></tr>
-<tr><td><code>y1_two_stage_huber</code></td><td>0.035684</td><td>0.010853</td><td>0.0786</td><td><strong>0.3193</strong></td><td>0.003106</td></tr>
-<tr><td><code>y1b_quadratic</code></td><td><strong>0.035612</strong></td><td><strong>0.010837</strong></td><td><strong>0.0823</strong></td><td>0.3169</td><td><strong>0.003291</strong></td></tr>
-</table>
-<p>Movement is real but tiny in the accuracy columns: RMSE improves by 0.00007 (0.2% relative),
-  R&sup2; improves by 0.0037, MAE is flat, and Spearman is marginally worse. <strong>Prediction
-  bias -- the quantity this rung actually exists to move -- gets worse, not better</strong>
-  (0.003106 -&gt; 0.003291).</p>
-
-<h3>11.5 Paired significance test, y1b vs y1</h3>
-<p>Per-fold RMSE: <code>y1b</code> beats <code>y1</code> in 5 of 5 folds, small and consistent
-  enough to produce a significant paired t-test (t=-9.67, <strong>p=0.0006</strong>) despite a
-  practically negligible effect size &mdash; mean diff -0.00007, roughly 20x smaller than Rung
-  0's own <code>y1</code>-vs-<code>y0</code> mean diff (-0.00148). Wilcoxon p=0.0625, the same
-  5-fold floor seen throughout this project. <strong>A significant p-value here is not read as
-  "clears the bar"</strong> &mdash; see section 11.7.</p>
-
-<h3>11.6 Calibration -- does y1b reduce the systematic positive bias?</h3>
-<table>
-<tr><th>Bin</th><th>y1 gap (Rung 0)</th><th>y1b gap (this rung)</th><th>Change</th></tr>
-<tr><td>0 (most negative predicted)</td><td>+0.00656</td><td><strong>+0.00499</strong></td><td>improves</td></tr>
-<tr><td>1</td><td>+0.00155</td><td>+0.00284</td><td><strong>worse</strong></td></tr>
-<tr><td>2</td><td>+0.00060</td><td>+0.00091</td><td>worse</td></tr>
-<tr><td>3</td><td>+0.00113</td><td>+0.00116</td><td>flat</td></tr>
-<tr><td>4 (most positive predicted)</td><td>+0.00406</td><td><strong>+0.00501</strong></td><td><strong>worse</strong></td></tr>
-</table>
-<div class="fail-box"><p><strong>No -- the systematic positive bias does not shrink; if anything
-  it is slightly worse.</strong> Only bin 0 improves; bins 1, 2, and 4 all move in the wrong
-  direction (bin 1 nearly doubles), and bin 3 is flat. The held-out <code>prediction_bias</code>
-  field confirms this at the aggregate level too: +0.00278 (<code>y1</code>) -&gt; +0.00298
-  (<code>y1b</code>), worse. <strong>This rung's real target (the systematic positive bias
-  identified in section 11.1) is not improved by adding curvature to the regression
-  head.</strong></p></div>
-
-<h3>11.7 Promotion call</h3>
-<div class="fail-box"><p><strong>y1b_quadratic does not clear the bar to replace y1 as the
-  standing baseline.</strong> The aggregate metrics move in <code>y1b</code>'s favor by an amount
-  too small to matter operationally, and the one thing this rung actually exists to move &mdash;
-  the systematic prediction bias &mdash; gets worse, not better. A statistically significant
-  paired test is not treated as sufficient on its own, the same discipline
-  <code>x1b_quadratic</code> established on the active leg.</p></div>
-<p><strong>y1_two_stage_huber remains the standing baseline.</strong> A valid, reportable Rung-1
-  outcome, not a failure to fix before moving on: the Step-0 evidence was real, and testing it
-  properly required actually fitting the expanded model rather than assuming curvature terms
-  would reduce a bias that, on inspection, is not a curvature-shaped problem in the first place
-  &mdash; <code>HuberRegressor</code>'s own systematic offset is a location/scale property of its
-  fit, not something additional nonlinear terms in the same linear-in-parameters model are
-  positioned to correct. This mirrors active-xT's own Rung 1 finding (a different model-family
-  change, not more features on the same model, closed its own calibration gap) &mdash; a
-  candidate hypothesis for this leg's own next rung, not something this document resolves.</p>
-
-
-<div class="variant-block">
-  <p class="variant-title">y1b_quadratic <span style="font-weight:400;color:var(--text-muted);font-size:12px;">(rung 1)</span></p>
-  <div class="chart-grid">
-    <div class="chart-card"><img src="../../../outputs/models/regression/charts/y1b_quadratic/predicted_vs_observed.png" alt="y1b_quadratic predicted vs observed"><p class="cc-label">predicted_vs_observed.png</p></div>
-    <div class="chart-card"><img src="../../../outputs/models/regression/charts/y1b_quadratic/residual_distribution.png" alt="y1b_quadratic residual distribution"><p class="cc-label">residual_distribution.png</p></div>
-    <div class="chart-card"><img src="../../../outputs/models/regression/charts/y1b_quadratic/calibration_bins.png" alt="y1b_quadratic calibration bins"><p class="cc-label">calibration_bins.png</p></div>
-    <div class="chart-card"><img src="../../../outputs/models/regression/charts/y1b_quadratic/feature_coefficients.png" alt="y1b_quadratic feature coefficients (including quadratic/interaction terms)"><p class="cc-label">feature_coefficients.png</p></div>
-  </div>
-</div>
-
-</div>
 </div>
 <footer>
-  <p>Generated by <code>scripts/models/train_passive_xt_baseline.py</code> and
-    <code>scripts/models/train_y1b_quadratic.py</code>. Markdown source:
-    <code>reports/modeling/passive_xt/PASSIVE_XT_BASELINE_SUMMARY.md</code>.</p>
+  <p>Generated by <code>scripts/models/train_passive_xt_baseline.py</code>. Markdown source:
+    <code>reports/modeling/passive_xt/PASSIVE_XT_BASELINE_SUMMARY.md</code>. Model ladder (Rung
+    1+): <a href="PASSIVE_XT_MODEL_LADDER.html" target="viewer">PASSIVE_XT_MODEL_LADDER.html</a>.</p>
 </footer>
 
 <div class="lightbox" id="lightbox">
