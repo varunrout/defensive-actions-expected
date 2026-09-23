@@ -1,5 +1,11 @@
 # Passive-xT Model Ladder
 
+> **Status update (Prompt 80, part A):** `y1c_random_forest` has cleared a full promotion audit
+> (tournament-stratified check, error-slice comparison, feature-shape sanity check, full-pipeline
+> held-out re-run) and is now promoted as the **passive-xT reference model**, superseding
+> `y1_two_stage_huber` -- not merely the Rung-2 ladder-gate winner it was documented as through
+> Prompt 79. See section 5 below.
+>
 > **Status update (Prompt 79):** `y1d_gradient_boosting` (Rung 3) does **not** clear this rung's
 > ladder gate against `y1c_random_forest`: the paired significance test on 5-fold CV RMSE is not
 > significant (paired-t p=0.0635, Wilcoxon p=0.125), and held-out Spearman regresses meaningfully
@@ -570,8 +576,145 @@ framing, this is a fully valid, reportable outcome: `y1d`'s test does not manufa
 narrative that does not apply here, and the honest answer is that gradient boosting does not
 improve on random forest by enough -- on this leg, at this rung -- to earn promotion.
 
-**`y1c_random_forest` remains the leg's standing baseline.** `y1_two_stage_huber` remains
-documented as the Rung-0 baseline, `y1b_quadratic` as the Rung-1 rung that did not clear its own
-bar, and `y1d_gradient_boosting` as this Rung-3 rung that also did not clear its own bar (a
-different, and for the first time genuinely mixed, kind of non-promotion than `y1b`'s). No further
-rung is built in this prompt; no promotion audit is run for `y1d` since it was not promoted.
+**`y1c_random_forest` remains the leg's standing baseline** at this point in the ladder (Prompt
+80, part A subsequently runs the deeper promotion audit and promotes it as the leg's reference
+model -- see section 5). `y1_two_stage_huber` remains documented as the Rung-0 baseline,
+`y1b_quadratic` as the Rung-1 rung that did not clear its own bar, and `y1d_gradient_boosting` as
+this Rung-3 rung that also did not clear its own bar (a different, and for the first time
+genuinely mixed, kind of non-promotion than `y1b`'s). No further rung is built in this prompt; no
+promotion audit is run for `y1d` since it was not promoted.
+
+## 5. Promotion decision: `y1c_random_forest` (prompt 80, part A)
+
+`y1c_random_forest`'s Rung-2 ladder gate (section 3.7) answered "is this rung's change real?" --
+5/5 CV folds, p&lt;0.0001. This section answers the deeper question every prior promotion decision
+on this project has asked (Prompts 43/46/52/58/75): should `y1c_random_forest` now replace
+`y1_two_stage_huber` as the leg's *documented reference model*? Four checks, run via
+`scripts/models/validate_y1c_promotion.py`, mirroring `x1c_random_forest`'s own audit
+(`validate_x1c_promotion.py`, Prompt 75) exactly in structure (train+val CV-OOF predictions for
+items 1-3, the held-out test set read once more, predict-only, for item 4). One thing does **not**
+carry over unchanged from `x1c`'s own audit: the error-slice columns. Passive's own locked
+categorical set differs from active's, and this leg's own EDA/modelling reports already established
+which columns carry real, already-documented signal worth slicing on -- `on_ball_event_type`
+(~176x zero-rate range, Prompt 76's own Step-0 evidence), `phase_label`, and
+`defender_functional_role` (this leg's own role-slicing precedent, `PASSIVE_SLICE_STRATIFICATION_V2.json`)
+-- three one-way breakdowns instead of `x1c`'s two.
+
+**Step 1 (re)confirmation**: `outputs/models/regression/y1c_random_forest.json` has both
+`clf_params` and `reg_params` populated -- `y1c_random_forest` replaced **both** of `y1`'s stages
+(Prompt 78's own Step-1 decision), so item 4 below is `y1c`'s own classifier x regressor product,
+not a mixed composite with any `y1` stage.
+
+### 5.1 Tournament-stratified check (`tournament_stratified_y1c.json`)
+
+Tournament composition reconfirmed directly, not assumed to match the active leg: exactly FIFA
+World Cup 2022 (650,170 rows, 50 matches) and UEFA Euro 2024 (625,119 rows, 42 matches) in
+train+val -- both large, no thin-slice caveat needed. `y1c_random_forest` beats
+`y1_two_stage_huber` on **both** tournaments, by almost exactly the same margin:
+
+| Tournament | Rows | `y1` RMSE | `y1c` RMSE | `y1` R² | `y1c` R² |
+|---|---|---|---|---|---|
+| FIFA World Cup 2022 | 650,170 | 0.03563 | 0.02635 | 0.0822 | 0.4980 |
+| UEFA Euro 2024 | 625,119 | 0.03574 | 0.02639 | 0.0747 | 0.4955 |
+
+R² improvement is +0.4158 (WC2022) and +0.4208 (Euro2024) -- within 0.0050 of each other, well
+under the ~0.02 divergence flag this check uses (and tighter than `x1c`'s own 0.012 spread).
+**Not reliant on one tournament**, the first criterion this promotion decision requires.
+
+### 5.2 Error-slice comparison (`error_analysis_y1c.json`)
+
+`on_ball_event_type` / `phase_label` / `defender_functional_role`, MAE on the signed
+`target_xt_delta_passive` scale, train+val CV-OOF. **All 17 slices clear the 30-row bar (largest:
+`on_ball_event_type=Pass`, 668,170 rows; smallest: `defender_functional_role=unclassified`, still
+766 rows). Of those 17: 6 improve outright, 11 are "about the same" (|MAE diff| &lt; 0.001), zero
+regress.**
+
+- `on_ball_event_type`: `Shot` improves dramatically (0.14120 -> 0.05344, the single largest
+  slice-level gain anywhere in this check -- consistent with Shot rows carrying this leg's largest
+  raw target magnitudes) and `Dribble` improves (0.00906 -> 0.00795); `Pass` and `Carry` move
+  fractionally in `y1`'s favor (+0.00027, +0.00058) but both stay inside the "about the same" band.
+- `phase_label`: `box_defence` improves clearly (0.04745 -> 0.03387); the other 6 phases are all
+  "about the same" in either direction, the largest such move a negligible +0.00056
+  (`settled_low_block_proxy`).
+- `defender_functional_role`: `central_screen`, `wide_cover`, and the thin-but-still-valid
+  `unclassified` slice (n=766) all improve; `mid_block`, `last_line`, and `advanced_wide` are
+  "about the same".
+
+**No new weak spot is introduced anywhere `y1c` has enough rows to be judged** -- zero regressions
+across all 17 slices, at least as clean a result as `x1c`'s own audit found on the active leg (also
+zero regressions, across 30 slices there).
+
+### 5.3 Feature-shape sanity check (`feature_shape_sanity_y1c.json`)
+
+Top 8 features by `y1c`'s Gini importance, **aggregated back from one-hot columns to the 38 locked
+PASSIVE features** first (the raw per-one-hot-column ranking would have put multiple dummy levels
+of `on_ball_event_type` in the "top 8", not 8 genuinely different features): 1 categorical
+(`on_ball_event_type`), 7 numeric. Every category and every 10-quantile numeric bin clears 30 rows
+(zero thin bins/categories across all 8 features). Marginal shapes:
+
+- `ball_x`: clean monotonic increase (-0.02926 -> +0.01584) across bins.
+- `defender_x`, `top_option_1_threat_score`, `top_option_2_threat_score`,
+  `top_option_3_threat_score`: all clean monotonic increases (deeper/more-threatening positions ->
+  higher predicted delta), directionally consistent with each other and football-sensible.
+- `top_option_3_dx`: clean monotonic decrease (+0.00450 -> -0.00465).
+- `ball_y`: flat and small across bins (-0.00466 -> -0.00438) -- consistent with the Karun Singh xT
+  grid varying far more along pitch length than width, the same finding Rung 2's own report cited.
+- `on_ball_event_type` (categorical): 4 categories, no small-n outlier (smallest, `Dribble`,
+  n=17,114).
+
+**Restated, not re-derived, per this leg's own established discipline**: `ball_x` and `ball_y`
+being in this top-8 list is the same construction-coupling caveat Rung 2's own report (section 3.6)
+and `reports/analysis/xt_target/PASSIVE_LEAKAGE_AUDIT.json`'s Part E' already flagged -- `ball_x`/
+`ball_y` are the exact two columns `xt_before = xT(ball_x, ball_y)` is computed from (`ball_x` at
+r=+0.52 vs `xt_before`, `ball_y` at r=-0.004). Not new information surfaced by this audit. No
+*additional* feature-shape red flag turns up beyond that already-documented one -- every shape
+above is either monotonic-and-plausible or (for `ball_y`) flat-and-plausible, none jagged or
+implausibly discontinuous.
+
+**Mostly football-sensible, not dominated by thin-bin noise, with the one caveat already on
+record** -- the third criterion holds.
+
+### 5.4 Full two-stage pipeline re-run (`full_pipeline_readout_y1c.json`) -- the decisive check
+
+`y1c_random_forest_classifier.joblib` and `y1c_random_forest_regressor.joblib` (both reused via
+`.predict_proba`/`.predict` only, never refit) combined on the held-out test set (315,311 rows),
+compared against `y1_two_stage_huber`'s own already-recorded held-out row (Prompt 76, reused
+directly, not rescored):
+
+| | RMSE | MAE | R² | Spearman |
+|---|---|---|---|---|
+| `y1_two_stage_huber` (Prompt 76, on record) | 0.03388 | 0.01021 | 0.06119 | 0.2936 |
+| `y1c_random_forest` (this re-run) | **0.02489** | **0.00928** | **0.49325** | **0.3154** |
+| Change | -0.00899 | -0.00094 | **+0.43206** | +0.02172 |
+
+The re-run reproduces `y1c`'s own Rung-2 held-out numbers exactly (Prompt 78's CSV row:
+rmse=0.024892, r2=0.493252, spearman=0.315355) -- confirms the regression-only gate's win
+translates fully into the combined pipeline, with **no shrinkage**, the same clean result `x1c`'s
+own audit found on the active leg. Both stages are this leg's own tuned models with no external
+dominating factor to dilute through, and the full combined R² improvement (+0.432) is, if anything,
+even larger in absolute terms than `x1c`'s own re-run improvement (+0.298) -- consistent with this
+leg's own Rung-2 ladder gate already having produced the largest effect size reported anywhere on
+either leg's ladder (section 3.3). **This is not a case where items 1-3 looked decisive but the
+end-to-end number disappointed** -- the fourth criterion holds as strongly as the first three.
+
+### 5.5 Decision: promoted
+
+**All four criteria are met, cleanly, not marginally:**
+
+1. Beats `y1` on both tournament slices, with near-identical effect size on each (5.1).
+2. Net improvement on every trustworthy error slice, zero regressions across all 17 (5.2).
+3. Feature-shape checks are football-sensible, zero thin bins across all 8 top features, with the
+   one already-documented construction-coupling caveat restated rather than treated as new (5.3).
+4. The re-run combined-pipeline readout shows a real, undiluted improvement -- the decisive check
+   (5.4).
+
+**`y1c_random_forest` is now the reference model for the passive-xT leg, superseding
+`y1_two_stage_huber` (Prompt 76); `y1_two_stage_huber` remains documented as the Rung 0 baseline it
+was measured against, and `y1b_quadratic`/`y1d_gradient_boosting` remain documented as rungs that
+didn't clear the bar against their respective comparisons.**
+
+**What changes downstream**: nothing outside this leg. No other leg, report, or pipeline currently
+consumes `target_xt_delta_passive` predictions -- this promotion changes this leg's own documented
+reference only, the same scope every prior promotion decision on this project has had before a
+cross-leg consumer existed, including `x1c_random_forest`'s own Prompt-75 promotion on the active
+leg.
