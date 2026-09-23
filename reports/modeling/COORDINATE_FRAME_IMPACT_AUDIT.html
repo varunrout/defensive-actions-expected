@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- Coordinate-Frame Bug Impact Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1; --plane: #eceee8; --surface: #ffffff;
+  --text-primary: #10151c; --text-secondary: #4c525b; --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09); --gridline: #e2e4de;
+  --accent: #e34948; --pos: #e34948; --neg: #2a78d6;
+  --amber: #eda100; --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b; --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+    --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09); --gridline: #232a34;
+    --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+    --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+  --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09); --gridline: #232a34;
+  --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+  --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary); font-family: "Public Sans", -apple-system, sans-serif; font-size: 15px; line-height: 1.5; }
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead { background: var(--bg); border-bottom: 1px solid var(--border); padding: 40px 24px 32px; }
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow { font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; color: var(--accent); font-weight: 600; margin: 0 0 10px; }
+h1.title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: clamp(26px, 4vw, 38px); margin: 0 0 12px; color: var(--text-primary); }
+.dek { color: var(--text-secondary); max-width: 68ch; margin: 0 0 24px; font-size: 15.5px; }
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b { display: block; font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; color: var(--text-primary); }
+.stat span { display: block; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+footer { border-top: 1px solid var(--border); padding: 28px 24px 60px; max-width: 1180px; margin: 0 auto; }
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 980px; }
+.article h2 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; margin: 44px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.article h2:first-of-type { margin-top: 0; }
+.article h3 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 17px; margin: 30px 0 4px; color: var(--accent); }
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article code { font-family: "JetBrains Mono", monospace; font-size: 0.88em; background: var(--plane); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--neg); }
+.article ul, .article ol { color: var(--text-secondary); font-size: 14.5px; padding-left: 22px; margin: 0 0 16px; }
+.article li { margin-bottom: 6px; }
+.article table { width: 100%; border-collapse: collapse; margin: 4px 0 22px; font-size: 12.5px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.article th { text-align: left; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 10px; letter-spacing: 0.03em; color: var(--text-muted); background: var(--plane); padding: 9px 10px; border-bottom: 1px solid var(--border); }
+.article td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p:last-child { margin-bottom: 0; }
+.verdict-box { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.verdict-box p { margin: 0; }
+.fail-box { background: rgba(227,73,72,0.10); border: 1px solid rgba(227,73,72,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.fail-box p { margin: 0; }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; Read-only diagnostic audit</p>
+    <h1 class="title">Coordinate-Frame Bug: Full Impact Audit</h1>
+    <p class="dek">Prompt 83 found that 46.4% of <code>player_defensive_actions.parquet</code> rows
+      are stored in a frame inconsistent with the rule-based phase labeller. This prompt traces
+      that bug through all 6 targets, all 6 legs' locked features, all 6 reference models' own
+      importance weights, and the existing report set's interpretive claims -- read-only, no fix,
+      no retraining.</p>
+    <div class="statbar">
+      <div class="stat"><b>4 / 6</b><span>targets proven frame-invariant by code inspection</span></div>
+      <div class="stat"><b>2 / 6</b><span>targets (both xT legs) directly frame-dependent</span></div>
+      <div class="stat"><b>~67-69%</b><span>of xT legs' own training rows have a wrong target value</span></div>
+      <div class="stat"><b>19-84%</b><span>range of frame-dependent importance share across the 6 models</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+
+<h2>1. Are the targets themselves affected, or only the features? (the decisive question)</h2>
+<p><strong>Answer: it depends on the leg, and the split is exact and traceable.</strong> Four of
+  the six targets are <strong>provably frame-invariant by construction</strong> (0% of their own
+  rows affected, proven by code inspection, not sampled). The two xT-delta targets are
+  <strong>directly, heavily frame-dependent</strong> -- this is a more serious category of problem
+  than a feature-quality issue, and it affects the <em>ground truth</em>
+  <code>x1c_random_forest</code>/<code>y1c_random_forest</code> were trained and evaluated
+  against, not just what those models were shown.</p>
+
+<h3>1a. target_future_shot_10s / target_future_xg_10s -- frame-invariant, proven by derivation</h3>
+<p>Both targets are computed in <code>src/dax/targets/short_horizon.py</code>
+  (<code>add_future_shot_target</code>/<code>add_future_xg_target</code>), the only code that
+  constructs them. Reading both function bodies in full: every column referenced --
+  <code>match_id</code>, <code>period</code>, the possession-group column, <code>index</code>,
+  <code>event_time_seconds</code>, <code>event_type</code>/<code>type</code>,
+  <code>attacking_team_before_action</code>, and <code>shot_statsbomb_xg</code> (StatsBomb's own
+  precomputed shot-xG value, not derived from this project's coordinates) -- is either temporal,
+  team-identity, or event-type. <strong>No x/y/location/ball_x/ball_y/action_x/action_y column is
+  read anywhere in either function.</strong> The binary target is a pure occurrence flag; the
+  continuous target sums StatsBomb's own xG values gated by that same occurrence logic. Neither
+  can be affected by which frame a coordinate is stored in, because neither ever looks at a
+  coordinate. <strong>0 of their own training rows are affected</strong>, for active-binary,
+  passive-binary, active-continuous, and passive-continuous (including the P(shot) stage each
+  hurdle pipeline reuses).</p>
+
+<h3>1b. target_xt_delta_v2 (active-xT) -- directly frame-dependent, 69.13% of rows exposed</h3>
+<p><code>target_xt_delta_v2 = xt_before - xt_after</code>. <code>xt_before</code> is a grid lookup
+  at the <strong>previous event's</strong> <code>ball_x</code>/<code>ball_y</code>;
+  <code>xt_after</code> is 0.0 if the action ends its own possession, else the
+  <strong>next event's</strong> own <code>shot_statsbomb_xg</code> if a Shot (frame-invariant),
+  else a grid lookup at the <strong>next event's</strong> <code>ball_x</code>/<code>ball_y</code>.
+  Both columns come from <code>events_with_targets.parquet</code> -- the already-flipped output of
+  the buggy loader.</p>
+<table>
+<tr><th></th><th>Rows</th><th>Share of 56,068</th></tr>
+<tr><td><code>xt_before</code> drawn from a frame-inconsistent event</td><td>29,532</td><td>52.7%</td></tr>
+<tr><td><code>xt_after</code> drawn from a frame-inconsistent event (grid-lookup cases only)</td><td>26,479</td><td>47.2%</td></tr>
+<tr><td><strong>Exposed via either lookup (target value itself is wrong)</strong></td><td><strong>38,758</strong></td><td><strong>69.13%</strong></td></tr>
+</table>
+<p>(source: <code>outputs/models/validation/coordinate_frame_impact_audit.json</code>; methodology
+  validated against Prompt 83's own published figure -- this script's general event-level method
+  reproduces <strong>26,039 of 56,068 (0.4644)</strong> exactly when restricted to the
+  defensive-action population Prompt 83 itself audited)</p>
+<div class="deviation-box"><p><strong>69.13% is higher than the 46.4% feature-level figure because
+  a row's target can be exposed via either of two independent lookups</strong> (the previous
+  event, the next event), each with its own independent chance of being frame-inconsistent --
+  compounding, not capping, the exposure rate.</p></div>
+
+<h3>1c. target_xt_delta_passive (passive-xT) -- directly frame-dependent, 66.5-67.2% of rows exposed</h3>
+<p>Unlike active, <code>xt_before</code> here is a grid lookup at the <strong>snapshot's own</strong>
+  on-ball event's <code>ball_x</code>/<code>ball_y</code> (no previous-event lookup);
+  <code>xt_after</code> uses the identical next-event rule active uses.</p>
+<table>
+<tr><th></th><th>Count</th><th>Share</th></tr>
+<tr><td><code>xt_before</code> (snapshot's own event) frame-inconsistent</td><td>117,370 of 198,354 unique events</td><td>59.2%</td></tr>
+<tr><td><code>xt_after</code> drawn from a frame-inconsistent event (grid-lookup cases only)</td><td>112,778 of 198,354</td><td>56.9%</td></tr>
+<tr><td><strong>Exposed via either lookup, unique events</strong></td><td><strong>131,863 of 198,354</strong></td><td><strong>66.48%</strong></td></tr>
+<tr><td><strong>Exposed via either lookup, defender-slot rows</strong> (the population <code>y1c_random_forest</code> actually trains on)</td><td><strong>1,070,428 of 1,593,181</strong></td><td><strong>67.19%</strong></td></tr>
+</table>
+
+<h3>1d. Summary -- this is the single most important result in this prompt</h3>
+<table>
+<tr><th>Target</th><th>Frame-dependent?</th><th>Rows affected</th></tr>
+<tr><td><code>target_future_shot_10s</code> (active-binary, passive-binary)</td><td><strong>No</strong></td><td>0</td></tr>
+<tr><td><code>target_future_xg_10s</code> (active-continuous, passive-continuous)</td><td><strong>No</strong></td><td>0</td></tr>
+<tr><td><code>target_xt_delta_v2</code> (active-xT)</td><td><strong>Yes</strong></td><td>38,758 / 56,068 (69.13%)</td></tr>
+<tr><td><code>target_xt_delta_passive</code> (passive-xT)</td><td><strong>Yes</strong></td><td>1,070,428 / 1,593,181 (67.19%)</td></tr>
+</table>
+<div class="fail-box"><p><strong>The four binary/hurdle-continuous legs' problem is scoped to
+  feature quality and interpretation -- serious, but bounded: their own ground truth is correct,
+  only some of what the model was shown to predict it is wrong. The two xT legs have a materially
+  worse problem: for roughly two-thirds of their own training rows, the number the model was
+  trained to match is itself computed from a misframed location and is therefore sometimes wrong.</strong>
+  This is not a feature-shape or interpretation issue on those two legs -- it is a
+  target-correctness issue, and it applies to <code>x1c_random_forest</code> and
+  <code>y1c_random_forest</code>'s own promoted-reference-model status, not merely to some
+  downstream chart.</p></div>
+
+<h2>2. Inventory of frame-dependent locked features, per leg</h2>
+<p>Locked feature lists are shared across legs on the same side (<code>src/eda/feature_config.py</code>'s
+  <code>ACTIVE</code>/<code>PASSIVE</code> dicts) and cited per leg's own feature-lock confirmation
+  doc: <code>reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json</code> (active-binary +
+  passive-binary, <code>active: 34, passive: 38</code>),
+  <code>reports/analysis/xg_target/FEATURE_LOCK_CONFIRMATION_XG.json</code> (active-continuous +
+  passive-continuous, same counts), <code>reports/analysis/xt_target/FEATURE_LOCK_CONFIRMATION_XT.json</code>
+  (active-xT, 34) and <code>PASSIVE_FEATURE_LOCK_CONFIRMATION_XT.json</code> (passive-xT, 38).</p>
+<p><strong>Classification principle</strong>: a feature that stores/derives from a raw coordinate,
+  references a <em>fixed external</em> pitch point or boundary, or is a <em>signed</em>
+  direction-dependent quantity is <strong>frame-dependent</strong>. A feature that is a purely
+  <em>relative</em>, isometry-invariant quantity between simultaneously-flipped points (a
+  Euclidean distance/magnitude, a count within a radius, a spread, a count-ratio) is
+  <strong>frame-independent even under the bug</strong>, because the loader's flip is applied to
+  every spatial input in a row at once, and a point-reflection through the pitch centre is a
+  distance-preserving isometry. Two non-obvious invariances:</p>
+<ul>
+<li><strong><code>is_wide_lane</code></strong> (<code>y &lt;= 12 or y &gt;= 68</code>): symmetric
+  about y=40, so the rule evaluates identically whether y or 80-y is supplied.</li>
+<li><strong><code>top_option_*_distance_from_ball</code></strong> (<code>hypot(dx,dy)</code>):
+  dx and dy both flip sign together, and <code>hypot(-dx,-dy) == hypot(dx,dy)</code>.</li>
+</ul>
+
+<h3>Active leg (34 locked features)</h3>
+<table>
+<tr><th>Frame-dependent (11)</th><th>Frame-independent (23)</th></tr>
+<tr><td><code>phase_label</code>, <code>phase_label_prev_event</code> -- rule-based labeller assumes possession team attacks toward x=120</td><td><code>position</code>, <code>event_type</code>, <code>play_pattern</code>, <code>period</code> -- categorical, not coordinate-derived</td></tr>
+<tr><td><code>is_in_defending_box</code>, <code>is_in_attacking_box</code> -- fixed zone boundaries</td><td><code>counterpress</code>, <code>action_was_under_opponent_possession</code>, <code>action_retained_defensive_team_control</code>, <code>has_previous_event</code>, <code>has_visible_attacker</code>, <code>has_visible_defender</code> -- non-spatial flags</td></tr>
+<tr><td><code>phase_changed_since_prev_event</code> -- derived from phase_label</td><td><code>match_time_seconds</code>, <code>possession_elapsed_seconds</code> -- temporal</td></tr>
+<tr><td><code>angle_to_attacking_goal</code>, <code>distance_to_attacking_box</code>, <code>attacking_goal_centrality</code> -- fixed-point reference</td><td><code>nearest_attacker_distance</code>, <code>nearest_defender_distance</code>, <code>attacker_spread</code>, <code>defender_spread</code> -- isometry-invariant</td></tr>
+<tr><td><code>defender_attacker_gap_x</code>, <code>defender_attacker_gap_y</code> -- signed, flip sign</td><td><code>attacker_defender_ratio</code>, <code>visible_attacker_count</code>, <code>visible_defender_count</code>, <code>attackers_within_5m</code>, <code>defenders_within_5m</code>, <code>attackers_within_10m</code>, <code>defenders_within_10m</code> -- counts/ratios, isometry-invariant</td></tr>
+<tr><td><code>defenders_between_ball_and_attacking_goal</code> -- direction-dependent count</td><td></td></tr>
+</table>
+
+<h3>Passive leg (38 locked features)</h3>
+<table>
+<tr><th>Frame-dependent (22)</th><th>Frame-independent (16)</th></tr>
+<tr><td><code>phase_label</code> -- same rule-based labeller</td><td><code>on_ball_event_type</code>, <code>period</code> -- categorical, not coordinate-derived</td></tr>
+<tr><td><code>defender_functional_role</code> -- relative x-ranking assumes a fixed attack direction</td><td><code>is_wide_lane</code> -- proven invariant above</td></tr>
+<tr><td><code>is_in_defending_box</code>, <code>is_in_attacking_box</code> -- fixed zone boundaries</td><td><code>has_option_2</code>, <code>has_option_3</code> -- existence flags</td></tr>
+<tr><td><code>is_goal_side_of_nearest_attacker</code> -- signed x-comparison</td><td><code>marking_tightness</code>, <code>engagement_distance_to_carrier</code> -- isometry-invariant</td></tr>
+<tr><td><code>defender_x</code>, <code>defender_y</code>, <code>ball_x</code>, <code>ball_y</code> -- raw coordinates</td><td><code>lane_screening_score_option_{1,2,3}</code> -- relative-distance-based, isometry-invariant</td></tr>
+<tr><td><code>angle_to_attacking_goal</code>, <code>attacking_goal_centrality</code> -- fixed-point reference</td><td><code>top_option_{1,2,3}_distance_from_ball</code> -- magnitude, proven invariant above</td></tr>
+<tr><td><code>top_option_{1,2,3}_threat_score</code> -- includes a fixed-point distance</td><td><code>overload_score</code>, <code>defender_slot_index</code> -- not spatial values</td></tr>
+<tr><td><code>top_option_{1,2,3}_dx</code>, <code>top_option_{1,2,3}_dy</code> -- signed, flip sign</td><td></td></tr>
+<tr><td><code>top_option_{1,2,3}_angle_from_ball</code> -- absolute bearing, interpretation flips</td><td></td></tr>
+</table>
+
+<h2>3. Quantify exposure per reference model</h2>
+<p>Computed from each of the 6 already-promoted reference models' own already-computed
+  importance/coefficient artifact, aggregated back to the original locked feature (longest-
+  categorical-prefix matching, this project's own established method), classified per section 2,
+  and summed. <strong>No estimation -- every share is an exact sum over the model's own full
+  importance list.</strong> (source: <code>outputs/models/validation/coordinate_frame_model_exposure.json</code>)</p>
+<table>
+<tr><th>Leg</th><th>Reference model</th><th>Share on frame-dependent features</th><th>Top frame-dependent feature(s) and share</th></tr>
+<tr><td>Active-binary</td><td><code>v1e_gradient_boosting_calibrated</code></td><td><strong>36.6%</strong></td><td><code>distance_to_attacking_box</code> (8.8%), <code>attacking_goal_centrality</code> (7.5%), <code>defender_attacker_gap_x</code> (5.6%)</td></tr>
+<tr><td>Passive-binary</td><td><code>p1e_gradient_boosting_calibrated</code></td><td><strong>84.3%</strong></td><td><code>defender_x</code> (26.1%), <code>ball_x</code> (7.8%), <code>top_option_3_threat_score</code> (7.7%)</td></tr>
+<tr><td>Active-continuous</td><td><code>c1d_random_forest</code></td><td><strong>42.1%</strong></td><td><code>attacking_goal_centrality</code> (11.8%), <code>distance_to_attacking_box</code> (9.2%), <code>angle_to_attacking_goal</code> (5.7%)</td></tr>
+<tr><td>Passive-continuous</td><td><code>d1_lognormal_glm</code></td><td><strong>75.1%</strong></td><td><code>defender_functional_role</code> one-hot levels (13.0/12.4/12.3/12.1/11.4% across its 5 dummies)</td></tr>
+<tr><td>Active-xT (regression head)</td><td><code>x1c_random_forest</code></td><td><strong>60.7%</strong></td><td><code>phase_label_prev_event_box_defence</code> (25.9%), <code>distance_to_attacking_box</code> (9.7%), <code>attacking_goal_centrality</code> (8.8%)</td></tr>
+<tr><td>Active-xT (classifier head)</td><td><code>x1c_random_forest</code></td><td><strong>35.3%</strong></td><td><code>attacking_goal_centrality</code> (7.0%), <code>distance_to_attacking_box</code> (4.5%), <code>angle_to_attacking_goal</code> (4.4%)</td></tr>
+<tr><td>Passive-xT (regression head)</td><td><code>y1c_random_forest</code></td><td><strong>70.1%</strong></td><td><code>ball_x</code> (33.9%), <code>ball_y</code> (31.5%), <code>top_option_3_threat_score</code> (0.8%)</td></tr>
+<tr><td>Passive-xT (classifier head)</td><td><code>y1c_random_forest</code></td><td><strong>19.1%</strong></td><td><code>ball_y</code> (1.7%), <code>ball_x</code> (1.5%), <code>top_option_3_dx</code> (1.4%)</td></tr>
+</table>
+<div class="deviation-box"><p><strong>y1c's own Rung-2 report claimed ball_x+ball_y+on_ball_event_type_Shot
+  together account for ~93% of regression-head importance -- confirmed here that ball_x+ball_y
+  alone (the frame-dependent two-thirds of that figure) are 33.9%+31.5%=65.4%, and
+  on_ball_event_type_Shot is NOT frame-dependent</strong> (a categorical event-type label, not a
+  coordinate) -- so the leg's own prior 93% figure was never entirely a frame-exposure number, but
+  the 65.4% spatial portion of it is now confirmed exposed, not assumed.</p></div>
+<div class="fail-box"><p><strong>The single largest surprise in this table is not the xT legs --
+  it is that exposure is consistently and substantially higher on the passive side than the
+  active side, across every target family, not just xT</strong>: passive-binary (84.3%) vs
+  active-binary (36.6%); passive-continuous (75.1%) vs active-continuous (42.1%); passive-xT
+  regression head (70.1%) vs active-xT regression head (60.7%). This tracks the passive leg's own
+  locked feature set containing more raw-coordinate and signed-geometry features relative to
+  categorical/count features than the active leg's does (22 of 38 vs 11 of 34) -- not something
+  specific to any one target family.</p></div>
+
+<h2>4. Inventory of affected claims already in the report set</h2>
+<p>A search across all 6 legs' own ladder/baseline/closeout docs plus the two cross-leg summaries
+  for language interpreting a frame-dependent feature's tactical meaning returns <strong>216
+  lines</strong> referencing a frame-dependent feature name or a <code>phase_label</code> level
+  name. The table below groups the clearest, most consequential interpretive claims by document
+  and topic -- a representative inventory for a follow-up remediation prompt, not a literal
+  transcription of all 216 lines.</p>
+<table>
+<tr><th>Doc</th><th>Section</th><th>Claim</th><th>Frame-dependent?</th></tr>
+<tr><td><code>active_binary/ACTIVE_BINARY_BASELINE_SUMMARY.md</code></td><td>Coefficient-sign table</td><td><code>attacking_goal_centrality</code> "confirms" its documented monotonic direction</td><td>Yes</td></tr>
+<tr><td>Same doc</td><td>Same table</td><td><code>distance_to_attacking_box</code>'s coefficient sign "doesn't even match" the Spearman direction</td><td>Yes</td></tr>
+<tr><td><code>active_binary/ACTIVE_BINARY_MODELLING_CLOSEOUT.md</code></td><td>&sect;~7</td><td>"8 of the top 10 interaction terms are clearly football-sensible"</td><td>Mixed</td></tr>
+<tr><td>Same doc</td><td>&sect;~8.3</td><td>"smooth, strictly monotonic decrease across all 10 bins" for a top-8 gain-importance feature</td><td>Likely yes</td></tr>
+<tr><td><code>active_continuous/ACTIVE_CONTINUOUS_MODEL_LADDER.md</code></td><td>&sect;~4.3/5.3</td><td><code>attacking_goal_centrality</code>: "mostly monotonic increasing... matches"</td><td>Yes</td></tr>
+<tr><td>Same doc</td><td>Same</td><td><code>distance_to_attacking_box</code>: "non-monotonic... the relationship isn't monotonic"</td><td>Yes</td></tr>
+<tr><td><code>active_xt/ACTIVE_XT_MODEL_LADDER.md</code></td><td>&sect;2, &sect;5.3</td><td><code>distance_to_attacking_box</code>: "clean 8-of-8/9-of-9 monotonic increase... accelerating"</td><td>Yes</td></tr>
+<tr><td>Same doc</td><td>&sect;5.3</td><td><code>angle_to_attacking_goal</code>: "clean monotonic decrease... matches the atlas"</td><td>Yes</td></tr>
+<tr><td><code>passive_binary/PASSIVE_BINARY_MODEL_LADDER.md</code></td><td>&sect;~7.4</td><td><code>phase_label</code>: "high_press_proxy and box_defence highest... matches the same phase ranking seen throughout this project"</td><td>Yes</td></tr>
+<tr><td>Same doc</td><td>Same</td><td><code>top_option_1_threat_score</code>: "mostly monotonic decreasing... broadly consistent"</td><td>Yes</td></tr>
+<tr><td><code>passive_xt/PASSIVE_XT_MODEL_LADDER.md</code></td><td>&sect;3.6/5.3</td><td><code>ball_x</code>/<code>ball_y</code>/<code>on_ball_event_type_Shot</code> ~93% combined dominance (already carries a construction-coupling caveat)</td><td>Yes (ball_x/ball_y); already caveated for a different reason</td></tr>
+<tr><td>Same doc</td><td>&sect;5.3</td><td><code>ball_x</code>: "clean monotonic increase"; threat scores: "deeper/more-threatening positions -&gt; higher predicted delta"</td><td>Yes</td></tr>
+<tr><td>Same doc</td><td>&sect;3.6, &sect;4.6/5.3</td><td>Shot rows "sit deep in the attacking box (structurally high on the xT grid)"</td><td>Indirectly</td></tr>
+<tr><td>All 6 legs' docs</td><td>Wherever phase_label appears</td><td>Level names themselves (<code>high_press_proxy</code>, <code>box_defence</code>, <code>settled_low_block_proxy</code>, etc.) are tactical assertions produced by the labeller the bug corrupts</td><td>Yes, definitionally</td></tr>
+</table>
+<div class="deviation-box"><p><strong>One important existing caveat already on record, not newly
+  found here</strong>: <code>passive_xt/PASSIVE_XT_MODEL_LADDER.md</code> sections 3.6 and 5.3
+  already flag that ball_x/ball_y's dominance is partly a <em>construction-coupling</em> artefact
+  (because <code>xt_before = xT(ball_x, ball_y)</code> shares its own two input columns with the
+  target's own construction) -- that is a real, separate, already-honestly-reported caveat and
+  remains valid. It is not the same caveat as the coordinate-frame bug this audit covers. Both
+  apply simultaneously and should both be carried forward by a remediation prompt.</p></div>
+
+<h2>5. Severity verdict, per leg</h2>
+<ul>
+<li><strong>Active-binary (v1e_gradient_boosting_calibrated)</strong>: <strong>Metrics valid,
+  interpretation compromised.</strong> Target proven frame-invariant -- held-out PR-AUC/ROC-AUC/
+  Brier/ECE stand. 36.6% of gain importance is frame-dependent, concentrated in
+  <code>distance_to_attacking_box</code>, <code>attacking_goal_centrality</code>, and the signed
+  gap pair -- meaningful but a minority share.</li>
+<li><strong>Passive-binary (p1e_gradient_boosting_calibrated)</strong>: <strong>Metrics valid,
+  interpretation compromised -- more severely than active.</strong> Target proven frame-invariant.
+  <strong>84.3%</strong> of gain importance is frame-dependent, the highest of the four non-xT
+  legs, dominated by <code>defender_x</code> alone (26.1%). The phase-ranking behavioral-sanity
+  claim needs re-verification before being cited again.</li>
+<li><strong>Active-continuous (c1d_random_forest)</strong>: <strong>Metrics valid, interpretation
+  compromised.</strong> Target proven frame-invariant -- hurdle RMSE/MAE/R&sup2; stand. 42.1% of
+  Gini importance is frame-dependent, led by the same goal-geometry trio.</li>
+<li><strong>Passive-continuous (d1_lognormal_glm)</strong>: <strong>Metrics valid, interpretation
+  compromised -- most severely of the four non-xT legs.</strong> Target proven frame-invariant.
+  <strong>75.1%</strong> of coefficient weight is frame-dependent, and the entire top-5 is one
+  categorical feature's own one-hot levels (<code>defender_functional_role</code>) -- the clearest
+  case of a single frame-dependent feature dominating a model's story anywhere in this audit.</li>
+<li><strong>Active-xT (x1c_random_forest)</strong>: <strong>Targets themselves partly wrong -- the
+  most severe category found in this audit.</strong> <code>target_xt_delta_v2</code> is directly
+  frame-dependent for 69.13% of its own training rows -- a ground-truth problem, not an
+  interpretation problem. 60.7% of the regression head's own importance is also frame-dependent.
+  The held-out numbers that promoted this model cannot be read as "accuracy against correct ground
+  truth" the way the four non-xT legs' can.</li>
+<li><strong>Passive-xT (y1c_random_forest)</strong>: <strong>Targets themselves partly wrong --
+  same severe category as active-xT, with a higher feature-exposure share on top.</strong>
+  <code>target_xt_delta_passive</code> is directly frame-dependent for 67.19% of its own
+  defender-slot training rows. The regression head's own importance is 70.1% frame-dependent, the
+  highest regression-head share of any of the six models, concentrated almost entirely in
+  <code>ball_x</code>+<code>ball_y</code> (65.4% combined).</li>
+</ul>
+
+<h2>6. What this prompt does not do</h2>
+<ul>
+<li><strong>No fix.</strong> The loader's <code>_infer_attack_sign_by_period_team</code> function
+  is not modified. No corrected coordinate, feature, or target value is written anywhere.</li>
+<li><strong>No retraining.</strong> All 6 reference models' artifacts are read, never refit.</li>
+<li><strong>No locked-file modification.</strong> Every parquet touched in this audit is
+  read-only throughout.</li>
+<li><strong>No editing of any existing ladder/baseline/closeout doc.</strong> Section 4 is an
+  inventory, not a rewrite -- every doc cited above is left exactly as it was.</li>
+<li><strong>No re-scoring of held-out test performance under a corrected frame.</strong> This
+  audit establishes how much is affected and how severely, not what the corrected numbers would
+  be -- a follow-up remediation prompt's job.</li>
+</ul>
+
+</div>
+</div>
+<footer>
+  <p>Generated by <code>scripts/analysis/coordinate_frame_impact_audit.py</code> and
+    <code>scripts/analysis/coordinate_frame_model_exposure.py</code>. Markdown source:
+    <code>reports/modeling/COORDINATE_FRAME_IMPACT_AUDIT.md</code>. Raw diagnostic JSON:
+    <code>outputs/models/validation/coordinate_frame_impact_audit.json</code>,
+    <code>outputs/models/validation/coordinate_frame_model_exposure.json</code>. Originating audit:
+    <code>dashboard_data/selection_and_frame_audit.json</code> (Prompt 83).</p>
+</footer>
+</body>
+</html>

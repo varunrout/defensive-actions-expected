@@ -322,6 +322,14 @@ Every number traces to the file named in its `source` field:
 ## 5. Known data-quality issue: coordinate frames in the locked features
 
 **Found while building this export. It is not fixed here, and it matters beyond the dashboard.**
+**Full impact audit (Prompt 84)**: this section is the original summary from Prompt 83; for the
+complete, traced-through-every-leg picture -- which of the 6 targets are actually frame-dependent
+(not just which features are), the exact importance-weighted exposure share for each of the 6
+promoted reference models, and an inventory of existing report claims that rest on a
+frame-dependent feature's tactical meaning -- see
+[`reports/modeling/COORDINATE_FRAME_IMPACT_AUDIT.md`](../reports/modeling/COORDINATE_FRAME_IMPACT_AUDIT.md)
+(`.html` version linked from `reports/modeling/INDEX.html`'s Project-wide group). That audit is
+also read-only; no fix has been applied yet.
 
 **The mismatch.** Raw StatsBomb event and 360 locations are always in the **acting team's own
 frame**: the actor attacks toward x=120, whatever the period. Verified on a 40-match sample of the
