@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- All-Legs Cross-Comparison Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1; --plane: #eceee8; --surface: #ffffff;
+  --text-primary: #10151c; --text-secondary: #4c525b; --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09); --gridline: #e2e4de;
+  --accent: #e34948; --pos: #e34948; --neg: #2a78d6;
+  --amber: #eda100; --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b; --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+    --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09); --gridline: #232a34;
+    --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+    --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+  --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09); --gridline: #232a34;
+  --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+  --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary); font-family: "Public Sans", -apple-system, sans-serif; font-size: 15px; line-height: 1.5; }
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead { background: var(--bg); border-bottom: 1px solid var(--border); padding: 40px 24px 32px; }
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow { font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; color: var(--accent); font-weight: 600; margin: 0 0 10px; }
+h1.title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: clamp(26px, 4vw, 38px); margin: 0 0 12px; color: var(--text-primary); }
+.dek { color: var(--text-secondary); max-width: 64ch; margin: 0 0 24px; font-size: 15.5px; }
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b { display: block; font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; color: var(--text-primary); }
+.stat span { display: block; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+footer { border-top: 1px solid var(--border); padding: 28px 24px 60px; max-width: 1180px; margin: 0 auto; }
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 960px; }
+.article h2 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; margin: 44px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.article h2:first-of-type { margin-top: 0; }
+.article h3 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 17px; margin: 30px 0 4px; color: var(--accent); }
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article code { font-family: "JetBrains Mono", monospace; font-size: 0.88em; background: var(--plane); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--neg); }
+.article ul, .article ol { color: var(--text-secondary); font-size: 14.5px; padding-left: 22px; margin: 0 0 16px; }
+.article li { margin-bottom: 6px; }
+.article table { width: 100%; border-collapse: collapse; margin: 4px 0 22px; font-size: 12.5px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.article th { text-align: left; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 10px; letter-spacing: 0.03em; color: var(--text-muted); background: var(--plane); padding: 9px 10px; border-bottom: 1px solid var(--border); }
+.article td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p:last-child { margin-bottom: 0; }
+.verdict-box { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.verdict-box p { margin: 0; }
+.fail-box { background: rgba(227,73,72,0.10); border: 1px solid rgba(227,73,72,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.fail-box p { margin: 0; }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; Project-wide, all six legs</p>
+    <h1 class="title">All-Legs Cross-Comparison Summary</h1>
+    <p class="dek">Six legs, side by side: two binary presence classifiers, two continuous
+      hurdle-pipeline regressors, two continuous two-stage xT-delta regressors. Synthesis only --
+      every number cites its own existing source; nothing here is recomputed, re-derived, or
+      re-audited.</p>
+    <div class="statbar">
+      <div class="stat"><b>6 / 6</b><span>legs at a documented reference model</span></div>
+      <div class="stat"><b>3 / 6</b><span>reference models are random forest (not 4)</span></div>
+      <div class="stat"><b>6 / 6</b><span>legs tried a random-forest rung</span></div>
+      <div class="stat"><b>Not consistent</b><span>active vs passive gain, across 3 families</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+
+<h2>1. What this closes out</h2>
+<p>Six legs, spanning two target-family shapes: <strong>binary presence</strong> (active-binary
+  <code>target_future_shot_10s</code>, passive-binary <code>target_future_shot_10s</code> on
+  passive features) and <strong>continuous value</strong>, where the continuous shape itself
+  splits into two sub-families with different architectures -- a <strong>hurdle pipeline</strong>
+  (active-continuous <code>E[xg|shot]</code>, passive-continuous <code>E[xg|shot]</code> on
+  passive features, each combined with its own leg-pair's binary classifier via
+  <code>P(shot) x E[xg|shot]</code>) and a <strong>two-stage xT-delta</strong> pipeline (active-xT
+  <code>target_xt_delta_v2</code>, passive-xT <code>target_xt_delta_passive</code>, each combined
+  internally via <code>P(nonzero) x E[delta|nonzero]</code>, with no external classifier
+  dependency). All six now stand at a documented reference model -- four promoted through a full
+  multi-check audit, one (passive-xT) promoted this same way as of Prompt 80, and one
+  (passive-continuous) still at its own Rung-0 baseline because nothing built on top of it ever
+  cleared significance.</p>
+
+<h2>2. The six reference models, side by side</h2>
+<table>
+<tr><th>Leg</th><th>Target type</th><th>Reference model</th><th>Model family</th><th>Held-out headline metric(s)</th><th>Audit status</th></tr>
+<tr><td>Active-binary</td><td>Binary</td><td><code>v1e_gradient_boosting_calibrated</code></td><td>Gradient boosting (LightGBM) + isotonic calibration</td><td>PR-AUC 0.4282, ROC-AUC 0.8364, Brier 0.0522, ECE 0.0096</td><td>Yes -- 3-check audit (tournament, error-slice, behavioral-sanity), Prompt 46</td></tr>
+<tr><td>Passive-binary</td><td>Binary</td><td><code>p1e_gradient_boosting_calibrated</code></td><td>Gradient boosting (LightGBM) + isotonic calibration</td><td>PR-AUC 0.2162, ROC-AUC 0.7889, Brier 0.0474, ECE 0.0044</td><td>Yes -- 5-check audit (tournament, error-slice, slice-calibration, behavioral-sanity, cluster-bootstrap), Prompt 52</td></tr>
+<tr><td>Active-continuous</td><td>Continuous (hurdle)</td><td><code>c1d_random_forest</code></td><td>Random forest</td><td>Hurdle pipeline RMSE 0.04416, MAE 0.01107, R&sup2; 0.1693</td><td>Yes -- 4-check audit incl. hurdle-pipeline re-run (decisive), Prompt 58</td></tr>
+<tr><td>Passive-continuous</td><td>Continuous (hurdle)</td><td><code>d1_lognormal_glm</code> <strong>(Rung 0, never beaten)</strong></td><td>Log-normal GLM (linear regression on log(xg))</td><td>Hurdle pipeline RMSE 0.03726, MAE 0.00980, R&sup2; 0.0426</td><td>No -- nothing cleared significance to trigger one; <code>d1d_random_forest</code> tried, failed (p=0.576)</td></tr>
+<tr><td>Active-xT</td><td>Two-stage continuous</td><td><code>x1c_random_forest</code></td><td>Random forest (two-stage)</td><td>Held-out RMSE 0.04277, R&sup2; 0.44947, Spearman 0.5947</td><td>Yes -- 4-check audit incl. full-pipeline re-run, Prompt 75</td></tr>
+<tr><td>Passive-xT</td><td>Two-stage continuous</td><td><code>y1c_random_forest</code></td><td>Random forest (two-stage)</td><td>Held-out RMSE 0.02489, R&sup2; 0.49325, Spearman 0.3154</td><td>Yes -- 4-check audit incl. full-pipeline re-run, Prompt 80 part A</td></tr>
+</table>
+<div class="deviation-box"><p><strong>Note on this table's own premise, stated plainly rather than
+  silently corrected</strong>: this prompt's own context table listed the passive-continuous
+  reference model as <code>d1d_random_forest</code>. That is not accurate as of the current
+  repository state. <code>d1d_random_forest</code> (Rung 2, built and tested) did <strong>not</strong>
+  clear its own ladder-gate significance test against <code>d1_lognormal_glm</code> (paired-t
+  p=0.576, the third independent null result on this leg), and <code>MODELLING_CLOSEOUT.md</code>
+  &sect;2/&sect;3 (itself already current, not stale) correctly documents <code>d1_lognormal_glm</code>
+  as standing, never beaten. The table above reports the actual current state, not the prompt's
+  premise.</p></div>
+
+<h2>3. The one real cross-leg pattern -- and where it does and doesn't hold</h2>
+<p>Random forest is the reference model for <strong>3 of 6 legs</strong>
+  (<code>c1d_random_forest</code>, <code>x1c_random_forest</code>, <code>y1c_random_forest</code>)
+  -- not 4, per the correction in section 2 above. On the remaining 3 legs, random forest was
+  still <strong>tried</strong> on every single one, and lost out for three different, leg-specific
+  reasons, not because it was never attempted:</p>
+<ul>
+<li><strong>Active-binary</strong>: <code>v1d_random_forest</code> (Rung 3) beat <code>v1c</code>
+  on PR-AUC (+0.0338, held-out 0.4085 vs 0.3747, p=0.0015) but with held-out ECE ~1.8x worse
+  (0.0183 vs 0.0103). It was explicitly framed from the start as <strong>"a diagnostic rung, not a
+  promotion candidate in its own right"</strong> -- used to size how much accuracy headroom
+  existed before committing to gradient boosting, not run as a genuine promotion attempt. No
+  promotion audit was ever run for <code>v1d</code> itself.</li>
+<li><strong>Passive-binary</strong>: <code>p1d_random_forest</code> (Rung 3) failed its own
+  ladder-gate significance test against <code>p1c</code> (mean diff +0.0025 PR-AUC, p=0.275, "NOT
+  significant") -- an ordinary ladder-rung loss, not a diagnostic-only framing the way
+  active-binary's was.</li>
+<li><strong>Passive-continuous</strong>: <code>d1d_random_forest</code> (Rung 2) also failed its
+  own ladder-gate significance test against <code>d1_lognormal_glm</code> (p=0.576), despite being
+  directionally ahead on 4 of 5 CV folds and nearly tripling corrected R&sup2; (0.0078 -&gt;
+  0.0211) -- a real but statistically unreliable signal at this leg's own effective sample size,
+  not evidence RF was untested here.</li>
+</ul>
+<div class="verdict-box"><p><strong>Stated only as far as the evidence supports</strong>: random
+  forest is not "the winning model family everywhere" -- it is the model family that won 3 of 6
+  head-to-head tests it was actually put through, with the two binary legs' own non-adoption
+  traceable to calibration cost (active) and a failed significance test (passive), and the third
+  continuous leg's own non-adoption traceable to the same failed-significance pattern repeating on
+  a smaller, noisier sample. The pattern worth reporting is not "RF wins," but <strong>"RF was
+  tried everywhere, and won exactly where the leg's own target had enough signal-to-noise for a
+  tree ensemble's flexibility to pay for itself on held-out data -- the three continuous/two-stage
+  legs with the largest row counts, not the two binary legs or the smallest continuous
+  leg."</strong></p></div>
+
+<h2>4. Active vs passive, leg by leg -- is there a consistent direction?</h2>
+<table>
+<tr><th>Target family</th><th>Active: improvement over its Rung 0</th><th>Passive: improvement over its Rung 0</th><th>Larger gain</th></tr>
+<tr><td>Binary (PR-AUC)</td><td>0.3725 -&gt; 0.4282, &Delta;+0.0557 (+14.9% relative)</td><td>0.1736 -&gt; 0.2162, &Delta;+0.0426 (+24.5% relative)</td><td><strong>Ambiguous</strong> -- active's absolute gain is larger, passive's relative gain is larger</td></tr>
+<tr><td>Continuous/hurdle (hurdle R&sup2;)</td><td>0.1426 -&gt; 0.1693, &Delta;+0.0267 (+18.7% relative)</td><td>0.0426 -&gt; 0.0426, &Delta;+0.0000 (0% -- nothing ever beat Rung 0)</td><td><strong>Active, decisively</strong></td></tr>
+<tr><td>xT-delta (held-out R&sup2;)</td><td>0.1519 -&gt; 0.4495, &Delta;+0.2976 (~3.0x)</td><td>0.0612 -&gt; 0.4933, &Delta;+0.4321 (~8.1x)</td><td><strong>Passive, decisively</strong></td></tr>
+</table>
+<div class="fail-box"><p><strong>No, there is not a consistent direction across all three
+  families.</strong> The xT-delta family shows passive with the clearly larger gain, but that
+  direction does not hold for the other two families: the hurdle/continuous family shows the
+  opposite pattern, active improving substantially while passive improved not at all (its own
+  reference model is still Rung 0), and the binary family is genuinely ambiguous -- which leg
+  "wins" depends on whether the question is asked in absolute PR-AUC points or relative percentage
+  terms. <strong>The passive-xT result is specific to that family, not part of a project-wide
+  "passive improves more" pattern</strong> -- if anything, the continuous/hurdle family shows the
+  strongest pattern in the <em>opposite</em> direction, and that is the more statistically
+  striking of the two (a leg with literally zero validated improvement across three independent
+  modelling attempts, versus a leg with a large one).</p></div>
+
+<h2>5. What's genuinely not comparable, stated plainly</h2>
+<p><strong>This document does not rank all six legs on one axis, because there is no single metric
+  that means the same thing across all of them.</strong> Binary-leg metrics (PR-AUC, ROC-AUC,
+  Brier score, ECE) answer "how well does this model separate and calibrate a yes/no outcome" --
+  they have no continuous-leg equivalent. Continuous-leg metrics (RMSE, R&sup2;, Spearman) answer
+  "how well does this model predict a numeric value's magnitude and ordering" -- they have no
+  binary-leg equivalent. A PR-AUC of 0.43 and an R&sup2; of 0.45 are not the same kind of number
+  and saying one leg "performs better" than the other by comparing them would be a category error,
+  not a finding. Even within the continuous legs, the hurdle-pipeline legs' R&sup2; (active
+  0.169, passive 0.043) and the two-stage xT legs' R&sup2; (active 0.449, passive 0.493) are
+  computed over different target distributions with different zero-inflation rates and different
+  downstream architectures (external classifier dependency vs. fully internal), so even a
+  same-units comparison across those four legs should be read with that caveat, not as a clean
+  four-way ranking. Section 2's table is ordered by leg pairing (the order the six legs were built
+  in), not by any performance ranking, and should not be read as one.</p>
+
+</div>
+</div>
+<footer>
+  <p>Markdown source: <code>reports/modeling/ALL_LEGS_SUMMARY.md</code>. Cross-leg closeouts:
+    <a href="MODELLING_CLOSEOUT.html" target="viewer">MODELLING_CLOSEOUT.html</a> (four original
+    DAx legs),
+    <a href="xt_target/XT_DELTA_CLOSEOUT.html" target="viewer">xt_target/XT_DELTA_CLOSEOUT.html</a>
+    (two xT legs). Per-leg detail:
+    <a href="active_binary/ACTIVE_BINARY_MODEL_LADDER.html" target="viewer">active_binary/ACTIVE_BINARY_MODEL_LADDER.html</a>,
+    <a href="passive_binary/PASSIVE_BINARY_MODEL_LADDER.html" target="viewer">passive_binary/PASSIVE_BINARY_MODEL_LADDER.html</a>,
+    <a href="active_continuous/ACTIVE_CONTINUOUS_MODEL_LADDER.html" target="viewer">active_continuous/ACTIVE_CONTINUOUS_MODEL_LADDER.html</a>,
+    <a href="passive_continuous/PASSIVE_CONTINUOUS_MODEL_LADDER.html" target="viewer">passive_continuous/PASSIVE_CONTINUOUS_MODEL_LADDER.html</a>,
+    <a href="active_xt/ACTIVE_XT_MODEL_LADDER.html" target="viewer">active_xt/ACTIVE_XT_MODEL_LADDER.html</a>,
+    <a href="passive_xt/PASSIVE_XT_MODEL_LADDER.html" target="viewer">passive_xt/PASSIVE_XT_MODEL_LADDER.html</a>.</p>
+</footer>
+</body>
+</html>
