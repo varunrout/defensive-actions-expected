@@ -328,6 +328,36 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   be -- a follow-up remediation prompt's job.</li>
 </ul>
 
+<h2>7. Closing update (prompt 85) -- the fix, the re-pipeline, and the re-promotion decisions</h2>
+<p>The remediation section 6 called for has been done. Prompt 85 fixed the loader (Phase 1, commit
+  <code>8b7d0a8</code>), then re-ran the full pipeline, re-computed both xT targets, and
+  re-validated all 6 legs against the corrected data. Full detail, every number cited to a
+  script/JSON artifact, in
+  <a href="COORDINATE_FRAME_FIX_AND_REPIPELINE.html">COORDINATE_FRAME_FIX_AND_REPIPELINE.html</a>.</p>
+<ul>
+<li><strong>Active-binary</strong> -- <strong>reconfirmed, closed.</strong> Fold-AP shift +0.0008
+  (p=0.929).</li>
+<li><strong>Passive-binary</strong> -- <strong>reopened, promotion stands, numbers updated.</strong>
+  Fold-AP shift +0.0248 (p=0.0004) -- the leg with the highest frame-dependent importance share
+  (84.3%) saw the largest, most significant improvement.</li>
+<li><strong>Active-continuous</strong> -- <strong>reopened, promotion stands, numbers updated.</strong>
+  Fold-RMSE shift &minus;0.0082 (p=0.014).</li>
+<li><strong>Passive-continuous</strong> -- <strong>reconfirmed, closed (borderline).</strong>
+  Fold-RMSE shift &minus;0.0078 (p=0.071), not significant at p&lt;0.05.</li>
+<li><strong>Active-xT</strong> -- <strong>newly promoted (same rung, corrected target).</strong>
+  Corrected held-out R&sup2; (0.374) is materially lower than the pre-fix number (0.449) -- some of
+  the old apparent accuracy was fit to a target computed from the same misframed coordinates as the
+  model's own features -- but <code>x1c_random_forest</code> still beats the two-stage Huber
+  comparator decisively when both are refit on the corrected target (p=9.5&times;10&supminus;&sup7;).</li>
+<li><strong>Passive-xT</strong> -- <strong>newly promoted (same rung, corrected target).</strong>
+  Same pattern: corrected R&sup2; (0.331) below the pre-fix number (0.493),
+  <code>y1c_random_forest</code> still decisively beats its comparator
+  (p=1.3&times;10&supminus;&sup5;).</li>
+</ul>
+<p>No leg promoted a different rung than it had before the fix. <code>dashboard_data/</code>
+  (prompt 83, all 6 legs' pre-fix predictions) is marked stale (<code>dashboard_data/STALE.md</code>)
+  pending a separate regeneration prompt.</p>
+
 </div>
 </div>
 <footer>

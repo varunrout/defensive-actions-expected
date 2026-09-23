@@ -331,3 +331,43 @@ forward by a remediation prompt, not treated as redundant.
   necessarily a follow-up remediation prompt's job, once these findings are reviewed and a fix
   strategy (re-run the loader, or a targeted re-derivation of only the affected rows/columns) is
   chosen.
+
+## 7. Closing update (prompt 85) -- the fix, the re-pipeline, and the re-promotion decisions
+
+The remediation this section 6 called for has been done. Prompt 85 fixed the loader (Phase 1,
+commit `8b7d0a8`: `_infer_attack_sign_by_period_team`'s noisy per-`(period, possession_team)`
+inference replaced by the row-local `_attack_sign_for_row(team, possession_team)` rule), then
+re-ran the full pipeline, re-computed both xT targets, and re-validated all 6 legs against the
+corrected data. Full detail, every number cited to a script/JSON artifact, in
+[`COORDINATE_FRAME_FIX_AND_REPIPELINE.md`](COORDINATE_FRAME_FIX_AND_REPIPELINE.md).
+
+Headline outcome, matching this audit's own section 5 severity split almost exactly:
+
+- **Active-binary (`v1e_gradient_boosting_calibrated`) -- reconfirmed, closed.** Fold-AP shift
+  +0.0008 (p=0.929) -- indistinguishable from zero, as this audit's "metrics valid" verdict
+  predicted for a frame-invariant target.
+- **Passive-binary (`p1e_gradient_boosting_calibrated`) -- reopened, promotion stands, numbers
+  updated.** Fold-AP shift +0.0248 (p=0.0004) -- the leg this audit flagged as having the highest
+  frame-dependent importance share (84.3%) saw the largest, most significant improvement of the 4
+  non-xT legs once that share's own feature values were corrected.
+- **Active-continuous (`c1d_random_forest`) -- reopened, promotion stands, numbers updated.**
+  Fold-RMSE shift &minus;0.0082 (p=0.014), a real but smaller improvement than passive-binary's.
+- **Passive-continuous (`d1_lognormal_glm`) -- reconfirmed, closed (borderline).** Fold-RMSE shift
+  &minus;0.0078 (p=0.071) -- not significant at p&lt;0.05, the closest borderline case of the 4,
+  consistent with this leg's own small (~4,200-row) shot-conditional sample limiting statistical
+  power even though it had the single most frame-dependent-feature-concentrated model (75.1%
+  weight on `defender_functional_role` alone).
+- **Active-xT (`x1c_random_forest`) -- newly promoted on corrected target_xt_delta_v2.** This
+  audit's most severe finding -- 69.13% of training rows' own ground truth was itself wrong -- was
+  real: `x1c`'s corrected held-out R&sup2; (0.374) is materially lower than its pre-fix number
+  (0.449), because some of the old apparent accuracy was fit to a target computed from the same
+  misframed coordinates as the model's own features. `x1c` still beats the two-stage Huber
+  comparator decisively when both are refit on the corrected target (p=9.5&times;10&supminus;&sup7;)
+  -- the architecture choice survives even though the absolute number does not.
+- **Passive-xT (`y1c_random_forest`) -- newly promoted on corrected target_xt_delta_passive.** Same
+  pattern: corrected R&sup2; (0.331) below the pre-fix number (0.493), `y1c` still decisively beats
+  its own two-stage comparator (p=1.3&times;10&supminus;&sup5;).
+
+No leg promoted a different rung than it had before the fix. `dashboard_data/` (prompt 83, all 6
+legs' pre-fix predictions) is marked stale (`dashboard_data/STALE.md`) pending a separate
+regeneration prompt.

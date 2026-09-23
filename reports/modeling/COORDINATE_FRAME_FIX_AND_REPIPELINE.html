@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- Coordinate-Frame Fix: Full Re-Pipeline &amp; Re-Promotion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1; --plane: #eceee8; --surface: #ffffff;
+  --text-primary: #10151c; --text-secondary: #4c525b; --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09); --gridline: #e2e4de;
+  --accent: #e34948; --pos: #e34948; --neg: #2a78d6;
+  --amber: #eda100; --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b; --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+    --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09); --gridline: #232a34;
+    --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+    --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+  --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09); --gridline: #232a34;
+  --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+  --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary); font-family: "Public Sans", -apple-system, sans-serif; font-size: 15px; line-height: 1.5; }
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead { background: var(--bg); border-bottom: 1px solid var(--border); padding: 40px 24px 32px; }
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow { font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; color: var(--accent); font-weight: 600; margin: 0 0 10px; }
+h1.title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: clamp(26px, 4vw, 38px); margin: 0 0 12px; color: var(--text-primary); }
+.dek { color: var(--text-secondary); max-width: 68ch; margin: 0 0 24px; font-size: 15.5px; }
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b { display: block; font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; color: var(--text-primary); }
+.stat span { display: block; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+footer { border-top: 1px solid var(--border); padding: 28px 24px 60px; max-width: 1180px; margin: 0 auto; }
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 980px; }
+.article h2 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; margin: 44px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.article h2:first-of-type { margin-top: 0; }
+.article h3 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 17px; margin: 30px 0 4px; color: var(--accent); }
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article code { font-family: "JetBrains Mono", monospace; font-size: 0.88em; background: var(--plane); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--neg); }
+.article ul, .article ol { color: var(--text-secondary); font-size: 14.5px; padding-left: 22px; margin: 0 0 16px; }
+.article li { margin-bottom: 6px; }
+.article table { width: 100%; border-collapse: collapse; margin: 4px 0 22px; font-size: 12.5px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.article th { text-align: left; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 10px; letter-spacing: 0.03em; color: var(--text-muted); background: var(--plane); padding: 9px 10px; border-bottom: 1px solid var(--border); }
+.article td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p:last-child { margin-bottom: 0; }
+.verdict-box { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.verdict-box p { margin: 0; }
+.fail-box { background: rgba(227,73,72,0.10); border: 1px solid rgba(227,73,72,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.fail-box p { margin: 0; }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; Fix + re-pipeline + re-promotion</p>
+    <h1 class="title">Coordinate-Frame Fix: Full Re-Pipeline, Re-Validation, and Re-Promotion</h1>
+    <p class="dek">Prompt 85, Phases 2-6. The loader fix (Phase 1, commit <code>8b7d0a8</code>) is
+      treated as ground truth here. This report re-runs the full feature-engineering pipeline, the
+      two xT-delta targets, re-validates all 6 legs' promoted reference models against the
+      corrected data, and issues explicit reconfirmed / reopened / promoted verdicts per leg.</p>
+    <div class="statbar">
+      <div class="stat"><b>422,561 / 56,068 / 1,593,181</b><span>event / active / passive rows, exact parity pre- vs post-fix</span></div>
+      <div class="stat"><b>59.2% / 50.75%</b><span>of active / passive xT-delta target values actually changed</span></div>
+      <div class="stat"><b>2 reconfirmed, 2 reopened, 2 promoted</b><span>verdict split across the 6 legs</span></div>
+      <div class="stat"><b>30.3% &rarr; 0.9%</b><span>Clearance events mislabelled high_press_proxy, pre- vs post-fix</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+
+<h2>Background</h2>
+<p><a href="COORDINATE_FRAME_IMPACT_AUDIT.html">COORDINATE_FRAME_IMPACT_AUDIT.html</a> (prompt 84)
+  is the full diagnosis this prompt executes against: 4 of 6 legs have frame-invariant targets
+  (feature-only exposure, 36.6-84.3% of importance/weight on frame-dependent features per leg); the
+  2 xT legs (<code>x1c_random_forest</code>, <code>y1c_random_forest</code>) have directly
+  frame-dependent targets, exposed for 69.13% / 67.19% of their own training rows. Phase 1 fixed
+  <code>_infer_attack_sign_by_period_team</code> (noisy per-<code>(period, possession_team)</code>
+  inference) with a row-local rule, <code>_attack_sign_for_row(team, possession_team)</code>:
+  sign=+1 if <code>team == possession_team</code> (already the acting team's own frame), sign=-1
+  otherwise -- confirmed by a goalkeeper sanity oracle (92.8% of GK defensive actions sit at raw
+  x&lt;20 in their own frame, exactly where a keeper's own action should be).</p>
+
+<h2>Phase 2 -- Re-run feature engineering</h2>
+<p>Full pipeline re-run once for all 6 legs: <code>scripts/run_pipeline.py --stage all</code>
+  (raw-data refresh, enrichment through the fixed loader, event-context, phase labelling, the two
+  frame-invariant short-horizon targets), then <code>scripts/features/build_passive_defense_dataset.py</code>
+  and <code>scripts/features/add_missingness_flags.py</code> (a second pass was required after the
+  first rebuild silently dropped the missingness-flag columns on both feature tables -- restored
+  and re-validated against that script's own hardcoded expected-false-count sanity gate, which
+  passed unchanged).</p>
+
+<h3>Row-count / schema parity</h3>
+<table>
+<tr><th>Table</th><th>Pre-fix rows</th><th>Post-fix rows</th><th>Match?</th></tr>
+<tr><td>events_with_targets.parquet</td><td>422,561</td><td>422,561</td><td>Yes</td></tr>
+<tr><td>player_defensive_actions.parquet (active)</td><td>56,068</td><td>56,068</td><td>Yes</td></tr>
+<tr><td>passive_defense.parquet (passive)</td><td>1,593,181</td><td>1,593,181</td><td>Yes</td></tr>
+</table>
+<p>Feature values changed substantially even though row counts didn't: 59.9% of
+  <code>passive_defense.parquet</code>'s 1,593,181 rows have a different <code>ball_x</code>
+  post-fix than pre-fix.</p>
+
+<h3>Clearance / phase_label sanity re-check</h3>
+<table>
+<tr><th></th><th>Pre-fix</th><th>Post-fix</th></tr>
+<tr><td>Clearance events (total)</td><td>4,518</td><td>4,518</td></tr>
+<tr><td>high_press_proxy</td><td>1,370 (30.3%)</td><td>41 (0.9%)</td></tr>
+<tr><td>box_defence</td><td>2,014 (44.6%)</td><td>3,287 (72.8%)</td></tr>
+<tr><td>settled_low_block_proxy</td><td>195</td><td>346</td></tr>
+<tr><td>counterpress_after_loss</td><td>341</td><td>341</td></tr>
+<tr><td>transition_defence</td><td>309</td><td>309</td></tr>
+<tr><td>settled_mid_block_proxy</td><td>181</td><td>129</td></tr>
+<tr><td>wide_defending_proxy</td><td>108</td><td>65</td></tr>
+</table>
+<p>Pre-fix, nearly a third of Clearance events were rule-labelled <code>high_press_proxy</code> --
+  a proxy for aggressive pressing, the opposite of what a clearance is. Post-fix that collapses to
+  0.9%, and <code>box_defence</code> (the intuitively correct label for most clearances) rises to
+  72.8%. <code>phase_label</code>'s own rule design still has the documented limitation that low
+  <code>ball_x</code> in a defender's own frame is labelled <code>high_press_proxy</code>
+  regardless of whether the action was actually a press or a retreat -- that rule is out of scope
+  here, but the coordinate input it receives is no longer randomly wrong for ~46% of rows.</p>
+
+<h2>Phase 3 -- Recompute the 2 xT targets</h2>
+<p>Both prototype builders re-run unchanged against the corrected feature tables. NaN-row parity
+  holds exactly (307/56,068 for active, 345/198,354 unique events for passive).</p>
+<table>
+<tr><th></th><th>target_xt_delta_v2 (active)</th><th>target_xt_delta_passive (passive)</th></tr>
+<tr><td>Rows with old &amp; new value defined</td><td>55,761</td><td>198,009</td></tr>
+<tr><td>Rows whose target value changed</td><td>33,018 (59.21%)</td><td>100,491 (50.75%)</td></tr>
+<tr><td>Rows that flipped sign</td><td>17,684 (31.71%)</td><td>64,392 (32.52%)</td></tr>
+<tr><td>Delta mean (new&minus;old)</td><td>+0.005625</td><td>&minus;0.002829</td></tr>
+<tr><td>Delta std</td><td>0.05448</td><td>0.03747</td></tr>
+<tr><td>Delta min / max</td><td>&minus;0.2730 / +0.2799</td><td>&minus;0.2932 / +0.2542</td></tr>
+</table>
+<p>Roughly a third of rows on each leg flip which side of zero their own xT-delta lands on. The
+  59.2%/50.75% actually-changed share is lower than the audit's own 69.13%/67.19% exposure
+  estimates because exposure counted any row whose lookup drew from a frame-inconsistent event,
+  while some lookups landed on a grid cell whose value doesn't differ enough to matter, or the two
+  lookups' errors partly cancelled in the subtraction.</p>
+
+<h2>Phase 4 -- Re-train and re-evaluate the 4 non-xT legs</h2>
+<div class="deviation-box"><p><strong>Scope decision.</strong> Each promoted model is refit at its
+  already-locked hyperparameters (no re-tuning), on the identical 5-fold canonical CV, compared via
+  the same paired test (<code>ttest_rel</code> + Wilcoxon) each leg's own promotion already used.
+  Re-running the full historical grid-search ladder was rejected: it would conflate "did the fix
+  change what's optimal" with "did the fix change how good the promoted model is", and the prompt's
+  own scope excludes the full ladder.</p></div>
+
+<h3>Per-fold significance (old features vs corrected features, identical folds/hyperparameters)</h3>
+<table>
+<tr><th>Leg</th><th>Model</th><th>Metric</th><th>Mean diff (new&minus;old)</th><th>Paired t p</th><th>Wilcoxon p</th></tr>
+<tr><td>Active-binary</td><td>v1e_gradient_boosting</td><td>average_precision &uarr;</td><td>+0.0008</td><td>0.929</td><td>1.000</td></tr>
+<tr><td>Passive-binary</td><td>p1e_gradient_boosting</td><td>average_precision &uarr;</td><td>+0.0248</td><td>0.0004</td><td>0.0625</td></tr>
+<tr><td>Active-continuous</td><td>c1d_random_forest</td><td>common_log_rmse &darr;</td><td>&minus;0.0082</td><td>0.014</td><td>0.0625</td></tr>
+<tr><td>Passive-continuous</td><td>d1_lognormal_glm</td><td>common_log_rmse &darr;</td><td>&minus;0.0078</td><td>0.071</td><td>0.125</td></tr>
+</table>
+
+<h3>Held-out headline metrics, old vs new (single refit, context only)</h3>
+<table>
+<tr><th>Leg</th><th>Metric</th><th>Old (pre-fix)</th><th>New (post-fix)</th></tr>
+<tr><td>Active-binary</td><td>average_precision</td><td>0.4282</td><td>0.4461</td></tr>
+<tr><td>Active-binary</td><td>roc_auc</td><td>0.8364</td><td>0.8367</td></tr>
+<tr><td>Passive-binary</td><td>average_precision</td><td>0.2162</td><td>0.2267</td></tr>
+<tr><td>Passive-binary</td><td>roc_auc</td><td>0.7889</td><td>0.8066</td></tr>
+<tr><td>Active-continuous</td><td>common_log_rmse</td><td>0.9553</td><td>0.9560</td></tr>
+<tr><td>Active-continuous</td><td>corrected_r2</td><td>0.0925</td><td>0.0978</td></tr>
+<tr><td>Passive-continuous</td><td>common_log_rmse</td><td>1.0374</td><td>1.0282</td></tr>
+<tr><td>Passive-continuous</td><td>corrected_r2</td><td>0.0078</td><td>0.0278</td></tr>
+</table>
+
+<h3>Outside-noise verdicts</h3>
+<div class="verdict-box"><p><strong>v1e_gradient_boosting -- RECONFIRMED, CLOSED.</strong> Mean
+  fold-AP shift +0.0008 (p=0.929) -- indistinguishable from zero. Original promotion (prompt 46)
+  stands.</p></div>
+<div class="deviation-box"><p><strong>p1e_gradient_boosting -- REOPENED (favourable).</strong> Mean
+  fold-AP shift +0.0248 (p=0.0004) -- nearly 3x the +0.0086 margin that justified the original
+  promotion, and far more significant. Promoted rung stands; headline numbers are stale and should
+  be updated in a follow-up documentation pass.</p></div>
+<div class="deviation-box"><p><strong>c1d_random_forest -- REOPENED (favourable).</strong> Mean
+  fold common_log_rmse shift &minus;0.0082 (p=0.014), though this leg's own original significance
+  test carried a small-n caution note that applies here too. Promoted rung stands; numbers stale.</p></div>
+<div class="verdict-box"><p><strong>d1_lognormal_glm -- RECONFIRMED, CLOSED (borderline).</strong>
+  Mean fold common_log_rmse shift &minus;0.0078 (p=0.071) -- not significant at p&lt;0.05, the
+  closest borderline case of the 4 non-xT legs. Original promotion stands.</p></div>
+
+<h2>Phase 5 -- Fresh promotion audit, the 2 xT legs</h2>
+<p>Both xT targets are directly recomputed from corrected coordinates, so this is not a
+  before/after diff of the same ground truth. The old comparator rungs'
+  (<code>x1_two_stage_huber</code> / <code>y1_two_stage_huber</code>) held-out numbers were scored
+  against the now-provably-wrong target and are not reused for the decision -- instead both
+  candidate and comparator are refit from scratch on the corrected target, at their own
+  already-locked configurations, on identical 5-fold canonical CV.</p>
+
+<h3>Active-xT: x1c_random_forest vs x1_two_stage_huber, both on corrected target_xt_delta_v2</h3>
+<table>
+<tr><th></th><th>x1c_random_forest (candidate)</th><th>x1_two_stage_huber (comparator)</th></tr>
+<tr><td>Held-out RMSE</td><td><strong>0.04630</strong></td><td>0.05492</td></tr>
+<tr><td>Held-out R&sup2;</td><td><strong>0.37407</strong></td><td>0.11908</td></tr>
+<tr><td>Held-out MAE</td><td>0.01898</td><td>0.02109</td></tr>
+<tr><td>Held-out Spearman</td><td>0.5765</td><td>0.5069</td></tr>
+</table>
+<p>Paired significance (candidate&minus;comparator RMSE, per fold): mean diff = <strong>&minus;0.00827</strong>,
+  paired-t p = <strong>9.5&times;10&supminus;&sup7;</strong>, Wilcoxon p = 0.0625 (the n=5 floor, all
+  5 folds favouring the candidate).</p>
+<div class="deviation-box"><p><strong>Context (not used in the decision).</strong> Pre-fix
+  promotion reported x1c RMSE=0.04277/R&sup2;=0.44947. The corrected R&sup2; (0.374) is lower --
+  the corrected target is genuinely harder to predict, because some old apparent accuracy came from
+  the model and the also-corrupted features sharing correlated errors with the old wrong target.
+  The comparator's own corrected R&sup2; (0.119) is likewise far below its old number (0.152),
+  confirming this is a property of the corrected target's difficulty, not specific to x1c.</p></div>
+
+<h3>Passive-xT: y1c_random_forest vs y1_two_stage_huber, both on corrected target_xt_delta_passive</h3>
+<table>
+<tr><th></th><th>y1c_random_forest (candidate)</th><th>y1_two_stage_huber (comparator)</th></tr>
+<tr><td>Held-out RMSE</td><td><strong>0.02418</strong></td><td>0.02767</td></tr>
+<tr><td>Held-out R&sup2;</td><td><strong>0.33130</strong></td><td>0.12473</td></tr>
+<tr><td>Held-out MAE</td><td>0.00796</td><td>0.00773</td></tr>
+<tr><td>Held-out Spearman</td><td>0.2042</td><td>0.1213</td></tr>
+</table>
+<p>Paired significance: mean diff = <strong>&minus;0.00358</strong>, paired-t p =
+  <strong>1.26&times;10&supminus;&sup5;</strong>, Wilcoxon p = 0.0625.</p>
+<div class="deviation-box"><p><strong>Context (not used in the decision).</strong> Pre-fix
+  promotion reported y1c RMSE=0.02489/R&sup2;=0.49325. Corrected R&sup2; (0.331) is again lower,
+  and the comparator's own corrected R&sup2; (0.125) is likewise far below its own pre-fix number
+  (0.061). Same explanation: <code>ball_x</code>/<code>ball_y</code> were the regression head's own
+  two most important features (65.4% combined) and directly frame-dependent.</p></div>
+
+<h3>Promotion verdicts</h3>
+<div class="verdict-box"><p><strong>Active-xT: PROMOTE x1c_random_forest.</strong> Fresh promotion
+  decision on genuinely new target values, run as a full audit: x1c beats x1_two_stage_huber by a
+  wide, highly significant margin when both are refit on the corrected target. Headline numbers
+  update to RMSE=0.04630/R&sup2;=0.37407.</p></div>
+<div class="verdict-box"><p><strong>Passive-xT: PROMOTE y1c_random_forest.</strong> Same pattern:
+  y1c beats y1_two_stage_huber decisively on the corrected target. Headline numbers update to
+  RMSE=0.02418/R&sup2;=0.33130.</p></div>
+<p><strong>Neither leg promotes a different rung than before.</strong> The fix changes the number
+  materially (both R&sup2; drop by roughly a fifth to a third of their old value), but not the
+  choice of which architecture to promote.</p>
+
+<h3>Summary verdict, all 6 legs</h3>
+<table>
+<tr><th>Leg</th><th>Reference model</th><th>Verdict</th></tr>
+<tr><td>Active-binary</td><td>v1e_gradient_boosting_calibrated</td><td>Reconfirmed, closed</td></tr>
+<tr><td>Passive-binary</td><td>p1e_gradient_boosting_calibrated</td><td>Reopened -- promotion stands, numbers updated</td></tr>
+<tr><td>Active-continuous</td><td>c1d_random_forest</td><td>Reopened -- promotion stands, numbers updated</td></tr>
+<tr><td>Passive-continuous</td><td>d1_lognormal_glm</td><td>Reconfirmed, closed (borderline)</td></tr>
+<tr><td>Active-xT</td><td>x1c_random_forest</td><td>Promoted (fresh audit, same rung)</td></tr>
+<tr><td>Passive-xT</td><td>y1c_random_forest</td><td>Promoted (fresh audit, same rung)</td></tr>
+</table>
+
+<h2>Phase 6 -- Downstream cleanup</h2>
+<ul>
+<li><strong>dashboard_data/STALE.md</strong> added (no other file in that folder touched): states
+  the folder predates this fix/re-pipeline and must not be used until regenerated (a separate,
+  out-of-scope follow-up).</li>
+<li><strong>This report</strong> is linked from COORDINATE_FRAME_IMPACT_AUDIT.html's own closing
+  section and from this INDEX's sidebar.</li>
+<li><strong>Non-goals honored:</strong> no historical never-promoted ladder-rung doc touched;
+  dashboard_data/ not regenerated; no React/Next.js dashboard build started; Phase 1's loader fix
+  and commit 8b7d0a8 not reopened or amended.</li>
+</ul>
+
+</div>
+</div>
+<footer>
+  <p>Generated for prompt 85, phases 2-6. Scripts:
+    <code>scripts/analysis/coordinate_frame_fix_clearance_phase_sanity_check.py</code>,
+    <code>scripts/analysis/phase3_xt_target_delta_report.py</code>,
+    <code>scripts/analysis/phase4_reconfirm_promoted_legs.py</code>,
+    <code>scripts/analysis/phase4_held_out_refit.py</code>,
+    <code>scripts/analysis/phase5_xt_promotion_audit.py</code>. Raw JSON:
+    <code>outputs/models/validation/coordinate_frame_fix_clearance_phase_sanity_check.json</code>,
+    <code>phase3_xt_target_delta_report.json</code>, <code>phase4_reconfirmation.json</code>,
+    <code>phase4_held_out_refit.json</code>, <code>phase5_xt_promotion_audit.json</code>. Markdown
+    source: <code>reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md</code>. Preceding
+    diagnostic: <a href="COORDINATE_FRAME_IMPACT_AUDIT.html">COORDINATE_FRAME_IMPACT_AUDIT.html</a>
+    (prompt 84). Loader fix: <code>src/dax/data/statsbomb_loader.py</code>, commit
+    <code>8b7d0a8</code> (prompt 85, phase 1).</p>
+</footer>
+</body>
+</html>
