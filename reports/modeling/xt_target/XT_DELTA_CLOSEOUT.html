@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defensive Action Expected -- xT-Delta Family Closeout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f1; --plane: #eceee8; --surface: #ffffff;
+  --text-primary: #10151c; --text-secondary: #4c525b; --text-muted: #868d96;
+  --border: rgba(16,21,28,0.09); --gridline: #e2e4de;
+  --accent: #e34948; --pos: #e34948; --neg: #2a78d6;
+  --amber: #eda100; --amber-wash: rgba(237,161,0,0.10);
+  --good: #2f9e5b; --good-wash: rgba(47,158,91,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+    --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+    --border: rgba(255,255,255,0.09); --gridline: #232a34;
+    --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+    --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+    --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --plane: #090c10; --surface: #161b22;
+  --text-primary: #f3f5f7; --text-secondary: #b6bdc7; --text-muted: #7c8591;
+  --border: rgba(255,255,255,0.09); --gridline: #232a34;
+  --accent: #e66767; --pos: #e66767; --neg: #3987e5;
+  --amber: #c98500; --amber-wash: rgba(201,133,0,0.14);
+  --good: #3fbf78; --good-wash: rgba(63,191,120,0.14);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary); font-family: "Public Sans", -apple-system, sans-serif; font-size: 15px; line-height: 1.5; }
+.mono { font-family: "JetBrains Mono", monospace; }
+.masthead { background: var(--bg); border-bottom: 1px solid var(--border); padding: 40px 24px 32px; }
+.masthead-inner { max-width: 1180px; margin: 0 auto; }
+.eyebrow { font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; color: var(--accent); font-weight: 600; margin: 0 0 10px; }
+h1.title { font-family: "Archivo", sans-serif; font-weight: 800; font-size: clamp(26px, 4vw, 38px); margin: 0 0 12px; color: var(--text-primary); }
+.dek { color: var(--text-secondary); max-width: 64ch; margin: 0 0 24px; font-size: 15.5px; }
+.statbar { display: flex; flex-wrap: wrap; gap: 28px 40px; }
+.stat b { display: block; font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; color: var(--text-primary); }
+.stat span { display: block; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+footer { border-top: 1px solid var(--border); padding: 28px 24px 60px; max-width: 1180px; margin: 0 auto; }
+footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 0 0 8px; }
+
+.article { max-width: 900px; }
+.article h2 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 22px; margin: 44px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.article h2:first-of-type { margin-top: 0; }
+.article h3 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 17px; margin: 30px 0 4px; color: var(--accent); }
+.article p { color: var(--text-secondary); margin: 0 0 14px; font-size: 14.5px; }
+.article strong { color: var(--text-primary); font-weight: 700; }
+.article code { font-family: "JetBrains Mono", monospace; font-size: 0.88em; background: var(--plane); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--neg); }
+.article ul, .article ol { color: var(--text-secondary); font-size: 14.5px; padding-left: 22px; margin: 0 0 16px; }
+.article li { margin-bottom: 6px; }
+.article table { width: 100%; border-collapse: collapse; margin: 4px 0 22px; font-size: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.article th { text-align: left; font-family: "JetBrains Mono", monospace; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.03em; color: var(--text-muted); background: var(--plane); padding: 9px 12px; border-bottom: 1px solid var(--border); }
+.article td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+.article tr:last-child td { border-bottom: none; }
+.article td:first-child, .article th:first-child { color: var(--text-primary); font-weight: 600; }
+.deviation-box { background: var(--amber-wash); border: 1px solid rgba(237,161,0,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.deviation-box p:last-child { margin-bottom: 0; }
+.verdict-box { background: var(--good-wash); border: 1px solid rgba(47,158,91,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.verdict-box p { margin: 0; }
+.fail-box { background: rgba(227,73,72,0.10); border: 1px solid rgba(227,73,72,0.35); border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
+.fail-box p { margin: 0; }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">DAX &middot; Modelling &middot; xT-delta family closeout</p>
+    <h1 class="title">xT-Delta Family Closeout</h1>
+    <p class="dek">Two-leg synthesis across active-xT (<code>target_xt_delta_v2</code>) and
+      passive-xT (<code>target_xt_delta_passive</code>). Sits one level above each leg's own
+      baseline/ladder/closeout docs, the xT-delta-family equivalent of
+      <code>../MODELLING_CLOSEOUT.html</code>'s own project-wide synthesis for the four original
+      DAx legs.</p>
+    <div class="statbar">
+      <div class="stat"><b>2 / 2</b><span>legs settled: x1c/y1c both promoted reference models</span></div>
+      <div class="stat"><b>Both -&gt; RF</b><span>Rung 2, model-family change, both legs</span></div>
+      <div class="stat"><b>Both fail GBM</b><span>Rung 3, different reasons per leg</span></div>
+      <div class="stat"><b>Model-shaped</b><span>calibration issues, not feature-shaped -- both legs</span></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="article">
+
+<p><em>This document does not replace or duplicate either per-leg doc (in particular
+<a href="../active_xt/ACTIVE_XT_MODEL_LADDER.html" target="viewer">ACTIVE_XT_MODEL_LADDER.html</a>
+and
+<a href="../passive_xt/PASSIVE_XT_MODEL_LADDER.html" target="viewer">PASSIVE_XT_MODEL_LADDER.html</a>,
+which remain the full ladder/promotion-audit records for each leg) -- it compares across the two
+legs and records the discipline that applied to both of them, linking out to per-leg detail rather
+than re-deriving it.</em></p>
+
+<h2>1. What this closes out</h2>
+<p>Both legs of the xT-delta target family -- active (<code>target_xt_delta_v2</code>) and passive
+  (<code>target_xt_delta_passive</code>) -- now have structurally complete ladders and a promoted
+  reference model each:</p>
+<ul>
+<li><strong>Active</strong>: <code>x0_dummy</code> -&gt; <code>x1_two_stage_huber</code> (Rung 0)
+  -&gt; <code>x1b_quadratic</code> (Rung 1, did not clear the bar) -&gt;
+  <code>x1c_random_forest</code> (Rung 2, cleared the bar, promoted as reference model, Prompt 75)
+  -&gt; <code>x1d_gradient_boosting</code> (Rung 3, mixed result against <code>x1c</code>, not
+  promoted, Prompt 74).</li>
+<li><strong>Passive</strong>: <code>y0_dummy</code> -&gt; <code>y1_two_stage_huber</code> (Rung 0)
+  -&gt; <code>y1b_quadratic</code> (Rung 1, did not clear the bar) -&gt;
+  <code>y1c_random_forest</code> (Rung 2, cleared the bar, promoted as reference model, Prompt 80
+  part A) -&gt; <code>y1d_gradient_boosting</code> (Rung 3, mixed result against <code>y1c</code>,
+  not promoted, Prompt 79).</li>
+</ul>
+<p>As of this closeout, no further model-ladder rungs are planned for either leg unless new
+  evidence specifically warrants revisiting one. This is a reporting closeout, not a new modelling
+  decision -- every number below was confirmed directly against the artifacts and reports cited,
+  not carried forward from memory, while writing this document.</p>
+
+<h2>2. Final state, both legs</h2>
+<table>
+<tr><th>Leg</th><th>Reference model</th><th>Held-out RMSE</th><th>Held-out R&sup2;</th><th>Held-out Spearman</th><th>Rungs beyond Rung 0</th></tr>
+<tr><td>Active-xT</td><td><code>x1c_random_forest</code></td><td>0.04277</td><td>0.44947</td><td>0.5947</td><td>3 (x1b, x1c, x1d)</td></tr>
+<tr><td>Passive-xT</td><td><code>y1c_random_forest</code></td><td>0.02489</td><td>0.49325</td><td>0.3154</td><td>3 (y1b, y1c, y1d)</td></tr>
+</table>
+<p>Both reference-model rows are the promotion-audit's own full-pipeline re-run numbers (active:
+  <code>full_pipeline_readout_x1c.json</code>, Prompt 75; passive:
+  <code>full_pipeline_readout_y1c.json</code>, Prompt 80 part A) -- an independent,
+  freshly-scored, predict-only combined-pipeline readout on each leg's own held-out test set, not
+  the Rung-2 ladder-gate's own CV number.</p>
+<p><strong>Improvement over each leg's own Rung-0 baseline:</strong></p>
+<table>
+<tr><th>Leg</th><th>Rung-0 RMSE</th><th>Reference RMSE</th><th>RMSE reduction</th><th>Rung-0 R&sup2;</th><th>Reference R&sup2;</th><th>R&sup2; change</th></tr>
+<tr><td>Active-xT (x1 -&gt; x1c)</td><td>0.05309</td><td>0.04277</td><td>-19.4%</td><td>0.1519</td><td>0.4495</td><td>+0.298 (~3.0x)</td></tr>
+<tr><td>Passive-xT (y1 -&gt; y1c)</td><td>0.03388</td><td>0.02489</td><td>-26.5%</td><td>0.0612</td><td>0.4933</td><td>+0.432 (~8.1x)</td></tr>
+</table>
+<p>Passive's own reference model shows both the larger relative RMSE reduction and the larger
+  absolute R&sup2; gain of the two legs -- confirmed directly by both legs' own promotion-audit
+  pipeline re-runs, not an artefact of CV-only numbers.</p>
+
+<h2>3. The real structural parallel: both legs landed on RF at Rung 2, both saw GBM fail at Rung 3 -- for different reasons</h2>
+<p>Both legs' ladders reached the identical shape: a features-only rung (<code>x1b</code>/<code>y1b</code>,
+  quadratic and interaction terms on the same model family) that did not clear the bar, then a
+  model-family change to random forest (<code>x1c</code>/<code>y1c</code>) that did, then a
+  further model-family change to gradient boosting (<code>x1d</code>/<code>y1d</code>) that also
+  did not clear the bar against the now-promoted RF baseline.</p>
+<div class="deviation-box"><p><strong>That shape is real and worth stating plainly. The reason GBM
+  failed to clear RF is not the same on both legs, and forcing it into one narrative would
+  misstate at least one leg.</strong></p></div>
+<ul>
+<li><strong>Active-xT</strong>: <code>x1d_gradient_boosting</code> won on the headline accuracy
+  metrics (RMSE, MAE) but gave back a real share of <code>x1c</code>'s own tail-calibration win --
+  the specific diagnostic this leg's own ladder has tracked since Rung 0. <code>x1c</code> had
+  closed that gap by 10-35x; <code>x1d</code> widened it back out by roughly 2-5x (still far
+  better than <code>x1b</code>/<code>x1</code>, but a real regression against the current
+  reference). Spearman also regressed. The promotion call weighed a small, real RMSE win against a
+  real regression on the two diagnostics this leg treats as first-class evidence, not a footnote,
+  and did not promote.</li>
+<li><strong>Passive-xT</strong>: <code>y1d_gradient_boosting</code> did not even clear the
+  significance bar against <code>y1c</code> in the first place -- paired-t p=0.0635, Wilcoxon
+  p=0.125, the first rung comparison on either leg's ladder that fails to clear significance at
+  all. RMSE/R&sup2; moved marginally in <code>y1d</code>'s favor (not a "real" win the way
+  active's <code>x1d</code> had on those same two metrics), and held-out Spearman regressed
+  meaningfully (0.3154 -&gt; 0.2732, ~13% relative) -- a rank-correlation regression with no
+  offsetting significant accuracy gain to weigh it against. The prediction-bias gate
+  <code>y1c</code> closed stayed closed either way, so that check did not distinguish the two
+  variants on this leg -- unlike active-xT, where calibration was the decisive axis.</li>
+</ul>
+<p><strong>Same shape, different actual reason on each leg</strong>: active's <code>x1d</code>
+  lost on calibration/rank evidence despite winning on raw accuracy; passive's <code>y1d</code>
+  did not even establish a significant accuracy win to begin with. Reading both as "GBM regressed
+  calibration" would be accurate for active and wrong for passive; reading both as "GBM wasn't
+  significant" would be wrong for active (it was significant on RMSE) and accurate for passive.
+  Each leg's own report states its own reason; this closeout does not average them into one.</p>
+
+<h2>4. The real asymmetry: both legs' calibration problems turned out to be model-family-shaped, not feature-shaped</h2>
+<p>This is the strongest piece of cross-leg evidence in the whole xT-delta family, and it appears
+  on both legs independently, via different motivating diagnostics:</p>
+<ul>
+<li><strong>Active-xT</strong>: Rung 0's own calibration table showed a <em>tail</em>
+  under-prediction gap (the two extreme bins under-predicting magnitude by 3x or more).
+  <code>x1b_quadratic</code> (Rung 1 -- more terms, same <code>HuberRegressor</code> model) added
+  curvature-capturing terms specifically aimed at that gap. <strong>The tail-calibration gap that
+  motivated the entire rung did not narrow -- it is unchanged to worse</strong> (bin 0's gap
+  actually widens slightly). It took <code>x1c_random_forest</code> (Rung 2 -- a genuine
+  model-family change, same features) to close that gap by 10-35x. The Rung-1 report's own
+  conclusion: the tail-calibration problem is a property of <code>HuberRegressor</code>'s own loss
+  function (which caps large residuals by design), not a curvature-shaped problem more terms in
+  the same loss function could fix.</li>
+<li><strong>Passive-xT</strong>: Rung 0's own calibration table showed a different pattern -- a
+  <em>systematic positive bias across all 5 bins</em>, not a tail-specific gap (<code>y1</code>'s
+  own held-out <code>prediction_bias</code>: +0.00278). <code>y1b_quadratic</code> (Rung 1 -- more
+  terms, same <code>HuberRegressor</code> model) added curvature-capturing terms specifically
+  aimed at that bias. <strong>The bias did not shrink -- it got marginally worse</strong>
+  (+0.00278 -&gt; +0.00298). It took <code>y1c_random_forest</code> (Rung 2 -- the same kind of
+  model-family change) to close it almost to zero (-0.000018, essentially eliminated).</li>
+</ul>
+<div class="verdict-box"><p><strong>Both legs ran the identical experiment (more features, same
+  model, aimed at a calibration problem) and got the identical null result, then both ran the
+  identical follow-up experiment (same features, different model family) and got the identical
+  positive result</strong> -- on two different calibration diagnostics (a tail gap on one leg, a
+  whole-distribution bias on the other), on two independently-built feature sets, with no shared
+  code path between the two legs' <code>x1b</code>/<code>y1b</code> scripts beyond the general
+  two-stage architecture. This convergence is the strongest evidence anywhere in this project that
+  <code>HuberRegressor</code>'s calibration limitations on this target family are a property of
+  the model family's own loss function, not something addressable by adding more terms to the same
+  linear-in-parameters model. A single leg showing this pattern could be leg-specific noise; two
+  independently-motivated legs showing the identical experiment/null/positive-result sequence is
+  not.</p></div>
+
+<h2>5. Where the two reference models draw signal</h2>
+<p>Top features by Gini importance, regression head, aggregated back to each leg's own original
+  locked feature set:</p>
+<table>
+<tr><th>Rank</th><th>Active-xT (x1c_random_forest)</th><th>Passive-xT (y1c_random_forest)</th></tr>
+<tr><td>1</td><td><code>phase_label_prev_event</code> (categorical, 35.5%)</td><td><code>ball_x</code> (33.9%)</td></tr>
+<tr><td>2</td><td><code>event_type</code> (categorical, 14.1%)</td><td><code>ball_y</code> (31.5%)</td></tr>
+<tr><td>3</td><td><code>distance_to_attacking_box</code> (9.7%)</td><td><code>on_ball_event_type</code> (categorical, 29.0%)</td></tr>
+<tr><td>4</td><td><code>attacking_goal_centrality</code> (8.8%)</td><td><code>top_option_3_threat_score</code> (0.8%)</td></tr>
+<tr><td>5</td><td><code>nearest_attacker_distance</code> (8.2%)</td><td><code>defender_x</code> (0.8%)</td></tr>
+</table>
+<p><strong>Little overlap in kind, and a real divergence in concentration.</strong> Active's top
+  signal is behavioral/contextual -- what phase the previous event happened in, what kind of event
+  it was, how far the defensive action is from its own box, how central the attacking goal angle
+  is -- a mix of two categorical features and three relative-geometry features, with the top 5
+  combining for ~76% and no long tail of near-zero features. Passive's top signal is dominated by
+  two raw location columns and one event-type category; the <strong>top 3 alone account for ~94%
+  of total aggregated Gini importance</strong> (33.9% + 31.5% + 29.0%), an extremely concentrated
+  result with no equivalent on the active leg -- everything past rank 3 on the passive side is
+  under 1%.</p>
+<div class="deviation-box"><p><strong>This concentration is not incidental, and passive's own
+  report already flagged why -- restated here, not re-derived</strong>:
+  <code>target_xt_delta_passive</code>'s own construction bakes in a <code>ball_x</code>/
+  <code>ball_y</code>-shaped signal that <code>target_xt_delta_v2</code> does not share.
+  <code>xt_before</code> on the passive leg is a direct grid lookup,
+  <code>xt_before = xT(ball_x, ball_y)</code>, off two columns that are <em>also</em> locked
+  PASSIVE modelling features; on the active leg, <code>xt_before</code> is looked up at the
+  <em>previous</em> event's location, not a feature-table column at all.
+  <code>PASSIVE_LEAKAGE_AUDIT.json</code>'s own Part E' measured <code>ball_x</code> at r=+0.52 vs
+  <code>xt_before</code> and r=+0.25 vs the target itself (<code>ball_y</code> correlates far more
+  weakly, r=-0.004). <code>y1c</code>'s accuracy gain is real (confirmed independently by the
+  Part-A promotion audit), but a meaningful share of what the model leans on is this
+  already-documented construction-linked signal, not entirely fresh predictive structure. Active
+  carries no equivalent flagged coupling in its own top features -- its own promotion audit
+  (Prompt 75) found no comparable red flag, a genuine difference between the two legs' own
+  feature-importance profiles, not merely a different presentation of the same caveat.</p></div>
+
+<h2>6. What's not done</h2>
+<ul>
+<li><strong>No deeper promotion audit beyond what already ran.</strong>
+  <code>x1c_random_forest</code>'s own audit (Prompt 75) and <code>y1c_random_forest</code>'s own
+  audit (this prompt's Part A) are both now on record; neither <code>x1d_gradient_boosting</code>
+  nor <code>y1d_gradient_boosting</code> gets a promotion audit, since neither was promoted -- a
+  promotion audit answers "should this replace the reference model," which does not apply to a
+  rung that already failed its own ladder gate.</li>
+<li><strong>No project-wide combined-target comparison.</strong> Whether the xT-delta family's own
+  reference models (<code>x1c_random_forest</code>, <code>y1c_random_forest</code>) should be
+  compared against, combined with, or read alongside the four original DAx legs' own reference
+  models (<code>v1e_gradient_boosting_calibrated</code>, <code>p1e_gradient_boosting_calibrated</code>,
+  <code>c1d_random_forest</code>, <code>d1_lognormal_glm</code> -- see
+  <a href="../MODELLING_CLOSEOUT.html" target="viewer">../MODELLING_CLOSEOUT.html</a>) is not
+  addressed here. That is a separate, later step if the user asks for it, not something this
+  closeout resolves.</li>
+<li><strong>No new ladder rungs.</strong> No <code>x1e</code>, no <code>y1e</code>. Both legs'
+  ladders are considered structurally complete as of this closeout, in the same sense
+  <code>../MODELLING_CLOSEOUT.html</code> closed the four original legs -- a stopping decision
+  based on the evidence gathered, not a hard rule against ever revisiting either leg.</li>
+</ul>
+
+</div>
+</div>
+<footer>
+  <p>Markdown source: <code>reports/modeling/xt_target/XT_DELTA_CLOSEOUT.md</code>. Per-leg detail:
+    <a href="../active_xt/ACTIVE_XT_MODEL_LADDER.html" target="viewer">ACTIVE_XT_MODEL_LADDER.html</a>,
+    <a href="../passive_xt/PASSIVE_XT_MODEL_LADDER.html" target="viewer">PASSIVE_XT_MODEL_LADDER.html</a>.
+    Project-wide (four original DAx legs):
+    <a href="../MODELLING_CLOSEOUT.html" target="viewer">MODELLING_CLOSEOUT.html</a>.</p>
+</footer>
+</body>
+</html>
