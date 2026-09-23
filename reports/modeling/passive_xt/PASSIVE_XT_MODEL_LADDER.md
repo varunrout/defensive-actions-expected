@@ -1,5 +1,12 @@
 # Passive-xT Model Ladder
 
+> **Status update (Prompt 79):** `y1d_gradient_boosting` (Rung 3) does **not** clear this rung's
+> ladder gate against `y1c_random_forest`: the paired significance test on 5-fold CV RMSE is not
+> significant (paired-t p=0.0635, Wilcoxon p=0.125), and held-out Spearman regresses meaningfully
+> (0.315 -> 0.273) even though RMSE/R^2 move slightly in `y1d`'s favor and the prediction-bias gate
+> `y1c` closed stays closed. See section 4.7 below. `y1c_random_forest` remains the leg's standing
+> baseline.
+>
 > **Status update (Prompt 78):** `y1c_random_forest` (Rung 2) has cleared this rung's ladder gate
 > against `y1_two_stage_huber` and is promoted to the leg's new standing baseline. See section 3.7
 > below. `y1b_quadratic` (Rung 1) did not clear its own gate and remains documented as the rung
@@ -367,3 +374,204 @@ prompt (73) followed before its own separate promotion-audit prompt (75).
 `y1_two_stage_huber` remains documented as the Rung-0 baseline it was measured against, and
 `y1b_quadratic` remains documented as the Rung-1 rung that didn't clear its own bar. No further
 rung (gradient boosting or otherwise) is built in this prompt.
+
+## 4. Rung 3 -- `y1d_gradient_boosting` (prompt 79)
+
+`y1c_random_forest` (Rung 2) is this leg's first real win: RMSE down ~26% (CV and held-out), R^2
+more than sextupling (0.079 -> 0.497 CV), and -- critically -- the systematic positive prediction
+bias this ladder tracked since Rung 0/1 (`y1`: +0.00278, `y1b`: +0.00298) is essentially eliminated
+by `y1c` (-0.000018). This rung tests a different tree-ensemble method -- gradient boosting --
+directly against `y1c`, mirroring active-xT's own Rung 3 (`x1d_gradient_boosting`, prompt 74) --
+a method worth checking once one tree method already found real structure, not assumed to help
+just because RF did.
+
+**Important difference from active-xT's own Rung 3 motivation, stated up front**: on active-xT,
+`x1c`'s own tail-calibration gap was still nonzero going into `x1d`, so `x1d`'s calibration check
+had something live to test. On passive-xT, `y1c` has already essentially closed the
+systematic-bias gate (-0.000018, functionally zero). So `y1d`'s own gate is **not** "does it fix a
+bias `y1c` left open" -- there isn't one left open to fix. `y1d`'s gate is: does it beat `y1c` on
+RMSE/R^2 without reopening the bias `y1c` just closed, and without a comparable regression
+elsewhere. The calibration check in section 4.5 below is a **non-regression check, not a
+fix-seeking one** -- no bias-fixing narrative is manufactured here where none applies.
+
+### 4.1 Step 1 -- what does `y1d` replace, decided from this leg's own evidence
+
+Same reasoning `x1d_gradient_boosting` applied on the active leg: `y1c_random_forest` replaced
+**both** of `y1`'s stages (confirmed directly against `outputs/models/regression/y1c_random_forest.json`
+-- `clf_params` and `reg_params` both present), and no new asymmetric evidence has appeared since
+Rung 2 to justify upgrading only one surface. **Decision: `y1d` replaces both stages with gradient
+boosting** -- `LGBMClassifier` for P(nonzero), `LGBMRegressor` for E[delta|nonzero], mirroring
+`y1c`'s own two-independent-models composition, gated against `y1c` specifically (not `y1`/`y1b`)
+per this prompt's own instruction. Library: LightGBM (version 4.6.0, confirmed available), matching
+`x1d_gradient_boosting`, `v1e_gradient_boosting`, and `c1e_gradient_boosting` -- kept consistent
+rather than introducing XGBoost as a second boosting library for no reason. Feature set: the same
+38 locked PASSIVE features `y1c` used (no `y1b` quadratic/interaction terms reused).
+
+### 4.2 Grid, sized for this leg's own row counts and duplication property
+
+Classifier trains on 1,275,289 trainval rows; regressor trains on 941,234 nonzero-only trainval
+rows -- the same row counts `y1c` reported, confirmed via `yb.load_data()`. Unlike active-xT's
+rows (1 row per event, independent), this leg's rows are **not** independent -- every
+defender-slot row sharing an `event_id` carries the identical target value (~8.03 rows/event,
+Prompt 68). For a leaf-wise boosted model this matters even more than it does for RF: LightGBM's
+leaf-wise growth can carve out a tiny leaf that isolates a handful of duplicate-target rows from
+one or two events and fit them near-perfectly -- exactly the kind of spurious "signal" grouped
+5-fold CV is meant to catch, but a too-small `min_child_samples` makes that state easy to reach
+within a single fold. `MIN_CHILD_SAMPLES_GRID` is therefore set to `[50, 150, 500]` -- **reusing
+`y1c`'s own already-established, duplication-aware `MIN_SAMPLES_LEAF_GRID` values directly** (same
+leg, same duplication property, same reasoning), rather than `x1d`'s smaller `[20, 50, 150]`
+(sized for active-xT's independent, ~30x-smaller-sample rows) or a blind copy of `v1e`'s
+`[10, 30, 100]`. `NUM_LEAVES_GRID=[15, 31, 63]` and `LEARNING_RATE_GRID=[0.01, 0.05, 0.1]` are
+unchanged from `x1d`/`v1e`/`c1e` -- neither scales with row count or duplication the way leaf-size
+parameters do. `n_estimators` is never grid-searched directly -- chosen per fit via early stopping
+(cap 2,000 rounds, 50-round patience) on a match-grouped validation carve-out of that fit's own
+training rows, exactly `x1d`'s own fitting procedure.
+
+**Classifier grid winner** (chosen by OOF ROC-AUC, full 27-row grid in
+`outputs/models/validation/y1d_classifier_tuning.json`): `learning_rate=0.01, num_leaves=63,
+min_child_samples=500` -- OOF ROC-AUC 0.8197, train ROC-AUC 0.8566, train-minus-OOF gap 0.0370,
+mean best iteration 575. As with `y1c`'s own grid, the largest `min_child_samples` value tried
+(500) wins at the most flexible `num_leaves` (63) -- the largest-leaf-size, most-flexible-tree
+corner of the grid, but held in check by early stopping rather than by the leaf-size constraint
+alone (unlike `y1c`'s RF grid, which has no per-fit early stopping and relies on `min_samples_leaf`
+alone to control overfit).
+
+**Regressor grid winner** (chosen by OOF RMSE, full 27-row grid in
+`outputs/models/validation/y1d_regressor_tuning.json`): `learning_rate=0.05, num_leaves=15,
+min_child_samples=500` -- OOF RMSE 0.02923, OOF R^2 0.5429, train R^2 0.5934, train-minus-OOF gap
+0.0505, mean best iteration 376. Here the *smallest* `num_leaves` (15) wins, not the largest --
+different from the classifier stage and from `y1c`'s own regressor grid (which picked
+`max_depth=None`, its least-constrained option). At every `num_leaves`/`learning_rate` combination
+tried, `min_child_samples=500` (the largest, most duplication-conservative option) wins or ties on
+OOF RMSE against the smaller options, confirming the duplication-aware upper end of the grid is
+doing real work here too, not just at the classifier stage.
+
+### 4.3 `y1d_gradient_boosting` vs `y1c_random_forest` -- ranking (CV and held-out)
+
+| Variant | RMSE (CV) | RMSE (held-out) | R&sup2; (CV) | R&sup2; (held-out) | Spearman (held-out) |
+|---|---|---|---|---|---|
+| `y1c_random_forest` | 0.026371 | 0.024892 | 0.4968 | 0.4933 | **0.3154** |
+| `y1d_gradient_boosting` | **0.026296** | **0.024645** | **0.4996** | **0.5032** | 0.2732 |
+
+A small, mixed result -- not the large, unambiguous win `y1c` itself produced over `y1` at Rung 2.
+RMSE improves marginally (CV: -0.28% relative; held-out: -0.99% relative), R^2 improves marginally
+(CV +0.0028; held-out +0.0100), but **Spearman regresses meaningfully on the held-out set**
+(0.3154 -> 0.2732, a ~13% relative drop) -- the opposite direction from every accuracy metric.
+`y1d`'s classifier ranks predictions less consistently with the true ordering than `y1c`'s does,
+even while its point predictions are closer on average (lower RMSE/MAE). This is the first rung on
+either leg's ladder where the headline accuracy metric (RMSE) and the rank metric (Spearman) move
+in opposite directions against the same comparison baseline.
+
+| Variant | Zero-row MAE | Nonzero-row MAE |
+|---|---|---|
+| `y1c_random_forest` | **0.004474** | 0.011080 |
+| `y1d_gradient_boosting` | 0.004011 | 0.011132 |
+
+Zero-row MAE improves (~10% lower); nonzero-row MAE is essentially flat, a marginal 0.5% worse. No
+large trade-off pattern here the way `y1c` itself showed over `y1`.
+
+### 4.4 Paired significance test, `y1d` vs `y1c` (not `y1`/`y1b`)
+
+Per-fold RMSE (`outputs/models/validation/significance_y1d_vs_y1c.json`), compared against the
+**current standing baseline (`y1c_random_forest`), not the older linear rungs**: `y1d` beats
+`y1c` in **4 of 5 folds** (0.027516 vs 0.027593, 0.026227 vs 0.026279, 0.026283 vs 0.026385,
+0.026548 vs 0.026710; `y1c` wins fold 4, 0.024974 vs `y1d`'s 0.024991), mean diff
+**-0.0000752** -- an order of magnitude smaller than Rung 2's own mean diff against `y1`
+(-0.00932). Paired t-test t=-2.548, **p=0.0635** -- not significant at the conventional 0.05
+threshold. Wilcoxon p=0.125, also not significant. **Unlike every prior rung comparison on this
+leg, this one does not clear the significance bar at all**, on either test.
+
+### 4.5 Calibration -- non-regression check, not a fix-seeking one
+
+As stated in this section's own introduction, `y1c` already closed the systematic-bias gate this
+ladder tracked since Rung 1 (-0.000018, functionally zero). This check asks only whether `y1d`
+**holds** that closure or **reopens** it -- there is no live bias left for `y1d` to fix.
+
+| Bin | `y1c` gap (Rung 2) | `y1d` gap (this rung) |
+|---|---|---|
+| 0 (most negative predicted) | -0.00063 | **-0.00025** |
+| 1 | -0.00015 | +0.00014 |
+| 2 | +0.00006 | +0.00013 |
+| 3 | +0.00014 | -0.00011 |
+| 4 (most positive predicted) | +0.00050 | **-0.00025** |
+
+| Variant | Prediction bias (held-out) |
+|---|---|
+| `y1_two_stage_huber` | +0.002780 |
+| `y1b_quadratic` | +0.002982 |
+| `y1c_random_forest` | -0.000018 |
+| `y1d_gradient_boosting` | -0.000068 |
+
+**The bias stays closed.** Every bin's gap remains in the +/-0.00025 range, the same noise-level
+magnitude `y1c` established -- roughly 25-40x smaller than Rung 0's own `y1` bin gaps (+0.00060 to
++0.00656). The aggregate `prediction_bias` is -0.000068, larger in raw magnitude than `y1c`'s
+-0.000018 (about 3.8x), but both values are two orders of magnitude smaller than `y1`'s own
++0.00278 -- this is noise around zero, not a reopening of the systematic bias this ladder spent
+Rungs 1-2 closing. Stated plainly, per this section's own framing: **`y1d` neither fixes a bias
+(there was none left to fix) nor reopens one.** This is a clean pass on the non-regression check,
+not a finding that moves the promotion decision either way.
+
+### 4.6 Feature importance cross-check
+
+Top gain-importance features (regression head, `outputs/models/regression/y1d_gradient_boosting.json`,
+56 one-hot-expanded columns from the same 38 locked features):
+
+| Rank | Feature | Gain importance | Share of total |
+|---|---|---|---|
+| 1 | `ball_x` | 844.0 | 16.0% |
+| 2 | `ball_y` | 539.0 | 10.2% |
+| 3 | `top_option_3_threat_score` | 348.0 | 6.6% |
+| 4 | `top_option_1_threat_score` | 335.0 | 6.4% |
+| 5 | `top_option_1_distance_from_ball` | 248.0 | 4.7% |
+
+On **gain importance alone**, `y1d`'s top-3 columns account for only ~33% of total importance --
+much more spread out than `y1c`'s ~93% Gini concentration in its own top 3. Read at face value,
+this would suggest `y1d` distributes its predictive weight across a much broader set of features
+than `y1c` does. **That reading does not survive a permutation-importance cross-check, and this
+leg's own established discipline (section 3.6) requires checking it before reporting a change in
+concentration as a real finding:**
+
+| Rank | Feature | Permutation importance (fold held-out) |
+|---|---|---|
+| 1 | `ball_x` | +0.001110 |
+| 2 | `ball_y` | +0.000462 |
+| 3 | `on_ball_event_type_Shot` | +0.000420 |
+| 4 | `on_ball_event_type_Pass` | +0.000042 |
+| 5 | `top_option_3_threat_score` | +0.000017 |
+
+By **permutation importance** -- the metric that actually measures each feature's contribution to
+predictive accuracy, rather than how often it is split on -- `ball_x`, `ball_y`, and
+`on_ball_event_type_Shot` account for **~95% of total positive permutation importance**, an even
+higher concentration than `y1c`'s own ~93% Gini figure. Gain importance's spread-out appearance is
+a property of gradient boosting's own split mechanism (many low-signal splits on `top_option_*`
+threat-score/distance features accumulate gain without meaningfully moving held-out accuracy), not
+evidence that `y1d` relies on genuinely broader structure than `y1c` does. **`y1d` leans on the
+same already-flagged construction-linked signal `y1c`'s own report identified**
+(`reports/analysis/xt_target/PASSIVE_LEAKAGE_AUDIT.json`'s Part E': `ball_x`/`ball_y` are the exact
+two columns `xt_before = xT(ball_x, ball_y)` is computed from, `ball_x` at r=+0.52 vs `xt_before`;
+`on_ball_event_type_Shot`'s importance is separately sensible, not a coupling artefact, for the
+same reason given in section 3.6 -- Shot rows sit deep in the attacking box and are almost never
+zero). This is not new structure discovered by the model-family change; it is the same
+construction-linked signal `y1c` already found, reported plainly rather than presented as fresh.
+
+### 4.7 Promotion call
+
+**`y1d_gradient_boosting` does not clear the bar to replace `y1c_random_forest` as the standing
+baseline.** The paired significance test against `y1c` (section 4.4) is **not significant** on
+either test (paired-t p=0.0635, Wilcoxon p=0.125) -- the first rung comparison on this leg that
+fails to clear significance at all, not merely a case of "significant but too small to matter" the
+way `y1b` was at Rung 1. RMSE and R^2 do move marginally in `y1d`'s favor on both CV and held-out,
+and the calibration non-regression check (section 4.5) passes cleanly -- the bias `y1c` closed
+stays closed. But **held-out Spearman regresses meaningfully** (0.3154 -> 0.2732, ~13% relative),
+the opposite direction from the accuracy metrics, and a statistically insignificant RMSE edge is
+not sufficient on its own to promote, the same standing discipline `x1b`/`y1b` established and
+`x1c` staying standing over `x1d` on the active leg confirmed most recently. Per this prompt's own
+framing, this is a fully valid, reportable outcome: `y1d`'s test does not manufacture a bias-fixing
+narrative that does not apply here, and the honest answer is that gradient boosting does not
+improve on random forest by enough -- on this leg, at this rung -- to earn promotion.
+
+**`y1c_random_forest` remains the leg's standing baseline.** `y1_two_stage_huber` remains
+documented as the Rung-0 baseline, `y1b_quadratic` as the Rung-1 rung that did not clear its own
+bar, and `y1d_gradient_boosting` as this Rung-3 rung that also did not clear its own bar (a
+different, and for the first time genuinely mixed, kind of non-promotion than `y1b`'s). No further
+rung is built in this prompt; no promotion audit is run for `y1d` since it was not promoted.
