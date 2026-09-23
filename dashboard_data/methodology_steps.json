@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "produced_by": "Prompt 83 (dashboard data export). Pipeline walkthrough pulled from the ladder/closeout docs cited on each step -- not re-summarised from memory.",
+  "steps": [
+    {
+      "id": "data",
+      "order": 1,
+      "stage": "Data",
+      "description": "StatsBomb open event data plus 360 freeze-frames (every visible player's position at each on-ball event) for the 2022 World Cup and Euro 2024: 115 matches.",
+      "facts": {"matches": 115, "wc2022_matches": 64, "euro2024_matches": 51},
+      "source": "outputs/models/splits/match_assignment.json (115 match ids); data/raw/matches/43_106.json, 55_282.json"
+    },
+    {
+      "id": "two_views",
+      "order": 2,
+      "stage": "Two ways to defend",
+      "description": "Active defending = on-ball actions (pressures, tackles, interceptions, recoveries, blocks, clearances). Passive defending = where each off-ball defender is standing at each attacking on-ball event, from the 360 frames.",
+      "facts": {"active_rows": 56068, "active_locked_features": 32, "passive_defender_rows": 1593181, "passive_on_ball_events": 198354, "passive_locked_features": 38},
+      "source": "train_active_binary_baseline.py / train_active_continuous_baseline.py (32 locked ACTIVE features); train_passive_continuous_baseline.py (38 locked PASSIVE features); train_passive_xt_baseline.py load_data docstring (1,593,181 rows, 198,354 events)"
+    },
+    {
+      "id": "targets",
+      "order": 3,
+      "stage": "Three questions per view (six legs)",
+      "description": "Will a shot follow within 10 seconds (binary)? How dangerous is it, in xG (continuous, hurdle model)? How much expected threat (xT) changed (continuous, two-stage model)? Asked separately for the active and passive views.",
+      "source": "reports/modeling/ALL_LEGS_SUMMARY.md section 1"
+    },
+    {
+      "id": "split",
+      "order": 4,
+      "stage": "One frozen, match-level split",
+      "description": "23 whole matches are held out as a final test set and read once per model; the other 92 are split into 5 cross-validation folds by match, so no match ever leaks between training and testing.",
+      "facts": {"held_out_test_matches": 23, "cv_folds": 5},
+      "source": "outputs/models/splits/match_assignment.json; src/dax/models/splits.py"
+    },
+    {
+      "id": "ladder",
+      "order": 5,
+      "stage": "Model ladder",
+      "description": "Each leg starts from a simple baseline (Rung 0), then tries one change per rung: curvature terms, interactions, random forest, gradient boosting. A rung only replaces the standing model if a paired significance test on the 5 CV folds says the change is real -- and the rung's own motivating diagnostic actually moves.",
+      "source": "each leg's *_MODEL_LADDER.md section 1 ('What a rung is')"
+    },
+    {
+      "id": "promotion_audit",
+      "order": 6,
+      "stage": "Promotion audit",
+      "description": "Winning a rung is not enough to become the reference model. A 3-5 check audit follows: does it win in BOTH tournaments, does it regress on any error slice, do its feature shapes make football sense, and does the win survive the full end-to-end pipeline on the held-out test set?",
+      "source": "MODELLING_CLOSEOUT.md section 4; ACTIVE_XT_MODEL_LADDER.md section 5; PASSIVE_XT_MODEL_LADDER.md section 5"
+    },
+    {
+      "id": "synthesis",
+      "order": 7,
+      "stage": "Cross-leg synthesis",
+      "description": "All six reference models side by side, with an explicit rule not to rank binary and continuous legs on one axis.",
+      "source": "reports/modeling/ALL_LEGS_SUMMARY.md sections 2 and 5"
+    }
+  ],
+  "honest_result_callouts": [
+    {
+      "id": "x1d_not_promoted",
+      "leg": "active_xt",
+      "step": "ladder",
+      "title": "Gradient boosting won on error -- and still wasn't promoted",
+      "summary": "x1d_gradient_boosting beat the random forest on RMSE in a significant, 5-of-5-fold way (p=0.0031), but its rank correlation dropped (-0.0255 Spearman held-out) and the tail-calibration gap the random forest had closed widened back out 2-5x. The RMSE edge was about 1/17th the size of the random forest's own edge over the baseline. x1c_random_forest stayed.",
+      "numbers": {"p_value": 0.0031, "spearman_change_held_out": -0.0255, "tail_gap_widening": "2-5x"},
+      "source": "reports/modeling/active_xt/ACTIVE_XT_MODEL_LADDER.md section 4.8"
+    },
+    {
+      "id": "y1d_not_promoted",
+      "leg": "passive_xt",
+      "step": "ladder",
+      "title": "A slightly better score that wasn't statistically real",
+      "summary": "y1d_gradient_boosting nudged RMSE and R-squared in its favour, but the paired test was not significant (p=0.0635; Wilcoxon p=0.125) and held-out Spearman fell from 0.3154 to 0.2732 (~13%). An insignificant edge with a real ranking cost was not promoted; y1c_random_forest stayed.",
+      "numbers": {"paired_t_p": 0.0635, "wilcoxon_p": 0.125, "spearman_from": 0.3154, "spearman_to": 0.2732},
+      "source": "reports/modeling/passive_xt/PASSIVE_XT_MODEL_LADDER.md sections 4.3, 4.4, 4.7"
+    },
+    {
+      "id": "y1b_bias",
+      "leg": "passive_xt",
+      "step": "ladder",
+      "title": "Significant, and still rejected: the bias got worse",
+      "summary": "y1b_quadratic beat the baseline in 5 of 5 folds (p=0.0006) -- but the one thing it existed to fix, a systematic over-prediction, got slightly worse (held-out bias +0.00278 -> +0.00298). Changing model family, not adding terms, was the fix: y1c_random_forest took the bias to -0.000018.",
+      "numbers": {"paired_t_p": 0.0006, "bias_y1": 0.002780, "bias_y1b": 0.002982, "bias_y1c": -0.000018},
+      "source": "reports/modeling/passive_xt/PASSIVE_XT_MODEL_LADDER.md sections 2.5-2.7 and 3.5"
+    },
+    {
+      "id": "x1b_calibration",
+      "leg": "active_xt",
+      "step": "ladder",
+      "title": "Same lesson on the active side",
+      "summary": "x1b_quadratic was also significant (p=0.0018) with a negligible effect, and the tail-calibration gap it targeted did not narrow. The cause was the Huber loss capping extreme predictions, not a missing curve -- again fixed by the random-forest model-family change.",
+      "numbers": {"paired_t_p": 0.0018},
+      "source": "reports/modeling/active_xt/ACTIVE_XT_MODEL_LADDER.md sections 2.4-2.6"
+    },
+    {
+      "id": "d1_three_nulls",
+      "leg": "passive_continuous",
+      "step": "ladder",
+      "title": "Three independent attempts, zero improvement",
+      "summary": "The passive shot-danger model was never beaten: a curvature term (p=0.50), a full interaction expansion (skipped after it scored worse than the plain linear model on a real-data check, negative CV R-squared), and a random forest (directionally better on 4 of 5 folds, but p=0.576). Three different angles converging on 'no reliable signal to add' is reported as the finding.",
+      "numbers": {"d1b_quadratic_p": 0.5013, "d1c_interactions": "skipped: CV R-squared -0.0249 / -0.0230 vs plain linear -0.0042", "d1d_random_forest_p": 0.576},
+      "source": "reports/modeling/passive_continuous/PASSIVE_CONTINUOUS_MODEL_LADDER.md sections 2.3, 3, 4.2, 4.4"
+    },
+    {
+      "id": "c1e_not_promoted",
+      "leg": "active_continuous",
+      "step": "ladder",
+      "title": "Beating the baseline is not the bar -- beating the current best is",
+      "summary": "c1e_gradient_boosting significantly beat the linear baseline (p=0.0402) but tied the random forest (2 of 5 folds better, p=0.31) and sat between the two on every held-out accuracy metric. c1d_random_forest stayed.",
+      "numbers": {"vs_baseline_p": 0.0402, "vs_rf_p": 0.3098},
+      "source": "reports/modeling/active_continuous/ACTIVE_CONTINUOUS_MODEL_LADDER.md sections 5.2, 5.5"
+    },
+    {
+      "id": "v1e_slice_calibration",
+      "leg": "active_binary",
+      "step": "promotion_audit",
+      "title": "Better headline numbers, rejected on slice calibration",
+      "summary": "The uncalibrated gradient-boosting model had a strong overall calibration score but was 6-19x worse than its predecessor on specific phase-of-play slices. The calibrated version was promoted instead.",
+      "numbers": {"slice_ece_worse_by": "6-19x"},
+      "source": "reports/modeling/MODELLING_CLOSEOUT.md section 3"
+    },
+    {
+      "id": "coordinate_frame_issue",
+      "leg": "all",
+      "step": "data",
+      "title": "Found while building this dashboard: a coordinate-frame bug upstream",
+      "summary": "Raw StatsBomb locations are in each acting team's own frame, but the data loader's direction-normalisation flips one possession team per half, so about half the rows in the locked feature files sit in the opposite frame from the rest. The rule-based phase-of-play labels inherit it (e.g. clearances labelled 'high press'). Every model was trained and tested on the same features, so the reported held-out metrics are real measurements -- but the spatial features are noisier than intended. Not fixed here (locked files); the dashboard's pitch coordinates are rebuilt from raw data so they are correct.",
+      "numbers": {"active_rows_in_inconsistent_frame_share": 0.4644, "clearances_labelled_high_press_when_inconsistent": 0.724, "clearances_labelled_box_defence_when_consistent": 0.79},
+      "source": "dashboard_data/selection_and_frame_audit.json (frame_audit), produced by scripts/dashboard/audit_frames_and_profile_matches.py; explained in dashboard_data/README.md section 5"
+    }
+  ]
+}

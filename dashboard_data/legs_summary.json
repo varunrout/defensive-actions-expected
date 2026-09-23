@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "produced_by": "Prompt 83 (dashboard data export). Presentation simplification of reports/modeling/ALL_LEGS_SUMMARY.md (Prompt 81) -- no number here is re-derived; each carries its source.",
+  "primary_source": "reports/modeling/ALL_LEGS_SUMMARY.md",
+  "comparability": {
+    "single_ranking_allowed": false,
+    "render_as": "separate_groups",
+    "rule": "Never sort or rank all six legs on one axis. Binary legs are scored with PR-AUC (a yes/no separation metric); continuous legs are scored with R-squared (a how-close-is-the-number metric). Comparing a PR-AUC of 0.43 with an R-squared of 0.45 is a category error, not a finding. Even the four continuous legs split into two sub-families (hurdle vs two-stage xT) with different target distributions and architectures, so compare within a group only.",
+    "source": "ALL_LEGS_SUMMARY.md section 5"
+  },
+  "groups": [
+    {
+      "id": "binary",
+      "title": "Will a shot follow?",
+      "plain_description": "Probability that the attacking team takes a shot within 10 seconds of the moment being scored.",
+      "headline_metric": "PR-AUC",
+      "headline_metric_plain": "How well the model picks out the moments that really did lead to a shot (0 to 1, higher is better). A model guessing at random scores roughly the share of moments that lead to a shot.",
+      "legs": ["active_binary", "passive_binary"]
+    },
+    {
+      "id": "hurdle",
+      "title": "How dangerous is the shot that follows?",
+      "plain_description": "Expected shot quality (xG) in the next 10 seconds, built as P(shot) x expected xG given a shot, reusing that side's own shot-probability model.",
+      "headline_metric": "R-squared (hurdle pipeline, held-out)",
+      "headline_metric_plain": "Share of the variation in what actually happened that the model explains (0 = no better than a flat average, 1 = perfect).",
+      "legs": ["active_continuous", "passive_continuous"]
+    },
+    {
+      "id": "xt",
+      "title": "How much threat did the defence take away?",
+      "plain_description": "Expected change in expected-threat (xT) around the moment, from a two-stage model: P(threat changes at all) x expected change given it does.",
+      "headline_metric": "R-squared (full two-stage pipeline, held-out)",
+      "headline_metric_plain": "Share of the variation in the actual threat change that the model explains (0 = no better than a flat average, 1 = perfect).",
+      "legs": ["active_xt", "passive_xt"]
+    }
+  ],
+  "legs": [
+    {
+      "id": "active_binary",
+      "group": "binary",
+      "side": "active",
+      "plain_name": "On-ball defending: shot risk",
+      "question": "After a tackle, interception, pressure or other on-ball defensive action, how likely is a shot within 10 seconds?",
+      "reference_model": "v1e_gradient_boosting_calibrated",
+      "model_family_plain": "Gradient boosting, with calibration so the probabilities can be read at face value",
+      "headline": {"metric": "PR-AUC", "value": 0.4282, "random_guess_level": 0.0720, "source": "outputs/models/comparisons/active_binary_baseline_held_out_test_readout.csv (v1e_gradient_boosting_calibrated row: average_precision 0.42817, positive_rate 0.07205)"},
+      "supporting_metrics": {"roc_auc": 0.8364, "brier": 0.0522, "ece": 0.0096, "source": "same CSV row; ALL_LEGS_SUMMARY.md section 2"},
+      "baseline_to_reference": {"metric": "PR-AUC", "from": 0.3725, "to": 0.4282, "source": "ALL_LEGS_SUMMARY.md section 4"},
+      "audit": {"status": "promoted", "checks": 3, "prompt": 46, "source": "ACTIVE_BINARY_MODELLING_CLOSEOUT.md section 8"},
+      "one_liner": "Promoted only after a slice-level calibration check overruled the uncalibrated version's better-looking headline numbers."
+    },
+    {
+      "id": "passive_binary",
+      "group": "binary",
+      "side": "passive",
+      "plain_name": "Off-ball positioning: shot risk",
+      "question": "Given where one off-ball defender is standing when the attacker plays the ball, how likely is a shot within 10 seconds?",
+      "reference_model": "p1e_gradient_boosting_calibrated",
+      "model_family_plain": "Gradient boosting, with calibration so the probabilities can be read at face value",
+      "headline": {"metric": "PR-AUC", "value": 0.2162, "random_guess_level": 0.0551, "source": "outputs/models/comparisons/passive_binary_baseline_held_out_test_readout.csv (p1e_gradient_boosting_calibrated row: average_precision 0.21619, positive_rate 0.05510)"},
+      "supporting_metrics": {"roc_auc": 0.7889, "brier": 0.0474, "ece": 0.0044, "source": "same CSV row; ALL_LEGS_SUMMARY.md section 2"},
+      "baseline_to_reference": {"metric": "PR-AUC", "from": 0.1736, "to": 0.2162, "source": "ALL_LEGS_SUMMARY.md section 4"},
+      "audit": {"status": "promoted", "checks": 5, "prompt": 52, "source": "PASSIVE_BINARY_MODEL_LADDER.md section 7"},
+      "one_liner": "Promoted with one weak spot flagged rather than hidden: defenders the pipeline could not assign a role to (a thin slice).",
+      "source_note": "ALL_LEGS_SUMMARY.md section 2 describes a 3rd-decimal discrepancy (CSV 0.210773 vs doc 0.2162). Re-checked in Prompt 83: 0.210773 is the UNCALIBRATED p1e_gradient_boosting row of that CSV; the calibrated reference row is 0.21619, matching the doc. There is no discrepancy."
+    },
+    {
+      "id": "active_continuous",
+      "group": "hurdle",
+      "side": "active",
+      "plain_name": "On-ball defending: shot danger",
+      "question": "After an on-ball defensive action, how much shot quality (xG) should we expect in the next 10 seconds?",
+      "reference_model": "c1d_random_forest (x v1e_gradient_boosting_calibrated P(shot))",
+      "model_family_plain": "Random forest for shot quality, combined with the active shot-risk model",
+      "headline": {"metric": "R-squared", "value": 0.1693, "source": "outputs/models/validation/hurdle_pipeline_readout_c1d.json, hurdle_pipeline_metrics.r2 = 0.16930"},
+      "supporting_metrics": {"rmse": 0.04416, "mae": 0.01107, "source": "same JSON"},
+      "baseline_to_reference": {"metric": "R-squared", "from": 0.1426, "to": 0.1693, "source": "ALL_LEGS_SUMMARY.md section 4 (hurdle_pipeline_readout_c1d.json c1_based vs hurdle_pipeline_metrics)"},
+      "audit": {"status": "promoted", "checks": 4, "prompt": 58, "source": "ACTIVE_CONTINUOUS_MODEL_LADDER.md section 6"},
+      "one_liner": "A real but modest end-to-end gain: most moments never lead to a shot, so the shot-probability half dominates the product."
+    },
+    {
+      "id": "passive_continuous",
+      "group": "hurdle",
+      "side": "passive",
+      "plain_name": "Off-ball positioning: shot danger",
+      "question": "Given one off-ball defender's position, how much shot quality (xG) should we expect in the next 10 seconds?",
+      "reference_model": "d1_lognormal_glm (x p1e_gradient_boosting_calibrated P(shot))",
+      "model_family_plain": "Simple log-normal linear model (the starting baseline, never beaten), combined with the passive shot-risk model",
+      "headline": {"metric": "R-squared", "value": 0.0426, "source": "outputs/models/validation/hurdle_pipeline_readout_passive.json, hurdle_pipeline_metrics.r2 = 0.04263"},
+      "supporting_metrics": {"rmse": 0.03726, "mae": 0.00980, "source": "same JSON"},
+      "baseline_to_reference": {"metric": "R-squared", "from": 0.0426, "to": 0.0426, "source": "ALL_LEGS_SUMMARY.md section 4 (Rung 0 is the reference model)"},
+      "audit": {"status": "standing_baseline_never_beaten", "checks": 0, "prompt": 62, "source": "PASSIVE_CONTINUOUS_MODEL_LADDER.md section 4.4; MODELLING_CLOSEOUT.md sections 2-3"},
+      "reference_confirmed_current": "Confirmed in Prompt 83 against MODELLING_CLOSEOUT.md section 2 and ALL_LEGS_SUMMARY.md section 2: d1_lognormal_glm is the standing reference (d1d_random_forest failed its gate, p=0.576).",
+      "one_liner": "Three different upgrades were tried and none beat the simple starting model -- reported as the finding, not hidden."
+    },
+    {
+      "id": "active_xt",
+      "group": "xt",
+      "side": "active",
+      "plain_name": "On-ball defending: threat removed",
+      "question": "How much does an on-ball defensive action change the attacking team's expected threat?",
+      "reference_model": "x1c_random_forest",
+      "model_family_plain": "Two-stage random forest (does threat change? then by how much?)",
+      "headline": {"metric": "R-squared", "value": 0.4495, "source": "outputs/models/validation/full_pipeline_readout_x1c.json, x1c_random_forest_combined_pipeline_metrics.r2 = 0.44947"},
+      "supporting_metrics": {"rmse": 0.04277, "spearman": 0.5947, "source": "same JSON"},
+      "baseline_to_reference": {"metric": "R-squared", "from": 0.1519, "to": 0.4495, "source": "ALL_LEGS_SUMMARY.md section 4 (XT_DELTA_CLOSEOUT.md section 2)"},
+      "audit": {"status": "promoted", "checks": 4, "prompt": 75, "source": "ACTIVE_XT_MODEL_LADDER.md section 5"},
+      "one_liner": "About 3x the explained variance of its starting model, and the win held equally in both tournaments."
+    },
+    {
+      "id": "passive_xt",
+      "group": "xt",
+      "side": "passive",
+      "plain_name": "Off-ball positioning: threat removed",
+      "question": "How much does an off-ball defender's position change the attacking team's expected threat?",
+      "reference_model": "y1c_random_forest",
+      "model_family_plain": "Two-stage random forest (does threat change? then by how much?)",
+      "headline": {"metric": "R-squared", "value": 0.4933, "source": "outputs/models/validation/full_pipeline_readout_y1c.json, y1c_random_forest_combined_pipeline_metrics.r2 = 0.49325"},
+      "supporting_metrics": {"rmse": 0.02489, "spearman": 0.3154, "source": "same JSON"},
+      "baseline_to_reference": {"metric": "R-squared", "from": 0.0612, "to": 0.4933, "source": "ALL_LEGS_SUMMARY.md section 4 (XT_DELTA_CLOSEOUT.md section 2)"},
+      "audit": {"status": "promoted", "checks": 4, "prompt": "80A", "source": "PASSIVE_XT_MODEL_LADDER.md section 5"},
+      "one_liner": "About 8x the explained variance of its starting model, and it removed a systematic over-prediction the linear models could not fix."
+    }
+  ],
+  "active_vs_passive": {
+    "consistent_direction_across_families": false,
+    "headline": "There is no project-wide 'passive improves more' (or 'active improves more') story -- the answer flips by target family.",
+    "by_family": [
+      {"group": "binary", "active": "PR-AUC 0.3725 -> 0.4282 (+0.0557, +14.9%)", "passive": "PR-AUC 0.1736 -> 0.2162 (+0.0426, +24.5%)", "larger_gain": "ambiguous", "plain": "Active gained more in absolute terms, passive more in relative terms."},
+      {"group": "hurdle", "active": "R-squared 0.1426 -> 0.1693 (+0.0267)", "passive": "R-squared 0.0426 -> 0.0426 (no model beat the baseline)", "larger_gain": "active", "plain": "Active improved; passive did not improve at all."},
+      {"group": "xt", "active": "R-squared 0.1519 -> 0.4495 (~3.0x)", "passive": "R-squared 0.0612 -> 0.4933 (~8.1x)", "larger_gain": "passive", "plain": "Passive improved far more -- but only in this family."}
+    ],
+    "source": "ALL_LEGS_SUMMARY.md section 4"
+  },
+  "cross_leg_pattern": {
+    "headline": "Random forest won 3 of the 6 legs -- and was tried on all 6.",
+    "detail": "It won the three continuous/two-stage legs with the most data. On the other three it lost for leg-specific reasons: worse calibration (active shot risk, where it was run as a diagnostic), a failed significance test (passive shot risk, p=0.275), and a failed significance test on a smaller, noisier sample (passive shot danger, p=0.576).",
+    "winners": ["active_continuous", "active_xt", "passive_xt"],
+    "source": "ALL_LEGS_SUMMARY.md section 3"
+  }
+}
