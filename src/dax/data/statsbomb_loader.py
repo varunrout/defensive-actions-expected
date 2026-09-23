@@ -159,87 +159,27 @@ def _normalize_xy(x: float | None, y: float | None, sign: int) -> tuple[float | 
     return x, y
 
 
-def _extract_end_x(row: pd.Series) -> float | None:
-    for col in [
-        "pass_end_location",
-        "carry_end_location",
-        "dribble_end_location",
-        "shot_end_location",
-    ]:
-        if col not in row.index:
-            continue
-        x, _ = _xy_from_any(row.get(col))
-        if x is not None:
-            return x
-    return None
+def _attack_sign_for_row(team: Any, possession_team: Any) -> int:
+    """Sign needed to normalize one event's raw coordinates into the possession
+    (attacking) team's frame.
 
-
-def _infer_attack_sign_by_period_team(events: pd.DataFrame, home_team: str, away_team: str) -> dict[tuple[int, str], int]:
-    """Infer attacking direction sign by (period, team) using progression deltas.
-
-    sign=+1 means coordinates already left-to-right for that attacking team.
-    sign=-1 means coordinates need 180-degree flip to become left-to-right.
+    StatsBomb raw event locations are always given in the ACTING team's own
+    attacking frame (own goal at x=0, attacking toward x=120) -- this holds
+    regardless of period or which team is which, and is not something that
+    needs inferring from ball-progression deltas (see
+    reports/modeling/COORDINATE_FRAME_IMPACT_AUDIT.md for the goalkeeper-event
+    verification of this invariant). So the only question per row is whether
+    the acting team (`team`) is the same team we want the frame expressed in
+    (`possession_team`, the attacking team downstream code assumes attacks
+    toward x=120): if they match, the raw frame is already correct (sign=+1);
+    if they differ, the two teams attack in opposite directions within the
+    same period, so it needs a 180-degree flip (sign=-1).
     """
-    work = events.copy()
-    if "period" not in work.columns:
-        return {}
-    if "possession_team" in work.columns:
-        work["_attack_team"] = work["possession_team"]
-    else:
-        work["_attack_team"] = work.get("team")
-
-    work["_x_raw"] = work["raw_ball_x"]
-    work["_end_x"] = work.apply(_extract_end_x, axis=1)
-    valid = work[
-        work["_attack_team"].notna()
-        & work["period"].notna()
-        & work["_x_raw"].notna()
-        & work["_end_x"].notna()
-    ].copy()
-    valid["_dx"] = pd.to_numeric(valid["_end_x"], errors="coerce") - pd.to_numeric(valid["_x_raw"], errors="coerce")
-
-    grouped = (
-        valid.groupby(["period", "_attack_team"], dropna=False)["_dx"]
-        .agg(median_dx="median", abs_median_dx=lambda s: float(s.abs().median()))
-        .reset_index()
-    )
-
-    signs: dict[tuple[int, str], int] = {}
-    confidence: dict[tuple[int, str], float] = {}
-    for _, row in grouped.iterrows():
-        period = int(row["period"])
-        team = str(row["_attack_team"])
-        median_dx = float(row["median_dx"])
-        signs[(period, team)] = 1 if median_dx >= 0 else -1
-        confidence[(period, team)] = float(row["abs_median_dx"])
-
-    periods = sorted({int(p) for p in work["period"].dropna().unique().tolist()})
-    for period in periods:
-        home_key = (period, home_team)
-        away_key = (period, away_team)
-        home_sign = signs.get(home_key)
-        away_sign = signs.get(away_key)
-
-        if home_sign is not None and away_sign is None:
-            signs[away_key] = -home_sign
-        elif home_sign is None and away_sign is not None:
-            signs[home_key] = -away_sign
-        elif home_sign is not None and away_sign is not None and home_sign == away_sign:
-            # If inference disagrees with football constraints, flip the weaker side.
-            home_conf = confidence.get(home_key, 0.0)
-            away_conf = confidence.get(away_key, 0.0)
-            if home_conf <= away_conf:
-                signs[home_key] = -home_sign
-            else:
-                signs[away_key] = -away_sign
-
-        # Last-resort fallback if both are missing.
-        if home_key not in signs and away_key not in signs:
-            fallback_home = 1 if period % 2 == 1 else -1
-            signs[home_key] = fallback_home
-            signs[away_key] = -fallback_home
-
-    return signs
+    if possession_team is None or (isinstance(possession_team, float) and pd.isna(possession_team)):
+        return 1
+    if team is None or (isinstance(team, float) and pd.isna(team)):
+        return 1
+    return 1 if str(team) == str(possession_team) else -1
 
 
 def _normalize_freeze_frame(frame: Any, sign: int) -> list[dict[str, Any]]:
@@ -306,15 +246,14 @@ def build_enriched_events(
         events["raw_ball_x"] = None
         events["raw_ball_y"] = None
 
-    # Infer attacking direction by (period, team) and normalize all coordinates
-    direction_map = _infer_attack_sign_by_period_team(events, home_team=home_team, away_team=away_team)
+    # Normalize each row's raw (acting-team-frame) coordinates into the
+    # possession team's attacking frame -- see _attack_sign_for_row.
+    poss_col = "possession_team" if "possession_team" in events.columns else None
 
     def _row_sign(row: pd.Series) -> int:
-        team_key = row.get("possession_team") if "possession_team" in events.columns else row.get("team")
-        period = row.get("period")
-        if pd.isna(period) or team_key is None:
-            return 1
-        return int(direction_map.get((int(period), str(team_key)), 1))
+        team_key = row.get("team")
+        poss_key = row.get(poss_col) if poss_col else None
+        return _attack_sign_for_row(team_key, poss_key)
 
     events["attack_dir_sign"] = events.apply(_row_sign, axis=1)
     events["ball_x"] = events.apply(
