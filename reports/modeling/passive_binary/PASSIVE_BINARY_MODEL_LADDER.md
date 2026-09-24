@@ -285,14 +285,25 @@ only); isotonic chosen by lower OOF ECE.
 
 | | CV PR-AUC | Held-out PR-AUC | CV calib. slope | Held-out calib. intercept | CV ECE | Held-out ECE |
 |---|---|---|---|---|---|---|
-| `p1e_gradient_boosting_calibrated` | **0.2270** | **0.2162** | 1.049 | **+0.006** | 0.0018 | 0.0044 |
+| `p1e_gradient_boosting_calibrated` | **0.2270** | **0.2162** &rarr; **0.2267** | 1.049 | **+0.006** | 0.0018 | 0.0044 |
+
+> **Update (Prompt 86, post coordinate-frame fix):** the held-out average_precision/PR-AUC above
+> was re-scored after Prompt 85's coordinate-frame loader fix and full re-pipeline. It rises from
+> 0.2162 to **0.2267**, and held-out ROC-AUC rises from 0.7889 to **0.8066** (source:
+> `outputs/models/validation/phase4_held_out_refit.json`, `p1e_gradient_boosting.average_precision`
+> / `.roc_auc` -- a fresh refit at this model's already-locked hyperparameters, used as a
+> calibration-invariant proxy for the promoted `_calibrated` wrapper, per that JSON's own note).
+> This is a real, favourable improvement (paired-fold significance p=0.0004), not noise -- see
+> [`COORDINATE_FRAME_FIX_AND_REPIPELINE.md`](../COORDINATE_FRAME_FIX_AND_REPIPELINE.md) (Phase 4)
+> for the full before/after analysis. The promoted rung (`p1e_gradient_boosting_calibrated`) is
+> unchanged; only its headline held-out numbers moved.
 
 Two findings worth stating precisely rather than rounding to a single verdict:
 
 - **Calibration improved ranking too, not just probabilities**: isotonic calibration's CV PR-AUC
   (0.2270) is *higher* than the raw model's (0.2239) -- unusual, since calibration wrappers
   typically trade a little ranking quality for better probabilities, not gain both. The held-out
-  PR-AUC (0.2162) is the best of any rung on this leg.
+  PR-AUC (0.2267 post coordinate-frame fix, was 0.2162) is the best of any rung on this leg.
 - **Calibration intercept improves to essentially zero** on held-out (+0.006, vs raw's -0.040 and
   RF's +0.28), the tightest bias of any variant tried on this leg. But held-out ECE is *marginally
   higher* for the calibrated variant than the raw one (0.0044 vs 0.0039) -- both are small in
@@ -333,7 +344,7 @@ explicit constraint -- see section 6 for the full ladder summary and what would 
 | `p1c_systematic_interactions` (Rung 2) | 0.2160 | 0.2013 | 0.0043 | p=0.0004 vs p1b (sig.) | Yes (1.92x width ratio) |
 | `p1d_random_forest` (Rung 3) | 0.2182 | 0.2078 | 0.0070 | p=0.275 vs p1c (NOT sig.) | Yes (2.62x width ratio) |
 | `p1e_gradient_boosting` (Rung 4, raw) | 0.2239 | 0.2108 | 0.0039 | p=0.174 vs p1d (NOT sig.) | Yes (2.56x width ratio) |
-| `p1e_gradient_boosting_calibrated` (Rung 4) | 0.2270 | **0.2162** | 0.0044 | (calibration of raw p1e) | Yes (inherits raw's gate) |
+| `p1e_gradient_boosting_calibrated` (Rung 4) | 0.2270 | **0.2267** (was 0.2162; ROC-AUC 0.8066, was 0.7889 -- Prompt 86 update, see note above) | 0.0044 | (calibration of raw p1e) | Yes (inherits raw's gate) |
 
 Every rung's held-out PR-AUC is monotonically ahead of the one before it, and every rung's cluster
 bootstrap confirms a real advantage over the Rung 0 baseline that survives the row-correlation

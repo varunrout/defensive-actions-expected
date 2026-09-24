@@ -101,7 +101,7 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
       <code>player_id</code> to run a player-disjoint recheck against). Section 7 (Prompt 52) is
       the promotion audit run once the full ladder was in.</p>
     <div class="statbar">
-      <div class="stat"><b>0.1736 &rarr; 0.2162</b><span>held-out PR-AUC, Rung 0 &rarr; best Rung 4</span></div>
+      <div class="stat"><b>0.1736 &rarr; 0.2267</b><span>held-out PR-AUC, Rung 0 &rarr; best Rung 4 (Prompt 86 coordinate-frame-fix update; was 0.2162)</span></div>
       <div class="stat"><b>4</b><span>rungs, each gated 3 ways</span></div>
       <div class="stat"><b>5-fold</b><span>canonical grouped CV, seed 42 (shared split)</span></div>
       <div class="stat"><b>2/4</b><span>rungs clear rung-to-rung significance</span></div>
@@ -346,14 +346,27 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 </table>
 <table>
 <tr><th></th><th>CV PR-AUC</th><th>Held-out PR-AUC</th><th>CV calib. slope</th><th>Held-out calib. intercept</th><th>CV ECE</th><th>Held-out ECE</th></tr>
-<tr><td><code>p1e_gradient_boosting_calibrated</code></td><td><strong>0.2270</strong></td><td><strong>0.2162</strong></td><td>1.049</td><td><strong>+0.006</strong></td><td>0.0018</td><td>0.0044</td></tr>
+<tr><td><code>p1e_gradient_boosting_calibrated</code></td><td><strong>0.2270</strong></td><td><strong>0.2162</strong> &rarr; <strong>0.2267</strong></td><td>1.049</td><td><strong>+0.006</strong></td><td>0.0018</td><td>0.0044</td></tr>
 </table>
+<blockquote>
+<p><strong>Update (Prompt 86, post coordinate-frame fix):</strong> the held-out average_precision/PR-AUC
+above was re-scored after Prompt 85's coordinate-frame loader fix and full re-pipeline. It rises from
+0.2162 to <strong>0.2267</strong>, and held-out ROC-AUC rises from 0.7889 to <strong>0.8066</strong>
+(source: <code>outputs/models/validation/phase4_held_out_refit.json</code>,
+<code>p1e_gradient_boosting.average_precision</code> / <code>.roc_auc</code> &mdash; a fresh refit at
+this model's already-locked hyperparameters, used as a calibration-invariant proxy for the promoted
+<code>_calibrated</code> wrapper, per that JSON's own note). This is a real, favourable improvement
+(paired-fold significance p=0.0004), not noise &mdash; see
+<a href="../COORDINATE_FRAME_FIX_AND_REPIPELINE.html">COORDINATE_FRAME_FIX_AND_REPIPELINE.html</a>
+(Phase 4) for the full before/after analysis. The promoted rung
+(<code>p1e_gradient_boosting_calibrated</code>) is unchanged; only its headline held-out numbers moved.</p>
+</blockquote>
 <p>Two findings worth stating precisely rather than rounding to a single verdict:</p>
 <ul>
   <li><strong>Calibration improved ranking too, not just probabilities</strong>: isotonic's CV
     PR-AUC (0.2270) is <em>higher</em> than raw's (0.2239) &mdash; unusual, since calibration
     wrappers typically trade a little ranking quality for better probabilities. Held-out PR-AUC
-    (0.2162) is the best of any rung on this leg.</li>
+    (0.2267 post coordinate-frame fix, was 0.2162) is the best of any rung on this leg.</li>
   <li><strong>Calibration intercept improves to essentially zero</strong> on held-out (+0.006, vs
     raw's -0.040 and RF's +0.28), the tightest bias of any variant tried. But held-out ECE is
     <em>marginally higher</em> for the calibrated variant than raw (0.0044 vs 0.0039) &mdash; both
@@ -446,7 +459,7 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <tr><td><code>p1c_systematic_interactions</code> (Rung 2)</td><td>0.2160</td><td>0.2013</td><td>0.0043</td><td>p=0.0004 vs p1b (sig.)</td><td>Yes (1.92x)</td></tr>
 <tr><td><code>p1d_random_forest</code> (Rung 3)</td><td>0.2182</td><td>0.2078</td><td>0.0070</td><td>p=0.275 vs p1c (NOT sig.)</td><td>Yes (2.62x)</td></tr>
 <tr><td><code>p1e_gradient_boosting</code> (Rung 4, raw)</td><td>0.2239</td><td>0.2108</td><td>0.0039</td><td>p=0.174 vs p1d (NOT sig.)</td><td>Yes (2.56x)</td></tr>
-<tr><td><code>p1e_gradient_boosting_calibrated</code> (Rung 4)</td><td>0.2270</td><td><strong>0.2162</strong></td><td>0.0044</td><td>(calibration of raw p1e)</td><td>Yes (inherits raw's gate)</td></tr>
+<tr><td><code>p1e_gradient_boosting_calibrated</code> (Rung 4)</td><td>0.2270</td><td><strong>0.2267</strong> (was 0.2162; ROC-AUC 0.8066, was 0.7889 &mdash; Prompt 86 update)</td><td>0.0044</td><td>(calibration of raw p1e)</td><td>Yes (inherits raw's gate)</td></tr>
 </table>
 <p>Every rung's held-out PR-AUC is monotonically ahead of the one before it, and every rung's
   cluster bootstrap confirms a real advantage over the Rung 0 baseline that survives the

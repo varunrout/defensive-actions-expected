@@ -108,12 +108,19 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <table>
 <tr><th>Leg</th><th>Target type</th><th>Reference model</th><th>Model family</th><th>Held-out headline metric(s)</th><th>Audit status</th></tr>
 <tr><td>Active-binary</td><td>Binary</td><td><code>v1e_gradient_boosting_calibrated</code></td><td>Gradient boosting (LightGBM) + isotonic calibration</td><td>PR-AUC 0.4282, ROC-AUC 0.8364, Brier 0.0522, ECE 0.0096</td><td>Yes -- 3-check audit (tournament, error-slice, behavioral-sanity), Prompt 46</td></tr>
-<tr><td>Passive-binary</td><td>Binary</td><td><code>p1e_gradient_boosting_calibrated</code></td><td>Gradient boosting (LightGBM) + isotonic calibration</td><td>PR-AUC 0.2162, ROC-AUC 0.7889, Brier 0.0474, ECE 0.0044</td><td>Yes -- 5-check audit (tournament, error-slice, slice-calibration, behavioral-sanity, cluster-bootstrap), Prompt 52</td></tr>
-<tr><td>Active-continuous</td><td>Continuous (hurdle)</td><td><code>c1d_random_forest</code></td><td>Random forest</td><td>Hurdle pipeline RMSE 0.04416, MAE 0.01107, R&sup2; 0.1693</td><td>Yes -- 4-check audit incl. hurdle-pipeline re-run (decisive), Prompt 58</td></tr>
+<tr><td>Passive-binary</td><td>Binary</td><td><code>p1e_gradient_boosting_calibrated</code></td><td>Gradient boosting (LightGBM) + isotonic calibration</td><td>PR-AUC 0.2267, ROC-AUC 0.8066, Brier 0.0470, ECE 0.0044 (Prompt 86 update, was 0.2162/0.7889)</td><td>Yes -- 5-check audit (tournament, error-slice, slice-calibration, behavioral-sanity, cluster-bootstrap), Prompt 52; reconfirmed on corrected features, Prompt 86</td></tr>
+<tr><td>Active-continuous</td><td>Continuous (hurdle)</td><td><code>c1d_random_forest</code></td><td>Random forest</td><td>Hurdle pipeline RMSE 0.04416, MAE 0.01107, R&sup2; 0.1693 (hurdle pipeline itself not re-scored, Prompt 86)</td><td>Yes -- 4-check audit incl. hurdle-pipeline re-run (decisive), Prompt 58; regression-only headline reconfirmed, Prompt 86</td></tr>
 <tr><td>Passive-continuous</td><td>Continuous (hurdle)</td><td><code>d1_lognormal_glm</code> <strong>(Rung 0, never beaten)</strong></td><td>Log-normal GLM (linear regression on log(xg))</td><td>Hurdle pipeline RMSE 0.03726, MAE 0.00980, R&sup2; 0.0426</td><td>No -- nothing cleared significance to trigger one; <code>d1d_random_forest</code> tried, failed (p=0.576)</td></tr>
-<tr><td>Active-xT</td><td>Two-stage continuous</td><td><code>x1c_random_forest</code></td><td>Random forest (two-stage)</td><td>Held-out RMSE 0.04277, R&sup2; 0.44947, Spearman 0.5947</td><td>Yes -- 4-check audit incl. full-pipeline re-run, Prompt 75</td></tr>
-<tr><td>Passive-xT</td><td>Two-stage continuous</td><td><code>y1c_random_forest</code></td><td>Random forest (two-stage)</td><td>Held-out RMSE 0.02489, R&sup2; 0.49325, Spearman 0.3154</td><td>Yes -- 4-check audit incl. full-pipeline re-run, Prompt 80 part A</td></tr>
+<tr><td>Active-xT</td><td>Two-stage continuous</td><td><code>x1c_random_forest</code></td><td>Random forest (two-stage)</td><td>Held-out RMSE 0.04630, R&sup2; 0.37407, Spearman 0.5765 (Prompt 86 update, was 0.04277/0.44947 -- target recomputed from corrected coordinates)</td><td>Yes -- 4-check audit incl. full-pipeline re-run, Prompt 75; fresh promotion audit on corrected target, Prompt 86</td></tr>
+<tr><td>Passive-xT</td><td>Two-stage continuous</td><td><code>y1c_random_forest</code></td><td>Random forest (two-stage)</td><td>Held-out RMSE 0.02418, R&sup2; 0.33130, Spearman 0.2042 (Prompt 86 update, was 0.02489/0.49325 -- target recomputed from corrected coordinates)</td><td>Yes -- 4-check audit incl. full-pipeline re-run, Prompt 80 part A; fresh promotion audit on corrected target, Prompt 86</td></tr>
 </table>
+<div class="deviation-box"><p><strong>Update (Prompt 86):</strong> the passive-binary, active-continuous,
+  and both xT legs' headline held-out numbers above were re-scored after Prompt 85's
+  coordinate-frame loader fix (<code>src/dax/data/statsbomb_loader.py</code>) and full
+  re-pipeline. Active-binary and passive-continuous were also re-checked and reconfirmed
+  unchanged. See
+  <a href="COORDINATE_FRAME_FIX_AND_REPIPELINE.html">COORDINATE_FRAME_FIX_AND_REPIPELINE.html</a>
+  for the full per-leg analysis.</p></div>
 <div class="deviation-box"><p><strong>Note on this table's own premise, stated plainly rather than
   silently corrected</strong>: this prompt's own context table listed the passive-continuous
   reference model as <code>d1d_random_forest</code>. That is not accurate as of the current
@@ -161,21 +168,31 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <h2>4. Active vs passive, leg by leg -- is there a consistent direction?</h2>
 <table>
 <tr><th>Target family</th><th>Active: improvement over its Rung 0</th><th>Passive: improvement over its Rung 0</th><th>Larger gain</th></tr>
-<tr><td>Binary (PR-AUC)</td><td>0.3725 -&gt; 0.4282, &Delta;+0.0557 (+14.9% relative)</td><td>0.1736 -&gt; 0.2162, &Delta;+0.0426 (+24.5% relative)</td><td><strong>Ambiguous</strong> -- active's absolute gain is larger, passive's relative gain is larger</td></tr>
+<tr><td>Binary (PR-AUC)</td><td>0.3725 -&gt; 0.4282, &Delta;+0.0557 (+14.9% relative)</td><td>0.1736 -&gt; 0.2267 (Prompt 86, was 0.2162), &Delta;+0.0531 (+30.6% relative)</td><td><strong>Ambiguous</strong> -- active's absolute gain is larger, passive's relative gain is larger</td></tr>
 <tr><td>Continuous/hurdle (hurdle R&sup2;)</td><td>0.1426 -&gt; 0.1693, &Delta;+0.0267 (+18.7% relative)</td><td>0.0426 -&gt; 0.0426, &Delta;+0.0000 (0% -- nothing ever beat Rung 0)</td><td><strong>Active, decisively</strong></td></tr>
-<tr><td>xT-delta (held-out R&sup2;)</td><td>0.1519 -&gt; 0.4495, &Delta;+0.2976 (~3.0x)</td><td>0.0612 -&gt; 0.4933, &Delta;+0.4321 (~8.1x)</td><td><strong>Passive, decisively</strong></td></tr>
+<tr><td>xT-delta (held-out R&sup2;, corrected target, Prompt 86)</td><td>0.11908 -&gt; 0.37407, &Delta;+0.25499 (~3.1x)</td><td>0.12473 -&gt; 0.33130, &Delta;+0.20657 (~2.7x)</td><td><strong>Active, now</strong> (previously reported as passive, decisively, on pre-fix numbers -- see update note below)</td></tr>
 </table>
+<div class="deviation-box"><p><strong>Update (Prompt 86, post coordinate-frame fix):</strong> the
+  xT-delta row above changes its own <strong>conclusion</strong>, not just its numbers. Both xT
+  targets were recomputed from corrected coordinates, so both the Rung-0 comparator and the
+  candidate had to be refit on the corrected target for a valid comparison
+  (<code>phase5_xt_promotion_audit.json</code>); the pre-fix numbers this row previously cited
+  (active 0.1519&rarr;0.4495, passive 0.0612&rarr;0.4933, "passive, decisively") were each scored
+  against a target that was itself wrong for 50-69% of its own rows. On the corrected target,
+  <strong>active's own gain is now larger than passive's</strong>, both in absolute R&sup2; points
+  and in multiplier terms -- the opposite of the pre-fix reading. See
+  <a href="COORDINATE_FRAME_FIX_AND_REPIPELINE.html">COORDINATE_FRAME_FIX_AND_REPIPELINE.html</a>
+  (Phase 5).</p></div>
 <div class="fail-box"><p><strong>No, there is not a consistent direction across all three
-  families.</strong> The xT-delta family shows passive with the clearly larger gain, but that
-  direction does not hold for the other two families: the hurdle/continuous family shows the
-  opposite pattern, active improving substantially while passive improved not at all (its own
-  reference model is still Rung 0), and the binary family is genuinely ambiguous -- which leg
-  "wins" depends on whether the question is asked in absolute PR-AUC points or relative percentage
-  terms. <strong>The passive-xT result is specific to that family, not part of a project-wide
-  "passive improves more" pattern</strong> -- if anything, the continuous/hurdle family shows the
-  strongest pattern in the <em>opposite</em> direction, and that is the more statistically
-  striking of the two (a leg with literally zero validated improvement across three independent
-  modelling attempts, versus a leg with a large one).</p></div>
+  families.</strong> On the corrected xT-delta numbers, the xT-delta family now shows
+  <strong>active</strong> with the larger gain, not passive as previously reported -- and that
+  direction does not hold for the other two families either: the hurdle/continuous family shows
+  active improving substantially while passive improved not at all (its own reference model is
+  still Rung 0), and the binary family is genuinely ambiguous -- which leg "wins" depends on
+  whether the question is asked in absolute PR-AUC points or relative percentage terms.
+  <strong>No single family's direction generalizes to the other two</strong> -- each of the three
+  families now shows a different winner, and passive does not lead any of the three families as
+  currently measured.</p></div>
 
 <h2>5. What's genuinely not comparable, stated plainly</h2>
 <p><strong>This document does not rank all six legs on one axis, because there is no single metric

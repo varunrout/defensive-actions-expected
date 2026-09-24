@@ -722,9 +722,29 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <table>
 <tr><th></th><th>RMSE</th><th>MAE</th><th>R&sup2;</th><th>Spearman</th></tr>
 <tr><td><code>x1_two_stage_huber</code> (Prompt 70, on record)</td><td>0.05309</td><td>0.02059</td><td>0.15194</td><td>0.5180</td></tr>
-<tr><td><strong><code>x1c_random_forest</code> (this re-run)</strong></td><td><strong>0.04277</strong></td><td><strong>0.01779</strong></td><td><strong>0.44947</strong></td><td><strong>0.5947</strong></td></tr>
+<tr><td><strong><code>x1c_random_forest</code> (this re-run)</strong></td><td><strong>0.04277</strong> &rarr; <strong>0.04630</strong> (Prompt 86)</td><td><strong>0.01779</strong></td><td><strong>0.44947</strong> &rarr; <strong>0.37407</strong> (Prompt 86)</td><td><strong>0.5947</strong></td></tr>
 <tr><td>Change</td><td>-0.01031</td><td>-0.00281</td><td><strong>+0.29753</strong></td><td>+0.07666</td></tr>
 </table>
+<blockquote>
+<p><strong>Update (Prompt 86, post coordinate-frame fix):</strong> Prompt 85 fixed a coordinate-frame
+bug in <code>src/dax/data/statsbomb_loader.py</code> and recomputed <code>target_xt_delta_v2</code>
+from corrected coordinates &mdash; this target is directly frame-dependent (unlike the other 4 legs'
+targets), so the fix changes the target's own values, not just feature quality. A fresh full
+promotion audit (<code>x1c_random_forest</code> vs <code>x1_two_stage_huber</code>, both refit at
+their already-locked hyperparameters on the corrected target) puts held-out RMSE/R&sup2; at
+<strong>0.04630 / 0.37407</strong> (source:
+<code>outputs/models/validation/phase5_xt_promotion_audit.json</code>,
+<code>active_xt.held_out_test.x1c_random_forest</code>), down from the pre-fix 0.04277 / 0.44947
+quoted above. <strong>This is a correction, not a regression</strong>: some of the old apparent
+accuracy came from the model and the (also frame-corrupted) <code>ball_x</code>/<code>ball_y</code>/
+<code>phase_label</code>-derived features sharing correlated errors with the old, wrong-frame target
+&mdash; a spurious fit that inflated the old R&sup2; without being real predictive skill.
+<code>x1c_random_forest</code> still beats <code>x1_two_stage_huber</code> decisively on the
+corrected target (RMSE 0.0463 vs 0.0549, R&sup2; 0.374 vs 0.119, paired-t p=9.5e-7) &mdash; the
+promotion stands, at the same rung, only the headline numbers changed. See
+<a href="../COORDINATE_FRAME_FIX_AND_REPIPELINE.html">COORDINATE_FRAME_FIX_AND_REPIPELINE.html</a>
+(Phase 5) for the full analysis.</p>
+</blockquote>
 <div class="verdict-box"><p>The re-run reproduces <code>x1c</code>'s own Rung-2 held-out numbers
   exactly (Prompt 73's CSV row: rmse=0.042771, r2=0.449469, spearman=0.594659) &mdash; confirms
   the regression-only gate's win translates fully into the combined pipeline, with <strong>no

@@ -211,7 +211,17 @@ because it already penalizes the overfit configs on their own terms.
 | Variant | Common log RMSE (CV) | Common log RMSE (held-out) |
 |---|---|---|
 | `c1_lognormal_glm` | 1.0014 | 0.9951 |
-| `c1d_random_forest` | 0.9801 | 0.9553 |
+| `c1d_random_forest` | 0.9801 | 0.9553 &rarr; 0.9560 (Prompt 86 update, see note below) |
+
+> **Update (Prompt 86, post coordinate-frame fix):** `c1d_random_forest`'s headline held-out
+> common_log_rmse rises marginally from 0.9553 to **0.9560**, and held-out corrected R&sup2; (see
+> the calibration table below) rises from 0.0925 to **0.0978** (source:
+> `outputs/models/validation/phase4_held_out_refit.json`, `c1d_random_forest.common_log_rmse` /
+> `.corrected_r2` -- a fresh refit at this model's already-locked hyperparameters). This is a real,
+> favourable improvement (paired-fold significance p=0.014), not noise -- see
+> [`COORDINATE_FRAME_FIX_AND_REPIPELINE.md`](../COORDINATE_FRAME_FIX_AND_REPIPELINE.md) (Phase 4)
+> for the full before/after analysis. The promoted rung (`c1d_random_forest`) is unchanged; only
+> its headline held-out numbers moved.
 
 Paired significance test (`outputs/models/validation/significance_c1_vs_c1d_random_forest.json`):
 mean diff (c1d &minus; c1) = **-0.0211** (c1d better), paired t-test **p=0.0126**, Wilcoxon
@@ -227,7 +237,7 @@ one caveat:**
 | Variant | Naive MAE | Naive R² | Naive Spearman | Corrected MAE | Corrected R² | Corrected prediction bias |
 |---|---|---|---|---|---|---|
 | `c1_lognormal_glm` | 0.0778 | -0.0638 | 0.3078 | 0.0863 | 0.0371 | -0.0089 |
-| `c1d_random_forest` | 0.0745 | -0.0152 | 0.3781 | 0.0786 | 0.0925 | -0.0223 |
+| `c1d_random_forest` | 0.0745 | -0.0152 | 0.3781 | 0.0786 | 0.0925 &rarr; 0.0978 (Prompt 86) | -0.0223 |
 
 `c1d_random_forest` beats `c1` on every accuracy metric here -- lower MAE (both back-transforms),
 higher R² (both), and meaningfully better rank correlation (Spearman 0.378 vs 0.308). **The one
@@ -358,7 +368,7 @@ vs `c1_lognormal_glm`: mean diff -0.0156 (c1e better), paired t-test **p=0.0402*
 
 | Variant | Common log RMSE (CV) | Common log RMSE (held-out) |
 |---|---|---|
-| `c1d_random_forest` | 0.9801 | 0.9553 |
+| `c1d_random_forest` | 0.9801 | 0.9553 &rarr; 0.9560 (Prompt 86 update) |
 | `c1e_gradient_boosting` | 0.9851 | 0.9672 |
 
 vs `c1d_random_forest`: mean diff **+0.0055** (c1e worse), paired t-test **p=0.3098**, Wilcoxon
@@ -373,7 +383,7 @@ ahead of `c1d`:**
 |---|---|---|---|---|---|
 | `c1_lognormal_glm` | 0.0778 | -0.0638 | 0.3078 | 0.0863 | 0.0371 |
 | `c1e_gradient_boosting` | 0.0759 | -0.0453 | 0.3567 | 0.0817 | 0.0803 |
-| `c1d_random_forest` | 0.0745 | -0.0152 | 0.3781 | 0.0786 | 0.0925 |
+| `c1d_random_forest` | 0.0745 | -0.0152 | 0.3781 | 0.0786 | 0.0925 &rarr; 0.0978 (Prompt 86) |
 
 Every single metric orders the same way: `c1` worst, `c1e` in the middle, `c1d` best. Ranking
 (Spearman) and calibration (R²/MAE) agree with each other here, and they agree with the significance

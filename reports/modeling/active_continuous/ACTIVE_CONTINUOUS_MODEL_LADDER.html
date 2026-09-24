@@ -318,8 +318,20 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <table>
 <tr><th>Variant</th><th>Common log RMSE (CV)</th><th>Common log RMSE (held-out)</th></tr>
 <tr><td><code>c1_lognormal_glm</code></td><td>1.0014</td><td>0.9951</td></tr>
-<tr><td><code>c1d_random_forest</code></td><td>0.9801</td><td>0.9553</td></tr>
+<tr><td><code>c1d_random_forest</code></td><td>0.9801</td><td>0.9553 &rarr; 0.9560 (Prompt 86 update, see note below)</td></tr>
 </table>
+<blockquote>
+<p><strong>Update (Prompt 86, post coordinate-frame fix):</strong> <code>c1d_random_forest</code>'s
+headline held-out common_log_rmse rises marginally from 0.9553 to <strong>0.9560</strong>, and held-out
+corrected R&sup2; (see the calibration table below) rises from 0.0925 to <strong>0.0978</strong>
+(source: <code>outputs/models/validation/phase4_held_out_refit.json</code>,
+<code>c1d_random_forest.common_log_rmse</code> / <code>.corrected_r2</code> &mdash; a fresh refit at
+this model's already-locked hyperparameters). This is a real, favourable improvement (paired-fold
+significance p=0.014), not noise &mdash; see
+<a href="../COORDINATE_FRAME_FIX_AND_REPIPELINE.html">COORDINATE_FRAME_FIX_AND_REPIPELINE.html</a>
+(Phase 4) for the full before/after analysis. The promoted rung (<code>c1d_random_forest</code>) is
+unchanged; only its headline held-out numbers moved.</p>
+</blockquote>
 <p>Paired significance test
   (<code>outputs/models/validation/significance_c1_vs_c1d_random_forest.json</code>): mean diff (c1d
   &minus; c1) = <strong>-0.0211</strong> (c1d better), paired t-test <strong>p=0.0126</strong>,
@@ -334,7 +346,7 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <table>
 <tr><th>Variant</th><th>Naive MAE</th><th>Naive R&sup2;</th><th>Naive Spearman</th><th>Corrected MAE</th><th>Corrected R&sup2;</th><th>Corrected prediction bias</th></tr>
 <tr><td><code>c1_lognormal_glm</code></td><td>0.0778</td><td>-0.0638</td><td>0.3078</td><td>0.0863</td><td>0.0371</td><td>-0.0089</td></tr>
-<tr><td><code>c1d_random_forest</code></td><td>0.0745</td><td>-0.0152</td><td>0.3781</td><td>0.0786</td><td>0.0925</td><td>-0.0223</td></tr>
+<tr><td><code>c1d_random_forest</code></td><td>0.0745</td><td>-0.0152</td><td>0.3781</td><td>0.0786</td><td>0.0925 &rarr; 0.0978 (Prompt 86)</td><td>-0.0223</td></tr>
 </table>
 <p><code>c1d_random_forest</code> beats <code>c1</code> on every accuracy metric here &mdash; lower
   MAE (both back-transforms), higher R&sup2; (both), and meaningfully better rank correlation
@@ -476,7 +488,7 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
   this rung:</strong></p>
 <table>
 <tr><th>Variant</th><th>Common log RMSE (CV)</th><th>Common log RMSE (held-out)</th></tr>
-<tr><td><code>c1d_random_forest</code></td><td>0.9801</td><td>0.9553</td></tr>
+<tr><td><code>c1d_random_forest</code></td><td>0.9801</td><td>0.9553 &rarr; 0.9560 (Prompt 86 update)</td></tr>
 <tr><td><code>c1e_gradient_boosting</code></td><td>0.9851</td><td>0.9672</td></tr>
 </table>
 <p>vs <code>c1d_random_forest</code>: mean diff <strong>+0.0055</strong> (c1e worse), paired t-test
@@ -490,7 +502,7 @@ footer p { color: var(--text-muted); font-size: 12px; max-width: 780px; margin: 
 <tr><th>Variant</th><th>Naive MAE</th><th>Naive R&sup2;</th><th>Naive Spearman</th><th>Corrected MAE</th><th>Corrected R&sup2;</th></tr>
 <tr><td><code>c1_lognormal_glm</code></td><td>0.0778</td><td>-0.0638</td><td>0.3078</td><td>0.0863</td><td>0.0371</td></tr>
 <tr><td><code>c1e_gradient_boosting</code></td><td>0.0759</td><td>-0.0453</td><td>0.3567</td><td>0.0817</td><td>0.0803</td></tr>
-<tr><td><code>c1d_random_forest</code></td><td>0.0745</td><td>-0.0152</td><td>0.3781</td><td>0.0786</td><td>0.0925</td></tr>
+<tr><td><code>c1d_random_forest</code></td><td>0.0745</td><td>-0.0152</td><td>0.3781</td><td>0.0786</td><td>0.0925 &rarr; 0.0978 (Prompt 86)</td></tr>
 </table>
 <p>Every single metric orders the same way: <code>c1</code> worst, <code>c1e</code> in the middle,
   <code>c1d</code> best. Ranking (Spearman) and calibration (R&sup2;/MAE) agree with each other here,

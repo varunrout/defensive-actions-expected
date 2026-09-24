@@ -684,8 +684,25 @@ directly, not rescored):
 | | RMSE | MAE | R² | Spearman |
 |---|---|---|---|---|
 | `y1_two_stage_huber` (Prompt 76, on record) | 0.03388 | 0.01021 | 0.06119 | 0.2936 |
-| `y1c_random_forest` (this re-run) | **0.02489** | **0.00928** | **0.49325** | **0.3154** |
+| `y1c_random_forest` (this re-run) | **0.02489** &rarr; **0.02418** (Prompt 86, see note below) | **0.00928** | **0.49325** &rarr; **0.33130** (Prompt 86) | **0.3154** |
 | Change | -0.00899 | -0.00094 | **+0.43206** | +0.02172 |
+
+> **Update (Prompt 86, post coordinate-frame fix):** Prompt 85 fixed a coordinate-frame bug in
+> `src/dax/data/statsbomb_loader.py` and recomputed `target_xt_delta_passive` from corrected
+> coordinates -- this target is directly frame-dependent (unlike the other 4 legs' targets), so
+> the fix changes the target's own values, not just feature quality. A fresh full promotion audit
+> (`y1c_random_forest` vs `y1_two_stage_huber`, both refit at their already-locked hyperparameters
+> on the corrected target) puts held-out RMSE/R&sup2; at **0.02418 / 0.33130** (source:
+> `outputs/models/validation/phase5_xt_promotion_audit.json`,
+> `passive_xt.held_out_test.y1c_random_forest`), down from the pre-fix 0.02489 / 0.49325 quoted
+> above. **This is a correction, not a regression**: some of the old apparent accuracy came from
+> the regression head's own two most important features (`ball_x`/`ball_y`, 65.4% combined
+> importance) sharing correlated errors with the old, wrong-frame target -- a spurious fit that
+> inflated the old R&sup2; without being real predictive skill. `y1c_random_forest` still beats
+> `y1_two_stage_huber` decisively on the corrected target (RMSE 0.0242 vs 0.0277, R&sup2; 0.331 vs
+> 0.125, paired-t p=1.3e-5) -- the promotion stands, at the same rung, only the headline numbers
+> changed. See [`COORDINATE_FRAME_FIX_AND_REPIPELINE.md`](../COORDINATE_FRAME_FIX_AND_REPIPELINE.md)
+> (Phase 5) for the full analysis.
 
 The re-run reproduces `y1c`'s own Rung-2 held-out numbers exactly (Prompt 78's CSV row:
 rmse=0.024892, r2=0.493252, spearman=0.315355) -- confirms the regression-only gate's win
