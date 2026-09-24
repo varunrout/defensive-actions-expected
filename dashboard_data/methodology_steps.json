@@ -123,10 +123,10 @@
       "id": "coordinate_frame_issue",
       "leg": "all",
       "step": "data",
-      "title": "Found while building this dashboard: a coordinate-frame bug upstream",
-      "summary": "Raw StatsBomb locations are in each acting team's own frame, but the data loader's direction-normalisation flips one possession team per half, so about half the rows in the locked feature files sit in the opposite frame from the rest. The rule-based phase-of-play labels inherit it (e.g. clearances labelled 'high press'). Every model was trained and tested on the same features, so the reported held-out metrics are real measurements -- but the spatial features are noisier than intended. Not fixed here (locked files); the dashboard's pitch coordinates are rebuilt from raw data so they are correct.",
-      "numbers": {"active_rows_in_inconsistent_frame_share": 0.4644, "clearances_labelled_high_press_when_inconsistent": 0.724, "clearances_labelled_box_defence_when_consistent": 0.79},
-      "source": "dashboard_data/selection_and_frame_audit.json (frame_audit), produced by scripts/dashboard/audit_frames_and_profile_matches.py; explained in dashboard_data/README.md section 5"
+      "title": "Found while building this dashboard, fixed in prompt 85: a coordinate-frame bug upstream",
+      "summary": "Raw StatsBomb locations are in each acting team's own frame, but the data loader used to infer direction from noisy per-(period, possession-team) ball-progression medians, which flipped one possession team per half incorrectly and left about half the rows in the locked feature files in the opposite frame from the rest. The rule-based phase-of-play labels inherited it (e.g. clearances labelled 'high press'). Prompt 85 fixed the loader (a row-local rule: sign=+1 if the row's own team is the possession team, else -1) and re-ran the full feature/target/model pipeline. Post-fix, only 4.8% of active rows are frame-inconsistent (was 46.4%), and 4 of the 6 promoted reference models' headline held-out numbers moved (2 xT legs' targets were themselves recomputed; 2 non-xT legs' promoted-model numbers improved on corrected features). All 6 legs' promotions stayed at the same rung. This export uses the corrected pipeline throughout.",
+      "numbers": {"active_rows_in_inconsistent_frame_share_pre_fix": 0.4644, "active_rows_in_inconsistent_frame_share_post_fix": 0.0483, "clearances_labelled_high_press_when_inconsistent": 0.724, "clearances_labelled_box_defence_when_consistent": 0.75},
+      "source": "dashboard_data/selection_and_frame_audit.json (frame_audit), produced by scripts/dashboard/audit_frames_and_profile_matches.py against the corrected pipeline; reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md (full fix + re-validation); explained in dashboard_data/README.md section 5"
     }
   ]
 }

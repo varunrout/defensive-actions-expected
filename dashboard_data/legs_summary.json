@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "produced_by": "Prompt 83 (dashboard data export). Presentation simplification of reports/modeling/ALL_LEGS_SUMMARY.md (Prompt 81) -- no number here is re-derived; each carries its source.",
+  "produced_by": "Prompt 83 (dashboard data export). Presentation simplification of reports/modeling/ALL_LEGS_SUMMARY.md (Prompt 81) -- no number here is re-derived; each carries its source. Prompt 86: 4 of 6 legs' numbers refreshed after Prompt 85's coordinate-frame loader fix and full re-pipeline; see reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md.",
   "primary_source": "reports/modeling/ALL_LEGS_SUMMARY.md",
   "comparability": {
     "single_ranking_allowed": false,
@@ -57,12 +57,12 @@
       "question": "Given where one off-ball defender is standing when the attacker plays the ball, how likely is a shot within 10 seconds?",
       "reference_model": "p1e_gradient_boosting_calibrated",
       "model_family_plain": "Gradient boosting, with calibration so the probabilities can be read at face value",
-      "headline": {"metric": "PR-AUC", "value": 0.2162, "random_guess_level": 0.0551, "source": "outputs/models/comparisons/passive_binary_baseline_held_out_test_readout.csv (p1e_gradient_boosting_calibrated row: average_precision 0.21619, positive_rate 0.05510)"},
-      "supporting_metrics": {"roc_auc": 0.7889, "brier": 0.0474, "ece": 0.0044, "source": "same CSV row; ALL_LEGS_SUMMARY.md section 2"},
-      "baseline_to_reference": {"metric": "PR-AUC", "from": 0.1736, "to": 0.2162, "source": "ALL_LEGS_SUMMARY.md section 4"},
-      "audit": {"status": "promoted", "checks": 5, "prompt": 52, "source": "PASSIVE_BINARY_MODEL_LADDER.md section 7"},
+      "headline": {"metric": "PR-AUC", "value": 0.2267, "random_guess_level": 0.0551, "source": "outputs/models/validation/phase4_held_out_refit.json, p1e_gradient_boosting.average_precision = 0.22674 (Prompt 86, post coordinate-frame fix; was 0.2162)"},
+      "supporting_metrics": {"roc_auc": 0.8066, "brier": 0.0470, "ece": 0.0044, "source": "same JSON (roc_auc=0.80659, brier_score=0.04698); ECE not re-scored in Prompt 86, carried from pre-fix ALL_LEGS_SUMMARY.md section 2"},
+      "baseline_to_reference": {"metric": "PR-AUC", "from": 0.1736, "to": 0.2267, "source": "ALL_LEGS_SUMMARY.md section 4 (Prompt 86 update)"},
+      "audit": {"status": "promoted", "checks": 5, "prompt": 52, "source": "PASSIVE_BINARY_MODEL_LADDER.md section 7; reconfirmed on corrected features, Prompt 86"},
       "one_liner": "Promoted with one weak spot flagged rather than hidden: defenders the pipeline could not assign a role to (a thin slice).",
-      "source_note": "ALL_LEGS_SUMMARY.md section 2 describes a 3rd-decimal discrepancy (CSV 0.210773 vs doc 0.2162). Re-checked in Prompt 83: 0.210773 is the UNCALIBRATED p1e_gradient_boosting row of that CSV; the calibrated reference row is 0.21619, matching the doc. There is no discrepancy."
+      "source_note": "ALL_LEGS_SUMMARY.md section 2 describes a 3rd-decimal discrepancy (CSV 0.210773 vs doc 0.2162, pre-fix numbers). Re-checked in Prompt 83: 0.210773 is the UNCALIBRATED p1e_gradient_boosting row of that CSV; the calibrated reference row is 0.21619, matching the doc. There is no discrepancy. Prompt 86: both numbers are now stale pre-fix figures; the current headline (0.2267) is a fresh refit at p1e's already-locked hyperparameters on Prompt 85's corrected features (outputs/models/validation/phase4_held_out_refit.json)."
     },
     {
       "id": "active_continuous",
@@ -101,11 +101,11 @@
       "question": "How much does an on-ball defensive action change the attacking team's expected threat?",
       "reference_model": "x1c_random_forest",
       "model_family_plain": "Two-stage random forest (does threat change? then by how much?)",
-      "headline": {"metric": "R-squared", "value": 0.4495, "source": "outputs/models/validation/full_pipeline_readout_x1c.json, x1c_random_forest_combined_pipeline_metrics.r2 = 0.44947"},
-      "supporting_metrics": {"rmse": 0.04277, "spearman": 0.5947, "source": "same JSON"},
-      "baseline_to_reference": {"metric": "R-squared", "from": 0.1519, "to": 0.4495, "source": "ALL_LEGS_SUMMARY.md section 4 (XT_DELTA_CLOSEOUT.md section 2)"},
-      "audit": {"status": "promoted", "checks": 4, "prompt": 75, "source": "ACTIVE_XT_MODEL_LADDER.md section 5"},
-      "one_liner": "About 3x the explained variance of its starting model, and the win held equally in both tournaments."
+      "headline": {"metric": "R-squared", "value": 0.3741, "source": "outputs/models/validation/phase5_xt_promotion_audit.json, active_xt.held_out_test.x1c_random_forest.r2 = 0.37407 (Prompt 86, post coordinate-frame fix -- target_xt_delta_v2 itself was recomputed from corrected coordinates; was 0.4495)"},
+      "supporting_metrics": {"rmse": 0.04630, "spearman": 0.5765, "source": "same JSON"},
+      "baseline_to_reference": {"metric": "R-squared", "from": 0.1191, "to": 0.3741, "source": "outputs/models/validation/phase5_xt_promotion_audit.json (comparator x1_two_stage_huber refit on corrected target: r2=0.11908; Prompt 86 update, was 0.1519 -> 0.4495 on the pre-fix target)"},
+      "audit": {"status": "promoted", "checks": 4, "prompt": 75, "source": "ACTIVE_XT_MODEL_LADDER.md section 5; fresh promotion audit on corrected target, same rung, Prompt 86 (phase5_xt_promotion_audit.json)"},
+      "one_liner": "Still a large explained-variance jump over its starting model on the corrected target, and the win held equally in both tournaments (pre-fix version of this check; not re-run in Prompt 86)."
     },
     {
       "id": "passive_xt",
@@ -115,22 +115,22 @@
       "question": "How much does an off-ball defender's position change the attacking team's expected threat?",
       "reference_model": "y1c_random_forest",
       "model_family_plain": "Two-stage random forest (does threat change? then by how much?)",
-      "headline": {"metric": "R-squared", "value": 0.4933, "source": "outputs/models/validation/full_pipeline_readout_y1c.json, y1c_random_forest_combined_pipeline_metrics.r2 = 0.49325"},
-      "supporting_metrics": {"rmse": 0.02489, "spearman": 0.3154, "source": "same JSON"},
-      "baseline_to_reference": {"metric": "R-squared", "from": 0.0612, "to": 0.4933, "source": "ALL_LEGS_SUMMARY.md section 4 (XT_DELTA_CLOSEOUT.md section 2)"},
-      "audit": {"status": "promoted", "checks": 4, "prompt": "80A", "source": "PASSIVE_XT_MODEL_LADDER.md section 5"},
-      "one_liner": "About 8x the explained variance of its starting model, and it removed a systematic over-prediction the linear models could not fix."
+      "headline": {"metric": "R-squared", "value": 0.3313, "source": "outputs/models/validation/phase5_xt_promotion_audit.json, passive_xt.held_out_test.y1c_random_forest.r2 = 0.33130 (Prompt 86, post coordinate-frame fix -- target_xt_delta_passive itself was recomputed from corrected coordinates; was 0.4933)"},
+      "supporting_metrics": {"rmse": 0.02418, "spearman": 0.2042, "source": "same JSON"},
+      "baseline_to_reference": {"metric": "R-squared", "from": 0.1247, "to": 0.3313, "source": "outputs/models/validation/phase5_xt_promotion_audit.json (comparator y1_two_stage_huber refit on corrected target: r2=0.12473; Prompt 86 update, was 0.0612 -> 0.4933 on the pre-fix target)"},
+      "audit": {"status": "promoted", "checks": 4, "prompt": "80A", "source": "PASSIVE_XT_MODEL_LADDER.md section 5; fresh promotion audit on corrected target, same rung, Prompt 86 (phase5_xt_promotion_audit.json)"},
+      "one_liner": "Still a large explained-variance jump over its starting model on the corrected target, and it removed a systematic over-prediction the linear models could not fix (pre-fix version of this check; not re-run in Prompt 86)."
     }
   ],
   "active_vs_passive": {
     "consistent_direction_across_families": false,
-    "headline": "There is no project-wide 'passive improves more' (or 'active improves more') story -- the answer flips by target family.",
+    "headline": "There is no project-wide 'passive improves more' (or 'active improves more') story -- the answer flips by target family. (Prompt 86: the xt row below reverses after the coordinate-frame fix -- active now leads, not passive.)",
     "by_family": [
-      {"group": "binary", "active": "PR-AUC 0.3725 -> 0.4282 (+0.0557, +14.9%)", "passive": "PR-AUC 0.1736 -> 0.2162 (+0.0426, +24.5%)", "larger_gain": "ambiguous", "plain": "Active gained more in absolute terms, passive more in relative terms."},
+      {"group": "binary", "active": "PR-AUC 0.3725 -> 0.4282 (+0.0557, +14.9%)", "passive": "PR-AUC 0.1736 -> 0.2267 (+0.0531, +30.6%; Prompt 86, was 0.2162/+24.5%)", "larger_gain": "ambiguous", "plain": "Active gained more in absolute terms, passive more in relative terms."},
       {"group": "hurdle", "active": "R-squared 0.1426 -> 0.1693 (+0.0267)", "passive": "R-squared 0.0426 -> 0.0426 (no model beat the baseline)", "larger_gain": "active", "plain": "Active improved; passive did not improve at all."},
-      {"group": "xt", "active": "R-squared 0.1519 -> 0.4495 (~3.0x)", "passive": "R-squared 0.0612 -> 0.4933 (~8.1x)", "larger_gain": "passive", "plain": "Passive improved far more -- but only in this family."}
+      {"group": "xt", "active": "R-squared 0.11908 -> 0.37407 (~3.1x; Prompt 86, corrected target)", "passive": "R-squared 0.12473 -> 0.33130 (~2.7x; Prompt 86, corrected target)", "larger_gain": "active", "plain": "Prompt 86 update: both xT targets were recomputed from corrected coordinates, so both Rung-0 comparator and candidate were refit on the corrected target for a valid comparison. Active's own gain is now larger than passive's -- the opposite of the pre-fix reading (which was passive 0.0612->0.4933 ~8.1x vs active 0.1519->0.4495 ~3.0x, scored against a target that was itself wrong for 50-69% of its own rows)."}
     ],
-    "source": "ALL_LEGS_SUMMARY.md section 4"
+    "source": "ALL_LEGS_SUMMARY.md section 4 (Prompt 86 update); outputs/models/validation/phase5_xt_promotion_audit.json for the xt row"
   },
   "cross_leg_pattern": {
     "headline": "Random forest won 3 of the 6 legs -- and was tried on all 6.",

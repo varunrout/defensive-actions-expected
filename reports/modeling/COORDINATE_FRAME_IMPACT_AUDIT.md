@@ -369,5 +369,6 @@ Headline outcome, matching this audit's own section 5 severity split almost exac
   its own two-stage comparator (p=1.3&times;10&supminus;&sup5;).
 
 No leg promoted a different rung than it had before the fix. `dashboard_data/` (prompt 83, all 6
-legs' pre-fix predictions) is marked stale (`dashboard_data/STALE.md`) pending a separate
-regeneration prompt.
+legs' pre-fix predictions) was marked stale (`dashboard_data/STALE.md`) pending regeneration; prompt
+86 regenerated it against this corrected pipeline and removed the marker (see
+`dashboard_data/README.md`'s own Prompt 86 update note).

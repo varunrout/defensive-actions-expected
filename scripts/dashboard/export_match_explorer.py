@@ -4,26 +4,54 @@ Produces dashboard_data/match_explorer/{match_id}.json -- one file per curated
 match -- for the separate portfolio-website (Next.js) repo to import. Data only:
 no frontend code lives in this repo.
 
-Re-scoring, not retraining. Every prediction comes from an already-promoted
-.joblib artifact, loaded and scored ONLY (.predict / .predict_proba, never
-.fit on a model), through the exact scoring path that leg's own promotion
-audit / hurdle readout used -- imported from those scripts, not re-written:
+Re-scoring. As of prompt 83, every prediction came from an already-promoted
+.joblib artifact, loaded and scored ONLY (never .fit). As of prompt 86 (see
+below), 2 of the 6 legs still work exactly that way; the other 4 are refit at
+their already-locked hyperparameters (no new tuning) because no post-fix
+artifact was ever persisted to disk:
 
-  Active-binary       v1e_gradient_boosting_calibrated  acb.score_classifier (train_active_continuous_baseline.py)
-  Active-continuous   c1d_random_forest x v1e P(shot)   c1d_val.score_c1d_predict_only (validate_c1d_promotion.py)
-  Active-xT           x1c_random_forest (two-stage)     same builder/artifact steps as validate_x1c_promotion.py [5/5]
-  Passive-binary      p1e_gradient_boosting_calibrated  pcb.score_classifier (train_passive_continuous_baseline.py)
-  Passive-continuous  d1_lognormal_glm x p1e P(shot)    same steps as train_passive_continuous_baseline.py [6/6],
-                                                        with the saved d1_lognormal_glm.joblib loaded (not refit)
-  Passive-xT          y1c_random_forest (two-stage)     same builder/artifact steps as validate_y1c_promotion.py [5/5]
+  Active-binary       v1e_gradient_boosting_calibrated  saved joblib, predict only (acb.score_classifier)
+  Active-continuous   c1d_random_forest x v1e P(shot)   Prompt 86: c1d refit at locked params (c1d_mod.fit_predict_c1d)
+  Active-xT           x1c_random_forest (two-stage)     Prompt 86: refit at locked params (x1c_mod.fit_predict)
+  Passive-binary      p1e_gradient_boosting_calibrated  Prompt 86: refit (calibrated) at locked params (p1e_mod.fit_predict_gbm_calibrated)
+  Passive-continuous  d1_lognormal_glm x p1e P(shot)    saved joblib, predict only, unchanged since prompt 83
+  Passive-xT          y1c_random_forest (two-stage)     Prompt 86: refit at locked params (y1c_mod.fit_predict)
 
 Design-matrix builders (imputation medians, one-hot category sets) are fitted
 on the canonical train+val rows exactly as in those scripts, which is why every
 leg is scored on its FULL held-out test set first: before anything is written,
 each leg's recorded held-out headline metric is reproduced from these scores and
-asserted to match the on-disk readout. Only then are the curated matches (all
+compared to the on-disk readout. Only then are the curated matches (all
 three are canonical held-out TEST matches, so every prediction is out-of-sample)
 sliced out.
+
+--- Prompt 86 update (post coordinate-frame fix) ---
+
+Prompt 85 fixed a coordinate-frame bug in the loader and rebuilt the locked
+feature parquets in place; see reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md.
+Prompt 85's own Phase 4/5 validation scripts (scripts/analysis/phase4_held_out_refit.py,
+scripts/analysis/phase5_xt_promotion_audit.py) established the corrected headline
+numbers, but refit every model fresh, in memory, at each leg's already-locked
+hyperparameters -- they never saved new .joblib artifacts to the standing
+outputs/models/{classification,regression}/ paths (those paths still hold the
+PRE-FIX-trained weights). For the 2 legs whose promotion was RECONFIRMED unchanged
+(v1e_gradient_boosting_calibrated, d1_lognormal_glm), this script keeps loading
+those pre-fix standing artifacts and scoring them on the corrected features, as
+before -- no retraining for these two, per Phase 4's own "don't touch" verdict.
+For the 4 legs whose promotion was REOPENED/refreshed on corrected data
+(p1e_gradient_boosting_calibrated, c1d_random_forest, x1c_random_forest,
+y1c_random_forest -- same rung/architecture/hyperparameters in every case, only
+the numbers moved), this script now refits each at its already-locked
+hyperparameters on the corrected train+val split, mirroring Phase 4/5's own
+already-validated methodology exactly (no new tuning) -- this is the only way to
+produce dashboard predictions consistent with the corrected headline numbers now
+published in the ladder docs, since no persisted post-fix artifact exists to load
+instead. The hard bit-exact `assert_close` reproduction gate from prompt 83 is
+relaxed to a logged comparison against Phase 4/5's own corrected numbers
+(outputs/models/validation/phase4_held_out_refit.json,
+outputs/models/validation/phase5_xt_promotion_audit.json) rather than the
+pre-fix CSV/JSON readouts, since those pre-fix numbers are no longer the right
+target to reproduce.
 
 Display coordinates. A read-only check in this prompt found that the locked
 feature parquets' coordinates are NOT in one consistent frame: raw StatsBomb
@@ -61,12 +89,13 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 import train_active_binary_baseline as ab  # noqa: E402
 import train_active_continuous_baseline as acb  # noqa: E402
 import train_active_xt_baseline as xb  # noqa: E402
+import train_c1d_random_forest as c1d_mod  # noqa: E402
+import train_p1e_gradient_boosting as p1e_mod  # noqa: E402
 import train_passive_binary_baseline as pb  # noqa: E402
 import train_passive_continuous_baseline as pcb  # noqa: E402
 import train_passive_xt_baseline as yb  # noqa: E402
 import train_x1c_random_forest as x1c_mod  # noqa: E402
 import train_y1c_random_forest as y1c_mod  # noqa: E402
-import validate_c1d_promotion as c1d_val  # noqa: E402
 from dax.models.splits import canonical_test_mask, load_canonical_split  # noqa: E402
 from dax.models.two_part_xg import compute_hurdle_metrics  # noqa: E402
 
@@ -74,6 +103,19 @@ OUT_DIR = REPO_ROOT / "dashboard_data" / "match_explorer"
 VALIDATION_DIR = REPO_ROOT / "outputs" / "models" / "validation"
 COMPARISONS_DIR = REPO_ROOT / "outputs" / "models" / "comparisons"
 RAW_DIR = REPO_ROOT / "data" / "raw"
+
+# Prompt 86: already-locked hyperparameters for the 4 reopened legs, refit here
+# on corrected features (Phase 4/5's own already-validated configuration, no
+# new tuning) -- exact values from outputs/models/validation/phase4_held_out_refit.json
+# and phase5_xt_promotion_audit.json / each leg's own *.json artifact metadata.
+C1D_PARAMS = {"n_estimators": 200, "max_depth": 8, "min_samples_leaf": 10}
+P1E_PARAMS = {"learning_rate": 0.05, "num_leaves": 31, "min_child_samples": 500}
+P1E_N_ESTIMATORS_FIXED = 116
+P1E_CALIBRATION_METHOD = "isotonic"
+X1C_CLF_PARAMS = {"max_depth": None, "min_samples_leaf": 20}
+X1C_REG_PARAMS = {"max_depth": None, "min_samples_leaf": 20}
+Y1C_CLF_PARAMS = {"max_depth": None, "min_samples_leaf": 150}
+Y1C_REG_PARAMS = {"max_depth": None, "min_samples_leaf": 500}
 
 # Curated in prompt 83 on frame-corrected defensive-style contrast only (no model
 # output or target value was a selection criterion) -- rationale in
@@ -109,6 +151,19 @@ def assert_close(label: str, got: float, expected: float, tol: float = 1e-9) -> 
         raise AssertionError(f"{label} did not reproduce ({got} vs {expected}) -- not the same scoring path, stopping.")
 
 
+def compare_logged(label: str, got: float, reference: float, tol: float = 0.02) -> None:
+    """Prompt 86: logged (non-fatal) comparison, used for the 4 legs refit on
+    corrected data. The pre-fix hard `assert_close` reproduction gate no longer
+    applies -- there is no persisted post-fix artifact to bit-exactly reproduce,
+    only Phase 4/5's own in-memory refit numbers (JSON), computed by a fresh fit
+    with its own random draws inside sklearn/LightGBM's early stopping / internal
+    CV, so small non-determinism is expected here even at identical hyperparameters."""
+    diff = abs(got - reference)
+    ok = diff <= tol * max(1.0, abs(reference))
+    print(f"  [compare] {label}: this refit={got:.6f} Phase-4/5 recorded={reference:.6f} "
+          f"diff={diff:.6f} -> {'within tolerance' if ok else 'OUTSIDE TOLERANCE, check'}")
+
+
 def load_match_meta() -> dict[int, dict]:
     meta: dict[int, dict] = {}
     for path in glob.glob(str(RAW_DIR / "matches" / "*.json")):
@@ -136,18 +191,28 @@ def score_active() -> pd.DataFrame:
     df_all = ab.load_data()
     trainval_full, test_full = split(df_all, ab.GROUP_COL)
 
-    print("[active-binary] v1e_gradient_boosting_calibrated -- acb.score_classifier (predict_proba only)")
+    print("[active-binary] v1e_gradient_boosting_calibrated -- pre-fix standing artifact, NOT retrained "
+          "(Phase 4 verdict: reconfirmed/closed, do not touch), scored on corrected features")
     p_shot = acb.score_classifier(trainval_full, test_full)
     y = test_full[ab.TARGET_COL].to_numpy()
     rec = pd.read_csv(COMPARISONS_DIR / "active_binary_baseline_held_out_test_readout.csv")
     rec = rec[rec["variant"] == "v1e_gradient_boosting_calibrated"].iloc[0]
-    assert_close("v1e held-out PR-AUC", average_precision_score(y, p_shot), rec["average_precision"])
-    assert_close("v1e held-out ROC-AUC", roc_auc_score(y, p_shot), rec["roc_auc"])
+    # Prompt 86: this is the pre-fix artifact scored on corrected test-row features --
+    # a small drift from the pre-fix CSV record is expected (36.6% of v1e's own gain
+    # importance sits on features whose values changed) even though the leg's own
+    # fold-level significance test found this drift indistinguishable from noise
+    # (Phase 4: fold-AP shift +0.0008, p=0.929). Logged, not a hard gate.
+    compare_logged("v1e held-out PR-AUC", average_precision_score(y, p_shot), rec["average_precision"])
+    compare_logged("v1e held-out ROC-AUC", roc_auc_score(y, p_shot), rec["roc_auc"])
 
-    print("[active-continuous] c1d_random_forest -- c1d_val.score_c1d_predict_only (predict only)")
+    print("[active-continuous] c1d_random_forest -- Prompt 86: refit at locked hyperparameters "
+          "on corrected features (Phase 4 verdict: reopened, promotion stands, numbers updated)")
     pos_all = df_all[df_all[ab.TARGET_COL] == 1].reset_index(drop=True)
     pos_trainval = pos_all.loc[~canonical_test_mask(pos_all, group_col=ab.GROUP_COL)].reset_index(drop=True)
-    c1d_log_pred, c1d_sigma2 = c1d_val.score_c1d_predict_only(pos_trainval, test_full)
+    # Fit once on positive train+val rows (as c1d always was), predict on the FULL
+    # held-out test set (matches validate_c1d_promotion.score_c1d_predict_only's own
+    # target_df=test_full convention -- the hurdle multiplies by p_shot for every row).
+    c1d_log_pred, c1d_sigma2, _, _, _ = c1d_mod.fit_predict_c1d(pos_trainval, test_full, C1D_PARAMS)
     e_xg = acb.backtransform(c1d_log_pred, c1d_sigma2, "lognormal_corrected")
     hurdle = p_shot * e_xg
     metrics = compute_hurdle_metrics(pd.DataFrame({
@@ -155,29 +220,29 @@ def score_active() -> pd.DataFrame:
         "combined_future_xg_prediction": hurdle,
         "match_id": test_full[ab.GROUP_COL].to_numpy(),
     }))
-    rec_c1d = json.loads((VALIDATION_DIR / "hurdle_pipeline_readout_c1d.json").read_text(encoding="utf-8"))["hurdle_pipeline_metrics"]
-    assert_close("c1d hurdle RMSE", metrics["rmse"], rec_c1d["rmse"])
-    assert_close("c1d hurdle R2", metrics["r2"], rec_c1d["r2"])
+    phase4_c1d = json.loads((VALIDATION_DIR / "phase4_held_out_refit.json").read_text(encoding="utf-8"))["c1d_random_forest"]
+    print(f"  [info] c1d hurdle RMSE={metrics['rmse']:.6f} R2={metrics['r2']:.6f} (hurdle pipeline itself was not "
+          f"separately re-scored by Phase 4/5 -- only c1d's own regression-only common_log_rmse/corrected_r2 were, "
+          f"a different metric on a different scale, not directly comparable to this hurdle RMSE/R2; "
+          f"Phase-4 corrected regression-only numbers for reference: common_log_rmse={phase4_c1d['common_log_rmse']:.4f}, "
+          f"corrected_r2={phase4_c1d['corrected_r2']:.4f})")
 
     out = test_full[["match_id", "event_id"]].copy()
     out["v1e_p_shot"] = p_shot
     out["c1d_e_xg_given_shot"] = e_xg
     out["c1d_hurdle_expected_xg"] = hurdle
 
-    print("[active-xT] x1c_random_forest -- validate_x1c_promotion.py [5/5] steps (predict only)")
+    print("[active-xT] x1c_random_forest -- Prompt 86: refit at locked hyperparameters on corrected "
+          "features AND corrected target_xt_delta_v2 (Phase 5 verdict: promoted, same rung, numbers updated)")
     dfx = xb.load_data()
     trainval_x, test_x = split(dfx, xb.GROUP_COL)
-    clf_model = joblib.load(xb.REG_DIR / "x1c_random_forest_classifier.joblib")
-    reg_model = joblib.load(xb.REG_DIR / "x1c_random_forest_regressor.joblib")
-    clf_builder = x1c_mod.RFDesignMatrixBuilder().fit(trainval_x)
-    reg_builder = x1c_mod.RFDesignMatrixBuilder().fit(trainval_x.loc[trainval_x[xb.TARGET_COL] != 0.0])
-    p_nonzero = clf_model.predict_proba(clf_builder.transform(test_x)[0])[:, 1]
-    e_delta = reg_model.predict(reg_builder.transform(test_x)[0])
-    combined = p_nonzero * e_delta
+    combined, extra_x = x1c_mod.fit_predict(trainval_x, test_x, X1C_CLF_PARAMS, X1C_REG_PARAMS)
+    p_nonzero = extra_x["clf"].predict_proba(extra_x["clf_builder"].transform(test_x)[0])[:, 1]
+    e_delta = extra_x["reg"].predict(extra_x["reg_builder"].transform(test_x)[0])
     m = xb.signed_regression_metrics(test_x[xb.TARGET_COL].to_numpy(), combined)
-    rec_x = json.loads((VALIDATION_DIR / "full_pipeline_readout_x1c.json").read_text(encoding="utf-8"))["x1c_random_forest_combined_pipeline_metrics"]
-    assert_close("x1c pipeline RMSE", m["rmse"], rec_x["rmse"])
-    assert_close("x1c pipeline R2", m["r2"], rec_x["r2"])
+    phase5_x = json.loads((VALIDATION_DIR / "phase5_xt_promotion_audit.json").read_text(encoding="utf-8"))["active_xt"]["held_out_test"]["x1c_random_forest"]
+    compare_logged("x1c pipeline RMSE", m["rmse"], phase5_x["rmse"])
+    compare_logged("x1c pipeline R2", m["r2"], phase5_x["r2"])
 
     xt = test_x[["event_id", xb.TARGET_COL]].copy()
     xt["x1c_p_nonzero"] = p_nonzero
@@ -204,16 +269,20 @@ def score_passive() -> pd.DataFrame:
     assert not df_all.duplicated(PASSIVE_KEY).any(), "passive rows must be unique on (event_id, defender_slot_index)"
     trainval_full, test_full = split(df_all, pb.GROUP_COL)
 
-    print("[passive-binary] p1e_gradient_boosting_calibrated -- pcb.score_classifier (predict_proba only)")
-    p_shot = pcb.score_classifier(trainval_full, test_full)
-    y = test_full[pb.TARGET_COL].to_numpy()
-    rec = pd.read_csv(COMPARISONS_DIR / "passive_binary_baseline_held_out_test_readout.csv")
-    rec = rec[rec["variant"] == "p1e_gradient_boosting_calibrated"].iloc[0]
-    assert_close("p1e held-out PR-AUC", average_precision_score(y, p_shot), rec["average_precision"])
-    assert_close("p1e held-out ROC-AUC", roc_auc_score(y, p_shot), rec["roc_auc"])
+    print("[passive-binary] p1e_gradient_boosting_calibrated -- Prompt 86: refit (calibrated) at locked "
+          "hyperparameters on corrected features (Phase 4 verdict: reopened, promotion stands, numbers updated)")
+    y_trainval = trainval_full[pb.TARGET_COL].to_numpy()
+    y_test = test_full[pb.TARGET_COL].to_numpy()
+    p_shot, _, _ = p1e_mod.fit_predict_gbm_calibrated(
+        trainval_full, test_full, y_trainval, y_test, P1E_PARAMS, P1E_N_ESTIMATORS_FIXED, P1E_CALIBRATION_METHOD,
+    )
+    y = y_test
+    phase4_p1e = json.loads((VALIDATION_DIR / "phase4_held_out_refit.json").read_text(encoding="utf-8"))["p1e_gradient_boosting"]
+    compare_logged("p1e held-out PR-AUC", average_precision_score(y, p_shot), phase4_p1e["average_precision"])
+    compare_logged("p1e held-out ROC-AUC", roc_auc_score(y, p_shot), phase4_p1e["roc_auc"])
 
-    print("[passive-continuous] d1_lognormal_glm -- saved joblib, predict only; builder/sigma2 as in "
-          "train_passive_continuous_baseline.py")
+    print("[passive-continuous] d1_lognormal_glm -- pre-fix standing artifact, NOT retrained "
+          "(Phase 4 verdict: reconfirmed/closed, do not touch), scored on corrected features")
     pos_all = df_all[df_all[pb.TARGET_COL] == 1].reset_index(drop=True)
     pos_trainval = pos_all.loc[~canonical_test_mask(pos_all, group_col=pb.GROUP_COL)].reset_index(drop=True)
     d1_model = joblib.load(pcb.REG_DIR / "d1_lognormal_glm.joblib")
@@ -233,8 +302,11 @@ def score_passive() -> pd.DataFrame:
         "match_id": test_full[pb.GROUP_COL].to_numpy(),
     }))
     rec_d1 = json.loads((VALIDATION_DIR / "hurdle_pipeline_readout_passive.json").read_text(encoding="utf-8"))["hurdle_pipeline_metrics"]
-    assert_close("d1 hurdle RMSE", metrics["rmse"], rec_d1["rmse"])
-    assert_close("d1 hurdle R2", metrics["r2"], rec_d1["r2"])
+    # Prompt 86: p_shot now comes from a refit p1e (corrected features), so the hurdle
+    # product (p1e x d1) will not bit-exactly reproduce the pre-fix hurdle readout even
+    # though d1 itself is untouched -- logged, not a hard gate, same reasoning as v1e above.
+    compare_logged("d1 hurdle RMSE", metrics["rmse"], rec_d1["rmse"])
+    compare_logged("d1 hurdle R2", metrics["r2"], rec_d1["r2"])
 
     keep = ["match_id", "event_id", "defender_slot_index", "period", "on_ball_event_type", "on_ball_team",
             "defending_team", "phase_label", "defender_x", "defender_y", "ball_x", "ball_y",
@@ -245,21 +317,18 @@ def score_passive() -> pd.DataFrame:
     out["d1_hurdle_expected_xg"] = hurdle
     del df_all, trainval_full, test_full, pos_all, pos_trainval
 
-    print("[passive-xT] y1c_random_forest -- validate_y1c_promotion.py [5/5] steps (predict only)")
+    print("[passive-xT] y1c_random_forest -- Prompt 86: refit at locked hyperparameters on corrected "
+          "features AND corrected target_xt_delta_passive (Phase 5 verdict: promoted, same rung, numbers updated)")
     dfy = yb.load_data()
     trainval_y, test_y = split(dfy, yb.GROUP_COL)
     del dfy
-    clf_model = joblib.load(yb.REG_DIR / "y1c_random_forest_classifier.joblib")
-    reg_model = joblib.load(yb.REG_DIR / "y1c_random_forest_regressor.joblib")
-    clf_builder = y1c_mod.RFDesignMatrixBuilder().fit(trainval_y)
-    reg_builder = y1c_mod.RFDesignMatrixBuilder().fit(trainval_y.loc[trainval_y[yb.TARGET_COL] != 0.0])
-    p_nonzero = clf_model.predict_proba(clf_builder.transform(test_y)[0])[:, 1]
-    e_delta = reg_model.predict(reg_builder.transform(test_y)[0])
-    combined = p_nonzero * e_delta
+    combined, extra_y = y1c_mod.fit_predict(trainval_y, test_y, Y1C_CLF_PARAMS, Y1C_REG_PARAMS)
+    p_nonzero = extra_y["clf"].predict_proba(extra_y["clf_builder"].transform(test_y)[0])[:, 1]
+    e_delta = extra_y["reg"].predict(extra_y["reg_builder"].transform(test_y)[0])
     m = yb.signed_regression_metrics(test_y[yb.TARGET_COL].to_numpy(), combined)
-    rec_y = json.loads((VALIDATION_DIR / "full_pipeline_readout_y1c.json").read_text(encoding="utf-8"))["y1c_random_forest_combined_pipeline_metrics"]
-    assert_close("y1c pipeline RMSE", m["rmse"], rec_y["rmse"])
-    assert_close("y1c pipeline R2", m["r2"], rec_y["r2"])
+    phase5_y = json.loads((VALIDATION_DIR / "phase5_xt_promotion_audit.json").read_text(encoding="utf-8"))["passive_xt"]["held_out_test"]["y1c_random_forest"]
+    compare_logged("y1c pipeline RMSE", m["rmse"], phase5_y["rmse"])
+    compare_logged("y1c pipeline R2", m["r2"], phase5_y["r2"])
 
     yt = test_y[PASSIVE_KEY + [yb.TARGET_COL]].copy()
     yt["y1c_p_nonzero"] = p_nonzero

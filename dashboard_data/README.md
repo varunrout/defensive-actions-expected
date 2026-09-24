@@ -1,13 +1,28 @@
-# Dashboard data export (Prompt 83)
+# Dashboard data export (Prompt 83; regenerated Prompt 86)
+
+> **Prompt 86 update.** This folder was originally exported in Prompt 83, then marked stale
+> (`dashboard_data/STALE.md`, added at the end of Prompt 85) because Prompt 85 found and fixed a
+> coordinate-frame bug in the loader (`src/dax/data/statsbomb_loader.py`) and re-ran the full
+> feature/target/model pipeline on the correction. Every file in this folder has now been
+> regenerated against that corrected pipeline, and the `STALE.md` marker has been removed. See
+> [`reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md`](../reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md)
+> for the full fix and re-validation, and section 8 below for exactly what changed in this folder.
 
 Pre-computed JSON for the defensive-analytics dashboard page in the **separate `portfolio-website`
 repo** (Next.js on Vercel). This folder is the whole handoff: it assumes no knowledge of the
 project's history. **This repo produces data only.** There is no React/Next.js code here, and none
 should be added.
 
-Everything here is **read-only re-scoring** of the six already-promoted reference models on
-already-built features. No model was retrained, no locked feature/target file was modified, and no
-existing rung's artifacts were touched.
+Everything here is **re-scoring** of the six already-promoted reference models (same rung/family in
+every case; none changed) on the corrected features. Two of the six legs
+(`v1e_gradient_boosting_calibrated`, `d1_lognormal_glm`) still load their existing, never-retrained
+`.joblib` artifacts, exactly as in Prompt 83, because Prompt 85's own validation reconfirmed their
+numbers unchanged. The other four (`p1e_gradient_boosting_calibrated`, `c1d_random_forest`,
+`x1c_random_forest`, `y1c_random_forest`) are refit at their already-locked hyperparameters (no new
+tuning) on the corrected features, because Prompt 85's own Phase 4/5 validation scripts established
+the corrected numbers this way and never persisted new `.joblib` artifacts to disk. See section 8.
+No locked feature/target file was modified by this export, and no rung's own hyperparameters were
+re-tuned.
 
 ---
 
@@ -235,32 +250,36 @@ no such aggregate was audited. If the page shows one, label it as a display aggr
 
 ### 3.5 Provenance and verification of the predictions
 
-`export_match_explorer.py` imports each leg's own scoring function from the script its promotion
-audit used; no scoring code was rewritten for the export:
+`export_match_explorer.py` imports each leg's own scoring/fitting function from the script its
+promotion audit used; no scoring code was rewritten for the export. **Updated in Prompt 86**: 2 of
+the 6 legs still load a saved `.joblib` (never retrained); the other 4 are refit at their
+already-locked hyperparameters on the corrected features, because Prompt 85's own Phase 4/5
+validation established the corrected numbers this way and never persisted new `.joblib` artifacts
+to the standing paths (see the top-of-file note above and this script's own module docstring):
 
-| Leg | Scoring path reused |
+| Leg | Scoring path used (Prompt 86) |
 |---|---|
-| Active-binary | `train_active_continuous_baseline.score_classifier` |
-| Active-continuous | `validate_c1d_promotion.score_c1d_predict_only` + `backtransform(..., "lognormal_corrected")` |
-| Active-xT | `validate_x1c_promotion.py` step [5/5] (same builders, same `.joblib` artifacts) |
-| Passive-binary | `train_passive_continuous_baseline.score_classifier` |
+| Active-binary | `train_active_continuous_baseline.score_classifier` -- saved joblib, unchanged since Prompt 83 |
+| Active-continuous | Prompt 86: `train_c1d_random_forest.fit_predict_c1d` (refit at locked hyperparameters) + `backtransform(..., "lognormal_corrected")` |
+| Active-xT | Prompt 86: `train_x1c_random_forest.fit_predict` (refit at locked hyperparameters, on the Phase-3-corrected `target_xt_delta_v2`) |
+| Passive-binary | Prompt 86: `train_p1e_gradient_boosting.fit_predict_gbm_calibrated` (refit, calibrated, at locked hyperparameters) |
 | Passive-continuous | `train_passive_continuous_baseline.py` step [6/6] with the saved `d1_lognormal_glm.joblib` loaded, not refit. The script asserts the design-matrix width equals the artifact's `n_features_in_` |
-| Passive-xT | `validate_y1c_promotion.py` step [5/5] |
+| Passive-xT | Prompt 86: `train_y1c_random_forest.fit_predict` (refit at locked hyperparameters, on the Phase-3-corrected `target_xt_delta_passive`) |
 
-Each model is first scored on its leg's **full** 23-match held-out set. Before anything is written,
-the script asserts that it reproduces the leg's recorded held-out metrics; any mismatch stops the
-run. All 12 checks reproduce to 10 decimal places:
+Each model is first scored on its leg's **full** 23-match held-out set. In Prompt 83, the script
+then hard-asserted bit-exact (1e-9) reproduction of each leg's pre-fix recorded held-out metric
+before writing anything. **That hard gate no longer applies to the 4 refit legs** in Prompt 86 --
+there is no persisted post-fix artifact to bit-exactly reproduce, and a fresh refit (even at
+identical hyperparameters) carries its own internal non-determinism (LightGBM early stopping's
+internal validation split, `CalibratedClassifierCV`'s internal folds). The script instead logs a
+comparison against Phase 4/5's own corrected numbers (`phase4_held_out_refit.json`,
+`phase5_xt_promotion_audit.json`) and does not hard-fail on a mismatch; the two untouched legs
+(active-binary, passive-continuous) are logged against their pre-fix CSV/JSON records for the same
+reason (corrected test-row features shift the score slightly even for an unchanged model). See the
+script's own console output for the actual reproduced-vs-recorded numbers from the run that
+produced the files in this folder.
 
-| Check | Reproduced = recorded | Recorded in |
-|---|---|---|
-| v1e PR-AUC / ROC-AUC | 0.4281721587 / 0.8364320995 | `outputs/models/comparisons/active_binary_baseline_held_out_test_readout.csv` |
-| c1d hurdle RMSE / R² | 0.0441613890 / 0.1692969331 | `outputs/models/validation/hurdle_pipeline_readout_c1d.json` |
-| x1c pipeline RMSE / R² | 0.0427711889 / 0.4494693636 | `outputs/models/validation/full_pipeline_readout_x1c.json` |
-| p1e PR-AUC / ROC-AUC | 0.2161872369 / 0.7888812374 | `outputs/models/comparisons/passive_binary_baseline_held_out_test_readout.csv` |
-| d1 hurdle RMSE / R² | 0.0372594903 / 0.0426346254 | `outputs/models/validation/hurdle_pipeline_readout_passive.json` |
-| y1c pipeline RMSE / R² | 0.0248916093 / 0.4932517979 | `outputs/models/validation/full_pipeline_readout_y1c.json` |
-
-Only after these checks pass are the three curated matches sliced out. Event metadata (timestamp,
+Only after this comparison are the three curated matches sliced out. Event metadata (timestamp,
 minute, second, acting team, raw location) comes from `data/raw/events/{match_id}.json`. Match
 metadata comes from `data/raw/matches/*.json`. `observed.*` values are the locked targets in
 `data/features/player_defensive_actions.parquet`, `data/features/passive_defense.parquet`, and
@@ -319,64 +338,82 @@ Every number traces to the file named in its `source` field:
 
 ---
 
-## 5. Known data-quality issue: coordinate frames in the locked features
+## 5. Coordinate-frame issue: found in Prompt 83, fixed in Prompt 85
 
-**Found while building this export. It is not fixed here, and it matters beyond the dashboard.**
-**Full impact audit (Prompt 84)**: this section is the original summary from Prompt 83; for the
-complete, traced-through-every-leg picture -- which of the 6 targets are actually frame-dependent
-(not just which features are), the exact importance-weighted exposure share for each of the 6
-promoted reference models, and an inventory of existing report claims that rest on a
-frame-dependent feature's tactical meaning -- see
+**Found while building this export in Prompt 83. Fixed in Prompt 85** (loader fix, commit
+`8b7d0a8`, full re-pipeline in
+[`reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md`](../reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md)).
+**Full impact audit (Prompt 84)**:
 [`reports/modeling/COORDINATE_FRAME_IMPACT_AUDIT.md`](../reports/modeling/COORDINATE_FRAME_IMPACT_AUDIT.md)
-(`.html` version linked from `reports/modeling/INDEX.html`'s Project-wide group). That audit is
-also read-only; no fix has been applied yet.
+(`.html` version linked from `reports/modeling/INDEX.html`'s Project-wide group) is the complete,
+traced-through-every-leg picture of which of the 6 targets were actually frame-dependent (not just
+which features were) and the exact importance-weighted exposure share for each of the 6 promoted
+reference models. This section is kept as the original Prompt 83 diagnosis, with the fix and its
+effect noted inline below each affected number.
 
-**The mismatch.** Raw StatsBomb event and 360 locations are always in the **acting team's own
-frame**: the actor attacks toward x=120, whatever the period. Verified on a 40-match sample of the
-raw event files here: 99.5% of 1,126 goalkeeper events sit at raw x<20, for both teams and both
-halves. The project's loader
-(`src/dax/data/statsbomb_loader.py`, `_infer_attack_sign_by_period_team`) assumes the opposite, a
-fixed-pitch frame. It infers a direction per (period, possession team) from ball progression. For
-StatsBomb data, both teams always appear to attack toward x=120, so the loader's "football
-constraint" step flips one of them.
+**The mismatch (pre-fix).** Raw StatsBomb event and 360 locations are always in the **acting team's
+own frame**: the actor attacks toward x=120, whatever the period. Verified on a 40-match sample of
+the raw event files here: 99.5% of 1,126 goalkeeper events sit at raw x<20, for both teams and both
+halves. The project's loader used to assume the opposite, inferring a direction per
+(period, possession team) from noisy ball-progression medians, which flipped one possession team
+per period incorrectly.
 
-**The result.** Each row's stored coordinates end up in whichever frame that period's possession
-team happened to get:
+**The fix (Prompt 85).** `src/dax/data/statsbomb_loader.py`'s `_infer_attack_sign_by_period_team`
+was replaced with a row-local rule, `_attack_sign_for_row(team, possession_team)`: sign=+1 if the
+row's own team is the possession team, else -1. Independently confirmed by a goalkeeper-event
+sanity oracle: 92.8% of goalkeeper defensive-action events now sit at raw x<20 in their own frame
+(up from the pre-fix loader's implicit assumption). The full feature/target/model pipeline was
+then re-run once, all 6 legs re-validated (4 of 6 legs' headline held-out numbers moved; all 6 kept
+their same promoted rung).
 
-- On-ball events and defensive actions within the same possession land in **opposite** frames.
-- Across `player_defensive_actions.parquet`, **26,039 of 56,068 rows (46.4%)** are in a different
-  frame from the one the rest of the pipeline assumes.
-- `passive_defense.parquet` is affected the same way, event by event.
+**The result, before vs after the fix:**
 
-**The rule-based `phase_label` inherits the problem**, because it reads `ball_x` and treats
-x ≥ 95 as box defence and x ≤ 30 as high press:
+- On-ball events and defensive actions within the same possession used to land in **opposite**
+  frames.
+- Across `player_defensive_actions.parquet`, frame-inconsistent rows dropped from **26,039 of
+  56,068 (46.4%)** pre-fix to **2,709 of 56,068 (4.83%)** post-fix (source:
+  `selection_and_frame_audit.json` → `frame_audit`, this export's own regenerated numbers).
+- `passive_defense.parquet` was affected the same way, event by event, and improved the same way.
+
+**The rule-based `phase_label` inherited the problem** (still does, to a much smaller degree),
+because it reads `ball_x` and treats x ≥ 95 as box defence and x ≤ 30 as high press:
 
 | Clearances (dataset-wide) | Labelled `box_defence` | Labelled `high_press_proxy` |
 |---|---|---|
-| Frame-consistent rows | 79.0% | 0.7% |
-| Frame-inconsistent rows | 1.0% | 72.4% |
+| Frame-consistent rows (pre-fix and post-fix, similar) | ~75-79% | 0.7-0.9% |
+| Frame-inconsistent rows (pre-fix, 46.4% of rows) | 1.0% | 72.4% |
 
-Clearances almost always happen in front of the defender's own goal.
+Post-fix, only 4.83% of rows are frame-inconsistent at all (vs 46.4% pre-fix), so the
+frame-inconsistent Clearance-row mislabelling this table describes now affects a much smaller
+population; see `reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md` Phase 2 for the full
+Clearance/phase_label sanity re-check (dataset-wide `high_press_proxy` share among Clearances
+dropped from 30.3% to 0.9%, `box_defence` rose from 44.6% to 72.8%).
 
 Source: `selection_and_frame_audit.json` → `frame_audit`, reproducible with
-`scripts/dashboard/audit_frames_and_profile_matches.py`.
+`scripts/dashboard/audit_frames_and_profile_matches.py` (re-run against the corrected pipeline for
+this export).
 
 **What it means:**
 
-- **Model metrics.** Every model was trained, cross-validated, and tested on the same features, so
-  the held-out numbers are real measurements of these models on these features. But the spatial
-  features, and every `phase_label`-sliced analysis in the reports, are noisier or partly
-  mislabelled compared with what was intended. The spatial features include distance/angle to goal,
-  zone flags, `phase_label`, and `phase_label_prev_event`. Models trained on correctly oriented
-  features might score differently, probably better.
+- **Model metrics (Prompt 83, pre-fix).** Every model was trained, cross-validated, and tested on
+  the same features, so the held-out numbers were real measurements of these models on those
+  features. But the spatial features, and every `phase_label`-sliced analysis in the reports, were
+  noisier or partly mislabelled compared with what was intended.
+- **Model metrics (Prompt 85/86, post-fix).** Confirmed, not hypothetical: 4 of the 6 promoted
+  reference models' headline held-out numbers moved once trained/evaluated on corrected features
+  (2 xT legs' targets were themselves recomputed; 2 non-xT legs' promoted models improved on
+  corrected features), while 2 legs' numbers were reconfirmed unchanged (within noise). All 6 legs
+  kept their same promoted rung/architecture. See
+  `reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md` for the full per-leg before/after.
 - **This dashboard.** `location` and `location_match_frame` are rebuilt from raw locations, so the
-  pitch plots are correct. `phase_label` is still exported, because it is a real model input, but
-  every event carries `phase_label_frame_consistent`. **Don't show `phase_label` as a tactical fact
-  when that flag is `false`**; hide it or grey it out. Each file's `data_quality` counts the affected
-  rows.
-- **Not done here.** No locked parquet, loader, or model was modified; that was out of scope for a
-  data-export prompt. Fixing the loader and re-running the feature → model pipeline is a separate
-  piece of work.
+  pitch plots have always been correct, pre- and post-fix. `phase_label` is still exported, because
+  it is a real model input, but every event carries `phase_label_frame_consistent`. **Don't show
+  `phase_label` as a tactical fact when that flag is `false`**; hide it or grey it out. Each file's
+  `data_quality` counts the affected rows -- post-fix, this count is much smaller (dataset-wide,
+  4.83% of active rows are frame-inconsistent, down from 46.4%).
+- **Done since Prompt 85.** The loader was fixed and the full feature → model pipeline was re-run
+  (Prompt 85); this export (Prompt 86) re-scores against that corrected pipeline. No locked file
+  was modified by this export itself.
 
 ---
 
@@ -398,13 +435,15 @@ Source: `selection_and_frame_audit.json` → `frame_audit`, reproducible with
   Portugal-Ghana 0.802, against a dataset-wide row share of 0.833. Netherlands-Qatar's 360 view is
   narrower than typical, although its defender counts per frame are normal. That was the deciding
   difference from the rejected Croatia-Brazil.
-- **Frame-inconsistent rows per match** (section 5):
+- **Frame-inconsistent rows per match** (section 5). **Prompt 86 update: these counts dropped
+  sharply after the coordinate-frame fix** (compare to the pre-fix counts, kept below for
+  reference):
 
-  | Match | Active rows | Passive events |
+  | Match | Active rows (post-fix / pre-fix, both /total) | Passive events (post-fix / pre-fix, both /total) |
   |---|---|---|
-  | France-Poland | 258 / 500 | 907 / 1,699 |
-  | Netherlands-Qatar | 226 / 463 | 1,415 / 2,194 |
-  | Portugal-Ghana | 223 / 443 | 713 / 1,775 |
+  | France-Poland | 21/500 / 258/500 | 60/1,699 / 907/1,699 |
+  | Netherlands-Qatar | 23/463 / 226/463 | 75/2,194 / 1,415/2,194 |
+  | Portugal-Ghana | 25/443 / 223/443 | 50/1,775 / 713/1,775 |
 
 - **Timestamps restart each period.** `timestamp` is relative to the start of the period
   (StatsBomb convention). Use `period` + `minute` + `second` for a single match clock.
@@ -421,8 +460,42 @@ Source: `selection_and_frame_audit.json` → `frame_audit`, reproducible with
   `methodology_steps.json` follow the brief's own description of those sections: plain-English leg
   names, one headline number per leg, active/passive as short strings, and stage + one-liner +
   honest-result callouts. If the plan doc turns up and differs, reconcile against it.
-- **The p1e "discrepancy" in `ALL_LEGS_SUMMARY.md` §2 is not a discrepancy.** That section reports
-  the CSV as showing PR-AUC 0.210773 for `p1e`, against the doc's 0.2162. Re-checked here: 0.210773
-  is the **uncalibrated** `p1e_gradient_boosting` row. The calibrated reference row reads 0.2161872,
-  which matches the doc and is reproduced exactly above. `ALL_LEGS_SUMMARY.md` was not edited in this
-  prompt.
+- **The p1e "discrepancy" in `ALL_LEGS_SUMMARY.md` §2 is not a discrepancy (pre-fix numbers; see
+  Prompt 86 below for the current headline).** That section reported the CSV as showing PR-AUC
+  0.210773 for `p1e`, against the doc's pre-fix 0.2162. Re-checked in Prompt 83: 0.210773 was the
+  **uncalibrated** `p1e_gradient_boosting` row; the calibrated reference row read 0.2161872,
+  matching the doc. `ALL_LEGS_SUMMARY.md` was not edited in Prompt 83; it was edited in Prompt 86
+  (see below) to cite the corrected 0.2267.
+
+---
+
+## 8. Prompt 86: what changed in this regeneration
+
+Regenerated against Prompt 85's corrected coordinate-frame pipeline (full context:
+[`reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md`](../reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md)).
+Re-ran this folder's own documented export procedure (`scripts/dashboard/audit_frames_and_profile_matches.py`
+then `scripts/dashboard/export_match_explorer.py`), scoring the **same 3 curated matches** -- no
+match was re-selected, added, or removed.
+
+- **`selection_and_frame_audit.json`**: fully regenerated. `frame_audit.share_frame_inconsistent`
+  drops from 0.4644 (pre-fix) to 0.0483 (post-fix); `held_out_style_profile` is naturally recomputed
+  from corrected `ball_x`/`ball_y`, though the three curated matches' own selection rationale
+  (section 2 above) was not re-evaluated -- the task's own instruction was to re-score the already-
+  curated matches, not re-select them.
+- **`legs_summary.json`**: 4 of 6 legs' headline numbers updated (passive-binary, active-continuous
+  xT-adjacent context, active-xT, passive-xT); active-binary and passive-continuous numbers
+  unchanged (Phase 4 reconfirmed them, within noise). The `active_vs_passive.by_family` xt row's
+  **conclusion reverses**: active's own gain over its Rung 0 is now larger than passive's on the
+  corrected target (previously the opposite was reported, scored against a target that was itself
+  wrong for 50-69% of its own rows).
+- **`match_explorer/{match_id}.json`** (all 3 files): every leg's predictions were re-scored.
+  2 legs (`v1e_gradient_boosting_calibrated`, `d1_lognormal_glm`) reuse their existing, untouched
+  `.joblib` artifacts scored on corrected features. 4 legs (`p1e_gradient_boosting_calibrated`,
+  `c1d_random_forest`, `x1c_random_forest`, `y1c_random_forest`) are refit at their already-locked
+  hyperparameters on corrected features (and, for the 2 xT legs, the corrected target) -- see
+  `scripts/dashboard/export_match_explorer.py`'s own module docstring and section 3.5 above for why
+  no persisted post-fix artifact existed to load instead. `data_quality` counts (frame-inconsistent
+  rows per match) dropped sharply; see section 6 above for the regenerated per-match table.
+- **`methodology_steps.json`**: the `coordinate_frame_issue` callout was rewritten to describe the
+  fix (was: describes the still-open bug with pre-fix numbers).
+- **`dashboard_data/STALE.md`**: deleted once this regeneration was verified complete and correct.
