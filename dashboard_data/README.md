@@ -6,7 +6,15 @@
 > feature/target/model pipeline on the correction. Every file in this folder has now been
 > regenerated against that corrected pipeline, and the `STALE.md` marker has been removed. See
 > [`reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md`](../reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md)
-> for the full fix and re-validation, and section 8 below for exactly what changed in this folder.
+> for the full fix and re-validation, and section 9 below for exactly what changed in this folder.
+>
+> **Prompt 87 update.** Added `match_features/{match_id}.json` (section 4 below): a read-only export
+> of the locked engineered feature values (34 active / 38 passive columns from
+> `src/eda/feature_config.py`) behind the same 3 curated matches, joined by `event_id` to
+> `match_explorer/{match_id}.json`. No modelling change; verified the 3 curated matches are still in
+> the 23-match canonical held-out test set (`outputs/models/splits/match_assignment.json`) and that
+> `legs_summary.json`'s 6 headline numbers still reflect the Prompt 85/86 coordinate-frame-corrected
+> figures. Also closed several schema-documentation gaps below (marked "Prompt 87").
 
 Pre-computed JSON for the defensive-analytics dashboard page in the **separate `portfolio-website`
 repo** (Next.js on Vercel). This folder is the whole handoff: it assumes no knowledge of the
@@ -20,7 +28,7 @@ every case; none changed) on the corrected features. Two of the six legs
 numbers unchanged. The other four (`p1e_gradient_boosting_calibrated`, `c1d_random_forest`,
 `x1c_random_forest`, `y1c_random_forest`) are refit at their already-locked hyperparameters (no new
 tuning) on the corrected features, because Prompt 85's own Phase 4/5 validation scripts established
-the corrected numbers this way and never persisted new `.joblib` artifacts to disk. See section 8.
+the corrected numbers this way and never persisted new `.joblib` artifacts to disk. See section 9.
 No locked feature/target file was modified by this export, and no rung's own hyperparameters were
 re-tuned.
 
@@ -33,9 +41,12 @@ re-tuned.
 | `match_explorer/3938643.json` | France 1-1 Poland, Euro 2024: every defensive moment, scored by all applicable models | `scripts/dashboard/export_match_explorer.py` |
 | `match_explorer/3857294.json` | Netherlands 2-0 Qatar, WC 2022 | same |
 | `match_explorer/3857298.json` | Portugal 3-2 Ghana, WC 2022 | same |
+| `match_features/3938643.json` | France 1-1 Poland: locked engineered feature values behind every event (see section 4) | `scripts/dashboard/export_match_features.py` (Prompt 87) |
+| `match_features/3857294.json` | Netherlands 2-0 Qatar | same |
+| `match_features/3857298.json` | Portugal 3-2 Ghana | same |
 | `legs_summary.json` | The six models in plain English, one headline number each, grouped so binary and continuous legs are **never ranked together** | Hand-written from `reports/modeling/ALL_LEGS_SUMMARY.md`. Every number carries its `source` |
 | `methodology_steps.json` | Pipeline walkthrough (7 stages) plus the "honest result" callouts | Hand-written from the ladder and closeout docs cited on each entry |
-| `selection_and_frame_audit.json` | Style profile of all 23 held-out matches (the basis for picking the matches) and the coordinate-frame audit (section 5) | `scripts/dashboard/audit_frames_and_profile_matches.py` |
+| `selection_and_frame_audit.json` | Style profile of all 23 held-out matches (the basis for picking the matches) and the coordinate-frame audit (section 6) | `scripts/dashboard/audit_frames_and_profile_matches.py` |
 
 To regenerate (from the repo root, about 5-10 minutes; the passive legs load 1.6M rows):
 
@@ -45,6 +56,10 @@ To regenerate (from the repo root, about 5-10 minutes; the passive legs load 1.6
 
 ```bash
 .venv/Scripts/python.exe scripts/dashboard/export_match_explorer.py
+```
+
+```bash
+.venv/Scripts/python.exe scripts/dashboard/export_match_features.py
 ```
 
 **Size.** Each match file is 6.6-8.2 MB of minified JSON, or about 0.7-0.85 MB gzipped. Vercel
@@ -90,7 +105,7 @@ contains both active on-ball actions and passive off-ball positioning throughout
 - **Slovenia 1-1 Serbia (`3930170`) was the original first pick, and it was wrong.** The first
   profiling pass used the stored `phase_label` and `action_x` columns, which made this look like
   the most extreme "Serbia press, Slovenia deep block" match in the pool. It turned out to be the
-  coordinate-frame artefact described in section 5. Measured correctly, its height gap is 3.7 m,
+  coordinate-frame artefact described in section 6. Measured correctly, its height gap is 3.7 m,
   one of the smallest. Dropped, and every later selection used raw-frame metrics only.
 - **Croatia 1-1 Brazil (`3869420`), WC 2022 quarter-final.** It was picked in the second pass
   (height gap 13.3 m, own-third gap 0.25) and fully exported. The export's own data-quality check
@@ -130,7 +145,7 @@ The top level follows the shape requested in Prompt 83, with a few additions:
   "why_selected": "...",
   "reference_models": {...},                // model id per leg
   "coordinate_frames": {...},               // human-readable description of the two location fields
-  "data_quality": {...},                    // per-match counts, see section 6
+  "data_quality": {...},                    // per-match counts, field-by-field in section 3.6
   "events": [ ... ]                         // sorted by period, then timestamp
 }
 ```
@@ -154,7 +169,7 @@ There is one entry per row of the active legs; the grain is one row per event.
   "on_ball_event_type": "Ball Recovery", // the defensive action itself: Pressure, Duel, Interception, ...
   "counterpress": false,
   "won_possession": false,
-  "phase_label": "transition_defence",   // rule-based proxy used as a MODEL INPUT, see section 5
+  "phase_label": "transition_defence",   // rule-based proxy used as a MODEL INPUT, see section 6
   "phase_label_frame_consistent": false, // false = this row's label was computed in the wrong frame
   "predictions": {
     "active_binary":     {"probability": 0.6517},
@@ -176,7 +191,7 @@ once, and the defenders are nested under the event:
   "event_id": "a5c81a3d-...",
   "timestamp": "00:08:17.399", "minute": 8, "second": 17, "period": 1,
   "team": "France",                      // the DEFENDING team
-  "player": null,                        // always null: see section 6
+  "player": null,                        // always null: see section 7
   "phase": "passive",
   "location": {"x": 46.9, "y": 49.7},    // the BALL, in the defending team's own frame
   "location_match_frame": {...},
@@ -220,7 +235,7 @@ no such aggregate was audited. If the page shows one, label it as a display aggr
   toward x=120 and the away team toward x=0, in **both halves**. StatsBomb does not record the teams
   switching ends, so don't try to reproduce it.
 - Both fields are rebuilt from **raw** StatsBomb locations, not from the model feature columns. See
-  section 5 for why. The sanity check on the final files agrees: in all three matches, the
+  section 6 for why. The sanity check on the final files agrees: in all three matches, the
   high-defending team's mean own-frame x is higher than its opponent's in both the active and the
   passive data. For example, France averages 62.2 (active) and 59.7 (passive defenders); Poland
   averages 42.1 and 39.3.
@@ -279,6 +294,22 @@ reason (corrected test-row features shift the score slightly even for an unchang
 script's own console output for the actual reproduced-vs-recorded numbers from the run that
 produced the files in this folder.
 
+### 3.6 `data_quality` fields (Prompt 87: named explicitly, was previously undocumented)
+
+Each match file's top-level `data_quality` object has exactly these keys (counts are per-match, not
+dataset-wide):
+
+| Key | Meaning |
+|---|---|
+| `active_rows` | Total active (on-ball) rows in this match |
+| `active_rows_feature_frame_inconsistent` | Of those, how many have `phase_label_frame_consistent: false` |
+| `active_rows_without_active_xt` | Active rows with no `active_xt` prediction (target undefined for that row; see 3.4) |
+| `passive_events` | Total passive (attacking on-ball) events in this match |
+| `passive_defender_rows` | Total visible-defender rows across all passive events (sum of `defenders[]` lengths) |
+| `passive_events_feature_frame_inconsistent` | Passive events with `phase_label_frame_consistent: false` |
+| `passive_defender_rows_without_passive_xt` | Defender rows with no `passive_xt` prediction |
+| `rows_with_unknown_frame` | Rows dropped because neither the raw nor flipped frame matched the stored coordinate (0 in all three current files) |
+
 Only after this comparison are the three curated matches sliced out. Event metadata (timestamp,
 minute, second, acting team, raw location) comes from `data/raw/events/{match_id}.json`. Match
 metadata comes from `data/raw/matches/*.json`. `observed.*` values are the locked targets in
@@ -291,7 +322,97 @@ beaten; `d1d_random_forest` failed its gate at p=0.576. `d1_lognormal_glm` is wh
 
 ---
 
-## 4. `legs_summary.json` and `methodology_steps.json`
+## 4. `match_features/{match_id}.json` schema (Prompt 87)
+
+A read-only export of the **locked engineered feature values** behind every event in the matching
+`match_explorer/{match_id}.json` file -- feature inputs, not model predictions. Produced by
+`scripts/dashboard/export_match_features.py`, which reads straight from the same locked feature
+parquets `export_match_explorer.py` already scores off:
+
+- Active-phase rows: `data/features/player_defensive_actions.parquet`
+- Passive-phase rows: `data/features/passive_defense.parquet`
+
+Both are the corrected, post-coordinate-frame-fix parquets (Prompt 85 Phase 2; see section 6). No
+feature is recomputed here -- every value is a straight column read for an already-identified
+`(match_id, event_id)` (and, for passive, `defender_slot_index`) row.
+
+**Locked feature lists only.** Only columns in `src/eda/feature_config.py`'s `ACTIVE`/`PASSIVE`
+`categorical` + `boolean` + `continuous` + `discrete` lists are included: **34 active**, **38
+passive**. These are the columns that survived correlation/VIF/leakage review (see
+`reports/analysis/shot_target/CORRELATION_ANALYSIS.json`, `VIF_ANALYSIS.json`,
+`LEAKAGE_AUDIT.json`). Camera/360-coverage metadata (`visibility_limited`, `has_360`,
+`freeze_frame_count`, `visible_area_*`, etc.) and every column `feature_config.py` excludes as "not
+football signal" are never pulled in, because the export reads its column list from
+`feature_config.py` directly rather than from the parquet's dtypes.
+
+**Event-id parity with `match_explorer`.** Each file's `events[]` carries exactly the same
+`event_id` set, in the same order, as the matching `match_explorer/{match_id}.json` -- verified by
+a set-equality assertion in the export script, not assumed. Join the two files by `event_id` (and,
+for passive defenders, `defender_slot_index`) to pair a prediction with the feature values behind it.
+
+```jsonc
+{
+  "match_id": "3938643",
+  "locked_feature_counts": {"active": 34, "passive": 38},
+  "events": [ ... ]
+}
+```
+
+### 4.1 `phase: "active"` entries
+
+One row per active leg row (same grain as `match_explorer`'s active entries):
+
+```jsonc
+{
+  "event_id": "6fa63155-...",
+  "location": {"x": 108.8, "y": 52.9},   // ball_x/ball_y, acting team's OWN frame (see 3.3)
+  "phase": "active",
+  "features": { "phase_label": "...", "position": "...", "match_time_seconds": 1122.4, "...": "... all 34 locked active columns, by name" }
+}
+```
+
+A missing key inside `features` means that locked column was null (`NaN`) for this specific row in
+the parquet (e.g. `phase_label_prev_event` is null for the first action of a possession) -- it is
+never a placeholder zero. All 34 keys are otherwise always present on an active event.
+
+### 4.2 `phase: "passive"` entries
+
+Passive locked columns split into two groups, verified empirically against the full
+`passive_defense.parquet` (not assumed from column names): 22 are constant across every defender of
+the same on-ball event (columns describing the on-ball moment or the passing options relative to the
+ball: `on_ball_event_type`, `phase_label`, `period`, `has_option_2`, `has_option_3`, `ball_x`,
+`ball_y`, and the three `top_option_N_{threat_score,dx,dy,distance_from_ball,angle_from_ball}`
+groups); the other 16 vary per `defender_slot_index` (the defender's own position and marking/lane
+metrics, functional role, overload score, in/out-of-box flags). The event-level 22 live in the
+event's own `features`; the per-defender 16 live inside each entry of `defenders[]`:
+
+```jsonc
+{
+  "event_id": "a5c81a3d-...",
+  "location": {"x": 46.9, "y": 49.7},    // ball_x/ball_y, defending team's own frame
+  "phase": "passive",
+  "features": { "on_ball_event_type": "Carry", "phase_label": "...", "ball_x": 46.9, "ball_y": 49.7, "...": "... 22 event-level locked columns total" },
+  "defenders": [
+    {
+      "defender_slot_index": 0,
+      "location": {"x": 41.47, "y": 50.83},   // defender_x/defender_y
+      "features": { "defender_functional_role": "wide_cover", "marking_tightness": 3.62, "...": "... 16 per-defender locked columns total" }
+    }
+  ]
+}
+```
+
+An active event never carries passive-only feature keys (e.g. `defender_functional_role`,
+`marking_tightness`) and a passive event/defender never carries active-only feature keys (e.g.
+`nearest_attacker_distance`) -- the inapplicable group is left out of `features` entirely, not
+zeroed or nulled. This was spot-checked directly against the generated files, not assumed.
+
+**No `predictions` or `observed` block here** -- this file is feature values only. Join by
+`event_id` to `match_explorer/{match_id}.json` for predictions/observed outcomes.
+
+---
+
+## 5. `legs_summary.json` and `methodology_steps.json`
 
 ### `legs_summary.json`
 
@@ -338,7 +459,7 @@ Every number traces to the file named in its `source` field:
 
 ---
 
-## 5. Coordinate-frame issue: found in Prompt 83, fixed in Prompt 85
+## 6. Coordinate-frame issue: found in Prompt 83, fixed in Prompt 85
 
 **Found while building this export in Prompt 83. Fixed in Prompt 85** (loader fix, commit
 `8b7d0a8`, full re-pipeline in
@@ -417,7 +538,7 @@ this export).
 
 ---
 
-## 6. Other gaps the frontend should know about
+## 7. Other gaps the frontend should know about
 
 - **No player identity for passive defenders.** StatsBomb 360 freeze-frames are anonymous. That is
   why `player` is always `null` and `defender_slot_index` is a per-frame index, not a player id.
@@ -435,7 +556,7 @@ this export).
   Portugal-Ghana 0.802, against a dataset-wide row share of 0.833. Netherlands-Qatar's 360 view is
   narrower than typical, although its defender counts per frame are normal. That was the deciding
   difference from the rejected Croatia-Brazil.
-- **Frame-inconsistent rows per match** (section 5). **Prompt 86 update: these counts dropped
+- **Frame-inconsistent rows per match** (section 6). **Prompt 86 update: these counts dropped
   sharply after the coordinate-frame fix** (compare to the pre-fix counts, kept below for
   reference):
 
@@ -452,7 +573,7 @@ this export).
 
 ---
 
-## 7. Notes for the record
+## 8. Notes for the record
 
 - **The plan doc is missing.** The Prompt 83 brief references
   `claude/eda-prompts/82-portfolio-dashboard-plan.md` (§3.1 / §3.3). That file does not exist in
@@ -469,7 +590,7 @@ this export).
 
 ---
 
-## 8. Prompt 86: what changed in this regeneration
+## 9. Prompt 86: what changed in this regeneration
 
 Regenerated against Prompt 85's corrected coordinate-frame pipeline (full context:
 [`reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md`](../reports/modeling/COORDINATE_FRAME_FIX_AND_REPIPELINE.md)).
@@ -495,7 +616,7 @@ match was re-selected, added, or removed.
   hyperparameters on corrected features (and, for the 2 xT legs, the corrected target) -- see
   `scripts/dashboard/export_match_explorer.py`'s own module docstring and section 3.5 above for why
   no persisted post-fix artifact existed to load instead. `data_quality` counts (frame-inconsistent
-  rows per match) dropped sharply; see section 6 above for the regenerated per-match table.
+  rows per match) dropped sharply; see section 7 above for the regenerated per-match table.
 - **`methodology_steps.json`**: the `coordinate_frame_issue` callout was rewritten to describe the
   fix (was: describes the still-open bug with pre-fix numbers).
 - **`dashboard_data/STALE.md`**: deleted once this regeneration was verified complete and correct.
