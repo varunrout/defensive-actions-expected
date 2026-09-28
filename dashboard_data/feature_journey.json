@@ -1,0 +1,5229 @@
+{
+  "generated_at": "2026-09-28T15:13:22.734879+00:00",
+  "generator": "scripts/dashboard/export_feature_journey.py",
+  "notes": [
+    "Candidate/locked feature lists parsed directly from src/eda/feature_config_v1_historical.py, feature_config_v2_historical.py and feature_config.py -- not retyped.",
+    "Per-feature profiles computed from ALL rows of the current (post coordinate-frame-fix, commit f7204c7 / Prompt 85) data/features/player_defensive_actions.parquet and data/features/passive_defense.parquet -- no train/test split applied here.",
+    "modelled=false on nearest_defender_distance / defenders_within_5m (active) reflects a downstream modelling-stage exclusion (train_active_binary_baseline.py), not a feature_config.py lock/drop decision -- both remain locked EDA candidates."
+  ],
+  "stages": {
+    "active": {
+      "stage_counts": {
+        "excluded_before_count": 16,
+        "candidate_pool_stage01": 51,
+        "post_collapse_review_stage07": 36,
+        "final_locked": 34
+      },
+      "type_breakdown": {
+        "candidate_stage01": {
+          "categorical": 9,
+          "boolean": 13,
+          "continuous": 18,
+          "discrete": 11
+        },
+        "locked_final": {
+          "categorical": 6,
+          "boolean": 9,
+          "continuous": 12,
+          "discrete": 7
+        }
+      }
+    },
+    "passive": {
+      "stage_counts": {
+        "excluded_before_count": 11,
+        "candidate_pool_stage01": 44,
+        "post_collapse_review_stage07": 39,
+        "final_locked": 38
+      },
+      "type_breakdown": {
+        "candidate_stage01": {
+          "categorical": 5,
+          "boolean": 11,
+          "continuous": 26,
+          "discrete": 2
+        },
+        "locked_final": {
+          "categorical": 4,
+          "boolean": 6,
+          "continuous": 26,
+          "discrete": 2
+        }
+      }
+    }
+  },
+  "assertions": [
+    {
+      "label": "active candidate pool (stage 01)",
+      "actual": 51,
+      "expected": null,
+      "passed": true
+    },
+    {
+      "label": "active final locked",
+      "actual": 34,
+      "expected": null,
+      "passed": true
+    },
+    {
+      "label": "passive candidate pool (stage 01)",
+      "actual": 44,
+      "expected": null,
+      "passed": true
+    },
+    {
+      "label": "passive final locked",
+      "actual": 38,
+      "expected": null,
+      "passed": true
+    },
+    {
+      "label": "active pipeline endpoint 51->34 (self-computed)",
+      "actual": "51->34",
+      "expected": null,
+      "passed": true
+    },
+    {
+      "label": "passive pipeline endpoint 44->38 (self-computed)",
+      "actual": "44->38",
+      "expected": null,
+      "passed": true
+    },
+    {
+      "label": "active candidate type breakdown (cat/bool/cont/disc)",
+      "actual": {
+        "categorical": 9,
+        "boolean": 13,
+        "continuous": 18,
+        "discrete": 11
+      },
+      "expected": null,
+      "passed": true
+    },
+    {
+      "label": "active locked type breakdown (cat/bool/cont/disc)",
+      "actual": {
+        "categorical": 6,
+        "boolean": 9,
+        "continuous": 12,
+        "discrete": 7
+      },
+      "expected": null,
+      "passed": true
+    },
+    {
+      "label": "passive candidate type breakdown (cat/bool/cont/disc)",
+      "actual": {
+        "categorical": 5,
+        "boolean": 11,
+        "continuous": 26,
+        "discrete": 2
+      },
+      "expected": null,
+      "passed": true
+    },
+    {
+      "label": "passive locked type breakdown (cat/bool/cont/disc)",
+      "actual": {
+        "categorical": 4,
+        "boolean": 6,
+        "continuous": 26,
+        "discrete": 2
+      },
+      "expected": null,
+      "passed": true
+    }
+  ],
+  "features": [
+    {
+      "name": "visibility_quality_band",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal (confound: crowded/dangerous zones are both harder to fully capture on camera and where shots cluster)",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "ball_inside_visible_area",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "action_inside_visible_area",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "local_5m_region_fully_visible",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "local_10m_region_fully_visible",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "visibility_limited",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "visible_area_polygon_area",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "visible_area_fraction_of_pitch",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "freeze_frame_count",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "data-collection artifact, not a defensive feature",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "carrier_x",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "verified 100%-duplicate of ball_x (already dropped from the passive parquet)",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "carrier_y",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "verified 100%-duplicate of ball_y (already dropped from the passive parquet)",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "action_x",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "verified 100%-duplicate of ball_x as of this pass -- known unresolved data issue",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "action_y",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "verified 100%-duplicate of ball_y as of this pass -- known unresolved data issue",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "action_changed_possession",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "structural zero (0.00% shot rate by target-window definition), not a genuine finding",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "action_ended_possession",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "structural zero (0.00% shot rate by target-window definition), not a genuine finding",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "action_won_possession",
+      "dataset": "active",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "structural zero (0.00% shot rate by target-window definition), not a genuine finding",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "defender_attacker_gap_x",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 55963,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-23.405, -1.733]",
+            "n": 5597,
+            "shot_rate_pct": 6.521
+          },
+          {
+            "bin": "(-1.733, 0.795]",
+            "n": 5596,
+            "shot_rate_pct": 10.811
+          },
+          {
+            "bin": "(0.795, 2.152]",
+            "n": 5596,
+            "shot_rate_pct": 10.722
+          },
+          {
+            "bin": "(2.152, 3.16]",
+            "n": 5596,
+            "shot_rate_pct": 10.061
+          },
+          {
+            "bin": "(3.16, 4.069]",
+            "n": 5597,
+            "shot_rate_pct": 9.469
+          },
+          {
+            "bin": "(4.069, 4.955]",
+            "n": 5596,
+            "shot_rate_pct": 8.238
+          },
+          {
+            "bin": "(4.955, 5.876]",
+            "n": 5596,
+            "shot_rate_pct": 7.416
+          },
+          {
+            "bin": "(5.876, 6.946]",
+            "n": 5596,
+            "shot_rate_pct": 6.272
+          },
+          {
+            "bin": "(6.946, 8.448]",
+            "n": 5596,
+            "shot_rate_pct": 4.95
+          },
+          {
+            "bin": "(8.448, 25.276]",
+            "n": 5597,
+            "shot_rate_pct": 3.52
+          }
+        ]
+      }
+    },
+    {
+      "name": "defender_attacker_gap_y",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 55963,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-32.007, -5.291]",
+            "n": 5597,
+            "shot_rate_pct": 5.807
+          },
+          {
+            "bin": "(-5.291, -3.242]",
+            "n": 5596,
+            "shot_rate_pct": 7.898
+          },
+          {
+            "bin": "(-3.242, -1.931]",
+            "n": 5596,
+            "shot_rate_pct": 8.202
+          },
+          {
+            "bin": "(-1.931, -0.865]",
+            "n": 5596,
+            "shot_rate_pct": 8.167
+          },
+          {
+            "bin": "(-0.865, 0.123]",
+            "n": 5597,
+            "shot_rate_pct": 8.987
+          },
+          {
+            "bin": "(0.123, 1.103]",
+            "n": 5596,
+            "shot_rate_pct": 8.149
+          },
+          {
+            "bin": "(1.103, 2.217]",
+            "n": 5596,
+            "shot_rate_pct": 8.792
+          },
+          {
+            "bin": "(2.217, 3.533]",
+            "n": 5596,
+            "shot_rate_pct": 7.702
+          },
+          {
+            "bin": "(3.533, 5.518]",
+            "n": 5596,
+            "shot_rate_pct": 7.756
+          },
+          {
+            "bin": "(5.518, 30.105]",
+            "n": 5597,
+            "shot_rate_pct": 6.521
+          }
+        ]
+      }
+    },
+    {
+      "name": "action_family",
+      "dataset": "active",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Correlation DROP-tier verdict",
+      "reason": "CORRELATION_ANALYSIS DROP tier: Cramer's V=1.0 vs event_type (kept, more granular)",
+      "evidence": {
+        "metric": "cramers_v",
+        "value": 1.0,
+        "vs": "event_type"
+      },
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "action_retained_defensive_team_control",
+      "dataset": "active",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "True",
+            "n": 39422,
+            "shot_rate_pct": 8.003
+          },
+          {
+            "value": "False",
+            "n": 16646,
+            "shot_rate_pct": 7.287
+          }
+        ]
+      }
+    },
+    {
+      "name": "action_was_under_opponent_possession",
+      "dataset": "active",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "True",
+            "n": 43027,
+            "shot_rate_pct": 7.333
+          },
+          {
+            "value": "False",
+            "n": 13041,
+            "shot_rate_pct": 9.301
+          }
+        ]
+      }
+    },
+    {
+      "name": "action_zone",
+      "dataset": "active",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "reason": "Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "angle_to_attacking_goal",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.001, 0.0837]",
+            "n": 5607,
+            "shot_rate_pct": 7.098
+          },
+          {
+            "bin": "(0.0837, 0.17]",
+            "n": 5607,
+            "shot_rate_pct": 6.224
+          },
+          {
+            "bin": "(0.17, 0.25]",
+            "n": 5607,
+            "shot_rate_pct": 6.331
+          },
+          {
+            "bin": "(0.25, 0.327]",
+            "n": 5606,
+            "shot_rate_pct": 6.101
+          },
+          {
+            "bin": "(0.327, 0.399]",
+            "n": 5607,
+            "shot_rate_pct": 5.564
+          },
+          {
+            "bin": "(0.399, 0.483]",
+            "n": 5607,
+            "shot_rate_pct": 6.777
+          },
+          {
+            "bin": "(0.483, 0.588]",
+            "n": 5606,
+            "shot_rate_pct": 7.867
+          },
+          {
+            "bin": "(0.588, 0.722]",
+            "n": 5608,
+            "shot_rate_pct": 9.772
+          },
+          {
+            "bin": "(0.722, 0.938]",
+            "n": 5606,
+            "shot_rate_pct": 10.738
+          },
+          {
+            "bin": "(0.938, 1.567]",
+            "n": 5607,
+            "shot_rate_pct": 11.432
+          }
+        ]
+      }
+    },
+    {
+      "name": "attacker_centroid_x",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 6,
+      "stage_label": "Stage 6 - Collapse-tier cluster merge (engineered replacement)",
+      "reason": "Cluster 2 (attacker/defender centroid, MERGE not drop): r=0.984 with defender_centroid_x -- replaced by defender_attacker_gap_x/y (defensive compactness relative to attacking shape), not simply dropped, since the two centroids describe different teams' shapes",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "attacker_centroid_y",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 6,
+      "stage_label": "Stage 6 - Collapse-tier cluster merge (engineered replacement)",
+      "reason": "Cluster 2 (attacker/defender centroid, MERGE not drop): see attacker_centroid_x",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "attacker_defender_ratio",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.001, 0.625]",
+            "n": 6975,
+            "shot_rate_pct": 14.222
+          },
+          {
+            "bin": "(0.625, 0.7]",
+            "n": 4415,
+            "shot_rate_pct": 13.205
+          },
+          {
+            "bin": "(0.7, 0.778]",
+            "n": 6819,
+            "shot_rate_pct": 11.233
+          },
+          {
+            "bin": "(0.778, 0.857]",
+            "n": 4719,
+            "shot_rate_pct": 10.574
+          },
+          {
+            "bin": "(0.857, 0.889]",
+            "n": 5368,
+            "shot_rate_pct": 7.955
+          },
+          {
+            "bin": "(0.889, 1.0]",
+            "n": 9773,
+            "shot_rate_pct": 5.74
+          },
+          {
+            "bin": "(1.0, 1.111]",
+            "n": 2581,
+            "shot_rate_pct": 3.177
+          },
+          {
+            "bin": "(1.111, 1.2]",
+            "n": 4552,
+            "shot_rate_pct": 3.141
+          },
+          {
+            "bin": "(1.2, 1.5]",
+            "n": 6408,
+            "shot_rate_pct": 2.762
+          },
+          {
+            "bin": "(1.5, 7.0]",
+            "n": 4458,
+            "shot_rate_pct": 3.096
+          }
+        ]
+      }
+    },
+    {
+      "name": "attacker_spread",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56037,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.001, 9.957]",
+            "n": 5604,
+            "shot_rate_pct": 17.648
+          },
+          {
+            "bin": "(9.957, 11.664]",
+            "n": 5604,
+            "shot_rate_pct": 12.634
+          },
+          {
+            "bin": "(11.664, 12.871]",
+            "n": 5603,
+            "shot_rate_pct": 11.28
+          },
+          {
+            "bin": "(12.871, 13.974]",
+            "n": 5604,
+            "shot_rate_pct": 8.672
+          },
+          {
+            "bin": "(13.974, 15.02]",
+            "n": 5604,
+            "shot_rate_pct": 7.316
+          },
+          {
+            "bin": "(15.02, 16.114]",
+            "n": 5603,
+            "shot_rate_pct": 6.746
+          },
+          {
+            "bin": "(16.114, 17.268]",
+            "n": 5604,
+            "shot_rate_pct": 5.139
+          },
+          {
+            "bin": "(17.268, 18.629]",
+            "n": 5603,
+            "shot_rate_pct": 3.926
+          },
+          {
+            "bin": "(18.629, 20.414]",
+            "n": 5604,
+            "shot_rate_pct": 2.98
+          },
+          {
+            "bin": "(20.414, 29.304]",
+            "n": 5604,
+            "shot_rate_pct": 1.588
+          }
+        ]
+      }
+    },
+    {
+      "name": "attackers_within_10m",
+      "dataset": "active",
+      "type": "discrete",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 43199,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "1.0",
+            "n": 15375,
+            "shot_rate_pct": 6.27
+          },
+          {
+            "value": "2.0",
+            "n": 14589,
+            "shot_rate_pct": 7.773
+          },
+          {
+            "value": "3.0",
+            "n": 6902,
+            "shot_rate_pct": 9.099
+          },
+          {
+            "value": "0.0",
+            "n": 3130,
+            "shot_rate_pct": 6.933
+          },
+          {
+            "value": "4.0",
+            "n": 2202,
+            "shot_rate_pct": 10.4
+          },
+          {
+            "value": "5.0",
+            "n": 758,
+            "shot_rate_pct": 12.269
+          },
+          {
+            "value": "6.0",
+            "n": 195,
+            "shot_rate_pct": 14.359
+          },
+          {
+            "value": "7.0",
+            "n": 36,
+            "shot_rate_pct": 5.556
+          },
+          {
+            "value": "8.0",
+            "n": 11,
+            "shot_rate_pct": 27.273
+          },
+          {
+            "value": "9.0",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "attackers_within_5m",
+      "dataset": "active",
+      "type": "discrete",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 52138,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "1.0",
+            "n": 31201,
+            "shot_rate_pct": 7.051
+          },
+          {
+            "value": "0.0",
+            "n": 14062,
+            "shot_rate_pct": 7.232
+          },
+          {
+            "value": "2.0",
+            "n": 5992,
+            "shot_rate_pct": 8.895
+          },
+          {
+            "value": "3.0",
+            "n": 737,
+            "shot_rate_pct": 12.483
+          },
+          {
+            "value": "4.0",
+            "n": 126,
+            "shot_rate_pct": 15.873
+          },
+          {
+            "value": "5.0",
+            "n": 17,
+            "shot_rate_pct": 35.294
+          },
+          {
+            "value": "6.0",
+            "n": 3,
+            "shot_rate_pct": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "attacking_goal_centrality",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.001, 0.132]",
+            "n": 5629,
+            "shot_rate_pct": 1.794
+          },
+          {
+            "bin": "(0.132, 0.225]",
+            "n": 5666,
+            "shot_rate_pct": 2.471
+          },
+          {
+            "bin": "(0.225, 0.33]",
+            "n": 5600,
+            "shot_rate_pct": 3.75
+          },
+          {
+            "bin": "(0.33, 0.44]",
+            "n": 5654,
+            "shot_rate_pct": 4.687
+          },
+          {
+            "bin": "(0.44, 0.54]",
+            "n": 5552,
+            "shot_rate_pct": 6.214
+          },
+          {
+            "bin": "(0.54, 0.63]",
+            "n": 5623,
+            "shot_rate_pct": 7.825
+          },
+          {
+            "bin": "(0.63, 0.722]",
+            "n": 5542,
+            "shot_rate_pct": 10.087
+          },
+          {
+            "bin": "(0.722, 0.822]",
+            "n": 5731,
+            "shot_rate_pct": 11.708
+          },
+          {
+            "bin": "(0.822, 0.912]",
+            "n": 5567,
+            "shot_rate_pct": 14.406
+          },
+          {
+            "bin": "(0.912, 1.0]",
+            "n": 5504,
+            "shot_rate_pct": 15.171
+          }
+        ]
+      }
+    },
+    {
+      "name": "counterpress",
+      "dataset": "active",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "False",
+            "n": 47378,
+            "shot_rate_pct": 8.472
+          },
+          {
+            "value": "True",
+            "n": 8690,
+            "shot_rate_pct": 4.074
+          }
+        ]
+      }
+    },
+    {
+      "name": "defender_centroid_x",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 6,
+      "stage_label": "Stage 6 - Collapse-tier cluster merge (engineered replacement)",
+      "reason": "Cluster 2 (attacker/defender centroid, MERGE not drop): see attacker_centroid_x",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "defender_centroid_y",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 6,
+      "stage_label": "Stage 6 - Collapse-tier cluster merge (engineered replacement)",
+      "reason": "Cluster 2 (attacker/defender centroid, MERGE not drop): see attacker_centroid_x",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "defender_spread",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 55992,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.001, 8.502]",
+            "n": 5600,
+            "shot_rate_pct": 19.875
+          },
+          {
+            "bin": "(8.502, 10.182]",
+            "n": 5599,
+            "shot_rate_pct": 14.86
+          },
+          {
+            "bin": "(10.182, 11.446]",
+            "n": 5599,
+            "shot_rate_pct": 10.895
+          },
+          {
+            "bin": "(11.446, 12.448]",
+            "n": 5599,
+            "shot_rate_pct": 8.073
+          },
+          {
+            "bin": "(12.448, 13.342]",
+            "n": 5599,
+            "shot_rate_pct": 6.34
+          },
+          {
+            "bin": "(13.342, 14.183]",
+            "n": 5599,
+            "shot_rate_pct": 4.876
+          },
+          {
+            "bin": "(14.183, 15.058]",
+            "n": 5599,
+            "shot_rate_pct": 3.697
+          },
+          {
+            "bin": "(15.058, 16.04]",
+            "n": 5599,
+            "shot_rate_pct": 3.715
+          },
+          {
+            "bin": "(16.04, 17.413]",
+            "n": 5599,
+            "shot_rate_pct": 2.786
+          },
+          {
+            "bin": "(17.413, 26.381]",
+            "n": 5600,
+            "shot_rate_pct": 2.839
+          }
+        ]
+      }
+    },
+    {
+      "name": "defenders_between_ball_and_attacking_goal",
+      "dataset": "active",
+      "type": "discrete",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "4",
+            "n": 8012,
+            "shot_rate_pct": 6.278
+          },
+          {
+            "value": "5",
+            "n": 7537,
+            "shot_rate_pct": 6.674
+          },
+          {
+            "value": "3",
+            "n": 7286,
+            "shot_rate_pct": 6.67
+          },
+          {
+            "value": "6",
+            "n": 6371,
+            "shot_rate_pct": 6.702
+          },
+          {
+            "value": "2",
+            "n": 6077,
+            "shot_rate_pct": 7.389
+          },
+          {
+            "value": "1",
+            "n": 5319,
+            "shot_rate_pct": 9.72
+          },
+          {
+            "value": "7",
+            "n": 4812,
+            "shot_rate_pct": 6.983
+          },
+          {
+            "value": "0",
+            "n": 4090,
+            "shot_rate_pct": 13.032
+          },
+          {
+            "value": "8",
+            "n": 3458,
+            "shot_rate_pct": 7.403
+          },
+          {
+            "value": "9",
+            "n": 2172,
+            "shot_rate_pct": 8.794
+          },
+          {
+            "value": "10",
+            "n": 719,
+            "shot_rate_pct": 13.213
+          },
+          {
+            "value": "11",
+            "n": 215,
+            "shot_rate_pct": 33.488
+          }
+        ]
+      }
+    },
+    {
+      "name": "defenders_within_10m",
+      "dataset": "active",
+      "type": "discrete",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 43199,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "1.0",
+            "n": 11997,
+            "shot_rate_pct": 5.326
+          },
+          {
+            "value": "2.0",
+            "n": 10526,
+            "shot_rate_pct": 6.641
+          },
+          {
+            "value": "0.0",
+            "n": 8206,
+            "shot_rate_pct": 3.205
+          },
+          {
+            "value": "3.0",
+            "n": 6298,
+            "shot_rate_pct": 10.035
+          },
+          {
+            "value": "4.0",
+            "n": 3017,
+            "shot_rate_pct": 14.352
+          },
+          {
+            "value": "5.0",
+            "n": 1563,
+            "shot_rate_pct": 17.53
+          },
+          {
+            "value": "6.0",
+            "n": 770,
+            "shot_rate_pct": 22.208
+          },
+          {
+            "value": "7.0",
+            "n": 468,
+            "shot_rate_pct": 23.077
+          },
+          {
+            "value": "8.0",
+            "n": 235,
+            "shot_rate_pct": 21.277
+          },
+          {
+            "value": "9.0",
+            "n": 90,
+            "shot_rate_pct": 23.333
+          },
+          {
+            "value": "10.0",
+            "n": 27,
+            "shot_rate_pct": 25.926
+          },
+          {
+            "value": "11.0",
+            "n": 2,
+            "shot_rate_pct": 50.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "defenders_within_5m",
+      "dataset": "active",
+      "type": "discrete",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": "confirmed substitutive/nested with defenders_within_10m for this target (reports/eda/FEATURE_INTERACTION_ANALYSIS.json) -- excluded from all active-leg models, though still a locked EDA candidate",
+      "evidence": null,
+      "modelled": false,
+      "source": "reports/modeling/active_binary/ACTIVE_BINARY_BASELINE_SUMMARY.md (also active_continuous / active_xt BASELINE_SUMMARY.md)",
+      "profile": {
+        "n_rows_used": 52138,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0.0",
+            "n": 30674,
+            "shot_rate_pct": 5.855
+          },
+          {
+            "value": "1.0",
+            "n": 15456,
+            "shot_rate_pct": 8.197
+          },
+          {
+            "value": "2.0",
+            "n": 4309,
+            "shot_rate_pct": 11.139
+          },
+          {
+            "value": "3.0",
+            "n": 1095,
+            "shot_rate_pct": 17.534
+          },
+          {
+            "value": "4.0",
+            "n": 393,
+            "shot_rate_pct": 21.374
+          },
+          {
+            "value": "5.0",
+            "n": 147,
+            "shot_rate_pct": 23.129
+          },
+          {
+            "value": "6.0",
+            "n": 56,
+            "shot_rate_pct": 23.214
+          },
+          {
+            "value": "7.0",
+            "n": 6,
+            "shot_rate_pct": 16.667
+          },
+          {
+            "value": "8.0",
+            "n": 2,
+            "shot_rate_pct": 50.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "distance_to_attacking_box",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.001, 4.2]",
+            "n": 11217,
+            "shot_rate_pct": 22.091
+          },
+          {
+            "bin": "(4.2, 11.8]",
+            "n": 5632,
+            "shot_rate_pct": 12.82
+          },
+          {
+            "bin": "(11.8, 19.24]",
+            "n": 5578,
+            "shot_rate_pct": 7.117
+          },
+          {
+            "bin": "(19.24, 27.6]",
+            "n": 5626,
+            "shot_rate_pct": 4.675
+          },
+          {
+            "bin": "(27.6, 37.1]",
+            "n": 5602,
+            "shot_rate_pct": 2.785
+          },
+          {
+            "bin": "(37.1, 47.264]",
+            "n": 5592,
+            "shot_rate_pct": 2.396
+          },
+          {
+            "bin": "(47.264, 59.1]",
+            "n": 5608,
+            "shot_rate_pct": 1.801
+          },
+          {
+            "bin": "(59.1, 74.2]",
+            "n": 5620,
+            "shot_rate_pct": 1.317
+          },
+          {
+            "bin": "(74.2, 101.454]",
+            "n": 5593,
+            "shot_rate_pct": 0.769
+          }
+        ]
+      }
+    },
+    {
+      "name": "distance_to_attacking_goal",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "reason": "Cluster 1 (goal-proximity, drop-to-one): mutually r/eta >= 0.94 with distance_to_attacking_box, distance_to_defending_goal/box, action_zone -- kept distance_to_attacking_box (is_in_attacking_box lift +11.99pp is the most predictive single cut)",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "distance_to_center_line",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Correlation DROP-tier verdict",
+      "reason": "CORRELATION_ANALYSIS DROP tier: Spearman r=-1.0 vs attacking_goal_centrality (kept)",
+      "evidence": {
+        "metric": "correlation_r",
+        "value": -1.0,
+        "vs": "attacking_goal_centrality"
+      },
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "distance_to_defending_box",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "reason": "Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "distance_to_defending_goal",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "reason": "Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "event_type",
+      "dataset": "active",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "Pressure",
+            "n": 27478,
+            "shot_rate_pct": 7.333
+          },
+          {
+            "value": "Ball Recovery",
+            "n": 8932,
+            "shot_rate_pct": 10.367
+          },
+          {
+            "value": "Duel",
+            "n": 6432,
+            "shot_rate_pct": 9.282
+          },
+          {
+            "value": "Clearance",
+            "n": 4187,
+            "shot_rate_pct": 10.127
+          },
+          {
+            "value": "Block",
+            "n": 3889,
+            "shot_rate_pct": 6.84
+          },
+          {
+            "value": "Foul Committed",
+            "n": 2643,
+            "shot_rate_pct": 1.362
+          },
+          {
+            "value": "Interception",
+            "n": 2029,
+            "shot_rate_pct": 3.746
+          },
+          {
+            "value": "50/50",
+            "n": 478,
+            "shot_rate_pct": 5.858
+          }
+        ]
+      }
+    },
+    {
+      "name": "events_elapsed_in_possession",
+      "dataset": "active",
+      "type": "discrete",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "reason": "Cluster 3 (possession clock, drop-to-one): mutually r=0.90-0.95 with possession_elapsed_seconds/phase_transitions_observed_so_far -- kept possession_elapsed_seconds (most granular, continuous)",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "has_previous_event",
+      "dataset": "active",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "True",
+            "n": 51534,
+            "shot_rate_pct": 8.307
+          },
+          {
+            "value": "False",
+            "n": 4534,
+            "shot_rate_pct": 1.919
+          }
+        ]
+      }
+    },
+    {
+      "name": "has_visible_attacker",
+      "dataset": "active",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "True",
+            "n": 56037,
+            "shot_rate_pct": 7.793
+          },
+          {
+            "value": "False",
+            "n": 31,
+            "shot_rate_pct": 3.226
+          }
+        ]
+      }
+    },
+    {
+      "name": "has_visible_defender",
+      "dataset": "active",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "True",
+            "n": 55992,
+            "shot_rate_pct": 7.796
+          },
+          {
+            "value": "False",
+            "n": 76,
+            "shot_rate_pct": 3.947
+          }
+        ]
+      }
+    },
+    {
+      "name": "is_central_lane",
+      "dataset": "active",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "reason": "Type 1 REVIEW resolution: point-biserial r=0.854 vs attacking_goal_centrality (kept)",
+      "evidence": {
+        "metric": "correlation_r",
+        "value": 0.854,
+        "vs": "attacking_goal_centrality"
+      },
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "is_deep_zone",
+      "dataset": "active",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "reason": "Type 2 REVIEW resolution: near-total subset of is_in_defending_box (kept, higher lift +12.04pp vs +7.22pp)",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "is_high_zone",
+      "dataset": "active",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "reason": "Type 2 REVIEW resolution: near-total subset of is_in_attacking_box (kept, higher lift +11.99pp vs +7.22pp)",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "is_in_attacking_box",
+      "dataset": "active",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 47570,
+            "shot_rate_pct": 5.016
+          },
+          {
+            "value": "1",
+            "n": 8498,
+            "shot_rate_pct": 23.323
+          }
+        ]
+      }
+    },
+    {
+      "name": "is_in_defending_box",
+      "dataset": "active",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 53838,
+            "shot_rate_pct": 8.08
+          },
+          {
+            "value": "1",
+            "n": 2230,
+            "shot_rate_pct": 0.807
+          }
+        ]
+      }
+    },
+    {
+      "name": "is_wide_lane",
+      "dataset": "active",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "reason": "Type 1 REVIEW resolution: point-biserial r=-0.785 vs attacking_goal_centrality (kept)",
+      "evidence": {
+        "metric": "correlation_r",
+        "value": -0.785,
+        "vs": "attacking_goal_centrality"
+      },
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "local_numerical_balance_10m",
+      "dataset": "active",
+      "type": "discrete",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 9,
+      "stage_label": "Stage 9 - VIF (multicollinearity) analysis",
+      "reason": "VIF analysis: near-exact linear combination of attackers_within_10m - defenders_within_10m (both kept); joint multicollinearity invisible to pairwise correlation, caught by VIF, not a COLLAPSE/REVIEW tier verdict -- see reports/analysis/shot_target/VIF_ANALYSIS.json",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "local_numerical_balance_5m",
+      "dataset": "active",
+      "type": "discrete",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 9,
+      "stage_label": "Stage 9 - VIF (multicollinearity) analysis",
+      "reason": "VIF analysis: near-exact linear combination of attackers_within_5m - defenders_within_5m (both kept); joint multicollinearity invisible to pairwise correlation, caught by VIF, not a COLLAPSE/REVIEW tier verdict -- see reports/analysis/shot_target/VIF_ANALYSIS.json",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "match_time_seconds",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(1.999, 517.0]",
+            "n": 5614,
+            "shot_rate_pct": 5.682
+          },
+          {
+            "bin": "(517.0, 1138.0]",
+            "n": 5605,
+            "shot_rate_pct": 6.387
+          },
+          {
+            "bin": "(1138.0, 1750.0]",
+            "n": 5607,
+            "shot_rate_pct": 8.026
+          },
+          {
+            "bin": "(1750.0, 2391.0]",
+            "n": 5609,
+            "shot_rate_pct": 6.579
+          },
+          {
+            "bin": "(2391.0, 2877.0]",
+            "n": 5600,
+            "shot_rate_pct": 8.393
+          },
+          {
+            "bin": "(2877.0, 3417.0]",
+            "n": 5609,
+            "shot_rate_pct": 8.718
+          },
+          {
+            "bin": "(3417.0, 4037.0]",
+            "n": 5604,
+            "shot_rate_pct": 7.905
+          },
+          {
+            "bin": "(4037.0, 4689.0]",
+            "n": 5610,
+            "shot_rate_pct": 8.075
+          },
+          {
+            "bin": "(4689.0, 5338.0]",
+            "n": 5604,
+            "shot_rate_pct": 8.208
+          },
+          {
+            "bin": "(5338.0, 7495.0]",
+            "n": 5606,
+            "shot_rate_pct": 9.936
+          }
+        ]
+      }
+    },
+    {
+      "name": "nearest_attacker_distance",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56037,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.0584, 1.024]",
+            "n": 5604,
+            "shot_rate_pct": 7.013
+          },
+          {
+            "bin": "(1.024, 1.557]",
+            "n": 5604,
+            "shot_rate_pct": 7.994
+          },
+          {
+            "bin": "(1.557, 2.064]",
+            "n": 5603,
+            "shot_rate_pct": 7.353
+          },
+          {
+            "bin": "(2.064, 2.591]",
+            "n": 5604,
+            "shot_rate_pct": 7.869
+          },
+          {
+            "bin": "(2.591, 3.196]",
+            "n": 5604,
+            "shot_rate_pct": 7.994
+          },
+          {
+            "bin": "(3.196, 3.965]",
+            "n": 5603,
+            "shot_rate_pct": 6.836
+          },
+          {
+            "bin": "(3.965, 5.18]",
+            "n": 5604,
+            "shot_rate_pct": 6.959
+          },
+          {
+            "bin": "(5.18, 7.479]",
+            "n": 5603,
+            "shot_rate_pct": 7.246
+          },
+          {
+            "bin": "(7.479, 12.511]",
+            "n": 5604,
+            "shot_rate_pct": 7.138
+          },
+          {
+            "bin": "(12.511, 110.236]",
+            "n": 5604,
+            "shot_rate_pct": 11.527
+          }
+        ]
+      }
+    },
+    {
+      "name": "nearest_defender_distance",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": "known self-reference bug (~73.6% of rows approx 0m per the distribution atlas), not a genuine defensive-distance signal -- excluded from all active-leg models (train_active_binary_baseline.py), though still a locked EDA candidate",
+      "evidence": null,
+      "modelled": false,
+      "source": "reports/modeling/active_binary/ACTIVE_BINARY_BASELINE_SUMMARY.md (also active_continuous / active_xt BASELINE_SUMMARY.md)",
+      "profile": {
+        "n_rows_used": 55992,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.0371, 1.738]",
+            "n": 5600,
+            "shot_rate_pct": 8.929
+          },
+          {
+            "bin": "(1.738, 2.867]",
+            "n": 5599,
+            "shot_rate_pct": 9.948
+          },
+          {
+            "bin": "(2.867, 4.014]",
+            "n": 5599,
+            "shot_rate_pct": 10.288
+          },
+          {
+            "bin": "(4.014, 5.149]",
+            "n": 5599,
+            "shot_rate_pct": 9.395
+          },
+          {
+            "bin": "(5.149, 6.35]",
+            "n": 5599,
+            "shot_rate_pct": 9.162
+          },
+          {
+            "bin": "(6.35, 7.643]",
+            "n": 5599,
+            "shot_rate_pct": 6.787
+          },
+          {
+            "bin": "(7.643, 9.177]",
+            "n": 5599,
+            "shot_rate_pct": 6.144
+          },
+          {
+            "bin": "(9.177, 11.285]",
+            "n": 5599,
+            "shot_rate_pct": 4.608
+          },
+          {
+            "bin": "(11.285, 15.498]",
+            "n": 5599,
+            "shot_rate_pct": 3.715
+          },
+          {
+            "bin": "(15.498, 110.356]",
+            "n": 5600,
+            "shot_rate_pct": 8.982
+          }
+        ]
+      }
+    },
+    {
+      "name": "period",
+      "dataset": "active",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "2",
+            "n": 27915,
+            "shot_rate_pct": 8.461
+          },
+          {
+            "value": "1",
+            "n": 26667,
+            "shot_rate_pct": 7.031
+          },
+          {
+            "value": "4",
+            "n": 783,
+            "shot_rate_pct": 8.429
+          },
+          {
+            "value": "3",
+            "n": 703,
+            "shot_rate_pct": 9.246
+          }
+        ]
+      }
+    },
+    {
+      "name": "phase_changed_since_prev_event",
+      "dataset": "active",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 45952,
+            "shot_rate_pct": 7.81
+          },
+          {
+            "value": "1",
+            "n": 10116,
+            "shot_rate_pct": 7.701
+          }
+        ]
+      }
+    },
+    {
+      "name": "phase_label",
+      "dataset": "active",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "box_defence",
+            "n": 14048,
+            "shot_rate_pct": 18.843
+          },
+          {
+            "value": "settled_low_block_proxy",
+            "n": 10110,
+            "shot_rate_pct": 7.547
+          },
+          {
+            "value": "counterpress_after_loss",
+            "n": 9822,
+            "shot_rate_pct": 3.665
+          },
+          {
+            "value": "settled_mid_block_proxy",
+            "n": 8617,
+            "shot_rate_pct": 1.996
+          },
+          {
+            "value": "transition_defence",
+            "n": 5699,
+            "shot_rate_pct": 5.984
+          },
+          {
+            "value": "wide_defending_proxy",
+            "n": 4429,
+            "shot_rate_pct": 1.219
+          },
+          {
+            "value": "high_press_proxy",
+            "n": 3343,
+            "shot_rate_pct": 0.927
+          }
+        ]
+      }
+    },
+    {
+      "name": "phase_label_prev_event",
+      "dataset": "active",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 51534,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "box_defence",
+            "n": 13196,
+            "shot_rate_pct": 18.589
+          },
+          {
+            "value": "counterpress_after_loss",
+            "n": 9923,
+            "shot_rate_pct": 4.122
+          },
+          {
+            "value": "settled_low_block_proxy",
+            "n": 9351,
+            "shot_rate_pct": 8.181
+          },
+          {
+            "value": "settled_mid_block_proxy",
+            "n": 7406,
+            "shot_rate_pct": 2.944
+          },
+          {
+            "value": "transition_defence",
+            "n": 5201,
+            "shot_rate_pct": 6.114
+          },
+          {
+            "value": "wide_defending_proxy",
+            "n": 4244,
+            "shot_rate_pct": 1.861
+          },
+          {
+            "value": "high_press_proxy",
+            "n": 2213,
+            "shot_rate_pct": 1.762
+          }
+        ]
+      }
+    },
+    {
+      "name": "phase_transitions_observed_so_far",
+      "dataset": "active",
+      "type": "discrete",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "reason": "Cluster 3 (possession clock, drop-to-one): see events_elapsed_in_possession",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "play_pattern",
+      "dataset": "active",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "Regular Play",
+            "n": 24253,
+            "shot_rate_pct": 6.073
+          },
+          {
+            "value": "From Throw In",
+            "n": 12349,
+            "shot_rate_pct": 7.685
+          },
+          {
+            "value": "From Free Kick",
+            "n": 8093,
+            "shot_rate_pct": 9.107
+          },
+          {
+            "value": "From Goal Kick",
+            "n": 4417,
+            "shot_rate_pct": 6.09
+          },
+          {
+            "value": "From Corner",
+            "n": 3090,
+            "shot_rate_pct": 19.968
+          },
+          {
+            "value": "From Kick Off",
+            "n": 1435,
+            "shot_rate_pct": 4.53
+          },
+          {
+            "value": "From Keeper",
+            "n": 1428,
+            "shot_rate_pct": 6.162
+          },
+          {
+            "value": "From Counter",
+            "n": 752,
+            "shot_rate_pct": 21.011
+          },
+          {
+            "value": "Other",
+            "n": 251,
+            "shot_rate_pct": 4.781
+          }
+        ]
+      }
+    },
+    {
+      "name": "position",
+      "dataset": "active",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "Left Center Back",
+            "n": 4619,
+            "shot_rate_pct": 11.496
+          },
+          {
+            "value": "Right Center Back",
+            "n": 4545,
+            "shot_rate_pct": 10.187
+          },
+          {
+            "value": "Center Forward",
+            "n": 4427,
+            "shot_rate_pct": 5.512
+          },
+          {
+            "value": "Right Defensive Midfield",
+            "n": 4397,
+            "shot_rate_pct": 7.869
+          },
+          {
+            "value": "Left Defensive Midfield",
+            "n": 4131,
+            "shot_rate_pct": 8.521
+          },
+          {
+            "value": "Left Back",
+            "n": 3574,
+            "shot_rate_pct": 7.974
+          },
+          {
+            "value": "Right Back",
+            "n": 3465,
+            "shot_rate_pct": 8.687
+          },
+          {
+            "value": "Right Wing",
+            "n": 3190,
+            "shot_rate_pct": 6.489
+          },
+          {
+            "value": "Left Wing",
+            "n": 2920,
+            "shot_rate_pct": 6.164
+          },
+          {
+            "value": "Center Attacking Midfield",
+            "n": 2352,
+            "shot_rate_pct": 6.888
+          },
+          {
+            "value": "Center Defensive Midfield",
+            "n": 2309,
+            "shot_rate_pct": 8.315
+          },
+          {
+            "value": "Left Center Midfield",
+            "n": 2251,
+            "shot_rate_pct": 6.042
+          },
+          {
+            "value": "Right Center Midfield",
+            "n": 2227,
+            "shot_rate_pct": 7.274
+          },
+          {
+            "value": "Right Wing Back",
+            "n": 1679,
+            "shot_rate_pct": 7.921
+          },
+          {
+            "value": "Left Wing Back",
+            "n": 1650,
+            "shot_rate_pct": 7.273
+          },
+          {
+            "value": "other",
+            "n": 8332,
+            "shot_rate_pct": 6.649
+          }
+        ]
+      }
+    },
+    {
+      "name": "position_group",
+      "dataset": "active",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Correlation DROP-tier verdict",
+      "reason": "CORRELATION_ANALYSIS DROP tier: Cramer's V=1.0 vs position (kept, more granular)",
+      "evidence": {
+        "metric": "cramers_v",
+        "value": 1.0,
+        "vs": "position"
+      },
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "possession_elapsed_seconds",
+      "dataset": "active",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.001, 2.0]",
+            "n": 12176,
+            "shot_rate_pct": 5.626
+          },
+          {
+            "bin": "(2.0, 4.0]",
+            "n": 5156,
+            "shot_rate_pct": 6.614
+          },
+          {
+            "bin": "(4.0, 7.0]",
+            "n": 5767,
+            "shot_rate_pct": 7.023
+          },
+          {
+            "bin": "(7.0, 11.0]",
+            "n": 5654,
+            "shot_rate_pct": 6.792
+          },
+          {
+            "bin": "(11.0, 16.0]",
+            "n": 5508,
+            "shot_rate_pct": 7.825
+          },
+          {
+            "bin": "(16.0, 22.0]",
+            "n": 5227,
+            "shot_rate_pct": 8.705
+          },
+          {
+            "bin": "(22.0, 31.0]",
+            "n": 5462,
+            "shot_rate_pct": 9.154
+          },
+          {
+            "bin": "(31.0, 47.0]",
+            "n": 5676,
+            "shot_rate_pct": 10.888
+          },
+          {
+            "bin": "(47.0, 219.0]",
+            "n": 5442,
+            "shot_rate_pct": 10.088
+          }
+        ]
+      }
+    },
+    {
+      "name": "visible_attacker_count",
+      "dataset": "active",
+      "type": "discrete",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "7",
+            "n": 11099,
+            "shot_rate_pct": 8.019
+          },
+          {
+            "value": "8",
+            "n": 10765,
+            "shot_rate_pct": 6.168
+          },
+          {
+            "value": "6",
+            "n": 8918,
+            "shot_rate_pct": 9.285
+          },
+          {
+            "value": "9",
+            "n": 8192,
+            "shot_rate_pct": 4.932
+          },
+          {
+            "value": "5",
+            "n": 5928,
+            "shot_rate_pct": 11.049
+          },
+          {
+            "value": "10",
+            "n": 4951,
+            "shot_rate_pct": 4.161
+          },
+          {
+            "value": "4",
+            "n": 3283,
+            "shot_rate_pct": 12.549
+          },
+          {
+            "value": "3",
+            "n": 1535,
+            "shot_rate_pct": 11.075
+          },
+          {
+            "value": "2",
+            "n": 641,
+            "shot_rate_pct": 10.296
+          },
+          {
+            "value": "11",
+            "n": 527,
+            "shot_rate_pct": 9.867
+          },
+          {
+            "value": "1",
+            "n": 198,
+            "shot_rate_pct": 10.101
+          },
+          {
+            "value": "0",
+            "n": 31,
+            "shot_rate_pct": 3.226
+          }
+        ]
+      }
+    },
+    {
+      "name": "visible_defender_count",
+      "dataset": "active",
+      "type": "discrete",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "9",
+            "n": 14029,
+            "shot_rate_pct": 7.741
+          },
+          {
+            "value": "8",
+            "n": 11247,
+            "shot_rate_pct": 7.967
+          },
+          {
+            "value": "7",
+            "n": 8513,
+            "shot_rate_pct": 7.424
+          },
+          {
+            "value": "10",
+            "n": 6557,
+            "shot_rate_pct": 12.75
+          },
+          {
+            "value": "6",
+            "n": 6329,
+            "shot_rate_pct": 5.783
+          },
+          {
+            "value": "5",
+            "n": 4132,
+            "shot_rate_pct": 4.792
+          },
+          {
+            "value": "4",
+            "n": 2279,
+            "shot_rate_pct": 4.168
+          },
+          {
+            "value": "3",
+            "n": 1164,
+            "shot_rate_pct": 3.436
+          },
+          {
+            "value": "11",
+            "n": 941,
+            "shot_rate_pct": 21.148
+          },
+          {
+            "value": "2",
+            "n": 557,
+            "shot_rate_pct": 2.873
+          },
+          {
+            "value": "1",
+            "n": 244,
+            "shot_rate_pct": 0.41
+          },
+          {
+            "value": "0",
+            "n": 76,
+            "shot_rate_pct": 3.947
+          }
+        ]
+      }
+    },
+    {
+      "name": "visibility_quality_band",
+      "dataset": "passive",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal (confound: crowded/dangerous zones are both harder to fully capture on camera and where shots cluster)",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "ball_inside_visible_area",
+      "dataset": "passive",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "action_inside_visible_area",
+      "dataset": "passive",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "local_5m_region_fully_visible",
+      "dataset": "passive",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "local_10m_region_fully_visible",
+      "dataset": "passive",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "visibility_limited",
+      "dataset": "passive",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "visible_area_polygon_area",
+      "dataset": "passive",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "visible_area_fraction_of_pitch",
+      "dataset": "passive",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "camera/360-tracking-coverage metadata, not a football signal",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "freeze_frame_count",
+      "dataset": "passive",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "data-collection artifact, not a defensive feature",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "carrier_x",
+      "dataset": "passive",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "verified 100%-duplicate of ball_x (already dropped from the passive parquet)",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "carrier_y",
+      "dataset": "passive",
+      "type": null,
+      "origin": "excluded_before_count",
+      "fate": "dropped",
+      "stage": 0,
+      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "reason": "verified 100%-duplicate of ball_y (already dropped from the passive parquet)",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "top_option_1_angle_from_ball",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 1592902,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-3.142, -1.776]",
+            "n": 159294,
+            "shot_rate_pct": 10.591
+          },
+          {
+            "bin": "(-1.776, -1.469]",
+            "n": 159301,
+            "shot_rate_pct": 7.208
+          },
+          {
+            "bin": "(-1.469, -1.229]",
+            "n": 159276,
+            "shot_rate_pct": 5.296
+          },
+          {
+            "bin": "(-1.229, -0.942]",
+            "n": 159296,
+            "shot_rate_pct": 3.556
+          },
+          {
+            "bin": "(-0.942, -0.017]",
+            "n": 159289,
+            "shot_rate_pct": 3.224
+          },
+          {
+            "bin": "(-0.017, 0.94]",
+            "n": 159288,
+            "shot_rate_pct": 2.814
+          },
+          {
+            "bin": "(0.94, 1.23]",
+            "n": 159289,
+            "shot_rate_pct": 3.679
+          },
+          {
+            "bin": "(1.23, 1.472]",
+            "n": 159305,
+            "shot_rate_pct": 5.213
+          },
+          {
+            "bin": "(1.472, 1.776]",
+            "n": 159273,
+            "shot_rate_pct": 7.605
+          },
+          {
+            "bin": "(1.776, 3.141]",
+            "n": 159291,
+            "shot_rate_pct": 10.458
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_option_1_distance_from_ball",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 1592902,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.185, 16.251]",
+            "n": 159300,
+            "shot_rate_pct": 9.859
+          },
+          {
+            "bin": "(16.251, 21.187]",
+            "n": 159285,
+            "shot_rate_pct": 8.717
+          },
+          {
+            "bin": "(21.187, 25.752]",
+            "n": 159287,
+            "shot_rate_pct": 7.923
+          },
+          {
+            "bin": "(25.752, 30.258]",
+            "n": 159290,
+            "shot_rate_pct": 7.059
+          },
+          {
+            "bin": "(30.258, 34.8]",
+            "n": 159293,
+            "shot_rate_pct": 5.924
+          },
+          {
+            "bin": "(34.8, 39.339]",
+            "n": 159293,
+            "shot_rate_pct": 5.562
+          },
+          {
+            "bin": "(39.339, 44.165]",
+            "n": 159293,
+            "shot_rate_pct": 4.838
+          },
+          {
+            "bin": "(44.165, 49.84]",
+            "n": 159289,
+            "shot_rate_pct": 4.25
+          },
+          {
+            "bin": "(49.84, 57.048]",
+            "n": 159284,
+            "shot_rate_pct": 3.268
+          },
+          {
+            "bin": "(57.048, 121.35]",
+            "n": 159288,
+            "shot_rate_pct": 2.244
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_option_1_dx",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 1592902,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-112.599, -12.368]",
+            "n": 159297,
+            "shot_rate_pct": 10.951
+          },
+          {
+            "bin": "(-12.368, -6.067]",
+            "n": 159286,
+            "shot_rate_pct": 9.287
+          },
+          {
+            "bin": "(-6.067, -0.982]",
+            "n": 159294,
+            "shot_rate_pct": 8.656
+          },
+          {
+            "bin": "(-0.982, 3.404]",
+            "n": 159291,
+            "shot_rate_pct": 7.894
+          },
+          {
+            "bin": "(3.404, 7.493]",
+            "n": 159288,
+            "shot_rate_pct": 7.215
+          },
+          {
+            "bin": "(7.493, 11.492]",
+            "n": 159289,
+            "shot_rate_pct": 5.411
+          },
+          {
+            "bin": "(11.492, 15.553]",
+            "n": 159294,
+            "shot_rate_pct": 4.361
+          },
+          {
+            "bin": "(15.553, 20.14]",
+            "n": 159290,
+            "shot_rate_pct": 2.902
+          },
+          {
+            "bin": "(20.14, 26.195]",
+            "n": 159283,
+            "shot_rate_pct": 1.937
+          },
+          {
+            "bin": "(26.195, 115.41]",
+            "n": 159290,
+            "shot_rate_pct": 1.031
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_option_1_dy",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 1592902,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-80.242, -45.791]",
+            "n": 159294,
+            "shot_rate_pct": 3.352
+          },
+          {
+            "bin": "(-45.791, -34.778]",
+            "n": 159287,
+            "shot_rate_pct": 5.077
+          },
+          {
+            "bin": "(-34.778, -24.924]",
+            "n": 159294,
+            "shot_rate_pct": 6.231
+          },
+          {
+            "bin": "(-24.924, -15.429]",
+            "n": 159294,
+            "shot_rate_pct": 7.093
+          },
+          {
+            "bin": "(-15.429, -0.196]",
+            "n": 159291,
+            "shot_rate_pct": 8.086
+          },
+          {
+            "bin": "(-0.196, 15.683]",
+            "n": 159286,
+            "shot_rate_pct": 8.075
+          },
+          {
+            "bin": "(15.683, 25.616]",
+            "n": 159294,
+            "shot_rate_pct": 7.042
+          },
+          {
+            "bin": "(25.616, 35.307]",
+            "n": 159281,
+            "shot_rate_pct": 6.553
+          },
+          {
+            "bin": "(35.307, 46.235]",
+            "n": 159298,
+            "shot_rate_pct": 4.978
+          },
+          {
+            "bin": "(46.235, 78.676]",
+            "n": 159283,
+            "shot_rate_pct": 3.157
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_option_2_angle_from_ball",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 1591000,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-3.142, -1.993]",
+            "n": 159105,
+            "shot_rate_pct": 8.097
+          },
+          {
+            "bin": "(-1.993, -1.631]",
+            "n": 159102,
+            "shot_rate_pct": 6.78
+          },
+          {
+            "bin": "(-1.631, -1.342]",
+            "n": 159094,
+            "shot_rate_pct": 5.586
+          },
+          {
+            "bin": "(-1.342, -0.982]",
+            "n": 159109,
+            "shot_rate_pct": 4.951
+          },
+          {
+            "bin": "(-0.982, 0.0262]",
+            "n": 159097,
+            "shot_rate_pct": 4.205
+          },
+          {
+            "bin": "(0.0262, 1.006]",
+            "n": 159095,
+            "shot_rate_pct": 3.957
+          },
+          {
+            "bin": "(1.006, 1.362]",
+            "n": 159101,
+            "shot_rate_pct": 5.15
+          },
+          {
+            "bin": "(1.362, 1.649]",
+            "n": 159101,
+            "shot_rate_pct": 5.914
+          },
+          {
+            "bin": "(1.649, 2.019]",
+            "n": 159102,
+            "shot_rate_pct": 6.14
+          },
+          {
+            "bin": "(2.019, 3.142]",
+            "n": 159094,
+            "shot_rate_pct": 8.752
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_option_2_distance_from_ball",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 1591000,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.264, 13.164]",
+            "n": 159108,
+            "shot_rate_pct": 8.627
+          },
+          {
+            "bin": "(13.164, 16.917]",
+            "n": 159096,
+            "shot_rate_pct": 7.184
+          },
+          {
+            "bin": "(16.917, 20.159]",
+            "n": 159100,
+            "shot_rate_pct": 7.336
+          },
+          {
+            "bin": "(20.159, 23.457]",
+            "n": 159100,
+            "shot_rate_pct": 6.521
+          },
+          {
+            "bin": "(23.457, 27.015]",
+            "n": 159101,
+            "shot_rate_pct": 6.148
+          },
+          {
+            "bin": "(27.015, 30.866]",
+            "n": 159097,
+            "shot_rate_pct": 5.88
+          },
+          {
+            "bin": "(30.866, 35.201]",
+            "n": 159102,
+            "shot_rate_pct": 5.236
+          },
+          {
+            "bin": "(35.201, 40.399]",
+            "n": 159100,
+            "shot_rate_pct": 4.996
+          },
+          {
+            "bin": "(40.399, 47.831]",
+            "n": 159097,
+            "shot_rate_pct": 4.417
+          },
+          {
+            "bin": "(47.831, 128.837]",
+            "n": 159099,
+            "shot_rate_pct": 3.189
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_option_2_dx",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 1591000,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-114.512, -14.873]",
+            "n": 159102,
+            "shot_rate_pct": 8.824
+          },
+          {
+            "bin": "(-14.873, -9.772]",
+            "n": 159101,
+            "shot_rate_pct": 6.854
+          },
+          {
+            "bin": "(-9.772, -5.691]",
+            "n": 159104,
+            "shot_rate_pct": 6.61
+          },
+          {
+            "bin": "(-5.691, -1.818]",
+            "n": 159099,
+            "shot_rate_pct": 7.173
+          },
+          {
+            "bin": "(-1.818, 1.967]",
+            "n": 159099,
+            "shot_rate_pct": 6.553
+          },
+          {
+            "bin": "(1.967, 5.835]",
+            "n": 159103,
+            "shot_rate_pct": 6.649
+          },
+          {
+            "bin": "(5.835, 9.92]",
+            "n": 159099,
+            "shot_rate_pct": 5.9
+          },
+          {
+            "bin": "(9.92, 14.44]",
+            "n": 159095,
+            "shot_rate_pct": 5.364
+          },
+          {
+            "bin": "(14.44, 20.496]",
+            "n": 159104,
+            "shot_rate_pct": 3.696
+          },
+          {
+            "bin": "(20.496, 114.2]",
+            "n": 159094,
+            "shot_rate_pct": 1.911
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_option_2_dy",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 1591000,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-81.762, -37.037]",
+            "n": 159102,
+            "shot_rate_pct": 4.087
+          },
+          {
+            "bin": "(-37.037, -26.832]",
+            "n": 159104,
+            "shot_rate_pct": 5.616
+          },
+          {
+            "bin": "(-26.832, -18.909]",
+            "n": 159095,
+            "shot_rate_pct": 5.851
+          },
+          {
+            "bin": "(-18.909, -11.406]",
+            "n": 159100,
+            "shot_rate_pct": 6.718
+          },
+          {
+            "bin": "(-11.406, 0.226]",
+            "n": 159099,
+            "shot_rate_pct": 7.398
+          },
+          {
+            "bin": "(0.226, 11.752]",
+            "n": 159104,
+            "shot_rate_pct": 7.718
+          },
+          {
+            "bin": "(11.752, 19.099]",
+            "n": 159099,
+            "shot_rate_pct": 6.713
+          },
+          {
+            "bin": "(19.099, 27.023]",
+            "n": 159102,
+            "shot_rate_pct": 5.814
+          },
+          {
+            "bin": "(27.023, 37.285]",
+            "n": 159099,
+            "shot_rate_pct": 5.615
+          },
+          {
+            "bin": "(37.285, 79.487]",
+            "n": 159096,
+            "shot_rate_pct": 4.004
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_option_3_angle_from_ball",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 1581783,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-3.142, -2.07]",
+            "n": 158180,
+            "shot_rate_pct": 7.244
+          },
+          {
+            "bin": "(-2.07, -1.648]",
+            "n": 158181,
+            "shot_rate_pct": 6.168
+          },
+          {
+            "bin": "(-1.648, -1.3]",
+            "n": 158175,
+            "shot_rate_pct": 5.908
+          },
+          {
+            "bin": "(-1.3, -0.853]",
+            "n": 158179,
+            "shot_rate_pct": 5.673
+          },
+          {
+            "bin": "(-0.853, 0.0224]",
+            "n": 158177,
+            "shot_rate_pct": 4.516
+          },
+          {
+            "bin": "(0.0224, 0.884]",
+            "n": 158186,
+            "shot_rate_pct": 4.273
+          },
+          {
+            "bin": "(0.884, 1.322]",
+            "n": 158174,
+            "shot_rate_pct": 5.97
+          },
+          {
+            "bin": "(1.322, 1.67]",
+            "n": 158179,
+            "shot_rate_pct": 6.304
+          },
+          {
+            "bin": "(1.67, 2.09]",
+            "n": 158174,
+            "shot_rate_pct": 5.891
+          },
+          {
+            "bin": "(2.09, 3.142]",
+            "n": 158178,
+            "shot_rate_pct": 6.91
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_option_3_distance_from_ball",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 1581783,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.102, 11.792]",
+            "n": 158182,
+            "shot_rate_pct": 8.756
+          },
+          {
+            "bin": "(11.792, 15.109]",
+            "n": 158179,
+            "shot_rate_pct": 7.192
+          },
+          {
+            "bin": "(15.109, 17.992]",
+            "n": 158182,
+            "shot_rate_pct": 6.325
+          },
+          {
+            "bin": "(17.992, 20.868]",
+            "n": 158173,
+            "shot_rate_pct": 5.915
+          },
+          {
+            "bin": "(20.868, 23.911]",
+            "n": 158181,
+            "shot_rate_pct": 5.851
+          },
+          {
+            "bin": "(23.911, 27.372]",
+            "n": 158177,
+            "shot_rate_pct": 5.881
+          },
+          {
+            "bin": "(27.372, 31.341]",
+            "n": 158175,
+            "shot_rate_pct": 5.347
+          },
+          {
+            "bin": "(31.341, 36.1]",
+            "n": 158183,
+            "shot_rate_pct": 5.037
+          },
+          {
+            "bin": "(36.1, 42.758]",
+            "n": 158173,
+            "shot_rate_pct": 4.879
+          },
+          {
+            "bin": "(42.758, 125.04]",
+            "n": 158178,
+            "shot_rate_pct": 3.674
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_option_3_dx",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 1581783,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-111.54, -14.839]",
+            "n": 158182,
+            "shot_rate_pct": 7.187
+          },
+          {
+            "bin": "(-14.839, -9.847]",
+            "n": 158180,
+            "shot_rate_pct": 6.141
+          },
+          {
+            "bin": "(-9.847, -5.927]",
+            "n": 158173,
+            "shot_rate_pct": 6.316
+          },
+          {
+            "bin": "(-5.927, -2.01]",
+            "n": 158184,
+            "shot_rate_pct": 6.197
+          },
+          {
+            "bin": "(-2.01, 1.927]",
+            "n": 158173,
+            "shot_rate_pct": 6.912
+          },
+          {
+            "bin": "(1.927, 5.987]",
+            "n": 158179,
+            "shot_rate_pct": 7.414
+          },
+          {
+            "bin": "(5.987, 10.223]",
+            "n": 158184,
+            "shot_rate_pct": 6.649
+          },
+          {
+            "bin": "(10.223, 15.062]",
+            "n": 158172,
+            "shot_rate_pct": 5.645
+          },
+          {
+            "bin": "(15.062, 21.489]",
+            "n": 158177,
+            "shot_rate_pct": 4.355
+          },
+          {
+            "bin": "(21.489, 115.774]",
+            "n": 158179,
+            "shot_rate_pct": 2.041
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_option_3_dy",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "engineered",
+      "fate": "locked",
+      "stage": 6,
+      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config_v1_historical.py (_ACTIVE_ENGINEERED_DURING_REDUCTION / _PASSIVE_ENGINEERED_DURING_REDUCTION)",
+      "profile": {
+        "n_rows_used": 1581783,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-76.793, -32.0]",
+            "n": 158182,
+            "shot_rate_pct": 4.693
+          },
+          {
+            "bin": "(-32.0, -22.242]",
+            "n": 158183,
+            "shot_rate_pct": 5.708
+          },
+          {
+            "bin": "(-22.242, -15.405]",
+            "n": 158171,
+            "shot_rate_pct": 5.768
+          },
+          {
+            "bin": "(-15.405, -8.765]",
+            "n": 158181,
+            "shot_rate_pct": 6.419
+          },
+          {
+            "bin": "(-8.765, 0.171]",
+            "n": 158176,
+            "shot_rate_pct": 6.999
+          },
+          {
+            "bin": "(0.171, 9.125]",
+            "n": 158182,
+            "shot_rate_pct": 6.649
+          },
+          {
+            "bin": "(9.125, 15.651]",
+            "n": 158178,
+            "shot_rate_pct": 6.343
+          },
+          {
+            "bin": "(15.651, 22.571]",
+            "n": 158180,
+            "shot_rate_pct": 5.674
+          },
+          {
+            "bin": "(22.571, 32.004]",
+            "n": 158175,
+            "shot_rate_pct": 5.799
+          },
+          {
+            "bin": "(32.004, 79.121]",
+            "n": 158175,
+            "shot_rate_pct": 4.806
+          }
+        ]
+      }
+    },
+    {
+      "name": "angle_to_attacking_goal",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.000999511, 0.0528]",
+            "n": 159319,
+            "shot_rate_pct": 4.348
+          },
+          {
+            "bin": "(0.0528, 0.107]",
+            "n": 159318,
+            "shot_rate_pct": 4.431
+          },
+          {
+            "bin": "(0.107, 0.162]",
+            "n": 159318,
+            "shot_rate_pct": 4.434
+          },
+          {
+            "bin": "(0.162, 0.219]",
+            "n": 159318,
+            "shot_rate_pct": 4.563
+          },
+          {
+            "bin": "(0.219, 0.279]",
+            "n": 159318,
+            "shot_rate_pct": 4.65
+          },
+          {
+            "bin": "(0.279, 0.346]",
+            "n": 159318,
+            "shot_rate_pct": 4.91
+          },
+          {
+            "bin": "(0.346, 0.425]",
+            "n": 159318,
+            "shot_rate_pct": 5.4
+          },
+          {
+            "bin": "(0.425, 0.529]",
+            "n": 159318,
+            "shot_rate_pct": 6.48
+          },
+          {
+            "bin": "(0.529, 0.697]",
+            "n": 159318,
+            "shot_rate_pct": 8.037
+          },
+          {
+            "bin": "(0.697, 3.142]",
+            "n": 159318,
+            "shot_rate_pct": 12.407
+          }
+        ]
+      }
+    },
+    {
+      "name": "attacking_goal_centrality",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.001, 0.294]",
+            "n": 159319,
+            "shot_rate_pct": 3.469
+          },
+          {
+            "bin": "(0.294, 0.432]",
+            "n": 159318,
+            "shot_rate_pct": 4.335
+          },
+          {
+            "bin": "(0.432, 0.534]",
+            "n": 159318,
+            "shot_rate_pct": 4.867
+          },
+          {
+            "bin": "(0.534, 0.62]",
+            "n": 159318,
+            "shot_rate_pct": 5.111
+          },
+          {
+            "bin": "(0.62, 0.698]",
+            "n": 159318,
+            "shot_rate_pct": 5.467
+          },
+          {
+            "bin": "(0.698, 0.769]",
+            "n": 159318,
+            "shot_rate_pct": 6.007
+          },
+          {
+            "bin": "(0.769, 0.834]",
+            "n": 159318,
+            "shot_rate_pct": 6.667
+          },
+          {
+            "bin": "(0.834, 0.893]",
+            "n": 159318,
+            "shot_rate_pct": 7.338
+          },
+          {
+            "bin": "(0.893, 0.948]",
+            "n": 159318,
+            "shot_rate_pct": 8.057
+          },
+          {
+            "bin": "(0.948, 1.0]",
+            "n": 159318,
+            "shot_rate_pct": 8.342
+          }
+        ]
+      }
+    },
+    {
+      "name": "ball_x",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.099, 29.5]",
+            "n": 160105,
+            "shot_rate_pct": 0.575
+          },
+          {
+            "bin": "(29.5, 41.7]",
+            "n": 158735,
+            "shot_rate_pct": 1.134
+          },
+          {
+            "bin": "(41.7, 50.3]",
+            "n": 160939,
+            "shot_rate_pct": 1.465
+          },
+          {
+            "bin": "(50.3, 57.2]",
+            "n": 158027,
+            "shot_rate_pct": 2.225
+          },
+          {
+            "bin": "(57.2, 65.1]",
+            "n": 160286,
+            "shot_rate_pct": 2.421
+          },
+          {
+            "bin": "(65.1, 72.7]",
+            "n": 159189,
+            "shot_rate_pct": 3.34
+          },
+          {
+            "bin": "(72.7, 79.9]",
+            "n": 158037,
+            "shot_rate_pct": 5.142
+          },
+          {
+            "bin": "(79.9, 87.9]",
+            "n": 160023,
+            "shot_rate_pct": 8.536
+          },
+          {
+            "bin": "(87.9, 98.2]",
+            "n": 159087,
+            "shot_rate_pct": 14.294
+          },
+          {
+            "bin": "(98.2, 120.0]",
+            "n": 158753,
+            "shot_rate_pct": 20.617
+          }
+        ]
+      }
+    },
+    {
+      "name": "ball_y",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.099, 7.5]",
+            "n": 159537,
+            "shot_rate_pct": 4.159
+          },
+          {
+            "bin": "(7.5, 15.5]",
+            "n": 161004,
+            "shot_rate_pct": 5.745
+          },
+          {
+            "bin": "(15.5, 22.9]",
+            "n": 157462,
+            "shot_rate_pct": 6.798
+          },
+          {
+            "bin": "(22.9, 30.5]",
+            "n": 160277,
+            "shot_rate_pct": 6.702
+          },
+          {
+            "bin": "(30.5, 39.7]",
+            "n": 159779,
+            "shot_rate_pct": 6.823
+          },
+          {
+            "bin": "(39.7, 48.5]",
+            "n": 159946,
+            "shot_rate_pct": 6.062
+          },
+          {
+            "bin": "(48.5, 56.3]",
+            "n": 158043,
+            "shot_rate_pct": 6.783
+          },
+          {
+            "bin": "(56.3, 64.1]",
+            "n": 160175,
+            "shot_rate_pct": 6.734
+          },
+          {
+            "bin": "(64.1, 72.4]",
+            "n": 159481,
+            "shot_rate_pct": 5.129
+          },
+          {
+            "bin": "(72.4, 80.0]",
+            "n": 157477,
+            "shot_rate_pct": 4.721
+          }
+        ]
+      }
+    },
+    {
+      "name": "defender_functional_role",
+      "dataset": "passive",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "mid_block",
+            "n": 838270,
+            "shot_rate_pct": 6.447
+          },
+          {
+            "value": "central_screen",
+            "n": 227029,
+            "shot_rate_pct": 6.182
+          },
+          {
+            "value": "last_line",
+            "n": 202565,
+            "shot_rate_pct": 5.231
+          },
+          {
+            "value": "advanced_wide",
+            "n": 190303,
+            "shot_rate_pct": 3.983
+          },
+          {
+            "value": "wide_cover",
+            "n": 133988,
+            "shot_rate_pct": 6.56
+          },
+          {
+            "value": "unclassified",
+            "n": 1026,
+            "shot_rate_pct": 0.487
+          }
+        ]
+      }
+    },
+    {
+      "name": "defender_slot_index",
+      "dataset": "passive",
+      "type": "discrete",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 198354,
+            "shot_rate_pct": 5.394
+          },
+          {
+            "value": "1",
+            "n": 197328,
+            "shot_rate_pct": 5.42
+          },
+          {
+            "value": "2",
+            "n": 194976,
+            "shot_rate_pct": 5.477
+          },
+          {
+            "value": "3",
+            "n": 190074,
+            "shot_rate_pct": 5.596
+          },
+          {
+            "value": "4",
+            "n": 182289,
+            "shot_rate_pct": 5.76
+          },
+          {
+            "value": "5",
+            "n": 169453,
+            "shot_rate_pct": 6.026
+          },
+          {
+            "value": "6",
+            "n": 150171,
+            "shot_rate_pct": 6.433
+          },
+          {
+            "value": "7",
+            "n": 127593,
+            "shot_rate_pct": 6.75
+          },
+          {
+            "value": "8",
+            "n": 102160,
+            "shot_rate_pct": 6.848
+          },
+          {
+            "value": "9",
+            "n": 66831,
+            "shot_rate_pct": 6.97
+          },
+          {
+            "value": "10",
+            "n": 13952,
+            "shot_rate_pct": 12.192
+          }
+        ]
+      }
+    },
+    {
+      "name": "defender_x",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-6.713, 39.194]",
+            "n": 159319,
+            "shot_rate_pct": 1.481
+          },
+          {
+            "bin": "(39.194, 52.409]",
+            "n": 159318,
+            "shot_rate_pct": 1.589
+          },
+          {
+            "bin": "(52.409, 61.479]",
+            "n": 159318,
+            "shot_rate_pct": 2.022
+          },
+          {
+            "bin": "(61.479, 68.852]",
+            "n": 159318,
+            "shot_rate_pct": 2.487
+          },
+          {
+            "bin": "(68.852, 75.916]",
+            "n": 159318,
+            "shot_rate_pct": 3.079
+          },
+          {
+            "bin": "(75.916, 82.608]",
+            "n": 159318,
+            "shot_rate_pct": 4.129
+          },
+          {
+            "bin": "(82.608, 89.225]",
+            "n": 159318,
+            "shot_rate_pct": 5.492
+          },
+          {
+            "bin": "(89.225, 96.105]",
+            "n": 159318,
+            "shot_rate_pct": 7.909
+          },
+          {
+            "bin": "(96.105, 103.385]",
+            "n": 159318,
+            "shot_rate_pct": 12.264
+          },
+          {
+            "bin": "(103.385, 126.606]",
+            "n": 159318,
+            "shot_rate_pct": 19.207
+          }
+        ]
+      }
+    },
+    {
+      "name": "defender_y",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-7.667000000000001, 17.263]",
+            "n": 159320,
+            "shot_rate_pct": 3.836
+          },
+          {
+            "bin": "(17.263, 24.811]",
+            "n": 159317,
+            "shot_rate_pct": 4.983
+          },
+          {
+            "bin": "(24.811, 30.745]",
+            "n": 159318,
+            "shot_rate_pct": 5.812
+          },
+          {
+            "bin": "(30.745, 35.723]",
+            "n": 159318,
+            "shot_rate_pct": 6.958
+          },
+          {
+            "bin": "(35.723, 39.993]",
+            "n": 159318,
+            "shot_rate_pct": 8.198
+          },
+          {
+            "bin": "(39.993, 44.258]",
+            "n": 159318,
+            "shot_rate_pct": 8.201
+          },
+          {
+            "bin": "(44.258, 49.245]",
+            "n": 159318,
+            "shot_rate_pct": 7.049
+          },
+          {
+            "bin": "(49.245, 55.173]",
+            "n": 159318,
+            "shot_rate_pct": 5.66
+          },
+          {
+            "bin": "(55.173, 62.724]",
+            "n": 159318,
+            "shot_rate_pct": 4.996
+          },
+          {
+            "bin": "(62.724, 89.508]",
+            "n": 159318,
+            "shot_rate_pct": 3.966
+          }
+        ]
+      }
+    },
+    {
+      "name": "defender_zone",
+      "dataset": "passive",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "reason": "Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "distance_to_attacking_box",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "reason": "Cluster 4 (defender-position, drop-to-one): mutually r/eta >= 0.92 with defender_x and the rest of this cluster -- kept defender_x (the most primitive measurement; it's upstream of every derived distance/zone column here, unlike the active side where the raw coordinate isn't itself a kept feature)",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "distance_to_attacking_goal",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "reason": "Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "distance_to_center_line",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Correlation DROP-tier verdict",
+      "reason": "CORRELATION_ANALYSIS DROP tier: Spearman r=-1.0 vs attacking_goal_centrality (kept)",
+      "evidence": {
+        "metric": "correlation_r",
+        "value": -1.0,
+        "vs": "attacking_goal_centrality"
+      },
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "distance_to_defending_box",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "reason": "Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "distance_to_defending_goal",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "reason": "Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "engagement_distance_to_carrier",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.00099847, 6.448]",
+            "n": 159319,
+            "shot_rate_pct": 7.842
+          },
+          {
+            "bin": "(6.448, 10.696]",
+            "n": 159318,
+            "shot_rate_pct": 7.7
+          },
+          {
+            "bin": "(10.696, 14.334]",
+            "n": 159318,
+            "shot_rate_pct": 7.235
+          },
+          {
+            "bin": "(14.334, 17.738]",
+            "n": 159318,
+            "shot_rate_pct": 6.649
+          },
+          {
+            "bin": "(17.738, 21.109]",
+            "n": 159318,
+            "shot_rate_pct": 6.068
+          },
+          {
+            "bin": "(21.109, 24.666]",
+            "n": 159318,
+            "shot_rate_pct": 5.639
+          },
+          {
+            "bin": "(24.666, 28.662]",
+            "n": 159318,
+            "shot_rate_pct": 5.24
+          },
+          {
+            "bin": "(28.662, 33.398]",
+            "n": 159318,
+            "shot_rate_pct": 4.903
+          },
+          {
+            "bin": "(33.398, 39.865]",
+            "n": 159318,
+            "shot_rate_pct": 4.696
+          },
+          {
+            "bin": "(39.865, 138.98]",
+            "n": 159318,
+            "shot_rate_pct": 3.687
+          }
+        ]
+      }
+    },
+    {
+      "name": "has_option_2",
+      "dataset": "passive",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "True",
+            "n": 1591000,
+            "shot_rate_pct": 5.953
+          },
+          {
+            "value": "False",
+            "n": 2181,
+            "shot_rate_pct": 15.131
+          }
+        ]
+      }
+    },
+    {
+      "name": "has_option_3",
+      "dataset": "passive",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "True",
+            "n": 1581783,
+            "shot_rate_pct": 5.886
+          },
+          {
+            "value": "False",
+            "n": 11398,
+            "shot_rate_pct": 17.091
+          }
+        ]
+      }
+    },
+    {
+      "name": "has_screened_outcome",
+      "dataset": "passive",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 10,
+      "stage_label": "Stage 10 - Leakage audit",
+      "reason": "Leakage exclusion (not a correlation-tier verdict): censoring-mechanism proxy for target_future_shot_10s's own 10s window being truncated at end-of-period/match, not defensive signal -- chi2=136.5, p=1.54e-31 vs target_future_shot_10s (0.50% shot rate when False [n=2,581] vs 5.97% when True); see reports/analysis/shot_target/LEAKAGE_AUDIT.json",
+      "evidence": {
+        "metric": "chi2",
+        "value": 136.5,
+        "p": 1.54e-31
+      },
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "is_central_lane",
+      "dataset": "passive",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "reason": "Type 1 REVIEW resolution: point-biserial r=0.849 vs attacking_goal_centrality (kept)",
+      "evidence": {
+        "metric": "correlation_r",
+        "value": 0.849,
+        "vs": "attacking_goal_centrality"
+      },
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "is_deep_zone",
+      "dataset": "passive",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "reason": "Type 2 REVIEW resolution: near-total subset of is_in_defending_box (kept, higher lift +12.31pp vs +7.02pp)",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "is_goal_side_of_nearest_attacker",
+      "dataset": "passive",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1592902,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "False",
+            "n": 972817,
+            "shot_rate_pct": 5.949
+          },
+          {
+            "value": "True",
+            "n": 620085,
+            "shot_rate_pct": 5.989
+          }
+        ]
+      }
+    },
+    {
+      "name": "is_high_zone",
+      "dataset": "passive",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "reason": "Type 2 REVIEW resolution: near-total subset of is_in_attacking_box (kept, higher lift +11.85pp vs +6.41pp)",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "is_in_attacking_box",
+      "dataset": "passive",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 1423331,
+            "shot_rate_pct": 4.398
+          },
+          {
+            "value": "1",
+            "n": 169850,
+            "shot_rate_pct": 19.109
+          }
+        ]
+      }
+    },
+    {
+      "name": "is_in_defending_box",
+      "dataset": "passive",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 1573988,
+            "shot_rate_pct": 6.018
+          },
+          {
+            "value": "1",
+            "n": 19193,
+            "shot_rate_pct": 1.688
+          }
+        ]
+      }
+    },
+    {
+      "name": "is_wide_lane",
+      "dataset": "passive",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 1428109,
+            "shot_rate_pct": 6.252
+          },
+          {
+            "value": "1",
+            "n": 165072,
+            "shot_rate_pct": 3.491
+          }
+        ]
+      }
+    },
+    {
+      "name": "lane_screening_score_option_1",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1592902,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.0091, 0.0358]",
+            "n": 159291,
+            "shot_rate_pct": 3.821
+          },
+          {
+            "bin": "(0.0358, 0.0449]",
+            "n": 159290,
+            "shot_rate_pct": 4.688
+          },
+          {
+            "bin": "(0.0449, 0.054]",
+            "n": 159290,
+            "shot_rate_pct": 5.339
+          },
+          {
+            "bin": "(0.054, 0.0646]",
+            "n": 159290,
+            "shot_rate_pct": 5.887
+          },
+          {
+            "bin": "(0.0646, 0.0776]",
+            "n": 159290,
+            "shot_rate_pct": 6.125
+          },
+          {
+            "bin": "(0.0776, 0.0945]",
+            "n": 159290,
+            "shot_rate_pct": 6.293
+          },
+          {
+            "bin": "(0.0945, 0.124]",
+            "n": 159290,
+            "shot_rate_pct": 6.502
+          },
+          {
+            "bin": "(0.124, 0.179]",
+            "n": 159290,
+            "shot_rate_pct": 6.817
+          },
+          {
+            "bin": "(0.179, 0.306]",
+            "n": 159290,
+            "shot_rate_pct": 6.972
+          },
+          {
+            "bin": "(0.306, 1.0]",
+            "n": 159291,
+            "shot_rate_pct": 7.201
+          }
+        ]
+      }
+    },
+    {
+      "name": "lane_screening_score_option_2",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1591000,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.008730000000000002, 0.0329]",
+            "n": 159100,
+            "shot_rate_pct": 3.25
+          },
+          {
+            "bin": "(0.0329, 0.0408]",
+            "n": 159100,
+            "shot_rate_pct": 3.996
+          },
+          {
+            "bin": "(0.0408, 0.0489]",
+            "n": 159100,
+            "shot_rate_pct": 4.646
+          },
+          {
+            "bin": "(0.0489, 0.0587]",
+            "n": 159100,
+            "shot_rate_pct": 5.442
+          },
+          {
+            "bin": "(0.0587, 0.0711]",
+            "n": 159100,
+            "shot_rate_pct": 5.784
+          },
+          {
+            "bin": "(0.0711, 0.0874]",
+            "n": 159100,
+            "shot_rate_pct": 6.204
+          },
+          {
+            "bin": "(0.0874, 0.115]",
+            "n": 159100,
+            "shot_rate_pct": 6.759
+          },
+          {
+            "bin": "(0.115, 0.168]",
+            "n": 159100,
+            "shot_rate_pct": 7.41
+          },
+          {
+            "bin": "(0.168, 0.29]",
+            "n": 159100,
+            "shot_rate_pct": 7.774
+          },
+          {
+            "bin": "(0.29, 1.0]",
+            "n": 159100,
+            "shot_rate_pct": 8.269
+          }
+        ]
+      }
+    },
+    {
+      "name": "lane_screening_score_option_3",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1581783,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.00791, 0.0328]",
+            "n": 158179,
+            "shot_rate_pct": 2.84
+          },
+          {
+            "bin": "(0.0328, 0.041]",
+            "n": 158178,
+            "shot_rate_pct": 3.859
+          },
+          {
+            "bin": "(0.041, 0.0497]",
+            "n": 158178,
+            "shot_rate_pct": 4.366
+          },
+          {
+            "bin": "(0.0497, 0.0601]",
+            "n": 158178,
+            "shot_rate_pct": 5.331
+          },
+          {
+            "bin": "(0.0601, 0.0735]",
+            "n": 158179,
+            "shot_rate_pct": 5.797
+          },
+          {
+            "bin": "(0.0735, 0.0916]",
+            "n": 158178,
+            "shot_rate_pct": 6.217
+          },
+          {
+            "bin": "(0.0916, 0.123]",
+            "n": 158178,
+            "shot_rate_pct": 6.983
+          },
+          {
+            "bin": "(0.123, 0.179]",
+            "n": 158178,
+            "shot_rate_pct": 7.395
+          },
+          {
+            "bin": "(0.179, 0.302]",
+            "n": 158178,
+            "shot_rate_pct": 7.708
+          },
+          {
+            "bin": "(0.302, 1.0]",
+            "n": 158179,
+            "shot_rate_pct": 8.363
+          }
+        ]
+      }
+    },
+    {
+      "name": "marking_tightness",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1592902,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.001, 2.336]",
+            "n": 159291,
+            "shot_rate_pct": 8.304
+          },
+          {
+            "bin": "(2.336, 3.49]",
+            "n": 159290,
+            "shot_rate_pct": 6.916
+          },
+          {
+            "bin": "(3.49, 4.538]",
+            "n": 159290,
+            "shot_rate_pct": 6.381
+          },
+          {
+            "bin": "(4.538, 5.578]",
+            "n": 159290,
+            "shot_rate_pct": 6.009
+          },
+          {
+            "bin": "(5.578, 6.656]",
+            "n": 159290,
+            "shot_rate_pct": 5.747
+          },
+          {
+            "bin": "(6.656, 7.824]",
+            "n": 159290,
+            "shot_rate_pct": 5.482
+          },
+          {
+            "bin": "(7.824, 9.17]",
+            "n": 159290,
+            "shot_rate_pct": 5.341
+          },
+          {
+            "bin": "(9.17, 10.881]",
+            "n": 159290,
+            "shot_rate_pct": 5.105
+          },
+          {
+            "bin": "(10.881, 13.55]",
+            "n": 159290,
+            "shot_rate_pct": 5.005
+          },
+          {
+            "bin": "(13.55, 57.302]",
+            "n": 159291,
+            "shot_rate_pct": 5.354
+          }
+        ]
+      }
+    },
+    {
+      "name": "on_ball_event_type",
+      "dataset": "passive",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "Pass",
+            "n": 833016,
+            "shot_rate_pct": 5.656
+          },
+          {
+            "value": "Carry",
+            "n": 714233,
+            "shot_rate_pct": 6.135
+          },
+          {
+            "value": "Shot",
+            "n": 24496,
+            "shot_rate_pct": 7.091
+          },
+          {
+            "value": "Dribble",
+            "n": 21436,
+            "shot_rate_pct": 11.121
+          }
+        ]
+      }
+    },
+    {
+      "name": "overload_score",
+      "dataset": "passive",
+      "type": "discrete",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 1189431,
+            "shot_rate_pct": 6.11
+          },
+          {
+            "value": "1",
+            "n": 261483,
+            "shot_rate_pct": 5.829
+          },
+          {
+            "value": "2",
+            "n": 96582,
+            "shot_rate_pct": 5.101
+          },
+          {
+            "value": "3",
+            "n": 45685,
+            "shot_rate_pct": 4.816
+          }
+        ]
+      }
+    },
+    {
+      "name": "period",
+      "dataset": "passive",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "1",
+            "n": 801811,
+            "shot_rate_pct": 5.116
+          },
+          {
+            "value": "2",
+            "n": 747977,
+            "shot_rate_pct": 6.773
+          },
+          {
+            "value": "3",
+            "n": 23655,
+            "shot_rate_pct": 6.341
+          },
+          {
+            "value": "4",
+            "n": 19686,
+            "shot_rate_pct": 9.469
+          },
+          {
+            "value": "5",
+            "n": 52,
+            "shot_rate_pct": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "phase_label",
+      "dataset": "passive",
+      "type": "categorical",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "settled_mid_block_proxy",
+            "n": 450006,
+            "shot_rate_pct": 2.168
+          },
+          {
+            "value": "settled_low_block_proxy",
+            "n": 339393,
+            "shot_rate_pct": 9.041
+          },
+          {
+            "value": "counterpress_after_loss",
+            "n": 225851,
+            "shot_rate_pct": 3.647
+          },
+          {
+            "value": "box_defence",
+            "n": 185253,
+            "shot_rate_pct": 19.683
+          },
+          {
+            "value": "wide_defending_proxy",
+            "n": 170714,
+            "shot_rate_pct": 1.504
+          },
+          {
+            "value": "transition_defence",
+            "n": 139800,
+            "shot_rate_pct": 4.966
+          },
+          {
+            "value": "high_press_proxy",
+            "n": 82164,
+            "shot_rate_pct": 0.481
+          }
+        ]
+      }
+    },
+    {
+      "name": "screens_top_option",
+      "dataset": "passive",
+      "type": "boolean",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "reason": "Type 1 REVIEW resolution: point-biserial r=0.832 vs lane_screening_score_option_1 (kept)",
+      "evidence": {
+        "metric": "correlation_r",
+        "value": 0.832,
+        "vs": "lane_screening_score_option_1"
+      },
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "top_option_1_target_x",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 4,
+      "stage_label": "Stage 4 - Structural redesign",
+      "reason": "Raw absolute coordinate, superseded by ball-relative top_option_1_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "top_option_1_target_y",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 4,
+      "stage_label": "Stage 4 - Structural redesign",
+      "reason": "Raw absolute coordinate, superseded by ball-relative top_option_1_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "top_option_1_threat_score",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1592902,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.00073, 0.0111]",
+            "n": 159291,
+            "shot_rate_pct": 2.423
+          },
+          {
+            "bin": "(0.0111, 0.0131]",
+            "n": 159292,
+            "shot_rate_pct": 2.448
+          },
+          {
+            "bin": "(0.0131, 0.0146]",
+            "n": 159297,
+            "shot_rate_pct": 2.637
+          },
+          {
+            "bin": "(0.0146, 0.016]",
+            "n": 159290,
+            "shot_rate_pct": 2.985
+          },
+          {
+            "bin": "(0.016, 0.0175]",
+            "n": 159281,
+            "shot_rate_pct": 3.664
+          },
+          {
+            "bin": "(0.0175, 0.0192]",
+            "n": 159295,
+            "shot_rate_pct": 4.568
+          },
+          {
+            "bin": "(0.0192, 0.0211]",
+            "n": 159287,
+            "shot_rate_pct": 5.545
+          },
+          {
+            "bin": "(0.0211, 0.0238]",
+            "n": 159289,
+            "shot_rate_pct": 7.72
+          },
+          {
+            "bin": "(0.0238, 0.0283]",
+            "n": 159290,
+            "shot_rate_pct": 11.718
+          },
+          {
+            "bin": "(0.0283, 0.865]",
+            "n": 159290,
+            "shot_rate_pct": 15.938
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_option_2_target_x",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 4,
+      "stage_label": "Stage 4 - Structural redesign",
+      "reason": "Raw absolute coordinate, superseded by ball-relative top_option_2_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "top_option_2_target_y",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 4,
+      "stage_label": "Stage 4 - Structural redesign",
+      "reason": "Raw absolute coordinate, superseded by ball-relative top_option_2_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "top_option_2_threat_score",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1591000,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.00027000000000000006, 0.0084]",
+            "n": 159106,
+            "shot_rate_pct": 3.113
+          },
+          {
+            "bin": "(0.0084, 0.0103]",
+            "n": 159095,
+            "shot_rate_pct": 3.492
+          },
+          {
+            "bin": "(0.0103, 0.0117]",
+            "n": 159101,
+            "shot_rate_pct": 3.672
+          },
+          {
+            "bin": "(0.0117, 0.0129]",
+            "n": 159098,
+            "shot_rate_pct": 3.985
+          },
+          {
+            "bin": "(0.0129, 0.0141]",
+            "n": 159106,
+            "shot_rate_pct": 4.453
+          },
+          {
+            "bin": "(0.0141, 0.0153]",
+            "n": 159099,
+            "shot_rate_pct": 5.028
+          },
+          {
+            "bin": "(0.0153, 0.0167]",
+            "n": 159099,
+            "shot_rate_pct": 5.544
+          },
+          {
+            "bin": "(0.0167, 0.0186]",
+            "n": 159105,
+            "shot_rate_pct": 6.623
+          },
+          {
+            "bin": "(0.0186, 0.0216]",
+            "n": 159094,
+            "shot_rate_pct": 8.655
+          },
+          {
+            "bin": "(0.0216, 0.211]",
+            "n": 159097,
+            "shot_rate_pct": 14.969
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_option_3_target_x",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 4,
+      "stage_label": "Stage 4 - Structural redesign",
+      "reason": "Raw absolute coordinate, superseded by ball-relative top_option_3_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "top_option_3_target_y",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 4,
+      "stage_label": "Stage 4 - Structural redesign",
+      "reason": "Raw absolute coordinate, superseded by ball-relative top_option_3_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
+      "evidence": null,
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    },
+    {
+      "name": "top_option_3_threat_score",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "locked",
+      "stage": 14,
+      "stage_label": "Stage 14 - final locked feature list",
+      "reason": null,
+      "evidence": null,
+      "modelled": true,
+      "source": "src/eda/feature_config.py",
+      "profile": {
+        "n_rows_used": 1581783,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(9.000000000000002e-05, 0.00639]",
+            "n": 158185,
+            "shot_rate_pct": 2.75
+          },
+          {
+            "bin": "(0.00639, 0.00806]",
+            "n": 158177,
+            "shot_rate_pct": 3.724
+          },
+          {
+            "bin": "(0.00806, 0.00933]",
+            "n": 158180,
+            "shot_rate_pct": 4.313
+          },
+          {
+            "bin": "(0.00933, 0.0105]",
+            "n": 158179,
+            "shot_rate_pct": 4.932
+          },
+          {
+            "bin": "(0.0105, 0.0115]",
+            "n": 158176,
+            "shot_rate_pct": 5.023
+          },
+          {
+            "bin": "(0.0115, 0.0126]",
+            "n": 158174,
+            "shot_rate_pct": 5.579
+          },
+          {
+            "bin": "(0.0126, 0.0138]",
+            "n": 158183,
+            "shot_rate_pct": 6.575
+          },
+          {
+            "bin": "(0.0138, 0.0153]",
+            "n": 158175,
+            "shot_rate_pct": 6.817
+          },
+          {
+            "bin": "(0.0153, 0.0177]",
+            "n": 158178,
+            "shot_rate_pct": 7.675
+          },
+          {
+            "bin": "(0.0177, 0.111]",
+            "n": 158176,
+            "shot_rate_pct": 11.47
+          }
+        ]
+      }
+    },
+    {
+      "name": "zone_defensive_value",
+      "dataset": "passive",
+      "type": "continuous",
+      "origin": "candidate",
+      "fate": "dropped",
+      "stage": 5,
+      "stage_label": "Stage 5 - Correlation DROP-tier verdict",
+      "reason": "CORRELATION_ANALYSIS DROP tier: Spearman r=-1.0 vs distance_to_defending_goal (kept)",
+      "evidence": {
+        "metric": "correlation_r",
+        "value": -1.0,
+        "vs": "distance_to_defending_goal"
+      },
+      "modelled": false,
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+    }
+  ]
+}

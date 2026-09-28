@@ -261,7 +261,9 @@ no such aggregate was audited. If the page shows one, label it as a display aggr
 - The hurdle legs' `p_shot` is deliberately not repeated inside `*_continuous`. It is identical to
   the same side's `*_binary.probability`.
 - Values are rounded to 4 significant figures for display. Coordinates are rounded to 2 decimals.
-- `observed.xt_delta` is signed. Negative values are possible and meaningful (threat went down).
+- `observed.xt_delta` is signed (`xt_before - xt_after`). **Positive** values mean threat fell across
+  the action (good for the defence); **negative** values mean threat rose (bad for the defence) --
+  see `src/eda/xt_common.py` and `reports/analysis/xt_target/MASTER_FINDINGS.md`.
 
 ### 3.5 Provenance and verification of the predictions
 
