@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-28T15:15:14.780314+00:00",
+  "generated_at": "2026-09-28T22:46:04.370603+00:00",
   "generator": "scripts/dashboard/export_analysis_facts.py",
   "facts": {
     "correlation_tiers": {
@@ -206,14 +206,14 @@
       "note": "A commonly-repeated figure of '102 collapse pairs' does not appear anywhere in the repo (grep for the exact phrase returns zero matches). It IS numerically explainable as the V1_HISTORICAL total (56 active + 46 passive collapse-tier pairs, CORRELATION_ANALYSIS_V1_HISTORICAL.json), which sums to 102. The CURRENT pipeline's total is 19 (CORRELATION_ANALYSIS.json), not 102 -- citing 102 without the 'historical' qualifier is misleading."
     },
     "exact_duplicate_pairs": {
-      "source": "computed from CORRELATION_ANALYSIS*.json (pairs with |correlation-like value| == 1.0)",
+      "source": "computed from CORRELATION_ANALYSIS*.json (DROP-tier pairs with |correlation-like value| >= 0.9999)",
       "by_version": {
         "current": {
           "count": 0,
           "pairs": []
         },
         "v1_historical": {
-          "count": 4,
+          "count": 5,
           "pairs": [
             {
               "dataset": "active",
@@ -238,6 +238,19 @@
               "method": "spearman",
               "value": -1.0,
               "abs_value": 1.0,
+              "n": 56068,
+              "downgraded_from_drop": false
+            },
+            {
+              "dataset": "active",
+              "tier": "drop",
+              "feature_a": "position",
+              "feature_b": "position_group",
+              "type_a": "categorical",
+              "type_b": "categorical",
+              "method": "cramers_v",
+              "value": 0.9999,
+              "abs_value": 0.9999,
               "n": 56068,
               "downgraded_from_drop": false
             },
@@ -278,7 +291,7 @@
           "pairs": []
         }
       },
-      "note": "A commonly-repeated figure of '5 exact dupes' does not match any recount here. The real count of exactly |r|=1.0 pairs is 4 in CORRELATION_ANALYSIS_V1_HISTORICAL.json and 0 in the current CORRELATION_ANALYSIS.json."
+      "note": "The real count of exact-duplicate (DROP-tier, |value|>=0.9999) pairs is 5 in CORRELATION_ANALYSIS_V1_HISTORICAL.json (3 active + 2 passive) and 0 in the current CORRELATION_ANALYSIS.json. A previously circulated figure of '4' undercounted by missing position<->position_group (active, Cramer's V=0.9999) -- a bit-exact 1.0 filter alone misses it due to floating-point rounding of the association statistic, even though it is a genuine structural duplicate."
     },
     "feature_lock_confirmation": {
       "source": "reports/analysis/shot_target/FEATURE_LOCK_CONFIRMATION.json",
@@ -2712,8 +2725,6 @@
         "scripts/analysis/build_xt_delta_prototype.py:84-92"
       ]
     },
-    "discrepancies_found": [
-      "'5 exact dupes' commonly cited; recount of |r|==1.0 pairs in CORRELATION_ANALYSIS_V1_HISTORICAL.json gives 4, not 5."
-    ]
+    "discrepancies_found": []
   }
 }

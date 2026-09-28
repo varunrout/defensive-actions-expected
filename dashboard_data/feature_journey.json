@@ -1,10 +1,12 @@
 {
-  "generated_at": "2026-09-28T15:13:22.734879+00:00",
+  "generated_at": "2026-09-28T22:45:14.719812+00:00",
   "generator": "scripts/dashboard/export_feature_journey.py",
   "notes": [
     "Candidate/locked feature lists parsed directly from src/eda/feature_config_v1_historical.py, feature_config_v2_historical.py and feature_config.py -- not retyped.",
-    "Per-feature profiles computed from ALL rows of the current (post coordinate-frame-fix, commit f7204c7 / Prompt 85) data/features/player_defensive_actions.parquet and data/features/passive_defense.parquet -- no train/test split applied here.",
-    "modelled=false on nearest_defender_distance / defenders_within_5m (active) reflects a downstream modelling-stage exclusion (train_active_binary_baseline.py), not a feature_config.py lock/drop decision -- both remain locked EDA candidates."
+    "Stage numbers/labels for every dropped or engineered candidate are looked up from hardcoded per-stage name sets, verified feature-by-feature against reports/analysis/shot_target/EDA_PIPELINE_LOG.html -- not inferred from the wording of each drop reason string.",
+    "Per-feature profiles computed from ALL rows of the current (post coordinate-frame-fix, commit f7204c7 / Prompt 85) data/features/player_defensive_actions.parquet and data/features/passive_defense.parquet -- no train/test split applied here. Profiles are computed for every feature record whose column exists in the parquet, not only the 72 locked features -- dropped candidates and pre-count exclusions get one too where the column is present; profile=null with profile_reason otherwise.",
+    "modelled=false on nearest_defender_distance / defenders_within_5m (active) reflects a downstream modelling-stage exclusion (train_active_binary_baseline.py), not a feature_config.py lock/drop decision -- both remain locked EDA candidates.",
+    "Pre-count exclusions are labelled 'before candidate pool', not stage 0 -- they never existed as stage-01 candidates at all."
   ],
   "stages": {
     "active": {
@@ -27,7 +29,79 @@
           "continuous": 12,
           "discrete": 7
         }
-      }
+      },
+      "ledger": [
+        {
+          "stage": 4,
+          "label": "Stage 04 - Structural redesign",
+          "count_before": 51,
+          "dropped": [
+            "action_family",
+            "distance_to_center_line",
+            "is_central_lane",
+            "is_deep_zone",
+            "is_high_zone",
+            "is_wide_lane",
+            "position_group"
+          ],
+          "engineered": [],
+          "count_after": 44,
+          "source": "reports/analysis/shot_target/EDA_PIPELINE_LOG.html"
+        },
+        {
+          "stage": 5,
+          "label": "Stage 05 - Collapse-tier resolution",
+          "count_before": 44,
+          "dropped": [
+            "action_zone",
+            "attacker_centroid_x",
+            "attacker_centroid_y",
+            "defender_centroid_x",
+            "defender_centroid_y",
+            "distance_to_attacking_goal",
+            "distance_to_defending_box",
+            "distance_to_defending_goal",
+            "events_elapsed_in_possession",
+            "phase_transitions_observed_so_far"
+          ],
+          "engineered": [
+            "defender_attacker_gap_x",
+            "defender_attacker_gap_y"
+          ],
+          "count_after": 36,
+          "source": "reports/analysis/shot_target/EDA_PIPELINE_LOG.html"
+        },
+        {
+          "stage": 6,
+          "label": "Stage 06 - Drop raw option coordinates",
+          "count_before": 36,
+          "dropped": [],
+          "engineered": [],
+          "count_after": 36,
+          "source": "reports/analysis/shot_target/EDA_PIPELINE_LOG.html"
+        },
+        {
+          "stage": 9,
+          "label": "Stage 09 - Multicollinearity (VIF)",
+          "count_before": 36,
+          "dropped": [
+            "local_numerical_balance_10m",
+            "local_numerical_balance_5m"
+          ],
+          "engineered": [],
+          "count_after": 34,
+          "source": "reports/analysis/shot_target/EDA_PIPELINE_LOG.html"
+        },
+        {
+          "stage": 10,
+          "label": "Stage 10 - Leakage audit",
+          "count_before": 34,
+          "dropped": [],
+          "engineered": [],
+          "count_after": 34,
+          "source": "reports/analysis/shot_target/EDA_PIPELINE_LOG.html"
+        }
+      ]
     },
     "passive": {
       "stage_counts": {
@@ -49,88 +123,242 @@
           "continuous": 26,
           "discrete": 2
         }
-      }
+      },
+      "ledger": [
+        {
+          "stage": 4,
+          "label": "Stage 04 - Structural redesign",
+          "count_before": 44,
+          "dropped": [
+            "distance_to_center_line",
+            "is_central_lane",
+            "is_deep_zone",
+            "is_high_zone",
+            "screens_top_option",
+            "zone_defensive_value"
+          ],
+          "engineered": [
+            "top_option_1_angle_from_ball",
+            "top_option_1_distance_from_ball",
+            "top_option_1_dx",
+            "top_option_1_dy",
+            "top_option_2_angle_from_ball",
+            "top_option_2_distance_from_ball",
+            "top_option_2_dx",
+            "top_option_2_dy",
+            "top_option_3_angle_from_ball",
+            "top_option_3_distance_from_ball",
+            "top_option_3_dx",
+            "top_option_3_dy"
+          ],
+          "count_after": 50,
+          "source": "reports/analysis/shot_target/EDA_PIPELINE_LOG.html"
+        },
+        {
+          "stage": 5,
+          "label": "Stage 05 - Collapse-tier resolution",
+          "count_before": 50,
+          "dropped": [
+            "defender_zone",
+            "distance_to_attacking_box",
+            "distance_to_attacking_goal",
+            "distance_to_defending_box",
+            "distance_to_defending_goal"
+          ],
+          "engineered": [],
+          "count_after": 45,
+          "source": "reports/analysis/shot_target/EDA_PIPELINE_LOG.html"
+        },
+        {
+          "stage": 6,
+          "label": "Stage 06 - Drop raw option coordinates",
+          "count_before": 45,
+          "dropped": [
+            "top_option_1_target_x",
+            "top_option_1_target_y",
+            "top_option_2_target_x",
+            "top_option_2_target_y",
+            "top_option_3_target_x",
+            "top_option_3_target_y"
+          ],
+          "engineered": [],
+          "count_after": 39,
+          "source": "reports/analysis/shot_target/EDA_PIPELINE_LOG.html"
+        },
+        {
+          "stage": 9,
+          "label": "Stage 09 - Multicollinearity (VIF)",
+          "count_before": 39,
+          "dropped": [],
+          "engineered": [],
+          "count_after": 39,
+          "source": "reports/analysis/shot_target/EDA_PIPELINE_LOG.html"
+        },
+        {
+          "stage": 10,
+          "label": "Stage 10 - Leakage audit",
+          "count_before": 39,
+          "dropped": [
+            "has_screened_outcome"
+          ],
+          "engineered": [],
+          "count_after": 38,
+          "source": "reports/analysis/shot_target/EDA_PIPELINE_LOG.html"
+        }
+      ]
     }
   },
   "assertions": [
     {
       "label": "active candidate pool (stage 01)",
       "actual": 51,
-      "expected": null,
+      "expected": 51,
       "passed": true
     },
     {
       "label": "active final locked",
       "actual": 34,
-      "expected": null,
+      "expected": 34,
       "passed": true
     },
     {
       "label": "passive candidate pool (stage 01)",
       "actual": 44,
-      "expected": null,
+      "expected": 44,
       "passed": true
     },
     {
       "label": "passive final locked",
       "actual": 38,
-      "expected": null,
+      "expected": 38,
       "passed": true
     },
     {
-      "label": "active pipeline endpoint 51->34 (self-computed)",
+      "label": "active pipeline endpoint 51->34",
       "actual": "51->34",
-      "expected": null,
+      "expected": "51->34",
       "passed": true
     },
     {
-      "label": "passive pipeline endpoint 44->38 (self-computed)",
+      "label": "passive pipeline endpoint 44->38",
       "actual": "44->38",
-      "expected": null,
+      "expected": "44->38",
       "passed": true
     },
     {
       "label": "active candidate type breakdown (cat/bool/cont/disc)",
-      "actual": {
-        "categorical": 9,
-        "boolean": 13,
-        "continuous": 18,
-        "discrete": 11
-      },
-      "expected": null,
+      "actual": [
+        9,
+        13,
+        18,
+        11
+      ],
+      "expected": [
+        9,
+        13,
+        18,
+        11
+      ],
       "passed": true
     },
     {
       "label": "active locked type breakdown (cat/bool/cont/disc)",
-      "actual": {
-        "categorical": 6,
-        "boolean": 9,
-        "continuous": 12,
-        "discrete": 7
-      },
-      "expected": null,
+      "actual": [
+        6,
+        9,
+        12,
+        7
+      ],
+      "expected": [
+        6,
+        9,
+        12,
+        7
+      ],
       "passed": true
     },
     {
       "label": "passive candidate type breakdown (cat/bool/cont/disc)",
-      "actual": {
-        "categorical": 5,
-        "boolean": 11,
-        "continuous": 26,
-        "discrete": 2
-      },
-      "expected": null,
+      "actual": [
+        5,
+        11,
+        26,
+        2
+      ],
+      "expected": [
+        5,
+        11,
+        26,
+        2
+      ],
       "passed": true
     },
     {
       "label": "passive locked type breakdown (cat/bool/cont/disc)",
-      "actual": {
-        "categorical": 4,
-        "boolean": 6,
-        "continuous": 26,
-        "discrete": 2
-      },
-      "expected": null,
+      "actual": [
+        4,
+        6,
+        26,
+        2
+      ],
+      "expected": [
+        4,
+        6,
+        26,
+        2
+      ],
+      "passed": true
+    },
+    {
+      "label": "active stage-count sequence (candidate->04->05->06->09->10)",
+      "actual": [
+        51,
+        44,
+        36,
+        36,
+        34,
+        34
+      ],
+      "expected": [
+        51,
+        44,
+        36,
+        36,
+        34,
+        34
+      ],
+      "passed": true
+    },
+    {
+      "label": "passive stage-count sequence (candidate->04->05->06->09->10)",
+      "actual": [
+        44,
+        50,
+        45,
+        39,
+        39,
+        38
+      ],
+      "expected": [
+        44,
+        50,
+        45,
+        39,
+        39,
+        38
+      ],
+      "passed": true
+    },
+    {
+      "label": "active pre-count exclusions",
+      "actual": 16,
+      "expected": 16,
+      "passed": true
+    },
+    {
+      "label": "passive pre-count exclusions",
+      "actual": 11,
+      "expected": 11,
       "passed": true
     }
   ],
@@ -141,12 +369,34 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal (confound: crowded/dangerous zones are both harder to fully capture on camera and where shots cluster)",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "low",
+            "n": 49899,
+            "shot_rate_pct": 8.497
+          },
+          {
+            "value": "medium",
+            "n": 6167,
+            "shot_rate_pct": 2.076
+          },
+          {
+            "value": "high",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "ball_inside_visible_area",
@@ -154,12 +404,29 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "True",
+            "n": 53162,
+            "shot_rate_pct": 7.362
+          },
+          {
+            "value": "False",
+            "n": 2906,
+            "shot_rate_pct": 15.623
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "action_inside_visible_area",
@@ -167,12 +434,14 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": null,
+      "profile_reason": "column 'action_inside_visible_area' not present in data/features/player_defensive_actions.parquet"
     },
     {
       "name": "local_5m_region_fully_visible",
@@ -180,12 +449,29 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "True",
+            "n": 52138,
+            "shot_rate_pct": 7.419
+          },
+          {
+            "value": "False",
+            "n": 3930,
+            "shot_rate_pct": 12.723
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "local_10m_region_fully_visible",
@@ -193,12 +479,29 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "True",
+            "n": 43199,
+            "shot_rate_pct": 7.634
+          },
+          {
+            "value": "False",
+            "n": 12869,
+            "shot_rate_pct": 8.315
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "visibility_limited",
@@ -206,12 +509,29 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "True",
+            "n": 49899,
+            "shot_rate_pct": 8.497
+          },
+          {
+            "value": "False",
+            "n": 6169,
+            "shot_rate_pct": 2.075
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "visible_area_polygon_area",
@@ -219,12 +539,69 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them) -- type unresolved, treated as continuous by cardinality",
+        "bins": [
+          {
+            "bin": "(494.055, 1642.454]",
+            "n": 5607,
+            "shot_rate_pct": 17.335
+          },
+          {
+            "bin": "(1642.454, 1885.847]",
+            "n": 5607,
+            "shot_rate_pct": 12.698
+          },
+          {
+            "bin": "(1885.847, 2086.658]",
+            "n": 5607,
+            "shot_rate_pct": 10.469
+          },
+          {
+            "bin": "(2086.658, 2279.544]",
+            "n": 5606,
+            "shot_rate_pct": 9.062
+          },
+          {
+            "bin": "(2279.544, 2506.546]",
+            "n": 5607,
+            "shot_rate_pct": 7.829
+          },
+          {
+            "bin": "(2506.546, 2781.409]",
+            "n": 5607,
+            "shot_rate_pct": 6.224
+          },
+          {
+            "bin": "(2781.409, 3095.93]",
+            "n": 5606,
+            "shot_rate_pct": 5.405
+          },
+          {
+            "bin": "(3095.93, 3451.541]",
+            "n": 5607,
+            "shot_rate_pct": 3.959
+          },
+          {
+            "bin": "(3451.541, 3892.406]",
+            "n": 5607,
+            "shot_rate_pct": 2.854
+          },
+          {
+            "bin": "(3892.406, 7664.585]",
+            "n": 5607,
+            "shot_rate_pct": 2.069
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "visible_area_fraction_of_pitch",
@@ -232,12 +609,69 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them) -- type unresolved, treated as continuous by cardinality",
+        "bins": [
+          {
+            "bin": "(0.050499999999999996, 0.171]",
+            "n": 5607,
+            "shot_rate_pct": 17.335
+          },
+          {
+            "bin": "(0.171, 0.196]",
+            "n": 5607,
+            "shot_rate_pct": 12.698
+          },
+          {
+            "bin": "(0.196, 0.217]",
+            "n": 5607,
+            "shot_rate_pct": 10.469
+          },
+          {
+            "bin": "(0.217, 0.237]",
+            "n": 5606,
+            "shot_rate_pct": 9.062
+          },
+          {
+            "bin": "(0.237, 0.261]",
+            "n": 5607,
+            "shot_rate_pct": 7.829
+          },
+          {
+            "bin": "(0.261, 0.29]",
+            "n": 5607,
+            "shot_rate_pct": 6.224
+          },
+          {
+            "bin": "(0.29, 0.322]",
+            "n": 5606,
+            "shot_rate_pct": 5.405
+          },
+          {
+            "bin": "(0.322, 0.36]",
+            "n": 5607,
+            "shot_rate_pct": 3.959
+          },
+          {
+            "bin": "(0.36, 0.405]",
+            "n": 5607,
+            "shot_rate_pct": 2.854
+          },
+          {
+            "bin": "(0.405, 0.798]",
+            "n": 5607,
+            "shot_rate_pct": 2.069
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "freeze_frame_count",
@@ -245,12 +679,64 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "data-collection artifact, not a defensive feature",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them) -- type unresolved, treated as continuous by cardinality",
+        "bins": [
+          {
+            "bin": "(0.999, 11.0]",
+            "n": 6160,
+            "shot_rate_pct": 7.273
+          },
+          {
+            "bin": "(11.0, 13.0]",
+            "n": 7043,
+            "shot_rate_pct": 7.994
+          },
+          {
+            "bin": "(13.0, 14.0]",
+            "n": 5119,
+            "shot_rate_pct": 7.873
+          },
+          {
+            "bin": "(14.0, 15.0]",
+            "n": 6087,
+            "shot_rate_pct": 8.28
+          },
+          {
+            "bin": "(15.0, 16.0]",
+            "n": 6626,
+            "shot_rate_pct": 7.546
+          },
+          {
+            "bin": "(16.0, 17.0]",
+            "n": 7054,
+            "shot_rate_pct": 7.825
+          },
+          {
+            "bin": "(17.0, 18.0]",
+            "n": 6957,
+            "shot_rate_pct": 8.279
+          },
+          {
+            "bin": "(18.0, 19.0]",
+            "n": 5771,
+            "shot_rate_pct": 7.867
+          },
+          {
+            "bin": "(19.0, 22.0]",
+            "n": 5251,
+            "shot_rate_pct": 7.008
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "carrier_x",
@@ -258,12 +744,14 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "verified 100%-duplicate of ball_x (already dropped from the passive parquet)",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": null,
+      "profile_reason": "column 'carrier_x' not present in data/features/player_defensive_actions.parquet"
     },
     {
       "name": "carrier_y",
@@ -271,12 +759,14 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "verified 100%-duplicate of ball_y (already dropped from the passive parquet)",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": null,
+      "profile_reason": "column 'carrier_y' not present in data/features/player_defensive_actions.parquet"
     },
     {
       "name": "action_x",
@@ -284,12 +774,69 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "verified 100%-duplicate of ball_x as of this pass -- known unresolved data issue",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them) -- type unresolved, treated as continuous by cardinality",
+        "bins": [
+          {
+            "bin": "(0.699, 28.1]",
+            "n": 5612,
+            "shot_rate_pct": 0.784
+          },
+          {
+            "bin": "(28.1, 43.4]",
+            "n": 5637,
+            "shot_rate_pct": 1.401
+          },
+          {
+            "bin": "(43.4, 55.3]",
+            "n": 5602,
+            "shot_rate_pct": 1.714
+          },
+          {
+            "bin": "(55.3, 65.5]",
+            "n": 5613,
+            "shot_rate_pct": 2.387
+          },
+          {
+            "bin": "(65.5, 75.4]",
+            "n": 5627,
+            "shot_rate_pct": 2.968
+          },
+          {
+            "bin": "(75.4, 84.2]",
+            "n": 5561,
+            "shot_rate_pct": 5.089
+          },
+          {
+            "bin": "(84.2, 92.9]",
+            "n": 5612,
+            "shot_rate_pct": 9.177
+          },
+          {
+            "bin": "(92.9, 101.3]",
+            "n": 5604,
+            "shot_rate_pct": 14.507
+          },
+          {
+            "bin": "(101.3, 109.5]",
+            "n": 5653,
+            "shot_rate_pct": 19.441
+          },
+          {
+            "bin": "(109.5, 119.9]",
+            "n": 5547,
+            "shot_rate_pct": 20.516
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "action_y",
@@ -297,12 +844,69 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "verified 100%-duplicate of ball_y as of this pass -- known unresolved data issue",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them) -- type unresolved, treated as continuous by cardinality",
+        "bins": [
+          {
+            "bin": "(-0.001, 8.8]",
+            "n": 5613,
+            "shot_rate_pct": 2.102
+          },
+          {
+            "bin": "(8.8, 17.5]",
+            "n": 5612,
+            "shot_rate_pct": 4.401
+          },
+          {
+            "bin": "(17.5, 25.1]",
+            "n": 5615,
+            "shot_rate_pct": 7.053
+          },
+          {
+            "bin": "(25.1, 32.88]",
+            "n": 5587,
+            "shot_rate_pct": 11.115
+          },
+          {
+            "bin": "(32.88, 40.1]",
+            "n": 5629,
+            "shot_rate_pct": 15.242
+          },
+          {
+            "bin": "(40.1, 47.1]",
+            "n": 5597,
+            "shot_rate_pct": 14.329
+          },
+          {
+            "bin": "(47.1, 54.7]",
+            "n": 5601,
+            "shot_rate_pct": 10.534
+          },
+          {
+            "bin": "(54.7, 62.4]",
+            "n": 5622,
+            "shot_rate_pct": 6.955
+          },
+          {
+            "bin": "(62.4, 70.9]",
+            "n": 5625,
+            "shot_rate_pct": 4.0
+          },
+          {
+            "bin": "(70.9, 79.9]",
+            "n": 5567,
+            "shot_rate_pct": 2.156
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "action_changed_possession",
@@ -310,12 +914,29 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "structural zero (0.00% shot rate by target-window definition), not a genuine finding",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "False",
+            "n": 51406,
+            "shot_rate_pct": 8.497
+          },
+          {
+            "value": "True",
+            "n": 4662,
+            "shot_rate_pct": 0.0
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "action_ended_possession",
@@ -323,12 +944,29 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "structural zero (0.00% shot rate by target-window definition), not a genuine finding",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "False",
+            "n": 51406,
+            "shot_rate_pct": 8.497
+          },
+          {
+            "value": "True",
+            "n": 4662,
+            "shot_rate_pct": 0.0
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "action_won_possession",
@@ -336,12 +974,29 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "structural zero (0.00% shot rate by target-window definition), not a genuine finding",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "False",
+            "n": 52463,
+            "shot_rate_pct": 8.326
+          },
+          {
+            "value": "True",
+            "n": 3605,
+            "shot_rate_pct": 0.0
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "defender_attacker_gap_x",
@@ -349,8 +1004,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 5,
+      "stage_label": "Stage 05 - Collapse-tier resolution (Cluster 2 MERGE: attacker/defender centroids replaced by defender_attacker_gap_x/y)",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -410,7 +1065,8 @@
             "shot_rate_pct": 3.52
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "defender_attacker_gap_y",
@@ -418,8 +1074,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 5,
+      "stage_label": "Stage 05 - Collapse-tier resolution (Cluster 2 MERGE: attacker/defender centroids replaced by defender_attacker_gap_x/y)",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -479,7 +1135,8 @@
             "shot_rate_pct": 6.521
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "action_family",
@@ -487,8 +1144,8 @@
       "type": "categorical",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 5,
-      "stage_label": "Stage 5 - Correlation DROP-tier verdict",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (DROP-tier / Type 1&2 REVIEW resolution applied)",
       "reason": "CORRELATION_ANALYSIS DROP tier: Cramer's V=1.0 vs event_type (kept, more granular)",
       "evidence": {
         "metric": "cramers_v",
@@ -496,7 +1153,39 @@
         "vs": "event_type"
       },
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "pressure",
+            "n": 27478,
+            "shot_rate_pct": 7.333
+          },
+          {
+            "value": "intervention",
+            "n": 10105,
+            "shot_rate_pct": 7.58
+          },
+          {
+            "value": "recovery",
+            "n": 8932,
+            "shot_rate_pct": 10.367
+          },
+          {
+            "value": "contest",
+            "n": 6910,
+            "shot_rate_pct": 9.045
+          },
+          {
+            "value": "discipline",
+            "n": 2643,
+            "shot_rate_pct": 1.362
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "action_retained_defensive_team_control",
@@ -525,7 +1214,8 @@
             "shot_rate_pct": 7.287
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "action_was_under_opponent_possession",
@@ -554,7 +1244,8 @@
             "shot_rate_pct": 9.301
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "action_zone",
@@ -563,11 +1254,63 @@
       "origin": "candidate",
       "fate": "dropped",
       "stage": 5,
-      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "stage_label": "Stage 05 - Collapse-tier resolution (clusters 1-3, drop-to-one)",
       "reason": "Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "attacking_third_center",
+            "n": 15408,
+            "shot_rate_pct": 20.035
+          },
+          {
+            "value": "middle_third_center",
+            "n": 9603,
+            "shot_rate_pct": 3.353
+          },
+          {
+            "value": "middle_third_left_flank",
+            "n": 5941,
+            "shot_rate_pct": 2.104
+          },
+          {
+            "value": "middle_third_right_flank",
+            "n": 5628,
+            "shot_rate_pct": 1.955
+          },
+          {
+            "value": "defensive_third_center",
+            "n": 5415,
+            "shot_rate_pct": 1.237
+          },
+          {
+            "value": "attacking_third_right_flank",
+            "n": 5010,
+            "shot_rate_pct": 6.387
+          },
+          {
+            "value": "attacking_third_left_flank",
+            "n": 4672,
+            "shot_rate_pct": 6.528
+          },
+          {
+            "value": "defensive_third_left_flank",
+            "n": 2224,
+            "shot_rate_pct": 1.214
+          },
+          {
+            "value": "defensive_third_right_flank",
+            "n": 2167,
+            "shot_rate_pct": 0.231
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "angle_to_attacking_goal",
@@ -636,7 +1379,8 @@
             "shot_rate_pct": 11.432
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "attacker_centroid_x",
@@ -644,12 +1388,69 @@
       "type": "continuous",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 6,
-      "stage_label": "Stage 6 - Collapse-tier cluster merge (engineered replacement)",
+      "stage": 5,
+      "stage_label": "Stage 05 - Collapse-tier resolution (clusters 1-3, drop-to-one)",
       "reason": "Cluster 2 (attacker/defender centroid, MERGE not drop): r=0.984 with defender_centroid_x -- replaced by defender_attacker_gap_x/y (defensive compactness relative to attacking shape), not simply dropped, since the two centroids describe different teams' shapes",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56037,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(1.7690000000000001, 25.609]",
+            "n": 5604,
+            "shot_rate_pct": 7.798
+          },
+          {
+            "bin": "(25.609, 39.398]",
+            "n": 5604,
+            "shot_rate_pct": 1.713
+          },
+          {
+            "bin": "(39.398, 51.116]",
+            "n": 5603,
+            "shot_rate_pct": 2.16
+          },
+          {
+            "bin": "(51.116, 61.726]",
+            "n": 5604,
+            "shot_rate_pct": 2.284
+          },
+          {
+            "bin": "(61.726, 71.425]",
+            "n": 5604,
+            "shot_rate_pct": 2.373
+          },
+          {
+            "bin": "(71.425, 80.897]",
+            "n": 5603,
+            "shot_rate_pct": 4.426
+          },
+          {
+            "bin": "(80.897, 89.626]",
+            "n": 5604,
+            "shot_rate_pct": 6.799
+          },
+          {
+            "bin": "(89.626, 97.418]",
+            "n": 5603,
+            "shot_rate_pct": 11.726
+          },
+          {
+            "bin": "(97.418, 103.669]",
+            "n": 5604,
+            "shot_rate_pct": 17.363
+          },
+          {
+            "bin": "(103.669, 118.845]",
+            "n": 5604,
+            "shot_rate_pct": 21.288
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "attacker_centroid_y",
@@ -657,12 +1458,69 @@
       "type": "continuous",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 6,
-      "stage_label": "Stage 6 - Collapse-tier cluster merge (engineered replacement)",
+      "stage": 5,
+      "stage_label": "Stage 05 - Collapse-tier resolution (clusters 1-3, drop-to-one)",
       "reason": "Cluster 2 (attacker/defender centroid, MERGE not drop): see attacker_centroid_x",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56037,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(2.6590000000000003, 23.548]",
+            "n": 5604,
+            "shot_rate_pct": 3.89
+          },
+          {
+            "bin": "(23.548, 28.673]",
+            "n": 5604,
+            "shot_rate_pct": 4.854
+          },
+          {
+            "bin": "(28.673, 32.641]",
+            "n": 5603,
+            "shot_rate_pct": 7.853
+          },
+          {
+            "bin": "(32.641, 36.302]",
+            "n": 5604,
+            "shot_rate_pct": 11.064
+          },
+          {
+            "bin": "(36.302, 39.877]",
+            "n": 5604,
+            "shot_rate_pct": 11.884
+          },
+          {
+            "bin": "(39.877, 43.526]",
+            "n": 5603,
+            "shot_rate_pct": 12.279
+          },
+          {
+            "bin": "(43.526, 47.068]",
+            "n": 5604,
+            "shot_rate_pct": 9.85
+          },
+          {
+            "bin": "(47.068, 51.095]",
+            "n": 5603,
+            "shot_rate_pct": 7.746
+          },
+          {
+            "bin": "(51.095, 56.089]",
+            "n": 5604,
+            "shot_rate_pct": 5.353
+          },
+          {
+            "bin": "(56.089, 81.615]",
+            "n": 5604,
+            "shot_rate_pct": 3.158
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "attacker_defender_ratio",
@@ -731,7 +1589,8 @@
             "shot_rate_pct": 3.096
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "attacker_spread",
@@ -800,7 +1659,8 @@
             "shot_rate_pct": 1.588
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "attackers_within_10m",
@@ -869,7 +1729,8 @@
             "shot_rate_pct": 0.0
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "attackers_within_5m",
@@ -923,7 +1784,8 @@
             "shot_rate_pct": 0.0
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "attacking_goal_centrality",
@@ -992,7 +1854,8 @@
             "shot_rate_pct": 15.171
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "counterpress",
@@ -1021,7 +1884,8 @@
             "shot_rate_pct": 4.074
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "defender_centroid_x",
@@ -1029,12 +1893,69 @@
       "type": "continuous",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 6,
-      "stage_label": "Stage 6 - Collapse-tier cluster merge (engineered replacement)",
+      "stage": 5,
+      "stage_label": "Stage 05 - Collapse-tier resolution (clusters 1-3, drop-to-one)",
       "reason": "Cluster 2 (attacker/defender centroid, MERGE not drop): see attacker_centroid_x",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 55992,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(1.776, 29.444]",
+            "n": 5600,
+            "shot_rate_pct": 7.911
+          },
+          {
+            "bin": "(29.444, 42.944]",
+            "n": 5599,
+            "shot_rate_pct": 1.715
+          },
+          {
+            "bin": "(42.944, 54.725]",
+            "n": 5599,
+            "shot_rate_pct": 2.125
+          },
+          {
+            "bin": "(54.725, 65.767]",
+            "n": 5599,
+            "shot_rate_pct": 2.036
+          },
+          {
+            "bin": "(65.767, 75.58]",
+            "n": 5599,
+            "shot_rate_pct": 2.893
+          },
+          {
+            "bin": "(75.58, 85.313]",
+            "n": 5599,
+            "shot_rate_pct": 4.554
+          },
+          {
+            "bin": "(85.313, 94.208]",
+            "n": 5599,
+            "shot_rate_pct": 6.519
+          },
+          {
+            "bin": "(94.208, 101.383]",
+            "n": 5599,
+            "shot_rate_pct": 11.198
+          },
+          {
+            "bin": "(101.383, 106.925]",
+            "n": 5599,
+            "shot_rate_pct": 17.7
+          },
+          {
+            "bin": "(106.925, 119.959]",
+            "n": 5600,
+            "shot_rate_pct": 21.304
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "defender_centroid_y",
@@ -1042,12 +1963,69 @@
       "type": "continuous",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 6,
-      "stage_label": "Stage 6 - Collapse-tier cluster merge (engineered replacement)",
+      "stage": 5,
+      "stage_label": "Stage 05 - Collapse-tier resolution (clusters 1-3, drop-to-one)",
       "reason": "Cluster 2 (attacker/defender centroid, MERGE not drop): see attacker_centroid_x",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 55992,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(3.4890000000000003, 24.634]",
+            "n": 5600,
+            "shot_rate_pct": 2.679
+          },
+          {
+            "bin": "(24.634, 29.441]",
+            "n": 5599,
+            "shot_rate_pct": 5.019
+          },
+          {
+            "bin": "(29.441, 33.096]",
+            "n": 5599,
+            "shot_rate_pct": 8.055
+          },
+          {
+            "bin": "(33.096, 36.468]",
+            "n": 5599,
+            "shot_rate_pct": 11.359
+          },
+          {
+            "bin": "(36.468, 40.037]",
+            "n": 5599,
+            "shot_rate_pct": 12.627
+          },
+          {
+            "bin": "(40.037, 43.552]",
+            "n": 5599,
+            "shot_rate_pct": 12.788
+          },
+          {
+            "bin": "(43.552, 46.944]",
+            "n": 5599,
+            "shot_rate_pct": 10.288
+          },
+          {
+            "bin": "(46.944, 50.519]",
+            "n": 5599,
+            "shot_rate_pct": 7.519
+          },
+          {
+            "bin": "(50.519, 55.259]",
+            "n": 5599,
+            "shot_rate_pct": 4.983
+          },
+          {
+            "bin": "(55.259, 84.459]",
+            "n": 5600,
+            "shot_rate_pct": 2.643
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "defender_spread",
@@ -1116,7 +2094,8 @@
             "shot_rate_pct": 2.839
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "defenders_between_ball_and_attacking_goal",
@@ -1195,7 +2174,8 @@
             "shot_rate_pct": 33.488
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "defenders_within_10m",
@@ -1274,7 +2254,8 @@
             "shot_rate_pct": 50.0
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "defenders_within_5m",
@@ -1338,7 +2319,8 @@
             "shot_rate_pct": 50.0
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "distance_to_attacking_box",
@@ -1402,7 +2384,8 @@
             "shot_rate_pct": 0.769
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "distance_to_attacking_goal",
@@ -1411,11 +2394,68 @@
       "origin": "candidate",
       "fate": "dropped",
       "stage": 5,
-      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "stage_label": "Stage 05 - Collapse-tier resolution (clusters 1-3, drop-to-one)",
       "reason": "Cluster 1 (goal-proximity, drop-to-one): mutually r/eta >= 0.94 with distance_to_attacking_box, distance_to_defending_goal/box, action_zone -- kept distance_to_attacking_box (is_in_attacking_box lift +11.99pp is the most predictive single cut)",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(1.139, 16.858]",
+            "n": 5607,
+            "shot_rate_pct": 25.468
+          },
+          {
+            "bin": "(16.858, 27.109]",
+            "n": 5607,
+            "shot_rate_pct": 19.797
+          },
+          {
+            "bin": "(27.109, 35.56]",
+            "n": 5607,
+            "shot_rate_pct": 13.198
+          },
+          {
+            "bin": "(35.56, 43.313]",
+            "n": 5606,
+            "shot_rate_pct": 6.118
+          },
+          {
+            "bin": "(43.313, 51.24]",
+            "n": 5607,
+            "shot_rate_pct": 4.673
+          },
+          {
+            "bin": "(51.24, 59.272]",
+            "n": 5607,
+            "shot_rate_pct": 2.568
+          },
+          {
+            "bin": "(59.272, 69.347]",
+            "n": 5606,
+            "shot_rate_pct": 2.444
+          },
+          {
+            "bin": "(69.347, 80.53]",
+            "n": 5607,
+            "shot_rate_pct": 1.659
+          },
+          {
+            "bin": "(80.53, 94.764]",
+            "n": 5607,
+            "shot_rate_pct": 1.195
+          },
+          {
+            "bin": "(94.764, 123.433]",
+            "n": 5607,
+            "shot_rate_pct": 0.785
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "distance_to_center_line",
@@ -1423,8 +2463,8 @@
       "type": "continuous",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 5,
-      "stage_label": "Stage 5 - Correlation DROP-tier verdict",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (DROP-tier / Type 1&2 REVIEW resolution applied)",
       "reason": "CORRELATION_ANALYSIS DROP tier: Spearman r=-1.0 vs attacking_goal_centrality (kept)",
       "evidence": {
         "metric": "correlation_r",
@@ -1432,7 +2472,64 @@
         "vs": "attacking_goal_centrality"
       },
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.001, 3.5]",
+            "n": 5688,
+            "shot_rate_pct": 15.295
+          },
+          {
+            "bin": "(3.5, 7.1]",
+            "n": 5538,
+            "shot_rate_pct": 14.265
+          },
+          {
+            "bin": "(7.1, 11.1]",
+            "n": 5718,
+            "shot_rate_pct": 11.612
+          },
+          {
+            "bin": "(11.1, 14.8]",
+            "n": 5520,
+            "shot_rate_pct": 9.909
+          },
+          {
+            "bin": "(14.8, 18.4]",
+            "n": 5642,
+            "shot_rate_pct": 7.958
+          },
+          {
+            "bin": "(18.4, 22.4]",
+            "n": 5545,
+            "shot_rate_pct": 6.096
+          },
+          {
+            "bin": "(22.4, 26.8]",
+            "n": 5649,
+            "shot_rate_pct": 4.673
+          },
+          {
+            "bin": "(26.8, 31.0]",
+            "n": 5598,
+            "shot_rate_pct": 3.733
+          },
+          {
+            "bin": "(31.0, 34.7]",
+            "n": 5708,
+            "shot_rate_pct": 2.488
+          },
+          {
+            "bin": "(34.7, 40.0]",
+            "n": 5462,
+            "shot_rate_pct": 1.739
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "distance_to_defending_box",
@@ -1441,11 +2538,68 @@
       "origin": "candidate",
       "fate": "dropped",
       "stage": 5,
-      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "stage_label": "Stage 05 - Collapse-tier resolution (clusters 1-3, drop-to-one)",
       "reason": "Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.001, 12.748]",
+            "n": 5607,
+            "shot_rate_pct": 0.892
+          },
+          {
+            "bin": "(12.748, 26.323]",
+            "n": 5608,
+            "shot_rate_pct": 1.391
+          },
+          {
+            "bin": "(26.323, 37.8]",
+            "n": 5628,
+            "shot_rate_pct": 1.599
+          },
+          {
+            "bin": "(37.8, 48.045]",
+            "n": 5584,
+            "shot_rate_pct": 2.471
+          },
+          {
+            "bin": "(48.045, 57.8]",
+            "n": 5625,
+            "shot_rate_pct": 2.933
+          },
+          {
+            "bin": "(57.8, 66.6]",
+            "n": 5592,
+            "shot_rate_pct": 5.258
+          },
+          {
+            "bin": "(66.6, 75.2]",
+            "n": 5641,
+            "shot_rate_pct": 9.218
+          },
+          {
+            "bin": "(75.2, 83.6]",
+            "n": 5596,
+            "shot_rate_pct": 14.528
+          },
+          {
+            "bin": "(83.6, 91.587]",
+            "n": 5581,
+            "shot_rate_pct": 19.351
+          },
+          {
+            "bin": "(91.587, 102.018]",
+            "n": 5606,
+            "shot_rate_pct": 20.335
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "distance_to_defending_goal",
@@ -1454,11 +2608,68 @@
       "origin": "candidate",
       "fate": "dropped",
       "stage": 5,
-      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "stage_label": "Stage 05 - Collapse-tier resolution (clusters 1-3, drop-to-one)",
       "reason": "Cluster 1 (goal-proximity, drop-to-one): see distance_to_attacking_goal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(1.441, 36.359]",
+            "n": 5608,
+            "shot_rate_pct": 1.07
+          },
+          {
+            "bin": "(36.359, 49.783]",
+            "n": 5606,
+            "shot_rate_pct": 1.409
+          },
+          {
+            "bin": "(49.783, 59.805]",
+            "n": 5607,
+            "shot_rate_pct": 1.569
+          },
+          {
+            "bin": "(59.805, 69.918]",
+            "n": 5606,
+            "shot_rate_pct": 2.604
+          },
+          {
+            "bin": "(69.918, 78.982]",
+            "n": 5607,
+            "shot_rate_pct": 3.317
+          },
+          {
+            "bin": "(78.982, 87.564]",
+            "n": 5607,
+            "shot_rate_pct": 5.457
+          },
+          {
+            "bin": "(87.564, 95.553]",
+            "n": 5607,
+            "shot_rate_pct": 9.773
+          },
+          {
+            "bin": "(95.553, 103.744]",
+            "n": 5606,
+            "shot_rate_pct": 14.27
+          },
+          {
+            "bin": "(103.744, 110.712]",
+            "n": 5608,
+            "shot_rate_pct": 20.007
+          },
+          {
+            "bin": "(110.712, 123.899]",
+            "n": 5606,
+            "shot_rate_pct": 18.427
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "event_type",
@@ -1517,7 +2728,8 @@
             "shot_rate_pct": 5.858
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "events_elapsed_in_possession",
@@ -1526,11 +2738,953 @@
       "origin": "candidate",
       "fate": "dropped",
       "stage": 5,
-      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "stage_label": "Stage 05 - Collapse-tier resolution (clusters 1-3, drop-to-one)",
       "reason": "Cluster 3 (possession clock, drop-to-one): mutually r=0.90-0.95 with possession_elapsed_seconds/phase_transitions_observed_so_far -- kept possession_elapsed_seconds (most granular, continuous)",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "1",
+            "n": 4534,
+            "shot_rate_pct": 1.919
+          },
+          {
+            "value": "3",
+            "n": 2926,
+            "shot_rate_pct": 9.979
+          },
+          {
+            "value": "4",
+            "n": 2837,
+            "shot_rate_pct": 7.014
+          },
+          {
+            "value": "2",
+            "n": 2660,
+            "shot_rate_pct": 7.857
+          },
+          {
+            "value": "5",
+            "n": 2302,
+            "shot_rate_pct": 7.211
+          },
+          {
+            "value": "7",
+            "n": 2245,
+            "shot_rate_pct": 5.969
+          },
+          {
+            "value": "6",
+            "n": 2207,
+            "shot_rate_pct": 6.434
+          },
+          {
+            "value": "8",
+            "n": 1958,
+            "shot_rate_pct": 6.384
+          },
+          {
+            "value": "10",
+            "n": 1817,
+            "shot_rate_pct": 6.439
+          },
+          {
+            "value": "9",
+            "n": 1797,
+            "shot_rate_pct": 5.287
+          },
+          {
+            "value": "11",
+            "n": 1612,
+            "shot_rate_pct": 7.32
+          },
+          {
+            "value": "12",
+            "n": 1489,
+            "shot_rate_pct": 6.447
+          },
+          {
+            "value": "13",
+            "n": 1439,
+            "shot_rate_pct": 8.27
+          },
+          {
+            "value": "14",
+            "n": 1334,
+            "shot_rate_pct": 6.522
+          },
+          {
+            "value": "15",
+            "n": 1250,
+            "shot_rate_pct": 8.48
+          },
+          {
+            "value": "16",
+            "n": 1151,
+            "shot_rate_pct": 8.601
+          },
+          {
+            "value": "17",
+            "n": 1109,
+            "shot_rate_pct": 6.222
+          },
+          {
+            "value": "18",
+            "n": 1082,
+            "shot_rate_pct": 7.579
+          },
+          {
+            "value": "19",
+            "n": 1024,
+            "shot_rate_pct": 9.57
+          },
+          {
+            "value": "20",
+            "n": 965,
+            "shot_rate_pct": 8.912
+          },
+          {
+            "value": "21",
+            "n": 928,
+            "shot_rate_pct": 8.836
+          },
+          {
+            "value": "22",
+            "n": 850,
+            "shot_rate_pct": 8.118
+          },
+          {
+            "value": "23",
+            "n": 790,
+            "shot_rate_pct": 10.253
+          },
+          {
+            "value": "24",
+            "n": 762,
+            "shot_rate_pct": 10.499
+          },
+          {
+            "value": "25",
+            "n": 717,
+            "shot_rate_pct": 8.089
+          },
+          {
+            "value": "26",
+            "n": 682,
+            "shot_rate_pct": 9.238
+          },
+          {
+            "value": "27",
+            "n": 648,
+            "shot_rate_pct": 9.722
+          },
+          {
+            "value": "29",
+            "n": 597,
+            "shot_rate_pct": 10.385
+          },
+          {
+            "value": "28",
+            "n": 591,
+            "shot_rate_pct": 10.998
+          },
+          {
+            "value": "30",
+            "n": 568,
+            "shot_rate_pct": 8.979
+          },
+          {
+            "value": "31",
+            "n": 553,
+            "shot_rate_pct": 10.85
+          },
+          {
+            "value": "33",
+            "n": 488,
+            "shot_rate_pct": 12.295
+          },
+          {
+            "value": "32",
+            "n": 487,
+            "shot_rate_pct": 13.142
+          },
+          {
+            "value": "34",
+            "n": 471,
+            "shot_rate_pct": 9.13
+          },
+          {
+            "value": "35",
+            "n": 465,
+            "shot_rate_pct": 12.473
+          },
+          {
+            "value": "36",
+            "n": 421,
+            "shot_rate_pct": 11.164
+          },
+          {
+            "value": "37",
+            "n": 406,
+            "shot_rate_pct": 11.823
+          },
+          {
+            "value": "38",
+            "n": 390,
+            "shot_rate_pct": 10.769
+          },
+          {
+            "value": "39",
+            "n": 350,
+            "shot_rate_pct": 9.714
+          },
+          {
+            "value": "40",
+            "n": 325,
+            "shot_rate_pct": 9.538
+          },
+          {
+            "value": "41",
+            "n": 325,
+            "shot_rate_pct": 8.615
+          },
+          {
+            "value": "43",
+            "n": 300,
+            "shot_rate_pct": 11.0
+          },
+          {
+            "value": "42",
+            "n": 287,
+            "shot_rate_pct": 10.453
+          },
+          {
+            "value": "44",
+            "n": 276,
+            "shot_rate_pct": 10.145
+          },
+          {
+            "value": "45",
+            "n": 249,
+            "shot_rate_pct": 8.835
+          },
+          {
+            "value": "46",
+            "n": 243,
+            "shot_rate_pct": 10.288
+          },
+          {
+            "value": "47",
+            "n": 227,
+            "shot_rate_pct": 10.573
+          },
+          {
+            "value": "49",
+            "n": 226,
+            "shot_rate_pct": 14.602
+          },
+          {
+            "value": "48",
+            "n": 226,
+            "shot_rate_pct": 5.752
+          },
+          {
+            "value": "50",
+            "n": 205,
+            "shot_rate_pct": 8.293
+          },
+          {
+            "value": "51",
+            "n": 204,
+            "shot_rate_pct": 10.294
+          },
+          {
+            "value": "52",
+            "n": 189,
+            "shot_rate_pct": 11.111
+          },
+          {
+            "value": "56",
+            "n": 174,
+            "shot_rate_pct": 8.046
+          },
+          {
+            "value": "55",
+            "n": 157,
+            "shot_rate_pct": 7.006
+          },
+          {
+            "value": "57",
+            "n": 157,
+            "shot_rate_pct": 12.739
+          },
+          {
+            "value": "58",
+            "n": 152,
+            "shot_rate_pct": 7.895
+          },
+          {
+            "value": "53",
+            "n": 148,
+            "shot_rate_pct": 6.757
+          },
+          {
+            "value": "54",
+            "n": 147,
+            "shot_rate_pct": 8.163
+          },
+          {
+            "value": "60",
+            "n": 127,
+            "shot_rate_pct": 9.449
+          },
+          {
+            "value": "61",
+            "n": 126,
+            "shot_rate_pct": 7.143
+          },
+          {
+            "value": "59",
+            "n": 121,
+            "shot_rate_pct": 6.612
+          },
+          {
+            "value": "62",
+            "n": 101,
+            "shot_rate_pct": 6.931
+          },
+          {
+            "value": "64",
+            "n": 97,
+            "shot_rate_pct": 7.216
+          },
+          {
+            "value": "68",
+            "n": 94,
+            "shot_rate_pct": 8.511
+          },
+          {
+            "value": "63",
+            "n": 93,
+            "shot_rate_pct": 6.452
+          },
+          {
+            "value": "65",
+            "n": 92,
+            "shot_rate_pct": 10.87
+          },
+          {
+            "value": "70",
+            "n": 86,
+            "shot_rate_pct": 16.279
+          },
+          {
+            "value": "67",
+            "n": 82,
+            "shot_rate_pct": 8.537
+          },
+          {
+            "value": "69",
+            "n": 81,
+            "shot_rate_pct": 7.407
+          },
+          {
+            "value": "66",
+            "n": 73,
+            "shot_rate_pct": 6.849
+          },
+          {
+            "value": "71",
+            "n": 72,
+            "shot_rate_pct": 6.944
+          },
+          {
+            "value": "74",
+            "n": 71,
+            "shot_rate_pct": 7.042
+          },
+          {
+            "value": "73",
+            "n": 70,
+            "shot_rate_pct": 10.0
+          },
+          {
+            "value": "72",
+            "n": 70,
+            "shot_rate_pct": 11.429
+          },
+          {
+            "value": "76",
+            "n": 68,
+            "shot_rate_pct": 7.353
+          },
+          {
+            "value": "77",
+            "n": 65,
+            "shot_rate_pct": 13.846
+          },
+          {
+            "value": "75",
+            "n": 63,
+            "shot_rate_pct": 12.698
+          },
+          {
+            "value": "79",
+            "n": 52,
+            "shot_rate_pct": 13.462
+          },
+          {
+            "value": "78",
+            "n": 51,
+            "shot_rate_pct": 5.882
+          },
+          {
+            "value": "80",
+            "n": 50,
+            "shot_rate_pct": 10.0
+          },
+          {
+            "value": "83",
+            "n": 47,
+            "shot_rate_pct": 10.638
+          },
+          {
+            "value": "85",
+            "n": 46,
+            "shot_rate_pct": 6.522
+          },
+          {
+            "value": "81",
+            "n": 45,
+            "shot_rate_pct": 26.667
+          },
+          {
+            "value": "82",
+            "n": 40,
+            "shot_rate_pct": 7.5
+          },
+          {
+            "value": "86",
+            "n": 39,
+            "shot_rate_pct": 20.513
+          },
+          {
+            "value": "88",
+            "n": 39,
+            "shot_rate_pct": 7.692
+          },
+          {
+            "value": "87",
+            "n": 39,
+            "shot_rate_pct": 10.256
+          },
+          {
+            "value": "89",
+            "n": 38,
+            "shot_rate_pct": 7.895
+          },
+          {
+            "value": "84",
+            "n": 37,
+            "shot_rate_pct": 10.811
+          },
+          {
+            "value": "91",
+            "n": 34,
+            "shot_rate_pct": 5.882
+          },
+          {
+            "value": "90",
+            "n": 31,
+            "shot_rate_pct": 12.903
+          },
+          {
+            "value": "95",
+            "n": 30,
+            "shot_rate_pct": 20.0
+          },
+          {
+            "value": "94",
+            "n": 29,
+            "shot_rate_pct": 13.793
+          },
+          {
+            "value": "92",
+            "n": 29,
+            "shot_rate_pct": 6.897
+          },
+          {
+            "value": "93",
+            "n": 28,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "99",
+            "n": 24,
+            "shot_rate_pct": 16.667
+          },
+          {
+            "value": "103",
+            "n": 23,
+            "shot_rate_pct": 13.043
+          },
+          {
+            "value": "100",
+            "n": 22,
+            "shot_rate_pct": 13.636
+          },
+          {
+            "value": "102",
+            "n": 21,
+            "shot_rate_pct": 19.048
+          },
+          {
+            "value": "104",
+            "n": 20,
+            "shot_rate_pct": 5.0
+          },
+          {
+            "value": "105",
+            "n": 20,
+            "shot_rate_pct": 10.0
+          },
+          {
+            "value": "98",
+            "n": 20,
+            "shot_rate_pct": 20.0
+          },
+          {
+            "value": "96",
+            "n": 19,
+            "shot_rate_pct": 15.789
+          },
+          {
+            "value": "107",
+            "n": 19,
+            "shot_rate_pct": 15.789
+          },
+          {
+            "value": "101",
+            "n": 18,
+            "shot_rate_pct": 11.111
+          },
+          {
+            "value": "97",
+            "n": 18,
+            "shot_rate_pct": 11.111
+          },
+          {
+            "value": "112",
+            "n": 17,
+            "shot_rate_pct": 5.882
+          },
+          {
+            "value": "108",
+            "n": 14,
+            "shot_rate_pct": 21.429
+          },
+          {
+            "value": "106",
+            "n": 14,
+            "shot_rate_pct": 14.286
+          },
+          {
+            "value": "114",
+            "n": 13,
+            "shot_rate_pct": 15.385
+          },
+          {
+            "value": "111",
+            "n": 12,
+            "shot_rate_pct": 25.0
+          },
+          {
+            "value": "122",
+            "n": 12,
+            "shot_rate_pct": 16.667
+          },
+          {
+            "value": "109",
+            "n": 11,
+            "shot_rate_pct": 18.182
+          },
+          {
+            "value": "126",
+            "n": 11,
+            "shot_rate_pct": 9.091
+          },
+          {
+            "value": "116",
+            "n": 11,
+            "shot_rate_pct": 9.091
+          },
+          {
+            "value": "131",
+            "n": 10,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "129",
+            "n": 10,
+            "shot_rate_pct": 10.0
+          },
+          {
+            "value": "127",
+            "n": 9,
+            "shot_rate_pct": 11.111
+          },
+          {
+            "value": "113",
+            "n": 9,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "124",
+            "n": 9,
+            "shot_rate_pct": 11.111
+          },
+          {
+            "value": "110",
+            "n": 9,
+            "shot_rate_pct": 22.222
+          },
+          {
+            "value": "119",
+            "n": 8,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "133",
+            "n": 8,
+            "shot_rate_pct": 25.0
+          },
+          {
+            "value": "121",
+            "n": 8,
+            "shot_rate_pct": 25.0
+          },
+          {
+            "value": "115",
+            "n": 7,
+            "shot_rate_pct": 14.286
+          },
+          {
+            "value": "128",
+            "n": 7,
+            "shot_rate_pct": 42.857
+          },
+          {
+            "value": "123",
+            "n": 7,
+            "shot_rate_pct": 14.286
+          },
+          {
+            "value": "125",
+            "n": 7,
+            "shot_rate_pct": 42.857
+          },
+          {
+            "value": "134",
+            "n": 6,
+            "shot_rate_pct": 16.667
+          },
+          {
+            "value": "139",
+            "n": 6,
+            "shot_rate_pct": 16.667
+          },
+          {
+            "value": "130",
+            "n": 6,
+            "shot_rate_pct": 16.667
+          },
+          {
+            "value": "120",
+            "n": 6,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "118",
+            "n": 6,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "157",
+            "n": 5,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "132",
+            "n": 5,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "138",
+            "n": 5,
+            "shot_rate_pct": 40.0
+          },
+          {
+            "value": "161",
+            "n": 4,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "117",
+            "n": 4,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "152",
+            "n": 4,
+            "shot_rate_pct": 25.0
+          },
+          {
+            "value": "160",
+            "n": 4,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "155",
+            "n": 3,
+            "shot_rate_pct": 33.333
+          },
+          {
+            "value": "162",
+            "n": 3,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "143",
+            "n": 3,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "154",
+            "n": 3,
+            "shot_rate_pct": 33.333
+          },
+          {
+            "value": "141",
+            "n": 3,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "144",
+            "n": 3,
+            "shot_rate_pct": 33.333
+          },
+          {
+            "value": "145",
+            "n": 3,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "149",
+            "n": 3,
+            "shot_rate_pct": 33.333
+          },
+          {
+            "value": "140",
+            "n": 3,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "164",
+            "n": 3,
+            "shot_rate_pct": 33.333
+          },
+          {
+            "value": "146",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "176",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "163",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "181",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "148",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "173",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "137",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "156",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "150",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "169",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "166",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "153",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "147",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "165",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "158",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "142",
+            "n": 2,
+            "shot_rate_pct": 50.0
+          },
+          {
+            "value": "159",
+            "n": 2,
+            "shot_rate_pct": 50.0
+          },
+          {
+            "value": "167",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "209",
+            "n": 1,
+            "shot_rate_pct": 100.0
+          },
+          {
+            "value": "193",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "216",
+            "n": 1,
+            "shot_rate_pct": 100.0
+          },
+          {
+            "value": "178",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "212",
+            "n": 1,
+            "shot_rate_pct": 100.0
+          },
+          {
+            "value": "210",
+            "n": 1,
+            "shot_rate_pct": 100.0
+          },
+          {
+            "value": "242",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "189",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "151",
+            "n": 1,
+            "shot_rate_pct": 100.0
+          },
+          {
+            "value": "182",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "183",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "243",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "190",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "203",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "171",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "136",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "135",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "172",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "174",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "has_previous_event",
@@ -1559,7 +3713,8 @@
             "shot_rate_pct": 1.919
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "has_visible_attacker",
@@ -1588,7 +3743,8 @@
             "shot_rate_pct": 3.226
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "has_visible_defender",
@@ -1617,7 +3773,8 @@
             "shot_rate_pct": 3.947
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "is_central_lane",
@@ -1625,8 +3782,8 @@
       "type": "boolean",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 5,
-      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (DROP-tier / Type 1&2 REVIEW resolution applied)",
       "reason": "Type 1 REVIEW resolution: point-biserial r=0.854 vs attacking_goal_centrality (kept)",
       "evidence": {
         "metric": "correlation_r",
@@ -1634,7 +3791,24 @@
         "vs": "attacking_goal_centrality"
       },
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 31712,
+            "shot_rate_pct": 4.285
+          },
+          {
+            "value": "1",
+            "n": 24356,
+            "shot_rate_pct": 12.354
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "is_deep_zone",
@@ -1642,12 +3816,29 @@
       "type": "boolean",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 5,
-      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (DROP-tier / Type 1&2 REVIEW resolution applied)",
       "reason": "Type 2 REVIEW resolution: near-total subset of is_in_defending_box (kept, higher lift +12.04pp vs +7.22pp)",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 49854,
+            "shot_rate_pct": 8.661
+          },
+          {
+            "value": "1",
+            "n": 6214,
+            "shot_rate_pct": 0.805
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "is_high_zone",
@@ -1655,12 +3846,29 @@
       "type": "boolean",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 5,
-      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (DROP-tier / Type 1&2 REVIEW resolution applied)",
       "reason": "Type 2 REVIEW resolution: near-total subset of is_in_attacking_box (kept, higher lift +11.99pp vs +7.22pp)",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 37325,
+            "shot_rate_pct": 2.88
+          },
+          {
+            "value": "1",
+            "n": 18743,
+            "shot_rate_pct": 17.569
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "is_in_attacking_box",
@@ -1689,7 +3897,8 @@
             "shot_rate_pct": 23.323
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "is_in_defending_box",
@@ -1718,7 +3927,8 @@
             "shot_rate_pct": 0.807
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "is_wide_lane",
@@ -1726,8 +3936,8 @@
       "type": "boolean",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 5,
-      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (DROP-tier / Type 1&2 REVIEW resolution applied)",
       "reason": "Type 1 REVIEW resolution: point-biserial r=-0.785 vs attacking_goal_centrality (kept)",
       "evidence": {
         "metric": "correlation_r",
@@ -1735,7 +3945,24 @@
         "vs": "attacking_goal_centrality"
       },
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 40662,
+            "shot_rate_pct": 9.781
+          },
+          {
+            "value": "1",
+            "n": 15406,
+            "shot_rate_pct": 2.538
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "local_numerical_balance_10m",
@@ -1744,11 +3971,98 @@
       "origin": "candidate",
       "fate": "dropped",
       "stage": 9,
-      "stage_label": "Stage 9 - VIF (multicollinearity) analysis",
+      "stage_label": "Stage 09 - Multicollinearity (VIF)",
       "reason": "VIF analysis: near-exact linear combination of attackers_within_10m - defenders_within_10m (both kept); joint multicollinearity invisible to pairwise correlation, caught by VIF, not a COLLAPSE/REVIEW tier verdict -- see reports/analysis/shot_target/VIF_ANALYSIS.json",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 43199,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0.0",
+            "n": 11816,
+            "shot_rate_pct": 6.796
+          },
+          {
+            "value": "1.0",
+            "n": 11631,
+            "shot_rate_pct": 4.221
+          },
+          {
+            "value": "-1.0",
+            "n": 7948,
+            "shot_rate_pct": 9.852
+          },
+          {
+            "value": "-2.0",
+            "n": 4232,
+            "shot_rate_pct": 12.642
+          },
+          {
+            "value": "2.0",
+            "n": 3806,
+            "shot_rate_pct": 4.283
+          },
+          {
+            "value": "-3.0",
+            "n": 1778,
+            "shot_rate_pct": 16.817
+          },
+          {
+            "value": "3.0",
+            "n": 791,
+            "shot_rate_pct": 1.896
+          },
+          {
+            "value": "-4.0",
+            "n": 670,
+            "shot_rate_pct": 20.448
+          },
+          {
+            "value": "-5.0",
+            "n": 233,
+            "shot_rate_pct": 24.893
+          },
+          {
+            "value": "4.0",
+            "n": 203,
+            "shot_rate_pct": 0.985
+          },
+          {
+            "value": "-6.0",
+            "n": 40,
+            "shot_rate_pct": 15.0
+          },
+          {
+            "value": "5.0",
+            "n": 24,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "-7.0",
+            "n": 13,
+            "shot_rate_pct": 30.769
+          },
+          {
+            "value": "6.0",
+            "n": 7,
+            "shot_rate_pct": 14.286
+          },
+          {
+            "value": "7.0",
+            "n": 4,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "-8.0",
+            "n": 3,
+            "shot_rate_pct": 33.333
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "local_numerical_balance_5m",
@@ -1757,11 +4071,78 @@
       "origin": "candidate",
       "fate": "dropped",
       "stage": 9,
-      "stage_label": "Stage 9 - VIF (multicollinearity) analysis",
+      "stage_label": "Stage 09 - Multicollinearity (VIF)",
       "reason": "VIF analysis: near-exact linear combination of attackers_within_5m - defenders_within_5m (both kept); joint multicollinearity invisible to pairwise correlation, caught by VIF, not a COLLAPSE/REVIEW tier verdict -- see reports/analysis/shot_target/VIF_ANALYSIS.json",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 52138,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "1.0",
+            "n": 23167,
+            "shot_rate_pct": 6.086
+          },
+          {
+            "value": "0.0",
+            "n": 16333,
+            "shot_rate_pct": 7.763
+          },
+          {
+            "value": "-1.0",
+            "n": 7171,
+            "shot_rate_pct": 9.315
+          },
+          {
+            "value": "2.0",
+            "n": 2605,
+            "shot_rate_pct": 6.219
+          },
+          {
+            "value": "-2.0",
+            "n": 2103,
+            "shot_rate_pct": 12.078
+          },
+          {
+            "value": "-3.0",
+            "n": 395,
+            "shot_rate_pct": 17.468
+          },
+          {
+            "value": "3.0",
+            "n": 209,
+            "shot_rate_pct": 3.349
+          },
+          {
+            "value": "-4.0",
+            "n": 115,
+            "shot_rate_pct": 24.348
+          },
+          {
+            "value": "-5.0",
+            "n": 19,
+            "shot_rate_pct": 10.526
+          },
+          {
+            "value": "4.0",
+            "n": 16,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "-6.0",
+            "n": 3,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "5.0",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "match_time_seconds",
@@ -1830,7 +4211,8 @@
             "shot_rate_pct": 9.936
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "nearest_attacker_distance",
@@ -1899,7 +4281,8 @@
             "shot_rate_pct": 11.527
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "nearest_defender_distance",
@@ -1968,7 +4351,8 @@
             "shot_rate_pct": 8.982
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "period",
@@ -2007,7 +4391,8 @@
             "shot_rate_pct": 9.246
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "phase_changed_since_prev_event",
@@ -2036,7 +4421,8 @@
             "shot_rate_pct": 7.701
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "phase_label",
@@ -2090,7 +4476,8 @@
             "shot_rate_pct": 0.927
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "phase_label_prev_event",
@@ -2144,7 +4531,8 @@
             "shot_rate_pct": 1.762
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "phase_transitions_observed_so_far",
@@ -2153,11 +4541,218 @@
       "origin": "candidate",
       "fate": "dropped",
       "stage": 5,
-      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "stage_label": "Stage 05 - Collapse-tier resolution (clusters 1-3, drop-to-one)",
       "reason": "Cluster 3 (possession clock, drop-to-one): see events_elapsed_in_possession",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 14748,
+            "shot_rate_pct": 6.082
+          },
+          {
+            "value": "1",
+            "n": 9953,
+            "shot_rate_pct": 6.701
+          },
+          {
+            "value": "2",
+            "n": 6418,
+            "shot_rate_pct": 6.762
+          },
+          {
+            "value": "3",
+            "n": 5083,
+            "shot_rate_pct": 7.85
+          },
+          {
+            "value": "4",
+            "n": 4162,
+            "shot_rate_pct": 9.731
+          },
+          {
+            "value": "5",
+            "n": 3290,
+            "shot_rate_pct": 9.027
+          },
+          {
+            "value": "6",
+            "n": 2649,
+            "shot_rate_pct": 10.193
+          },
+          {
+            "value": "7",
+            "n": 2005,
+            "shot_rate_pct": 11.072
+          },
+          {
+            "value": "8",
+            "n": 1570,
+            "shot_rate_pct": 10.764
+          },
+          {
+            "value": "9",
+            "n": 1308,
+            "shot_rate_pct": 9.021
+          },
+          {
+            "value": "10",
+            "n": 1037,
+            "shot_rate_pct": 10.318
+          },
+          {
+            "value": "11",
+            "n": 783,
+            "shot_rate_pct": 8.94
+          },
+          {
+            "value": "12",
+            "n": 655,
+            "shot_rate_pct": 11.145
+          },
+          {
+            "value": "13",
+            "n": 431,
+            "shot_rate_pct": 7.889
+          },
+          {
+            "value": "14",
+            "n": 367,
+            "shot_rate_pct": 8.174
+          },
+          {
+            "value": "15",
+            "n": 314,
+            "shot_rate_pct": 10.51
+          },
+          {
+            "value": "16",
+            "n": 248,
+            "shot_rate_pct": 5.242
+          },
+          {
+            "value": "17",
+            "n": 216,
+            "shot_rate_pct": 9.259
+          },
+          {
+            "value": "18",
+            "n": 166,
+            "shot_rate_pct": 8.434
+          },
+          {
+            "value": "19",
+            "n": 143,
+            "shot_rate_pct": 17.483
+          },
+          {
+            "value": "21",
+            "n": 81,
+            "shot_rate_pct": 14.815
+          },
+          {
+            "value": "20",
+            "n": 80,
+            "shot_rate_pct": 13.75
+          },
+          {
+            "value": "24",
+            "n": 61,
+            "shot_rate_pct": 22.951
+          },
+          {
+            "value": "22",
+            "n": 55,
+            "shot_rate_pct": 5.455
+          },
+          {
+            "value": "23",
+            "n": 44,
+            "shot_rate_pct": 6.818
+          },
+          {
+            "value": "26",
+            "n": 42,
+            "shot_rate_pct": 11.905
+          },
+          {
+            "value": "25",
+            "n": 29,
+            "shot_rate_pct": 10.345
+          },
+          {
+            "value": "28",
+            "n": 26,
+            "shot_rate_pct": 23.077
+          },
+          {
+            "value": "29",
+            "n": 18,
+            "shot_rate_pct": 11.111
+          },
+          {
+            "value": "30",
+            "n": 17,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "27",
+            "n": 16,
+            "shot_rate_pct": 12.5
+          },
+          {
+            "value": "37",
+            "n": 14,
+            "shot_rate_pct": 28.571
+          },
+          {
+            "value": "31",
+            "n": 9,
+            "shot_rate_pct": 33.333
+          },
+          {
+            "value": "34",
+            "n": 8,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "33",
+            "n": 8,
+            "shot_rate_pct": 37.5
+          },
+          {
+            "value": "32",
+            "n": 5,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "38",
+            "n": 5,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "44",
+            "n": 2,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "39",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          },
+          {
+            "value": "35",
+            "n": 1,
+            "shot_rate_pct": 0.0
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "play_pattern",
@@ -2221,7 +4816,8 @@
             "shot_rate_pct": 4.781
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "position",
@@ -2320,7 +4916,8 @@
             "shot_rate_pct": 6.649
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "position_group",
@@ -2328,8 +4925,8 @@
       "type": "categorical",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 5,
-      "stage_label": "Stage 5 - Correlation DROP-tier verdict",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (DROP-tier / Type 1&2 REVIEW resolution applied)",
       "reason": "CORRELATION_ANALYSIS DROP tier: Cramer's V=1.0 vs position (kept, more granular)",
       "evidence": {
         "metric": "cramers_v",
@@ -2337,7 +4934,49 @@
         "vs": "position"
       },
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 56068,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "defensive_midfielder",
+            "n": 10837,
+            "shot_rate_pct": 8.213
+          },
+          {
+            "value": "centre_back",
+            "n": 10588,
+            "shot_rate_pct": 10.927
+          },
+          {
+            "value": "fullback_wingback",
+            "n": 10368,
+            "shot_rate_pct": 8.092
+          },
+          {
+            "value": "midfielder",
+            "n": 10218,
+            "shot_rate_pct": 6.674
+          },
+          {
+            "value": "forward",
+            "n": 7073,
+            "shot_rate_pct": 5.74
+          },
+          {
+            "value": "other",
+            "n": 6110,
+            "shot_rate_pct": 6.334
+          },
+          {
+            "value": "goalkeeper",
+            "n": 874,
+            "shot_rate_pct": 0.801
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "possession_elapsed_seconds",
@@ -2401,7 +5040,8 @@
             "shot_rate_pct": 10.088
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "visible_attacker_count",
@@ -2480,7 +5120,8 @@
             "shot_rate_pct": 3.226
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "visible_defender_count",
@@ -2559,7 +5200,8 @@
             "shot_rate_pct": 3.947
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "visibility_quality_band",
@@ -2567,12 +5209,34 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal (confound: crowded/dangerous zones are both harder to fully capture on camera and where shots cluster)",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "low",
+            "n": 1327874,
+            "shot_rate_pct": 6.789
+          },
+          {
+            "value": "medium",
+            "n": 264686,
+            "shot_rate_pct": 1.852
+          },
+          {
+            "value": "high",
+            "n": 621,
+            "shot_rate_pct": 0.0
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "ball_inside_visible_area",
@@ -2580,12 +5244,29 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "True",
+            "n": 1583390,
+            "shot_rate_pct": 5.973
+          },
+          {
+            "value": "False",
+            "n": 9791,
+            "shot_rate_pct": 4.749
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "action_inside_visible_area",
@@ -2593,12 +5274,29 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "True",
+            "n": 1579989,
+            "shot_rate_pct": 5.968
+          },
+          {
+            "value": "False",
+            "n": 13192,
+            "shot_rate_pct": 5.723
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "local_5m_region_fully_visible",
@@ -2606,12 +5304,29 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "True",
+            "n": 1335675,
+            "shot_rate_pct": 6.235
+          },
+          {
+            "value": "False",
+            "n": 257506,
+            "shot_rate_pct": 4.572
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "local_10m_region_fully_visible",
@@ -2619,12 +5334,29 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "True",
+            "n": 995051,
+            "shot_rate_pct": 6.393
+          },
+          {
+            "value": "False",
+            "n": 598130,
+            "shot_rate_pct": 5.256
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "visibility_limited",
@@ -2632,12 +5364,29 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts (top 15 + other) -- type unresolved, treated as discrete/categorical by cardinality",
+        "bins": [
+          {
+            "value": "True",
+            "n": 1327874,
+            "shot_rate_pct": 6.789
+          },
+          {
+            "value": "False",
+            "n": 265307,
+            "shot_rate_pct": 1.848
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "visible_area_polygon_area",
@@ -2645,12 +5394,69 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them) -- type unresolved, treated as continuous by cardinality",
+        "bins": [
+          {
+            "bin": "(175.19299999999998, 1913.428]",
+            "n": 159322,
+            "shot_rate_pct": 12.993
+          },
+          {
+            "bin": "(1913.428, 2177.864]",
+            "n": 159319,
+            "shot_rate_pct": 8.665
+          },
+          {
+            "bin": "(2177.864, 2406.693]",
+            "n": 159320,
+            "shot_rate_pct": 8.194
+          },
+          {
+            "bin": "(2406.693, 2641.121]",
+            "n": 159312,
+            "shot_rate_pct": 6.986
+          },
+          {
+            "bin": "(2641.121, 2890.521]",
+            "n": 159319,
+            "shot_rate_pct": 6.206
+          },
+          {
+            "bin": "(2890.521, 3148.412]",
+            "n": 159324,
+            "shot_rate_pct": 5.331
+          },
+          {
+            "bin": "(3148.412, 3420.174]",
+            "n": 159318,
+            "shot_rate_pct": 4.079
+          },
+          {
+            "bin": "(3420.174, 3719.364]",
+            "n": 159312,
+            "shot_rate_pct": 3.284
+          },
+          {
+            "bin": "(3719.364, 4114.368]",
+            "n": 159321,
+            "shot_rate_pct": 2.174
+          },
+          {
+            "bin": "(4114.368, 8650.309]",
+            "n": 159314,
+            "shot_rate_pct": 1.748
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "visible_area_fraction_of_pitch",
@@ -2658,12 +5464,69 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "camera/360-tracking-coverage metadata, not a football signal",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them) -- type unresolved, treated as continuous by cardinality",
+        "bins": [
+          {
+            "bin": "(0.0172, 0.199]",
+            "n": 159322,
+            "shot_rate_pct": 12.993
+          },
+          {
+            "bin": "(0.199, 0.227]",
+            "n": 159319,
+            "shot_rate_pct": 8.665
+          },
+          {
+            "bin": "(0.227, 0.251]",
+            "n": 159320,
+            "shot_rate_pct": 8.194
+          },
+          {
+            "bin": "(0.251, 0.275]",
+            "n": 159312,
+            "shot_rate_pct": 6.986
+          },
+          {
+            "bin": "(0.275, 0.301]",
+            "n": 159319,
+            "shot_rate_pct": 6.206
+          },
+          {
+            "bin": "(0.301, 0.328]",
+            "n": 159324,
+            "shot_rate_pct": 5.331
+          },
+          {
+            "bin": "(0.328, 0.356]",
+            "n": 159318,
+            "shot_rate_pct": 4.079
+          },
+          {
+            "bin": "(0.356, 0.387]",
+            "n": 159312,
+            "shot_rate_pct": 3.284
+          },
+          {
+            "bin": "(0.387, 0.429]",
+            "n": 159321,
+            "shot_rate_pct": 2.174
+          },
+          {
+            "bin": "(0.429, 0.901]",
+            "n": 159314,
+            "shot_rate_pct": 1.748
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "freeze_frame_count",
@@ -2671,12 +5534,14 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "data-collection artifact, not a defensive feature",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": null,
+      "profile_reason": "column 'freeze_frame_count' not present in data/features/passive_defense.parquet"
     },
     {
       "name": "carrier_x",
@@ -2684,12 +5549,14 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "verified 100%-duplicate of ball_x (already dropped from the passive parquet)",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": null,
+      "profile_reason": "column 'carrier_x' not present in data/features/passive_defense.parquet"
     },
     {
       "name": "carrier_y",
@@ -2697,12 +5564,14 @@
       "type": null,
       "origin": "excluded_before_count",
       "fate": "dropped",
-      "stage": 0,
-      "stage_label": "Stage 0 - excluded before candidate pool (data-collection artefact / duplicate / structural zero)",
+      "stage": null,
+      "stage_label": "Before candidate pool - excluded before stage 01 (data-collection artefact / duplicate / structural zero)",
       "reason": "verified 100%-duplicate of ball_y (already dropped from the passive parquet)",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (EXCLUDED_COLUMNS_ACTIVE/EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": null,
+      "profile_reason": "column 'carrier_y' not present in data/features/passive_defense.parquet"
     },
     {
       "name": "top_option_1_angle_from_ball",
@@ -2710,8 +5579,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (raw option coordinates replaced by ball-relative top_option_n_{dx,dy,distance_from_ball,angle_from_ball})",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -2771,7 +5640,8 @@
             "shot_rate_pct": 10.458
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_1_distance_from_ball",
@@ -2779,8 +5649,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (raw option coordinates replaced by ball-relative top_option_n_{dx,dy,distance_from_ball,angle_from_ball})",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -2840,7 +5710,8 @@
             "shot_rate_pct": 2.244
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_1_dx",
@@ -2848,8 +5719,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (raw option coordinates replaced by ball-relative top_option_n_{dx,dy,distance_from_ball,angle_from_ball})",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -2909,7 +5780,8 @@
             "shot_rate_pct": 1.031
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_1_dy",
@@ -2917,8 +5789,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (raw option coordinates replaced by ball-relative top_option_n_{dx,dy,distance_from_ball,angle_from_ball})",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -2978,7 +5850,8 @@
             "shot_rate_pct": 3.157
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_2_angle_from_ball",
@@ -2986,8 +5859,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (raw option coordinates replaced by ball-relative top_option_n_{dx,dy,distance_from_ball,angle_from_ball})",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -3047,7 +5920,8 @@
             "shot_rate_pct": 8.752
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_2_distance_from_ball",
@@ -3055,8 +5929,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (raw option coordinates replaced by ball-relative top_option_n_{dx,dy,distance_from_ball,angle_from_ball})",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -3116,7 +5990,8 @@
             "shot_rate_pct": 3.189
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_2_dx",
@@ -3124,8 +5999,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (raw option coordinates replaced by ball-relative top_option_n_{dx,dy,distance_from_ball,angle_from_ball})",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -3185,7 +6060,8 @@
             "shot_rate_pct": 1.911
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_2_dy",
@@ -3193,8 +6069,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (raw option coordinates replaced by ball-relative top_option_n_{dx,dy,distance_from_ball,angle_from_ball})",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -3254,7 +6130,8 @@
             "shot_rate_pct": 4.004
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_3_angle_from_ball",
@@ -3262,8 +6139,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (raw option coordinates replaced by ball-relative top_option_n_{dx,dy,distance_from_ball,angle_from_ball})",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -3323,7 +6200,8 @@
             "shot_rate_pct": 6.91
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_3_distance_from_ball",
@@ -3331,8 +6209,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (raw option coordinates replaced by ball-relative top_option_n_{dx,dy,distance_from_ball,angle_from_ball})",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -3392,7 +6270,8 @@
             "shot_rate_pct": 3.674
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_3_dx",
@@ -3400,8 +6279,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (raw option coordinates replaced by ball-relative top_option_n_{dx,dy,distance_from_ball,angle_from_ball})",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -3461,7 +6340,8 @@
             "shot_rate_pct": 2.041
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_3_dy",
@@ -3469,8 +6349,8 @@
       "type": "continuous",
       "origin": "engineered",
       "fate": "locked",
-      "stage": 6,
-      "stage_label": "Stage 6 - engineered replacement (post-collapse-tier)",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (raw option coordinates replaced by ball-relative top_option_n_{dx,dy,distance_from_ball,angle_from_ball})",
       "reason": "Engineered during the reduction itself to replace a collapsed cluster (did not exist as a stage-01 candidate).",
       "evidence": null,
       "modelled": true,
@@ -3530,7 +6410,8 @@
             "shot_rate_pct": 4.806
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "angle_to_attacking_goal",
@@ -3599,7 +6480,8 @@
             "shot_rate_pct": 12.407
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "attacking_goal_centrality",
@@ -3668,7 +6550,8 @@
             "shot_rate_pct": 8.342
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "ball_x",
@@ -3737,7 +6620,8 @@
             "shot_rate_pct": 20.617
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "ball_y",
@@ -3806,7 +6690,8 @@
             "shot_rate_pct": 4.721
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "defender_functional_role",
@@ -3855,7 +6740,8 @@
             "shot_rate_pct": 0.487
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "defender_slot_index",
@@ -3929,7 +6815,8 @@
             "shot_rate_pct": 12.192
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "defender_x",
@@ -3998,7 +6885,8 @@
             "shot_rate_pct": 19.207
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "defender_y",
@@ -4067,7 +6955,8 @@
             "shot_rate_pct": 3.966
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "defender_zone",
@@ -4076,11 +6965,63 @@
       "origin": "candidate",
       "fate": "dropped",
       "stage": 5,
-      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "stage_label": "Stage 05 - Collapse-tier resolution (Cluster 4, drop-to-one)",
       "reason": "Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts (top 15 + other)",
+        "bins": [
+          {
+            "value": "attacking_third_center",
+            "n": 545395,
+            "shot_rate_pct": 11.515
+          },
+          {
+            "value": "middle_third_center",
+            "n": 510836,
+            "shot_rate_pct": 2.563
+          },
+          {
+            "value": "defensive_third_center",
+            "n": 116378,
+            "shot_rate_pct": 1.566
+          },
+          {
+            "value": "middle_third_left_flank",
+            "n": 108680,
+            "shot_rate_pct": 2.332
+          },
+          {
+            "value": "middle_third_right_flank",
+            "n": 106638,
+            "shot_rate_pct": 2.458
+          },
+          {
+            "value": "attacking_third_right_flank",
+            "n": 77835,
+            "shot_rate_pct": 7.502
+          },
+          {
+            "value": "attacking_third_left_flank",
+            "n": 76769,
+            "shot_rate_pct": 7.408
+          },
+          {
+            "value": "defensive_third_right_flank",
+            "n": 25605,
+            "shot_rate_pct": 0.98
+          },
+          {
+            "value": "defensive_third_left_flank",
+            "n": 25045,
+            "shot_rate_pct": 1.589
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "distance_to_attacking_box",
@@ -4089,11 +7030,63 @@
       "origin": "candidate",
       "fate": "dropped",
       "stage": 5,
-      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "stage_label": "Stage 05 - Collapse-tier resolution (Cluster 4, drop-to-one)",
       "reason": "Cluster 4 (defender-position, drop-to-one): mutually r/eta >= 0.92 with defender_x and the rest of this cluster -- kept defender_x (the most primitive measurement; it's upstream of every derived distance/zone column here, unlike the active side where the raw coordinate isn't itself a kept feature)",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.001, 6.829]",
+            "n": 318637,
+            "shot_rate_pct": 15.756
+          },
+          {
+            "bin": "(6.829, 13.383]",
+            "n": 159318,
+            "shot_rate_pct": 7.952
+          },
+          {
+            "bin": "(13.383, 19.787]",
+            "n": 159318,
+            "shot_rate_pct": 5.448
+          },
+          {
+            "bin": "(19.787, 26.373]",
+            "n": 159318,
+            "shot_rate_pct": 4.113
+          },
+          {
+            "bin": "(26.373, 33.377]",
+            "n": 159318,
+            "shot_rate_pct": 3.051
+          },
+          {
+            "bin": "(33.377, 40.714]",
+            "n": 159318,
+            "shot_rate_pct": 2.474
+          },
+          {
+            "bin": "(40.714, 49.764]",
+            "n": 159318,
+            "shot_rate_pct": 2.037
+          },
+          {
+            "bin": "(49.764, 62.963]",
+            "n": 159318,
+            "shot_rate_pct": 1.588
+          },
+          {
+            "bin": "(62.963, 108.895]",
+            "n": 159318,
+            "shot_rate_pct": 1.486
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "distance_to_attacking_goal",
@@ -4102,11 +7095,68 @@
       "origin": "candidate",
       "fate": "dropped",
       "stage": 5,
-      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "stage_label": "Stage 05 - Collapse-tier resolution (Cluster 4, drop-to-one)",
       "reason": "Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.0703, 19.953]",
+            "n": 159319,
+            "shot_rate_pct": 18.94
+          },
+          {
+            "bin": "(19.953, 28.461]",
+            "n": 159318,
+            "shot_rate_pct": 12.214
+          },
+          {
+            "bin": "(28.461, 35.247]",
+            "n": 159318,
+            "shot_rate_pct": 8.113
+          },
+          {
+            "bin": "(35.247, 41.405]",
+            "n": 159318,
+            "shot_rate_pct": 5.654
+          },
+          {
+            "bin": "(41.405, 47.621]",
+            "n": 159318,
+            "shot_rate_pct": 4.072
+          },
+          {
+            "bin": "(47.621, 54.159]",
+            "n": 159318,
+            "shot_rate_pct": 3.027
+          },
+          {
+            "bin": "(54.159, 61.268]",
+            "n": 159318,
+            "shot_rate_pct": 2.492
+          },
+          {
+            "bin": "(61.268, 70.085]",
+            "n": 159318,
+            "shot_rate_pct": 2.054
+          },
+          {
+            "bin": "(70.085, 82.985]",
+            "n": 159318,
+            "shot_rate_pct": 1.604
+          },
+          {
+            "bin": "(82.985, 129.835]",
+            "n": 159318,
+            "shot_rate_pct": 1.489
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "distance_to_center_line",
@@ -4114,8 +7164,8 @@
       "type": "continuous",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 5,
-      "stage_label": "Stage 5 - Correlation DROP-tier verdict",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (DROP-tier resolution; option-coordinate cleanup counted separately at stage 06)",
       "reason": "CORRELATION_ANALYSIS DROP tier: Spearman r=-1.0 vs attacking_goal_centrality (kept)",
       "evidence": {
         "metric": "correlation_r",
@@ -4123,7 +7173,64 @@
         "vs": "attacking_goal_centrality"
       },
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.0009741, 2.067]",
+            "n": 159319,
+            "shot_rate_pct": 8.342
+          },
+          {
+            "bin": "(2.067, 4.267]",
+            "n": 159318,
+            "shot_rate_pct": 8.057
+          },
+          {
+            "bin": "(4.267, 6.651]",
+            "n": 159318,
+            "shot_rate_pct": 7.338
+          },
+          {
+            "bin": "(6.651, 9.25]",
+            "n": 159319,
+            "shot_rate_pct": 6.666
+          },
+          {
+            "bin": "(9.25, 12.083]",
+            "n": 159317,
+            "shot_rate_pct": 6.007
+          },
+          {
+            "bin": "(12.083, 15.182]",
+            "n": 159318,
+            "shot_rate_pct": 5.467
+          },
+          {
+            "bin": "(15.182, 18.625]",
+            "n": 159318,
+            "shot_rate_pct": 5.111
+          },
+          {
+            "bin": "(18.625, 22.73]",
+            "n": 159318,
+            "shot_rate_pct": 4.867
+          },
+          {
+            "bin": "(22.73, 28.234]",
+            "n": 159318,
+            "shot_rate_pct": 4.335
+          },
+          {
+            "bin": "(28.234, 49.508]",
+            "n": 159318,
+            "shot_rate_pct": 3.469
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "distance_to_defending_box",
@@ -4132,11 +7239,68 @@
       "origin": "candidate",
       "fate": "dropped",
       "stage": 5,
-      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "stage_label": "Stage 05 - Collapse-tier resolution (Cluster 4, drop-to-one)",
       "reason": "Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-0.001, 21.644]",
+            "n": 159319,
+            "shot_rate_pct": 1.483
+          },
+          {
+            "bin": "(21.644, 34.646]",
+            "n": 159318,
+            "shot_rate_pct": 1.587
+          },
+          {
+            "bin": "(34.646, 43.651]",
+            "n": 159318,
+            "shot_rate_pct": 2.024
+          },
+          {
+            "bin": "(43.651, 51.002]",
+            "n": 159318,
+            "shot_rate_pct": 2.476
+          },
+          {
+            "bin": "(51.002, 58.042]",
+            "n": 159318,
+            "shot_rate_pct": 3.099
+          },
+          {
+            "bin": "(58.042, 64.716]",
+            "n": 159318,
+            "shot_rate_pct": 4.137
+          },
+          {
+            "bin": "(64.716, 71.319]",
+            "n": 159318,
+            "shot_rate_pct": 5.505
+          },
+          {
+            "bin": "(71.319, 78.176]",
+            "n": 159318,
+            "shot_rate_pct": 7.933
+          },
+          {
+            "bin": "(78.176, 85.428]",
+            "n": 159318,
+            "shot_rate_pct": 12.245
+          },
+          {
+            "bin": "(85.428, 108.606]",
+            "n": 159318,
+            "shot_rate_pct": 19.169
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "distance_to_defending_goal",
@@ -4145,11 +7309,68 @@
       "origin": "candidate",
       "fate": "dropped",
       "stage": 5,
-      "stage_label": "Stage 5 - Collapse-tier cluster drop-to-one",
+      "stage_label": "Stage 05 - Collapse-tier resolution (Cluster 4, drop-to-one)",
       "reason": "Cluster 4 (defender-position, drop-to-one): see distance_to_attacking_box",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.169, 43.206]",
+            "n": 159319,
+            "shot_rate_pct": 1.472
+          },
+          {
+            "bin": "(43.206, 55.356]",
+            "n": 159318,
+            "shot_rate_pct": 1.597
+          },
+          {
+            "bin": "(55.356, 63.92]",
+            "n": 159318,
+            "shot_rate_pct": 2.055
+          },
+          {
+            "bin": "(63.92, 71.087]",
+            "n": 159318,
+            "shot_rate_pct": 2.481
+          },
+          {
+            "bin": "(71.087, 77.92]",
+            "n": 159318,
+            "shot_rate_pct": 3.174
+          },
+          {
+            "bin": "(77.92, 84.429]",
+            "n": 159318,
+            "shot_rate_pct": 4.183
+          },
+          {
+            "bin": "(84.429, 90.877]",
+            "n": 159318,
+            "shot_rate_pct": 5.655
+          },
+          {
+            "bin": "(90.877, 97.531]",
+            "n": 159318,
+            "shot_rate_pct": 7.96
+          },
+          {
+            "bin": "(97.531, 104.46]",
+            "n": 159318,
+            "shot_rate_pct": 12.193
+          },
+          {
+            "bin": "(104.46, 128.782]",
+            "n": 159318,
+            "shot_rate_pct": 18.89
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "engagement_distance_to_carrier",
@@ -4218,7 +7439,8 @@
             "shot_rate_pct": 3.687
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "has_option_2",
@@ -4247,7 +7469,8 @@
             "shot_rate_pct": 15.131
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "has_option_3",
@@ -4276,7 +7499,8 @@
             "shot_rate_pct": 17.091
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "has_screened_outcome",
@@ -4293,7 +7517,24 @@
         "p": 1.54e-31
       },
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "True",
+            "n": 1590321,
+            "shot_rate_pct": 5.973
+          },
+          {
+            "value": "False",
+            "n": 2860,
+            "shot_rate_pct": 1.888
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "is_central_lane",
@@ -4301,8 +7542,8 @@
       "type": "boolean",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 5,
-      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (DROP-tier resolution; option-coordinate cleanup counted separately at stage 06)",
       "reason": "Type 1 REVIEW resolution: point-biserial r=0.849 vs attacking_goal_centrality (kept)",
       "evidence": {
         "metric": "correlation_r",
@@ -4310,7 +7551,24 @@
         "vs": "attacking_goal_centrality"
       },
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "1",
+            "n": 995724,
+            "shot_rate_pct": 6.918
+          },
+          {
+            "value": "0",
+            "n": 597457,
+            "shot_rate_pct": 4.379
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "is_deep_zone",
@@ -4318,12 +7576,29 @@
       "type": "boolean",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 5,
-      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (DROP-tier resolution; option-coordinate cleanup counted separately at stage 06)",
       "reason": "Type 2 REVIEW resolution: near-total subset of is_in_defending_box (kept, higher lift +12.31pp vs +7.02pp)",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 1508184,
+            "shot_rate_pct": 6.218
+          },
+          {
+            "value": "1",
+            "n": 84997,
+            "shot_rate_pct": 1.489
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "is_goal_side_of_nearest_attacker",
@@ -4352,7 +7627,8 @@
             "shot_rate_pct": 5.989
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "is_high_zone",
@@ -4360,12 +7636,29 @@
       "type": "boolean",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 5,
-      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (DROP-tier resolution; option-coordinate cleanup counted separately at stage 06)",
       "reason": "Type 2 REVIEW resolution: near-total subset of is_in_attacking_box (kept, higher lift +11.85pp vs +6.41pp)",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "0",
+            "n": 1133556,
+            "shot_rate_pct": 2.961
+          },
+          {
+            "value": "1",
+            "n": 459625,
+            "shot_rate_pct": 13.378
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "is_in_attacking_box",
@@ -4394,7 +7687,8 @@
             "shot_rate_pct": 19.109
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "is_in_defending_box",
@@ -4423,7 +7717,8 @@
             "shot_rate_pct": 1.688
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "is_wide_lane",
@@ -4452,7 +7747,8 @@
             "shot_rate_pct": 3.491
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "lane_screening_score_option_1",
@@ -4521,7 +7817,8 @@
             "shot_rate_pct": 7.201
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "lane_screening_score_option_2",
@@ -4590,7 +7887,8 @@
             "shot_rate_pct": 8.269
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "lane_screening_score_option_3",
@@ -4659,7 +7957,8 @@
             "shot_rate_pct": 8.363
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "marking_tightness",
@@ -4728,7 +8027,8 @@
             "shot_rate_pct": 5.354
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "on_ball_event_type",
@@ -4767,7 +8067,8 @@
             "shot_rate_pct": 11.121
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "overload_score",
@@ -4806,7 +8107,8 @@
             "shot_rate_pct": 4.816
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "period",
@@ -4850,7 +8152,8 @@
             "shot_rate_pct": 0.0
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "phase_label",
@@ -4904,7 +8207,8 @@
             "shot_rate_pct": 0.481
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "screens_top_option",
@@ -4912,8 +8216,8 @@
       "type": "boolean",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 5,
-      "stage_label": "Stage 5 - Correlation REVIEW-tier resolution",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (DROP-tier resolution; option-coordinate cleanup counted separately at stage 06)",
       "reason": "Type 1 REVIEW resolution: point-biserial r=0.832 vs lane_screening_score_option_1 (kept)",
       "evidence": {
         "metric": "correlation_r",
@@ -4921,7 +8225,24 @@
         "vs": "lane_screening_score_option_1"
       },
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1592902,
+        "binning_method": "value counts",
+        "bins": [
+          {
+            "value": "False",
+            "n": 1452638,
+            "shot_rate_pct": 5.845
+          },
+          {
+            "value": "True",
+            "n": 140264,
+            "shot_rate_pct": 7.204
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_1_target_x",
@@ -4929,12 +8250,69 @@
       "type": "continuous",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 4,
-      "stage_label": "Stage 4 - Structural redesign",
+      "stage": 6,
+      "stage_label": "Stage 06 - Drop raw option coordinates (ball-relative replacements from stage 04 confirmed working)",
       "reason": "Raw absolute coordinate, superseded by ball-relative top_option_1_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1592902,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-5.4190000000000005, 40.643]",
+            "n": 159295,
+            "shot_rate_pct": 1.457
+          },
+          {
+            "bin": "(40.643, 52.764]",
+            "n": 159295,
+            "shot_rate_pct": 1.719
+          },
+          {
+            "bin": "(52.764, 61.185]",
+            "n": 159289,
+            "shot_rate_pct": 1.818
+          },
+          {
+            "bin": "(61.185, 67.882]",
+            "n": 159289,
+            "shot_rate_pct": 2.379
+          },
+          {
+            "bin": "(67.882, 73.95]",
+            "n": 159291,
+            "shot_rate_pct": 3.05
+          },
+          {
+            "bin": "(73.95, 79.666]",
+            "n": 159286,
+            "shot_rate_pct": 4.707
+          },
+          {
+            "bin": "(79.666, 85.271]",
+            "n": 159292,
+            "shot_rate_pct": 6.32
+          },
+          {
+            "bin": "(85.271, 91.426]",
+            "n": 159291,
+            "shot_rate_pct": 9.404
+          },
+          {
+            "bin": "(91.426, 98.804]",
+            "n": 159292,
+            "shot_rate_pct": 12.346
+          },
+          {
+            "bin": "(98.804, 125.274]",
+            "n": 159282,
+            "shot_rate_pct": 16.446
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_1_target_y",
@@ -4942,12 +8320,69 @@
       "type": "continuous",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 4,
-      "stage_label": "Stage 4 - Structural redesign",
+      "stage": 6,
+      "stage_label": "Stage 06 - Drop raw option coordinates (ball-relative replacements from stage 04 confirmed working)",
       "reason": "Raw absolute coordinate, superseded by ball-relative top_option_1_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1592902,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-9.158, 8.224]",
+            "n": 159294,
+            "shot_rate_pct": 3.07
+          },
+          {
+            "bin": "(8.224, 16.588]",
+            "n": 159289,
+            "shot_rate_pct": 4.99
+          },
+          {
+            "bin": "(16.588, 25.228]",
+            "n": 159294,
+            "shot_rate_pct": 6.654
+          },
+          {
+            "bin": "(25.228, 33.105]",
+            "n": 159285,
+            "shot_rate_pct": 7.427
+          },
+          {
+            "bin": "(33.105, 39.906]",
+            "n": 159290,
+            "shot_rate_pct": 7.869
+          },
+          {
+            "bin": "(39.906, 46.662]",
+            "n": 159293,
+            "shot_rate_pct": 7.307
+          },
+          {
+            "bin": "(46.662, 54.37]",
+            "n": 159291,
+            "shot_rate_pct": 7.965
+          },
+          {
+            "bin": "(54.37, 63.124]",
+            "n": 159287,
+            "shot_rate_pct": 6.652
+          },
+          {
+            "bin": "(63.124, 71.859]",
+            "n": 159294,
+            "shot_rate_pct": 4.772
+          },
+          {
+            "bin": "(71.859, 89.719]",
+            "n": 159285,
+            "shot_rate_pct": 2.938
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_1_threat_score",
@@ -5016,7 +8451,8 @@
             "shot_rate_pct": 15.938
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_2_target_x",
@@ -5024,12 +8460,69 @@
       "type": "continuous",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 4,
-      "stage_label": "Stage 4 - Structural redesign",
+      "stage": 6,
+      "stage_label": "Stage 06 - Drop raw option coordinates (ball-relative replacements from stage 04 confirmed working)",
       "reason": "Raw absolute coordinate, superseded by ball-relative top_option_2_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1591000,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-3.819, 33.129]",
+            "n": 159100,
+            "shot_rate_pct": 1.371
+          },
+          {
+            "bin": "(33.129, 44.772]",
+            "n": 159100,
+            "shot_rate_pct": 1.527
+          },
+          {
+            "bin": "(44.772, 53.434]",
+            "n": 159102,
+            "shot_rate_pct": 1.674
+          },
+          {
+            "bin": "(53.434, 60.635]",
+            "n": 159101,
+            "shot_rate_pct": 2.265
+          },
+          {
+            "bin": "(60.635, 67.306]",
+            "n": 159097,
+            "shot_rate_pct": 3.033
+          },
+          {
+            "bin": "(67.306, 74.434]",
+            "n": 159100,
+            "shot_rate_pct": 4.157
+          },
+          {
+            "bin": "(74.434, 82.281]",
+            "n": 159103,
+            "shot_rate_pct": 6.193
+          },
+          {
+            "bin": "(82.281, 90.808]",
+            "n": 159103,
+            "shot_rate_pct": 9.516
+          },
+          {
+            "bin": "(90.808, 100.01]",
+            "n": 159096,
+            "shot_rate_pct": 11.669
+          },
+          {
+            "bin": "(100.01, 125.102]",
+            "n": 159098,
+            "shot_rate_pct": 18.128
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_2_target_y",
@@ -5037,12 +8530,69 @@
       "type": "continuous",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 4,
-      "stage_label": "Stage 4 - Structural redesign",
+      "stage": 6,
+      "stage_label": "Stage 06 - Drop raw option coordinates (ball-relative replacements from stage 04 confirmed working)",
       "reason": "Raw absolute coordinate, superseded by ball-relative top_option_2_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1591000,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-9.568999999999999, 10.265]",
+            "n": 159103,
+            "shot_rate_pct": 3.697
+          },
+          {
+            "bin": "(10.265, 20.878]",
+            "n": 159103,
+            "shot_rate_pct": 5.165
+          },
+          {
+            "bin": "(20.878, 28.436]",
+            "n": 159101,
+            "shot_rate_pct": 6.45
+          },
+          {
+            "bin": "(28.436, 34.572]",
+            "n": 159096,
+            "shot_rate_pct": 7.14
+          },
+          {
+            "bin": "(34.572, 39.837]",
+            "n": 159098,
+            "shot_rate_pct": 7.405
+          },
+          {
+            "bin": "(39.837, 45.064]",
+            "n": 159105,
+            "shot_rate_pct": 7.609
+          },
+          {
+            "bin": "(45.064, 51.189]",
+            "n": 159098,
+            "shot_rate_pct": 7.205
+          },
+          {
+            "bin": "(51.189, 58.82]",
+            "n": 159100,
+            "shot_rate_pct": 5.886
+          },
+          {
+            "bin": "(58.82, 69.54]",
+            "n": 159100,
+            "shot_rate_pct": 5.269
+          },
+          {
+            "bin": "(69.54, 89.505]",
+            "n": 159096,
+            "shot_rate_pct": 3.707
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_2_threat_score",
@@ -5111,7 +8661,8 @@
             "shot_rate_pct": 14.969
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_3_target_x",
@@ -5119,12 +8670,69 @@
       "type": "continuous",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 4,
-      "stage_label": "Stage 4 - Structural redesign",
+      "stage": 6,
+      "stage_label": "Stage 06 - Drop raw option coordinates (ball-relative replacements from stage 04 confirmed working)",
       "reason": "Raw absolute coordinate, superseded by ball-relative top_option_3_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1581783,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-5.083, 30.789]",
+            "n": 158182,
+            "shot_rate_pct": 1.146
+          },
+          {
+            "bin": "(30.789, 42.88]",
+            "n": 158177,
+            "shot_rate_pct": 1.424
+          },
+          {
+            "bin": "(42.88, 52.156]",
+            "n": 158182,
+            "shot_rate_pct": 1.776
+          },
+          {
+            "bin": "(52.156, 60.145]",
+            "n": 158174,
+            "shot_rate_pct": 2.191
+          },
+          {
+            "bin": "(60.145, 67.88]",
+            "n": 158183,
+            "shot_rate_pct": 2.953
+          },
+          {
+            "bin": "(67.88, 76.323]",
+            "n": 158173,
+            "shot_rate_pct": 4.697
+          },
+          {
+            "bin": "(76.323, 84.688]",
+            "n": 158184,
+            "shot_rate_pct": 6.18
+          },
+          {
+            "bin": "(84.688, 92.733]",
+            "n": 158178,
+            "shot_rate_pct": 8.65
+          },
+          {
+            "bin": "(92.733, 101.131]",
+            "n": 158174,
+            "shot_rate_pct": 11.573
+          },
+          {
+            "bin": "(101.131, 123.882]",
+            "n": 158176,
+            "shot_rate_pct": 18.268
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_3_target_y",
@@ -5132,12 +8740,69 @@
       "type": "continuous",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 4,
-      "stage_label": "Stage 4 - Structural redesign",
+      "stage": 6,
+      "stage_label": "Stage 06 - Drop raw option coordinates (ball-relative replacements from stage 04 confirmed working)",
       "reason": "Raw absolute coordinate, superseded by ball-relative top_option_3_dx/dy/distance_from_ball/angle_from_ball; correlated 0.68-0.88 with ball_x/defender_x/threat_score as a coordinate-frame artefact, not genuine redundancy",
       "evidence": null,
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1581783,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(-8.581, 14.701]",
+            "n": 158185,
+            "shot_rate_pct": 4.249
+          },
+          {
+            "bin": "(14.701, 23.672]",
+            "n": 158179,
+            "shot_rate_pct": 4.82
+          },
+          {
+            "bin": "(23.672, 30.082]",
+            "n": 158171,
+            "shot_rate_pct": 5.725
+          },
+          {
+            "bin": "(30.082, 35.339]",
+            "n": 158179,
+            "shot_rate_pct": 6.829
+          },
+          {
+            "bin": "(35.339, 39.856]",
+            "n": 158180,
+            "shot_rate_pct": 7.848
+          },
+          {
+            "bin": "(39.856, 44.373]",
+            "n": 158185,
+            "shot_rate_pct": 7.503
+          },
+          {
+            "bin": "(44.373, 49.519]",
+            "n": 158176,
+            "shot_rate_pct": 6.725
+          },
+          {
+            "bin": "(49.519, 56.063]",
+            "n": 158175,
+            "shot_rate_pct": 5.893
+          },
+          {
+            "bin": "(56.063, 65.047]",
+            "n": 158176,
+            "shot_rate_pct": 4.972
+          },
+          {
+            "bin": "(65.047, 89.679]",
+            "n": 158177,
+            "shot_rate_pct": 4.292
+          }
+        ]
+      },
+      "profile_reason": null
     },
     {
       "name": "top_option_3_threat_score",
@@ -5206,7 +8871,8 @@
             "shot_rate_pct": 11.47
           }
         ]
-      }
+      },
+      "profile_reason": null
     },
     {
       "name": "zone_defensive_value",
@@ -5214,8 +8880,8 @@
       "type": "continuous",
       "origin": "candidate",
       "fate": "dropped",
-      "stage": 5,
-      "stage_label": "Stage 5 - Correlation DROP-tier verdict",
+      "stage": 4,
+      "stage_label": "Stage 04 - Structural redesign (DROP-tier resolution; option-coordinate cleanup counted separately at stage 06)",
       "reason": "CORRELATION_ANALYSIS DROP tier: Spearman r=-1.0 vs distance_to_defending_goal (kept)",
       "evidence": {
         "metric": "correlation_r",
@@ -5223,7 +8889,64 @@
         "vs": "distance_to_defending_goal"
       },
       "modelled": false,
-      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)"
+      "source": "src/eda/feature_config.py (REDUNDANCY_DROPPED_ACTIVE/REDUNDANCY_DROPPED_PASSIVE or EXCLUDED_COLUMNS_PASSIVE)",
+      "profile": {
+        "n_rows_used": 1593181,
+        "binning_method": "quantile deciles (10 bins, or fewer if ties collapse them)",
+        "bins": [
+          {
+            "bin": "(0.00671, 0.00948]",
+            "n": 159319,
+            "shot_rate_pct": 18.89
+          },
+          {
+            "bin": "(0.00948, 0.0101]",
+            "n": 159318,
+            "shot_rate_pct": 12.193
+          },
+          {
+            "bin": "(0.0101, 0.0109]",
+            "n": 159318,
+            "shot_rate_pct": 7.96
+          },
+          {
+            "bin": "(0.0109, 0.0117]",
+            "n": 159318,
+            "shot_rate_pct": 5.655
+          },
+          {
+            "bin": "(0.0117, 0.0127]",
+            "n": 159318,
+            "shot_rate_pct": 4.183
+          },
+          {
+            "bin": "(0.0127, 0.0139]",
+            "n": 159318,
+            "shot_rate_pct": 3.174
+          },
+          {
+            "bin": "(0.0139, 0.0154]",
+            "n": 159318,
+            "shot_rate_pct": 2.481
+          },
+          {
+            "bin": "(0.0154, 0.0177]",
+            "n": 159318,
+            "shot_rate_pct": 2.055
+          },
+          {
+            "bin": "(0.0177, 0.0226]",
+            "n": 159318,
+            "shot_rate_pct": 1.597
+          },
+          {
+            "bin": "(0.0226, 0.855]",
+            "n": 159318,
+            "shot_rate_pct": 1.472
+          }
+        ]
+      },
+      "profile_reason": null
     }
   ]
 }
