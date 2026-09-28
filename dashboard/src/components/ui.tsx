@@ -31,14 +31,24 @@ export function Banner({ tone, children }: { tone: "pitch" | "wip" | "blocked" |
   return <div className={`banner ${tone}`}>{children}</div>;
 }
 
-export function StatusBadge({ status }: { status: "promoted" | "blocked" | "mixed" | "reference" }) {
-  const text = {
-    promoted: "Promoted",
-    blocked: "Not promoted",
+export type LadderStatus = "current_reference" | "superseded" | "tried_not_promoted" | "mixed" | "skipped_by_design";
+
+export function StatusBadge({ status }: { status: LadderStatus }) {
+  const text: Record<LadderStatus, string> = {
+    current_reference: "Current reference",
+    superseded: "Superseded",
+    tried_not_promoted: "Tried, not promoted",
     mixed: "Mixed / trade-off",
-    reference: "Reference",
-  }[status];
-  return <span className={`status-badge ${status}`}>{text}</span>;
+    skipped_by_design: "Skipped by design",
+  };
+  const cls: Record<LadderStatus, string> = {
+    current_reference: "promoted",
+    superseded: "reference",
+    tried_not_promoted: "blocked",
+    mixed: "mixed",
+    skipped_by_design: "skipped",
+  };
+  return <span className={`status-badge ${cls[status]}`}>{text[status]}</span>;
 }
 
 export function Card({ children, style }: { children: ReactNode; style?: CSSProperties }) {

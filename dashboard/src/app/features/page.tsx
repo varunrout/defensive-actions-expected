@@ -1,64 +1,66 @@
 import { PageHeading, StatBar, Banner, Card } from "@/components/ui";
-import { getAtlasFeature, getFeatureAtlas, getFeatureAtlasCounts } from "@/lib/data";
-import { Hist, AtlasCaption } from "@/components/FeatureHist";
-import FeatureAtlasExplorer from "@/components/FeatureAtlasExplorer";
+import { getFeatureJourney, getAnalysisFacts } from "@/lib/data";
+import FeatureJourneyExplorer from "@/components/FeatureJourneyExplorer";
 
 export default function FeaturesPage() {
-  const markingTightness = getAtlasFeature("passive", "marking_tightness")!;
-  const distanceToAttackingGoal = getAtlasFeature("active", "distance_to_attacking_goal")!;
-  const zoneDefensiveValue = getAtlasFeature("passive", "zone_defensive_value")!;
-  const overloadScore = getAtlasFeature("passive", "overload_score")!;
-  const eventsElapsedInPossession = getAtlasFeature("active", "events_elapsed_in_possession")!;
+  const journey = getFeatureJourney();
+  const facts = getAnalysisFacts().facts;
 
-  // Numerical (continuous + discrete) counts computed live from each atlas's
-  // own `type` field — see getFeatureAtlasCounts in lib/data.ts. Categorical
-  // counts have no per-target JSON atlas for the shot_target dataset (only
-  // active_category_atlas.html / passive_category_atlas.html exist, no JSON
-  // sibling), so these use the already-locked candidate lists in
-  // src/eda/feature_config.py: ACTIVE["categorical"] (6 entries: phase_label,
-  // position, event_type, play_pattern, phase_label_prev_event, period) and
-  // PASSIVE["categorical"] (4 entries: on_ball_event_type, phase_label,
-  // defender_functional_role, period) — verified 2026-09-28.
-  const activeCounts = getFeatureAtlasCounts("active");
-  const passiveCounts = getFeatureAtlasCounts("passive");
-  const ACTIVE_CATEGORICAL_COUNT = 6;
-  const PASSIVE_CATEGORICAL_COUNT = 4;
+  const active = journey.stages.active;
+  const passive = journey.stages.passive;
 
-  const activeAtlas = getFeatureAtlas("active");
-  const passiveAtlas = getFeatureAtlas("passive");
+  const activeLocked = journey.features.filter((f) => f.dataset === "active" && f.fate === "locked");
+  const activeModelled = activeLocked.filter((f) => f.modelled);
+  const passiveLocked = journey.features.filter((f) => f.dataset === "passive" && f.fate === "locked");
+  const passiveModelled = passiveLocked.filter((f) => f.modelled);
+
+  const totalCandidates = active.stage_counts.candidate_pool_stage01 + passive.stage_counts.candidate_pool_stage01;
+  const totalEngineered = journey.features.filter((f) => f.origin === "engineered").length;
+  const totalExclusions = journey.features.filter((f) => f.origin === "excluded_before_count").length;
+
+  const markingTightness = journey.features.find((f) => f.name === "marking_tightness" && f.dataset === "passive")!;
+  const laneScreening = journey.features.find((f) => f.name === "lane_screening_score_option_1" && f.dataset === "passive")!;
+  const markingBins = markingTightness.profile!.bins;
+  const laneBins = laneScreening.profile!.bins;
+
+  const confound = facts.confound_analysis as { tests: Array<{ name: string; verdict: string }> };
+  const markingTest = confound.tests.find((t) => t.name.startsWith("marking_tightness_vs"))!;
+  const laneTest = confound.tests.find((t) => t.name.startsWith("lane_screening_vs"))!;
+
+  const zoneDefensiveValue = journey.features.find((f) => f.name === "zone_defensive_value" && f.dataset === "passive")!;
 
   return (
     <div className="flex flex-col gap-[22px] px-[88px] py-[34px] overflow-y-auto">
       <PageHeading
         eyebrow="Features"
-        title="The initial candidate list"
-        subhead="Before the correlation review and collapse-tier resolution on page 04 narrowed anything down — this is what the pipeline actually started with."
+        title="From every candidate to what's actually locked"
+        subhead="Every feature that was ever considered, tracked stage by stage from feature_journey.json — not just the survivors."
       />
 
       <div className="grid grid-cols-2 gap-4">
         <Card>
-          <b style={{ fontSize: 14 }}>Active-defence candidates</b>
+          <b style={{ fontSize: 14 }}>Active-defence pipeline</b>
           <div className="mt-2">
             <StatBar
               stats={[
-                { value: String(activeCounts.total), label: "Numerical" },
-                { value: String(activeCounts.continuous), label: "Continuous" },
-                { value: String(activeCounts.discrete), label: "Discrete" },
-                { value: String(ACTIVE_CATEGORICAL_COUNT), label: "Categorical" },
+                { value: String(active.stage_counts.candidate_pool_stage01), label: "Candidates" },
+                { value: String(active.stage_counts.final_locked), label: "Locked" },
+                { value: String(activeModelled.length), label: "Modelled" },
+                { value: String(active.stage_counts.excluded_before_count), label: "Excluded pre-pool" },
               ]}
               wrap
             />
           </div>
         </Card>
         <Card>
-          <b style={{ fontSize: 14 }}>Passive-defence candidates</b>
+          <b style={{ fontSize: 14 }}>Passive-defence pipeline</b>
           <div className="mt-2">
             <StatBar
               stats={[
-                { value: "1.59M", label: "Rows" },
-                { value: String(PASSIVE_CATEGORICAL_COUNT), label: "Categorical" },
-                { value: "5.97%", label: "Base shot rate" },
-                { value: "115", label: "Matches" },
+                { value: String(passive.stage_counts.candidate_pool_stage01), label: "Candidates" },
+                { value: String(passive.stage_counts.final_locked), label: "Locked" },
+                { value: String(passiveModelled.length), label: "Modelled" },
+                { value: String(passive.stage_counts.excluded_before_count), label: "Excluded pre-pool" },
               ]}
               wrap
             />
@@ -67,129 +69,58 @@ export default function FeaturesPage() {
       </div>
 
       <Banner tone="wip">
-        <b>Shape only, this pass</b> — no shot-rate signal yet. One self-reference bug
-        (nearest_defender_distance) was caught and fixed here; 5 columns dropped as duplicates or
-        camera-coverage artifacts (action_x/y — identical to ball_x/y — plus two visible-area
-        columns and freeze_frame_count).
+        <b>{totalCandidates} candidates in the pool</b> ({active.stage_counts.candidate_pool_stage01} active + {passive.stage_counts.candidate_pool_stage01} passive),
+        plus {totalEngineered} features engineered mid-pipeline and {totalExclusions} excluded before the pool was even formed —{" "}
+        {journey.features.length} feature records in total, every one browsable below.
       </Banner>
 
       <section>
-        <h3 style={{ fontSize: 15, marginBottom: 4 }}>
-          Continuous — highlighted examples{" "}
-          <span style={{ fontWeight: 400, color: "var(--muted)", fontSize: 12.5 }}>
-            bars = shot rate per decile bin, hover for bin edges — browse all {activeCounts.total + passiveCounts.total}{" "}
-            numerical candidates below
-          </span>
-        </h3>
-        <div className="grid grid-cols-3 gap-3">
-          <Card>
-            <div className="mono" style={{ fontSize: 12.5, marginBottom: 6 }}>marking_tightness</div>
-            <Hist atlasFeature={markingTightness} />
-            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>Monotonic decreasing shot rate — tightest marking decile is 8.3%, loosest is 5.4%</p>
-            <AtlasCaption atlasFeature={markingTightness} dataset="passive" />
-          </Card>
-          <Card>
-            <div className="mono" style={{ fontSize: 12.5, marginBottom: 6 }}>distance_to_attacking_goal</div>
-            <Hist atlasFeature={distanceToAttackingGoal} />
-            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>U-shaped — highest shot rate right at the goal, lowest around 55–70m out</p>
-            <AtlasCaption atlasFeature={distanceToAttackingGoal} dataset="active" />
-          </Card>
-          <Card>
-            <div className="mono" style={{ fontSize: 12.5, marginBottom: 6 }}>zone_defensive_value</div>
-            <Hist atlasFeature={zoneDefensiveValue} />
-            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>U-shaped — bounded 0–1, denser at both ends</p>
-            <AtlasCaption atlasFeature={zoneDefensiveValue} dataset="passive" />
-          </Card>
-        </div>
+        <h3 style={{ fontSize: 16, marginBottom: 8 }}>The journey: candidates → locked</h3>
+        <FeatureJourneyExplorer journey={journey} />
       </section>
-
-      <section>
-        <h3 style={{ fontSize: 15, marginBottom: 4 }}>
-          Discrete — highlighted examples{" "}
-          <span style={{ fontWeight: 400, color: "var(--muted)", fontSize: 12.5 }}>bars = shot rate per bin, hover for bin edges</span>
-        </h3>
-        <div className="grid grid-cols-3 gap-3">
-          <Card>
-            <div className="mono" style={{ fontSize: 12.5, marginBottom: 6 }}>overload_score</div>
-            <Hist atlasFeature={overloadScore} />
-            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>0–3 converging defenders, monotonic decreasing shot rate (6.1% → 4.5%)</p>
-            <AtlasCaption atlasFeature={overloadScore} dataset="passive" />
-          </Card>
-          <Card>
-            <div className="mono" style={{ fontSize: 12.5, marginBottom: 6 }}>events_elapsed_in_possession</div>
-            <Hist atlasFeature={eventsElapsedInPossession} />
-            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>Monotonic increasing — shot rate rises from 4.1% early in a possession to ~10% late</p>
-            <AtlasCaption atlasFeature={eventsElapsedInPossession} dataset="active" />
-          </Card>
-        </div>
-      </section>
-
-      <section>
-        <h3 style={{ fontSize: 15, marginBottom: 4 }}>
-          Browse all candidate features{" "}
-          <span style={{ fontWeight: 400, color: "var(--muted)", fontSize: 12.5 }}>
-            every numerical feature in both atlases — {activeCounts.total} active + {passiveCounts.total} passive
-          </span>
-        </h3>
-        <FeatureAtlasExplorer activeFeatures={activeAtlas.features} passiveFeatures={passiveAtlas.features} />
-      </section>
-
-      <Banner tone="neutral">
-        Small categories carry wide uncertainty — e.g. goalkeeper (n=874) or visibility
-        &quot;high&quot; (n=2) in the active-defending category breakdown. Read their rates as
-        noisy, not settled.
-      </Banner>
 
       <section className="mt-2">
-        <h3 style={{ fontSize: 16 }}>What actually mattered on the pitch</h3>
+        <h3 style={{ fontSize: 16 }}>What actually held up</h3>
         <p style={{ fontSize: 13.5, color: "var(--muted)", marginBottom: 10 }}>
-          Of the {activeCounts.total} candidates, these are the ones with a real, football-legible story — not just
-          a passing correlation.
+          Findings sourced only from analysis_facts.json&apos;s confound analysis and feature_journey.json&apos;s own
+          per-feature profiles — not from the earlier (pre-fix) &quot;selection effect&quot; reading, which the
+          confound analysis contradicts.
         </p>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <Card>
-            <div className="mono" style={{ fontSize: 12.5, color: "var(--pitch)" }}>marking_tightness</div>
+            <div className="mono" style={{ fontSize: 12.5, color: "var(--pitch)" }}>marking_tightness — a reversal that survives</div>
             <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 6 }}>
-              Tighter marking (0–3.6m) → 7.6% near-term shot rate; loosest (9–57m) → 4.9%. Reads
-              as a selection effect — defenders mark tight because the situation is already
-              dangerous.
+              Tightest marking decile: {markingBins[0].shot_rate_pct}% near-term shot rate (n={markingBins[0].n.toLocaleString()}).
+              Loosest decile: {markingBins[markingBins.length - 1].shot_rate_pct}% (n={markingBins[markingBins.length - 1].n.toLocaleString()}).
+              Tighter marking correlates with a <b>higher</b>, not lower, shot rate — the opposite of a pure
+              selection-effect reading.
+            </p>
+            <p className="mono" style={{ fontSize: 11, color: "var(--pitch)", marginTop: 8 }}>
+              confound test &quot;{markingTest.name}&quot;: verdict = {markingTest.verdict} (not explained away by zone_defensive_value)
             </p>
           </Card>
           <Card>
-            <div className="mono" style={{ fontSize: 12.5, color: "var(--pitch)" }}>lane_screening_score</div>
+            <div className="mono" style={{ fontSize: 12.5, color: "var(--pitch)" }}>lane_screening_score_option_1 — a reversal that survives</div>
             <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 6 }}>
-              Screening the top-ranked passing option correlates with a HIGHER shot rate (7.6% vs
-              5.8%). A &quot;worth screening&quot; option usually means the situation is already
-              threatening.
+              Lowest-screening decile: {laneBins[0].shot_rate_pct}% shot rate (n={laneBins[0].n.toLocaleString()}).
+              Highest-screening decile: {laneBins[laneBins.length - 1].shot_rate_pct}% (n={laneBins[laneBins.length - 1].n.toLocaleString()}).
+              More screening of the top passing option correlates with a <b>higher</b> shot rate.
+            </p>
+            <p className="mono" style={{ fontSize: 11, color: "var(--pitch)", marginTop: 8 }}>
+              confound test &quot;{laneTest.name}&quot;: verdict = {laneTest.verdict} (not explained away by top_option_1_threat_score)
             </p>
           </Card>
-          <Card>
-            <div className="mono" style={{ fontSize: 12.5, color: "var(--pitch)" }}>zone_defensive_value</div>
-            <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 6 }}>
-              A real U-shape: high press → 8.1% shot rate; calm midfield → 2.4–2.9%; deep/own-box
-              → 10.4%. Both extremes carry more risk than the calm middle.
-            </p>
-          </Card>
-          <Card>
-            <div className="mono" style={{ fontSize: 12.5, color: "var(--pitch)" }}>overload_score</div>
-            <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 6 }}>
-              The one feature that behaves exactly as designed: more converging defenders (0→3) →
-              shot rate drops 6.1% → 4.8%, monotonically.
-            </p>
-          </Card>
-          <Card>
-            <div className="mono" style={{ fontSize: 12.5, color: "var(--pitch)" }}>defender_functional_role</div>
-            <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 6 }}>
-              last_line / wide_cover / central_screen / unclassified. Small spread alone
-              (4.7–6.3%) — likely more useful combined with zone/screening features.
-            </p>
-          </Card>
-          <div className="banner pitch flex items-center" style={{ fontSize: 12.5, fontWeight: 600 }}>
-            No causal claims anywhere — every relationship here is &quot;correlates with,&quot;
-            never &quot;causes.&quot;
-          </div>
         </div>
+        <Banner tone="blocked" >
+          <b>zone_defensive_value is not a surviving signal.</b> It was dropped at {zoneDefensiveValue.stage_label.split(" (")[0]}
+          {" "}— {zoneDefensiveValue.reason}. Earlier dashboard copy that listed it as a &quot;surviving U-shape&quot; predates this
+          correction and is removed here.
+        </Banner>
       </section>
+
+      <Banner tone="pitch">
+        No causal claims anywhere — every relationship here is &quot;correlates with,&quot; never &quot;causes.&quot;
+      </Banner>
     </div>
   );
 }

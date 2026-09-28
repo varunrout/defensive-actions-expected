@@ -129,6 +129,118 @@ export function getSelectionAudit(): unknown {
   return readJson("selection_and_frame_audit.json");
 }
 
+// --- Feature journey / analysis facts / model ladders (prompt 90/91, phase B) ---
+// Read straight from the locked exporters in dashboard_data/ (synced verbatim by
+// scripts/sync-data.mjs). Never hand-edited, never re-derived by hand in a page.
+
+export interface FeatureJourneyStageEntry {
+  stage: number;
+  label: string;
+  count_before: number;
+  dropped: string[];
+  engineered: string[];
+  count_after: number;
+  source: string;
+}
+
+export interface FeatureJourneyDatasetSummary {
+  stage_counts: {
+    excluded_before_count: number;
+    candidate_pool_stage01: number;
+    post_collapse_review_stage07: number;
+    final_locked: number;
+  };
+  type_breakdown: {
+    candidate_stage01: Record<string, number>;
+    locked_final: Record<string, number>;
+  };
+  ledger: FeatureJourneyStageEntry[];
+}
+
+export interface FeatureJourneyBin {
+  bin?: string;
+  value?: string;
+  n: number;
+  shot_rate_pct: number;
+}
+
+export interface FeatureJourneyProfile {
+  n_rows_used: number;
+  binning_method: string;
+  bins: FeatureJourneyBin[];
+}
+
+export interface FeatureJourneyFeature {
+  name: string;
+  dataset: "active" | "passive";
+  type: "categorical" | "boolean" | "continuous" | "discrete" | null;
+  origin: "candidate" | "excluded_before_count" | "engineered";
+  fate: "locked" | "dropped";
+  stage: number | null;
+  stage_label: string;
+  reason: string;
+  evidence: { metric: string; value: number; vs: string } | null;
+  modelled: boolean;
+  source: string;
+  profile: FeatureJourneyProfile | null;
+  profile_reason: string | null;
+}
+
+export interface FeatureJourney {
+  generated_at: string;
+  generator: string;
+  notes: string[];
+  stages: { active: FeatureJourneyDatasetSummary; passive: FeatureJourneyDatasetSummary };
+  assertions: Array<{ label: string; actual: unknown; expected: unknown; passed: boolean }>;
+  features: FeatureJourneyFeature[];
+}
+
+export function getFeatureJourney(): FeatureJourney {
+  return readJson<FeatureJourney>("feature_journey.json");
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getAnalysisFacts(): { generated_at: string; generator: string; facts: Record<string, any> } {
+  return readJson("analysis_facts.json");
+}
+
+export interface ModelLadderRung {
+  name: string;
+  status: "current_reference" | "superseded" | "tried_not_promoted" | "mixed" | "skipped_by_design";
+  headline_metric_name: string | null;
+  headline_metric_value: number | null;
+  pre_fix: boolean;
+  headline: { metric: string; value: number; split: string; pre_fix: boolean; source: string } | null;
+  note: string;
+  source: string;
+  caveat?: string;
+  hurdle_pipeline_headline?: { metric: string; value: number; split: string; pre_fix: boolean; rescored: boolean; source: string };
+}
+
+export interface ModelLadderLeg {
+  label: string;
+  reference_model: string;
+  reference_model_status: string;
+  coordinate_fix_verdict: string;
+  rungs: ModelLadderRung[];
+  note?: string;
+}
+
+export interface ModelLadders {
+  generated_at: string;
+  generator: string;
+  verification_notes: string[];
+  assertions: Array<{ label: string; actual: unknown; expected: unknown; passed: boolean }>;
+  legs: Record<
+    "active_binary" | "active_continuous" | "passive_binary" | "passive_continuous" | "active_xt" | "passive_xt",
+    ModelLadderLeg
+  >;
+}
+
+export function getModelLadders(): ModelLadders {
+  return readJson<ModelLadders>("model_ladders.json");
+}
+
 // --- Feature atlas (page 05) support ---------------------------------------
 // Real per-feature decile-bin distributions (bin edges, n, shot_rate_pct),
 // synced from reports/analysis/shot_target/*_numerical_target_atlas.json via
@@ -296,17 +408,17 @@ export function getExplorerData(matchId: string): { label: string; rows: Explore
           {
             label: "Active — Binary (v1e)",
             value: p.active_binary!.probability.toFixed(2),
-            note: "Probability this action succeeds as a defensive intervention — the tackle/block/interception lands.",
+            note: "P(shot within 10s) — probability the attacking team takes a shot within 10 seconds of this action.",
           },
           {
             label: "Active — Continuous (c1d)",
             value: p.active_continuous!.expected_value.toFixed(3),
-            note: "Expected danger prevented on this action, on the leg's own scale. Higher = more threat taken off the game.",
+            note: "Expected xG in the next 10s (hurdle: P(shot) × E[xG|shot], reusing the active-binary model's own probability).",
           },
           {
             label: "Active — xT (x1c)",
             value: p.active_xt!.expected_delta.toFixed(3),
-            note: "Expected-threat swing from this action. Negative = threat removed from the attacking side.",
+            note: "Expected-threat swing from this action (xt_before − xt_after). Positive means threat was removed from the attacking side; a value below zero means threat rose instead.",
           },
         ],
       });
@@ -330,17 +442,17 @@ export function getExplorerData(matchId: string): { label: string; rows: Explore
           {
             label: "Passive — Binary (p1e)",
             value: p.passive_binary!.probability.toFixed(2),
-            note: "Probability this off-ball position counts as a strong defensive stance — not an action, a state.",
+            note: "P(shot within 10s) — probability a shot follows within 10 seconds, given this off-ball position (not an action, a state).",
           },
           {
             label: "Passive — Continuous (d1)",
             value: p.passive_continuous!.expected_value.toFixed(3),
-            note: "Expected danger prevented purely by this positioning, before any action is taken.",
+            note: "Expected xG in the next 10s (hurdle: P(shot) × E[xG|shot]), attributable to holding this position before any action is taken.",
           },
           {
             label: "Passive — xT (y1c)",
             value: p.passive_xt!.expected_delta.toFixed(3),
-            note: "Expected-threat swing attributable to holding this position. Positive here reads as residual exposure, not prevention.",
+            note: "Expected-threat swing attributable to holding this position (xt_before − xt_after). Positive means threat was removed; a value below zero means threat rose instead.",
           },
         ],
       });

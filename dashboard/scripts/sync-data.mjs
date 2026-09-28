@@ -21,7 +21,16 @@ function copyRecursive(src, dest) {
   }
 }
 
-const files = ["legs_summary.json", "methodology_steps.json", "selection_and_frame_audit.json", "match_explorer", "match_features"];
+const files = [
+  "legs_summary.json",
+  "methodology_steps.json",
+  "selection_and_frame_audit.json",
+  "match_explorer",
+  "match_features",
+  "feature_journey.json",
+  "analysis_facts.json",
+  "model_ladders.json",
+];
 
 for (const f of files) {
   const s = path.join(SRC, f);

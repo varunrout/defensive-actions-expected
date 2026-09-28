@@ -47,6 +47,7 @@ export default function MatchAnalyserClient({ matches }: { matches: AnalyserMatc
           {ANALYSER_FEATURES.map((f) => (
             <button key={f} className={`pill mono ${f === feature ? "active" : ""}`} style={{ fontSize: 11.5 }} onClick={() => { setFeature(f); setSelectedId(null); }}>
               {f}
+              {!ANALYSER_FEATURE_META[f].modelled && " *"}
             </button>
           ))}
         </div>
@@ -95,8 +96,25 @@ export default function MatchAnalyserClient({ matches }: { matches: AnalyserMatc
         </div>
 
         <div className="card flex flex-col gap-3" style={{ flex: 1, minWidth: 0, overflowY: "auto" }}>
-          <div className="mono" style={{ color: "var(--pitch)", fontSize: 13, fontWeight: 600 }}>{meta.label}</div>
+          <div className="flex items-center gap-2">
+            <div className="mono" style={{ color: "var(--pitch)", fontSize: 13, fontWeight: 600 }}>{meta.label}</div>
+            <span
+              className="mono"
+              style={{
+                fontSize: 10,
+                padding: "2px 7px",
+                borderRadius: 4,
+                background: meta.modelled ? "var(--pitch-soft)" : "var(--blocked-soft)",
+                color: meta.modelled ? "var(--pitch)" : "var(--blocked)",
+              }}
+            >
+              {meta.modelled ? "modelled" : "locked, not modelled"}
+            </span>
+          </div>
           <p style={{ fontSize: 14, color: "var(--text)" }}>{meta.finding}</p>
+          {!meta.modelled && meta.modelledNote && (
+            <p style={{ fontSize: 12.5, color: "var(--blocked)" }}>{meta.modelledNote}</p>
+          )}
           <div style={{ borderTop: "1px solid var(--border)", paddingTop: 10, fontSize: 12, color: "var(--muted)" }}>
             Click a marker to see its real value. Darker fill = higher value on this feature.
             Range in this sample: {meta.format(lo)} – {meta.format(hi)}.

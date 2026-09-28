@@ -9,30 +9,41 @@ export const ANALYSER_FEATURES = [
 ] as const;
 export type AnalyserFeature = (typeof ANALYSER_FEATURES)[number];
 
-export const ANALYSER_FEATURE_META: Record<AnalyserFeature, { label: string; finding: string; format: (v: number) => string }> = {
+export const ANALYSER_FEATURE_META: Record<
+  AnalyserFeature,
+  { label: string; finding: string; format: (v: number) => string; modelled: boolean; modelledNote?: string }
+> = {
   nearest_defender_distance: {
     label: "nearest_defender_distance",
     finding:
       "Distance (m) from the acting defender to the nearest attacker at the moment of the action. Tighter distances cluster around already-dangerous situations rather than causing them.",
     format: (v) => `${v.toFixed(1)}m`,
+    modelled: false,
+    modelledNote:
+      "Locked as an active-defence candidate (feature_journey.json), but excluded from every active-leg model — a downstream modelling-stage exclusion (train_active_binary_baseline.py), not a feature_config.py drop.",
   },
   distance_to_attacking_box: {
     label: "distance_to_attacking_box",
     finding:
       "Distance (m) from the action to the edge of the box being attacked. Actions taken deep in the defensive third sit at the low end of this scale.",
     format: (v) => `${v.toFixed(1)}m`,
+    modelled: true,
   },
   defenders_within_5m: {
     label: "defenders_within_5m",
     finding:
       "Count of teammates within 5m of the action. Higher local defensive density generally reads as cover, not vulnerability.",
     format: (v) => `${Math.round(v)}`,
+    modelled: false,
+    modelledNote:
+      "Locked as an active-defence candidate, but excluded from every active-leg model — confirmed substitutive/nested with defenders_within_10m for this target, not a feature_config.py drop.",
   },
   attacker_defender_ratio: {
     label: "attacker_defender_ratio",
     finding:
       "Ratio of nearby attackers to nearby defenders around the action. Values above 1 mean the defending side is locally outnumbered.",
     format: (v) => v.toFixed(2),
+    modelled: true,
   },
 };
 

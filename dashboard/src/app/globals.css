@@ -97,6 +97,7 @@ h1, h2, h3 {
 .status-badge.blocked { background: var(--blocked-soft); color: var(--blocked); }
 .status-badge.mixed { background: var(--wip-soft); color: var(--wip); }
 .status-badge.reference { background: var(--surface-2); color: var(--muted); }
+.status-badge.skipped { background: #e4edf3; color: var(--active-marker); }
 
 .pill {
   font-family: var(--mono);
