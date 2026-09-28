@@ -167,20 +167,29 @@ export default function TransformPage() {
 
       <div>
         <h3 style={{ fontSize: 16, marginBottom: 8 }}>Sample transformed row</h3>
+        <p style={{ fontSize: 12, color: "var(--muted)", marginBottom: 8 }}>
+          Two real rows from the synced match_features exports (event 8d710fee… in match 3938643,
+          event 3cdf61b2… in match 3857294). <code>zone_defensive_value</code> isn&apos;t carried
+          through the export — it was dropped in correlation review (Spearman r=−1.0 vs
+          distance_to_defending_goal, see page 04) — so this column shows{" "}
+          <code>attacking_goal_centrality</code> instead, the closest real per-defender positional
+          value still present (also bounded 0–1). <code>target_future_shot_10s</code> is the real{" "}
+          <code>observed.shot_within_10s</code> field for that event.
+        </p>
         <table className="w-full mono" style={{ fontSize: 13, borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ color: "var(--muted)", textAlign: "left" }}>
               <th className="py-2 pr-4">defender_slot</th>
               <th className="py-2 pr-4">on_ball_event</th>
               <th className="py-2 pr-4">marking_tightness</th>
-              <th className="py-2 pr-4">zone_defensive_value</th>
+              <th className="py-2 pr-4">attacking_goal_centrality</th>
               <th className="py-2 pr-4">target_future_shot_10s</th>
             </tr>
           </thead>
           <tbody>
             {[
-              ["4", "Pass", "2.1m", "0.031", "0"],
-              ["6", "Carry", "5.8m", "0.047", "1"],
+              ["5", "Pass", "6.1m", "0.499", "1"],
+              ["3", "Carry", "6.9m", "0.701", "0"],
             ].map((row, i) => (
               <tr key={i} style={{ borderTop: "1px solid var(--border)" }}>
                 {row.map((cell, j) => (

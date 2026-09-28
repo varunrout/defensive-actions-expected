@@ -1,16 +1,47 @@
 import { PageHeading, StatBar, Banner, Card } from "@/components/ui";
+import { getAtlasFeature, type FeatureAtlasFeature } from "@/lib/data";
 
-function Hist({ heights }: { heights: number[] }) {
+// Bars are scaled from shot_rate_pct, not n. These are quantile-decile bins
+// (n is ~equal per bin by construction for continuous/quantile features), so a
+// histogram of n would render as ~flat bars and hide the real shape. shot_rate_pct
+// is the actual signal the atlas exists to show, and it varies meaningfully across
+// bins (U-shaped, monotonic, etc.) for every one of these 5 features.
+function Hist({ atlasFeature }: { atlasFeature: FeatureAtlasFeature }) {
+  const { bins } = atlasFeature;
+  const max = Math.max(...bins.map((b) => b.shot_rate_pct), 0.0001);
   return (
     <div className="flex items-end gap-[2px]" style={{ height: 44 }}>
-      {heights.map((h, i) => (
-        <div key={i} style={{ width: 6, height: `${h}%`, background: "var(--pitch)", opacity: 0.7 }} />
+      {bins.map((b, i) => (
+        <div
+          key={i}
+          title={`${b.bin} · n=${b.n.toLocaleString()} · shot rate ${b.shot_rate_pct}%`}
+          style={{
+            width: 6,
+            height: `${Math.max((b.shot_rate_pct / max) * 100, 3)}%`,
+            background: "var(--pitch)",
+            opacity: 0.7,
+          }}
+        />
       ))}
     </div>
   );
 }
 
+function AtlasCaption({ atlasFeature, dataset }: { atlasFeature: FeatureAtlasFeature; dataset: "active" | "passive" }) {
+  return (
+    <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>
+      n={atlasFeature.n_rows_used.toLocaleString()} rows analysed, {dataset} defence dataset
+    </p>
+  );
+}
+
 export default function FeaturesPage() {
+  const markingTightness = getAtlasFeature("passive", "marking_tightness")!;
+  const distanceToAttackingGoal = getAtlasFeature("active", "distance_to_attacking_goal")!;
+  const zoneDefensiveValue = getAtlasFeature("passive", "zone_defensive_value")!;
+  const overloadScore = getAtlasFeature("passive", "overload_score")!;
+  const eventsElapsedInPossession = getAtlasFeature("active", "events_elapsed_in_possession")!;
+
   return (
     <div className="flex flex-col gap-[22px] px-[88px] py-[34px] overflow-y-auto">
       <PageHeading
@@ -59,45 +90,50 @@ export default function FeaturesPage() {
 
       <section>
         <h3 style={{ fontSize: 15, marginBottom: 4 }}>
-          Continuous — illustrative shapes (3 of 18){" "}
+          Continuous — real histograms (3 of 18){" "}
           <span style={{ fontWeight: 400, color: "var(--muted)", fontSize: 12.5 }}>
-            not the real histograms
+            bars = shot rate per decile bin, hover for bin edges
           </span>
         </h3>
         <div className="grid grid-cols-3 gap-3">
           <Card>
             <div className="mono" style={{ fontSize: 12.5, marginBottom: 6 }}>marking_tightness</div>
-            <Hist heights={[90, 70, 55, 40, 30, 20, 14, 10]} />
-            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>Right-skewed — most defenders are close, long tail out</p>
+            <Hist atlasFeature={markingTightness} />
+            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>Monotonic decreasing shot rate — tightest marking decile is 8.3%, loosest is 5.4%</p>
+            <AtlasCaption atlasFeature={markingTightness} dataset="passive" />
           </Card>
           <Card>
             <div className="mono" style={{ fontSize: 12.5, marginBottom: 6 }}>distance_to_attacking_goal</div>
-            <Hist heights={[20, 45, 70, 90, 75, 50, 30, 18]} />
-            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>Broad, roughly central spread across the pitch</p>
+            <Hist atlasFeature={distanceToAttackingGoal} />
+            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>U-shaped — highest shot rate right at the goal, lowest around 55–70m out</p>
+            <AtlasCaption atlasFeature={distanceToAttackingGoal} dataset="active" />
           </Card>
           <Card>
             <div className="mono" style={{ fontSize: 12.5, marginBottom: 6 }}>zone_defensive_value</div>
-            <Hist heights={[80, 50, 25, 15, 15, 25, 50, 80]} />
-            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>Bounded 0–1, denser at both ends</p>
+            <Hist atlasFeature={zoneDefensiveValue} />
+            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>U-shaped — bounded 0–1, denser at both ends</p>
+            <AtlasCaption atlasFeature={zoneDefensiveValue} dataset="passive" />
           </Card>
         </div>
       </section>
 
       <section>
         <h3 style={{ fontSize: 15, marginBottom: 4 }}>
-          Discrete — illustrative shapes (2 of 11){" "}
-          <span style={{ fontWeight: 400, color: "var(--muted)", fontSize: 12.5 }}>raw value counts</span>
+          Discrete — real histograms (2 of 11){" "}
+          <span style={{ fontWeight: 400, color: "var(--muted)", fontSize: 12.5 }}>bars = shot rate per bin, hover for bin edges</span>
         </h3>
         <div className="grid grid-cols-3 gap-3">
           <Card>
             <div className="mono" style={{ fontSize: 12.5, marginBottom: 6 }}>overload_score</div>
-            <Hist heights={[95, 60, 25, 8]} />
-            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>0–4 converging defenders, mostly 0–1</p>
+            <Hist atlasFeature={overloadScore} />
+            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>0–3 converging defenders, monotonic decreasing shot rate (6.1% → 4.5%)</p>
+            <AtlasCaption atlasFeature={overloadScore} dataset="passive" />
           </Card>
           <Card>
             <div className="mono" style={{ fontSize: 12.5, marginBottom: 6 }}>events_elapsed_in_possession</div>
-            <Hist heights={[100, 70, 45, 25, 12, 6]} />
-            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>Heavy at low counts, decays fast</p>
+            <Hist atlasFeature={eventsElapsedInPossession} />
+            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>Monotonic increasing — shot rate rises from 4.1% early in a possession to ~10% late</p>
+            <AtlasCaption atlasFeature={eventsElapsedInPossession} dataset="active" />
           </Card>
           <Card style={{ display: "flex", alignItems: "center", justifyContent: "center", borderStyle: "dashed" }}>
             <span style={{ fontSize: 12.5, color: "var(--muted)" }}>+ 9 more discrete features in the full atlas</span>

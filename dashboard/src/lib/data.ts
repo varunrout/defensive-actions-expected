@@ -129,6 +129,60 @@ export function getSelectionAudit(): unknown {
   return readJson("selection_and_frame_audit.json");
 }
 
+// --- Feature atlas (page 05) support ---------------------------------------
+// Real per-feature decile-bin distributions (bin edges, n, shot_rate_pct),
+// synced from reports/analysis/shot_target/*_numerical_target_atlas.json via
+// scripts/sync-feature-atlas.mjs. Shape matches the source JSON exactly.
+
+export interface FeatureAtlasBin {
+  bin: string;
+  n: number;
+  shot_rate_pct: number;
+}
+
+export interface FeatureAtlasFeature {
+  feature: string;
+  status: "locked" | "dropped";
+  reason: string | null;
+  type: "continuous" | "discrete";
+  n_rows_used: number;
+  n_unique_values: number;
+  binning_method: string;
+  pearson_r: number;
+  spearman_rho: number;
+  bin_range_pp: number;
+  bins: FeatureAtlasBin[];
+  shape: string;
+  consistency_check?: unknown;
+  unreliable_note?: string | null;
+}
+
+export interface FeatureAtlas {
+  dataset: "active" | "passive";
+  generated_at: string;
+  target: string;
+  pool_construction: {
+    n_locked: number;
+    n_dropped: number;
+    n_total: number;
+    excluded_as_coordinate_duplicate: string[];
+  };
+  n_features_analyzed: number;
+  n_features_checked_for_consistency: number;
+  n_features_flagged_inconsistent: number;
+  rho_threshold: number;
+  range_threshold_pp: number;
+  features: FeatureAtlasFeature[];
+}
+
+export function getFeatureAtlas(dataset: "active" | "passive"): FeatureAtlas {
+  return readJson<FeatureAtlas>(`feature_atlas/${dataset}.json`);
+}
+
+export function getAtlasFeature(dataset: "active" | "passive", feature: string): FeatureAtlasFeature | undefined {
+  return getFeatureAtlas(dataset).features.find((f) => f.feature === feature);
+}
+
 export function getMatchExplorer(matchId: string): MatchExplorer {
   return readJson<MatchExplorer>(`match_explorer/${matchId}.json`);
 }
