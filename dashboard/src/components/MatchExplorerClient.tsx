@@ -77,7 +77,7 @@ export default function MatchExplorerClient({ matches }: { matches: MatchBundle[
       </div>
 
       <div className="flex gap-5 flex-1" style={{ minHeight: 0 }}>
-        <div className="flex flex-col gap-2.5" style={{ flex: 1.4, minHeight: 0 }}>
+        <div className="flex flex-col gap-2.5" style={{ flex: 1.4, minHeight: 0, minWidth: 0 }}>
           <div className="relative rounded-xl overflow-hidden flex-1" style={{ background: "#e9f3ec", border: "1px solid var(--border)" }}>
             <PitchSvg />
             {visible.map((r) => (
@@ -122,7 +122,7 @@ export default function MatchExplorerClient({ matches }: { matches: MatchBundle[
           </div>
         </div>
 
-        <div className="card" style={{ flex: 1, overflowY: "auto" }}>
+        <div className="card" style={{ flex: 1, minWidth: 0, overflowY: "auto" }}>
           {!selected ? (
             <div className="h-full flex items-center justify-center text-center" style={{ color: "var(--muted)", fontSize: 14 }}>
               Click a marker or a time below the pitch to see its DAx rating.

@@ -53,7 +53,7 @@ export default function MatchAnalyserClient({ matches }: { matches: AnalyserMatc
       </div>
 
       <div className="flex gap-5 flex-1" style={{ minHeight: 0 }}>
-        <div style={{ flex: 1.4, position: "relative" }}>
+        <div style={{ flex: 1.4, minWidth: 0, position: "relative" }}>
           <div className="relative rounded-xl overflow-hidden h-full" style={{ background: "#e9f3ec", border: "1px solid var(--border)" }}>
             <PitchSvg />
             {match.events.map((e) => (
@@ -94,7 +94,7 @@ export default function MatchAnalyserClient({ matches }: { matches: AnalyserMatc
           </div>
         </div>
 
-        <div className="card flex flex-col gap-3" style={{ flex: 1, overflowY: "auto" }}>
+        <div className="card flex flex-col gap-3" style={{ flex: 1, minWidth: 0, overflowY: "auto" }}>
           <div className="mono" style={{ color: "var(--pitch)", fontSize: 13, fontWeight: 600 }}>{meta.label}</div>
           <p style={{ fontSize: 14, color: "var(--text)" }}>{meta.finding}</p>
           <div style={{ borderTop: "1px solid var(--border)", paddingTop: 10, fontSize: 12, color: "var(--muted)" }}>
