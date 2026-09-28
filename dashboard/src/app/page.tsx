@@ -1,14 +1,37 @@
 import Link from "next/link";
 import { Eyebrow } from "@/components/ui";
+import { getMatchExplorer } from "@/lib/data";
+
+// Five real held-out active-defending events, sampled from the 3 curated
+// matches' match_explorer data (dashboard_data/match_explorer/*.json), chosen
+// to span the pitch. Values are each event's real active_continuous
+// prediction (expected danger prevented), not invented numbers.
+const HERO_EVENT_IDS: Array<{ matchId: string; eventId: string }> = [
+  { matchId: "3938643", eventId: "60e45c80-0e46-48e5-933e-aaf27aae7c9d" },
+  { matchId: "3857298", eventId: "52a3b304-4244-42f8-82f8-9a7cd38dedfb" },
+  { matchId: "3857298", eventId: "7c82986c-cf5f-4261-91f2-152b5bbb6130" },
+  { matchId: "3857298", eventId: "01527cb2-1208-4389-9a16-f387e0e01232" },
+  { matchId: "3938643", eventId: "6b2fb60f-99fa-4720-81ef-68bdbc4bdb20" },
+];
+
+function getHeroEvents() {
+  const cache = new Map<string, ReturnType<typeof getMatchExplorer>>();
+  return HERO_EVENT_IDS.map(({ matchId, eventId }) => {
+    if (!cache.has(matchId)) cache.set(matchId, getMatchExplorer(matchId));
+    const explorer = cache.get(matchId)!;
+    const event = explorer.events.find((e) => e.event_id === eventId)!;
+    const dax = event.predictions!.active_continuous!.expected_value;
+    return {
+      id: eventId,
+      x: (event.location.x / 120) * 100,
+      y: (event.location.y / 80) * 100,
+      v: `${dax >= 0 ? "+" : ""}${dax.toFixed(3)}`,
+    };
+  });
+}
 
 export default function HeroPage() {
-  const events = [
-    { id: "a", x: 22, y: 30, v: "+0.014" },
-    { id: "b", x: 55, y: 20, v: "+0.006" },
-    { id: "c", x: 70, y: 55, v: "+0.011" },
-    { id: "d", x: 40, y: 65, v: "+0.002" },
-    { id: "e", x: 85, y: 40, v: "+0.004" },
-  ];
+  const events = getHeroEvents();
 
   return (
     <div className="flex-1 flex items-center px-[88px] gap-14">
@@ -89,7 +112,7 @@ export default function HeroPage() {
           className="absolute bottom-2 left-2 mono"
           style={{ fontSize: 9.5, color: "var(--muted)" }}
         >
-          Illustrative held-out events — not final match_explorer data
+          Real held-out events, match_explorer data
         </div>
       </div>
     </div>

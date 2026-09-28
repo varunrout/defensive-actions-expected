@@ -1,6 +1,22 @@
 import { PageHeading, Banner, Card } from "@/components/ui";
+import { getMatchExplorer } from "@/lib/data";
+
+// One real active-phase event location and one real passive-phase defender
+// location, pulled from match_explorer/3857294.json (Qatar match) — used to
+// mark the two pitch-outline diagrams below.
+function getContextMarkers() {
+  const explorer = getMatchExplorer("3857294");
+  const activeEvent = explorer.events.find((e) => e.event_id === "560a638c-f6ba-4eeb-bad1-4aded92c10ff")!;
+  const passiveEvent = explorer.events.find((e) => e.event_id === "316677c3-5da3-4444-a9bc-7bcb9494f5d2")!;
+  const passiveDefender = passiveEvent.defenders!.find((d) => d.defender_slot_index === 0)!;
+  return {
+    active: { x: (activeEvent.location.x / 120) * 100, y: (activeEvent.location.y / 80) * 100 },
+    passive: { x: (passiveDefender.location.x / 120) * 100, y: (passiveDefender.location.y / 80) * 100 },
+  };
+}
 
 export default function ContextPage() {
+  const markers = getContextMarkers();
   return (
     <div className="flex flex-col gap-5 px-[88px] py-[34px] overflow-y-auto">
       <PageHeading eyebrow="Context" title={'What "defending well" actually means'} />
@@ -41,6 +57,18 @@ export default function ContextPage() {
             style={{ aspectRatio: "3 / 2", background: "var(--surface-2)" }}
           >
             <PitchOutline />
+            <span
+              className="absolute rounded-full"
+              style={{
+                left: `${markers.active.x}%`,
+                top: `${markers.active.y}%`,
+                width: 10,
+                height: 10,
+                transform: "translate(-50%, -50%)",
+                background: "var(--active-marker)",
+                border: "1px solid white",
+              }}
+            />
           </div>
           <p style={{ fontSize: 13, color: "var(--muted)" }}>
             A visible, on-ball event — something happens, and it&apos;s clearly attributable to
@@ -57,6 +85,18 @@ export default function ContextPage() {
             style={{ aspectRatio: "3 / 2", background: "var(--surface-2)" }}
           >
             <PitchOutline />
+            <span
+              className="absolute rounded-full"
+              style={{
+                left: `${markers.passive.x}%`,
+                top: `${markers.passive.y}%`,
+                width: 10,
+                height: 10,
+                transform: "translate(-50%, -50%)",
+                background: "var(--passive-marker)",
+                border: "1px solid white",
+              }}
+            />
           </div>
           <p style={{ fontSize: 13, color: "var(--muted)" }}>
             No event at all — the value is in the body shape blocking the lane before anything
@@ -65,7 +105,7 @@ export default function ContextPage() {
         </Card>
       </div>
       <div className="mono text-center" style={{ fontSize: 11, color: "var(--muted)" }}>
-        Illustrative held-out moments — not final match data.
+        Real held-out moments, match_explorer data (Qatar match).
       </div>
 
       <Banner tone="pitch">

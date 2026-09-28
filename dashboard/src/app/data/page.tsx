@@ -1,6 +1,30 @@
 import { PageHeading, Banner, Card } from "@/components/ui";
+import { getMatchExplorer } from "@/lib/data";
+
+// Three real raw events pulled directly from match_explorer/3938643.json
+// (France 1-1 Poland), one per distinct on_ball_event_type for variety.
+const SAMPLE_EVENT_IDS = [
+  "b7bd4f7e-a2a3-45c9-b6b6-f48e1b4fd10c", // Pressure
+  "bf8b4183-2a9b-4d33-965b-612a34410f91", // Ball Recovery
+  "83b74e22-763a-41a4-aa9b-1ef96082d56d", // Block
+];
+
+function getSampleRows() {
+  const explorer = getMatchExplorer("3938643");
+  return SAMPLE_EVENT_IDS.map((id) => {
+    const e = explorer.events.find((ev) => ev.event_id === id)!;
+    return [
+      e.on_ball_event_type,
+      e.player ?? "—",
+      e.team,
+      `(${e.location.x.toFixed(1)}, ${e.location.y.toFixed(1)})`,
+      String(e.minute),
+    ];
+  });
+}
 
 export default function DataPage() {
+  const sampleRows = getSampleRows();
   return (
     <div className="flex flex-col gap-[18px] px-[88px] py-[34px] overflow-y-auto">
       <PageHeading eyebrow="The data" title="Two raw sources, before any transformation" />
@@ -59,7 +83,7 @@ export default function DataPage() {
 
       <div className="mt-2">
         <h3 style={{ fontSize: 16, marginBottom: 4 }}>
-          Sample raw event <span style={{ fontWeight: 400, color: "var(--muted)", fontSize: 13 }}>(illustrative — not pulled from the real data)</span>
+          Sample raw event <span style={{ fontWeight: 400, color: "var(--muted)", fontSize: 13 }}>(real events, France 1–1 Poland match_explorer data)</span>
         </h3>
         <table className="w-full mono" style={{ fontSize: 13, borderCollapse: "collapse" }}>
           <thead>
@@ -72,11 +96,7 @@ export default function DataPage() {
             </tr>
           </thead>
           <tbody>
-            {[
-              ["Pressure", "#4", "Defending team", "(88.2, 34.5)", "23"],
-              ["Pass", "#8", "Attacking team", "(70.1, 40.2)", "23"],
-              ["Interception", "#6", "Defending team", "(75.4, 38.9)", "23"],
-            ].map((row, i) => (
+            {sampleRows.map((row, i) => (
               <tr key={i} style={{ borderTop: "1px solid var(--border)" }}>
                 {row.map((cell, j) => (
                   <td key={j} className="py-2 pr-4">

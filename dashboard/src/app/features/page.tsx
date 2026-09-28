@@ -1,39 +1,7 @@
 import { PageHeading, StatBar, Banner, Card } from "@/components/ui";
-import { getAtlasFeature, type FeatureAtlasFeature } from "@/lib/data";
-
-// Bars are scaled from shot_rate_pct, not n. These are quantile-decile bins
-// (n is ~equal per bin by construction for continuous/quantile features), so a
-// histogram of n would render as ~flat bars and hide the real shape. shot_rate_pct
-// is the actual signal the atlas exists to show, and it varies meaningfully across
-// bins (U-shaped, monotonic, etc.) for every one of these 5 features.
-function Hist({ atlasFeature }: { atlasFeature: FeatureAtlasFeature }) {
-  const { bins } = atlasFeature;
-  const max = Math.max(...bins.map((b) => b.shot_rate_pct), 0.0001);
-  return (
-    <div className="flex items-end gap-[2px]" style={{ height: 44 }}>
-      {bins.map((b, i) => (
-        <div
-          key={i}
-          title={`${b.bin} · n=${b.n.toLocaleString()} · shot rate ${b.shot_rate_pct}%`}
-          style={{
-            width: 6,
-            height: `${Math.max((b.shot_rate_pct / max) * 100, 3)}%`,
-            background: "var(--pitch)",
-            opacity: 0.7,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function AtlasCaption({ atlasFeature, dataset }: { atlasFeature: FeatureAtlasFeature; dataset: "active" | "passive" }) {
-  return (
-    <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>
-      n={atlasFeature.n_rows_used.toLocaleString()} rows analysed, {dataset} defence dataset
-    </p>
-  );
-}
+import { getAtlasFeature, getFeatureAtlas, getFeatureAtlasCounts } from "@/lib/data";
+import { Hist, AtlasCaption } from "@/components/FeatureHist";
+import FeatureAtlasExplorer from "@/components/FeatureAtlasExplorer";
 
 export default function FeaturesPage() {
   const markingTightness = getAtlasFeature("passive", "marking_tightness")!;
@@ -41,6 +9,23 @@ export default function FeaturesPage() {
   const zoneDefensiveValue = getAtlasFeature("passive", "zone_defensive_value")!;
   const overloadScore = getAtlasFeature("passive", "overload_score")!;
   const eventsElapsedInPossession = getAtlasFeature("active", "events_elapsed_in_possession")!;
+
+  // Numerical (continuous + discrete) counts computed live from each atlas's
+  // own `type` field — see getFeatureAtlasCounts in lib/data.ts. Categorical
+  // counts have no per-target JSON atlas for the shot_target dataset (only
+  // active_category_atlas.html / passive_category_atlas.html exist, no JSON
+  // sibling), so these use the already-locked candidate lists in
+  // src/eda/feature_config.py: ACTIVE["categorical"] (6 entries: phase_label,
+  // position, event_type, play_pattern, phase_label_prev_event, period) and
+  // PASSIVE["categorical"] (4 entries: on_ball_event_type, phase_label,
+  // defender_functional_role, period) — verified 2026-09-28.
+  const activeCounts = getFeatureAtlasCounts("active");
+  const passiveCounts = getFeatureAtlasCounts("passive");
+  const ACTIVE_CATEGORICAL_COUNT = 6;
+  const PASSIVE_CATEGORICAL_COUNT = 4;
+
+  const activeAtlas = getFeatureAtlas("active");
+  const passiveAtlas = getFeatureAtlas("passive");
 
   return (
     <div className="flex flex-col gap-[22px] px-[88px] py-[34px] overflow-y-auto">
@@ -56,10 +41,10 @@ export default function FeaturesPage() {
           <div className="mt-2">
             <StatBar
               stats={[
-                { value: "29", label: "Numerical" },
-                { value: "18", label: "Continuous" },
-                { value: "11", label: "Discrete" },
-                { value: "10", label: "Categorical" },
+                { value: String(activeCounts.total), label: "Numerical" },
+                { value: String(activeCounts.continuous), label: "Continuous" },
+                { value: String(activeCounts.discrete), label: "Discrete" },
+                { value: String(ACTIVE_CATEGORICAL_COUNT), label: "Categorical" },
               ]}
               wrap
             />
@@ -71,7 +56,7 @@ export default function FeaturesPage() {
             <StatBar
               stats={[
                 { value: "1.59M", label: "Rows" },
-                { value: "6", label: "Categorical" },
+                { value: String(PASSIVE_CATEGORICAL_COUNT), label: "Categorical" },
                 { value: "5.97%", label: "Base shot rate" },
                 { value: "115", label: "Matches" },
               ]}
@@ -90,9 +75,10 @@ export default function FeaturesPage() {
 
       <section>
         <h3 style={{ fontSize: 15, marginBottom: 4 }}>
-          Continuous — real histograms (3 of 18){" "}
+          Continuous — highlighted examples{" "}
           <span style={{ fontWeight: 400, color: "var(--muted)", fontSize: 12.5 }}>
-            bars = shot rate per decile bin, hover for bin edges
+            bars = shot rate per decile bin, hover for bin edges — browse all {activeCounts.total + passiveCounts.total}{" "}
+            numerical candidates below
           </span>
         </h3>
         <div className="grid grid-cols-3 gap-3">
@@ -119,7 +105,7 @@ export default function FeaturesPage() {
 
       <section>
         <h3 style={{ fontSize: 15, marginBottom: 4 }}>
-          Discrete — real histograms (2 of 11){" "}
+          Discrete — highlighted examples{" "}
           <span style={{ fontWeight: 400, color: "var(--muted)", fontSize: 12.5 }}>bars = shot rate per bin, hover for bin edges</span>
         </h3>
         <div className="grid grid-cols-3 gap-3">
@@ -135,10 +121,17 @@ export default function FeaturesPage() {
             <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>Monotonic increasing — shot rate rises from 4.1% early in a possession to ~10% late</p>
             <AtlasCaption atlasFeature={eventsElapsedInPossession} dataset="active" />
           </Card>
-          <Card style={{ display: "flex", alignItems: "center", justifyContent: "center", borderStyle: "dashed" }}>
-            <span style={{ fontSize: 12.5, color: "var(--muted)" }}>+ 9 more discrete features in the full atlas</span>
-          </Card>
         </div>
+      </section>
+
+      <section>
+        <h3 style={{ fontSize: 15, marginBottom: 4 }}>
+          Browse all candidate features{" "}
+          <span style={{ fontWeight: 400, color: "var(--muted)", fontSize: 12.5 }}>
+            every numerical feature in both atlases — {activeCounts.total} active + {passiveCounts.total} passive
+          </span>
+        </h3>
+        <FeatureAtlasExplorer activeFeatures={activeAtlas.features} passiveFeatures={passiveAtlas.features} />
       </section>
 
       <Banner tone="neutral">
@@ -150,7 +143,7 @@ export default function FeaturesPage() {
       <section className="mt-2">
         <h3 style={{ fontSize: 16 }}>What actually mattered on the pitch</h3>
         <p style={{ fontSize: 13.5, color: "var(--muted)", marginBottom: 10 }}>
-          Of the 29 candidates, these are the ones with a real, football-legible story — not just
+          Of the {activeCounts.total} candidates, these are the ones with a real, football-legible story — not just
           a passing correlation.
         </p>
         <div className="grid grid-cols-3 gap-3">

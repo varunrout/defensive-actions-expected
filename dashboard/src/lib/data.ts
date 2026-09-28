@@ -183,6 +183,20 @@ export function getAtlasFeature(dataset: "active" | "passive", feature: string):
   return getFeatureAtlas(dataset).features.find((f) => f.feature === feature);
 }
 
+// Live counts of numerical (continuous + discrete) candidate features, computed
+// straight from each dataset's atlas `type` field — never hardcoded, so the
+// page 05 stat tiles can't drift out of sync with the underlying atlas again.
+export function getFeatureAtlasCounts(dataset: "active" | "passive"): {
+  continuous: number;
+  discrete: number;
+  total: number;
+} {
+  const { features } = getFeatureAtlas(dataset);
+  const continuous = features.filter((f) => f.type === "continuous").length;
+  const discrete = features.filter((f) => f.type === "discrete").length;
+  return { continuous, discrete, total: continuous + discrete };
+}
+
 export function getMatchExplorer(matchId: string): MatchExplorer {
   return readJson<MatchExplorer>(`match_explorer/${matchId}.json`);
 }
