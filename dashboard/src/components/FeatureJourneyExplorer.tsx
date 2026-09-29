@@ -35,7 +35,10 @@ const STAGE_LABELS: Record<string, string> = {
 
 function stageKey(f: FeatureJourneyFeature): string {
   if (f.origin === "excluded_before_count") return "before";
-  return String(f.stage ?? "1");
+  if (f.stage == null) {
+    throw new Error(`FeatureJourneyExplorer: feature "${f.name}" (${f.dataset}) has no stage but origin is "${f.origin}", not "excluded_before_count" — feature_journey.json is missing stage attribution for it`);
+  }
+  return String(f.stage);
 }
 
 export default function FeatureJourneyExplorer({ journey }: { journey: FeatureJourney }) {

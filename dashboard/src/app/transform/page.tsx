@@ -47,6 +47,17 @@ export default function TransformPage() {
   const actionFamily = feat("action_family", "active");
   const positionGroup = feat("position_group", "active");
 
+  // No UI fallback for these — methodology_steps.json is the source of truth and these
+  // fields are always populated for the "data"/"two_views" steps; if one is ever missing,
+  // throwing here fails the static build loudly instead of silently rendering a stale number.
+  const requireFact = <T,>(value: T | undefined, label: string): T => {
+    if (value === undefined) throw new Error(`transform page: missing required fact "${label}" in methodology_steps.json`);
+    return value;
+  };
+  const matchCount = requireFact(dataStep.facts?.matches, "data.matches");
+  const activeRows = requireFact(viewsStep.facts?.active_rows, "two_views.active_rows");
+  const passiveDefenderRows = requireFact(viewsStep.facts?.passive_defender_rows, "two_views.passive_defender_rows");
+
   // Two real, non-degenerate rows from match_features/*.json — one active, one passive.
   const mf = getMatchFeatures("3938643");
   const activeRow = mf.events.find((e) => e.event_id === "d9f53cc5-22e9-49fc-b824-07313815960e")!;
@@ -195,19 +206,19 @@ export default function TransformPage() {
         <Card>
           <b style={{ fontSize: 14 }}>Active-defence dataset</b>
           <div className="mono" style={{ fontSize: 22, color: "var(--pitch)", margin: "6px 0" }}>
-            {viewsStep.facts?.active_rows?.toLocaleString() ?? "56,068"} rows
+            {activeRows.toLocaleString()} rows
           </div>
           <p style={{ fontSize: 13, color: "var(--muted)" }}>
-            {dataStep.facts?.matches ?? 115} matches — one row per on-ball defensive event
+            {matchCount} matches — one row per on-ball defensive event
           </p>
         </Card>
         <Card>
           <b style={{ fontSize: 14 }}>Passive-defence dataset</b>
           <div className="mono" style={{ fontSize: 22, color: "var(--pitch)", margin: "6px 0" }}>
-            {viewsStep.facts?.passive_defender_rows?.toLocaleString() ?? "1,593,181"} rows
+            {passiveDefenderRows.toLocaleString()} rows
           </div>
           <p style={{ fontSize: 13, color: "var(--muted)" }}>
-            {dataStep.facts?.matches ?? 115} matches — one row per (defender-slot, on-ball event)
+            {matchCount} matches — one row per (defender-slot, on-ball event)
             pair
           </p>
         </Card>
